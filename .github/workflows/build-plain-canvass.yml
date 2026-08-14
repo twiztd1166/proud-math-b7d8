@@ -1,11 +1,11 @@
-name: Build plain canvass app
+name: Validate canvass register
 on:
   push:
     branches: [paradise-canvass-manager-public]
 permissions:
   contents: write
 jobs:
-  build:
+  validate:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Build plain-data app
+      - name: Rebuild and validate controlled register
         shell: bash
         run: |
           node <<'NODE'
@@ -34,27 +34,19 @@ jobs:
           if(obj.records.length!==78||obj.meta.goCount!==76||obj.meta.noGoCount!==2) throw new Error('Control mismatch');
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
           if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs'])) throw new Error('NO-GO mismatch');
+          if(obj.records.some(r=>!Array.isArray(r.sources)||r.sources.length<1)) throw new Error('Source coverage mismatch');
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+JSON.stringify(obj)+';\n');
-          const old=fs.readFileSync('app.js','utf8');
-          const marker='async function loadPako()';
-          const i=old.indexOf(marker);
-          if(i<0) throw new Error('App loader marker missing');
-          const core=old.slice(0,i);
-          const boot="(function(){render();try{db=window.PCM_DATA;if(!db||db.records.length!==78||db.meta.goCount!==76||db.meta.noGoCount!==2)throw Error('Control mismatch');render()}catch(e){console.error(e);M.innerHTML='<div class=\"empty\"><h2>Controlled register unavailable</h2><p>Do not use this app for deployment decisions.</p></div>'}})();";
-          fs.writeFileSync('app-plain.js',core+boot+'\n');
-          const html='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#12344d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Canvass Manager"><meta name="robots" content="noindex,nofollow,noarchive"><title>Paradise Canvass Manager</title><link rel="stylesheet" href="style.css"></head><body><header class="top"><div class="logo">P</div><div class="brand"><small>PARADISE EXTERIORS</small><b>Canvass Manager</b></div><button id="reset" class="reset">↺</button></header><main id="main" class="main"></main><nav class="nav"><button id="nLook" class="on"><b>⌕</b>Lookup</button><button id="nRel"><b>✓</b>Release</button></nav><script src="plain-data.js"></script><script src="app-plain.js"></script></body></html>';
-          fs.writeFileSync('index.html',html);
-          console.log({records:obj.records.length,go:obj.meta.goCount,noGo:obj.meta.noGoCount,stops});
+          console.log({records:obj.records.length,go:obj.meta.goCount,noGo:obj.meta.noGoCount,sourceCoverage:obj.records.length,stops});
           NODE
-      - name: Commit plain build
+      - name: Commit validated snapshot if changed
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html plain-data.js app-plain.js
+          git add plain-data.js
           if git diff --cached --quiet; then
-            echo 'No changes'
+            echo 'Validated snapshot unchanged'
           else
-            git commit -m 'Publish iPhone-safe plain-data canvass app'
+            git commit -m 'Refresh validated canvass snapshot'
             git push origin HEAD:paradise-canvass-manager-public
           fi
