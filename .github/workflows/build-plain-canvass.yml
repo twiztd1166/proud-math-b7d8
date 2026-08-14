@@ -69,6 +69,7 @@ jobs:
           node --check boot-v2.js
           node --check sw.js
           node --check tests/mobile-regression.spec.js
+          node --check tests/offline-regression.spec.js
           node --check canvass-worker.js
           node --check scripts/build-canvass-site.mjs
           grep -q 'manifest.webmanifest' index.html
@@ -95,12 +96,13 @@ jobs:
         run: |
           npm install --no-save --ignore-scripts @playwright/test
           npx playwright install --with-deps webkit
-      - name: Run iPhone WebKit and true-offline regression
+      - name: Run iPhone WebKit and cached-network outage regression
         shell: bash
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
-          npx playwright test --project=webkit-iphone
+          npx playwright test tests/mobile-regression.spec.js --project=webkit-iphone
+          npx playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
       - name: Publish validated snapshot metadata
         shell: bash
         run: |
