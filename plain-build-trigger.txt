@@ -1,0 +1,1 @@
+Build the Paradise Canvass Manager plain-data mobile app from the controlled 2026-08-13 snapshot.
