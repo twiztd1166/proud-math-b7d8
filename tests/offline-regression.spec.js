@@ -65,7 +65,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await page.getByRole('button',{name:'New search'}).click();
 
     await pick(page,'Boynton Beach');
-    await page.getByRole('button',{name:/START ROUTE RELEASE/}).click();
+    await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
     await page.getByPlaceholder('Manager name').fill('Offline Test Manager');
     await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');
     await page.getByPlaceholder('Exact street address or boundary').fill('789 Offline Test Route');
