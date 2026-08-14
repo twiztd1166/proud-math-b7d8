@@ -20,14 +20,16 @@ jobs:
         run: |
           node <<'NODE'
           const fs=require('fs'), zlib=require('zlib');
-          const parts=['data1a.js','data2a.js','data3a1.js','data3a2_1.js','data3a2_2a.js','data3a2_2b.js','data4a.js'];
-          let b64='';
-          for(const f of parts){
-            const s=fs.readFileSync(f,'utf8');
-            const m=s.match(/\+'([^']+)'/);
-            if(!m) throw new Error('Missing data fragment '+f);
-            b64+=m[1];
-          }
+          const parts=[
+            'payload00.txt','payload01.txt','payload02.txt','payload03a.txt','payload03b.txt',
+            'payload04a1.txt','payload04a2.txt','payload04b1.txt','payload04b2.txt',
+            'payload05a1.txt','payload05a2a.txt','payload05a2b1.txt','payload05a2b2.txt',
+            'payload05b1a11.txt','payload05b1a12.txt','payload05b1a21.txt','payload05b1a22.txt',
+            'payload05b1b11.txt','payload05b1b12a.txt','payload05b1b12b.txt','payload05b1b21.txt','payload05b1b22a.txt','payload05b1b22b.txt',
+            'payload05b2a11.txt','payload05b2a12a.txt'
+          ];
+          let b64=parts.map(f=>fs.readFileSync(f,'utf8').trim()).join('');
+          b64 += Buffer.from(fs.readFileSync('payload05tail.hex','utf8').trim(),'hex').toString('utf8');
           const obj=JSON.parse(zlib.gunzipSync(Buffer.from(b64,'base64')).toString('utf8'));
           if(obj.records.length!==78||obj.meta.goCount!==76||obj.meta.noGoCount!==2) throw new Error('Control mismatch');
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
