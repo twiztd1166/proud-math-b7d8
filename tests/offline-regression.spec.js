@@ -52,6 +52,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
 
     await pick(page,'Boynton Beach');
     await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
+    await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
     await expect(page.getByText('COMMERCIAL DOOR HANGER',{exact:true})).toBeVisible();
     await expect(page.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
     await page.getByText('Official sources / offline proof').click();
@@ -64,7 +65,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
     await page.getByRole('button',{name:'New search'}).click();
 
-    await pick(page,'Boynton Beach');
+    await pick(page,'Dania');
     await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
     await page.getByPlaceholder('Manager name').fill('Offline Test Manager');
     await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');
@@ -77,6 +78,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.3');
     await page.getByRole('button',{name:'View history'}).click();
     await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
+    await expect(page.locator('.historyCard').first()).toContainText('Dania');
   }finally{
     if(server.exitCode===null)server.kill('SIGTERM');
   }
