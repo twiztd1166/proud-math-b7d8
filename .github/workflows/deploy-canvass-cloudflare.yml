@@ -1,7 +1,7 @@
 name: Deploy Canvass Manager to Cloudflare
 on:
   workflow_run:
-    workflows: ["Validate canvass register"]
+    workflows: ["Build plain canvass app", "Validate canvass register"]
     types: [completed]
     branches: [paradise-canvass-manager-public]
   workflow_dispatch:
