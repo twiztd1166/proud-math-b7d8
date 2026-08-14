@@ -5,11 +5,13 @@ let pcmLatest=null,pcmDeferredInstall=null;
 function pcmStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
 function pcmVersionParts(v=''){const m=String(v).match(/^(\d{4})\.(\d{2})\.(\d{2})-v(\d+)(?:\.(\d+))?/);return m?m.slice(1).map(Number):null}
 function pcmIsNewerVersion(candidate,current=PCM_BUILD_VERSION){const a=pcmVersionParts(candidate),b=pcmVersionParts(current);if(!a||!b)return false;for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false}
-function pcmReadUpdateLock(){try{const x=JSON.parse(localStorage[PCM_UPDATE_LOCK_KEY]||'null');if(x&&x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256){delete localStorage[PCM_UPDATE_LOCK_KEY];return null}return x&&x.datasetSha256?x:null}catch{return null}}
-function pcmWriteUpdateLock(meta){try{localStorage[PCM_UPDATE_LOCK_KEY]=JSON.stringify({datasetSha256:meta.datasetSha256,version:meta.version||'',url:meta.url||'',detectedAt:new Date().toISOString()})}catch{}}
+function pcmIsNewerSnapshot(candidate,current=window.PCM_PROVENANCE?.snapshot||''){const a=String(candidate||''),b=String(current||'');return /^\d{4}-\d{2}-\d{2}$/.test(a)&&/^\d{4}-\d{2}-\d{2}$/.test(b)&&a>b}
+function pcmMetaIsActionable(meta){return!!(meta&&meta.validated===true&&meta.datasetSha256&&meta.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256&&(pcmIsNewerVersion(meta.version)||pcmIsNewerSnapshot(meta.snapshot)))}
+function pcmReadUpdateLock(){try{const x=JSON.parse(localStorage[PCM_UPDATE_LOCK_KEY]||'null');if(!x||!x.datasetSha256)return null;if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256||!(pcmIsNewerVersion(x.version)||pcmIsNewerSnapshot(x.snapshot))){delete localStorage[PCM_UPDATE_LOCK_KEY];return null}return x}catch{return null}}
+function pcmWriteUpdateLock(meta){try{localStorage[PCM_UPDATE_LOCK_KEY]=JSON.stringify({datasetSha256:meta.datasetSha256,version:meta.version||'',snapshot:meta.snapshot||'',url:meta.url||'',detectedAt:new Date().toISOString()})}catch{}}
 function pcmClearUpdateLock(){try{delete localStorage[PCM_UPDATE_LOCK_KEY]}catch{}}
-function pcmValidatedDataUpdate(){const live=!!(pcmLatest&&pcmLatest.validated===true&&pcmLatest.datasetSha256&&pcmLatest.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256);return live||!!pcmReadUpdateLock()}
-function pcmUpdateTarget(){return pcmLatest&&pcmLatest.validated===true?pcmLatest:pcmReadUpdateLock()}
+function pcmValidatedDataUpdate(){return pcmMetaIsActionable(pcmLatest)||!!pcmReadUpdateLock()}
+function pcmUpdateTarget(){return pcmMetaIsActionable(pcmLatest)?pcmLatest:pcmReadUpdateLock()}
 function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'A newer validated controlled register is available. Update the app before any new DEPLOY decision.':''}
 function pcmHealth(){
   const el=document.getElementById('appHealth');if(!el)return;
@@ -32,7 +34,7 @@ function pcmShowInstall(text){
 }
 async function pcmCheckLatest(){
   if(!navigator.onLine){pcmApplyDeployBlock();pcmHealth();return}
-  try{let r=await fetch(PCM_LATEST_META+'?t='+Date.now(),{cache:'no-store'});if(r.ok){let x=await r.json();if(x&&x.validated===true){pcmLatest=x;if(x.datasetSha256&&x.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256)pcmWriteUpdateLock(x);else if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256)pcmClearUpdateLock()}}}catch{}
+  try{let r=await fetch(PCM_LATEST_META+'?t='+Date.now(),{cache:'no-store'});if(r.ok){let x=await r.json();if(x&&x.validated===true){pcmLatest=x;if(pcmMetaIsActionable(x))pcmWriteUpdateLock(x);else if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256)pcmClearUpdateLock()}}}catch{}
   const before=currentDeployBlock();pcmApplyDeployBlock();pcmHealth();
   if(before!==currentDeployBlock()&&typeof render==='function')render();
 }
