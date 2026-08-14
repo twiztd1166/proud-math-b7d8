@@ -5,7 +5,7 @@ async function pick(page,name){
 }
 async function setupGo(page,address='123 Test Route'){
   await page.goto('/index.html');
-  await pick(page,'Boynton Beach');
+  await pick(page,'Dania');
   await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
   await page.getByPlaceholder('Manager name').fill('Test Manager');
   await page.getByPlaceholder('Neighborhood / route').fill('Test Route A');
@@ -13,13 +13,14 @@ async function setupGo(page,address='123 Test Route'){
   await page.getByRole('checkbox').check();
   await page.getByRole('button',{name:/START 5 CHECKS/}).click();
 }
-test('controlled lookup renders current canvass, hours, hanger, courtesy and both NO-GOs',async({page})=>{
+test('controlled lookup renders current canvass, hours hold, hanger, courtesy and both NO-GOs',async({page})=>{
   await page.goto('/index.html');
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
   await pick(page,'Boynton Beach');
   await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
   await expect(page.locator('.traffic')).toContainText('COMMERCIAL CANVASS STATUS');
-  await expect(page.locator('.staleBanner').filter({hasText:'HOURS TEXT BLOCKER.'})).toBeVisible();
+  await expect(page.locator('.blockBanner').filter({hasText:'HOURS TEXT BLOCKER — COMMERCIAL CANVASS HOLD.'})).toBeVisible();
+  await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
   const hangerSummary=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
   await expect(hangerSummary.getByText('COMMERCIAL DOOR HANGER',{exact:true})).toBeVisible();
   await expect(hangerSummary.getByText('FIELD ACTION',{exact:true})).toBeVisible();
@@ -28,6 +29,12 @@ test('controlled lookup renders current canvass, hours, hanger, courtesy and bot
   await expect(courtesySummary.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
   await expect(courtesySummary.getByText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION',{exact:true})).toBeVisible();
   await expect(courtesySummary.getByText('HOA / GATE / PRIVATE ACCESS',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Release',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Daily Release'})).toBeVisible();
+  await expect(page.getByText('COMMERCIAL ROUTE RELEASE BLOCKED',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'HOURS TEXT BLOCKER'})).toBeVisible();
+  await expect(page.getByText(/Legal classification remains GO/)).toBeVisible();
+  await page.getByRole('button',{name:'Back'}).click();
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Punta Gorda');
   await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
@@ -55,10 +62,13 @@ test('browse areas by county works',async({page})=>{
   await expect(page.getByRole('heading',{name:'Palm Beach County'})).toBeVisible();
   await page.getByRole('button',{name:/Boynton Beach/}).click();
   await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
+  await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
 });
 test('required route identity and five PASS checks produce evidence-grade DEPLOY record',async({page})=>{
   await page.goto('/index.html');
-  await pick(page,'Boynton Beach');
+  await pick(page,'Dania');
+  await expect(page.getByText('COMMERCIAL CANVASS HOURS',{exact:true})).toBeVisible();
+  await expect(page.getByText(/9:00 AM–8:00 PM|9 AM–8 PM/).first()).toBeVisible();
   await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
   const start=page.getByRole('button',{name:/START 5 CHECKS/});
   await expect(start).toBeDisabled();
@@ -76,7 +86,7 @@ test('required route identity and five PASS checks produce evidence-grade DEPLOY
   await expect(page.locator('.scopeBanner')).toContainText('Valid only for');
   await page.getByRole('button',{name:'View history'}).click();
   await expect(page.getByRole('heading',{name:'Release History'})).toBeVisible();
-  await expect(page.locator('.historyCard').first()).toContainText('Boynton Beach');
+  await expect(page.locator('.historyCard').first()).toContainText('Dania');
 });
 test('STOP and ESCALATE fail closed with field guidance',async({page})=>{
   await setupGo(page);
@@ -84,7 +94,7 @@ test('STOP and ESCALATE fail closed with field guidance',async({page})=>{
   await expect(page.locator('.finalDecision')).toContainText('DO NOT DEPLOY');
   await expect(page.locator('.fieldResponse')).toContainText('What to do now');
   await page.getByRole('button',{name:'START NEW ROUTE'}).click();
-  await pick(page,'Boynton Beach');
+  await pick(page,'Dania');
   await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
   await page.getByPlaceholder('Manager name').fill('Test Manager');
   await page.getByPlaceholder('Neighborhood / route').fill('Test Route B');
