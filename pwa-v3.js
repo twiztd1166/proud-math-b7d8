@@ -1,13 +1,17 @@
-const PCM_BUILD_VERSION='2026.08.14-v3.1';
+const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.2';
 const PCM_LATEST_META='https://raw.githubusercontent.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-public/latest.json';
 let pcmLatest=null,pcmDeferredInstall=null;
 function pcmStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function pcmValidatedDataUpdate(){return!!(pcmLatest&&pcmLatest.validated===true&&pcmLatest.datasetSha256&&pcmLatest.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256)}
+function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'A newer validated controlled register is available. Update the app before any new DEPLOY decision.':''}
 function pcmHealth(){
   const el=document.getElementById('appHealth');if(!el)return;
-  const online=navigator.onLine;
-  const newer=pcmLatest&&pcmLatest.version&&pcmLatest.version!==PCM_BUILD_VERSION;
-  el.className='appHealth '+(online?'online':'offline')+(newer?' update':'');
-  el.innerHTML=`<span class="healthNet">${online?'● ONLINE':'● OFFLINE'}</span><span>Snapshot ${esc(db?.meta?.snapshotDate||'—')}</span><span>${esc(PCM_BUILD_VERSION)}</span>${newer?`<a href="${esc(pcmLatest.url||'#')}" class="healthUpdate">UPDATE AVAILABLE</a>`:''}${!pcmStandalone()?'<button id="installApp" class="healthInstall">INSTALL</button>':''}`;
+  const online=navigator.onLine,age=typeof pcmSnapshotAgeDays==='function'?pcmSnapshotAgeDays():null;
+  const newerCode=pcmLatest&&pcmLatest.validated===true&&pcmLatest.version&&pcmLatest.version!==PCM_BUILD_VERSION;
+  const newerData=pcmValidatedDataUpdate(),stale=age!==null&&age>30;
+  el.className='appHealth '+(online?'online':'offline')+(newerCode?' update':'')+(newerData?' dataUpdate':'')+(stale&&!newerData?' stale':'');
+  const ageText=age===null?'':` · ${age}d`;
+  el.innerHTML=`<span class="healthNet">${online?'● ONLINE':'● OFFLINE'}</span><span>Snapshot ${esc(db?.meta?.snapshotDate||'—')}${ageText}</span><span>${esc(PCM_BUILD_VERSION)}</span>${newerData?'<span class="healthBlock">DEPLOY BLOCKED — VALIDATED DATA UPDATE</span>':''}${newerCode||newerData?`<a href="${esc(pcmLatest.url||'#')}" class="healthUpdate">UPDATE AVAILABLE</a>`:''}${!pcmStandalone()?'<button id="installApp" class="healthInstall">INSTALL</button>':''}`;
   const b=document.getElementById('installApp');if(b)b.onclick=pcmInstall;
 }
 async function pcmInstall(){
@@ -21,9 +25,10 @@ function pcmShowInstall(text){
   let d=document.createElement('div');d.id='installSheet';d.className='installSheet';d.innerHTML=`<div class="installCard"><div class="logo installLogo">P</div><h3>Add Canvass Manager</h3><p>${esc(text)}</p><button class="btn primary" id="closeInstall">GOT IT</button></div>`;document.body.appendChild(d);document.getElementById('closeInstall').onclick=()=>d.remove();d.onclick=e=>{if(e.target===d)d.remove()};
 }
 async function pcmCheckLatest(){
-  if(!navigator.onLine)return pcmHealth();
-  try{let r=await fetch(PCM_LATEST_META+'?t='+Date.now(),{cache:'no-store'});if(r.ok)pcmLatest=await r.json()}catch{}
-  pcmHealth();
+  if(!navigator.onLine){pcmApplyDeployBlock();pcmHealth();return}
+  try{let r=await fetch(PCM_LATEST_META+'?t='+Date.now(),{cache:'no-store'});if(r.ok){let x=await r.json();if(x&&x.validated===true)pcmLatest=x}}catch{}
+  const before=currentDeployBlock();pcmApplyDeployBlock();pcmHealth();
+  if(before!==currentDeployBlock()&&typeof render==='function')render();
 }
 async function pcmRegisterSW(){
   if(!('serviceWorker'in navigator))return pcmHealth();
@@ -35,4 +40,4 @@ window.addEventListener('appinstalled',()=>{pcmDeferredInstall=null;pcmHealth()}
 window.addEventListener('online',()=>{pcmHealth();pcmCheckLatest()});
 window.addEventListener('offline',pcmHealth);
 window.PCM_BUILD_VERSION=PCM_BUILD_VERSION;
-setTimeout(()=>{pcmHealth();pcmRegisterSW();pcmCheckLatest()},80);
+setTimeout(()=>{pcmApplyDeployBlock();pcmHealth();pcmRegisterSW();pcmCheckLatest()},80);
