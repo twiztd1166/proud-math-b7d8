@@ -131,19 +131,24 @@ jobs:
           test -f canvass-dist/provenance-v3-2.js
           test -f canvass-dist/hardening-v3-2.css
           test -f canvass-dist/sw.js
-      - name: Install browser test runtimes
+      - name: Install isolated browser test runtimes
         shell: bash
         run: |
-          npm install --no-save --ignore-scripts @playwright/test
-          npx playwright install --with-deps webkit chromium
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-playwright"
+          rm -rf "$PLAYWRIGHT_ROOT" node_modules
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
       - name: Run field regression matrix
         shell: bash
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
-          npx playwright test tests/mobile-regression.spec.js --project=webkit-iphone
-          npx playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
-          npx playwright test tests/matrix-smoke.spec.js
+          ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone
+          ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
+          ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js
       - name: Publish validated snapshot artifacts and metadata
         shell: bash
         run: |
