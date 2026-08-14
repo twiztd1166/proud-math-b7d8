@@ -38,7 +38,7 @@ test('permanent controlled-document links are exposed',async({page})=>{
   await expect(page.getByRole('link',{name:'OPEN CURRENT COURTESY NOTICE'}).last()).toHaveAttribute('href',/1vGHFL0aXX0EmV65kPZRrUqs1ONupqRWi/);
   await expect(page.getByRole('link',{name:'OPEN CURRENT MUNICIPALITY MASTER PDF'})).toHaveAttribute('href',/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/);
   await expect(page.getByRole('link',{name:'OPEN CURRENT CONTROLLED SHEET'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
-  await expect(page.getByRole('link',{name:'OPEN PERMANENT CANVASS MANAGER URL'})).toHaveAttribute('href','https://canvass.paradiseexteriors.com/');
+  await expect(page.getByRole('link',{name:'OPEN PERMANENT CANVASS MANAGER URL'})).toHaveAttribute('href','https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html');
 });
 test('browse areas by county works',async({page})=>{
   await page.goto('/index.html');
