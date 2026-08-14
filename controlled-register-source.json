@@ -21,8 +21,8 @@
     "currentCourtesyNoticeUrl": "https://drive.google.com/file/d/1vGHFL0aXX0EmV65kPZRrUqs1ONupqRWi/view?usp=drivesdk",
     "currentMasterPdfUrl": "https://drive.google.com/file/d/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/view?usp=drivesdk",
     "currentSheetUrl": "https://docs.google.com/spreadsheets/d/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/edit",
-    "currentAppUrl": "https://canvass.paradiseexteriors.com/",
-    "permanentLinkControl": "CURRENT courtesy notice, municipality master PDF, controlled Sheet, and Canvass Manager use permanent operational links. Drive documents are updated in place; the app uses the permanent canvass.paradiseexteriors.com endpoint."
+    "currentAppUrl": "https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html",
+    "permanentLinkControl": "CURRENT courtesy notice, municipality master PDF, controlled Sheet, and Canvass Manager use stable operational links. Drive documents are updated in place; the manager app URL follows only the validated GitHub release branch after the full validation workflow passes."
   },
   "records": [
     {
