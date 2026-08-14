@@ -1,1 +1,1 @@
-Build the Paradise Canvass Manager plain-data mobile app from the controlled 2026-08-13 snapshot.
+Build and publish the Paradise Canvass Manager from the validated controlled 2026-08-14 snapshot; deploy only after all validation gates pass.
