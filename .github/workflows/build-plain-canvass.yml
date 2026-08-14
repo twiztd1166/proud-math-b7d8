@@ -51,20 +51,12 @@ jobs:
           if(obj.meta.snapshotDate!==baseline.snapshot)throw new Error('Snapshot baseline mismatch');
           const canonical=JSON.stringify(obj);
           const hash=crypto.createHash('sha256').update(canonical).digest('hex');
-          const manifest={
-            schemaVersion:1,
-            snapshot:obj.meta.snapshotDate,
-            records:obj.records.length,
-            go,noGo,
-            noGoNames:stops,
-            sourceCoverage,
-            sha256:hash
-          };
+          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,sha256:hash};
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           console.log(manifest);
           NODE
-      - name: Validate app, PWA and no dormant sync
+      - name: Validate app, PWA and production bundle
         shell: bash
         run: |
           node --check core-v2.js
@@ -77,6 +69,8 @@ jobs:
           node --check boot-v2.js
           node --check sw.js
           node --check tests/mobile-regression.spec.js
+          node --check canvass-worker.js
+          node --check scripts/build-canvass-site.mjs
           grep -q 'manifest.webmanifest' index.html
           grep -q 'pwa-v3.css' index.html
           grep -q 'browse-v3.js' index.html
@@ -86,11 +80,16 @@ jobs:
           grep -q 'icon-512.png' manifest.webmanifest
           grep -q 'plain-data.js' sw.js
           grep -q 'browse-v3.js' sw.js
+          grep -q 'canvass.paradiseexteriors.com' wrangler.canvass.jsonc
           test -f icon-192.png
           test -f icon-512.png
           test -f control-baseline.json
           test -f register-manifest.json
           if grep -Eq 'central-sync|central-config|central-style' index.html; then echo 'Dormant central sync exposed'; exit 1; fi
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/index.html
+          test -f canvass-dist/plain-data.js
+          test -f canvass-dist/sw.js
       - name: Install WebKit test runtime
         shell: bash
         run: |
@@ -116,18 +115,7 @@ jobs:
           const m=text.match(/PCM_BUILD_VERSION='([^']+)'/);if(!m)throw new Error('Build version missing');
           const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
           const sha=process.env.GITHUB_SHA;
-          const meta={
-            version:m[1],
-            sha,
-            snapshot:manifest.snapshot,
-            datasetSha256:manifest.sha256,
-            records:manifest.records,
-            go:manifest.go,
-            noGo:manifest.noGo,
-            url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,
-            validated:true,
-            publishedAt:new Date().toISOString()
-          };
+          const meta={version:m[1],sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};
           fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
           NODE
           git config user.name 'github-actions[bot]'
