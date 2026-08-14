@@ -1,4 +1,4 @@
-const PCM_BUILD_VERSION='2026.08.14-v3';
+const PCM_BUILD_VERSION='2026.08.14-v3.1';
 const PCM_LATEST_META='https://raw.githubusercontent.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-public/latest.json';
 let pcmLatest=null,pcmDeferredInstall=null;
 function pcmStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
