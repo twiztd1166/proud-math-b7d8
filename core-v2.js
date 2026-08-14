@@ -1,5 +1,5 @@
 let db=window.PCM_DATA,sel=null,view='lookup',q='',releaseStep=0;
-let form={manager:localStorage.pcmManager||'',office:localStorage.pcmOffice||'',route:'',address:'',confirm:false,notes:'',completedAt:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};
+let form={manager:localStorage.pcmManager||'',office:localStorage.pcmOffice||'',route:'',address:'',confirm:false,notes:'',completedAt:'',releaseId:'',releaseDate:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};
 const M=document.getElementById('main'),NL=document.getElementById('nLook'),NR=document.getElementById('nRel');
 const aliases={'st pete':'Saint Petersburg','st petersburg':'Saint Petersburg','psl':'Port Saint Lucie','port st lucie':'Port Saint Lucie','ft lauderdale':'Fort Lauderdale','ft pierce':'Fort Pierce','dania beach':'Dania','opa-locka':'Opa Locka','pbg':'Palm Beach Gardens','wpb':'West Palm Beach','nmb':'North Miami Beach'};
 const checks=[{key:'time',title:'Time window',help:r=>r.hours},{key:'signs',title:'Signs / access / refusal',help:r=>r.refusal},{key:'materials',title:'Materials / ROW',help:r=>r.access},{key:'permit',title:'Permit / ID / entity',help:r=>r.doFirst},{key:'appointment',title:'Appointment-only / script / HSS',help:r=>r.hssEscalation}];
@@ -18,9 +18,14 @@ function favorites(){return readList('pcmFavorites')}
 function isFavorite(name){return favorites().includes(name)}
 function toggleFavorite(name){let a=favorites();a=a.includes(name)?a.filter(x=>x!==name):[name,...a].slice(0,12);writeList('pcmFavorites',a);render()}
 function recordsFromNames(names){return names.map(n=>db.records.find(r=>r.name===n)).filter(Boolean)}
-function resetForm(){form={...form,route:'',address:'',confirm:false,notes:'',completedAt:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};releaseStep=0}
+function localDateISO(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`}
+function currentDeployBlock(){return String(window.PCM_DEPLOY_BLOCK_REASON||'').trim()}
+function releaseIdentityReady(){return!!(form.manager.trim()&&form.route.trim()&&form.address.trim()&&form.confirm&&!currentDeployBlock())}
+function resetForm(){form={...form,route:'',address:'',confirm:false,notes:'',completedAt:'',releaseId:'',releaseDate:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};releaseStep=0}
 function choose(r){sel=r;q=r.name;resetForm();let a=readList('pcmRecent').filter(x=>x!==r.name);a.unshift(r.name);writeList('pcmRecent',a.slice(0,6));view='lookup';render();scrollTo(0,0)}
 function setView(v){view=v;render();scrollTo(0,0)}
 function home(){sel=null;q='';resetForm();setView('lookup');setTimeout(()=>document.getElementById('search')?.focus(),30)}
-function decision(){if(!sel||sel.release!=='GO')return[false,'Current municipality status is NO-GO.'];if(!form.address.trim())return[false,'Exact address / route boundary is required.'];if(!form.confirm)return[false,'Confirm the address matches the legal jurisdiction shown.'];for(const x of checks)if(form.c[x.key]==='STOP')return[false,`${x.title} is STOP.`];for(const x of checks)if(form.c[x.key]==='ESCALATE')return[false,`${x.title} requires escalation.`];if(checks.some(x=>form.c[x.key]!=='PASS'))return[false,'All five controls must be PASS.'];return[true,'GO jurisdiction + address confirmed + all five controls PASS.']}
+function blockingCheck(){for(const x of checks)if(form.c[x.key]==='STOP'||form.c[x.key]==='ESCALATE')return{x,value:form.c[x.key]};return null}
+function decision(){const block=currentDeployBlock();if(block)return[false,block];if(!sel||sel.release!=='GO')return[false,'Current municipality status is NO-GO.'];if(!form.manager.trim())return[false,'Manager name is required.'];if(!form.route.trim())return[false,'Territory / route is required.'];if(!form.address.trim())return[false,'Exact address / route boundary is required.'];if(!form.confirm)return[false,'Confirm the address matches the legal jurisdiction shown.'];for(const x of checks)if(form.c[x.key]==='STOP')return[false,`${x.title} is STOP.`];for(const x of checks)if(form.c[x.key]==='ESCALATE')return[false,`${x.title} requires escalation.`];if(checks.some(x=>form.c[x.key]!=='PASS'))return[false,'All five controls must be PASS.'];return[true,'GO jurisdiction + manager/route/address confirmed + all five controls PASS.']}
+function releaseScopeText(date=form.releaseDate||localDateISO()){return`Valid only for ${date}, this municipality, and the exact route/address boundary recorded in this release.`}
 function toast(s){let e=document.createElement('div');e.className='toast';e.textContent=s;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
