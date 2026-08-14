@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Apply controlled v3.3 register payload
+        run: node scripts/apply-controlled-update.mjs
       - name: Rebuild and validate controlled register
         shell: bash
         run: |
@@ -33,7 +35,6 @@ jobs:
             let b64=parts.map(f=>fs.readFileSync(f,'utf8').trim()).join('');
             b64+=Buffer.from(fs.readFileSync('payload05tail.hex','utf8').trim(),'hex').toString('utf8');
             obj=JSON.parse(zlib.gunzipSync(Buffer.from(b64,'base64')).toString('utf8'));
-            fs.writeFileSync('controlled-register-source.json',JSON.stringify(obj,null,2)+'\n');
           }
           if(!obj||!Array.isArray(obj.records)||!obj.meta)throw new Error('Controlled register structure invalid');
           const names=obj.records.map(r=>String(r.name||'').trim());
@@ -52,8 +53,17 @@ jobs:
           const canonical=JSON.stringify(obj);
           const hash=crypto.createHash('sha256').update(canonical).digest('hex');
           const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,sha256:hash};
+          fs.writeFileSync('controlled-register-source.json',JSON.stringify(obj,null,2)+'\n');
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          let p=fs.readFileSync('provenance-v3-2.js','utf8');
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.3'")
+             .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
+             .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
+             .replace(/records:\d+/,`records:${manifest.records}`)
+             .replace(/go:\d+/,`go:${manifest.go}`)
+             .replace(/noGo:\d+/,`noGo:${manifest.noGo}`);
+          fs.writeFileSync('provenance-v3-2.js',p);
           console.log(manifest);
           NODE
       - name: Generate controlled change report
@@ -94,6 +104,7 @@ jobs:
           node --check canvass-worker.js
           node --check scripts/build-canvass-site.mjs
           node --check scripts/change-control-report.mjs
+          node --check scripts/apply-controlled-update.mjs
           grep -q 'manifest.webmanifest' index.html
           grep -q 'pwa-v3.css' index.html
           grep -q 'hardening-v3-2.css' index.html
@@ -133,29 +144,37 @@ jobs:
           npx playwright test tests/mobile-regression.spec.js --project=webkit-iphone
           npx playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
           npx playwright test tests/matrix-smoke.spec.js
-      - name: Publish validated snapshot metadata
+      - name: Publish validated snapshot artifacts and metadata
         shell: bash
         run: |
           REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
           if [ "$REMOTE_SHA" != "$GITHUB_SHA" ]; then
-            echo "A newer commit exists; this validated run will not overwrite latest.json."
+            echo "A newer commit exists; this validated run will not overwrite validated artifacts."
             exit 0
           fi
-          node <<'NODE'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add controlled-register-source.json plain-data.js register-manifest.json change-control-report.json provenance-v3-2.js
+          if git diff --cached --quiet; then
+            VALIDATED_SHA="$GITHUB_SHA"
+          else
+            git commit -m 'Publish validated canvass app artifacts'
+            git push origin HEAD:paradise-canvass-manager-public
+            VALIDATED_SHA="$(git rev-parse HEAD)"
+          fi
+          VALIDATED_SHA="$VALIDATED_SHA" node <<'NODE'
           const fs=require('fs');
           const p=fs.readFileSync('provenance-v3-2.js','utf8');
           const m=p.match(/appVersion:'([^']+)'/);if(!m)throw new Error('Build version missing');
           const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
           const changes=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
-          const sha=process.env.GITHUB_SHA;
+          const sha=process.env.VALIDATED_SHA;
           const meta={version:m[1],sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,changeControl:{datasetChanged:changes.datasetChanged,jurisdictionChangeCount:changes.jurisdictionChangeCount,classificationChanges:changes.classificationChanges.length},url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};
           fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
           NODE
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add controlled-register-source.json plain-data.js register-manifest.json change-control-report.json latest.json
+          git add latest.json
           if git diff --cached --quiet; then
-            echo 'Validated artifacts unchanged'
+            echo 'Validated metadata unchanged'
           else
             git commit -m 'Publish validated canvass app metadata'
             git push origin HEAD:paradise-canvass-manager-public

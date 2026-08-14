@@ -1,8 +1,8 @@
 const PCM_PROVENANCE=Object.freeze({
   schemaVersion:2,
-  appVersion:'2026.08.14-v3.2',
-  snapshot:'2026-08-13',
-  datasetSha256:'1a0e74faccac96abddea820fe08391fbd17b5fd8feb9222103ee827a1282879e',
+  appVersion:'2026.08.14-v3.3',
+  snapshot:'2026-08-14',
+  datasetSha256:'7508cd852b943376b33abfb329696aed8d0919fea9765c14558ca69eb0564b99',
   records:78,
   go:76,
   noGo:2,
@@ -32,7 +32,7 @@ function pcmSourceDescriptor(raw,index=0){
   }catch{return `Official source ${index+1}`}
 }
 function pcmAuthorityRefs(r){
-  const text=[r?.why,r?.doFirst,r?.hours,r?.refusal,r?.access,r?.hssEscalation].filter(Boolean).join(' ');
+  const text=[r?.why,r?.doFirst,r?.hours,r?.refusal,r?.access,r?.hssEscalation,r?.hangerPlacement,r?.courtesyPlacement].filter(Boolean).join(' ');
   const hits=text.match(/§\s*\d+(?:\.\d+)+(?:\([A-Za-z0-9]+\))*/g)||[];
   return [...new Set(hits.map(x=>x.replace(/\s+/g,'')))].slice(0,10);
 }
