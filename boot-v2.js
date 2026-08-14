@@ -1,0 +1,2 @@
+function render(){NL.classList.toggle('on',view==='lookup');NR.classList.toggle('on',view==='release');if(!db||!db.records||db.records.length!==78||db.meta.goCount!==76||db.meta.noGoCount!==2){M.innerHTML='<div class="empty"><h2>Controlled register unavailable</h2><p>Do not use this app for deployment decisions.</p></div>';return}view==='release'?release():sel?city():lookupHome()}
+NL.onclick=()=>setView('lookup');NR.onclick=()=>setView('release');document.getElementById('reset').onclick=home;render();
