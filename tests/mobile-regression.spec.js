@@ -94,16 +94,20 @@ test('special material-placement branches stay field-visible',async({page})=>{
 test('commercial hanger and courtesy-only releases stay distinct',async({page})=>{
   await page.goto('/index.html');
   const sample=await page.evaluate(()=>{
-    const r=window.PCM_DATA.records.find(x=>x.release==='GO'&&String(x.hangerRelease||'').startsWith('DO NOT LEAVE')&&String(x.courtesyRelease||'').includes('LEAVE WITH CONDITIONS'));
-    if(!r)throw new Error('No GO commercial-hanger-blocked / courtesy-allowed sample found');
-    return{name:r.name,hangerRelease:r.hangerRelease,courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyDelta:r.courtesyDelta};
+    const r=window.PCM_DATA.records.find(x=>x.name==='New Port Richey');
+    if(!r)throw new Error('Controlled New Port Richey record missing');
+    return{name:r.name,hangerRelease:r.hangerRelease,hangerPlacement:r.hangerPlacement,hangerMode:r.hangerMode,courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement,courtesyDelta:r.courtesyDelta};
   });
+  expect(`${sample.hangerRelease} ${sample.hangerPlacement} ${sample.hangerMode}`).toMatch(/DO NOT|PROHIBIT|NO DISTRIBUT/i);
+  expect(sample.courtesyFieldAction).toMatch(/^LEAVE\b/);
   await pick(page,sample.name);
   const hanger=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
   await expect(hanger).toContainText(sample.hangerRelease);
+  await expect(hanger).toContainText(sample.hangerPlacement);
   const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
   await expect(courtesy).toContainText(sample.courtesyRelease);
   await expect(courtesy).toContainText(sample.courtesyFieldAction);
+  await expect(courtesy).toContainText(sample.courtesyPlacement);
   await page.getByText('Installation courtesy notice details').click();
   const details=page.locator('details').filter({hasText:'Installation courtesy notice details'});
   await expect(details).toContainText(sample.courtesyDelta);
