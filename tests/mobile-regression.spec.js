@@ -19,10 +19,11 @@ test('controlled lookup renders current canvass, hours, hanger, courtesy and bot
   await pick(page,'Boynton Beach');
   await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
   await expect(page.locator('.traffic')).toContainText('COMMERCIAL CANVASS STATUS');
-  await expect(page.getByText('HOURS TEXT BLOCKER.',{exact:false})).toBeVisible();
+  await expect(page.locator('.staleBanner').filter({hasText:'HOURS TEXT BLOCKER.'})).toBeVisible();
   await expect(page.getByText('COMMERCIAL DOOR HANGER',{exact:true})).toBeVisible();
-  await expect(page.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
-  await expect(page.getByText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION',{exact:true})).toBeVisible();
+  const courtesySummary=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+  await expect(courtesySummary.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
+  await expect(courtesySummary.getByText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Punta Gorda');
   await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
