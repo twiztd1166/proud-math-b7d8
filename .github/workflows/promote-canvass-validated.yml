@@ -1,0 +1,36 @@
+name: Promote validated canvass release
+on:
+  workflow_run:
+    workflows: ["Build plain canvass app", "Validate canvass register"]
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  promote:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'paradise-canvass-manager-public'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: paradise-canvass-manager-public
+          fetch-depth: 1
+      - name: Verify validated metadata and promote stable branch
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const latest=JSON.parse(fs.readFileSync('latest.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const source=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          const hash=crypto.createHash('sha256').update(JSON.stringify(source)).digest('hex');
+          if(!latest.validated) throw new Error('latest.json is not validated');
+          if(latest.records!==78 || latest.go!==76 || latest.noGo!==2) throw new Error('Validated count mismatch');
+          if(latest.datasetSha256!==manifest.sha256 || manifest.sha256!==hash) throw new Error('Dataset hash chain mismatch');
+          if(!/^[0-9a-f]{40}$/.test(latest.sha)) throw new Error('Validated SHA invalid');
+          fs.writeFileSync('/tmp/validated_sha', latest.sha+'\n');
+          console.log({version:latest.version,snapshot:latest.snapshot,sha:latest.sha,datasetSha256:hash});
+          NODE
+          VALIDATED_SHA="$(cat /tmp/validated_sha)"
+          git fetch origin "$VALIDATED_SHA" --depth=1
+          git cat-file -e "$VALIDATED_SHA^{commit}"
+          git push --force origin "$VALIDATED_SHA:refs/heads/paradise-canvass-manager-validated"
