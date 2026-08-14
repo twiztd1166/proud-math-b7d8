@@ -1,0 +1,67 @@
+name: Deploy Canvass Manager to Cloudflare
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY to publish the validated app to canvass.paradiseexteriors.com'
+        required: true
+        default: ''
+permissions:
+  contents: read
+jobs:
+  deploy:
+    if: github.event.inputs.confirm == 'DEPLOY'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: paradise-canvass-manager-public
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify validated production state
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const latest=JSON.parse(fs.readFileSync('latest.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const source=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          const hash=crypto.createHash('sha256').update(JSON.stringify(source)).digest('hex');
+          if(!latest.validated)throw new Error('latest.json is not validated');
+          if(latest.datasetSha256!==manifest.sha256||manifest.sha256!==hash)throw new Error('Dataset hash chain mismatch');
+          if(manifest.records!==78||manifest.go!==76||manifest.noGo!==2)throw new Error('Controlled count mismatch');
+          if(JSON.stringify(manifest.noGoNames)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO mismatch');
+          console.log({version:latest.version,snapshot:latest.snapshot,datasetSha256:hash});
+          NODE
+      - name: Require Cloudflare deployment credentials
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CLOUDFLARE_API_TOKEN repository secret'; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID repository secret'; exit 1; }
+      - name: Build isolated production static site
+        run: |
+          npm ci
+          node scripts/build-canvass-site.mjs
+      - name: Deploy permanent Paradise domain
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy --config wrangler.canvass.jsonc
+      - name: Public post-deploy smoke test
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            if curl -fsS https://canvass.paradiseexteriors.com/ | grep -q 'Canvass Manager'; then
+              echo 'Permanent public Canvass Manager endpoint is live.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Deployment completed but permanent-domain smoke test did not pass.'
+          exit 1
