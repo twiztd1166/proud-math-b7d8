@@ -1,1 +1,1 @@
-Build and publish the Paradise Canvass Manager from the validated controlled 2026-08-14 snapshot; deploy only after all validation gates pass. Final workflow-run deployment trigger registered on main.
+Build and publish the Paradise Canvass Manager from the validated controlled 2026-08-14 snapshot; deploy only after all validation gates pass. Final workflow-run deployment trigger registered on main and aligned to the registered validator workflow name.
