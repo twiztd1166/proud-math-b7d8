@@ -16,9 +16,11 @@ function city(){
   </section>
   <section class="card essentials">
     <div class="sectionTitle">COMMERCIAL DOOR HANGER</div>
-    ${row('RELEASE',r.hangerRelease,'strong')}
-    ${row('PLACEMENT MODE',r.hangerMode,'strong')}
-    ${row('FIELD PLACEMENT',r.hangerPlacement)}
+    ${row('FIELD ACTION',r.hangerPlacement,'strong')}
+    ${row('RELEASE',r.hangerRelease)}
+    ${row('PLACEMENT MODE',r.hangerMode)}
+    ${row('SIGNS / REFUSAL',r.hangerSigns)}
+    ${row('MAILBOX',r.hangerMailbox,'strong')}
   </section>
   <section class="card essentials">
     <div class="sectionTitle">INSTALLATION COURTESY NOTICE • CURRENT</div>
@@ -26,9 +28,10 @@ function city(){
     ${row('COURTESY RELEASE',r.courtesyRelease)}
     ${row('PLACEMENT MODE',r.courtesyMode)}
     ${row('FIELD PLACEMENT',r.courtesyPlacement)}
+    ${row('HOA / GATE / PRIVATE ACCESS',r.courtesyHOA)}
     ${docLink('OPEN CURRENT COURTESY NOTICE',db.meta.currentCourtesyNoticeUrl||db.meta.courtesyNoticeUrl)}
   </section>
-  <div class="actions"><button id="rel" class="btn ${releaseBlocked?'danger':'primary'} heroAction">${block?'UPDATE REQUIRED — DO NOT DEPLOY':r.release==='GO'?'START ROUTE RELEASE →':'✕ DO NOT DEPLOY'}</button><button id="proof" class="btn secondary">Why / Proof</button><button id="script" class="btn secondary">What to say</button></div>
+  <div class="actions"><button id="rel" class="btn ${releaseBlocked?'danger':'primary'} heroAction">${block?'UPDATE REQUIRED — COMMERCIAL CANVASS BLOCKED':r.release==='GO'?'START COMMERCIAL CANVASS RELEASE →':'✕ COMMERCIAL CANVASS — DO NOT DEPLOY'}</button><button id="proof" class="btn secondary">Why / Proof</button><button id="script" class="btn secondary">What to say</button></div>
   <section class="card">
     <details><summary>Commercial door hanger details</summary><div class="detail detailRows">
       ${row('Door hanger release',r.hangerRelease)}
@@ -69,7 +72,7 @@ function city(){
   </section>`;
   document.getElementById('new').onclick=home;
   document.getElementById('fav').onclick=()=>toggleFavorite(r.name);
-  document.getElementById('rel').onclick=()=>{if(block){toast(block);return}if(r.release==='GO'){releaseStep=0;setView('release')}else toast('NO-GO: do not deploy this ordinary route.')};
+  document.getElementById('rel').onclick=()=>{if(block){toast(block);return}if(r.release==='GO'){releaseStep=0;setView('release')}else toast('COMMERCIAL CANVASS NO-GO: do not deploy this ordinary canvass route. Courtesy-notice controls, if any, are separate.')};
   document.getElementById('proof').onclick=()=>openDetail('why');
   document.getElementById('script').onclick=()=>openDetail('say');
 }
