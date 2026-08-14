@@ -52,7 +52,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
 
     await pick(page,'Boynton Beach');
     await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
-    await page.getByRole('button',{name:'Why / Proof'}).click();
+    await page.getByText('Official sources / offline proof').click();
     await expect(page.getByText(/Authority references in controlled rationale/)).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
     await pick(page,'Punta Gorda');
