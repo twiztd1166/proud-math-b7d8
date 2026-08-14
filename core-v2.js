@@ -1,0 +1,26 @@
+let db=window.PCM_DATA,sel=null,view='lookup',q='',releaseStep=0;
+let form={manager:localStorage.pcmManager||'',office:localStorage.pcmOffice||'',route:'',address:'',confirm:false,notes:'',completedAt:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};
+const M=document.getElementById('main'),NL=document.getElementById('nLook'),NR=document.getElementById('nRel');
+const aliases={'st pete':'Saint Petersburg','st petersburg':'Saint Petersburg','psl':'Port Saint Lucie','port st lucie':'Port Saint Lucie','ft lauderdale':'Fort Lauderdale','ft pierce':'Fort Pierce','dania beach':'Dania','opa-locka':'Opa Locka','pbg':'Palm Beach Gardens','wpb':'West Palm Beach','nmb':'North Miami Beach'};
+const checks=[{key:'time',title:'Time window',help:r=>r.hours},{key:'signs',title:'Signs / access / refusal',help:r=>r.refusal},{key:'materials',title:'Materials / ROW',help:r=>r.access},{key:'permit',title:'Permit / ID / entity',help:r=>r.doFirst},{key:'appointment',title:'Appointment-only / script / HSS',help:r=>r.hssEscalation}];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function norm(s=''){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\bst\.?\b/g,'saint').replace(/[^a-z0-9]+/g,' ').trim()}
+function dist(a,b){let r=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let p=r[0];r[0]=i;for(let j=1;j<=b.length;j++){let t=r[j];r[j]=Math.min(r[j]+1,r[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return r[b.length]}
+function score(x,s){let raw=s.toLowerCase().trim(),z=norm(s),n=norm(x.name);if(aliases[raw]===x.name)return 1000;if(!z)return 0;if(n===z)return 950;if(n.startsWith(z))return 850;if(n.split(' ').some(w=>w.startsWith(z)))return 760;if(n.includes(z))return 700;if(norm(x.county).includes(z)||norm(x.jurisdiction).includes(z))return 400;if(z.length>2){let v=1-dist(n,z)/Math.max(n.length,z.length);if(v>.62)return 300+v*200}return 0}
+function find(s){return db.records.map(r=>[r,score(r,s)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]||a[0].name.localeCompare(b[0].name)).slice(0,8).map(x=>x[0])}
+function status(r){if(r.release==='NO-GO')return{tone:'stop',label:'NO-GO — DO NOT DEPLOY',ans:'STOP - DO NOT DEPLOY',symbol:'✕'};if(r.managerClass.includes('DO THIS FIRST'))return{tone:'first',label:'GO — DO THIS FIRST',ans:'GO AFTER LISTED PRECHECKS PASS',symbol:'!'};if(r.managerClass==='GO - SPECIAL RULES')return{tone:'special',label:'GO — SPECIAL RULES',ans:'GO - FOLLOW SPECIAL RULES',symbol:'!'};return{tone:'go',label:'GO — NO PAPERWORK',ans:'GO - STANDARD ROUTE RELEASE ONLY',symbol:'✓'}}
+function managerAction(r){if(r.release==='NO-GO')return'STOP. Do not deploy this ordinary uninvited route.';if(r.managerClass.includes('DO THIS FIRST'))return'Complete DO FIRST below, then complete Daily Release before deployment.';if(r.managerClass==='GO - SPECIAL RULES')return'Follow the special rules below, then complete Daily Release before deployment.';return'Review the field rules below, then complete Daily Release before deployment.'}
+function pill(r){let s=status(r),t=s.tone==='stop'?'NO-GO':s.tone==='special'?'SPECIAL':s.tone==='first'?'DO FIRST':'GO';return`<span class="pill ${s.tone}">${t}</span>`}
+function row(l,v,strong=''){return`<div class="row"><div class="lab">${esc(l)}</div><div class="val ${strong}">${esc(v||'—')}</div></div>`}
+function readList(k){try{return JSON.parse(localStorage[k]||'[]')}catch{return[]}}
+function writeList(k,v){localStorage[k]=JSON.stringify(v)}
+function favorites(){return readList('pcmFavorites')}
+function isFavorite(name){return favorites().includes(name)}
+function toggleFavorite(name){let a=favorites();a=a.includes(name)?a.filter(x=>x!==name):[name,...a].slice(0,12);writeList('pcmFavorites',a);render()}
+function recordsFromNames(names){return names.map(n=>db.records.find(r=>r.name===n)).filter(Boolean)}
+function resetForm(){form={...form,route:'',address:'',confirm:false,notes:'',completedAt:'',c:{time:'',signs:'',materials:'',permit:'',appointment:''}};releaseStep=0}
+function choose(r){sel=r;q=r.name;resetForm();let a=readList('pcmRecent').filter(x=>x!==r.name);a.unshift(r.name);writeList('pcmRecent',a.slice(0,6));view='lookup';render();scrollTo(0,0)}
+function setView(v){view=v;render();scrollTo(0,0)}
+function home(){sel=null;q='';resetForm();setView('lookup');setTimeout(()=>document.getElementById('search')?.focus(),30)}
+function decision(){if(!sel||sel.release!=='GO')return[false,'Current municipality status is NO-GO.'];if(!form.address.trim())return[false,'Exact address / route boundary is required.'];if(!form.confirm)return[false,'Confirm the address matches the legal jurisdiction shown.'];for(const x of checks)if(form.c[x.key]==='STOP')return[false,`${x.title} is STOP.`];for(const x of checks)if(form.c[x.key]==='ESCALATE')return[false,`${x.title} requires escalation.`];if(checks.some(x=>form.c[x.key]!=='PASS'))return[false,'All five controls must be PASS.'];return[true,'GO jurisdiction + address confirmed + all five controls PASS.']}
+function toast(s){let e=document.createElement('div');e.className='toast';e.textContent=s;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
