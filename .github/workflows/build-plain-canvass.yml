@@ -44,15 +44,18 @@ jobs:
           node --check core-v2.js
           node --check lookup-v2.js
           node --check release-v2a.js
+          node --check history-v2.js
           node --check release-v2b.js
           node --check boot-v2.js
           grep -q 'plain-data.js' index.html
           grep -q 'core-v2.js' index.html
           grep -q 'lookup-v2.js' index.html
           grep -q 'release-v2a.js' index.html
+          grep -q 'history-v2.js' index.html
           grep -q 'release-v2b.js' index.html
           grep -q 'boot-v2.js' index.html
           grep -q 'style-v2.css' index.html
+          grep -q 'id="nHist"' index.html
       - name: Commit validated snapshot if changed
         shell: bash
         run: |
