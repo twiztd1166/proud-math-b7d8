@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "snapshot": "2026-08-13",
+  "records": 78,
+  "go": 76,
+  "noGo": 2,
+  "noGoNames": [
+    "Punta Gorda",
+    "Tarpon Springs"
+  ],
+  "sourceCoverage": 78,
+  "sha256": "1a0e74faccac96abddea820fe08391fbd17b5fd8feb9222103ee827a1282879e"
+}
