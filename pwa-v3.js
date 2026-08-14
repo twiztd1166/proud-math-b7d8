@@ -7,6 +7,7 @@ function pcmVersionParts(v=''){const m=String(v).match(/^(\d{4})\.(\d{2})\.(\d{2
 function pcmIsNewerVersion(candidate,current=PCM_BUILD_VERSION){const a=pcmVersionParts(candidate),b=pcmVersionParts(current);if(!a||!b)return false;for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false}
 function pcmIsNewerSnapshot(candidate,current=window.PCM_PROVENANCE?.snapshot||''){const a=String(candidate||''),b=String(current||'');return /^\d{4}-\d{2}-\d{2}$/.test(a)&&/^\d{4}-\d{2}-\d{2}$/.test(b)&&a>b}
 function pcmMetaIsActionable(meta){return!!(meta&&meta.validated===true&&meta.datasetSha256&&meta.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256&&(pcmIsNewerVersion(meta.version)||pcmIsNewerSnapshot(meta.snapshot)))}
+function pcmValidationHost(){return location.hostname==='127.0.0.1'||location.hostname==='localhost'}
 function pcmReadUpdateLock(){try{const x=JSON.parse(localStorage[PCM_UPDATE_LOCK_KEY]||'null');if(!x||!x.datasetSha256)return null;if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256||!(pcmIsNewerVersion(x.version)||pcmIsNewerSnapshot(x.snapshot))){delete localStorage[PCM_UPDATE_LOCK_KEY];return null}return x}catch{return null}}
 function pcmWriteUpdateLock(meta){try{localStorage[PCM_UPDATE_LOCK_KEY]=JSON.stringify({datasetSha256:meta.datasetSha256,version:meta.version||'',snapshot:meta.snapshot||'',url:meta.url||'',detectedAt:new Date().toISOString()})}catch{}}
 function pcmClearUpdateLock(){try{delete localStorage[PCM_UPDATE_LOCK_KEY]}catch{}}
@@ -33,6 +34,7 @@ function pcmShowInstall(text){
   let d=document.createElement('div');d.id='installSheet';d.className='installSheet';d.innerHTML=`<div class="installCard"><div class="logo installLogo">P</div><h3>Add Canvass Manager</h3><p>${esc(text)}</p><button class="btn primary" id="closeInstall">GOT IT</button></div>`;document.body.appendChild(d);document.getElementById('closeInstall').onclick=()=>d.remove();d.onclick=e=>{if(e.target===d)d.remove()};
 }
 async function pcmCheckLatest(){
+  if(pcmValidationHost()){pcmLatest=null;pcmClearUpdateLock();pcmApplyDeployBlock();pcmHealth();return}
   if(!navigator.onLine){pcmApplyDeployBlock();pcmHealth();return}
   try{let r=await fetch(PCM_LATEST_META+'?t='+Date.now(),{cache:'no-store'});if(r.ok){let x=await r.json();if(x&&x.validated===true){pcmLatest=x;if(pcmMetaIsActionable(x))pcmWriteUpdateLock(x);else if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256)pcmClearUpdateLock()}}}catch{}
   const before=currentDeployBlock();pcmApplyDeployBlock();pcmHealth();
