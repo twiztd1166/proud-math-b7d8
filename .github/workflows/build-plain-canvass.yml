@@ -2,6 +2,9 @@ name: Validate canvass register
 on:
   push:
     branches: [paradise-canvass-manager-public]
+concurrency:
+  group: paradise-canvass-manager-public-validation
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -11,10 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: paradise-canvass-manager-public
+          ref: ${{ github.sha }}
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Rebuild and validate controlled register
         shell: bash
         run: |
@@ -69,6 +73,11 @@ jobs:
       - name: Publish validated snapshot metadata
         shell: bash
         run: |
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          if [ "$REMOTE_SHA" != "$GITHUB_SHA" ]; then
+            echo "A newer commit exists; this validated run will not overwrite latest.json."
+            exit 0
+          fi
           node <<'NODE'
           const fs=require('fs');
           const text=fs.readFileSync('pwa-v3.js','utf8');
