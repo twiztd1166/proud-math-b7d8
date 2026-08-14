@@ -91,6 +91,28 @@ test('special material-placement branches stay field-visible',async({page})=>{
     await expect(courtesy).toContainText(sample.courtesyPlacement);
   }
 });
+test('commercial hanger and courtesy-only releases stay distinct',async({page})=>{
+  await page.goto('/index.html');
+  const sample=await page.evaluate(()=>{
+    const r=window.PCM_DATA.records.find(x=>x.release==='GO'&&String(x.hangerRelease||'').startsWith('DO NOT LEAVE')&&String(x.courtesyRelease||'').includes('LEAVE WITH CONDITIONS'));
+    if(!r)throw new Error('No GO commercial-hanger-blocked / courtesy-allowed sample found');
+    return{name:r.name,hangerRelease:r.hangerRelease,courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyDelta:r.courtesyDelta};
+  });
+  await pick(page,sample.name);
+  const hanger=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
+  await expect(hanger).toContainText(sample.hangerRelease);
+  const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+  await expect(courtesy).toContainText(sample.courtesyRelease);
+  await expect(courtesy).toContainText(sample.courtesyFieldAction);
+  await page.getByText('Installation courtesy notice details').click();
+  const details=page.locator('details').filter({hasText:'Installation courtesy notice details'});
+  await expect(details).toContainText(sample.courtesyDelta);
+
+  await page.getByRole('button',{name:'New search'}).click();
+  await pick(page,'North Miami Beach');
+  const nmbCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+  await expect(nmbCourtesy).toContainText('OUTSIDE UNIVERSAL STOCK — DO NOT ISSUE');
+});
 test('required route identity and five PASS checks produce evidence-grade DEPLOY record',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Dania');
