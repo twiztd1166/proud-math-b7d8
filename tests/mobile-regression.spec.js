@@ -29,7 +29,7 @@ test('controlled lookup renders current canvass, hours hold, hanger, courtesy an
   await expect(courtesySummary.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
   await expect(courtesySummary.getByText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION',{exact:true})).toBeVisible();
   await expect(courtesySummary.getByText('HOA / GATE / PRIVATE ACCESS',{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Release',exact:true}).click();
+  await page.locator('#nRel').click();
   await expect(page.getByRole('heading',{name:'Daily Release'})).toBeVisible();
   await expect(page.getByText('COMMERCIAL ROUTE RELEASE BLOCKED',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'HOURS TEXT BLOCKER'})).toBeVisible();
