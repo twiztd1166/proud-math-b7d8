@@ -29,6 +29,8 @@ fs.writeFileSync('controlled-register-source.json',JSON.stringify(obj,null,2)+'\
 
 // Fail closed if any municipality loses a required hours, hanger, or courtesy control.
 execFileSync(process.execPath,['scripts/validate-field-controls.mjs'],{stdio:'inherit'});
+// Fail closed if field devices would load external executable resources or lose the SW same-origin guard.
+execFileSync(process.execPath,['scripts/validate-runtime-isolation.mjs'],{stdio:'inherit'});
 
 const canonicalHash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
 console.log(JSON.stringify({parts:files.length,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,sourceCoverage,payloadSha256:payloadHash,canonicalSha256:canonicalHash,currentAppUrl:obj.meta.currentAppUrl},null,2));
