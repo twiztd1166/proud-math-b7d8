@@ -9,6 +9,13 @@ const requiredFields=[
   'courtesyRelease','courtesyMode','courtesyPlacement','courtesyHOA','courtesyContent','courtesyBehavior','courtesyFieldAction'
 ];
 
+const expectedHoursBlockers=[
+  'Belle Glade','Boynton Beach','Coral Springs','Indian Rocks Beach','Lakeland','Melbourne',
+  'Oldsmar','Pahokee','Port Richey','Rockledge','Safety Harbor','Vero Beach'
+].sort();
+const expectedCourtesyBlocks=['Deerfield Beach','Port Saint Lucie','Punta Gorda','Vero Beach'].sort();
+const expectedNoGo=['Punta Gorda','Tarpon Springs'].sort();
+
 const blank=[];
 for(const r of db.records){
   for(const field of requiredFields){
@@ -24,10 +31,10 @@ const outsideUniversal=db.records.filter(r=>String(r.courtesyFieldAction).starts
 const noGo=db.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
 
 if(db.records.length!==78)throw new Error(`Expected 78 jurisdictions; found ${db.records.length}`);
-if(hoursBlockers.length!==12)throw new Error(`Expected 12 hours text blockers; found ${hoursBlockers.length}: ${hoursBlockers.join(', ')}`);
-if(courtesyBlocks.length!==4)throw new Error(`Expected 4 courtesy blockers; found ${courtesyBlocks.length}: ${courtesyBlocks.join(', ')}`);
+if(JSON.stringify(hoursBlockers)!==JSON.stringify(expectedHoursBlockers))throw new Error(`Hours blocker set changed. Expected: ${expectedHoursBlockers.join(', ')}. Found: ${hoursBlockers.join(', ')}`);
+if(JSON.stringify(courtesyBlocks)!==JSON.stringify(expectedCourtesyBlocks))throw new Error(`Courtesy blocker set changed. Expected: ${expectedCourtesyBlocks.join(', ')}. Found: ${courtesyBlocks.join(', ')}`);
 if(outsideUniversal.length!==1||outsideUniversal[0]!=='North Miami Beach')throw new Error(`Expected only North Miami Beach outside universal stock; found ${outsideUniversal.join(', ')}`);
-if(JSON.stringify(noGo)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error(`NO-GO set changed: ${noGo.join(', ')}`);
+if(JSON.stringify(noGo)!==JSON.stringify(expectedNoGo))throw new Error(`NO-GO set changed. Expected: ${expectedNoGo.join(', ')}. Found: ${noGo.join(', ')}`);
 
 const stableUrl='https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html';
 if(db.meta.currentAppUrl!==stableUrl)throw new Error(`currentAppUrl drift: ${db.meta.currentAppUrl}`);
@@ -41,8 +48,11 @@ const counts={
   noGo:noGo.length,
   hoursBlockers:hoursBlockers.length,
   courtesyBlocks:courtesyBlocks.length,
+  courtesyUsableExcludingNmb:db.records.length-courtesyBlocks.length-outsideUniversal.length,
   outsideUniversalStock:outsideUniversal.length,
   requiredFields:requiredFields.length,
   missingFields:blank.length
 };
+if(counts.courtesyUsableExcludingNmb!==73)throw new Error(`Expected 73 courtesy-usable service areas excluding NMB; found ${counts.courtesyUsableExcludingNmb}`);
+
 console.log(JSON.stringify({counts,hoursBlockers,courtesyBlocks,outsideUniversal,noGo,currentAppUrl:db.meta.currentAppUrl},null,2));
