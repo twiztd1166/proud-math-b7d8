@@ -1,9 +1,5 @@
-name: Deploy Canvass Manager to Cloudflare
+name: Deploy Canvass Manager to Cloudflare (manual only)
 on:
-  workflow_run:
-    workflows: ["Build plain canvass app", "Validate canvass register"]
-    types: [completed]
-    branches: [paradise-canvass-manager-public]
   workflow_dispatch:
     inputs:
       confirm:
@@ -14,7 +10,7 @@ permissions:
   contents: read
 jobs:
   deploy:
-    if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'DEPLOY')
+    if: github.event.inputs.confirm == 'DEPLOY'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
