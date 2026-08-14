@@ -2,13 +2,14 @@ const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.2';
 const PCM_LATEST_META='https://raw.githubusercontent.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-public/latest.json';
 let pcmLatest=null,pcmDeferredInstall=null;
 function pcmStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function pcmVersionParts(v=''){const m=String(v).match(/^(\d{4})\.(\d{2})\.(\d{2})-v(\d+)(?:\.(\d+))?/);return m?m.slice(1).map(Number):null}
+function pcmIsNewerVersion(candidate,current=PCM_BUILD_VERSION){const a=pcmVersionParts(candidate),b=pcmVersionParts(current);if(!a||!b)return false;for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false}
 function pcmValidatedDataUpdate(){return!!(pcmLatest&&pcmLatest.validated===true&&pcmLatest.datasetSha256&&pcmLatest.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256)}
 function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'A newer validated controlled register is available. Update the app before any new DEPLOY decision.':''}
 function pcmHealth(){
   const el=document.getElementById('appHealth');if(!el)return;
   const online=navigator.onLine,age=typeof pcmSnapshotAgeDays==='function'?pcmSnapshotAgeDays():null;
-  const newerCode=pcmLatest&&pcmLatest.validated===true&&pcmLatest.version&&pcmLatest.version!==PCM_BUILD_VERSION;
-  const newerData=pcmValidatedDataUpdate(),stale=age!==null&&age>30;
+  const newerCode=pcmLatest&&pcmLatest.validated===true&&pcmIsNewerVersion(pcmLatest.version),newerData=pcmValidatedDataUpdate(),stale=age!==null&&age>30;
   el.className='appHealth '+(online?'online':'offline')+(newerCode?' update':'')+(newerData?' dataUpdate':'')+(stale&&!newerData?' stale':'');
   const ageText=age===null?'':` · ${age}d`;
   el.innerHTML=`<span class="healthNet">${online?'● ONLINE':'● OFFLINE'}</span><span>Snapshot ${esc(db?.meta?.snapshotDate||'—')}${ageText}</span><span>${esc(PCM_BUILD_VERSION)}</span>${newerData?'<span class="healthBlock">DEPLOY BLOCKED — VALIDATED DATA UPDATE</span>':''}${newerCode||newerData?`<a href="${esc(pcmLatest.url||'#')}" class="healthUpdate">UPDATE AVAILABLE</a>`:''}${!pcmStandalone()?'<button id="installApp" class="healthInstall">INSTALL</button>':''}`;
