@@ -52,6 +52,8 @@ test('cached iPhone app works end-to-end after its origin server is physically u
 
     await pick(page,'Boynton Beach');
     await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
+    await page.getByRole('button',{name:'Why / Proof'}).click();
+    await expect(page.getByText(/Authority references in controlled rationale/)).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
     await pick(page,'Punta Gorda');
     await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
@@ -62,12 +64,15 @@ test('cached iPhone app works end-to-end after its origin server is physically u
 
     await pick(page,'Boynton Beach');
     await page.getByRole('button',{name:/START ROUTE RELEASE/}).click();
+    await page.getByPlaceholder('Manager name').fill('Offline Test Manager');
+    await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');
     await page.getByPlaceholder('Exact street address or boundary').fill('789 Offline Test Route');
     await page.getByRole('checkbox').check();
     await page.getByRole('button',{name:/START 5 CHECKS/}).click();
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('DEPLOY');
     await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS DEVICE');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.2');
     await page.getByRole('button',{name:'View history'}).click();
     await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
   }finally{
