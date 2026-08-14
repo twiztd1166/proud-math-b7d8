@@ -7,7 +7,10 @@ async function pick(page,name){
   await page.locator('.opt').filter({hasText:name}).first().click();
 }
 
-test('cached iPhone app works end-to-end when every uncached network request is cut off',async({page,context})=>{
+test('cached iPhone app works end-to-end after the origin server is physically unavailable',async({page})=>{
+  const pid=Number(process.env.PCM_TEST_SERVER_PID||0);
+  if(!pid)throw new Error('PCM_TEST_SERVER_PID missing');
+
   await page.goto('/index.html');
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 
@@ -15,18 +18,19 @@ test('cached iPhone app works end-to-end when every uncached network request is 
     await navigator.serviceWorker.ready;
     const keys=await caches.keys();
     const key=keys.find(k=>k.startsWith('pcm-field-'));
-    if(!key)return 0;
+    if(!key)return {count:0,index:false};
     const cache=await caches.open(key);
-    return (await cache.keys()).length;
-  }),{timeout:15000}).toBeGreaterThan(10);
+    const index=await cache.match('./index.html');
+    return {count:(await cache.keys()).length,index:!!index};
+  }),{timeout:15000}).toMatchObject({index:true});
 
   await page.reload({waitUntil:'domcontentloaded'});
   await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
+  await expect(page.evaluate(async()=>!!(await caches.match('./index.html')))).resolves.toBeTruthy();
 
-  // Playwright WebKit has an internal crash when setOffline(true) is followed by reload.
-  // Blocking every uncached request exercises the same failover path without relying on that broken emulator API.
-  // Requests already satisfied by the service worker are not intercepted by BrowserContext.route().
-  await context.route('**/*',route=>route.abort('internetdisconnected'));
+  process.kill(pid,'SIGTERM');
+  await new Promise(r=>setTimeout(r,750));
+
   await page.reload({waitUntil:'domcontentloaded',timeout:15000});
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 
