@@ -64,6 +64,33 @@ test('browse areas by county works',async({page})=>{
   await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
   await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
 });
+test('special material-placement branches stay field-visible',async({page})=>{
+  await page.goto('/index.html');
+  const samples=await page.evaluate(()=>{
+    const records=window.PCM_DATA.records;
+    const one=(predicate,label)=>{
+      const r=records.find(predicate);
+      if(!r)throw new Error(`No controlled ${label} sample found`);
+      return{name:r.name,hangerPlacement:r.hangerPlacement,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement};
+    };
+    return[
+      one(r=>/DIRECT HANDOFF ONLY/.test(String(r.hangerMode||'')),'direct-handoff'),
+      one(r=>/OWNER CONSENT/.test(String(r.hangerMode||'')),'owner-consent'),
+      one(r=>/RECEPTACLE/.test(String(r.hangerMode||'')),'receptacle'),
+      one(r=>/NON-AFFIXED/.test(String(r.hangerMode||'')),'non-affixed'),
+      one(r=>String(r.courtesyFieldAction||'').startsWith('DO NOT LEAVE — COURTESY TEXT BLOCKER'),'courtesy-blocked')
+    ];
+  });
+  for(const sample of samples){
+    await page.goto('/index.html');
+    await pick(page,sample.name);
+    const hanger=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
+    await expect(hanger).toContainText(sample.hangerPlacement);
+    const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+    await expect(courtesy).toContainText(sample.courtesyFieldAction);
+    await expect(courtesy).toContainText(sample.courtesyPlacement);
+  }
+});
 test('required route identity and five PASS checks produce evidence-grade DEPLOY record',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Dania');
