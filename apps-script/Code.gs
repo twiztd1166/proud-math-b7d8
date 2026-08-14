@@ -58,6 +58,9 @@ function pcmSave_(r,id){
 
   const existing=pcmFindExisting_(log,id);
   if(existing){
+    pcmValidateDuplicate_(log,existing,{manager,office,route,address,municipality,vals,expectedDecision});
+    const updateNote=['APP-ID='+id,'APP-SNAPSHOT='+PCM_EXPECTED_SNAPSHOT,'APP-UPDATED='+new Date().toISOString(),notes].filter(Boolean).join(' | ');
+    log.getRange(existing,16).setValue(pcmCell_(updateNote));
     SpreadsheetApp.flush();
     return{type:'PCM_CENTRAL_SAVE',ok:true,id:id,duplicate:true,row:existing,decision:String(log.getRange(existing,15).getDisplayValue()||expectedDecision),receipt:pcmReceipt_(completedAt,existing)};
   }
@@ -78,6 +81,16 @@ function pcmSave_(r,id){
     throw new Error('SHEET_FORMULA_VALIDATION_FAILED');
   }
   return{type:'PCM_CENTRAL_SAVE',ok:true,id:id,row:row,decision:sheetDecision,receipt:pcmReceipt_(completedAt,row)};
+}
+
+function pcmValidateDuplicate_(sheet,row,x){
+  const fixed=sheet.getRange(row,2,1,5).getDisplayValues()[0].map(v=>String(v||'').trim());
+  const expectedFixed=[x.manager,x.office,x.route,x.address,x.municipality].map(v=>String(v||'').trim());
+  if(JSON.stringify(fixed)!==JSON.stringify(expectedFixed))throw new Error('DUPLICATE_ID_CONFLICT');
+  const oldChecks=sheet.getRange(row,10,1,5).getDisplayValues()[0].map(v=>String(v||'').trim().toUpperCase());
+  if(JSON.stringify(oldChecks)!==JSON.stringify(x.vals))throw new Error('DUPLICATE_ID_CONFLICT');
+  const oldDecision=String(sheet.getRange(row,15).getDisplayValue()||'').trim();
+  if(oldDecision!==x.expectedDecision)throw new Error('DUPLICATE_ID_CONFLICT');
 }
 
 function pcmFirstOpenRow_(sheet){
