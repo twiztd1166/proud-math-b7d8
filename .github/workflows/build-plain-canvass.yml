@@ -41,21 +41,31 @@ jobs:
       - name: Validate mobile app modules
         shell: bash
         run: |
+          node --check central-config.js
           node --check core-v2.js
           node --check lookup-v2.js
           node --check release-v2a.js
           node --check history-v2.js
+          node --check central-sync.js
           node --check release-v2b.js
           node --check boot-v2.js
           grep -q 'plain-data.js' index.html
+          grep -q 'central-config.js' index.html
           grep -q 'core-v2.js' index.html
           grep -q 'lookup-v2.js' index.html
           grep -q 'release-v2a.js' index.html
           grep -q 'history-v2.js' index.html
+          grep -q 'central-sync.js' index.html
           grep -q 'release-v2b.js' index.html
           grep -q 'boot-v2.js' index.html
           grep -q 'style-v2.css' index.html
+          grep -q 'central-style.css' index.html
           grep -q 'id="nHist"' index.html
+          grep -q "PCM_SPREADSHEET_ID='1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8'" apps-script/Code.gs
+          grep -q "PCM_EXPECTED_SNAPSHOT='2026-08-13'" apps-script/Code.gs
+          grep -q "PCM_LOG_SHEET='Daily Release Log'" apps-script/Code.gs
+          grep -q "function doPost" apps-script/Code.gs
+          grep -q "APP-ID=" apps-script/Code.gs
       - name: Commit validated snapshot if changed
         shell: bash
         run: |
