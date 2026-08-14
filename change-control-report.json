@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "generatedForCommit": "de17f8bdc74d4eeaf79d978127bc126477673b48",
+  "generatedAt": "2026-08-14T08:40:30.672Z",
+  "previousAvailable": true,
+  "previousDatasetSha256": "1a0e74faccac96abddea820fe08391fbd17b5fd8feb9222103ee827a1282879e",
+  "currentDatasetSha256": "1a0e74faccac96abddea820fe08391fbd17b5fd8feb9222103ee827a1282879e",
+  "previousCounts": {
+    "records": 78,
+    "go": 76,
+    "noGo": 2
+  },
+  "currentCounts": {
+    "records": 78,
+    "go": 76,
+    "noGo": 2
+  },
+  "datasetChanged": false,
+  "jurisdictionChangeCount": 0,
+  "classificationChanges": [],
+  "changes": []
+}
