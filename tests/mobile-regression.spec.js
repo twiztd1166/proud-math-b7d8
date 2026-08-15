@@ -134,7 +134,7 @@ test('required route identity and five PASS checks produce evidence-grade DEPLOY
   for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
   await expect(page.locator('.finalDecision')).toContainText('DEPLOY');
   await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS DEVICE');
-  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.3');
+  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.4');
   await expect(page.locator('.finalFacts')).toContainText(/Dataset SHA-256/);
   await expect(page.locator('.scopeBanner')).toContainText('Valid only for');
   await page.getByRole('button',{name:'View history'}).click();
