@@ -35,7 +35,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
       const cache=await caches.open(key);
       const index=await cache.match('./index.html');
       return {count:(await cache.keys()).length,index:!!index,key};
-    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-4-2026-08-14'});
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-5-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
@@ -51,32 +51,35 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 
     await pick(page,'Boynton Beach');
-    await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
-    await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
-    await expect(page.getByText('COMMERCIAL DOOR HANGER',{exact:true})).toBeVisible();
-    await expect(page.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
-    await page.getByText('Official sources / offline proof').click();
-    await expect(page.getByText(/Authority references in controlled rationale/)).toBeVisible();
+    await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+    await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
+    await expect(page.getByText('DOOR HANGER',{exact:true})).toBeVisible();
+    await expect(page.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
+    await page.getByText('Sources and offline proof').click();
+    await expect(page.getByText(/Code sections referenced/)).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
     await pick(page,'Punta Gorda');
-    await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
+    await expect(page.locator('.traffic')).toContainText('NO-GO');
+    await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
     await page.getByRole('button',{name:'New search'}).click();
     await pick(page,'Tarpon Springs');
-    await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
+    await expect(page.locator('.traffic')).toContainText('NO-GO');
+    await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
     await page.getByRole('button',{name:'New search'}).click();
 
     await pick(page,'Dania');
-    await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
+    await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
     await page.getByPlaceholder('Manager name').fill('Offline Test Manager');
     await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');
     await page.getByPlaceholder('Exact street address or boundary').fill('789 Offline Test Route');
     await page.getByRole('checkbox').check();
     await page.getByRole('button',{name:/START 5 CHECKS/}).click();
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
-    await expect(page.locator('.finalDecision')).toContainText('DEPLOY');
-    await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS DEVICE');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.4');
-    await page.getByRole('button',{name:'View history'}).click();
+    await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
+    await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.5');
+    await page.getByRole('button',{name:'History'}).click();
+    await expect(page.getByRole('heading',{name:'Daily Check History'})).toBeVisible();
     await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
     await expect(page.locator('.historyCard').first()).toContainText('Dania');
   }finally{
