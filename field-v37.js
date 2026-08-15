@@ -76,6 +76,15 @@ window.hangerActionSummary=fieldHanger;
 window.hangerWhereSummary=fieldHanger;
 window.courtesyActionSummary=fieldCourtesy;
 window.courtesyWhereSummary=fieldCourtesy;
+window.startSummary=function(r){
+  if(r?.release==='NO-GO')return'Do not start this route.';
+  if(fieldNeedsAddress(r))return'Address changes which local rules apply. Confirm the city/county, then run the Daily Check.';
+  return'Run the Daily Check before starting.';
+};
+window.addressSummary=function(r){
+  if(fieldNeedsAddress(r))return'Address changes which local rules apply. Use the rule for the exact city/county.';
+  return'This rule applies to the city or service area shown.';
+};
 
 window.city=function(){
   const r=sel,f=fieldCanvass(r),fav=isFavorite(r.name),block=currentDeployBlock(),age=typeof pcmSnapshotAgeDays==='function'?pcmSnapshotAgeDays():null,first=fieldFirstStep(r),releaseBlocked=r.release!=='GO'||!!block;
