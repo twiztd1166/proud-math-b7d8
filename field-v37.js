@@ -5,9 +5,9 @@ function fieldNeedsAddress(r){return /EXACT ADDRESS|LEGAL JURISDICTION CHECK REQ
 
 function fieldHours(r){
   if(r?.release==='NO-GO')return'DO NOT CANVASS';
-  if(fieldNeedsAddress(r))return'CHECK ADDRESS — confirm city/county before using the hours rule.';
   const h=String(r?.hours||'').trim();
   if(typeof rawHoursUnconfirmed==='function'&&rawHoursUnconfirmed(r))return'NOT CONFIRMED — use Paradise’s normal route schedule.';
+  if(fieldNeedsAddress(r))return'CHECK ADDRESS — confirm city/county before using the hours rule.';
   const m=h.match(/\b\d{1,2}(?::\d{2})?\s*(?:AM|PM)\s*(?:–|-|to)\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)/i);
   if(m)return m[0].replace(/\s+to\s+/i,'–').toUpperCase();
   if(/NO .*CLOCK-HOUR LIMIT FOUND|no general .*hours|no city-specific .*hours|no separate city .*hours/i.test(h))return'USE PARADISE’S NORMAL ROUTE SCHEDULE';
@@ -58,7 +58,7 @@ function fieldFirstStep(r){
   return'';
 }
 
-function fieldDetailRow(label,value){return`<div class="row"><div class="lab">${esc(label)}</div><div class="val strong">${esc(value||'—')}</div></div>`}
+function fieldDetailRow(label,value){return`<div class="row" data-field="${esc(label.toLowerCase().replace(/[^a-z0-9]+/g,'-'))}"><div class="lab">${esc(label)}</div><div class="val strong">${esc(value||'—')}</div></div>`}
 
 window.status=function(r){
   const f=fieldCanvass(r);
