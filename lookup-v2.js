@@ -12,14 +12,14 @@ function city(){
     <div class="sectionTitle">BEFORE YOU START</div>
     ${row('Hours',hoursSummary(r),'strong')}
     ${row('First step',startSummary(r),'strong')}
-    ${addressFirst?row('Address / city check',r.addressCheck):''}
+    ${addressFirst?row('Address / city check',addressSummary(r)):''}
     ${row('Signs / resident refusal',refusalSummary(r))}
   </section>
   <section class="card essentials">
     <div class="sectionTitle">DOOR HANGER</div>
     ${row('What to do',hangerActionSummary(r),'strong')}
     ${row('Where / how',hangerWhereSummary(r))}
-    ${row('Signs / refusal',r.hangerSigns)}
+    ${row('Signs / refusal',hangerSignsSummary())}
     ${row('Mailbox',mailboxSummary(),'strong')}
   </section>
   <section class="card essentials">
@@ -31,37 +31,28 @@ function city(){
   </section>
   <div class="actions"><button id="rel" class="btn ${releaseBlocked?'danger':'primary'} heroAction">${block?'UPDATE APP BEFORE STARTING':hoursBlocker?'HOURS NOT CLEARED — DO NOT START ROUTE':r.release==='GO'?'RUN DAILY CHECK →':'✕ DO NOT CANVASS'}</button><button id="proof" class="btn secondary">Why?</button><button id="script" class="btn secondary">What to say</button></div>
   <section class="card">
-    <details><summary>Full canvassing rule</summary><div class="detail detailRows">
-      ${row('Jurisdiction / address rule',r.jurisdiction)}
-      ${row('Address check',r.addressCheck)}
-      ${row('Hours — full rule',r.hours)}
-      ${row('Signs / refusal — full rule',r.refusal)}
-      ${row('Property access / materials',r.access)}
-      ${row('Before starting — full rule',r.doFirst)}
-      ${row('Next step',r.nextAction)}
+    <details><summary>More canvassing details</summary><div class="detail detailRows">
+      ${row('City / county rule',r.jurisdiction)}
+      ${row('Address check',addressSummary(r))}
+      ${row('Hours',hoursSummary(r))}
+      ${row('Signs / resident refusal',refusalSummary(r))}
+      ${row('Property access',materialsSummary(r))}
+      ${row('Before starting',startSummary(r))}
+      ${row('Appointment-setting only',appointmentSummary(r))}
     </div></details>
-    <details><summary>Full door-hanger rule</summary><div class="detail detailRows">
-      ${row('Overall rule',r.hangerRelease)}
-      ${row('Placement type',r.hangerMode)}
-      ${row('Nobody home',r.hangerUnattended)}
-      ${row('Resident answers',r.hangerHandoff)}
-      ${row('Signs / refusal',r.hangerSigns)}
-      ${row('How to secure it',r.hangerSecurement)}
-      ${row('Mailbox',r.hangerMailbox)}
-      ${row('Public areas / vehicles',r.hangerPublic)}
-      ${row('Material version',r.hangerMaterial)}
-      ${row('Last checked',r.hangerLastVerified)}
+    <details><summary>More door-hanger details</summary><div class="detail detailRows">
+      ${row('What to do',hangerActionSummary(r),'strong')}
+      ${row('Where / how',hangerWhereSummary(r))}
+      ${row('Signs / refusal',hangerSignsSummary())}
+      ${row('Mailbox',mailboxSummary())}
+      ${row('Public areas / vehicles',publicPlacementSummary())}
+      ${row('Material','Use only the approved Paradise door hanger for this route.')}
     </div></details>
-    <details><summary>Full courtesy-notice rule</summary><div class="detail detailRows">
-      ${row('What to do',r.courtesyFieldAction,'strong')}
-      ${row('Overall rule',r.courtesyRelease)}
-      ${row('Placement type',r.courtesyMode)}
-      ${row('Where / how',r.courtesyPlacement)}
-      ${row('Installation-day behavior',r.courtesyBehavior)}
-      ${row('HOA / gate / private access',r.courtesyHOA)}
-      ${row('What the notice may contain',r.courtesyContent)}
-      ${row('Approved material',r.courtesyMaterial)}
-      ${row('Why this differs from the sales hanger',r.courtesyDelta)}
+    <details><summary>More courtesy-notice details</summary><div class="detail detailRows">
+      ${row('What to do',courtesyActionSummary(r),'strong')}
+      ${row('Where / how',courtesyWhereSummary(r))}
+      ${row('HOA / gate / private access',hoaSummary())}
+      ${row('What the notice may contain',courtesyContentSummary())}
       ${docLink('Open courtesy notice',db.meta.currentCourtesyNoticeUrl||db.meta.courtesyNoticeUrl)}
     </div></details>
     <details><summary>Reference documents</summary><div class="detail">
@@ -71,11 +62,11 @@ function city(){
       ${docLink('Canvass Manager',db.meta.currentAppUrl)}
       <div class="notice"><b>Stable links:</b> These links stay the same when the approved files or app are updated.</div>
     </div></details>
-    <details id="why"><summary>Why?</summary><div class="detail">${esc(cleanDetail(r.why))}</div></details>
-    <details id="say"><summary>What to say</summary><div class="detail">${esc(cleanDetail(r.script))}</div></details>
-    <details><summary>If someone questions the rule</summary><div class="detail">${esc(cleanDetail(r.challenge))}</div></details>
-    <details><summary>If the conversation turns into a sale</summary><div class="detail">${esc(cleanDetail(r.hssEscalation))}</div></details>
-    <details><summary>Sources and offline proof</summary><div class="detail"><b>Last checked:</b> ${esc(r.lastVerified||'—')}<br><br>${sourceProof(r)}<div class="notice"><b>Where these rules come from:</b> Canvassing hours come from Manager Lookup. Door-hanger rules come from the Door Hanger Audit. Courtesy-notice rules come from the Installation Courtesy Audit.</div></div></details>
+    <details id="why"><summary>Why?</summary><div class="detail">${esc(whySummary(r))}</div></details>
+    <details id="say"><summary>What to say</summary><div class="detail">${esc(plainScript(r))}</div></details>
+    <details><summary>If someone questions the rule</summary><div class="detail">${esc(challengeSummary())}</div></details>
+    <details><summary>If the conversation turns into a sale</summary><div class="detail">${esc(appointmentSummary(r))}</div></details>
+    <details><summary>Sources and proof</summary><div class="detail"><b>Last checked:</b> ${esc(r.lastVerified||db.meta.snapshotDate||'—')}<br><br>${sourceProof(r)}${docLink('Open municipality master PDF',db.meta.currentMasterPdfUrl)}${docLink('Open rules sheet',db.meta.currentSheetUrl)}<div class="notice"><b>Source record:</b> The exact controlled legal text remains in the source record and official links. This screen shows the manager-ready instructions.</div></div></details>
   </section>`;
   document.getElementById('new').onclick=home;
   document.getElementById('fav').onclick=()=>toggleFavorite(r.name);
