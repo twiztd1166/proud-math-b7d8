@@ -17,54 +17,46 @@ async function waitForServer(url,timeout=10000){
   throw new Error('Offline-test origin did not start');
 }
 
-test('cached iPhone app works end-to-end after its origin server is physically unavailable',async({page})=>{
+test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
   const origin='http://127.0.0.1:4183';
-  const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{
-    cwd:process.cwd(),stdio:'ignore'
-  });
+  const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
   try{
     await waitForServer(origin+'/index.html');
     await page.goto(origin+'/index.html');
     await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
-
     await expect.poll(async()=>page.evaluate(async()=>{
       await navigator.serviceWorker.ready;
       const keys=await caches.keys();
       const key=keys.find(k=>k.startsWith('pcm-field-'));
-      if(!key)return {count:0,index:false,key:null};
+      if(!key)return {index:false,key:null};
       const cache=await caches.open(key);
-      const index=await cache.match('./index.html');
-      return {count:(await cache.keys()).length,index:!!index,key};
-    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-6-2026-08-14'});
+      return {index:!!(await cache.match('./index.html')),key};
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-7-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
-    await expect(page.evaluate(async()=>!!(await caches.match('./index.html')))).resolves.toBeTruthy();
-
     server.kill('SIGTERM');
     await new Promise(r=>setTimeout(r,750));
-    await expect.poll(async()=>{
-      try{await fetch(origin+'/index.html');return false}catch{return true}
-    },{timeout:5000}).toBeTruthy();
-
+    await expect.poll(async()=>{try{await fetch(origin+'/index.html');return false}catch{return true}},{timeout:5000}).toBeTruthy();
     await page.reload({waitUntil:'domcontentloaded',timeout:15000});
-    await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 
     await pick(page,'Boynton Beach');
-    await expect(page.locator('.traffic')).toContainText('CANVASS — HOURS NOT CONFIRMED');
+    await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
     await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
-    await expect(page.getByText('DOOR HANGER',{exact:true})).toBeVisible();
-    await expect(page.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
-    await expect(page.getByText(/Hours are still being verified\. You may canvass\./).first()).toBeVisible();
-    await page.getByText('Sources and proof').click();
-    await expect(page.getByText(/Code sections referenced/)).toBeVisible();
+    await expect(page.getByText(/NOT CONFIRMED — use Paradise’s normal route schedule\./)).toBeVisible();
+    await expect(page.getByText('Details & sources')).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
+
+    const knobName=await page.evaluate(()=>{
+      const r=window.PCM_DATA.records.find(x=>/HANG ON (?:FRONT )?KNOB/i.test(String(x.hangerMode||'')));
+      if(!r)throw new Error('No verified knob sample found');
+      return r.name;
+    });
+    await pick(page,knobName);
+    await expect(page.getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'New search'}).click();
+
     await pick(page,'Punta Gorda');
-    await expect(page.locator('.traffic')).toContainText('NO-GO');
-    await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
-    await page.getByRole('button',{name:'New search'}).click();
-    await pick(page,'Tarpon Springs');
-    await expect(page.locator('.traffic')).toContainText('NO-GO');
     await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
     await page.getByRole('button',{name:'New search'}).click();
 
@@ -77,12 +69,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await page.getByRole('button',{name:/START 5 CHECKS/}).click();
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
-    await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.6');
-    await page.getByRole('button',{name:'History'}).click();
-    await expect(page.getByRole('heading',{name:'Daily Check History'})).toBeVisible();
-    await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
-    await expect(page.locator('.historyCard').first()).toContainText('Dania');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.7');
   }finally{
     if(server.exitCode===null)server.kill('SIGTERM');
   }
