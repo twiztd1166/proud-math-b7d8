@@ -3,7 +3,7 @@ import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const expectedHash='7508cd852b943376b33abfb329696aed8d0919fea9765c14558ca69eb0564b99';
-const expectedPatchedHash='PENDING_HASH_CAPTURE';
+const expectedPatchedHash='13040b38f5ef8e67f32b0fc5d51b20e83916512d14ec1038ae55a502b6dcb421';
 const stableManagerUrl='https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html';
 const files=fs.readdirSync('.').filter(f=>/^controlled-register-v34-part-\d+\.b64$/.test(f)).sort();
 if(!files.length)throw new Error('Controlled v3.4 payload parts missing');
@@ -64,10 +64,6 @@ const remainingOldCommercial=obj.records.filter(r=>r.hangerMode===oldMode).map(r
 const remainingOldCourtesy=obj.records.filter(r=>r.courtesyMode===oldMode).map(r=>r.name);
 if(remainingOldCommercial.length||remainingOldCourtesy.length)throw new Error(`Unpatched knob modes remain: commercial=${remainingOldCommercial.join('|')} courtesy=${remainingOldCourtesy.join('|')}`);
 const patchedHash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
-if(expectedPatchedHash==='PENDING_HASH_CAPTURE'){
-  console.error(`::error title=Controlled knob patch hash capture::${patchedHash}`);
-  throw new Error(`Controlled knob patch hash pending lock: ${patchedHash}`);
-}
 if(patchedHash!==expectedPatchedHash)throw new Error(`Controlled knob patch hash mismatch: ${patchedHash}`);
 
 // Operational-link normalization occurs only after the controlled legal payload passes
