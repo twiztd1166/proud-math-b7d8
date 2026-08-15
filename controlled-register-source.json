@@ -88,8 +88,8 @@
       "sources": [
         "https://library.municode.com/fl/belle_glade/codes/code_of_ordinances?nodeId=COOR"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Belle Glade code-wide handbill/circular/leaflet/pamphlet/advertising-matter sweep did not locate a private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to the separate canvass/solicitor rules.",
@@ -101,14 +101,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Boca Raton",
@@ -130,8 +130,8 @@
       "sources": [
         "https://library.municode.com/fl/boca_raton/codes/code_of_ordinances"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Boca code sweep located §13-1 as a public-place handbill restriction and did not locate a separate private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to the same property/refusal controls.",
@@ -143,14 +143,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Boynton Beach",
@@ -173,8 +173,8 @@
         "https://library.municode.com/Fl/boynton_beach",
         "https://library.municode.com/FL/Boynton%20Beach/CODES/Code_of_Ordinances?nodeId=CH13LI_ARTVREHO"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "A current code-wide search for handbill, circular, leaflet, pamphlet, printed matter, and advertising matter did not locate a Boynton Beach private-residential door-hanger prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -186,14 +186,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Bradenton",
@@ -302,8 +302,8 @@
         "https://library.municode.com/fl/clearwater/codes/code_of_ordinances?nodeId=SPAGEOR_CH23PESOCA",
         "https://library.municode.com/FL/Clearwater/codes/code_of_ordinances?nodeId=SPAGEOR_CH3AD_ARTIIHA"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Private-residence distribution is contemplated by the code; use secure non-littering entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -315,14 +315,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Cocoa",
@@ -345,8 +345,8 @@
         "https://library.municode.com/fl/cocoa/codes/code_of_ordinances",
         "https://www.cocoafl.gov/16/City-Clerk"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current City-code and 2026 ordinance/publication sweep did not identify a Cocoa ordinance prohibiting deliberate secure commercial handbill delivery at a lawful private residential entry. Leave only by secure non-littering placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction.",
@@ -358,14 +358,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Coral Springs",
@@ -517,8 +517,8 @@
         "https://www.delraybeachfl.gov/government/city-departments/neighborhood-community-services/business-tax-receipts/business-tax-receipt-fees",
         "https://www.delraybeachfl.gov/home/showpublisheddocument/208/636745030254830000"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Secure unattended placement is released only as deliberate non-littering delivery at occupied private premises; do not throw, scatter, or allow the piece to become discarded material.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction.",
@@ -530,14 +530,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Englewood",
@@ -560,8 +560,8 @@
         "https://www.charlottecountyfl.gov/core/fileparse.php/363/urlt/FAQ.pdf",
         "https://www.sarasotaclerk.com/Records/Recording-Services/Home-Solicitation-Sales-Permit"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "ADDRESS DEPENDENT — CHARLOTTE OR SARASOTA COUNTY; BOTH LEAVE WITH CONDITIONS",
       "hangerUnattended": "Both verified county branches support only secure non-littering private-entry placement; exact address is mandatory.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed in either county branch.",
@@ -573,14 +573,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "ADDRESS DEPENDENT — CHARLOTTE OR SARASOTA COUNTY; BOTH LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "ADDRESS CHECK FIRST — READ PLACEMENT"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Fort Lauderdale",
@@ -732,8 +732,8 @@
         "https://library.municode.com/fl/hialeah/codes/code_of_ordinances?nodeId=PTIICOOR_CH18BU_ARTVIPESOITVE_DIV3SO_S18-339CHOR",
         "https://library.municode.com/FL/Hialeah/codes/Code_of_Ordinances?nodeId=PTIICOOR_CH18BU_ARTVIPESOITVE_DIV3SO_S18-340DO-DSOSOSTCOIN"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Hialeah Code and the City's 2026 ordinance publication layer were searched for a city-specific private-residential commercial-handbill prohibition; none was located. Miami-Dade §21-29.1.1 independently prohibits covered commercial activity/advertising on private residential property from 7:00 PM to 8:00 AM without owner/resident consent.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed only during an otherwise lawful canvass interaction and within the controlling local/county time and access rules.",
@@ -745,14 +745,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Hobe Sound",
@@ -775,8 +775,8 @@
         "https://www.martin.fl.us/business-tax-receipts",
         "https://www.martin.fl.us/resources/peddler-information-sheet-pdf"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Martin County code-wide handbill/circular/leaflet/advertising-matter sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -788,14 +788,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Hollywood",
@@ -946,8 +946,8 @@
       "sources": [
         "https://library.municode.com/FL/Indian%20Rocks%20Beach/codes/code_of_ordinances"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "The current Indian Rocks Beach handbill provisions expressly prohibit public-place distribution and vehicle placement but do not establish a separate private-residential handbill prohibition in the current code-wide review. Private placement therefore remains subject to the statewide secure-delivery/litter control, signs/refusal and property-access law.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed on lawful private premises, subject to the exact solicitation/sign/access rules.",
@@ -959,14 +959,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Jensen Beach",
@@ -989,8 +989,8 @@
         "https://www.martin.fl.us/business-tax-receipts",
         "https://www.martin.fl.us/resources/peddler-information-sheet-pdf"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Martin County code-wide handbill/circular/leaflet/advertising-matter sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -1002,14 +1002,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Jupiter",
@@ -1032,8 +1032,8 @@
         "https://library.municode.com/fl/jupiter/codes/code_of_ordinances?nodeId=SPAADRE_CH7BURE",
         "https://www.jupiter.fl.us/384/Code-Citation-Fees"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Town-code sweep did not locate a separate private-residential handbill prohibition. Use secure non-littering private-entry placement and do not treat public property as a distribution surface.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -1045,14 +1045,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Lake Worth",
@@ -1075,8 +1075,8 @@
         "https://www.pbctax.gov/taxes/business-tax/",
         "https://www.pbctax.gov/resources/faq/"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "ADDRESS DEPENDENT — BOTH BRANCHES LEAVE WITH CONDITIONS",
       "hangerUnattended": "Unattended placement is released in either verified branch only as secure non-littering lawful private-entry placement; exact jurisdiction must be confirmed before the route.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed in either branch, subject to property/access/refusal controls.",
@@ -1088,14 +1088,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "ADDRESS DEPENDENT — BOTH BRANCHES LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "ADDRESS CHECK FIRST — READ PLACEMENT"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Lake Worth Beach",
@@ -1118,8 +1118,8 @@
         "https://library.municode.com/fl/lake_worth_beach/ordinances/code_of_ordinances?nodeId=2022",
         "https://mccmeetingspublic.blob.core.usgovcloudapi.net/lakewthfl-meet-41376c1af2b14243b51bf7db4fc6891f/ITEM-Attachment-005-c881e4b78d9246fa9dd5e3d19dceca19.pdf"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Lake Worth Beach code/pending-ordinance sweep did not locate a separate private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -1131,14 +1131,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Lakeland",
@@ -1161,8 +1161,8 @@
         "https://library.municode.com/fl/lakeland/codes/code_of_ordinances",
         "https://www.lakelandgov.net/"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "The published Lakeland Code plus the current post-codification ordinance/current-law layer were searched for handbill, circular, flyer, peddler, and solicitor changes. No current private-residential handbill prohibition was recovered. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction; Chapter 78 canvass/solicitor controls remain separate.",
@@ -1174,14 +1174,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Land O Lakes",
@@ -1332,8 +1332,8 @@
       "sources": [
         "https://library.municode.com/FL/Longboat%20Key/codes/code_of_ordinances?nodeId=TIT11BURE_CH115RERERE"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Longboat Key Code Supplement 29 Update 1 and the adopted-not-yet-codified ordinance list do not contain a private-residential commercial handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to separate canvass/property controls.",
@@ -1345,14 +1345,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Lutz",
@@ -1504,8 +1504,8 @@
         "https://library.municode.com/FL/Miami/Code_of_Ordinances",
         "https://www.miamidade.gov/govaction/matter.asp?file=false&fileAnalysis=false&matter=241386&yearFolder=Y2024"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS — EXACT JURISDICTION REQUIRED",
       "hangerUnattended": "Current City of Miami and Miami-Dade County code sweeps did not locate a general private-residential commercial-handbill prohibition. Miami-Dade §21-29.1.1 expressly regulates private-residential commercial activity/advertising and bars it from 7:00 PM to 8:00 AM without owner/resident consent.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed only during an otherwise lawful canvass interaction; exact City/County branch still controls all other canvass requirements.",
@@ -1517,14 +1517,14 @@
       "hangerAppReady": "YES — ONLY AFTER EXACT JURISDICTION CONFIRMATION",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS — EXACT JURISDICTION REQUIRED",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "ADDRESS CHECK FIRST — READ PLACEMENT"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Miami Beach",
@@ -1633,8 +1633,8 @@
         "https://www.mymanatee.org/connect/news-and-information/frequently-asked-questions/-in-Categories%2Cservices%2Clicenses",
         "https://www.flsenate.gov/Laws/Statutes/2025/0501.022"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Manatee County code-wide sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -1646,14 +1646,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "New Port Richey",
@@ -1689,14 +1689,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "COURTESY-ONLY RELEASE — LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "INSTALLATION-DAY COURTESY ONLY. Secure lawful private-entry placement; no sales CTA, no knock/ring, no mailbox. Honor signs/refusals/HOA/access. Do not use this release for commercial advertising.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "INSTALLATION-DAY COURTESY ONLY. Place the notice securely over the lawful front-door knob/handle. No sales CTA, no knock/ring, no mailbox, no adhesive/fastener, no damage or lock/latch obstruction. Honor signs/refusals/HOA/access. Do not use this release for commercial advertising.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "UNLOCK FROM COMMERCIAL — COURTESY-ONLY CONTENT REQUIRED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "North Miami Beach",
@@ -1848,8 +1848,8 @@
         "https://library.municode.com/fl/oldsmar/codes/code_of_ordinances",
         "https://www.myoldsmar.com/DocumentCenter/View/9831/Temporary-Use-Permit-Fee-Schedule"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Oldsmar code-wide and post-codification ordinance sweep did not locate a private-residential commercial handbill prohibition or a Chapter 46 provision extending its knock/solicitation rules to standalone no-knock literature placement. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to separate canvass/solicitor controls.",
@@ -1861,14 +1861,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Opa Locka",
@@ -1891,8 +1891,8 @@
         "https://opalocka.elaws.us/code/coor_ch2_artxiv_sec2-654",
         "https://library.municode.com/fl/opa-locka/codes/code_of_ordinances?nodeId=PTIICOOR_CH13LIBURE_ARTXIIITOCO"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Opa-locka Code, including the Advertising and sign chapters, plus the current legislative/public-notice sweep did not identify a private-residential commercial-handbill prohibition. Miami-Dade §21-29.1.1 separately controls the residential commercial/advertising time window.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed only during an otherwise lawful canvass interaction.",
@@ -1904,14 +1904,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Pahokee",
@@ -1933,8 +1933,8 @@
       "sources": [
         "https://library.municode.com/fl/pahokee"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Pahokee code-wide handbill/circular/leaflet/pamphlet/advertising-matter sweep did not locate a private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to the separate solicitor/peddler rules.",
@@ -1946,14 +1946,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Palm Bay",
@@ -2147,8 +2147,8 @@
         "https://www.mymanatee.org/connect/news-and-information/frequently-asked-questions/-in-Categories%2Cservices%2Clicenses",
         "https://www.flsenate.gov/Laws/Statutes/2025/0501.022"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Manatee County code-wide sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -2160,14 +2160,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Pembroke Pines",
@@ -2233,8 +2233,8 @@
         "https://library.municode.com/fl/plant_city/codes/code_of_ordinances?nodeId=SPAGEOR_CH18BU_ARTVSEORBU",
         "https://library.municode.com/fl/plant_city/codes/code_of_ordinances?nodeId=SPAGEOR_CH62STSIOTPUPL_ARTIIOB_DIV1GE"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "The current Plant City Code expressly cross-references §6-57 as the rule for throwing/distributing handbills in public places. Current targeted review did not identify a separate prohibition on deliberate secure handbill delivery at lawful private residential entries.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction and within the controlling Plant City canvass window.",
@@ -2246,14 +2246,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Pompano Beach",
@@ -2319,8 +2319,8 @@
         "https://www.charlottecountyfl.gov/core/fileparse.php/363/urlt/FAQ.pdf",
         "https://www.flsenate.gov/Laws/Statutes/2025/0501.022"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Charlotte County Code Supplement 127 sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -2332,14 +2332,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Port Richey",
@@ -2362,8 +2362,8 @@
         "https://library.municode.com/fl/port_richey/codes/code_of_ordinances",
         "https://library.municode.com/fl/port_richey/ordinances/code_of_ordinances?nodeId=2026"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Port Richey code-wide and 2026 ordinance sweep did not locate a private-residential commercial handbill prohibition or a Chapter 22 provision converting standalone no-knock literature placement into prohibited distribution. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to separate peddler/solicitor controls.",
@@ -2375,14 +2375,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Port Saint Lucie",
@@ -2534,8 +2534,8 @@
         "https://www.cityofrockledge.org/145/Business-Tax-Receipts",
         "https://library.municode.com/fl/rockledge/codes/code_of_ordinances"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Rockledge recodified Code plus the adopted-not-yet-codified legislation list were searched for handbill/circular/leaflet/private-residential distribution restrictions. No local prohibition on deliberate secure private-residential handbill delivery was identified.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction.",
@@ -2547,14 +2547,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Rotonda West",
@@ -2577,8 +2577,8 @@
         "https://www.charlottecountyfl.gov/core/fileparse.php/363/urlt/FAQ.pdf",
         "https://www.flsenate.gov/Laws/Statutes/2025/0501.022"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Charlotte County Code Supplement 127 sweep did not locate a general private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -2590,14 +2590,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Safety Harbor",
@@ -2620,8 +2620,8 @@
         "https://library.municode.com/fl/safety_harbor/codes/code_of_ordinances?nodeId=PTIICICO_CH17PEPASOSESA",
         "https://www.cityofsafetyharbor.com/FAQ.aspx?QID=13"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "The base Code plus the City's later ordinance/legal-notice layer were reconciled. No current Safety Harbor ordinance was identified that prohibits deliberate secure commercial handbill delivery at a lawful private residence. Chapter 17's canvasser/solicitor permit is a separate canvass control, not a literature-placement prohibition.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed only during an otherwise lawful canvass interaction and subject to the separate Chapter 17 route requirements.",
@@ -2633,14 +2633,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Saint Petersburg",
@@ -2706,8 +2706,8 @@
         "https://library.municode.com/fl/sarasota/codes/code_of_ordinances/359476?nodeId=PTIITHCO_CH23PESO_ARTIINGE_S23-1SODIPURO",
         "https://www.sarasotafl.gov/Department-Pages/Development-Services/Building-Permitting"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "ADDRESS DEPENDENT — BOTH BRANCHES LEAVE WITH CONDITIONS",
       "hangerUnattended": "City branch remains subject to its publication/notice rules and no leaving near streets so material may scatter. County branch uses secure lawful private-entry placement after current-code sweep found no general private-residential prohibition.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed where the applicable branch/property rules allow.",
@@ -2719,14 +2719,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "ADDRESS DEPENDENT — BOTH BRANCHES LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "ADDRESS CHECK FIRST — READ PLACEMENT"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Satellite Beach",
@@ -2749,8 +2749,8 @@
         "https://library.municode.com/FL/Satellite_Beach/codes/Code_of_Ordinances?nodeId=PTIICICO_CH42PESO",
         "https://www.satellitebeach.gov/departments/police-department/community-engagement/solicitation-permits/\nhttps://www.satellitebeach.gov/departments/community-development/business-tax-receipts/"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "The current City Code contains the detailed Chapter 42 residential solicitor controls but no separate private-residential handbill/door-hanger prohibition was located in the current-code/pending-material sweep. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during a lawful canvass interaction.",
@@ -2762,14 +2762,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Sebastian",
@@ -2878,8 +2878,8 @@
         "https://library.municode.com/fl/pinellas_county/codes/code_of_ordinances?nodeId=PTIIPICOCO_CH42COPR_ARTVPESO",
         "https://library.municode.com/fl/seminole/ordinances/code_of_ordinances"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS — EXACT JURISDICTION REQUIRED",
       "hangerUnattended": "City of Seminole Supplement 8 and Pinellas County Supplement 124 were separately searched for handbill/circular/leaflet/private-residential distribution restrictions. No general private-residential commercial-handbill prohibition was located in either branch.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed only during an otherwise lawful canvass interaction after the exact City/County branch has been confirmed.",
@@ -2891,14 +2891,14 @@
       "hangerAppReady": "YES — ONLY AFTER EXACT JURISDICTION CONFIRMATION",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS — EXACT JURISDICTION REQUIRED",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "ADDRESS CHECK FIRST — READ PLACEMENT"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "South Bay",
@@ -2921,8 +2921,8 @@
         "https://library.municode.com/fl/south_bay/codes/code_of_ordinances?nodeId=PTIICOOR_CH20PESOTRME",
         "https://library.municode.com/fl/south_bay/codes/code_of_ordinances"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current South Bay code-wide targeted search did not locate a separate residential handbill/door-hanger prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed, subject to the separate solicitor/canvasser rules.",
@@ -2934,14 +2934,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Spring Hill",
@@ -3149,14 +3149,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "COURTESY-ONLY RELEASE — LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "INSTALLATION-DAY COURTESY ONLY. Secure lawful private-entry placement only while the notice contains no offer or attempt to persuade the recipient to receive a paid service. No sales CTA, no knock/ring, no mailbox. Do not use in the Sponge Dock Area. Honor signs/refusals/HOA/access.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "INSTALLATION-DAY COURTESY ONLY. Place the notice securely over the lawful front-door knob/handle only while the notice contains no offer or attempt to persuade the recipient to receive a paid service. No sales CTA, no knock/ring, no mailbox, no adhesive/fastener, no damage or lock/latch obstruction. Do not use in the Sponge Dock Area. Honor signs/refusals/HOA/access.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "UNLOCK FROM COMMERCIAL — COURTESY-ONLY CONTENT REQUIRED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Valrico",
@@ -3222,8 +3222,8 @@
         "https://library.municode.com/FL/venice/codes/code_of_ordinances?nodeId=SPAGEOR_CH42MIOF",
         "https://www.venicegov.com/government/planning-and-zoning/business-tax-copy"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current Venice code and uncodified-ordinance sweep did not locate a private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed during an otherwise lawful canvass interaction.",
@@ -3235,14 +3235,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     },
     {
       "name": "Vero Beach",
@@ -3351,8 +3351,8 @@
         "https://library.municode.com/fl/west_palm_beach/codes/code_of_ordinances?nodeId=PTIICOOR_CH22BUBURE_ARTVIPE_DIV1GE_S22-253USSTSISPEVRE",
         "https://www.wpb.org/Departments/Development-Services/Business-Tax"
       ],
-      "hangerMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "hangerPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "hangerMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "hangerPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "hangerRelease": "LEAVE WITH CONDITIONS",
       "hangerUnattended": "Current West Palm Beach code/pending-ordinance sweep located handbill restrictions in natural areas but did not locate a separate citywide private-residential handbill prohibition. Use secure non-littering private-entry placement.",
       "hangerHandoff": "Direct handoff to a willing resident is allowed.",
@@ -3364,14 +3364,14 @@
       "hangerAppReady": "YES",
       "hangerLastVerified": "2026-08-14",
       "courtesyRelease": "LEAVE WITH CONDITIONS",
-      "courtesyMode": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
-      "courtesyPlacement": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+      "courtesyMode": "HANG ON KNOB/HANDLE — SECURE REMOVABLE",
+      "courtesyPlacement": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version.",
       "courtesyHOA": "HOA/security/private-access rules independently control. Customer/job access does NOT authorize neighbor distribution. Never bypass a gate, fence, private street, access control, or express instruction. If HOA/security says no flyers/no distribution or admission is job-address-only, do not distribute. Prefer explicit HOA/security authorization in gated communities.",
       "courtesyContent": "INSTALLATION-DAY COURTESY ONLY — NO SALES CTA. No free estimate, free inspection, discount, financing, quote/schedule request, sales QR/URL, product/service pitch, referral offer, neighbor pricing, testimonial, or cross-sell. Operational contact only. Always list both Paradise entities; no installer checkbox or entity selection.",
       "courtesyBehavior": "INSTALLATION DAY ONLY — no knock or ring just to deliver this notice. Limit distribution to immediately affected neighbors. If a resident is already present, willing handoff is allowed only where the placement row permits. Do not initiate a sales conversation from the notice.",
       "courtesyMaterial": "ONE UNIVERSAL STOCK: Neighbor Courtesy Notice. Always list both: Paradise Exteriors LLC — FL Lic. SCC131150472; Paradise Exteriors Roofing LLC — FL Lic. CCC1328522. Address: 1918 Corporate Drive, Boynton Beach, FL 33426. Include current printer/manufacturer name + address and applicable distributor/causing-distribution identification where required. Operations phone only; no sales QR/URL.",
       "courtesyDelta": "SAME PHYSICAL PLACEMENT AS COMMERCIAL — COURTESY CONTENT/BEHAVIOR LOCK ADDED",
-      "courtesyFieldAction": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION"
+      "courtesyFieldAction": "LEAVE — KNOB/HANDLE"
     }
   ]
 }

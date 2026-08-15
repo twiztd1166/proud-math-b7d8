@@ -1,10 +1,10 @@
 {
-  "schemaVersion": 1,
-  "generatedForCommit": "7d0ee764a93cf0bdc2b1e2a4c79fa3ba5248a74f",
-  "generatedAt": "2026-08-15T02:29:38.044Z",
+  "schemaVersion": 2,
+  "generatedForCommit": "81d1ff0429aeedf7c5bc1f0313cab3e022bdf31d",
+  "generatedAt": "2026-08-15T02:57:03.763Z",
   "previousAvailable": true,
   "previousDatasetSha256": "d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0",
-  "currentDatasetSha256": "d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0",
+  "currentDatasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
   "previousCounts": {
     "records": 78,
     "go": 76,
@@ -15,8 +15,1105 @@
     "go": 76,
     "noGo": 2
   },
-  "datasetChanged": false,
-  "jurisdictionChangeCount": 0,
+  "datasetChanged": true,
+  "jurisdictionChangeCount": 36,
   "classificationChanges": [],
-  "changes": []
+  "changes": [
+    {
+      "jurisdiction": "Belle Glade",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Boca Raton",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Boynton Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Clearwater",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Cocoa",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Delray Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Englewood",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "ADDRESS CHECK FIRST — READ PLACEMENT",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Hialeah",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Hobe Sound",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Indian Rocks Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Jensen Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Jupiter",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Lake Worth",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "ADDRESS CHECK FIRST — READ PLACEMENT",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Lake Worth Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Lakeland",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Longboat Key",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Miami",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "ADDRESS CHECK FIRST — READ PLACEMENT",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Myakka City",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "New Port Richey",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "INSTALLATION-DAY COURTESY ONLY. Secure lawful private-entry placement; no sales CTA, no knock/ring, no mailbox. Honor signs/refusals/HOA/access. Do not use this release for commercial advertising.",
+          "after": "INSTALLATION-DAY COURTESY ONLY. Place the notice securely over the lawful front-door knob/handle. No sales CTA, no knock/ring, no mailbox, no adhesive/fastener, no damage or lock/latch obstruction. Honor signs/refusals/HOA/access. Do not use this release for commercial advertising."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Oldsmar",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Opa Locka",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Pahokee",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Parrish",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Plant City",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Port Charlotte",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Port Richey",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Rockledge",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Rotonda West",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Safety Harbor",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Sarasota",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "ADDRESS CHECK FIRST — READ PLACEMENT",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Satellite Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Seminole",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "ADDRESS CHECK FIRST — READ PLACEMENT",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "South Bay",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Tarpon Springs",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "INSTALLATION-DAY COURTESY ONLY. Secure lawful private-entry placement only while the notice contains no offer or attempt to persuade the recipient to receive a paid service. No sales CTA, no knock/ring, no mailbox. Do not use in the Sponge Dock Area. Honor signs/refusals/HOA/access.",
+          "after": "INSTALLATION-DAY COURTESY ONLY. Place the notice securely over the lawful front-door knob/handle only while the notice contains no offer or attempt to persuade the recipient to receive a paid service. No sales CTA, no knock/ring, no mailbox, no adhesive/fastener, no damage or lock/latch obstruction. Do not use in the Sponge Dock Area. Honor signs/refusals/HOA/access."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "Venice",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    },
+    {
+      "jurisdiction": "West Palm Beach",
+      "type": "MODIFIED",
+      "changes": [
+        {
+          "field": "hangerMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "hangerPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyMode",
+          "before": "SECURE PRIVATE-ENTRY — KNOB NOT SPECIFICALLY VERIFIED",
+          "after": "HANG ON KNOB/HANDLE — SECURE REMOVABLE"
+        },
+        {
+          "field": "courtesyPlacement",
+          "before": "Secure lawful private-entry placement only. Do not assume doorknob attachment is approved. Follow the full row; if no secure lawful spot exists, take it with you.",
+          "after": "Preferred unattended method: place the approved die-cut/slit hanger over the lawful front-door knob/handle so it is secure against wind. No tape, staples, nails, glue, adhesive, mailbox contact, damage, or obstruction of the lock/latch/door operation. Honor all signs/refusals and the full row; use only the municipality-compliant material version."
+        },
+        {
+          "field": "courtesyFieldAction",
+          "before": "LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION",
+          "after": "LEAVE — KNOB/HANDLE"
+        }
+      ]
+    }
+  ]
 }
