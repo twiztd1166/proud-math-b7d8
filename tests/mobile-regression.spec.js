@@ -23,12 +23,12 @@ test('lookup renders canvass, hours hold, hanger, courtesy and both NO-GOs',asyn
   await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
   const hangerSummary=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
   await expect(hangerSummary.getByText('DOOR HANGER',{exact:true})).toBeVisible();
-  await expect(hangerSummary.getByText('WHAT TO DO',{exact:true})).toBeVisible();
-  await expect(hangerSummary.getByText('MAILBOX',{exact:true})).toBeVisible();
+  await expect(hangerSummary.getByText('What to do',{exact:true})).toBeVisible();
+  await expect(hangerSummary.getByText('Mailbox',{exact:true})).toBeVisible();
   const courtesySummary=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(courtesySummary.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
   await expect(courtesySummary).toContainText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION');
-  await expect(courtesySummary.getByText('HOA / GATE / PRIVATE ACCESS',{exact:true})).toBeVisible();
+  await expect(courtesySummary.getByText('HOA / gate / private access',{exact:true})).toBeVisible();
   await page.locator('#nRel').click();
   await expect(page.getByRole('heading',{name:'Daily Check'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'HOURS NOT CLEARED'})).toBeVisible();
@@ -51,7 +51,7 @@ test('reference document links are exposed',async({page})=>{
   await page.getByText('Reference documents').click();
   await expect(page.getByRole('link',{name:'Courtesy notice'}).last()).toHaveAttribute('href',/1vGHFL0aXX0EmV65kPZRrUqs1ONupqRWi/);
   await expect(page.getByRole('link',{name:'Municipality master PDF'})).toHaveAttribute('href',/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/);
-  await expect(page.getByRole('link',{name:'Controlled rules sheet'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
+  await expect(page.getByRole('link',{name:'Rules sheet'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
   await expect(page.getByRole('link',{name:'Canvass Manager'})).toHaveAttribute('href','https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html');
 });
 test('code-only approved update has a real target without triggering a rules-data block',async({page})=>{
@@ -134,7 +134,7 @@ test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
 test('required route identity and five PASS checks produce an evidence-grade record',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Dania');
-  await expect(page.getByText('HOURS',{exact:true}).first()).toBeVisible();
+  await expect(page.getByText('Hours',{exact:true}).first()).toBeVisible();
   await expect(page.getByText(/9:00 AM–8:00 PM|9 AM–8 PM/).first()).toBeVisible();
   await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
   const start=page.getByRole('button',{name:/START 5 CHECKS/});
@@ -177,7 +177,7 @@ test('manager-facing copy stays plain English',async({page})=>{
   await pick(page,'Boynton Beach');
   const text=await page.locator('body').innerText();
   expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE/i);
-  await expect(page.getByText('Before you start',{exact:false}).first()).toBeVisible();
+  await expect(page.getByText(/BEFORE YOU START/i).first()).toBeVisible();
   await expect(page.getByText('Full canvassing rule')).toBeVisible();
   await expect(page.getByText('If someone questions the rule')).toBeVisible();
 });
