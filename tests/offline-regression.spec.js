@@ -17,7 +17,7 @@ async function waitForServer(url,timeout=10000){
   throw new Error('Offline-test origin did not start');
 }
 
-test('cached iPhone app keeps the v3.9 field dashboard and final answers offline',async({page})=>{
+test('cached iPhone app keeps the v3.10 field dashboard and corrected placement answers offline',async({page})=>{
   const origin='http://127.0.0.1:4183';
   const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
   try{
@@ -31,7 +31,7 @@ test('cached iPhone app keeps the v3.9 field dashboard and final answers offline
       if(!key)return {index:false,key:null};
       const cache=await caches.open(key);
       return {index:!!(await cache.match('./index.html')),key};
-    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-9-2026-08-14'});
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-10-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
@@ -46,21 +46,19 @@ test('cached iPhone app keeps the v3.9 field dashboard and final answers offline
     await expect(d.getByText('FIELD ANSWERS')).toBeVisible();
     await expect(d.locator('[data-field="address-rule"]')).toHaveCount(0);
     await expect(d.locator('[data-field="hours"] .val')).toHaveText('USE PARADISE’S NORMAL ROUTE SCHEDULE');
+    await expect(d.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
+    await expect(d.locator('[data-field="courtesy-notice"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
     await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
 
     await pick(page,'Boynton Beach');
     await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
     await expect(page.locator('section.card.essentials [data-field="hours"] .val')).toHaveText('NOT CONFIRMED — use Paradise’s normal route schedule.');
+    await expect(page.locator('section.card.essentials [data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
     await page.getByRole('button',{name:'New search'}).click();
 
-    const knobName=await page.evaluate(()=>{
-      const r=window.PCM_DATA.records.find(x=>/HANG ON (?:FRONT )?KNOB/i.test(String(x.hangerMode||'')));
-      if(!r)throw new Error('No verified knob sample found');
-      return r.name;
-    });
-    await pick(page,knobName);
-    await expect(page.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
+    await pick(page,'Miami Gardens');
+    await expect(page.locator('[data-field="door-hanger"] .val')).toContainText('DO NOT ATTACH');
     await page.getByRole('button',{name:'New search'}).click();
 
     await pick(page,'Punta Gorda');
@@ -76,7 +74,7 @@ test('cached iPhone app keeps the v3.9 field dashboard and final answers offline
     await page.getByRole('button',{name:/START 5 CHECKS/}).click();
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.9');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.10');
     const final=page.locator('.finalFieldAnswers');
     await expect(final.getByText('FIELD ANSWERS — KEEP THIS SCREEN OPEN')).toBeVisible();
     await expect(final.locator('[data-field="door-hanger"] .val')).not.toHaveText(/FOLLOW/i);
