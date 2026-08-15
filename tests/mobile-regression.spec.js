@@ -99,7 +99,7 @@ test('details and source documents remain available without cluttering first scr
 
 test('any newer approved app version blocks field use until update',async({page})=>{
   await page.goto('/index.html');
-  const meta={validated:true,version:'2026.08.14-v3.8',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v38/index.html'};
+  const meta={validated:true,version:'2026.08.14-v3.9',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v39/index.html'};
   const state=await page.evaluate(meta=>{
     eval('pcmLatest = meta');
     pcmWriteUpdateLock(meta);
@@ -111,14 +111,24 @@ test('any newer approved app version blocks field use until update',async({page}
   expect(state.block).toMatch(/newer approved app version/i);
 });
 
-test('required route identity and five PASS checks produce a v3.7 record',async({page})=>{
+test('required route identity and five PASS checks produce a self-contained v3.8 record',async({page})=>{
   await setupGo(page);
   for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
   await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
   await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
-  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.7');
+  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.8');
+  const final=page.locator('.finalFieldAnswers');
+  await expect(final.getByText('FIELD ANSWERS — KEEP THIS SCREEN OPEN')).toBeVisible();
+  await expect(final.locator('[data-field="door-hanger"] .val')).not.toHaveText(/FOLLOW/i);
+  await expect(final.locator('[data-field="courtesy-notice"] .val')).not.toHaveText(/FOLLOW/i);
+  await expect(final.locator('[data-field="always"] .val')).toContainText('NEVER USE A USPS MAILBOX');
   await page.getByRole('button',{name:'History'}).click();
   await expect(page.getByRole('heading',{name:'Daily Check History'})).toBeVisible();
+  await page.locator('.historyHead').first().click();
+  const historyDetail=page.locator('.historyDetail').first();
+  await expect(historyDetail).toContainText('Door hanger');
+  await expect(historyDetail).toContainText('Courtesy notice');
+  await expect(historyDetail).toContainText('NEVER USE A USPS MAILBOX');
 });
 
 test('STOP and REVIEW still prevent canvassing',async({page})=>{
@@ -141,7 +151,7 @@ test('PWA metadata, provenance and service worker are present',async({page})=>{
   await page.goto('/index.html');
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href','manifest.webmanifest');
   await expect.poll(async()=>page.evaluate(()=>navigator.serviceWorker?.ready.then(()=>true).catch(()=>false))).toBeTruthy();
-  await expect(page.locator('#appHealth')).toContainText('2026.08.14-v3.7');
+  await expect(page.locator('#appHealth')).toContainText('2026.08.14-v3.8');
   await expect.poll(async()=>page.evaluate(()=>window.PCM_PROVENANCE?.datasetSha256)).toMatch(/^[0-9a-f]{64}$/);
 });
 
