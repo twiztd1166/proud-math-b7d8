@@ -57,7 +57,7 @@ jobs:
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
-          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.5'")
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.6'")
              .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
              .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
              .replace(/records:\d+/,`records:${manifest.records}`)
@@ -96,6 +96,7 @@ jobs:
           node --check history-v2.js
           node --check release-v2b.js
           node --check pwa-v3.js
+          node --check field-v36.js
           node --check boot-v2.js
           node --check sw.js
           node --check tests/mobile-regression.spec.js
@@ -105,17 +106,18 @@ jobs:
           node --check scripts/build-canvass-site.mjs
           node --check scripts/change-control-report.mjs
           node --check scripts/apply-controlled-update.mjs
-          grep -q "appVersion:'2026.08.14-v3.5'" provenance-v3-2.js
-          grep -q "2026.08.14-v3.5" pwa-v3.js
-          grep -q "pcm-field-v3-5-2026-08-14" sw.js
-          grep -q "2026.08.14-v3.5" tests/mobile-regression.spec.js
-          grep -q "2026.08.14-v3.5" tests/offline-regression.spec.js
+          grep -q "appVersion:'2026.08.14-v3.6'" provenance-v3-2.js
+          grep -q "2026.08.14-v3.6" pwa-v3.js
+          grep -q "pcm-field-v3-6-2026-08-14" sw.js
+          grep -q "2026.08.14-v3.6" tests/mobile-regression.spec.js
+          grep -q "2026.08.14-v3.6" tests/offline-regression.spec.js
           grep -q 'manifest.webmanifest' index.html
           grep -q 'pwa-v3.css' index.html
           grep -q 'hardening-v3-2.css' index.html
           grep -q 'provenance-v3-2.js' index.html
           grep -q 'browse-v3.js' index.html
           grep -q 'pwa-v3.js' index.html
+          grep -q 'field-v36.js' index.html
           grep -q 'plain-data.js' index.html
           grep -q 'icon-192.png' manifest.webmanifest
           grep -q 'icon-512.png' manifest.webmanifest
@@ -123,6 +125,7 @@ jobs:
           grep -q 'provenance-v3-2.js' sw.js
           grep -q 'hardening-v3-2.css' sw.js
           grep -q 'browse-v3.js' sw.js
+          grep -q 'field-v36.js' sw.js
           grep -q 'canvass.paradiseexteriors.com' wrangler.canvass.jsonc
           if grep -Eiq 'controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE' core-v2.js lookup-v2.js browse-v3.js release-v2a.js release-v2b.js history-v2.js pwa-v3.js boot-v2.js; then echo 'Audit-style manager copy reintroduced'; exit 1; fi
           test -f icon-192.png
