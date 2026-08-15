@@ -7,7 +7,11 @@ let previous=null;
 try{previous=JSON.parse(execFileSync('git',['show','HEAD^:controlled-register-source.json'],{encoding:'utf8'}))}catch{}
 const hash=o=>crypto.createHash('sha256').update(JSON.stringify(o)).digest('hex');
 const counts=o=>({records:o?.records?.length||0,go:o?.records?.filter(r=>r.release==='GO').length||0,noGo:o?.records?.filter(r=>r.release==='NO-GO').length||0});
-const fields=['jurisdiction','release','addressCheck','hours','refusal','access','hssEscalation','nextAction','managerClass','doFirst','why','script','challenge','lastVerified'];
+const fields=[
+  'jurisdiction','release','addressCheck','hours','refusal','access','hssEscalation','nextAction','managerClass','doFirst','why','script','challenge','lastVerified',
+  'hangerMode','hangerPlacement','hangerRelease','hangerUnattended','hangerHandoff','hangerSigns','hangerSecurement','hangerMailbox','hangerPublic','hangerMaterial','hangerAppReady','hangerLastVerified',
+  'courtesyRelease','courtesyMode','courtesyPlacement','courtesyHOA','courtesyContent','courtesyBehavior','courtesyMaterial','courtesyDelta','courtesyFieldAction'
+];
 const byName=o=>new Map((o?.records||[]).map(r=>[r.name,r]));
 const oldMap=byName(previous),newMap=byName(current),names=[...new Set([...oldMap.keys(),...newMap.keys()])].sort();
 const changes=[];
@@ -22,6 +26,6 @@ for(const name of names){
   if(sourceAdded.length||sourceRemoved.length)changedFields.push({field:'sources',added:sourceAdded,removed:sourceRemoved,before:oldSources,after:newSources});
   if(changedFields.length)changes.push({jurisdiction:name,type:'MODIFIED',changes:changedFields});
 }
-const report={schemaVersion:1,generatedForCommit:process.env.GITHUB_SHA||'',generatedAt:new Date().toISOString(),previousAvailable:!!previous,previousDatasetSha256:previous?hash(previous):null,currentDatasetSha256:hash(current),previousCounts:previous?counts(previous):null,currentCounts:counts(current),datasetChanged:previous?hash(previous)!==hash(current):null,jurisdictionChangeCount:changes.length,classificationChanges:changes.filter(x=>x.type==='MODIFIED'&&x.changes?.some(c=>c.field==='release')).map(x=>({jurisdiction:x.jurisdiction,change:x.changes.find(c=>c.field==='release')})),changes};
+const report={schemaVersion:2,generatedForCommit:process.env.GITHUB_SHA||'',generatedAt:new Date().toISOString(),previousAvailable:!!previous,previousDatasetSha256:previous?hash(previous):null,currentDatasetSha256:hash(current),previousCounts:previous?counts(previous):null,currentCounts:counts(current),datasetChanged:previous?hash(previous)!==hash(current):null,jurisdictionChangeCount:changes.length,classificationChanges:changes.filter(x=>x.type==='MODIFIED'&&x.changes?.some(c=>c.field==='release')).map(x=>({jurisdiction:x.jurisdiction,change:x.changes.find(c=>c.field==='release')})),changes};
 fs.writeFileSync('change-control-report.json',JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({datasetChanged:report.datasetChanged,jurisdictionChangeCount:report.jurisdictionChangeCount,classificationChanges:report.classificationChanges.length},null,2));
