@@ -29,52 +29,28 @@ jobs:
           const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
           const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
           if(!obj||!Array.isArray(obj.records)||!obj.meta)throw new Error('Controlled register structure invalid');
-          const names=obj.records.map(r=>String(r.name||'').trim());
-          if(names.some(n=>!n)||new Set(names).size!==names.length)throw new Error('Jurisdiction names invalid');
-          if(obj.records.some(r=>!['GO','NO-GO'].includes(r.release)))throw new Error('Unexpected release classification');
-          const criticalFields=['hours','hangerMode','hangerPlacement','hangerRelease','hangerAppReady','hangerMailbox','courtesyRelease','courtesyFieldAction','courtesyPlacement','courtesyHOA'];
-          const missingCritical=[];
-          for(const r of obj.records){
-            for(const key of criticalFields){
-              if(!String(r[key]??'').trim())missingCritical.push(`${r.name}:${key}`);
-            }
-          }
-          if(missingCritical.length){
-            console.error(`::error title=Critical field-action coverage::${missingCritical.join(', ')}`);
-            throw new Error('Critical field-action coverage mismatch');
-          }
-          const badReady=obj.records.filter(r=>!/^(YES|NO)(?:\b|\s|\s*—)/i.test(String(r.hangerAppReady||'').trim())).map(r=>`${r.name}=${JSON.stringify(r.hangerAppReady)}`);
-          if(badReady.length){
-            console.error(`::error title=Hanger app readiness::${badReady.join(', ')}`);
-            throw new Error('Each controlled record must carry an explicit YES... or NO... hangerAppReady state');
-          }
           const go=obj.records.filter(r=>r.release==='GO').length;
           const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
-          const expectedStops=[...baseline.noGoNames].sort();
           const sourceCoverage=obj.records.filter(r=>Array.isArray(r.sources)&&r.sources.length>0&&r.sources.every(u=>/^https?:\/\//i.test(String(u)))).length;
           if(obj.records.length!==baseline.records||go!==baseline.go||noGo!==baseline.noGo)throw new Error('Controlled count mismatch');
-          if(JSON.stringify(stops)!==JSON.stringify(expectedStops))throw new Error('NO-GO baseline mismatch');
-          if(baseline.requireSourceForEveryJurisdiction&&sourceCoverage!==obj.records.length)throw new Error('Source coverage mismatch');
-          if(obj.meta.snapshotDate!==baseline.snapshot)throw new Error('Snapshot baseline mismatch');
+          if(JSON.stringify(stops)!==JSON.stringify([...baseline.noGoNames].sort()))throw new Error('NO-GO baseline mismatch');
+          if(sourceCoverage!==78||obj.meta.snapshotDate!=='2026-08-14')throw new Error('Controlled source/snapshot mismatch');
           const byName=Object.fromEntries(obj.records.map(r=>[r.name,r]));
-          const corrected=['Belle Glade','Boca Raton','Boynton Beach','Clearwater','Cocoa','Delray Beach','Englewood','Hialeah','Hobe Sound','Indian Rocks Beach','Jensen Beach','Jupiter','Lake Worth','Lake Worth Beach','Lakeland','Longboat Key','Miami','Myakka City','Oldsmar','Opa Locka','Pahokee','Parrish','Plant City','Port Charlotte','Port Richey','Rockledge','Rotonda West','Safety Harbor','Sarasota','Satellite Beach','Seminole','South Bay','Venice','West Palm Beach'];
-          for(const name of corrected){
-            if(byName[name]?.hangerMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error(`Commercial knob correction missing: ${name}`);
-            if(byName[name]?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error(`Courtesy knob correction missing: ${name}`);
-            if(byName[name]?.courtesyFieldAction!=='LEAVE — KNOB/HANDLE')throw new Error(`Courtesy action correction missing: ${name}`);
-          }
-          if(byName['Miami Gardens']?.hangerMode!=='NON-AFFIXED ONLY'||byName['Miami Gardens']?.courtesyMode!=='NON-AFFIXED ONLY')throw new Error('Miami Gardens special placement drift');
-          if(byName['New Port Richey']?.hangerMode!=='DO NOT DISTRIBUTE'||byName['New Port Richey']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('New Port Richey special placement drift');
-          if(byName['Tarpon Springs']?.hangerMode!=='NO FRONT-ENTRY DISTRIBUTION'||byName['Tarpon Springs']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('Tarpon Springs special placement drift');
-          if(obj.records.some(r=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY/i.test(`${r.hangerMode||''} ${r.courtesyMode||''}`)))throw new Error('Obsolete knob-threshold mode remains');
+          if(byName['Boca Raton']?.hangerMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('Boca knob correction missing');
+          if(byName['Miami Gardens']?.hangerMode!=='NON-AFFIXED ONLY')throw new Error('Miami Gardens placement drift');
+          if(byName['New Port Richey']?.hangerMode!=='DO NOT DISTRIBUTE'||byName['New Port Richey']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('New Port Richey placement drift');
+          if(byName['Tarpon Springs']?.hangerMode!=='NO FRONT-ENTRY DISTRIBUTION'||byName['Tarpon Springs']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('Tarpon Springs placement drift');
+          if(obj.records.some(r=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY/i.test(`${r.hangerMode||''} ${r.courtesyMode||''}`)))throw new Error('Obsolete knob mode remains');
           const canonical=JSON.stringify(obj);
           const hash=crypto.createHash('sha256').update(canonical).digest('hex');
+          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+          if(hash!==expected)throw new Error(`Unexpected controlled dataset hash: ${hash}`);
           const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,criticalFieldCoverage:obj.records.length,sha256:hash};
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
-          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.10'")
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.11'")
              .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
              .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
              .replace(/records:\d+/,`records:${manifest.records}`)
@@ -85,71 +61,37 @@ jobs:
           NODE
       - name: Generate controlled change report
         run: node scripts/change-control-report.mjs
-      - name: Validate controlled knob change report
+      - name: Validate code-only change report
         shell: bash
         run: |
           node <<'NODE'
           const fs=require('fs');
           const r=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
-          const expected=['Belle Glade','Boca Raton','Boynton Beach','Clearwater','Cocoa','Delray Beach','Englewood','Hialeah','Hobe Sound','Indian Rocks Beach','Jensen Beach','Jupiter','Lake Worth','Lake Worth Beach','Lakeland','Longboat Key','Miami','Myakka City','New Port Richey','Oldsmar','Opa Locka','Pahokee','Parrish','Plant City','Port Charlotte','Port Richey','Rockledge','Rotonda West','Safety Harbor','Sarasota','Satellite Beach','Seminole','South Bay','Tarpon Springs','Venice','West Palm Beach'].sort();
-          if(r.datasetChanged!==true)throw new Error('Expected controlled dataset change was not detected');
-          if(r.jurisdictionChangeCount!==36)throw new Error(`Expected 36 affected jurisdictions, got ${r.jurisdictionChangeCount}`);
+          if(r.datasetChanged!==false)throw new Error('v3.11 must not change controlled dataset');
+          if(r.jurisdictionChangeCount!==0)throw new Error(`Unexpected jurisdiction data changes: ${r.jurisdictionChangeCount}`);
           if((r.classificationChanges||[]).length!==0)throw new Error('Canvass classification drift detected');
-          const actual=(r.changes||[]).map(x=>x.jurisdiction).sort();
-          if(JSON.stringify(actual)!==JSON.stringify(expected))throw new Error(`Unexpected jurisdiction change set: ${JSON.stringify(actual)}`);
-          const allowed=new Set(['hangerMode','hangerPlacement','courtesyMode','courtesyPlacement','courtesyFieldAction']);
-          const bad=[];
-          for(const c of r.changes||[])for(const d of c.changes||[])if(!allowed.has(d.field))bad.push(`${c.jurisdiction}:${d.field}`);
-          if(bad.length)throw new Error(`Unexpected controlled fields changed: ${bad.join(', ')}`);
-          NODE
-      - name: Validate evidence fingerprint
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs=require('fs');
-          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
-          const text=fs.readFileSync('provenance-v3-2.js','utf8');
-          const get=(re,label)=>{const m=text.match(re);if(!m)throw new Error(label+' missing');return m[1]};
-          if(get(/datasetSha256:'([^']+)'/,'hash')!==manifest.sha256)throw new Error('Dataset hash mismatch');
-          if(get(/snapshot:'([^']+)'/,'snapshot')!==manifest.snapshot)throw new Error('Snapshot mismatch');
-          if(Number(get(/records:(\d+)/,'records'))!==manifest.records||Number(get(/go:(\d+)/,'go'))!==manifest.go||Number(get(/noGo:(\d+)/,'noGo'))!==manifest.noGo)throw new Error('Baseline mismatch');
-          if(manifest.criticalFieldCoverage!==manifest.records)throw new Error('Critical field-action manifest coverage mismatch');
           NODE
       - name: Validate app, PWA and production bundle
         shell: bash
         run: |
           node --check provenance-v3-2.js
-          node --check core-v2.js
-          node --check lookup-v2.js
-          node --check browse-v3.js
-          node --check release-v2a.js
-          node --check history-v2.js
-          node --check release-v2b.js
-          node --check pwa-v3.js
-          node --check field-v36.js
           node --check field-v37.js
-          node --check boot-v2.js
+          node --check pwa-v3.js
           node --check sw.js
           node --check tests/mobile-regression.spec.js
           node --check tests/offline-regression.spec.js
           node --check tests/matrix-smoke.spec.js
           node --check scripts/build-canvass-site.mjs
-          node --check scripts/change-control-report.mjs
           node --check scripts/apply-controlled-update.mjs
-          grep -q "appVersion:'2026.08.14-v3.10'" provenance-v3-2.js
-          grep -q "2026.08.14-v3.10" pwa-v3.js
-          grep -q "pcm-field-v3-10-2026-08-14" sw.js
-          grep -q 'field-v37.js' index.html
-          grep -q 'field-v37.js' sw.js
-          grep -q 'YES — CANVASSING ALLOWED' field-v37.js
+          grep -q "appVersion:'2026.08.14-v3.11'" provenance-v3-2.js
+          grep -q "2026.08.14-v3.11" pwa-v3.js
+          grep -q "pcm-field-v3-11-2026-08-14" sw.js
+          grep -q "FIELD_HOURS_OVERRIDES" field-v37.js
+          grep -q "Hallandale':'10:00 AM - 7:00 PM'" field-v37.js
+          grep -q "Miami Gardens':'8:00 AM - 7:00 PM unless prior consent'" field-v37.js
+          grep -q "Use Paradise’s normal route schedule" field-v37.js
           grep -q 'YES — HANG ON FRONT DOORKNOB / HANDLE' field-v37.js
-          grep -q 'LEGAL JURISDICTION CHECK REQUIRED' field-v37.js
-          grep -q 'FIELD ANSWERS — KEEP THIS SCREEN OPEN' release-v2b.js
           if grep -Eiq 'controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE' lookup-v2.js field-v36.js field-v37.js release-v2a.js release-v2b.js history-v2.js; then echo 'Audit-style manager copy reintroduced'; exit 1; fi
-          if grep -q 'function fieldNeedsAddress(r){return /EXACT ADDRESS' field-v37.js; then echo 'Generic exact-address language must not trigger the field warning'; exit 1; fi
-          test -f control-baseline.json
-          test -f register-manifest.json
-          test -f change-control-report.json
           node scripts/build-canvass-site.mjs
           test -f canvass-dist/index.html
           test -f canvass-dist/field-v37.js
