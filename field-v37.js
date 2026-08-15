@@ -1,4 +1,4 @@
-/* Paradise Canvass Manager v3.7 — one-screen field dashboard.
+/* Paradise Canvass Manager v3.8 — one-screen field dashboard.
    Controlled legal/source data is unchanged. */
 
 function fieldNeedsAddress(r){return /EXACT ADDRESS|LEGAL JURISDICTION CHECK REQUIRED/i.test(String(r?.addressCheck||''))}
@@ -19,6 +19,7 @@ function fieldHanger(r){
   if(m.includes('LIMITED ENTITY/EMPLOYEE'))return'NOT APPROVED — do not use the universal hanger.';
   if(m.includes('BLOCKED')||m.includes('DO NOT DISTRIBUTE'))return'NO — take the hanger with you.';
   if(m.includes('NO FRONT-ENTRY'))return'NO AT FRONT DOOR — do not leave it in the restricted entrance area.';
+  if(m.includes('PERMISSION / LOCATION'))return'NO COLD LEAVE — take it with you. Only give it to a resident after express permission at an allowed location.';
   if(m.includes('OWNER CONSENT'))return'HANDOFF WITH CONSENT — do not leave it unattended.';
   if(m.includes('DIRECT HANDOFF'))return'HANDOFF ONLY — if no one answers, take it with you.';
   if(m.includes('RECEPTACLE'))return'YES — use an existing non-USPS flyer/newspaper holder, or hand it to a resident.';
@@ -35,6 +36,7 @@ function fieldCourtesy(r){
   if(a.includes('OUTSIDE UNIVERSAL STOCK'))return'NOT APPROVED — do not use the universal courtesy notice.';
   if(a.includes('DO NOT LEAVE'))return'NO — take the notice with you.';
   if(a.includes('OWNER CONSENT'))return'HANDOFF WITH CONSENT — do not leave it unattended.';
+  if(a.includes('APPROVED NON-USPS RECEPTACLE')||a.includes('RECEPTACLE OR HANDOFF'))return'YES — use an existing non-USPS flyer/newspaper holder, or hand it to a resident.';
   if(a.includes('HANDOFF ONLY'))return'HANDOFF ONLY — do not leave it unattended.';
   if(a.includes('ADDRESS CHECK FIRST'))return'CHECK ADDRESS BEFORE LEAVING IT.';
   if(a.includes('NO-KNOCK'))return'YES — leave it at the allowed front entry. DO NOT KNOCK OR RING.';
