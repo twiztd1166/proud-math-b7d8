@@ -1,6 +1,6 @@
 const PCM_PROVENANCE=Object.freeze({
   schemaVersion:2,
-  appVersion:'2026.08.14-v3.10',
+  appVersion:'2026.08.14-v3.11',
   snapshot:'2026-08-14',
   datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200',
   records:78,
