@@ -10,5 +10,6 @@
   ],
   "sourceCoverage": 78,
   "criticalFieldCoverage": 78,
+  "scriptCoverage": 78,
   "sha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200"
 }
