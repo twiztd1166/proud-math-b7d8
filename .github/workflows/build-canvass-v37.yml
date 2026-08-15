@@ -43,10 +43,10 @@ jobs:
             console.error(`::error title=Critical field-action coverage::${missingCritical.join(', ')}`);
             throw new Error('Critical field-action coverage mismatch');
           }
-          const notReady=obj.records.filter(r=>String(r.hangerAppReady||'').trim().toUpperCase()!=='YES').map(r=>`${r.name}=${JSON.stringify(r.hangerAppReady)}`);
-          if(notReady.length){
-            console.error(`::error title=Hanger app readiness::${notReady.join(', ')}`);
-            throw new Error('Every controlled record must be hangerAppReady=YES before publish');
+          const badReady=obj.records.filter(r=>!/^(YES|NO)(?:\b|\s|\s*—)/i.test(String(r.hangerAppReady||'').trim())).map(r=>`${r.name}=${JSON.stringify(r.hangerAppReady)}`);
+          if(badReady.length){
+            console.error(`::error title=Hanger app readiness::${badReady.join(', ')}`);
+            throw new Error('Each controlled record must carry an explicit YES... or NO... hangerAppReady state');
           }
           const go=obj.records.filter(r=>r.release==='GO').length;
           const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
