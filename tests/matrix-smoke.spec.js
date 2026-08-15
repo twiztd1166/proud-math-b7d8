@@ -48,3 +48,23 @@ test('verified knob placement stays explicit across devices',async({page})=>{
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
 });
+
+test('all 78 controlled records resolve to first-screen placement answers',async({page})=>{
+  await page.goto('/index.html');
+  const audit=await page.evaluate(()=>window.PCM_DATA.records.map(r=>({
+    name:r.name,
+    hangerMode:String(r.hangerMode||''),
+    courtesyFieldAction:String(r.courtesyFieldAction||''),
+    hanger:fieldHanger(r),
+    courtesy:fieldCourtesy(r)
+  })));
+  expect(audit).toHaveLength(78);
+  const fallback=audit.filter(x=>/FOLLOW THE PLACEMENT RULE IN DETAILS/i.test(`${x.hanger} ${x.courtesy}`));
+  expect(fallback,`Records requiring manager interpretation:\n${JSON.stringify(fallback,null,2)}`).toEqual([]);
+  const knobMismatch=audit.filter(x=>/HANG ON (?:FRONT )?KNOB/i.test(x.hangerMode)&&x.hanger!=='YES — HANG ON FRONT DOORKNOB / HANDLE.');
+  expect(knobMismatch,`Verified knob records without explicit knob answer:\n${JSON.stringify(knobMismatch,null,2)}`).toEqual([]);
+  const privateEntryMismatch=audit.filter(x=>/SECURE PRIVATE-ENTRY/i.test(x.hangerMode)&&x.hanger!=='YES — LEAVE AT FRONT ENTRY. DO NOT USE THE KNOB / HANDLE.');
+  expect(privateEntryMismatch,`Private-entry records without explicit no-knob answer:\n${JSON.stringify(privateEntryMismatch,null,2)}`).toEqual([]);
+  const rawAuditLeak=audit.filter(x=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY|COURTESY TEXT BLOCKER|DO NOT DISTRIBUTE COMMERCIAL DOOR HANGERS/i.test(`${x.hanger} ${x.courtesy}`));
+  expect(rawAuditLeak,`Internal audit wording leaked into manager answers:\n${JSON.stringify(rawAuditLeak,null,2)}`).toEqual([]);
+});
