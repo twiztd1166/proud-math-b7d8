@@ -23,12 +23,12 @@ test('lookup renders canvass, hours hold, hanger, courtesy and both NO-GOs',asyn
   await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
   const hangerSummary=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
   await expect(hangerSummary.getByText('DOOR HANGER',{exact:true})).toBeVisible();
-  await expect(hangerSummary.getByText('What to do',{exact:true})).toBeVisible();
-  await expect(hangerSummary.getByText('Mailbox',{exact:true})).toBeVisible();
+  await expect(hangerSummary).toContainText('Leave it securely at the private front entry');
+  await expect(hangerSummary).toContainText('Never put Paradise literature in, on, or attached to a USPS mailbox');
   const courtesySummary=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(courtesySummary.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
-  await expect(courtesySummary).toContainText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION');
-  await expect(courtesySummary.getByText('HOA / gate / private access',{exact:true})).toBeVisible();
+  await expect(courtesySummary).toContainText('Leave it securely at the private front entry');
+  await expect(courtesySummary).toContainText('Permission to work at one home does not give permission to distribute to neighbors');
   await page.locator('#nRel').click();
   await expect(page.getByRole('heading',{name:'Daily Check'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'HOURS NOT CLEARED'})).toBeVisible();
@@ -43,7 +43,7 @@ test('lookup renders canvass, hours hold, hanger, courtesy and both NO-GOs',asyn
   await expect(page.locator('.traffic')).toContainText('NO-GO');
   await expect(page.getByRole('button',{name:/DO NOT CANVASS/})).toBeVisible();
   const tarponCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
-  await expect(tarponCourtesy).toContainText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION');
+  await expect(tarponCourtesy).toContainText('Leave it securely at the private front entry');
 });
 test('reference document links are exposed',async({page})=>{
   await page.goto('/index.html');
@@ -78,14 +78,14 @@ test('browse areas by county works',async({page})=>{
   await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
   await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
 });
-test('special material-placement rules stay visible',async({page})=>{
+test('special material-placement rules stay visible in plain English with exact rules preserved',async({page})=>{
   await page.goto('/index.html');
   const samples=await page.evaluate(()=>{
     const records=window.PCM_DATA.records;
     const one=(predicate,label)=>{
       const r=records.find(predicate);
       if(!r)throw new Error(`No ${label} sample found`);
-      return{name:r.name,hangerMode:r.hangerMode,hangerPlacement:r.hangerPlacement,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement};
+      return{name:r.name,hangerMode:r.hangerMode,hangerAction:hangerActionSummary(r),hangerWhere:hangerWhereSummary(r),courtesyFieldAction:r.courtesyFieldAction,courtesyAction:courtesyActionSummary(r),courtesyWhere:courtesyWhereSummary(r)};
     };
     return[
       one(r=>/DIRECT HANDOFF ONLY/.test(String(r.hangerMode||'')),'direct-handoff'),
@@ -99,11 +99,15 @@ test('special material-placement rules stay visible',async({page})=>{
     await page.goto('/index.html');
     await pick(page,sample.name);
     const hanger=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
-    await expect(hanger).toContainText(sample.hangerMode);
-    await expect(hanger).toContainText(sample.hangerPlacement);
+    await expect(hanger).toContainText(sample.hangerAction);
+    await expect(hanger).toContainText(sample.hangerWhere);
     const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
-    await expect(courtesy).toContainText(sample.courtesyFieldAction);
-    await expect(courtesy).toContainText(sample.courtesyPlacement);
+    await expect(courtesy).toContainText(sample.courtesyAction);
+    await expect(courtesy).toContainText(sample.courtesyWhere);
+    await page.getByText('Full door-hanger rule').click();
+    await expect(page.locator('details').filter({hasText:'Full door-hanger rule'})).toContainText(sample.hangerMode);
+    await page.getByText('Full courtesy-notice rule').click();
+    await expect(page.locator('details').filter({hasText:'Full courtesy-notice rule'})).toContainText(sample.courtesyFieldAction);
   }
 });
 test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
@@ -111,17 +115,17 @@ test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
   const sample=await page.evaluate(()=>{
     const r=window.PCM_DATA.records.find(x=>x.name==='New Port Richey');
     if(!r)throw new Error('New Port Richey record missing');
-    return{name:r.name,hangerRelease:r.hangerRelease,hangerPlacement:r.hangerPlacement,hangerMode:r.hangerMode,courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement,courtesyDelta:r.courtesyDelta};
+    return{name:r.name,hangerRelease:r.hangerRelease,hangerMode:r.hangerMode,hangerAction:hangerActionSummary(r),courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyAction:courtesyActionSummary(r),courtesyDelta:r.courtesyDelta};
   });
-  expect(`${sample.hangerRelease} ${sample.hangerPlacement} ${sample.hangerMode}`).toMatch(/DO NOT|PROHIBIT|NO DISTRIBUT/i);
+  expect(`${sample.hangerRelease} ${sample.hangerMode}`).toMatch(/DO NOT|PROHIBIT|NO DISTRIBUT/i);
   expect(sample.courtesyFieldAction).toMatch(/^LEAVE\b/);
   await pick(page,sample.name);
   const hanger=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
-  await expect(hanger).toContainText(sample.hangerMode);
-  await expect(hanger).toContainText(sample.hangerPlacement);
+  await expect(hanger).toContainText(sample.hangerAction);
   const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
-  await expect(courtesy).toContainText(sample.courtesyFieldAction);
-  await expect(courtesy).toContainText(sample.courtesyPlacement);
+  await expect(courtesy).toContainText(sample.courtesyAction);
+  await page.getByText('Full door-hanger rule').click();
+  await expect(page.locator('details').filter({hasText:'Full door-hanger rule'})).toContainText(sample.hangerRelease);
   await page.getByText('Full courtesy-notice rule').click();
   const details=page.locator('details').filter({hasText:'Full courtesy-notice rule'});
   await expect(details).toContainText(sample.courtesyDelta);
@@ -129,7 +133,7 @@ test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'North Miami Beach');
   const nmbCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
-  await expect(nmbCourtesy).toContainText('OUTSIDE UNIVERSAL STOCK — DO NOT ISSUE');
+  await expect(nmbCourtesy).toContainText('Do not issue the universal courtesy notice here.');
 });
 test('required route identity and five PASS checks produce an evidence-grade record',async({page})=>{
   await page.goto('/index.html');
@@ -176,7 +180,7 @@ test('manager-facing copy stays plain English',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Boynton Beach');
   const text=await page.locator('body').innerText();
-  expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE/i);
+  expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE|SECURE PRIVATE-ENTRY|KNOB NOT SPECIFICALLY VERIFIED/i);
   await expect(page.getByText(/BEFORE YOU START/i).first()).toBeVisible();
   await expect(page.getByText('Full canvassing rule')).toBeVisible();
   await expect(page.getByText('If someone questions the rule')).toBeVisible();
