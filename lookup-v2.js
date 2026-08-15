@@ -67,7 +67,7 @@ function city(){
     <details><summary>Reference documents</summary><div class="detail">
       ${docLink('Courtesy notice',db.meta.currentCourtesyNoticeUrl||db.meta.courtesyNoticeUrl)}
       ${docLink('Municipality master PDF',db.meta.currentMasterPdfUrl)}
-      ${docLink('Controlled rules sheet',db.meta.currentSheetUrl)}
+      ${docLink('Rules sheet',db.meta.currentSheetUrl)}
       ${docLink('Canvass Manager',db.meta.currentAppUrl)}
       <div class="notice"><b>Stable links:</b> These links stay the same when the approved files or app are updated.</div>
     </div></details>
@@ -75,7 +75,7 @@ function city(){
     <details id="say"><summary>What to say</summary><div class="detail">${esc(cleanDetail(r.script))}</div></details>
     <details><summary>If someone questions the rule</summary><div class="detail">${esc(cleanDetail(r.challenge))}</div></details>
     <details><summary>If the conversation turns into a sale</summary><div class="detail">${esc(cleanDetail(r.hssEscalation))}</div></details>
-    <details><summary>Sources and offline proof</summary><div class="detail"><b>Last checked:</b> ${esc(r.lastVerified||'—')}<br><br>${sourceProof(r)}<div class="notice"><b>Rule source:</b> Canvassing hours come from Manager Lookup. Door-hanger rules come from the Door Hanger Audit. Courtesy-notice rules come from the Installation Courtesy Audit.</div></div></details>
+    <details><summary>Sources and offline proof</summary><div class="detail"><b>Last checked:</b> ${esc(r.lastVerified||'—')}<br><br>${sourceProof(r)}<div class="notice"><b>Where these rules come from:</b> Canvassing hours come from Manager Lookup. Door-hanger rules come from the Door Hanger Audit. Courtesy-notice rules come from the Installation Courtesy Audit.</div></div></details>
   </section>`;
   document.getElementById('new').onclick=home;
   document.getElementById('fav').onclick=()=>toggleFavorite(r.name);
