@@ -17,7 +17,7 @@ async function waitForServer(url,timeout=10000){
   throw new Error('Offline-test origin did not start');
 }
 
-test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
+test('cached iPhone app keeps the v3.8 field dashboard and final answers offline',async({page})=>{
   const origin='http://127.0.0.1:4183';
   const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
   try{
@@ -31,7 +31,7 @@ test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
       if(!key)return {index:false,key:null};
       const cache=await caches.open(key);
       return {index:!!(await cache.match('./index.html')),key};
-    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-7-2026-08-14'});
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-8-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
@@ -70,7 +70,11 @@ test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
     await page.getByRole('button',{name:/START 5 CHECKS/}).click();
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.7');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.8');
+    const final=page.locator('.finalFieldAnswers');
+    await expect(final.getByText('FIELD ANSWERS — KEEP THIS SCREEN OPEN')).toBeVisible();
+    await expect(final.locator('[data-field="door-hanger"] .val')).not.toHaveText(/FOLLOW/i);
+    await expect(final.locator('[data-field="courtesy-notice"] .val')).not.toHaveText(/FOLLOW/i);
   }finally{
     if(server.exitCode===null)server.kill('SIGTERM');
   }
