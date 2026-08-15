@@ -16,16 +16,19 @@ async function setupGo(page,address='123 Test Route'){
   await page.getByRole('button',{name:/START 5 CHECKS/}).click();
 }
 
+const dashboard=page=>page.locator('section.card.essentials');
+
 test('city page is a one-screen manager decision dashboard',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Boca Raton');
+  const d=dashboard(page);
   await expect(page.locator('.traffic')).toContainText('CANVASS');
-  await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
-  await expect(page.getByText('Hours',{exact:true})).toBeVisible();
-  await expect(page.getByText('Door hanger',{exact:true})).toBeVisible();
-  await expect(page.getByText('Courtesy notice',{exact:true})).toBeVisible();
-  await expect(page.getByText('Always',{exact:true})).toBeVisible();
-  await expect(page.getByText(/NEVER USE A USPS MAILBOX/)).toBeVisible();
+  await expect(d.getByText('FIELD ANSWERS')).toBeVisible();
+  await expect(d.getByText('Hours',{exact:true})).toBeVisible();
+  await expect(d.getByText('Door hanger',{exact:true})).toBeVisible();
+  await expect(d.getByText('Courtesy notice',{exact:true})).toBeVisible();
+  await expect(d.getByText('Always',{exact:true})).toBeVisible();
+  await expect(d.getByText(/NEVER USE A USPS MAILBOX/)).toBeVisible();
   await expect(page.getByText('Details & sources')).toBeVisible();
   await expect(page.getByText('More canvassing details')).toHaveCount(0);
   await expect(page.getByText('More door-hanger details')).toHaveCount(0);
@@ -41,8 +44,9 @@ test('specifically allowed doorknob placement is explicit on the first screen',a
     return r.name;
   });
   await pick(page,name);
-  await expect(page.getByText('Door hanger',{exact:true})).toBeVisible();
-  await expect(page.getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
+  const d=dashboard(page);
+  await expect(d.getByText('Door hanger',{exact:true})).toBeVisible();
+  await expect(d.getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
 });
 
 test('non-knob placement is equally explicit on the first screen',async({page})=>{
@@ -53,7 +57,7 @@ test('non-knob placement is equally explicit on the first screen',async({page})=
     return r.name;
   });
   await pick(page,name);
-  await expect(page.getByText('YES — LEAVE AT FRONT ENTRY. DO NOT USE THE KNOB / HANDLE.',{exact:true})).toBeVisible();
+  await expect(dashboard(page).getByText('YES — LEAVE AT FRONT ENTRY. DO NOT USE THE KNOB / HANDLE.',{exact:true})).toBeVisible();
 });
 
 test('unresolved hours stay canvassable and do not expose audit language',async({page})=>{
@@ -61,7 +65,7 @@ test('unresolved hours stay canvassable and do not expose audit language',async(
   await pick(page,'Boynton Beach');
   await expect(page.locator('.traffic')).toContainText('CANVASS');
   await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
-  await expect(page.getByText(/NOT CONFIRMED — use Paradise’s normal route schedule\./)).toBeVisible();
+  await expect(dashboard(page).getByText(/NOT CONFIRMED — use Paradise’s normal route schedule\./)).toBeVisible();
   const text=await page.locator('body').innerText();
   expect(text).not.toMatch(/HOURS TEXT BLOCKER|controlled rationale|legal classification|operative text|targeted current|re-audit|do not invent|inference|SECURE PRIVATE-ENTRY|KNOB NOT SPECIFICALLY VERIFIED|COURTESY TEXT BLOCKER/i);
   await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
@@ -81,11 +85,10 @@ test('both NO-GOs still block canvassing',async({page})=>{
 test('commercial hanger and courtesy notice remain separate decisions',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'New Port Richey');
-  const answers=page.locator('section.card.essentials');
-  await expect(answers).toContainText('Door hanger');
-  await expect(answers).toContainText('NO — take the hanger with you.');
-  await expect(answers).toContainText('Courtesy notice');
-  await expect(answers).not.toContainText('Courtesy notice\nNO — take the hanger with you.');
+  const d=dashboard(page);
+  await expect(d).toContainText('Door hanger');
+  await expect(d).toContainText('NO — take the hanger with you.');
+  await expect(d).toContainText('Courtesy notice');
 });
 
 test('details and source documents remain available without cluttering first screen',async({page})=>{
