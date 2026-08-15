@@ -39,13 +39,9 @@ test('keyboard-only exact lookup works',async({page})=>{
 
 test('verified knob placement stays explicit across devices',async({page})=>{
   await page.goto('/index.html');
-  const name=await page.evaluate(()=>{
-    const r=window.PCM_DATA.records.find(x=>/HANG ON (?:FRONT )?KNOB/i.test(String(x.hangerMode||'')));
-    if(!r)throw new Error('No verified knob sample found');
-    return r.name;
-  });
-  await pick(page,name);
+  await pick(page,'Boca Raton');
   await expect(page.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
+  await expect(page.locator('[data-field="courtesy-notice"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
 });
@@ -65,11 +61,13 @@ test('all GO records resolve to an explicit YES canvass decision',async({page})=
   expect(explicitBranches.every(x=>x.needsAddress)).toBeTruthy();
 });
 
-test('all 78 controlled records resolve to first-screen placement answers',async({page})=>{
+test('all 78 controlled records resolve to first-screen placement answers with no obsolete knob assumption',async({page})=>{
   await page.goto('/index.html');
   const audit=await page.evaluate(()=>window.PCM_DATA.records.map(r=>({
     name:r.name,
+    release:r.release,
     hangerMode:String(r.hangerMode||''),
+    courtesyMode:String(r.courtesyMode||''),
     courtesyFieldAction:String(r.courtesyFieldAction||''),
     hanger:fieldHanger(r),
     courtesy:fieldCourtesy(r)
@@ -77,10 +75,22 @@ test('all 78 controlled records resolve to first-screen placement answers',async
   expect(audit).toHaveLength(78);
   const fallback=audit.filter(x=>/FOLLOW THE PLACEMENT RULE IN DETAILS/i.test(`${x.hanger} ${x.courtesy}`));
   expect(fallback,`Records requiring manager interpretation:\n${JSON.stringify(fallback,null,2)}`).toEqual([]);
+  const obsolete=audit.filter(x=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY/i.test(`${x.hangerMode} ${x.courtesyMode}`));
+  expect(obsolete,`Obsolete knob-threshold modes remain:\n${JSON.stringify(obsolete,null,2)}`).toEqual([]);
   const knobMismatch=audit.filter(x=>/HANG ON (?:FRONT )?KNOB/i.test(x.hangerMode)&&x.hanger!=='YES — HANG ON FRONT DOORKNOB / HANDLE.');
-  expect(knobMismatch,`Verified knob records without explicit knob answer:\n${JSON.stringify(knobMismatch,null,2)}`).toEqual([]);
-  const privateEntryMismatch=audit.filter(x=>/SECURE PRIVATE-ENTRY/i.test(x.hangerMode)&&x.hanger!=='YES — LEAVE AT FRONT ENTRY. DO NOT USE THE KNOB / HANDLE.');
-  expect(privateEntryMismatch,`Private-entry records without explicit no-knob answer:\n${JSON.stringify(privateEntryMismatch,null,2)}`).toEqual([]);
+  expect(knobMismatch,`Knob records without explicit knob answer:\n${JSON.stringify(knobMismatch,null,2)}`).toEqual([]);
+  const courtesyKnobMismatch=audit.filter(x=>/HANG ON (?:FRONT )?KNOB/i.test(x.courtesyMode)&&x.courtesy!=='YES — HANG ON FRONT DOORKNOB / HANDLE.');
+  expect(courtesyKnobMismatch,`Courtesy knob records without explicit knob answer:\n${JSON.stringify(courtesyKnobMismatch,null,2)}`).toEqual([]);
   const rawAuditLeak=audit.filter(x=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY|COURTESY TEXT BLOCKER|DO NOT DISTRIBUTE COMMERCIAL DOOR HANGERS/i.test(`${x.hanger} ${x.courtesy}`));
   expect(rawAuditLeak,`Internal audit wording leaked into manager answers:\n${JSON.stringify(rawAuditLeak,null,2)}`).toEqual([]);
+
+  const byName=Object.fromEntries(audit.map(x=>[x.name,x]));
+  expect(byName['Boca Raton'].hangerMode).toBe('HANG ON KNOB/HANDLE — SECURE REMOVABLE');
+  expect(byName['Boca Raton'].courtesyMode).toBe('HANG ON KNOB/HANDLE — SECURE REMOVABLE');
+  expect(byName['Miami Gardens'].hangerMode).toBe('NON-AFFIXED ONLY');
+  expect(byName['Miami Gardens'].courtesyMode).toBe('NON-AFFIXED ONLY');
+  expect(byName['New Port Richey'].hangerMode).toBe('DO NOT DISTRIBUTE');
+  expect(byName['New Port Richey'].courtesyMode).toBe('HANG ON KNOB/HANDLE — SECURE REMOVABLE');
+  expect(byName['Tarpon Springs'].hangerMode).toBe('NO FRONT-ENTRY DISTRIBUTION');
+  expect(byName['Tarpon Springs'].courtesyMode).toBe('HANG ON KNOB/HANDLE — SECURE REMOVABLE');
 });
