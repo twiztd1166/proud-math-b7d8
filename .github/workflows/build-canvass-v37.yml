@@ -1,0 +1,146 @@
+name: Validate canvass register
+on:
+  push:
+    branches: [paradise-canvass-manager-public]
+concurrency:
+  group: paradise-canvass-manager-public-validation
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply controlled register payload
+        run: node scripts/apply-controlled-update.mjs
+      - name: Rebuild and validate controlled register
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
+          const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          if(!obj||!Array.isArray(obj.records)||!obj.meta)throw new Error('Controlled register structure invalid');
+          const names=obj.records.map(r=>String(r.name||'').trim());
+          if(names.some(n=>!n)||new Set(names).size!==names.length)throw new Error('Jurisdiction names invalid');
+          if(obj.records.some(r=>!['GO','NO-GO'].includes(r.release)))throw new Error('Unexpected release classification');
+          const go=obj.records.filter(r=>r.release==='GO').length;
+          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+          const expectedStops=[...baseline.noGoNames].sort();
+          const sourceCoverage=obj.records.filter(r=>Array.isArray(r.sources)&&r.sources.length>0&&r.sources.every(u=>/^https?:\/\//i.test(String(u)))).length;
+          if(obj.records.length!==baseline.records||go!==baseline.go||noGo!==baseline.noGo)throw new Error('Controlled count mismatch');
+          if(JSON.stringify(stops)!==JSON.stringify(expectedStops))throw new Error('NO-GO baseline mismatch');
+          if(baseline.requireSourceForEveryJurisdiction&&sourceCoverage!==obj.records.length)throw new Error('Source coverage mismatch');
+          if(obj.meta.snapshotDate!==baseline.snapshot)throw new Error('Snapshot baseline mismatch');
+          const canonical=JSON.stringify(obj);
+          const hash=crypto.createHash('sha256').update(canonical).digest('hex');
+          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,sha256:hash};
+          fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
+          fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          let p=fs.readFileSync('provenance-v3-2.js','utf8');
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.7'")
+             .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
+             .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
+             .replace(/records:\d+/,`records:${manifest.records}`)
+             .replace(/go:\d+/,`go:${manifest.go}`)
+             .replace(/noGo:\d+/,`noGo:${manifest.noGo}`);
+          fs.writeFileSync('provenance-v3-2.js',p);
+          console.log(manifest);
+          NODE
+      - name: Generate controlled change report
+        run: node scripts/change-control-report.mjs
+      - name: Validate evidence fingerprint
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const text=fs.readFileSync('provenance-v3-2.js','utf8');
+          const get=(re,label)=>{const m=text.match(re);if(!m)throw new Error(label+' missing');return m[1]};
+          if(get(/datasetSha256:'([^']+)'/,'hash')!==manifest.sha256)throw new Error('Dataset hash mismatch');
+          if(get(/snapshot:'([^']+)'/,'snapshot')!==manifest.snapshot)throw new Error('Snapshot mismatch');
+          if(Number(get(/records:(\d+)/,'records'))!==manifest.records||Number(get(/go:(\d+)/,'go'))!==manifest.go||Number(get(/noGo:(\d+)/,'noGo'))!==manifest.noGo)throw new Error('Baseline mismatch');
+          NODE
+      - name: Validate app, PWA and production bundle
+        shell: bash
+        run: |
+          node --check provenance-v3-2.js
+          node --check core-v2.js
+          node --check lookup-v2.js
+          node --check browse-v3.js
+          node --check release-v2a.js
+          node --check history-v2.js
+          node --check release-v2b.js
+          node --check pwa-v3.js
+          node --check field-v36.js
+          node --check field-v37.js
+          node --check boot-v2.js
+          node --check sw.js
+          node --check tests/mobile-regression.spec.js
+          node --check tests/offline-regression.spec.js
+          node --check tests/matrix-smoke.spec.js
+          node --check scripts/build-canvass-site.mjs
+          node --check scripts/change-control-report.mjs
+          node --check scripts/apply-controlled-update.mjs
+          grep -q "appVersion:'2026.08.14-v3.7'" provenance-v3-2.js
+          grep -q "2026.08.14-v3.7" pwa-v3.js
+          grep -q "pcm-field-v3-7-2026-08-14" sw.js
+          grep -q 'field-v37.js' index.html
+          grep -q 'field-v37.js' sw.js
+          grep -q 'YES — HANG ON FRONT DOORKNOB / HANDLE' field-v37.js
+          if grep -Eiq 'controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE' lookup-v2.js field-v36.js field-v37.js release-v2a.js release-v2b.js history-v2.js; then echo 'Audit-style manager copy reintroduced'; exit 1; fi
+          test -f control-baseline.json
+          test -f register-manifest.json
+          test -f change-control-report.json
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/index.html
+          test -f canvass-dist/field-v37.js
+          test -f canvass-dist/sw.js
+      - name: Install isolated browser test runtimes
+        shell: bash
+        run: |
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-playwright"
+          rm -rf "$PLAYWRIGHT_ROOT" node_modules
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
+      - name: Run field regression matrix
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+          ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone
+          ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
+          ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js
+      - name: Publish validated snapshot artifacts and metadata
+        shell: bash
+        run: |
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          if [ "$REMOTE_SHA" != "$GITHUB_SHA" ]; then echo 'A newer commit exists; not publishing this run.'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add controlled-register-source.json plain-data.js register-manifest.json change-control-report.json provenance-v3-2.js
+          if git diff --cached --quiet; then VALIDATED_SHA="$GITHUB_SHA"; else git commit -m 'Publish validated canvass app artifacts'; git push origin HEAD:paradise-canvass-manager-public; VALIDATED_SHA="$(git rev-parse HEAD)"; fi
+          VALIDATED_SHA="$VALIDATED_SHA" node <<'NODE'
+          const fs=require('fs');
+          const p=fs.readFileSync('provenance-v3-2.js','utf8');
+          const version=p.match(/appVersion:'([^']+)'/)[1];
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const changes=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          const sha=process.env.VALIDATED_SHA;
+          const meta={version,sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,changeControl:{datasetChanged:changes.datasetChanged,jurisdictionChangeCount:changes.jurisdictionChangeCount,classificationChanges:changes.classificationChanges.length},url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};
+          fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
+          NODE
+          git add latest.json
+          if ! git diff --cached --quiet; then git commit -m 'Publish validated canvass app metadata'; git push origin HEAD:paradise-canvass-manager-public; fi
