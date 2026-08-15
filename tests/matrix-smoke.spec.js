@@ -9,7 +9,8 @@ test('core lookup remains usable across the device matrix',async({page})=>{
   await page.goto('/index.html');
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
   await pick(page,'Boynton Beach');
-  await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+  await expect(page.locator('.traffic')).toContainText('CANVASS — HOURS NOT CONFIRMED');
+  await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Punta Gorda');
   await expect(page.locator('.traffic')).toContainText('NO-GO');
@@ -24,7 +25,7 @@ test('200 percent text remains horizontally contained',async({page})=>{
   await pick(page,'Boynton Beach');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
-  await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+  await expect(page.locator('.traffic')).toContainText('CANVASS — HOURS NOT CONFIRMED');
 });
 
 test('keyboard-only exact lookup works',async({page})=>{
@@ -33,5 +34,5 @@ test('keyboard-only exact lookup works',async({page})=>{
   await search.focus();
   await search.fill('Boynton Beach');
   await search.press('Enter');
-  await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+  await expect(page.locator('.traffic')).toContainText('CANVASS — HOURS NOT CONFIRMED');
 });
