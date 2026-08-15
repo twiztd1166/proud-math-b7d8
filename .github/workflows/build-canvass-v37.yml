@@ -32,6 +32,15 @@ jobs:
           const names=obj.records.map(r=>String(r.name||'').trim());
           if(names.some(n=>!n)||new Set(names).size!==names.length)throw new Error('Jurisdiction names invalid');
           if(obj.records.some(r=>!['GO','NO-GO'].includes(r.release)))throw new Error('Unexpected release classification');
+          const criticalFields=['hours','hangerMode','hangerPlacement','hangerRelease','hangerAppReady','hangerMailbox','courtesyRelease','courtesyFieldAction','courtesyPlacement','courtesyHOA'];
+          const missingCritical=[];
+          for(const r of obj.records){
+            for(const key of criticalFields){
+              if(!String(r[key]??'').trim())missingCritical.push(`${r.name}:${key}`);
+            }
+          }
+          if(missingCritical.length)throw new Error('Critical field-action coverage mismatch: '+missingCritical.slice(0,30).join(', '));
+          if(obj.records.some(r=>String(r.hangerAppReady||'').trim().toUpperCase()!=='YES'))throw new Error('Every controlled record must be hangerAppReady=YES before publish');
           const go=obj.records.filter(r=>r.release==='GO').length;
           const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
@@ -43,7 +52,7 @@ jobs:
           if(obj.meta.snapshotDate!==baseline.snapshot)throw new Error('Snapshot baseline mismatch');
           const canonical=JSON.stringify(obj);
           const hash=crypto.createHash('sha256').update(canonical).digest('hex');
-          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,sha256:hash};
+          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,criticalFieldCoverage:obj.records.length,sha256:hash};
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
@@ -69,6 +78,7 @@ jobs:
           if(get(/datasetSha256:'([^']+)'/,'hash')!==manifest.sha256)throw new Error('Dataset hash mismatch');
           if(get(/snapshot:'([^']+)'/,'snapshot')!==manifest.snapshot)throw new Error('Snapshot mismatch');
           if(Number(get(/records:(\d+)/,'records'))!==manifest.records||Number(get(/go:(\d+)/,'go'))!==manifest.go||Number(get(/noGo:(\d+)/,'noGo'))!==manifest.noGo)throw new Error('Baseline mismatch');
+          if(manifest.criticalFieldCoverage!==manifest.records)throw new Error('Critical field-action manifest coverage mismatch');
           NODE
       - name: Validate app, PWA and production bundle
         shell: bash
