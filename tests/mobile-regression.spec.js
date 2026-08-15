@@ -120,7 +120,7 @@ test('any newer approved app version blocks field use until update',async({page}
     return{text:document.querySelector('.healthUpdate')?.textContent||'',block:window.PCM_DEPLOY_BLOCK_REASON||''};
   },meta);
   expect(state.text).toContain('UPDATE NOW');
-  expect(state.block).toMatch(/New approved rules are available/i);
+  expect(state.block).toMatch(/newer approved app version is available/i);
 });
 
 test('required route identity and five PASS checks produce a self-contained v3.10 record',async({page})=>{
