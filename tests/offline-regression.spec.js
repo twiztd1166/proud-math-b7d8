@@ -55,7 +55,8 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
     await expect(page.getByText('DOOR HANGER',{exact:true})).toBeVisible();
     await expect(page.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
-    await page.getByText('Sources and offline proof').click();
+    await expect(page.getByText(/Leave it securely at the private front entry/).first()).toBeVisible();
+    await page.getByText('Sources and proof').click();
     await expect(page.getByText(/Code sections referenced/)).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
     await pick(page,'Punta Gorda');
