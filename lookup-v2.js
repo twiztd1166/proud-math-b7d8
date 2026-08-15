@@ -17,16 +17,16 @@ function city(){
   </section>
   <section class="card essentials">
     <div class="sectionTitle">DOOR HANGER</div>
-    ${row('What to do',r.hangerMode,'strong')}
-    ${row('Where / how',r.hangerPlacement)}
+    ${row('What to do',hangerActionSummary(r),'strong')}
+    ${row('Where / how',hangerWhereSummary(r))}
     ${row('Signs / refusal',r.hangerSigns)}
-    ${row('Mailbox',r.hangerMailbox,'strong')}
+    ${row('Mailbox',mailboxSummary(),'strong')}
   </section>
   <section class="card essentials">
     <div class="sectionTitle">INSTALLATION-DAY COURTESY NOTICE</div>
-    ${row('What to do',r.courtesyFieldAction,'strong')}
-    ${row('Where / how',r.courtesyPlacement)}
-    ${row('HOA / gate / private access',r.courtesyHOA)}
+    ${row('What to do',courtesyActionSummary(r),'strong')}
+    ${row('Where / how',courtesyWhereSummary(r))}
+    ${row('HOA / gate / private access',hoaSummary())}
     ${docLink('Open courtesy notice',db.meta.currentCourtesyNoticeUrl||db.meta.courtesyNoticeUrl)}
   </section>
   <div class="actions"><button id="rel" class="btn ${releaseBlocked?'danger':'primary'} heroAction">${block?'UPDATE APP BEFORE STARTING':hoursBlocker?'HOURS NOT CLEARED — DO NOT START ROUTE':r.release==='GO'?'RUN DAILY CHECK →':'✕ DO NOT CANVASS'}</button><button id="proof" class="btn secondary">Why?</button><button id="script" class="btn secondary">What to say</button></div>
