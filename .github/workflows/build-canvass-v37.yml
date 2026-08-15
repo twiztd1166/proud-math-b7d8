@@ -63,7 +63,7 @@ jobs:
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
-          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.8'")
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.9'")
              .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
              .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
              .replace(/records:\d+/,`records:${manifest.records}`)
@@ -108,14 +108,17 @@ jobs:
           node --check scripts/build-canvass-site.mjs
           node --check scripts/change-control-report.mjs
           node --check scripts/apply-controlled-update.mjs
-          grep -q "appVersion:'2026.08.14-v3.8'" provenance-v3-2.js
-          grep -q "2026.08.14-v3.8" pwa-v3.js
-          grep -q "pcm-field-v3-8-2026-08-14" sw.js
+          grep -q "appVersion:'2026.08.14-v3.9'" provenance-v3-2.js
+          grep -q "2026.08.14-v3.9" pwa-v3.js
+          grep -q "pcm-field-v3-9-2026-08-14" sw.js
           grep -q 'field-v37.js' index.html
           grep -q 'field-v37.js' sw.js
+          grep -q 'YES — CANVASSING ALLOWED' field-v37.js
           grep -q 'YES — HANG ON FRONT DOORKNOB / HANDLE' field-v37.js
+          grep -q 'LEGAL JURISDICTION CHECK REQUIRED' field-v37.js
           grep -q 'FIELD ANSWERS — KEEP THIS SCREEN OPEN' release-v2b.js
           if grep -Eiq 'controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE' lookup-v2.js field-v36.js field-v37.js release-v2a.js release-v2b.js history-v2.js; then echo 'Audit-style manager copy reintroduced'; exit 1; fi
+          if grep -q 'function fieldNeedsAddress(r){return /EXACT ADDRESS' field-v37.js; then echo 'Generic exact-address language must not trigger the field warning'; exit 1; fi
           test -f control-baseline.json
           test -f register-manifest.json
           test -f change-control-report.json
