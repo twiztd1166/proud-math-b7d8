@@ -19,13 +19,16 @@ async function setupGo(page,address='123 Test Route'){
 const dashboard=page=>page.locator('section.card.essentials');
 const fieldValue=(page,name)=>dashboard(page).locator(`[data-field="${name}"] .val`);
 
-test('city page is a one-screen manager decision dashboard',async({page})=>{
+test('city page gives Boca Raton an unambiguous YES canvass answer',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Boca Raton');
   const d=dashboard(page);
-  await expect(page.locator('.traffic')).toContainText('CANVASS');
+  await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
+  await expect(page.locator('.traffic')).toHaveClass(/go/);
   await expect(d.getByText('FIELD ANSWERS')).toBeVisible();
   await expect(d.getByText('Hours',{exact:true})).toBeVisible();
+  await expect(fieldValue(page,'hours')).toHaveText('USE PARADISE’S NORMAL ROUTE SCHEDULE');
+  await expect(d.locator('[data-field="address-rule"]')).toHaveCount(0);
   await expect(d.getByText('Door hanger',{exact:true})).toBeVisible();
   await expect(d.getByText('Courtesy notice',{exact:true})).toBeVisible();
   await expect(d.getByText('Always',{exact:true})).toBeVisible();
@@ -35,6 +38,15 @@ test('city page is a one-screen manager decision dashboard',async({page})=>{
   await expect(page.getByText('More door-hanger details')).toHaveCount(0);
   await expect(page.getByText('More courtesy-notice details')).toHaveCount(0);
   await expect(page.getByText('Reference documents')).toHaveCount(0);
+});
+
+test('real jurisdiction split stays YES while showing a separate address rule',async({page})=>{
+  await page.goto('/index.html');
+  await pick(page,'Apollo Beach');
+  await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
+  await expect(page.locator('.traffic')).toHaveClass(/go/);
+  await expect(dashboard(page).locator('[data-field="address-rule"] .val')).toContainText('ADDRESS CHANGES THE LOCAL RULES');
+  await expect(page.locator('.traffic')).not.toContainText('CHECK ADDRESS FIRST');
 });
 
 test('specifically allowed doorknob placement is explicit on the first screen',async({page})=>{
@@ -62,7 +74,7 @@ test('non-knob placement is equally explicit on the first screen',async({page})=
 test('unresolved hours stay canvassable and do not expose audit language',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Boynton Beach');
-  await expect(page.locator('.traffic')).toContainText('CANVASS');
+  await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
   await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
   await expect(fieldValue(page,'hours')).toHaveText('NOT CONFIRMED — use Paradise’s normal route schedule.');
   const text=await page.locator('body').innerText();
@@ -75,7 +87,7 @@ test('both NO-GOs still block canvassing',async({page})=>{
   await page.goto('/index.html');
   for(const name of ['Punta Gorda','Tarpon Springs']){
     await pick(page,name);
-    await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
+    await expect(page.locator('.traffic')).toContainText('NO — DO NOT CANVASS');
     await expect(page.getByRole('button',{name:/DO NOT CANVASS/})).toBeVisible();
     if(name==='Punta Gorda')await page.getByRole('button',{name:'New search'}).click();
   }
@@ -99,7 +111,7 @@ test('details and source documents remain available without cluttering first scr
 
 test('any newer approved app version blocks field use until update',async({page})=>{
   await page.goto('/index.html');
-  const meta={validated:true,version:'2026.08.14-v3.9',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v39/index.html'};
+  const meta={validated:true,version:'2026.08.14-v3.10',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v310/index.html'};
   const state=await page.evaluate(meta=>{
     eval('pcmLatest = meta');
     pcmWriteUpdateLock(meta);
@@ -111,12 +123,12 @@ test('any newer approved app version blocks field use until update',async({page}
   expect(state.block).toMatch(/newer approved app version/i);
 });
 
-test('required route identity and five PASS checks produce a self-contained v3.8 record',async({page})=>{
+test('required route identity and five PASS checks produce a self-contained v3.9 record',async({page})=>{
   await setupGo(page);
   for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
   await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
   await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
-  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.8');
+  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.9');
   const final=page.locator('.finalFieldAnswers');
   await expect(final.getByText('FIELD ANSWERS — KEEP THIS SCREEN OPEN')).toBeVisible();
   await expect(final.locator('[data-field="door-hanger"] .val')).not.toHaveText(/FOLLOW/i);
@@ -151,7 +163,7 @@ test('PWA metadata, provenance and service worker are present',async({page})=>{
   await page.goto('/index.html');
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href','manifest.webmanifest');
   await expect.poll(async()=>page.evaluate(()=>navigator.serviceWorker?.ready.then(()=>true).catch(()=>false))).toBeTruthy();
-  await expect(page.locator('#appHealth')).toContainText('2026.08.14-v3.8');
+  await expect(page.locator('#appHealth')).toContainText('2026.08.14-v3.9');
   await expect.poll(async()=>page.evaluate(()=>window.PCM_PROVENANCE?.datasetSha256)).toMatch(/^[0-9a-f]{64}$/);
 });
 
