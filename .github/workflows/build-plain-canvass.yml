@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Apply controlled v3.3 register payload
+      - name: Apply controlled v3.4 register payload
         run: node scripts/apply-controlled-update.mjs
       - name: Rebuild and validate controlled register
         shell: bash
@@ -57,7 +57,7 @@ jobs:
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
-          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.3'")
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.4'")
              .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
              .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
              .replace(/records:\d+/,`records:${manifest.records}`)
