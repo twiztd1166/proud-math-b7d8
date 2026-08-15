@@ -1,16 +1,16 @@
-/* Paradise Canvass Manager v3.8 — one-screen field dashboard.
+/* Paradise Canvass Manager v3.9 — one-screen field dashboard.
    Controlled legal/source data is unchanged. */
 
-function fieldNeedsAddress(r){return /EXACT ADDRESS|LEGAL JURISDICTION CHECK REQUIRED/i.test(String(r?.addressCheck||''))}
+function fieldNeedsAddress(r){return /LEGAL JURISDICTION CHECK REQUIRED/i.test(String(r?.addressCheck||''))}
 
 function fieldHours(r){
   if(r?.release==='NO-GO')return'DO NOT CANVASS';
   const h=String(r?.hours||'').trim();
   if(typeof rawHoursUnconfirmed==='function'&&rawHoursUnconfirmed(r))return'NOT CONFIRMED — use Paradise’s normal route schedule.';
-  if(fieldNeedsAddress(r))return'CHECK ADDRESS — confirm city/county before using the hours rule.';
   const m=h.match(/\b\d{1,2}(?::\d{2})?\s*(?:AM|PM)\s*(?:–|-|to)\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)/i);
   if(m)return m[0].replace(/\s+to\s+/i,'–').toUpperCase();
   if(/NO .*CLOCK-HOUR LIMIT FOUND|no general .*hours|no city-specific .*hours|no separate city .*hours/i.test(h))return'USE PARADISE’S NORMAL ROUTE SCHEDULE';
+  if(fieldNeedsAddress(r))return'ADDRESS DEPENDENT — use the hours for the exact city/county.';
   return firstSentence(h);
 }
 
@@ -47,14 +47,14 @@ function fieldCourtesy(r){
 }
 
 function fieldCanvass(r){
-  if(r?.release==='NO-GO')return{tone:'stop',symbol:'✕',title:'DO NOT CANVASS',sub:'This area is not approved for canvassing.'};
-  if(fieldNeedsAddress(r))return{tone:'first',symbol:'!',title:'CANVASS — CHECK ADDRESS FIRST',sub:'Confirm the exact city/county, then run the Daily Check.'};
-  return{tone:'go',symbol:'✓',title:'CANVASS',sub:'Run the Daily Check before starting.'};
+  if(r?.release==='NO-GO')return{tone:'stop',symbol:'✕',title:'NO — DO NOT CANVASS',sub:'This area is not approved for canvassing.'};
+  if(fieldNeedsAddress(r))return{tone:'go',symbol:'✓',title:'YES — CANVASSING ALLOWED',sub:'Address changes which local rules apply. Confirm the city/county, then run the Daily Check.'};
+  return{tone:'go',symbol:'✓',title:'YES — CANVASSING ALLOWED',sub:'Run the Daily Check before starting.'};
 }
 
 function fieldFirstStep(r){
   if(r?.release==='NO-GO')return'';
-  if(fieldNeedsAddress(r))return'CHECK THE EXACT ADDRESS / CITY-COUNTY BOUNDARY FIRST.';
+  if(fieldNeedsAddress(r))return'ADDRESS CHANGES THE LOCAL RULES — confirm the exact city/county.';
   const d=String(r?.doFirst||'');
   if(/permit|registration|badge|identification|\bID\b|background check|fingerprint|fee/i.test(d)&&!/No government permit|NOT REQUIRED|no .*permit.*required|no .*filing.*required/i.test(d))return firstSentence(d);
   return'';
@@ -69,7 +69,6 @@ window.status=function(r){
 window.managerAction=function(r){return fieldCanvass(r).sub};
 window.pill=function(r){
   if(r.release==='NO-GO')return'<span class="pill stop">NO-GO</span>';
-  if(fieldNeedsAddress(r))return'<span class="pill first">CHECK ADDRESS</span>';
   return'<span class="pill go">CANVASS</span>';
 };
 window.hoursSummary=fieldHours;
@@ -88,7 +87,7 @@ window.city=function(){
     <section class="card essentials">
       <div class="sectionTitle">FIELD ANSWERS</div>
       ${fieldDetailRow('Hours',fieldHours(r))}
-      ${first?fieldDetailRow('Before starting',first):''}
+      ${first?fieldDetailRow(fieldNeedsAddress(r)?'Address rule':'Before starting',first):''}
       ${fieldDetailRow('Door hanger',fieldHanger(r))}
       ${fieldDetailRow('Courtesy notice',fieldCourtesy(r))}
       ${fieldDetailRow('Always','OBEY POSTED SIGNS. LEAVE IF ASKED. NEVER USE A USPS MAILBOX.')}
