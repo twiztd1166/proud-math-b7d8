@@ -35,7 +35,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
       const cache=await caches.open(key);
       const index=await cache.match('./index.html');
       return {count:(await cache.keys()).length,index:!!index,key};
-    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-5-2026-08-14'});
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-6-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
@@ -51,11 +51,11 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 
     await pick(page,'Boynton Beach');
-    await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
-    await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
+    await expect(page.locator('.traffic')).toContainText('CANVASS — HOURS NOT CONFIRMED');
+    await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
     await expect(page.getByText('DOOR HANGER',{exact:true})).toBeVisible();
     await expect(page.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
-    await expect(page.getByText(/Leave it securely at the private front entry/).first()).toBeVisible();
+    await expect(page.getByText(/Hours are still being verified\. You may canvass\./).first()).toBeVisible();
     await page.getByText('Sources and proof').click();
     await expect(page.getByText(/Code sections referenced/)).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
@@ -78,7 +78,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
     await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.5');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.6');
     await page.getByRole('button',{name:'History'}).click();
     await expect(page.getByRole('heading',{name:'Daily Check History'})).toBeVisible();
     await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
