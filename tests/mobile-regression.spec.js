@@ -97,7 +97,7 @@ test('details and source documents remain available without cluttering first scr
   await page.getByText('Details & sources').click();
   await expect(page.getByRole('link',{name:'Municipality master PDF'})).toHaveAttribute('href',/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/);
   await expect(page.getByRole('link',{name:'Rules sheet'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
-  await expect(page.getByText(/Official source 1/)).toBeVisible();
+  await expect(page.locator('.sourceRef').first()).toContainText('Official source 1');
 });
 
 test('any newer approved app version blocks field use until update',async({page})=>{
