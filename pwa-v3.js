@@ -7,12 +7,13 @@ function pcmVersionParts(v=''){const m=String(v).match(/^(\d{4})\.(\d{2})\.(\d{2
 function pcmIsNewerVersion(candidate,current=PCM_BUILD_VERSION){const a=pcmVersionParts(candidate),b=pcmVersionParts(current);if(!a||!b)return false;for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false}
 function pcmIsNewerSnapshot(candidate,current=window.PCM_PROVENANCE?.snapshot||''){const a=String(candidate||''),b=String(current||'');return /^\d{4}-\d{2}-\d{2}$/.test(a)&&/^\d{4}-\d{2}-\d{2}$/.test(b)&&a>b}
 function pcmMetaIsActionable(meta){return!!(meta&&meta.validated===true&&meta.datasetSha256&&meta.datasetSha256!==window.PCM_PROVENANCE?.datasetSha256&&(pcmIsNewerVersion(meta.version)||pcmIsNewerSnapshot(meta.snapshot)))}
+function pcmMetaIsNewer(meta){return!!(meta&&meta.validated===true&&(pcmIsNewerVersion(meta.version)||pcmIsNewerSnapshot(meta.snapshot)))}
 function pcmValidationHost(){return location.hostname==='127.0.0.1'||location.hostname==='localhost'}
 function pcmReadUpdateLock(){try{const x=JSON.parse(localStorage[PCM_UPDATE_LOCK_KEY]||'null');if(!x||!x.datasetSha256)return null;if(x.datasetSha256===window.PCM_PROVENANCE?.datasetSha256||!(pcmIsNewerVersion(x.version)||pcmIsNewerSnapshot(x.snapshot))){delete localStorage[PCM_UPDATE_LOCK_KEY];return null}return x}catch{return null}}
 function pcmWriteUpdateLock(meta){try{localStorage[PCM_UPDATE_LOCK_KEY]=JSON.stringify({datasetSha256:meta.datasetSha256,version:meta.version||'',snapshot:meta.snapshot||'',url:meta.url||'',detectedAt:new Date().toISOString()})}catch{}}
 function pcmClearUpdateLock(){try{delete localStorage[PCM_UPDATE_LOCK_KEY]}catch{}}
 function pcmValidatedDataUpdate(){return pcmMetaIsActionable(pcmLatest)||!!pcmReadUpdateLock()}
-function pcmUpdateTarget(){return pcmMetaIsActionable(pcmLatest)?pcmLatest:pcmReadUpdateLock()}
+function pcmUpdateTarget(){return pcmMetaIsNewer(pcmLatest)?pcmLatest:pcmReadUpdateLock()}
 function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'A newer validated controlled register is available. Update the app before any new DEPLOY decision.':''}
 function pcmHealth(){
   const el=document.getElementById('appHealth');if(!el)return;
