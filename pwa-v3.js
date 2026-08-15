@@ -1,4 +1,4 @@
-const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.6';
+const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.7';
 const PCM_LATEST_META='https://raw.githubusercontent.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-public/latest.json';
 const PCM_UPDATE_LOCK_KEY='pcmValidatedUpdateLockV1';
 let pcmLatest=null,pcmDeferredInstall=null;
