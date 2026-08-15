@@ -41,9 +41,10 @@ test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
     await page.reload({waitUntil:'domcontentloaded',timeout:15000});
 
     await pick(page,'Boynton Beach');
-    await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
+    const d=page.locator('section.card.essentials');
+    await expect(d.getByText('FIELD ANSWERS')).toBeVisible();
     await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
-    await expect(page.getByText(/NOT CONFIRMED — use Paradise’s normal route schedule\./)).toBeVisible();
+    await expect(d.getByText(/NOT CONFIRMED — use Paradise’s normal route schedule\./)).toBeVisible();
     await expect(page.getByText('Details & sources')).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
 
@@ -53,7 +54,7 @@ test('cached iPhone app keeps the v3.7 field dashboard offline',async({page})=>{
       return r.name;
     });
     await pick(page,knobName);
-    await expect(page.getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
+    await expect(page.locator('section.card.essentials').getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
     await page.getByRole('button',{name:'New search'}).click();
 
     await pick(page,'Punta Gorda');
