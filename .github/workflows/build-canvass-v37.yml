@@ -39,8 +39,15 @@ jobs:
               if(!String(r[key]??'').trim())missingCritical.push(`${r.name}:${key}`);
             }
           }
-          if(missingCritical.length)throw new Error('Critical field-action coverage mismatch: '+missingCritical.slice(0,30).join(', '));
-          if(obj.records.some(r=>String(r.hangerAppReady||'').trim().toUpperCase()!=='YES'))throw new Error('Every controlled record must be hangerAppReady=YES before publish');
+          if(missingCritical.length){
+            console.error(`::error title=Critical field-action coverage::${missingCritical.join(', ')}`);
+            throw new Error('Critical field-action coverage mismatch');
+          }
+          const notReady=obj.records.filter(r=>String(r.hangerAppReady||'').trim().toUpperCase()!=='YES').map(r=>`${r.name}=${JSON.stringify(r.hangerAppReady)}`);
+          if(notReady.length){
+            console.error(`::error title=Hanger app readiness::${notReady.join(', ')}`);
+            throw new Error('Every controlled record must be hangerAppReady=YES before publish');
+          }
           const go=obj.records.filter(r=>r.release==='GO').length;
           const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
