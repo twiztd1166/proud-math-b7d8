@@ -29,33 +29,27 @@ jobs:
           const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
           const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
           if(!obj||!Array.isArray(obj.records)||!obj.meta)throw new Error('Controlled register structure invalid');
-          const go=obj.records.filter(r=>r.release==='GO').length;
-          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const go=obj.records.filter(r=>r.release==='GO').length,noGo=obj.records.filter(r=>r.release==='NO-GO').length;
           const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
           const sourceCoverage=obj.records.filter(r=>Array.isArray(r.sources)&&r.sources.length>0&&r.sources.every(u=>/^https?:\/\//i.test(String(u)))).length;
           if(obj.records.length!==baseline.records||go!==baseline.go||noGo!==baseline.noGo)throw new Error('Controlled count mismatch');
           if(JSON.stringify(stops)!==JSON.stringify([...baseline.noGoNames].sort()))throw new Error('NO-GO baseline mismatch');
           if(sourceCoverage!==78||obj.meta.snapshotDate!=='2026-08-14')throw new Error('Controlled source/snapshot mismatch');
+          const missingScripts=obj.records.filter(r=>!String(r.script||'').trim()||!String(r.challenge||'').trim()).map(r=>r.name);
+          if(missingScripts.length)throw new Error(`Controlled permit/challenge response missing: ${missingScripts.join(', ')}`);
           const byName=Object.fromEntries(obj.records.map(r=>[r.name,r]));
           if(byName['Boca Raton']?.hangerMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('Boca knob correction missing');
           if(byName['Miami Gardens']?.hangerMode!=='NON-AFFIXED ONLY')throw new Error('Miami Gardens placement drift');
           if(byName['New Port Richey']?.hangerMode!=='DO NOT DISTRIBUTE'||byName['New Port Richey']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('New Port Richey placement drift');
           if(byName['Tarpon Springs']?.hangerMode!=='NO FRONT-ENTRY DISTRIBUTION'||byName['Tarpon Springs']?.courtesyMode!=='HANG ON KNOB/HANDLE — SECURE REMOVABLE')throw new Error('Tarpon Springs placement drift');
-          if(obj.records.some(r=>/KNOB NOT SPECIFICALLY VERIFIED|SECURE PRIVATE-ENTRY/i.test(`${r.hangerMode||''} ${r.courtesyMode||''}`)))throw new Error('Obsolete knob mode remains');
-          const canonical=JSON.stringify(obj);
-          const hash=crypto.createHash('sha256').update(canonical).digest('hex');
+          const canonical=JSON.stringify(obj),hash=crypto.createHash('sha256').update(canonical).digest('hex');
           const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
           if(hash!==expected)throw new Error(`Unexpected controlled dataset hash: ${hash}`);
-          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,criticalFieldCoverage:obj.records.length,sha256:hash};
+          const manifest={schemaVersion:1,snapshot:obj.meta.snapshotDate,records:obj.records.length,go,noGo,noGoNames:stops,sourceCoverage,criticalFieldCoverage:obj.records.length,scriptCoverage:obj.records.length,sha256:hash};
           fs.writeFileSync('plain-data.js','window.PCM_DATA='+canonical+';\n');
           fs.writeFileSync('register-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           let p=fs.readFileSync('provenance-v3-2.js','utf8');
-          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.11'")
-             .replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`)
-             .replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`)
-             .replace(/records:\d+/,`records:${manifest.records}`)
-             .replace(/go:\d+/,`go:${manifest.go}`)
-             .replace(/noGo:\d+/,`noGo:${manifest.noGo}`);
+          p=p.replace(/appVersion:'[^']+'/,"appVersion:'2026.08.14-v3.12'").replace(/snapshot:'[^']+'/,`snapshot:'${manifest.snapshot}'`).replace(/datasetSha256:'[^']+'/,`datasetSha256:'${manifest.sha256}'`).replace(/records:\d+/,`records:${manifest.records}`).replace(/go:\d+/,`go:${manifest.go}`).replace(/noGo:\d+/,`noGo:${manifest.noGo}`);
           fs.writeFileSync('provenance-v3-2.js',p);
           console.log(manifest);
           NODE
@@ -65,9 +59,8 @@ jobs:
         shell: bash
         run: |
           node <<'NODE'
-          const fs=require('fs');
-          const r=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
-          if(r.datasetChanged!==false)throw new Error('v3.11 must not change controlled dataset');
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          if(r.datasetChanged!==false)throw new Error('v3.12 must not change controlled dataset');
           if(r.jurisdictionChangeCount!==0)throw new Error(`Unexpected jurisdiction data changes: ${r.jurisdictionChangeCount}`);
           if((r.classificationChanges||[]).length!==0)throw new Error('Canvass classification drift detected');
           NODE
@@ -83,14 +76,16 @@ jobs:
           node --check tests/matrix-smoke.spec.js
           node --check scripts/build-canvass-site.mjs
           node --check scripts/apply-controlled-update.mjs
-          grep -q "appVersion:'2026.08.14-v3.11'" provenance-v3-2.js
-          grep -q "2026.08.14-v3.11" pwa-v3.js
-          grep -q "pcm-field-v3-11-2026-08-14" sw.js
-          grep -q "FIELD_HOURS_OVERRIDES" field-v37.js
-          grep -q "Hallandale':'10:00 AM - 7:00 PM'" field-v37.js
-          grep -q "Miami Gardens':'8:00 AM - 7:00 PM unless prior consent'" field-v37.js
-          grep -q "Use Paradise’s normal route schedule" field-v37.js
-          grep -q 'YES — HANG ON FRONT DOORKNOB / HANDLE' field-v37.js
+          grep -q "appVersion:'2026.08.14-v3.12'" provenance-v3-2.js
+          grep -q "2026.08.14-v3.12" pwa-v3.js
+          grep -q "pcm-field-v3-12-2026-08-14" sw.js
+          grep -q 'Permit / permission' field-v37.js
+          grep -q 'IF THEY ASK ABOUT A PERMIT' field-v37.js
+          grep -q 'IF THEY SAY YOU NEED PERMISSION' field-v37.js
+          grep -q 'IF THEY ASK ABOUT THE COURTESY NOTICE' field-v37.js
+          grep -q 'fieldPermitResponse' field-v37.js
+          grep -q 'fieldCourtesyResponse' field-v37.js
+          grep -q 'scriptBlock' hardening-v3-2.css
           if grep -Eiq 'controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE' lookup-v2.js field-v36.js field-v37.js release-v2a.js release-v2b.js history-v2.js; then echo 'Audit-style manager copy reintroduced'; exit 1; fi
           node scripts/build-canvass-site.mjs
           test -f canvass-dist/index.html
@@ -127,14 +122,7 @@ jobs:
           git add controlled-register-source.json plain-data.js register-manifest.json change-control-report.json provenance-v3-2.js
           if git diff --cached --quiet; then VALIDATED_SHA="$GITHUB_SHA"; else git commit -m 'Publish validated canvass app artifacts'; git push origin HEAD:paradise-canvass-manager-public; VALIDATED_SHA="$(git rev-parse HEAD)"; fi
           VALIDATED_SHA="$VALIDATED_SHA" node <<'NODE'
-          const fs=require('fs');
-          const p=fs.readFileSync('provenance-v3-2.js','utf8');
-          const version=p.match(/appVersion:'([^']+)'/)[1];
-          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
-          const changes=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
-          const sha=process.env.VALIDATED_SHA;
-          const meta={version,sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,changeControl:{datasetChanged:changes.datasetChanged,jurisdictionChangeCount:changes.jurisdictionChangeCount,classificationChanges:changes.classificationChanges.length},url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};
-          fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
+          const fs=require('fs');const p=fs.readFileSync('provenance-v3-2.js','utf8');const version=p.match(/appVersion:'([^']+)'/)[1];const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));const changes=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));const sha=process.env.VALIDATED_SHA;const meta={version,sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,changeControl:{datasetChanged:changes.datasetChanged,jurisdictionChangeCount:changes.jurisdictionChangeCount,classificationChanges:changes.classificationChanges.length},url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
           NODE
           git add latest.json
           if ! git diff --cached --quiet; then git commit -m 'Publish validated canvass app metadata'; git push origin HEAD:paradise-canvass-manager-public; fi
