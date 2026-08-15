@@ -6,57 +6,57 @@ async function pick(page,name){
 async function setupGo(page,address='123 Test Route'){
   await page.goto('/index.html');
   await pick(page,'Dania');
-  await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
+  await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
   await page.getByPlaceholder('Manager name').fill('Test Manager');
   await page.getByPlaceholder('Neighborhood / route').fill('Test Route A');
   await page.getByPlaceholder('Exact street address or boundary').fill(address);
   await page.getByRole('checkbox').check();
   await page.getByRole('button',{name:/START 5 CHECKS/}).click();
 }
-test('controlled lookup renders current canvass, hours hold, hanger, courtesy and both NO-GOs',async({page})=>{
+test('lookup renders canvass, hours hold, hanger, courtesy and both NO-GOs',async({page})=>{
   await page.goto('/index.html');
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
   await pick(page,'Boynton Beach');
-  await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
-  await expect(page.locator('.traffic')).toContainText('COMMERCIAL CANVASS STATUS');
-  await expect(page.locator('.blockBanner').filter({hasText:'HOURS TEXT BLOCKER — COMMERCIAL CANVASS HOLD.'})).toBeVisible();
-  await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
-  const hangerSummary=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
-  await expect(hangerSummary.getByText('COMMERCIAL DOOR HANGER',{exact:true})).toBeVisible();
-  await expect(hangerSummary.getByText('FIELD ACTION',{exact:true})).toBeVisible();
+  await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+  await expect(page.locator('.traffic')).toContainText('CANVASSING');
+  await expect(page.locator('.blockBanner').filter({hasText:'HOURS NOT CLEARED.'})).toBeVisible();
+  await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
+  const hangerSummary=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
+  await expect(hangerSummary.getByText('DOOR HANGER',{exact:true})).toBeVisible();
+  await expect(hangerSummary.getByText('WHAT TO DO',{exact:true})).toBeVisible();
   await expect(hangerSummary.getByText('MAILBOX',{exact:true})).toBeVisible();
-  const courtesySummary=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
-  await expect(courtesySummary.getByText('INSTALLATION COURTESY NOTICE • CURRENT',{exact:true})).toBeVisible();
-  await expect(courtesySummary.getByText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION',{exact:true})).toBeVisible();
+  const courtesySummary=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
+  await expect(courtesySummary.getByText('INSTALLATION-DAY COURTESY NOTICE',{exact:true})).toBeVisible();
+  await expect(courtesySummary).toContainText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION');
   await expect(courtesySummary.getByText('HOA / GATE / PRIVATE ACCESS',{exact:true})).toBeVisible();
   await page.locator('#nRel').click();
-  await expect(page.getByRole('heading',{name:'Daily Release'})).toBeVisible();
-  await expect(page.getByText('COMMERCIAL ROUTE RELEASE BLOCKED',{exact:true})).toBeVisible();
-  await expect(page.getByRole('heading',{name:'HOURS TEXT BLOCKER'})).toBeVisible();
-  await expect(page.getByText(/Legal classification remains GO/)).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Daily Check'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'HOURS NOT CLEARED'})).toBeVisible();
+  await expect(page.getByText(/Do not start a commercial canvass route/).first()).toBeVisible();
   await page.getByRole('button',{name:'Back'}).click();
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Punta Gorda');
-  await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
+  await expect(page.locator('.traffic')).toContainText('NO-GO');
+  await expect(page.locator('.traffic')).toContainText('DO NOT CANVASS');
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Tarpon Springs');
-  await expect(page.locator('.traffic')).toContainText('NO-GO — DO NOT DEPLOY');
-  await expect(page.getByRole('button',{name:/COMMERCIAL CANVASS — DO NOT DEPLOY/})).toBeVisible();
-  const tarponCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+  await expect(page.locator('.traffic')).toContainText('NO-GO');
+  await expect(page.getByRole('button',{name:/DO NOT CANVASS/})).toBeVisible();
+  const tarponCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(tarponCourtesy).toContainText('LEAVE — SECURE PRIVATE-ENTRY / NO KNOB ASSUMPTION');
 });
-test('permanent controlled-document links are exposed',async({page})=>{
+test('reference document links are exposed',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Apollo Beach');
-  await page.getByText('Current controlled documents').click();
-  await expect(page.getByRole('link',{name:'OPEN CURRENT COURTESY NOTICE'}).last()).toHaveAttribute('href',/1vGHFL0aXX0EmV65kPZRrUqs1ONupqRWi/);
-  await expect(page.getByRole('link',{name:'OPEN CURRENT MUNICIPALITY MASTER PDF'})).toHaveAttribute('href',/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/);
-  await expect(page.getByRole('link',{name:'OPEN CURRENT CONTROLLED SHEET'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
-  await expect(page.getByRole('link',{name:'OPEN PERMANENT CANVASS MANAGER URL'})).toHaveAttribute('href','https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html');
+  await page.getByText('Reference documents').click();
+  await expect(page.getByRole('link',{name:'Courtesy notice'}).last()).toHaveAttribute('href',/1vGHFL0aXX0EmV65kPZRrUqs1ONupqRWi/);
+  await expect(page.getByRole('link',{name:'Municipality master PDF'})).toHaveAttribute('href',/1GrHvdIupQiANktfoeC_9aEwnSGlzDOgl/);
+  await expect(page.getByRole('link',{name:'Controlled rules sheet'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
+  await expect(page.getByRole('link',{name:'Canvass Manager'})).toHaveAttribute('href','https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html');
 });
-test('code-only validated update has a real target without triggering a legal-data deploy block',async({page})=>{
+test('code-only approved update has a real target without triggering a rules-data block',async({page})=>{
   await page.goto('/index.html');
-  const meta={validated:true,version:'2026.08.14-v3.5',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v35/index.html'};
+  const meta={validated:true,version:'2026.08.14-v3.6',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v36/index.html'};
   const state=await page.evaluate(meta=>{
     eval('pcmLatest = meta');
     pcmApplyDeployBlock();
@@ -65,7 +65,7 @@ test('code-only validated update has a real target without triggering a legal-da
     return{href:link?.getAttribute('href')||'',text:link?.textContent||'',block:window.PCM_DEPLOY_BLOCK_REASON||''};
   },meta);
   expect(state.href).toBe(meta.url);
-  expect(state.text).toContain('UPDATE AVAILABLE');
+  expect(state.text).toContain('UPDATE APP');
   expect(state.block).toBe('');
 });
 test('browse areas by county works',async({page})=>{
@@ -75,17 +75,17 @@ test('browse areas by county works',async({page})=>{
   await page.getByRole('button',{name:/Palm Beach County/}).click();
   await expect(page.getByRole('heading',{name:'Palm Beach County'})).toBeVisible();
   await page.getByRole('button',{name:/Boynton Beach/}).click();
-  await expect(page.locator('.traffic')).toContainText('GO — NO PAPERWORK');
-  await expect(page.getByRole('button',{name:/HOURS BLOCKER — COMMERCIAL CANVASS HOLD/})).toBeVisible();
+  await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
+  await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
 });
-test('special material-placement branches stay field-visible',async({page})=>{
+test('special material-placement rules stay visible',async({page})=>{
   await page.goto('/index.html');
   const samples=await page.evaluate(()=>{
     const records=window.PCM_DATA.records;
     const one=(predicate,label)=>{
       const r=records.find(predicate);
-      if(!r)throw new Error(`No controlled ${label} sample found`);
-      return{name:r.name,hangerPlacement:r.hangerPlacement,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement};
+      if(!r)throw new Error(`No ${label} sample found`);
+      return{name:r.name,hangerMode:r.hangerMode,hangerPlacement:r.hangerPlacement,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement};
     };
     return[
       one(r=>/DIRECT HANDOFF ONLY/.test(String(r.hangerMode||'')),'direct-handoff'),
@@ -98,45 +98,45 @@ test('special material-placement branches stay field-visible',async({page})=>{
   for(const sample of samples){
     await page.goto('/index.html');
     await pick(page,sample.name);
-    const hanger=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
+    const hanger=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
+    await expect(hanger).toContainText(sample.hangerMode);
     await expect(hanger).toContainText(sample.hangerPlacement);
-    const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+    const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
     await expect(courtesy).toContainText(sample.courtesyFieldAction);
     await expect(courtesy).toContainText(sample.courtesyPlacement);
   }
 });
-test('commercial hanger and courtesy-only releases stay distinct',async({page})=>{
+test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
   await page.goto('/index.html');
   const sample=await page.evaluate(()=>{
     const r=window.PCM_DATA.records.find(x=>x.name==='New Port Richey');
-    if(!r)throw new Error('Controlled New Port Richey record missing');
+    if(!r)throw new Error('New Port Richey record missing');
     return{name:r.name,hangerRelease:r.hangerRelease,hangerPlacement:r.hangerPlacement,hangerMode:r.hangerMode,courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyPlacement:r.courtesyPlacement,courtesyDelta:r.courtesyDelta};
   });
   expect(`${sample.hangerRelease} ${sample.hangerPlacement} ${sample.hangerMode}`).toMatch(/DO NOT|PROHIBIT|NO DISTRIBUT/i);
   expect(sample.courtesyFieldAction).toMatch(/^LEAVE\b/);
   await pick(page,sample.name);
-  const hanger=page.locator('section.card.essentials').filter({hasText:'COMMERCIAL DOOR HANGER'});
-  await expect(hanger).toContainText(sample.hangerRelease);
+  const hanger=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
+  await expect(hanger).toContainText(sample.hangerMode);
   await expect(hanger).toContainText(sample.hangerPlacement);
-  const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
-  await expect(courtesy).toContainText(sample.courtesyRelease);
+  const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(courtesy).toContainText(sample.courtesyFieldAction);
   await expect(courtesy).toContainText(sample.courtesyPlacement);
-  await page.getByText('Installation courtesy notice details').click();
-  const details=page.locator('details').filter({hasText:'Installation courtesy notice details'});
+  await page.getByText('Full courtesy-notice rule').click();
+  const details=page.locator('details').filter({hasText:'Full courtesy-notice rule'});
   await expect(details).toContainText(sample.courtesyDelta);
 
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'North Miami Beach');
-  const nmbCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION COURTESY NOTICE • CURRENT'});
+  const nmbCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(nmbCourtesy).toContainText('OUTSIDE UNIVERSAL STOCK — DO NOT ISSUE');
 });
-test('required route identity and five PASS checks produce evidence-grade DEPLOY record',async({page})=>{
+test('required route identity and five PASS checks produce an evidence-grade record',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Dania');
-  await expect(page.getByText('COMMERCIAL CANVASS HOURS',{exact:true})).toBeVisible();
+  await expect(page.getByText('HOURS',{exact:true}).first()).toBeVisible();
   await expect(page.getByText(/9:00 AM–8:00 PM|9 AM–8 PM/).first()).toBeVisible();
-  await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
+  await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
   const start=page.getByRole('button',{name:/START 5 CHECKS/});
   await expect(start).toBeDisabled();
   await page.getByPlaceholder('Manager name').fill('Test Manager');
@@ -146,44 +146,53 @@ test('required route identity and five PASS checks produce evidence-grade DEPLOY
   await expect(start).toBeEnabled();
   await start.click();
   for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
-  await expect(page.locator('.finalDecision')).toContainText('DEPLOY');
-  await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS DEVICE');
-  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.4');
+  await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
+  await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS PHONE');
+  await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.5');
   await expect(page.locator('.finalFacts')).toContainText(/Dataset SHA-256/);
-  await expect(page.locator('.scopeBanner')).toContainText('Valid only for');
-  await page.getByRole('button',{name:'View history'}).click();
-  await expect(page.getByRole('heading',{name:'Release History'})).toBeVisible();
+  await expect(page.locator('.scopeBanner')).toContainText('For');
+  await page.getByRole('button',{name:'History'}).click();
+  await expect(page.getByRole('heading',{name:'Daily Check History'})).toBeVisible();
   await expect(page.locator('.historyCard').first()).toContainText('Dania');
 });
-test('STOP and ESCALATE fail closed with field guidance',async({page})=>{
+test('STOP and REVIEW prevent canvassing with field guidance',async({page})=>{
   await setupGo(page);
   await page.getByRole('button',{name:/STOP/}).click();
-  await expect(page.locator('.finalDecision')).toContainText('DO NOT DEPLOY');
+  await expect(page.locator('.finalDecision')).toContainText('DO NOT CANVASS');
   await expect(page.locator('.fieldResponse')).toContainText('What to do now');
   await page.getByRole('button',{name:'START NEW ROUTE'}).click();
   await pick(page,'Dania');
-  await page.getByRole('button',{name:/START COMMERCIAL CANVASS RELEASE/}).click();
+  await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
   await page.getByPlaceholder('Manager name').fill('Test Manager');
   await page.getByPlaceholder('Neighborhood / route').fill('Test Route B');
   await page.getByPlaceholder('Exact street address or boundary').fill('456 Test Route');
   await page.getByRole('checkbox').check();
   await page.getByRole('button',{name:/START 5 CHECKS/}).click();
-  await page.getByRole('button',{name:/ESCALATE/}).click();
-  await expect(page.locator('.finalDecision')).toContainText('DO NOT DEPLOY');
+  await page.getByRole('button',{name:/REVIEW/}).click();
+  await expect(page.locator('.finalDecision')).toContainText('DO NOT CANVASS');
   await expect(page.locator('.fieldResponse')).toContainText('manager/compliance');
+});
+test('manager-facing copy stays plain English',async({page})=>{
+  await page.goto('/index.html');
+  await pick(page,'Boynton Beach');
+  const text=await page.locator('body').innerText();
+  expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE/i);
+  await expect(page.getByText('Before you start',{exact:false}).first()).toBeVisible();
+  await expect(page.getByText('Full canvassing rule')).toBeVisible();
+  await expect(page.getByText('If someone questions the rule')).toBeVisible();
 });
 test('PWA metadata, provenance and service worker are present',async({page})=>{
   await page.goto('/index.html');
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href','manifest.webmanifest');
   await expect.poll(async()=>page.evaluate(()=>navigator.serviceWorker?.ready.then(()=>true).catch(()=>false))).toBeTruthy();
-  await expect(page.locator('#appHealth')).toContainText('Snapshot 2026-08-14');
+  await expect(page.locator('#appHealth')).toContainText('Rules 2026-08-14');
   await expect.poll(async()=>page.evaluate(()=>window.PCM_PROVENANCE?.datasetSha256)).toMatch(/^[0-9a-f]{64}$/);
 });
-test('malformed device storage fails safe instead of crashing',async({page})=>{
+test('malformed phone storage fails safe instead of crashing',async({page})=>{
   await page.goto('/index.html');
   await page.evaluate(()=>{localStorage.pcmFavorites='{bad';localStorage.pcmRecent='not-json';localStorage.pcmReleaseHistoryV1='{broken'});
   await page.reload();
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
   await page.getByRole('button',{name:'History'}).click();
-  await expect(page.getByText('No completed releases yet')).toBeVisible();
+  await expect(page.getByText('No Daily Checks yet')).toBeVisible();
 });
