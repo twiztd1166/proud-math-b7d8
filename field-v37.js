@@ -1,17 +1,36 @@
-/* Paradise Canvass Manager v3.9 — one-screen field dashboard.
-   Controlled legal/source data is unchanged. */
+/* Paradise Canvass Manager v3.11 — one-screen field dashboard.
+   Controlled legal/source data is unchanged by this presentation-layer hours fix. */
 
 function fieldNeedsAddress(r){return /LEGAL JURISDICTION CHECK REQUIRED/i.test(String(r?.addressCheck||''))}
 
+const FIELD_HOURS_OVERRIDES=Object.freeze({
+  'Dania':'9:00 AM - 8:00 PM',
+  'Fort Lauderdale':'8:00 AM - 8:00 PM',
+  'Hallandale':'10:00 AM - 7:00 PM',
+  'Hialeah':'8:00 AM - 7:00 PM unless prior owner/resident consent',
+  'Homestead':'10:00 AM - 5:00 PM',
+  'Jupiter':'9:00 AM - 8:30 PM Mon-Sat; no Sunday unless appointment/invitation or authorized exception',
+  'Largo':'9:00 AM - 5:00 PM; until 7:00 PM during daylight saving time',
+  'Miami':'8:00 AM - 7:00 PM unless prior owner/resident consent',
+  'Miami Beach':'9:00 AM - 7:00 PM Mon-Sat; no Sunday or legal holidays',
+  'Miami Gardens':'8:00 AM - 7:00 PM unless prior consent',
+  'North Miami Beach':'8:00 AM - 7:00 PM unless prior owner/resident consent',
+  'North Palm Beach':'9:00 AM - 8:00 PM Mon-Sat; no Sunday except appointment/invitation/authorization',
+  'Opa Locka':'8:00 AM - 7:00 PM unless prior consent',
+  'Palm Beach':'10:00 AM - 9:00 PM daily',
+  'Pembroke Pines':'9:00 AM - 9:00 PM',
+  'Plant City':'9:00 AM - 9:00 PM',
+  'Port Saint Lucie':'8:00 AM - 8:00 PM',
+  'Saint Petersburg':'8:00 AM - earlier of 7:00 PM or sunset',
+  'Satellite Beach':'9:00 AM - 6:00 PM daily'
+});
+
 function fieldHours(r){
-  if(r?.release==='NO-GO')return'DO NOT CANVASS';
-  const h=String(r?.hours||'').trim();
-  if(typeof rawHoursUnconfirmed==='function'&&rawHoursUnconfirmed(r))return'NOT CONFIRMED — use Paradise’s normal route schedule.';
-  const m=h.match(/\b\d{1,2}(?::\d{2})?\s*(?:AM|PM)\s*(?:–|-|to)\s*\d{1,2}(?::\d{2})?\s*(?:AM|PM)/i);
-  if(m)return m[0].replace(/\s+to\s+/i,'–').toUpperCase();
-  if(/NO .*CLOCK-HOUR LIMIT FOUND|no general .*hours|no city-specific .*hours|no separate city .*hours/i.test(h))return'USE PARADISE’S NORMAL ROUTE SCHEDULE';
-  if(fieldNeedsAddress(r))return'ADDRESS DEPENDENT — use the hours for the exact city/county.';
-  return firstSentence(h);
+  if(r?.release==='NO-GO')return'Do not canvass.';
+  if(typeof rawHoursUnconfirmed==='function'&&rawHoursUnconfirmed(r))return'Hours not confirmed - use Paradise’s normal route schedule.';
+  const exact=FIELD_HOURS_OVERRIDES[String(r?.name||'')];
+  if(exact)return exact;
+  return'Use Paradise’s normal route schedule.';
 }
 
 function fieldHanger(r){
