@@ -115,14 +115,17 @@ jobs:
           npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
           ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
           ./node_modules/.bin/playwright install --with-deps webkit chromium
-      - name: Run field regression matrix
+      - name: Start field test server
         shell: bash
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
-          ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone
-          ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0
-          ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js
+      - name: Run iPhone manager dashboard regression
+        run: ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone --reporter=github
+      - name: Run iPhone offline regression
+        run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
+      - name: Run device matrix regression
+        run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
       - name: Publish validated snapshot artifacts and metadata
         shell: bash
         run: |
