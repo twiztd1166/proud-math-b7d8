@@ -44,7 +44,7 @@ test('verified knob placement stays explicit across devices',async({page})=>{
     return r.name;
   });
   await pick(page,name);
-  await expect(page.locator('section.card.essentials').getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
+  await expect(page.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
 });
