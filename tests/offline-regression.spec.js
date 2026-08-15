@@ -31,11 +31,11 @@ test('cached iPhone app works end-to-end after its origin server is physically u
       await navigator.serviceWorker.ready;
       const keys=await caches.keys();
       const key=keys.find(k=>k.startsWith('pcm-field-'));
-      if(!key)return {count:0,index:false};
+      if(!key)return {count:0,index:false,key:null};
       const cache=await caches.open(key);
       const index=await cache.match('./index.html');
-      return {count:(await cache.keys()).length,index:!!index};
-    }),{timeout:15000}).toMatchObject({index:true});
+      return {count:(await cache.keys()).length,index:!!index,key};
+    }),{timeout:15000}).toMatchObject({index:true,key:'pcm-field-v3-4-2026-08-14'});
 
     await page.reload({waitUntil:'domcontentloaded'});
     await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
@@ -75,7 +75,7 @@ test('cached iPhone app works end-to-end after its origin server is physically u
     for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
     await expect(page.locator('.finalDecision')).toContainText('DEPLOY');
     await expect(page.locator('.savedBanner')).toContainText('SAVED ON THIS DEVICE');
-    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.3');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.4');
     await page.getByRole('button',{name:'View history'}).click();
     await expect(page.locator('.historyCard').first()).toContainText('789 Offline Test Route');
     await expect(page.locator('.historyCard').first()).toContainText('Dania');
