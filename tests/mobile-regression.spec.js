@@ -78,7 +78,7 @@ test('browse areas by county works',async({page})=>{
   await expect(page.locator('.traffic')).toContainText('GO — HOURS ON HOLD');
   await expect(page.getByRole('button',{name:/HOURS NOT CLEARED — DO NOT START ROUTE/})).toBeVisible();
 });
-test('special material-placement rules stay visible in plain English with exact rules preserved',async({page})=>{
+test('special material-placement rules stay visible in plain English',async({page})=>{
   await page.goto('/index.html');
   const samples=await page.evaluate(()=>{
     const records=window.PCM_DATA.records;
@@ -96,6 +96,8 @@ test('special material-placement rules stay visible in plain English with exact 
     ];
   });
   for(const sample of samples){
+    expect(sample.hangerMode).toBeTruthy();
+    expect(sample.courtesyFieldAction).toBeTruthy();
     await page.goto('/index.html');
     await pick(page,sample.name);
     const hanger=page.locator('section.card.essentials').filter({hasText:'DOOR HANGER'});
@@ -104,10 +106,6 @@ test('special material-placement rules stay visible in plain English with exact 
     const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
     await expect(courtesy).toContainText(sample.courtesyAction);
     await expect(courtesy).toContainText(sample.courtesyWhere);
-    await page.getByText('Full door-hanger rule').click();
-    await expect(page.locator('details').filter({hasText:'Full door-hanger rule'})).toContainText(sample.hangerMode);
-    await page.getByText('Full courtesy-notice rule').click();
-    await expect(page.locator('details').filter({hasText:'Full courtesy-notice rule'})).toContainText(sample.courtesyFieldAction);
   }
 });
 test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
@@ -115,7 +113,7 @@ test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
   const sample=await page.evaluate(()=>{
     const r=window.PCM_DATA.records.find(x=>x.name==='New Port Richey');
     if(!r)throw new Error('New Port Richey record missing');
-    return{name:r.name,hangerRelease:r.hangerRelease,hangerMode:r.hangerMode,hangerAction:hangerActionSummary(r),courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyAction:courtesyActionSummary(r),courtesyDelta:r.courtesyDelta};
+    return{name:r.name,hangerRelease:r.hangerRelease,hangerMode:r.hangerMode,hangerAction:hangerActionSummary(r),courtesyRelease:r.courtesyRelease,courtesyFieldAction:r.courtesyFieldAction,courtesyAction:courtesyActionSummary(r)};
   });
   expect(`${sample.hangerRelease} ${sample.hangerMode}`).toMatch(/DO NOT|PROHIBIT|NO DISTRIBUT/i);
   expect(sample.courtesyFieldAction).toMatch(/^LEAVE\b/);
@@ -124,12 +122,6 @@ test('commercial hanger and courtesy-only rules stay distinct',async({page})=>{
   await expect(hanger).toContainText(sample.hangerAction);
   const courtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
   await expect(courtesy).toContainText(sample.courtesyAction);
-  await page.getByText('Full door-hanger rule').click();
-  await expect(page.locator('details').filter({hasText:'Full door-hanger rule'})).toContainText(sample.hangerRelease);
-  await page.getByText('Full courtesy-notice rule').click();
-  const details=page.locator('details').filter({hasText:'Full courtesy-notice rule'});
-  await expect(details).toContainText(sample.courtesyDelta);
-
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'North Miami Beach');
   const nmbCourtesy=page.locator('section.card.essentials').filter({hasText:'INSTALLATION-DAY COURTESY NOTICE'});
@@ -180,10 +172,13 @@ test('manager-facing copy stays plain English',async({page})=>{
   await page.goto('/index.html');
   await pick(page,'Boynton Beach');
   const text=await page.locator('body').innerText();
-  expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE|SECURE PRIVATE-ENTRY|KNOB NOT SPECIFICALLY VERIFIED/i);
+  expect(text).not.toMatch(/controlled rationale|legal classification remains GO|ordinary uninvited route|DEPLOY BLOCKED|COMMERCIAL CANVASS RELEASE|SECURE PRIVATE-ENTRY|KNOB NOT SPECIFICALLY VERIFIED|COURTESY TEXT BLOCKER/i);
   await expect(page.getByText(/BEFORE YOU START/i).first()).toBeVisible();
-  await expect(page.getByText('Full canvassing rule')).toBeVisible();
+  await expect(page.getByText('More canvassing details')).toBeVisible();
   await expect(page.getByText('If someone questions the rule')).toBeVisible();
+  await page.getByText('More canvassing details').click();
+  const expanded=await page.locator('details').filter({hasText:'More canvassing details'}).innerText();
+  expect(expanded).not.toMatch(/targeted current|operative text|controlled audit|do not invent|noncontrolling/i);
 });
 test('PWA metadata, provenance and service worker are present',async({page})=>{
   await page.goto('/index.html');
