@@ -9,7 +9,7 @@ test('core lookup remains usable across the device matrix',async({page})=>{
   await page.goto('/index.html');
   await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
   await pick(page,'Boynton Beach');
-  await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
+  await expect(page.locator('section.card.essentials').getByText('FIELD ANSWERS')).toBeVisible();
   await expect(page.getByRole('button',{name:/RUN DAILY CHECK/})).toBeVisible();
   await page.getByRole('button',{name:'New search'}).click();
   await pick(page,'Punta Gorda');
@@ -24,7 +24,7 @@ test('200 percent text remains horizontally contained',async({page})=>{
   await pick(page,'Boynton Beach');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
-  await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
+  await expect(page.locator('section.card.essentials').getByText('FIELD ANSWERS')).toBeVisible();
 });
 
 test('keyboard-only exact lookup works',async({page})=>{
@@ -33,7 +33,7 @@ test('keyboard-only exact lookup works',async({page})=>{
   await search.focus();
   await search.fill('Boynton Beach');
   await search.press('Enter');
-  await expect(page.getByText('FIELD ANSWERS')).toBeVisible();
+  await expect(page.locator('section.card.essentials').getByText('FIELD ANSWERS')).toBeVisible();
 });
 
 test('verified knob placement stays explicit across devices',async({page})=>{
@@ -44,7 +44,7 @@ test('verified knob placement stays explicit across devices',async({page})=>{
     return r.name;
   });
   await pick(page,name);
-  await expect(page.getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
+  await expect(page.locator('section.card.essentials').getByText('YES — HANG ON FRONT DOORKNOB / HANDLE.',{exact:true})).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
 });
