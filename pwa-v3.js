@@ -1,4 +1,4 @@
-const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.4';
+const PCM_BUILD_VERSION=window.PCM_PROVENANCE?.appVersion||'2026.08.14-v3.5';
 const PCM_LATEST_META='https://raw.githubusercontent.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-public/latest.json';
 const PCM_UPDATE_LOCK_KEY='pcmValidatedUpdateLockV1';
 let pcmLatest=null,pcmDeferredInstall=null;
@@ -14,20 +14,20 @@ function pcmWriteUpdateLock(meta){try{localStorage[PCM_UPDATE_LOCK_KEY]=JSON.str
 function pcmClearUpdateLock(){try{delete localStorage[PCM_UPDATE_LOCK_KEY]}catch{}}
 function pcmValidatedDataUpdate(){return pcmMetaIsActionable(pcmLatest)||!!pcmReadUpdateLock()}
 function pcmUpdateTarget(){return pcmMetaIsNewer(pcmLatest)?pcmLatest:pcmReadUpdateLock()}
-function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'A newer validated controlled register is available. Update the app before any new DEPLOY decision.':''}
+function pcmApplyDeployBlock(){window.PCM_DEPLOY_BLOCK_REASON=pcmValidatedDataUpdate()?'New approved rules are available. Update the app before starting another route.':''}
 function pcmHealth(){
   const el=document.getElementById('appHealth');if(!el)return;
   const online=navigator.onLine,age=typeof pcmSnapshotAgeDays==='function'?pcmSnapshotAgeDays():null,target=pcmUpdateTarget();
   const newerCode=pcmLatest&&pcmLatest.validated===true&&pcmIsNewerVersion(pcmLatest.version),newerData=pcmValidatedDataUpdate(),stale=age!==null&&age>30;
   el.className='appHealth '+(online?'online':'offline')+(newerCode?' update':'')+(newerData?' dataUpdate':'')+(stale&&!newerData?' stale':'');
   const ageText=age===null?'':` · ${age}d`;
-  el.innerHTML=`<span class="healthNet">${online?'● ONLINE':'● OFFLINE'}</span><span>Snapshot ${esc(db?.meta?.snapshotDate||'—')}${ageText}</span><span>${esc(PCM_BUILD_VERSION)}</span>${newerData?'<span class="healthBlock">DEPLOY BLOCKED — VALIDATED DATA UPDATE</span>':''}${newerCode||newerData?`<a href="${esc(target?.url||'#')}" class="healthUpdate">UPDATE AVAILABLE</a>`:''}${!pcmStandalone()?'<button id="installApp" class="healthInstall">INSTALL</button>':''}`;
+  el.innerHTML=`<span class="healthNet">${online?'● ONLINE':'● OFFLINE'}</span><span>Rules ${esc(db?.meta?.snapshotDate||'—')}${ageText}</span><span>${esc(PCM_BUILD_VERSION)}</span>${newerData?'<span class="healthBlock">UPDATE REQUIRED — NEW RULES</span>':''}${newerCode||newerData?`<a href="${esc(target?.url||'#')}" class="healthUpdate">UPDATE APP</a>`:''}${!pcmStandalone()?'<button id="installApp" class="healthInstall">ADD TO HOME SCREEN</button>':''}`;
   const b=document.getElementById('installApp');if(b)b.onclick=pcmInstall;
 }
 async function pcmInstall(){
   if(pcmDeferredInstall){pcmDeferredInstall.prompt();try{await pcmDeferredInstall.userChoice}catch{}pcmDeferredInstall=null;pcmHealth();return}
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  const msg=ios?'On iPhone: tap the Share button in Safari, choose “Add to Home Screen,” then tap Add.':'Use your browser menu and choose Install app / Add to Home Screen.';
+  const msg=ios?'On iPhone: tap Share in Safari, choose “Add to Home Screen,” then tap Add.':'Open your browser menu and choose Install app or Add to Home Screen.';
   pcmShowInstall(msg);
 }
 function pcmShowInstall(text){
