@@ -54,6 +54,20 @@ test('permanent controlled-document links are exposed',async({page})=>{
   await expect(page.getByRole('link',{name:'OPEN CURRENT CONTROLLED SHEET'})).toHaveAttribute('href',/1IuiNXffS7cUOmZbW91IJ5L8J3jz_WX-czfueveIp4t8/);
   await expect(page.getByRole('link',{name:'OPEN PERMANENT CANVASS MANAGER URL'})).toHaveAttribute('href','https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html');
 });
+test('code-only validated update has a real target without triggering a legal-data deploy block',async({page})=>{
+  await page.goto('/index.html');
+  const meta={validated:true,version:'2026.08.14-v3.5',snapshot:'2026-08-14',datasetSha256:'d347c695c7693cb9d0944a492d395f8c23c9d5af54c6a8aad59dc1cdbbf1caf0',url:'https://example.test/validated-v35/index.html'};
+  const state=await page.evaluate(meta=>{
+    eval('pcmLatest = meta');
+    pcmApplyDeployBlock();
+    pcmHealth();
+    const link=document.querySelector('.healthUpdate');
+    return{href:link?.getAttribute('href')||'',text:link?.textContent||'',block:window.PCM_DEPLOY_BLOCK_REASON||''};
+  },meta);
+  expect(state.href).toBe(meta.url);
+  expect(state.text).toContain('UPDATE AVAILABLE');
+  expect(state.block).toBe('');
+});
 test('browse areas by county works',async({page})=>{
   await page.goto('/index.html');
   await page.getByRole('button',{name:'BROWSE ALL AREAS'}).click();
