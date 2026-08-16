@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "2026.08.16-pu-release-gate-v1",
+  "status": "NOT_RELEASE_READY",
+  "workingBranch": "agent/paradise-university-v1",
+  "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+  "lastFullyGreenSoftwareCheckpoint": "1e9ed36da001ea8bb80f6fc382bd7368d664b3a1",
+  "lastFullyGreenValidatorRun": 31968623114,
+  "fieldBaseline": {
+    "status": "PASS",
+    "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+    "records": 78,
+    "go": 76,
+    "noGo": 2
+  },
+  "softwareValidation": {
+    "status": "PASS",
+    "syntaxBuildBoundary": "PASS",
+    "trainingHardening": "PASS",
+    "fieldReleaseIsolation": "PASS",
+    "staticProductionBundle": "PASS",
+    "automatedIPhoneField": "PASS",
+    "automatedIPhoneOffline": "PASS",
+    "automatedUniversityIPhone": "PASS",
+    "deviceMatrix": "PASS",
+    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance."
+  },
+  "practiceV2": {
+    "status": "PASS",
+    "scenarioCount": 20,
+    "categories": 4,
+    "scenariosPerCategory": 5,
+    "minimumHardStops": 6,
+    "schemaValidator": "PASS",
+    "offline": "PASS"
+  },
+  "mediaRights": {
+    "status": "BLOCKED",
+    "curatedThirdPartyReviewed": 12,
+    "copiedThirdPartyPlayable": 0,
+    "rightsHeld": 12,
+    "paradiseOwnedPlayableAudio": 0,
+    "paradiseOwnedPlayableVideo": 0,
+    "requiredToClose": "At least one rights-cleared or Paradise-owned audio item and one rights-cleared or Paradise-owned video item must be loaded and then physically tested. Exact vendor recordings require an actual rights basis before internal re-hosting."
+  },
+  "physicalDeviceAcceptance": {
+    "status": "OPEN",
+    "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md record on an actual iPhone for Safari and installed Home Screen PWA, including offline behavior and cleared audio/video playback."
+  },
+  "humanCurriculumComplianceReview": {
+    "status": "OPEN",
+    "requiredEvidence": "Named human reviewer(s), date, exact candidate commit, and disposition covering curriculum accuracy, Paradise policy boundaries, field-authority separation, sales procedure holds, and media rights posture."
+  },
+  "promotionAuthorization": {
+    "status": "OPEN",
+    "requiredEvidence": "Explicit authorization to advance the validated branch after all other gates are PASS."
+  },
+  "validatedBranchReadback": {
+    "status": "NOT_APPLICABLE_UNTIL_PROMOTION",
+    "requiredEvidence": "After authorized promotion, read back validated branch commit, dataset SHA, 78/76/2 guards, and operational URL behavior before calling the release live."
+  },
+  "hardRule": "A green software validator is necessary but not sufficient for release. Do not change status to RELEASE_READY unless every required non-software gate is supported by recorded evidence."
+}
