@@ -77,8 +77,9 @@ test('Grosso expanded source lineage is retained but copied-file link is withhel
   await expect(row).toBeVisible();await expect(row).toContainText(/RIGHTS REVIEW/);await expect(page.getByRole('link',{name:/11-Step Breakdown Expanded Edition/})).toHaveCount(0);
 });
 
-test('manager ride-along Paradise source remains available when not part of trainer media rights hold',async({page})=>{
-  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();await page.getByRole('button',{name:/Ride-Along Coaching/}).click();await page.getByText('Go deeper / source material').click();await expect(page.getByRole('link',{name:/Ride Along Evaluation Form/})).toHaveAttribute('href',/1cm2QPzwPRFPITk68fJmT8wc_z_OEPyTl/);
+test('Grosso ride-along source lineage is retained but copied-file link is withheld pending rights',async({page})=>{
+  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();await page.getByRole('button',{name:/Ride-Along Coaching/}).click();await page.getByText('Go deeper / source material').click();
+  const row=page.locator('.puMoreRow').filter({hasText:/Grosso University — Ride Along Evaluation Form/});await expect(row).toBeVisible();await expect(row).toContainText(/RIGHTS REVIEW/);await expect(page.getByRole('link',{name:/Ride Along Evaluation Form/})).toHaveCount(0);
 });
 
 test('direct player call cannot bypass copied trainer media rights hold',async({page})=>{
