@@ -2,11 +2,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const ctx={window:{}};vm.createContext(ctx);
-for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js','training-media-expanded-v1.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
+for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js','training-media-expanded-v1.js','training-governance-v1.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
 const u=ctx.window.PU_CONTENT;
 if(!u||!Array.isArray(u.lessons)||!Array.isArray(u.media)||!Array.isArray(u.drills)||!Array.isArray(u.managerLessons))throw new Error('Training content model missing');
 if(u.version!=='2026.08.16-pu-v1-content-5')throw new Error(`Unexpected training version ${u.version}`);
 if(u.mediaCatalogVersion!=='2026.08.16-pu-media-expanded-v1')throw new Error(`Unexpected media catalog version ${u.mediaCatalogVersion||'missing'}`);
+if(u.governanceVersion!=='2026.08.16-pu-governance-v1')throw new Error(`Unexpected governance version ${u.governanceVersion||'missing'}`);
 
 const minimum={foundation:4,'field-ready':7,canvasser:9,senior:6,'sales-apprentice':11,'sales-rep':7};
 for(const [stage,min] of Object.entries(minimum)){const n=u.lessons.filter(x=>x.stage===stage).length;if(n<min)throw new Error(`Insufficient ${stage} curriculum: ${n}/${min}`)}
@@ -15,6 +16,12 @@ if(u.managerLessons.length<14)throw new Error(`Insufficient manager curriculum: 
 if(u.media.length<30)throw new Error(`Expanded media catalog too small: ${u.media.length}/30`);
 if(Object.keys(u.sources||{}).length<20)throw new Error(`Expanded source catalog too small: ${Object.keys(u.sources||{}).length}/20`);
 if(u.salesPolicyGate?.status!=='CURRENT_POLICY_REQUIRED')throw new Error('Sales policy gate missing');
+
+for(const lesson of [...u.lessons,...u.managerLessons]){
+  if(lesson.contentStatus!=='Published')throw new Error(`Published content status missing for ${lesson.id}`);
+  if(lesson.trainingVersion!==u.version)throw new Error(`Training version missing or stale for ${lesson.id}`);
+  if(!['Editorial','Training Update','Critical'].includes(lesson.changeClass))throw new Error(`Invalid change class for ${lesson.id}`);
+}
 
 for(const cat of ['Opening','Objections','Appointments','Field Rules'])if(!u.drills.some(x=>x.category===cat))throw new Error(`Practice category missing: ${cat}`);
 const forbidden=['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up','Financing','Contract','Rescission'];
@@ -48,4 +55,4 @@ if(!/current Paradise|current approved|current product/i.test(coreSales))throw n
 const mg=u.managerLessons.map(x=>`${x.title} ${x.learn} ${x.pass}`).join(' ');
 if(!/do not improvise law|does not override the live municipality|NO-GO/i.test(mg))throw new Error('Manager compliance boundary missing');
 
-console.log({status:'PASS',version:u.version,mediaCatalogVersion:u.mediaCatalogVersion,lessons:u.lessons.length,managerLessons:u.managerLessons.length,media:u.media.length,sourceLibraryMedia:u.media.filter(x=>x.priority==='SOURCE_LIBRARY').length,sources:Object.keys(u.sources||{}).length,drills:u.drills.length,policyGate:u.salesPolicyGate.status});
+console.log({status:'PASS',version:u.version,mediaCatalogVersion:u.mediaCatalogVersion,governanceVersion:u.governanceVersion,lessons:u.lessons.length,managerLessons:u.managerLessons.length,media:u.media.length,sourceLibraryMedia:u.media.filter(x=>x.priority==='SOURCE_LIBRARY').length,sources:Object.keys(u.sources||{}).length,drills:u.drills.length,policyGate:u.salesPolicyGate.status});
