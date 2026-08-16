@@ -1,6 +1,12 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
+process.on('uncaughtException',err=>{
+  const msg=String(err?.message||err||'Unknown hardening failure').replace(/\r?\n/g,' ');
+  console.error(`::error title=Paradise University hardening::${msg}`);
+  process.exit(1);
+});
+
 const ctx={window:{}};vm.createContext(ctx);
 for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
 const u=ctx.window.PU_CONTENT;
