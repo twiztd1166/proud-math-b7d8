@@ -41,7 +41,9 @@ test('knowledge evidence persists but remains separate from content progress and
   expect(state.checks['canvass-cert-ready'].correct).toBe(1);
   expect(state.checks['canvass-cert-ready'].passed).toBeTruthy();
   expect(state.required).toBeTruthy();expect(state.passed).toBeTruthy();expect(state.ready).toBeFalsy();
-  expect(Object.keys(state.progress)).toHaveLength(0);
+  expect(state.progress['canvass-cert-ready']).toBeTruthy();
+  expect(state.progress['canvass-cert-ready'].startedAt).toBeTruthy();
+  expect(state.progress['canvass-cert-ready'].complete).not.toBeTruthy();
   await page.getByRole('button',{name:'MARK COMPLETE'}).click();
   state=await page.evaluate(()=>({progress:JSON.parse(localStorage.puProgress||'{}'),ready:window.puLessonTrainingReady('canvass-cert-ready')}));
   expect(state.progress['canvass-cert-ready'].complete).toBeTruthy();
