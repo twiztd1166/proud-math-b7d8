@@ -57,21 +57,24 @@ jobs:
           grep -q 'training-checks-v1.css' sw.js
           grep -q 'training-more-v1.js' sw.js
           grep -q 'training-more-v1.css' sw.js
-          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness1-practice1-checks1-more1-2026-08-16' sw.js
+          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-2026-08-16' sw.js
           grep -q '2026.08.16-pu-v1-content-3' training-content-sourcefix-v1.js
           grep -q '2026.08.16-pu-v1-content-4' training-manager-v1-data.js
           grep -q '2026.08.16-pu-v1-content-5' training-sales-v1-data.js
           grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
           grep -q 'CURRENT POLICY REQUIRED' training-sales-v1-ui.js
-          grep -q '2026.08.16-pu-readiness-v1' training-readiness-v1.js
+          grep -q '2026.08.16-pu-readiness-v2' training-readiness-v1.js
           grep -q 'not an official Paradise certification' training-readiness-v1.js
           grep -q 'manager role-play and field verification required' training-readiness-v1.js
+          grep -q 'DEVICE TRAINING COMPLETE' training-readiness-v1.js
+          grep -q 'REQUIRED KNOWLEDGE CHECKS' training-readiness-v1.js
           grep -q '2026.08.16-pu-practice-v1' training-practice-v1.js
           grep -q 'not an official certification or manager verification' training-practice-v1.js
           grep -q 'puPracticeStatsV1' training-practice-v1.js
           grep -q 'SHOW COACHING ANSWER' training-practice-v1.js
-          grep -q '2026.08.16-pu-checks-v1' training-checks-v1.js
+          grep -q '2026.08.16-pu-checks-v2' training-checks-v1.js
           grep -q 'puQuickChecksV1' training-checks-v1.js
+          grep -q 'puLessonTrainingReady' training-checks-v1.js
           grep -q 'The live municipality instructions control the actual route' training-checks-v1.js
           grep -q 'Managers do not override NO-GO' training-checks-v1.js
           grep -q '2026.08.16-pu-player-v1' training-player-v1.js
