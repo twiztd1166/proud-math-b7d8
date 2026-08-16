@@ -67,6 +67,21 @@ test('senior and sales apprentice stages are fully populated',async({page})=>{
   await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
 });
 
+test('Manager Academy stays behind Career Path and has operational curriculum',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await expect(page.getByRole('button',{name:/Canvass Manager Academy/})).toHaveCount(0);
+  await page.getByRole('button',{name:/Career Path/}).first().click();
+  await page.getByRole('button',{name:/Canvass Manager Academy/}).click();
+  await expect(page.getByRole('heading',{name:'Canvass Manager Academy'})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Compliance Leadership/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Ride-Along Coaching/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Manage the Funnel, Not One Number/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Develop Future Sales Reps/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Field Incident & Escalation/})).toBeVisible();
+  await expect(page.getByText(/does not override the live municipality result/i)).toBeVisible();
+});
+
 test('opening lesson does not misuse courtesy notice where route blocks it',async({page})=>{
   await page.goto('/index.html');
   await page.getByRole('button',{name:/Training/}).click();
@@ -101,8 +116,7 @@ test('five commitments lesson links the exact Dave source',async({page})=>{
   await page.getByRole('button',{name:/3\. Certified Canvasser/}).click();
   await page.getByRole('button',{name:/Five Appointment Commitments/}).click();
   await page.getByText('Go deeper / source material').click();
-  const link=page.getByRole('link',{name:/Dave Yoho — The Five Commitments/});
-  await expect(link).toHaveAttribute('href','https://drive.google.com/file/d/1Au1PhatdFIG84Azy8LiNXh0QLnjLSuIs/view?usp=drivesdk');
+  await expect(page.getByRole('link',{name:/Dave Yoho — The Five Commitments/})).toHaveAttribute('href','https://drive.google.com/file/d/1Au1PhatdFIG84Azy8LiNXh0QLnjLSuIs/view?usp=drivesdk');
 });
 
 test('sales process map links the exact Grosso Expanded source',async({page})=>{
@@ -113,6 +127,16 @@ test('sales process map links the exact Grosso Expanded source',async({page})=>{
   await page.getByRole('button',{name:/Full Sales Process Map/}).click();
   await page.getByText('Go deeper / source material').click();
   await expect(page.getByRole('link',{name:/11-Step Breakdown Expanded Edition/})).toHaveAttribute('href','https://drive.google.com/file/d/100B1iq77BW00sH4HYMO6zPl80ctMsaam/view?usp=drivesdk');
+});
+
+test('manager ride-along lesson links exact source form',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await page.getByRole('button',{name:/Career Path/}).first().click();
+  await page.getByRole('button',{name:/Canvass Manager Academy/}).click();
+  await page.getByRole('button',{name:/Ride-Along Coaching/}).click();
+  await page.getByText('Go deeper / source material').click();
+  await expect(page.getByRole('link',{name:/Ride Along Evaluation Form/})).toHaveAttribute('href',/1cm2QPzwPRFPITk68fJmT8wc_z_OEPyTl/);
 });
 
 test('Drive media opens in persistent Paradise player and survives app navigation',async({page})=>{
@@ -139,7 +163,7 @@ test('player infrastructure includes custom speed seek resume path for future co
   await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v1');
   const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION}));
   expect(state.player).toBeTruthy();
-  expect(state.version).toBe('2026.08.16-pu-v1-content-3');
+  expect(state.version).toBe('2026.08.16-pu-v1-content-4');
 });
 
 test('practice hard stop says leave rather than rebut',async({page})=>{
