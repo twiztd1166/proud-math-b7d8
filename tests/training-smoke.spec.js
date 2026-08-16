@@ -31,7 +31,7 @@ test('approved Paradise lesson is visually separate from reference source media'
   await page.getByRole('button',{name:/Training/}).click();
   await page.locator('#puContinue').click();
   await expect(page.getByText('PARADISE APPROVED',{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:/Training/}).click();
+  await page.locator('#puBack').click();
   await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   await expect(page.getByText('REFERENCE',{exact:true}).first()).toBeVisible();
   await expect(page.getByText(/Original Tony Hoty, Dave Yoho, and Grosso material is reference training/i)).toBeVisible();
