@@ -43,10 +43,10 @@
 
   function score(item,q){
     const query=norm(q);if(!query)return 0;const terms=words(q);const title=norm(item.title),text=norm(item.text),tags=norm(item.tags);
-    let s=0;if(title===query)s+=120;if(title.includes(query))s+=80;if(text.includes(query))s+=35;if(tags.includes(query))s+=30;
-    for(const t of terms){if(title.includes(t))s+=18;if(text.includes(t))s+=7;if(tags.includes(t))s+=8}
-    s+=item.type==='lesson'?60:item.type==='drill'?40:item.type==='media'?20:0;
-    return s;
+    let relevance=0;if(title===query)relevance+=120;if(title.includes(query))relevance+=80;if(text.includes(query))relevance+=35;if(tags.includes(query))relevance+=30;
+    for(const t of terms){if(title.includes(t))relevance+=18;if(text.includes(t))relevance+=7;if(tags.includes(t))relevance+=8}
+    if(!relevance)return 0;
+    return relevance+(item.type==='lesson'?60:item.type==='drill'?40:item.type==='media'?20:0);
   }
   function searchIndex(){
     const lessons=allLessons().map(x=>({type:'lesson',id:x.id,title:x.title,text:[x.summary,x.learn,x.practice,x.pass].join(' '),tags:x.stage||'',stage:x.stage}));
