@@ -12,7 +12,7 @@ Do **not** approve the 2025-derived candidate as Paradise's best current operati
 
 Recommended replacement for human adoption:
 
-> **“Hi, I’m [Name] with Paradise Exteriors. I’m not here to give you a quote or sales presentation at the door. I’m checking whether you’d be interested in scheduling a free consultation for your [windows / doors / roof]. Have you ever gotten an estimate?”**
+> **“Hi, I’m [Name] with Paradise Exteriors. I’m not here to give you a quote at the door. I’m checking whether you’d be interested in scheduling a consultation for your [windows / doors / roof]. Have you ever gotten an estimate?”**
 
 This is a recommendation for human review. It is not active Paradise policy unless a named Paradise reviewer explicitly adopts it.
 
@@ -20,7 +20,7 @@ This is a recommendation for human review. It is not active Paradise policy unle
 
 ### 1. It preserves the truthful doorstep boundary
 
-Paradise University already separates canvassing from the in-home sales appointment. The canvasser should not quote, negotiate, contract, take payment, or turn the porch into the full sales presentation. The recommended wording states that limited truth directly: no quote or sales presentation at the door.
+Paradise University already separates canvassing from the in-home sales appointment. The canvasser should not quote, negotiate, contract, take payment, or turn the porch into the full sales appointment. The recommended wording states the narrowest clearly supported boundary directly: no quote is being given at the door.
 
 ### 2. It does not deny the commercial purpose
 
@@ -32,24 +32,28 @@ This does **not** establish that the old phrase is automatically unlawful. It do
 
 ### 3. It states the actual next step
 
-The recommended opener tells the homeowner the immediate purpose: determine whether they are interested in scheduling a free consultation. That makes the commercial intent clear without turning the porch into the sales appointment.
+The recommended opener tells the homeowner the immediate purpose: determine whether they are interested in scheduling a consultation. That makes the commercial intent clear without turning the porch into the in-home sales appointment.
 
 ### 4. It avoids an unnecessary neighborhood-work claim
 
 The 2025-derived candidate says `We’re doing some work here in the neighborhood.` That may be true on some routes and false or unverifiable on others. The recommended base opener removes that statement. If Paradise wants a neighbor/job-site variant, it should be used only when factually true for that route.
 
+### 5. It avoids unverified promotional language
+
+The base recommendation does not say `free consultation`, `free estimate`, `free inspection`, or use a discount/promotion. Any such claim should be added only if it is current, accurate, and approved for the service and route.
+
 ## Optional route-specific variant — only when factually true
 
-> “Hi, I’m [Name] with Paradise Exteriors. We’re working on a home nearby. I’m not here to give you a quote or sales presentation at the door. I’m checking whether you’d be interested in scheduling a free consultation for your [windows / doors / roof]. Have you ever gotten an estimate?”
+> “Hi, I’m [Name] with Paradise Exteriors. We’re working on a home nearby. I’m not here to give you a quote at the door. I’m checking whether you’d be interested in scheduling a consultation for your [windows / doors / roof]. Have you ever gotten an estimate?”
 
-Use this variant only when Paradise can truthfully substantiate that the crew/company is actually working on a home nearby. Do not use `we’re working nearby` merely as a generic canvass device.
+Use this variant only when Paradise can truthfully substantiate that the company is actually working on a home nearby. Do not use `we’re working nearby` merely as a generic canvass device.
 
 ## Words intentionally avoided
 
 - `I’m not here to sell you anything` — unnecessarily broad denial of commercial purpose.
 - `I’m just...` — can minimize the actual purpose rather than clarify it.
 - `We’re doing work in the neighborhood` — unless true on that route.
-- `Free inspection` / `free estimate` / promotional claims — unless those exact offers and conditions are current Paradise policy for the route and service.
+- `Free consultation` / `free inspection` / `free estimate` / promotional claims — unless those exact offers and conditions are current Paradise policy for the route and service.
 - Any statement implying governmental, utility, HOA, inspection, insurance, storm-response, or neighbor authority that Paradise does not actually have.
 
 ## Human decision
@@ -59,7 +63,7 @@ Recommended disposition for `PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md`:
 - `REVISE` the 2025-derived candidate.
 - Adopt the recommended replacement above, or a human-edited equivalent preserving these three required concepts:
   1. identify Paradise Exteriors;
-  2. truthfully state that no quote/full sales presentation is being conducted at the door;
+  2. truthfully state the limited doorstep boundary (for example, no quote is being given at the door);
   3. disclose that the purpose is to determine interest in scheduling a consultation.
 
 If a named Paradise reviewer adopts replacement wording, implement it in the runtime and rerun the affected validator, offline cache, University iPhone/currentness regression, and device matrix before physical-device release acceptance.
