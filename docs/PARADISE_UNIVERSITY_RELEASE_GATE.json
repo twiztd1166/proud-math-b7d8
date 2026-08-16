@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026.08.16-pu-release-gate-v4",
+  "schemaVersion": "2026.08.16-pu-release-gate-v5",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
@@ -43,7 +43,7 @@
     "mediaPolicyVersion": "2026.08.16-pu-media-internal-v2",
     "mediaUiVersion": "2026.08.16-pu-media-ui-v5",
     "curatedTargetAudit": {
-      "status": "PASS_TARGET_EXISTENCE_AND_TYPE_FOR_11_PLUS_OVERSIZE_EXISTENCE_FOR_1",
+      "status": "PASS_TARGET_EXISTENCE_PLUS_LOCAL_INTEGRITY_FOR_RETRIEVABLE_SET",
       "catalogTargetsReviewed": 12,
       "fullDriveMetadataReturned": 11,
       "fullMetadataTypeMatchesCatalog": 11,
@@ -51,8 +51,12 @@
       "expectedCatalogMix": "8 audio / 4 video",
       "grossoSet": "6/6 targets resolved: 3 audio/mpeg + 3 video/mp4, all nonzero",
       "tonySet": "5/5 targets resolved: 5 audio/mpeg, all nonzero",
+      "localProbe": "11/11 retrieved files opened successfully in ffprobe with readable duration/stream metadata",
+      "localDecodeIntegrity": "11/11 retrieved files completed full ffmpeg decode with -xerror and no decode errors",
+      "retrievedVideoCodecs": "3/3 Grosso videos = H.264 video + AAC audio",
+      "retrievedAudioCodecs": "8/8 retrieved audio files = MP3, 44.1 kHz stereo",
       "daveScienceCanvassing": "Target exists and reports 1,690,853,160 bytes; connector raw download is blocked by its 268,435,456-byte ceiling, so actual browser playback remains a physical acceptance item",
-      "note": "This target audit establishes that the curated catalog is not pointing at missing Drive objects. It does not substitute for real Safari/PWA playback."
+      "note": "This target audit establishes that the curated catalog is not pointing at missing Drive objects and that every retrievable curated file is structurally decodable. It does not substitute for real Safari/PWA playback."
     },
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy.",
     "note": "Internal-use treatment is a project operating choice, not a legal opinion. Media-rights documentation is not a Paradise University release gate under the current project scope."
