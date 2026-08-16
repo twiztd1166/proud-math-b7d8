@@ -70,6 +70,17 @@ for(const m of u.media||[]){
   if(/Tony Hoty|Dave Yoho|Grosso/i.test(String(m.trainer||''))&&m.authority==='PARADISE_APPROVED')throw new Error(`Third-party media misclassified as Paradise approved: ${m.id}`);
 }
 
+const salesSource=u.sources?.paradiseSalesPolicy2026;
+const salesGate=u.salesPolicyGate;
+if(!salesSource)throw new Error('Verified 2026 Paradise sales policy source missing');
+if(salesSource.authority!=='PARADISE_APPROVED')throw new Error('2026 Paradise sales policy source must remain PARADISE_APPROVED');
+if(!/138nsdiqs3XeSmq4PXlnGQNHFnDp2EJSe33ldrFu3TNQ/.test(String(salesSource.url||'')))throw new Error('Unexpected 2026 Paradise sales policy source URL');
+if(salesGate?.status!=='CURRENT_POLICY_REQUIRED')throw new Error('Sales policy procedure gate was weakened');
+if(salesGate?.sourceId!=='paradiseSalesPolicy2026')throw new Error('Sales policy gate lost verified source linkage');
+if(salesGate?.sourceRevision!=='1585'||salesGate?.sourceModified!=='2026-03-05')throw new Error('Sales policy source revision control drift');
+for(const phrase of ['price-presentation procedure','Financing presentation workflow','Contract execution','Customer cancellation / rescission handling procedure','full Sales Rep certification checklist'])if(!(salesGate.unresolved||[]).some(x=>String(x).includes(phrase)))throw new Error(`Sales procedure hold missing: ${phrase}`);
+if((salesGate.supported||[]).length<5)throw new Error('Verified 2026 sales policy scope unexpectedly incomplete');
+
 const expectedExpanded=['tony-callback','tony-recruit-manager','tony-new-canvasser-part1','tony-storm-xactimate','tony-audio-dvd-main','tony-dvd-main-video','tony-dvd-video','tony-video-clips','grosso-extreme-leadership-video','grosso-sales-training-video'];
 for(const id of expectedExpanded)if(!mediaIds.includes(id))throw new Error(`Expanded source media missing: ${id}`);
 for(const id of ['tonyDvdFolder','tonyIndividualAudio','tonyTrainingAudio','grossoAudioFolder','grossoVideoFolder','grossoObjectionSchool','grossoVirtualClosers','grossoAdvancedSelling'])if(!u.sources?.[id])throw new Error(`Expanded source group missing: ${id}`);
@@ -93,4 +104,4 @@ if(!requiredBoundaries.manager.test(managerBlob))throw new Error('Manager live-r
 if((u.drills||[]).some(d=>/leave my property|get off my property/i.test(d.prompt||'')&&!/stop immediately and leave/i.test(d.answer||'')))throw new Error('Clear-refusal practice answer drift');
 if((u.drills||[]).some(d=>/NO-GO/i.test(d.title||d.prompt||'')&&!/do not canvass/i.test(d.answer||'')))throw new Error('NO-GO practice answer drift');
 
-console.log({status:'PASS',fieldLessons:fieldLessons.length,totalLessons:lessons.length,sources:Object.keys(u.sources||{}).length,media:(u.media||[]).length,mediaCatalogVersion:u.mediaCatalogVersion,drills:(u.drills||[]).length});
+console.log({status:'PASS',fieldLessons:fieldLessons.length,totalLessons:lessons.length,sources:Object.keys(u.sources||{}).length,media:(u.media||[]).length,mediaCatalogVersion:u.mediaCatalogVersion,drills:(u.drills||[]).length,salesPolicySource:salesGate.sourceId,salesProcedureGate:salesGate.status});
