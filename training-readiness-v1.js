@@ -7,6 +7,15 @@
     'sales-apprentice':{label:'Sales Apprentice',next:'Device training gates complete → manager sales-readiness review and shadowing verification required.'},
     'sales-rep':{label:'Sales Rep Academy — Part 1',next:'Part 1 device training complete → current Paradise policy modules are still required before full Sales Rep certification.'}
   };
+  const careerGuidance=Object.freeze({
+    foundation:{role:'Build the Paradise baseline before independent field training.',skills:'Professional conduct, products 101, compliance foundation, the lead-to-install journey, and core field terminology.',certification:'Foundation completion on this device is training progress only; current Paradise onboarding and manager requirements remain separate.',next:'Field Ready — live municipality lookup, route preparation, approach, refusals, access, literature, and field-readiness demonstration.'},
+    'field-ready':{role:'Prepare to canvass correctly under the live municipality result and current Paradise field controls.',skills:'Jurisdiction lookup, GO / conditional / NO-GO decisions, hours and special conditions, literature modes, route preparation, opening, delivery, hard stops, access, and escalation.',certification:'Complete the device training gates, then demonstrate the current script and compliance process to a manager before field verification.',next:'Certified Canvasser — deeper conversation skill, appointment quality, objections, Five Commitments, practice, and certification readiness.'},
+    canvasser:{role:'Create accurate, qualified future appointments without turning the doorstep into the sales appointment.',skills:'Listening, project discovery, objection handling, value of the visit, Five Commitments, appointment setting, appointment quality, literature discipline, and field situations.',certification:'Canvasser certification remains a four-part process: knowledge, verbal/script demonstration, role-play, and field verification. Device progress is evidence, not the certification record.',next:'Senior Canvasser — advanced listening, objection diagnosis, appointment quality, Products 201, funnel fundamentals, peer leadership, and sales readiness.'},
+    senior:{role:'Operate as an advanced field rep and begin helping raise the quality of the team around you.',skills:'Advanced listening, objection diagnosis, appointment-quality coaching, Products 201, understanding the sales appointment, funnel fundamentals, peer leadership, and readiness assessment.',certification:'Complete the Senior device training gates and the current Paradise manager advancement review; progression is guidance, not permission.',next:'Choose the growth path that fits the demonstrated role: Sales Apprentice, Canvass Manager Academy, or continued Senior development.'},
+    'sales-apprentice':{role:'Prepare for a future in-home sales role while remaining inside the current canvasser authority at the door.',skills:'Advanced needs analysis, listening, sales objections, Paradise story, Product 301, inspection/measurement concepts, sales-process structure, and shadowing.',certification:'Sales Apprentice completion is not Sales Rep certification and is not authorization to quote, price, finance, contract, take payment, or sell at the door. Manager sales-readiness review and shadowing verification remain required.',next:'Sales Rep Academy — begin the Paradise-controlled in-home process while policy-sensitive modules remain gated to verified current company sources.'},
+    'sales-rep':{role:'Learn the Paradise-controlled in-home sales process for the Sales Rep role.',skills:'Part 1 currently covers preparation, introduction, needs analysis, measure/inspection, company story, category education, and product presentation.',certification:'Full Sales Rep certification is not available from Part 1 alone. Price presentation, financing, qualification, closing, contracts, cancellation/rescission, button-up, and final certification require verified current Paradise policy and the current certification process.',next:'Complete Part 1 and continue only into policy-sensitive modules that have been verified and published from current Paradise sources.'},
+    manager:{role:'Lead the canvass system: train reps, coach field behavior, manage route execution, appointment quality, performance, compliance, and escalation.',skills:'Compliance leadership, script coaching, ride-alongs, huddles, territory management, appointment QA, funnel/KPI diagnosis, performance coaching, incident response, and developing future sales reps.',certification:'Manager certification remains separate from device completion and includes compliance knowledge, script and coaching demonstrations, route/jurisdiction scenarios, appointment-quality review, KPI diagnosis, incident response, huddle/training demonstration, field verification, and current Paradise sign-off.',next:'Demonstrate the complete manager system under current Paradise standards and maintain ongoing coaching, compliance, and performance readiness.'}
+  });
   const ready=id=>typeof puLessonTrainingReady==='function'?puLessonTrainingReady(id):puLessonDone(id);
   const checkRequired=id=>typeof puQuickCheckRequired==='function'&&puQuickCheckRequired(id);
   const checkPassed=id=>typeof puQuickCheckPassed==='function'&&puQuickCheckPassed(id);
@@ -29,5 +38,17 @@
     document.getElementById('puBack').onclick=()=>puSetPage('home');
     document.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>puSetPage('lesson:'+b.dataset.lesson));
   };
-  window.PU_READINESS_VERSION='2026.08.16-pu-readiness-v2';
+  const baseStage=puStage;
+  puStage=function(stage){
+    baseStage(stage);
+    const g=careerGuidance[stage];if(!g||view!=='training')return;
+    const heading=document.createElement('div');heading.className='puSection';heading.textContent='Stage guide';
+    const card=document.createElement('section');card.className='card puCareerGuide';
+    card.innerHTML=`<div class="row"><div class="lab">ROLE</div><div class="val">${esc(g.role)}</div></div><div class="row"><div class="lab">SKILLS LEARNED</div><div class="val">${esc(g.skills)}</div></div><div class="row"><div class="lab">CERTIFICATION</div><div class="val">${esc(g.certification)}</div></div><div class="row"><div class="lab">WHAT'S NEXT</div><div class="val">${esc(g.next)}</div></div>`;
+    const marker=[...M.querySelectorAll('.puSection')].find(x=>/^(Lessons|Core sales lessons|Manager tools)$/i.test((x.textContent||'').trim()));
+    if(marker){M.insertBefore(heading,marker);M.insertBefore(card,marker)}else{M.appendChild(heading);M.appendChild(card)}
+  };
+  window.PU_CAREER_GUIDANCE=careerGuidance;
+  window.PU_CAREER_GUIDANCE_VERSION='2026.08.16-pu-career-guidance-v1';
+  window.PU_READINESS_VERSION='2026.08.16-pu-readiness-v3';
 })();
