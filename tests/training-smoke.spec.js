@@ -47,7 +47,7 @@ test('Sales Rep Academy publishes only policy-neutral Part 1 and shows current-p
   await expect(page.getByRole('button',{name:/3\. Survey \/ Needs Analysis/})).toBeVisible();
   await expect(page.getByRole('button',{name:/7\. Product Presentation/})).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED/)).toBeVisible();
-  await expect(page.getByText(/Price presentation, financing, qualification, closing, contract, cancellation\/rescission, and final button-up procedures require a verified current Paradise sales-policy source/i)).toBeVisible();
+  await expect(page.getByText(/Detailed price presentation, financing presentation, qualification, closing scripts, contract execution, cancellation\/rescission handling, final button-up, and full Sales Rep certification remain gated until current Paradise procedural sources are verified/i)).toBeVisible();
   for(const term of ['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up'])await expect(page.getByRole('button',{name:new RegExp(term,'i')})).toHaveCount(0);
 });
 
