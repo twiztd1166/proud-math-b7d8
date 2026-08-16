@@ -51,10 +51,11 @@ test('Sales Rep Academy publishes only policy-neutral Part 1 and shows current-p
   for(const term of ['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up'])await expect(page.getByRole('button',{name:new RegExp(term,'i')})).toHaveCount(0);
 });
 
-test('Manager Academy stays behind Career Path and has operational curriculum',async({page})=>{
+test('Manager Academy stays behind Career Path and keeps operational curriculum secondary',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await expect(page.getByRole('button',{name:/Canvass Manager Academy/})).toHaveCount(0);
   await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();
-  await expect(page.getByRole('heading',{name:'Canvass Manager Academy'})).toBeVisible();await expect(page.getByRole('button',{name:/Compliance Leadership/})).toBeVisible();await expect(page.getByRole('button',{name:/Ride-Along Coaching/})).toBeVisible();await expect(page.getByRole('button',{name:/Manage the Funnel, Not One Number/})).toBeVisible();await expect(page.getByRole('button',{name:/Develop Future Sales Reps/})).toBeVisible();await expect(page.getByRole('button',{name:/Field Incident & Escalation/})).toBeVisible();await expect(page.getByText(/does not override the live municipality result/i)).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Canvass Manager Academy'})).toBeVisible();await expect(page.getByRole('button',{name:/Compliance Leadership/})).toBeVisible();await expect(page.getByRole('button',{name:/Ride-Along Coaching/})).toBeVisible();await expect(page.getByRole('button',{name:/Manage the Funnel, Not One Number/})).toBeVisible();await expect(page.getByRole('button',{name:/Develop Future Sales Reps/})).toBeVisible();await expect(page.getByText(/does not override the live municipality result/i)).toBeVisible();
+  await expect(page.getByText(/Full Manager Curriculum/)).toBeVisible();await page.locator('.puManagerCurriculum summary').click();await expect(page.getByRole('button',{name:/Field Incident & Escalation/})).toBeVisible();
 });
 
 test('opening lesson does not misuse courtesy notice where route blocks it',async({page})=>{
