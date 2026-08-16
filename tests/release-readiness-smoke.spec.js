@@ -43,3 +43,32 @@ test('Sales Rep Academy uses verified 2026 Paradise policy without weakening the
   await expect(page.getByRole('link',{name:/Open verified Paradise policy source/})).toHaveAttribute('href',/138nsdiqs3XeSmq4PXlnGQNHFnDp2EJSe33ldrFu3TNQ/);
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
 });
+
+test('pricing and financing control path uses live tools without unlocking dynamic procedures',async({page})=>{
+  await page.goto('/index.html');
+  const ctl=await page.evaluate(()=>window.PU_SALES_PRICING_FINANCE_CONTROL);
+  expect(ctl?.status).toBe('PARTIAL_SOURCE_CLOSURE');
+  expect(ctl?.asOf).toBe('2026-08-16');
+  expect(ctl?.rules).toEqual(expect.arrayContaining([
+    expect.stringMatching(/current Paradise-approved price configured in the live sales system/i),
+    expect.stringMatching(/DealDesk and manager-approval controls/i),
+    expect.stringMatching(/does not authorize a Leap Lending application workflow/i)
+  ]));
+  expect(ctl?.sources?.map(x=>x.id)).toEqual(expect.arrayContaining(['sales-workbook-v3','dealdeck-v191','sales-meeting-2026-03-16','vytex-price-book-2025-09-06']));
+  expect(ctl?.sources?.every(x=>x.authority==='REFERENCE')).toBeTruthy();
+  expect(ctl?.unresolved).toEqual(expect.arrayContaining([
+    expect.stringMatching(/discount authorization/i),
+    expect.stringMatching(/lender application/i),
+    expect.stringMatching(/Contract execution/i),
+    expect.stringMatching(/cancellation \/ rescission/i),
+    expect.stringMatching(/CRM handoff/i)
+  ]));
+  await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
+  await expect(page.getByText(/Current pricing & financing control path/i)).toBeVisible();
+  await expect(page.getByText(/PARTIAL SOURCE CLOSURE/i)).toBeVisible();
+  await expect(page.getByText(/Do not quote from memory or from a static training PDF/i)).toBeVisible();
+  await expect(page.getByText(/Never bypass an approval indicator/i)).toBeVisible();
+  await expect(page.getByText(/does not authorize a Leap Lending application workflow/i)).toBeVisible();
+  await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
+  await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
+});
