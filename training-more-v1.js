@@ -99,9 +99,10 @@
     return`<div class="puSection">${esc(title)}</div><section class="card puLibraryGroup">${src.map(x=>`<a class="puLibraryItem" href="${esc(x.url)}" target="_blank" rel="noopener"><span><small>SOURCE / REFERENCE</small><b>${esc(x.title)}</b></span><strong>↗</strong></a>`).join('')}${media.map(x=>`<button class="puLibraryItem" data-media="${esc(x.id)}"><span><small>${x.authority==='HISTORICAL'?'HISTORICAL':'MEDIA / REFERENCE'}</small><b>${esc(x.title)}</b><em>${esc(x.trainer||'')}</em></span><strong>▶</strong></button>`).join('')}</section>`;
   }
   function puLibrary(){
-    const isTony=x=>/tony hoty/i.test(String(x.title||x.trainer||''));
-    const isDave=x=>/dave yoho/i.test(String(x.title||x.trainer||''));
-    const isGrosso=x=>/grosso/i.test(String(x.title||x.trainer||''));
+    const groupText=x=>`${x.title||''} ${x.trainer||''}`;
+    const isTony=x=>/tony hoty/i.test(groupText(x));
+    const isDave=x=>/dave yoho/i.test(groupText(x));
+    const isGrosso=x=>/grosso/i.test(groupText(x));
     M.innerHTML=`<button class="back puBack" id="puBack">← More</button><h2>Source Library</h2><p class="sub">Original training is here when you want to go deeper.</p><div class="puNotice"><b>SOURCE / REFERENCE MATERIAL:</b> Paradise-approved curriculum, current company policy, and live municipality instructions control.</div>${sourceGroup('Tony Hoty',isTony)}${sourceGroup('Dave Yoho',isDave)}${sourceGroup('Rick Grosso / Grosso University',isGrosso)}<div class="puSection">Paradise Current Reference</div>${puCurrentRefs()}`;
     document.getElementById('puBack').onclick=()=>puSetPage('more');
     document.getElementById('puGoLookup').onclick=()=>setView('lookup');
