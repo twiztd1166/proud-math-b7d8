@@ -21,12 +21,14 @@ jobs:
       - name: Syntax and build-boundary checks
         shell: bash
         run: |
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js boot-v2.js core-v2.js lookup-v2.js sw.js scripts/build-canvass-site.mjs scripts/validate-training-model-v1.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-release-isolation.mjs tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/release-readiness-smoke.spec.js tests/offline-regression.spec.js; do node --check "$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js boot-v2.js core-v2.js lookup-v2.js sw.js scripts/build-canvass-site.mjs scripts/validate-training-model-v1.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-release-isolation.mjs tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/release-readiness-smoke.spec.js tests/offline-regression.spec.js; do node --check "$f"; done
           for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do grep -q "$f" index.html; done
-          for f in training-media-expanded-v1.js training-media-ui-v1.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-more-v1.js; do grep -q "$f" sw.js; done
-          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui1-2026-08-16' sw.js
+          for f in training-media-expanded-v1.js training-media-ui-v1.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do grep -q "$f" sw.js; done
+          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player2-2026-08-16' sw.js
           grep -q '2026.08.16-pu-media-expanded-v1' training-media-expanded-v1.js
-          grep -q '2026.08.16-pu-media-ui-v1' training-media-ui-v1.js
+          grep -q '2026.08.16-pu-media-ui-v2' training-media-ui-v1.js
+          grep -q '2026.08.16-pu-player-v2' training-player-v1.js
+          grep -q 'puMediaProgressV2' training-player-v1.js
           grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
           grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
           grep -q 'Training search never replaces the live municipality result' training-more-v1.js
@@ -47,7 +49,7 @@ jobs:
       - name: Build static production bundle
         run: |
           node scripts/build-canvass-site.mjs
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do test -f "canvass-dist/$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-readiness-v1.css training-practice-v1.js training-practice-v1.css training-checks-v1.js training-checks-v1.css training-player-v1.js training-player-v1.css training-more-v1.js training-more-v1.css; do test -f "canvass-dist/$f"; done
 
       - name: Install isolated Playwright runtime
         shell: bash
@@ -72,7 +74,7 @@ jobs:
         run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
 
       - name: Run Paradise University iPhone regression
-        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/release-readiness-smoke.spec.js --project=webkit-iphone --reporter=github
+        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/release-readiness-smoke.spec.js --project=webkit-iphone --reporter=github
 
       - name: Run device matrix regression
         run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
