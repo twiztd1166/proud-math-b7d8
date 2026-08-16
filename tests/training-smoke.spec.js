@@ -62,9 +62,9 @@ test('opening lesson does not misuse courtesy notice where route blocks it',asyn
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/2\. Field Ready/}).click();await page.getByRole('button',{name:/Opening & First 20 Seconds/}).click();await expect(page.getByText(/Do not claim you are handing out notices where the live municipality screen says not to use them/i)).toBeVisible();
 });
 
-test('curated media catalog exposes verified Drive source assets',async({page})=>{
+test('curated media catalog exposes verified Drive source assets even when an item is reused across playlists',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Videos & Audio/}).first().click();
-  await expect(page.getByText('Tonality and Body Language',{exact:true}).first()).toBeVisible();await expect(page.getByText('Formula For Handling Objections',{exact:true}).first()).toBeVisible();await expect(page.getByText('Definition of a Good Lead',{exact:true}).first()).toBeVisible();await expect(page.getByText('The Science of Successful Canvassing',{exact:true})).toBeVisible();await expect(page.getByText('Canvassing 101',{exact:true})).toBeVisible();await expect(page.getByText('New Canvasser Training — Process',{exact:true})).toBeVisible();
+  for(const title of ['Tonality and Body Language','Formula For Handling Objections','Definition of a Good Lead','The Science of Successful Canvassing','Canvassing 101','New Canvasser Training — Process'])await expect(page.getByText(title,{exact:true}).first()).toBeVisible();
   const hrefs=await page.locator('a.puSourceOpen').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
   expect(hrefs).toContain('https://drive.google.com/file/d/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn/view?usp=drivesdk');expect(hrefs).toContain('https://drive.google.com/file/d/1GCrveqXP0xgc8n2S9WPlVAd9wd9D2X5Y/view?usp=drivesdk');expect(hrefs).toContain('https://drive.google.com/file/d/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/view?usp=drivesdk');expect(hrefs).toContain('https://drive.google.com/file/d/12hnKxDUE0nOO5kv_FuBb9fahiFGX4wty/view?usp=drivesdk');expect(hrefs).not.toContain('https://drive.google.com/file/d/19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0/view?usp=drivesdk');
 });
