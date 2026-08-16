@@ -31,7 +31,7 @@ jobs:
           grep -q '2026.08.16-pu-manager-ui-v2' training-manager-v1-ui.js
           grep -q '2026.08.16-pu-progress-state-v1' training-progress-state-v1.js
           grep -q '2026.08.16-pu-player-v2' training-player-v1.js
-          grep -q '2026.08.16-pu-sales-closing-v1' training-sales-closing-v1.js
+          grep -q '2026.08.16-pu-sales-closing-v2' training-sales-closing-v1.js
           grep -q 'puMediaProgressV2' training-player-v1.js
           grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
           grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
