@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('future v3.13 code-only release prompts update without blocking current field rules',async({page})=>{
+test('future v3.13 code-only validated release requires app update before route while preserving current field rules',async({page})=>{
   await page.goto('/index.html');
   const state=await page.evaluate(()=>{
     const meta={validated:true,version:'2026.08.16-v3.13',snapshot:window.PCM_PROVENANCE.snapshot,datasetSha256:window.PCM_PROVENANCE.datasetSha256,url:'https://example.test/v313/index.html'};
@@ -10,12 +10,13 @@ test('future v3.13 code-only release prompts update without blocking current fie
   expect(state.current).toBe('2026.08.14-v3.12');
   expect(state.newer).toBeTruthy();
   expect(state.actionableData).toBeFalsy();
-  expect(state.block).toBe('');
-  expect(state.updateText).toMatch(/UPDATE APP/);
-  expect(state.ruleBlock).toBe('');
+  expect(state.block).toMatch(/newer approved app version/i);
+  expect(state.updateText).toMatch(/UPDATE NOW/);
+  expect(state.ruleBlock).toMatch(/UPDATE REQUIRED/);
   await page.getByPlaceholder('Start typing a city…').fill('Boca Raton');
   await page.locator('.opt').filter({hasText:'Boca Raton'}).first().click();
   await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
+  await expect(page.getByRole('button',{name:/UPDATE APP BEFORE STARTING/})).toBeVisible();
 });
 
 test('release candidate keeps controlled jurisdiction SHA unchanged',async({page})=>{
