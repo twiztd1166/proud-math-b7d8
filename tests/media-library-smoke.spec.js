@@ -53,3 +53,22 @@ test('expanded source catalog remains metadata-only in PWA bundle',async({page})
   await page.goto('/index.html');const state=await page.evaluate(()=>({version:window.PU_CONTENT?.mediaCatalogVersion,count:window.PU_CONTENT?.media?.length||0,sourceOnly:window.PU_CONTENT?.media?.filter(x=>x.priority==='SOURCE_LIBRARY').length||0,streamed:window.PU_CONTENT?.media?.filter(x=>x.streamUrl).length||0}));
   expect(state.version).toBe('2026.08.16-pu-media-expanded-v1');expect(state.count).toBeGreaterThanOrEqual(30);expect(state.sourceOnly).toBeGreaterThanOrEqual(15);expect(state.streamed).toBe(0);
 });
+
+test('trainer library reconciliation accounts for all confirmed canonical media without expanding required playlists',async({page})=>{
+  await page.goto('/index.html');
+  const state=await page.evaluate(()=>{
+    const media=window.PU_CONTENT?.media||[];
+    const byTrainer=name=>media.filter(x=>x.trainer===name);
+    const expected=[
+      'tony-video-process','tony-video-no-luck-senior','tony-video-canvass-set','tony-video-callback','tony-soundbite-solara','tony-soundbite-storm','tony-soundbite-patio-door','tony-soundbite-multiproduct','tony-soundbite-gutter','tony-soundbite-french-doors','tony-soundbite-entry-doors',
+      'dave-advertising-video','dave-website-video','dave-leads-audio',
+      'grosso-objection-school-rbo','grosso-objection-school-reflex','grosso-objection-school-brush-offs','grosso-objection-school-true-objections','grosso-virtual-closers-needs-analysis','grosso-advanced-objections','grosso-advanced-ignore-objections','grosso-advanced-assume-vs-ask','grosso-advanced-tonality','grosso-advanced-tie-downs','grosso-advanced-calling-home','grosso-product-sales-academy-11','grosso-product-rick-step6','grosso-product-10-step','grosso-product-11-step','grosso-product-sherwin-williams','grosso-rick-goals','grosso-rick-objections-close','grosso-rick-overcoming-objections','grosso-rick-isolating-objections','grosso-rick-button-up','grosso-rick-good-lead','grosso-rick-retail-closes','grosso-rick-qualification','grosso-rick-needs-analysis','grosso-rick-overview','grosso-rick-introduction','grosso-rick-system-selling','grosso-company-11-step-story','grosso-company-rick-step4','grosso-company-11-step-demo','grosso-thermal-full-demo','grosso-thermal-measure','grosso-thermal-needs','grosso-thermal-intro'
+    ];
+    const added=expected.map(id=>media.find(x=>x.id===id));
+    return{reconciliation:window.PU_CONTENT?.libraryReconciliationVersion,total:media.length,sourceOnly:media.filter(x=>x.priority==='SOURCE_LIBRARY').length,curated:media.filter(x=>x.priority!=='SOURCE_LIBRARY').length,expectedCount:expected.length,missing:expected.filter(id=>!media.some(x=>x.id===id)),wrongPriority:added.filter(x=>x&&x.priority!=='SOURCE_LIBRARY').map(x=>x.id),paradiseApproved:added.filter(x=>x&&x.authority==='PARADISE_APPROVED').map(x=>x.id),trainers:{tony:byTrainer('Tony Hoty').length,dave:byTrainer('Dave Yoho').length,grosso:byTrainer('Grosso University').length}};
+  });
+  expect(state.reconciliation).toBe('2026.08.16-pu-trainer-library-reconciliation-v1');
+  expect(state.total).toBe(79);expect(state.sourceOnly).toBe(67);expect(state.curated).toBe(12);
+  expect(state.expectedCount).toBe(49);expect(state.missing).toEqual([]);expect(state.wrongPriority).toEqual([]);expect(state.paradiseApproved).toEqual([]);
+  expect(state.trainers).toEqual({tony:24,dave:4,grosso:51});
+});
