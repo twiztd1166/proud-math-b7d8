@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+// Progress-state acceptance coverage for the isolated Paradise University v1 build.
 
 test('My Progress separates device training evidence from official certification',async({page})=>{
   await page.goto('/index.html');
