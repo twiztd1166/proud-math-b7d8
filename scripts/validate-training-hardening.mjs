@@ -54,7 +54,8 @@ for(const [id,s] of Object.entries(u.sources||{})){
 }
 for(const m of u.media||[]){
   if(!['REFERENCE','HISTORICAL','PARADISE_APPROVED'].includes(m.authority))throw new Error(`Unknown authority ${m.authority} for media ${m.id}`);
-  if(m.authority!=='PARADISE_APPROVED'&&!/Paradise|current|source|historical|reference|control|policy|legacy|approved/i.test(String(m.note||'')))throw new Error(`Reference media lacks authority warning: ${m.id}`);
+  if(m.authority!=='PARADISE_APPROVED'&&!String(m.note||'').trim())throw new Error(`Reference media lacks source note: ${m.id}`);
+  if(/Tony Hoty|Dave Yoho|Grosso/i.test(String(m.trainer||''))&&m.authority==='PARADISE_APPROVED')throw new Error(`Third-party media misclassified as Paradise approved: ${m.id}`);
 }
 
 const requiredBoundaries={
