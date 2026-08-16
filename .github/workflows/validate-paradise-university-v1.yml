@@ -17,99 +17,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Syntax and controlled-data boundary
+
+      - name: Syntax and build-boundary checks
         shell: bash
         run: |
-          node --check training-content-v1.js
-          node --check training-content-sourcefix-v1.js
-          node --check training-manager-v1-data.js
-          node --check training-sales-v1-data.js
-          node --check training-media-expanded-v1.js
-          node --check training-v1.js
-          node --check training-manager-v1-ui.js
-          node --check training-sales-v1-ui.js
-          node --check training-readiness-v1.js
-          node --check training-practice-v1.js
-          node --check training-checks-v1.js
-          node --check training-player-v1.js
-          node --check training-more-v1.js
-          node --check boot-v2.js
-          node --check core-v2.js
-          node --check lookup-v2.js
-          node --check sw.js
-          node --check scripts/build-canvass-site.mjs
-          node --check scripts/validate-training-model-v1.mjs
-          node --check tests/training-smoke.spec.js
-          node --check tests/readiness-smoke.spec.js
-          node --check tests/practice-smoke.spec.js
-          node --check tests/checks-smoke.spec.js
-          node --check tests/more-search-smoke.spec.js
-          node --check tests/offline-regression.spec.js
-          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
-          grep -q 'records.length!==78' boot-v2.js
-          grep -q 'db.meta.goCount!==76' boot-v2.js
-          grep -q 'db.meta.noGoCount!==2' boot-v2.js
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do grep -q "$f" index.html; done
-          for f in training-readiness-v1.css training-practice-v1.css training-checks-v1.css training-more-v1.css; do grep -q "$f" index.html; done
-          for f in training-readiness-v1.js training-readiness-v1.css training-practice-v1.js training-practice-v1.css training-checks-v1.js training-checks-v1.css training-more-v1.js training-more-v1.css training-media-expanded-v1.js; do grep -q "$f" sw.js; done
-          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-2026-08-16' sw.js
-          grep -q '2026.08.16-pu-v1-content-3' training-content-sourcefix-v1.js
-          grep -q '2026.08.16-pu-v1-content-4' training-manager-v1-data.js
-          grep -q '2026.08.16-pu-v1-content-5' training-sales-v1-data.js
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js boot-v2.js core-v2.js lookup-v2.js sw.js scripts/build-canvass-site.mjs scripts/validate-training-model-v1.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/offline-regression.spec.js; do node --check "$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do grep -q "$f" index.html; done
+          for f in training-media-expanded-v1.js training-media-ui-v1.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-more-v1.js; do grep -q "$f" sw.js; done
+          grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui1-2026-08-16' sw.js
           grep -q '2026.08.16-pu-media-expanded-v1' training-media-expanded-v1.js
+          grep -q '2026.08.16-pu-media-ui-v1' training-media-ui-v1.js
           grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
-          grep -q 'CURRENT POLICY REQUIRED' training-sales-v1-ui.js
-          grep -q '2026.08.16-pu-readiness-v2' training-readiness-v1.js
-          grep -q 'not an official Paradise certification' training-readiness-v1.js
-          grep -q 'manager role-play and field verification required' training-readiness-v1.js
-          grep -q 'DEVICE TRAINING COMPLETE' training-readiness-v1.js
-          grep -q 'REQUIRED KNOWLEDGE CHECKS' training-readiness-v1.js
-          grep -q '2026.08.16-pu-practice-v1' training-practice-v1.js
-          grep -q 'not an official certification or manager verification' training-practice-v1.js
-          grep -q 'puPracticeStatsV1' training-practice-v1.js
-          grep -q 'SHOW COACHING ANSWER' training-practice-v1.js
-          grep -q '2026.08.16-pu-checks-v2' training-checks-v1.js
-          grep -q 'puQuickChecksV1' training-checks-v1.js
-          grep -q 'puLessonTrainingReady' training-checks-v1.js
-          grep -q 'The live municipality instructions control the actual route' training-checks-v1.js
-          grep -q 'Managers do not override NO-GO' training-checks-v1.js
-          grep -q '2026.08.16-pu-player-v1' training-player-v1.js
-          grep -q 'playbackRate' training-player-v1.js
-          grep -q 'seekbackward' training-player-v1.js
-          grep -q 'puMediaResume' training-player-v1.js
-          grep -q '2026.08.16-pu-more-v1' training-more-v1.js
-          grep -q 'Current Paradise lessons are ranked before legacy/source material' training-more-v1.js
+          grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
           grep -q 'Training search never replaces the live municipality result' training-more-v1.js
           grep -q 'SOURCE / REFERENCE MATERIAL' training-more-v1.js
-          grep -q 'Do not claim you are handing out notices where the live municipality screen says not to use them' training-content-v1.js
-          grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
-          grep -q 'The manager does not override the live municipality result' training-manager-v1-ui.js
-          if grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-sourcefix-v1.js; then echo 'Unverified Tony media ID reintroduced'; exit 1; fi
-      - name: Validate training content model
-        run: node scripts/validate-training-model-v1.mjs
-      - name: Recompute controlled dataset hash
-        shell: bash
+          if grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-sourcefix-v1.js training-media-expanded-v1.js; then echo 'Unverified Tony media ID reintroduced'; exit 1; fi
+
+      - name: Validate training content and hardening
         run: |
-          node <<'NODE'
-          const fs=require('fs'),crypto=require('crypto'),vm=require('vm');
-          const src=fs.readFileSync('plain-data.js','utf8');
-          const ctx={window:{}};vm.createContext(ctx);vm.runInContext(src,ctx);
-          const obj=ctx.window.PCM_DATA;
-          if(!obj||!Array.isArray(obj.records))throw new Error('PCM data missing');
-          const hash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
-          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
-          const go=obj.records.filter(r=>r.release==='GO').length;
-          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
-          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
-          if(hash!==expected)throw new Error(`Dataset hash drift: ${hash}`);
-          if(obj.records.length!==78||go!==76||noGo!==2)throw new Error('Controlled count drift');
-          if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO drift');
-          console.log({hash,records:obj.records.length,go,noGo,stops});
-          NODE
+          node scripts/validate-training-model-v1.mjs
+          node scripts/validate-training-hardening.mjs
+
+      - name: Reconfirm controlled field baseline
+        run: node scripts/validate-field-baseline-v1.mjs
+
       - name: Build static production bundle
         run: |
           node scripts/build-canvass-site.mjs
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-readiness-v1.css training-practice-v1.js training-practice-v1.css training-checks-v1.js training-checks-v1.css training-player-v1.js training-more-v1.js training-more-v1.css; do test -f "canvass-dist/$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-sales-v1-ui.js training-readiness-v1.js training-practice-v1.js training-checks-v1.js training-player-v1.js training-more-v1.js; do test -f "canvass-dist/$f"; done
+
       - name: Install isolated Playwright runtime
         shell: bash
         run: |
@@ -119,16 +55,21 @@ jobs:
           npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
           ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
           ./node_modules/.bin/playwright install --with-deps webkit chromium
+
       - name: Start test server
         shell: bash
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+
       - name: Run existing iPhone field regression
         run: ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone --reporter=github
+
       - name: Run existing iPhone offline regression
         run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
-      - name: Run Paradise University smoke regression
-        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js --project=webkit-iphone --reporter=github
+
+      - name: Run Paradise University iPhone regression
+        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js --project=webkit-iphone --reporter=github
+
       - name: Run device matrix regression
         run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
