@@ -5,7 +5,6 @@ Working branch: `agent/paradise-university-v1`
 Proven green runtime commit: `5670f98e8772184841ba3934a959b082db6d595b`  
 Green main validator run: `31969848140`  
 Green content-hardening run: `31969848166`  
-Documentation head when this packet was prepared: `682a2874cba55a09d4df952597c84d6a04dd33f9`  
 Validated field base: `5e7efc40de524bef0e63c76595c3c518925888b9`  
 Controlled dataset SHA-256: `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`  
 Controlled counts: `78 records / 76 GO / 2 NO-GO`
@@ -16,12 +15,110 @@ This is the finite human sign-off required before Paradise University v1 can be 
 
 The AI pre-review found no additional software-side release defect at the proven green runtime. Human review should therefore focus on the meaning, accuracy, and operational appropriateness of the training—not re-perform the automated field regression.
 
+## AI pre-review evidence map — non-signing
+
+This section records what was already checked before the human review. It is evidence support only; it does **not** check any human approval box below.
+
+### Field / release isolation — AI disposition: PASS BY AUTOMATED EVIDENCE
+
+- Full validator `31969848140` passed the exact controlled field baseline, release-isolation proof, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix on runtime commit `5670f98e8772184841ba3934a959b082db6d595b`.
+- Separate content-hardening run `31969848166` passed on the same runtime.
+- Controlled field SHA remained `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200` with `78 / 76 GO / 2 NO-GO`.
+- Release-isolation validation protects the validated field engine from training-only changes.
+
+Human judgment still required: whether the training language is operationally appropriate even though it does not technically override the field engine.
+
+### Authority / source hierarchy — AI disposition: PASS BY CODE + REGRESSION REVIEW
+
+- Paradise lessons remain separately labeled from `REFERENCE` and `HISTORICAL` trainer material.
+- Operational search tests require Paradise lesson content to rank ahead of source/reference material for high-risk queries.
+- Trainer media remains internal training/reference material and is not converted to Paradise-approved policy merely because it is playable.
+- Live municipality Lookup remains one tap away from Training and remains the route authority.
+
+Human judgment still required: whether any trainer example is culturally or operationally undesirable even when correctly labeled as non-authoritative.
+
+### Canvasser curriculum — AI disposition: PASS / HUMAN TONE REVIEW OPEN
+
+- Foundation → Field Ready → Certified Canvasser → Senior Canvasser is populated with real lessons rather than placeholders.
+- Refusal and NO-GO hard-stop concepts are reinforced in lesson content, Quick Checks, and Practice v2.
+- Doorstep role language continues to prohibit quoting, negotiating, contracting, taking payment, or turning the porch into the full sales appointment.
+- Municipality/literature/courtesy-notice distinctions remain explicit.
+
+Human judgment still required: opening wording, coaching tone, product depth, appointment-quality expectations, and whether the material sounds like Paradise in practice.
+
+### Practice v2 — AI disposition: PASS BY SCHEMA + SAFETY TESTS
+
+- Controlled model: 20 scenarios / four categories / five scenarios per category.
+- Each governed scenario carries skill/category metadata, accepted concepts, prohibited concepts, hard-stop status, scoring/coaching fields, source lineage, and content version.
+- Hard-stop scenarios cannot validly teach continuing after a clear stop condition.
+- Local attempt history is bounded and remains device progress rather than company certification.
+
+Human judgment still required: coaching quality, realism, phrasing, and whether accepted/prohibited concepts match how Paradise wants managers to coach.
+
+### Sales Apprentice / Sales Rep — AI disposition: PASS WITH INTENTIONAL PROCEDURE HOLDS
+
+- The verified 2026 Paradise policy layer supports the current readiness/testing standard, manager release, issued-appointment controls, in-home timeline, Rilla/TO requirements, deposit/net-sale controls, and related current operational standards.
+- The current TO script and commitment worksheet were recovered and the stale “TO source missing” assumption was removed.
+- Pricing/financing training is bounded to current Paradise tools/approval paths rather than evergreen memorized rates or discounts.
+- Finance Coordinator / office handoff is represented as the operational boundary where the source record supports it.
+- Leap Lending is not promoted as an active Paradise rep workflow where the recovered record showed evaluation/enrollment without established adoption.
+- Result/release and payment-control concepts are included only to the level supported by current operational evidence.
+- Detailed procedures that remain source-incomplete stay gated rather than being invented.
+
+Human judgment still required: confirm the recovered 2026 policies/processes are still the business rules Paradise wants employees trained on today and identify any superseding internal procedure not present in the controlled source set.
+
+### Sales readiness / certification — AI disposition: PASS WITH HUMAN RELEASE REQUIRED
+
+- Paradise’s current written + verbal readiness standard is represented as company policy rather than browser certification.
+- Sales Manager release remains required before independent appointment authority.
+- Grosso Masterclass assessment structure is visibly `REFERENCE` evidence and is not represented as Paradise’s permanent certification system.
+- Device completion / Quick Checks do not become the HR/system-of-record certification.
+- No unrecovered exam, scoring rubric, ride-along threshold, sign-off form, or system-of-record artifact was fabricated.
+
+Human judgment still required: confirm the current release authority and any live certification artifact/process used by management.
+
+### Manager Academy — AI disposition: PASS BY STRUCTURE + REGRESSION REVIEW
+
+- Manager Academy is action-first rather than a 14-lesson dump.
+- The seven manager jobs remain: Train a Rep / Coach in the Field / Run Today’s Huddle / Review Appointments / Review Numbers / Compliance Help / Develop Future Sales Reps.
+- Manager training explicitly does not override live municipality results.
+- Funnel and ride-along coaching remain separated from browser certification claims.
+
+Human judgment still required: usefulness, coaching style, KPI emphasis, escalation practice, and whether these are the seven jobs Paradise management wants surfaced first.
+
+### Internal trainer media — AI disposition: PASS FOR CURRENT PROJECT SCOPE
+
+- Current curated employee-facing trainer set = 12 items.
+- Project scope permits internal use; media-rights clearance is not treated as a Paradise University release blocker.
+- Authority remains `REFERENCE` / `HISTORICAL` as applicable.
+- All 12 Drive targets were accounted for during closeout.
+- Eleven targets were small enough for connector retrieval; all eleven returned the expected file types, nonzero sizes, readable ffprobe stream/duration metadata, and completed full ffmpeg decode with `-xerror` and no decode errors.
+- The Dave Yoho video target exists but is approximately 1.69 GB, above the connector’s 256 MB raw-download ceiling; actual Safari/PWA playback remains the correct functional acceptance test for that item.
+
+Human judgment still required: usefulness, playlist curation, and whether any item should be removed despite being technically available.
+
+### Progress / usability — AI disposition: PASS BY AUTOMATED EVIDENCE
+
+- Device state distinguishes not started / in progress / complete.
+- Knowledge evidence is distinct from content completion.
+- Device progress is explicitly distinct from official certification / manager verification.
+- Career Path includes role, skills, certification boundary, and next-step guidance.
+- Mobile player close/minimize geometry and major navigation paths are covered by iPhone/WebKit regression.
+
+Human judgment still required: real-employee clarity and real-device touch/visual quality.
+
+### AI pre-review bottom line
+
+`AI_PRE_REVIEW = PASS_WITH_HUMAN_JUDGMENT_GATES`
+
+No additional source-backed or software-side defect was identified that should independently block the candidate before human review. The AI pre-review does **not** approve company policy, certify an employee, complete the physical-device gate, or authorize promotion.
+
 ## Reviewer record
 
 Reviewer name: ______________________________  
 Role: ______________________________________  
 Review date: ________________________________  
-Exact candidate reviewed: ____________________  
+Exact candidate reviewed: `5670f98e8772184841ba3934a959b082db6d595b`  
 
 Disposition — check one:
 
