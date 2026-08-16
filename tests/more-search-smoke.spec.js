@@ -42,6 +42,15 @@ test('source-name searches remain relevance-first when the query is not operatio
   await expect(results.first()).toContainText(/SOURCE \/ REFERENCE|MEDIA/);
 });
 
+test('search source results cannot expose rights-unverified trainer Drive links',async({page})=>{
+  await search(page,'Tony Hoty');
+  await expect(page.locator('.puSearchResult.source.puRightsHold').first()).toBeVisible();
+  await expect(page.locator('.puSearchResult.source.puRightsHold').first()).toContainText(/RIGHTS REVIEW/);
+  const hrefs=await page.locator('a.puSearchResult.source[href]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
+  expect(hrefs.some(h=>/drive\.google\.com|docs\.google\.com/.test(h||''))).toBeFalsy();
+  await expect.poll(async()=>page.evaluate(()=>window.PU_MORE_RIGHTS_GATE_VERSION)).toBe('2026.08.16-pu-more-rights-v1');
+});
+
 test('training search can find practice content',async({page})=>{
   await more(page);await page.getByRole('button',{name:/Search Training/}).click();
   await page.getByPlaceholder(/Try: not interested/).fill('not interested');
@@ -58,6 +67,19 @@ test('source library visibly separates all source groups from current controls',
   await expect(page.locator('.puSection').filter({hasText:/^Paradise Historical Training$/})).toBeVisible();
   await expect(page.getByText(/No controlled historical Paradise training source is loaded in this build/)).toBeVisible();
   await expect(page.locator('.puSection').filter({hasText:/^Paradise Current Reference$/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Live Municipality Lookup/})).toBeVisible();
+});
+
+test('Source Library retains trainer lineage but blocks copied-file anchors',async({page})=>{
+  await more(page);await page.getByRole('button',{name:/Source Library/}).click();
+  for(const name of ['Tony Hoty','Dave Yoho','Rick Grosso / Grosso University']){
+    const heading=page.locator('.puSection').filter({hasText:new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)});
+    await expect(heading).toBeVisible();
+  }
+  await expect(page.locator('.puLibraryItem.puRightsHold').first()).toBeVisible();
+  await expect(page.locator('.puLibraryItem.puRightsHold').first()).toContainText(/RIGHTS REVIEW/);
+  const trainerHrefs=await page.locator('.puLibraryGroup a.puLibraryItem[href]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
+  expect(trainerHrefs.some(h=>/drive\.google\.com|docs\.google\.com/.test(h||''))).toBeFalsy();
   await expect(page.getByRole('button',{name:/Live Municipality Lookup/})).toBeVisible();
 });
 
