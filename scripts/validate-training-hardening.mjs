@@ -8,9 +8,14 @@ process.on('uncaughtException',err=>{
 });
 
 const ctx={window:{}};vm.createContext(ctx);
-for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
+for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js','training-media-expanded-v1.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
 const u=ctx.window.PU_CONTENT;
 if(!u)throw new Error('Paradise University content missing');
+if(u.mediaCatalogVersion!=='2026.08.16-pu-media-expanded-v1')throw new Error(`Unexpected media catalog version ${u.mediaCatalogVersion||'missing'}`);
+if((u.media||[]).length<30)throw new Error(`Expanded media catalog unexpectedly small: ${(u.media||[]).length}/30`);
+if(Object.keys(u.sources||{}).length<20)throw new Error(`Expanded source library unexpectedly small: ${Object.keys(u.sources||{}).length}/20`);
+const mediaIds=(u.media||[]).map(x=>x.id);
+if(new Set(mediaIds).size!==mediaIds.length)throw new Error('Duplicate media IDs in expanded catalog');
 
 const lessons=[...(u.lessons||[]),...(u.managerLessons||[])];
 const fieldLessons=(u.lessons||[]).filter(x=>['foundation','field-ready','canvasser'].includes(x.stage));
@@ -61,8 +66,13 @@ for(const [id,s] of Object.entries(u.sources||{})){
 for(const m of u.media||[]){
   if(!['REFERENCE','HISTORICAL','PARADISE_APPROVED'].includes(m.authority))throw new Error(`Unknown authority ${m.authority} for media ${m.id}`);
   if(m.authority!=='PARADISE_APPROVED'&&!String(m.note||'').trim())throw new Error(`Reference media lacks source note: ${m.id}`);
+  if(!/^https:\/\//.test(String(m.url||'')))throw new Error(`Media URL invalid for ${m.id}`);
   if(/Tony Hoty|Dave Yoho|Grosso/i.test(String(m.trainer||''))&&m.authority==='PARADISE_APPROVED')throw new Error(`Third-party media misclassified as Paradise approved: ${m.id}`);
 }
+
+const expectedExpanded=['tony-callback','tony-recruit-manager','tony-new-canvasser-part1','tony-storm-xactimate','tony-audio-dvd-main','tony-dvd-main-video','tony-dvd-video','tony-video-clips','grosso-extreme-leadership-video','grosso-sales-training-video'];
+for(const id of expectedExpanded)if(!mediaIds.includes(id))throw new Error(`Expanded source media missing: ${id}`);
+for(const id of ['tonyDvdFolder','tonyIndividualAudio','tonyTrainingAudio','grossoAudioFolder','grossoVideoFolder','grossoObjectionSchool','grossoVirtualClosers','grossoAdvancedSelling'])if(!u.sources?.[id])throw new Error(`Expanded source group missing: ${id}`);
 
 const requiredBoundaries={
   fieldLookup:/live municipality/i,
@@ -83,4 +93,4 @@ if(!requiredBoundaries.manager.test(managerBlob))throw new Error('Manager live-r
 if((u.drills||[]).some(d=>/leave my property|get off my property/i.test(d.prompt||'')&&!/stop immediately and leave/i.test(d.answer||'')))throw new Error('Clear-refusal practice answer drift');
 if((u.drills||[]).some(d=>/NO-GO/i.test(d.title||d.prompt||'')&&!/do not canvass/i.test(d.answer||'')))throw new Error('NO-GO practice answer drift');
 
-console.log({status:'PASS',fieldLessons:fieldLessons.length,totalLessons:lessons.length,sources:Object.keys(u.sources||{}).length,media:(u.media||[]).length,drills:(u.drills||[]).length});
+console.log({status:'PASS',fieldLessons:fieldLessons.length,totalLessons:lessons.length,sources:Object.keys(u.sources||{}).length,media:(u.media||[]).length,mediaCatalogVersion:u.mediaCatalogVersion,drills:(u.drills||[]).length});
