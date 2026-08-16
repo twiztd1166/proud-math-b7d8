@@ -22,12 +22,14 @@ jobs:
         run: |
           node --check training-content-v1.js
           node --check training-v1.js
+          node --check training-player-v1.js
           node --check boot-v2.js
           node --check core-v2.js
           node --check lookup-v2.js
           node --check sw.js
           node --check scripts/build-canvass-site.mjs
           node --check tests/training-smoke.spec.js
+          node --check tests/offline-regression.spec.js
           grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
           grep -q 'records.length!==78' boot-v2.js
           grep -q 'db.meta.goCount!==76' boot-v2.js
@@ -35,10 +37,19 @@ jobs:
           grep -q 'training-content-v1.js' index.html
           grep -q 'training-v1.js' index.html
           grep -q 'training-v1.css' index.html
+          grep -q 'training-player-v1.js' index.html
+          grep -q 'training-player-v1.css' index.html
           grep -q 'training-content-v1.js' sw.js
           grep -q 'training-v1.js' sw.js
           grep -q 'training-v1.css' sw.js
+          grep -q 'training-player-v1.js' sw.js
+          grep -q 'training-player-v1.css' sw.js
+          grep -q 'pcm-field-v3-12-pu-v1-player1-2026-08-16' sw.js
           grep -q '2026.08.16-pu-v1-content-1' training-content-v1.js
+          grep -q '2026.08.16-pu-player-v1' training-player-v1.js
+          grep -q 'playbackRate' training-player-v1.js
+          grep -q 'seekbackward' training-player-v1.js
+          grep -q 'puMediaResume' training-player-v1.js
           grep -q 'Do not claim you are handing out notices where the live municipality screen says not to use them' training-content-v1.js
           grep -q '1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn' training-content-v1.js
           grep -q '1GCrveqXP0xgc8n2S9WPlVAd9wd9D2X5Y' training-content-v1.js
@@ -85,6 +96,8 @@ jobs:
           test -f canvass-dist/training-content-v1.js
           test -f canvass-dist/training-v1.js
           test -f canvass-dist/training-v1.css
+          test -f canvass-dist/training-player-v1.js
+          test -f canvass-dist/training-player-v1.css
       - name: Install isolated Playwright runtime
         shell: bash
         run: |
