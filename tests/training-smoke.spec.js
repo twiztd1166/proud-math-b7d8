@@ -18,7 +18,7 @@ test('approved Paradise lessons stay separate from internal reference media',asy
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#puContinue').click();
   await expect(page.getByText('PARADISE APPROVED',{exact:true})).toBeVisible();await page.locator('#puBack').click();
   await page.getByRole('button',{name:/Videos & Audio/}).first().click();
-  await expect(page.getByText(/INTERNAL TRAINING MEDIA/i)).toBeVisible();
+  await expect(page.getByText('INTERNAL TRAINING MEDIA:',{exact:true})).toBeVisible();
   await expect(page.getByText('REFERENCE',{exact:true}).first()).toBeVisible();
   await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
 });
@@ -79,7 +79,7 @@ test('Grosso ride-along source lineage is retained with internal source access',
 
 test('direct player call opens internal trainer media while preserving reference authority',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
-  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('#puDrivePlayer')).toBeVisible();await expect(player.getByText(/SOURCE \/ REFERENCE/)).toBeVisible();
+  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('#puDrivePlayer')).toBeVisible();await expect(player.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
   await page.locator('#nLook').click();await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await player.getByRole('button',{name:'Close player'}).click();await expect(player).toBeEmpty();
 });
 
