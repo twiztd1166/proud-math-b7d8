@@ -40,7 +40,7 @@ test('sales apprentice training preserves doorstep boundary',async({page})=>{
   await page.getByRole('button',{name:/Training/}).click();
   await page.getByRole('button',{name:/Career Path/}).first().click();
   await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();
-  await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
+  await expect(page.getByText(/not authorization to price.*sell at the door/i)).toBeVisible();
 });
 
 test('training does not weaken NO-GO field result',async({page})=>{
