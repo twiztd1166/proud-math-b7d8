@@ -61,7 +61,7 @@ test('opening lesson does not misuse courtesy notice where route blocks it',asyn
   await expect(page.getByText(/Do not claim you are handing out notices where the live municipality screen says not to use them/i)).toBeVisible();
 });
 
-test('curated media catalog exposes exact Drive source assets',async({page})=>{
+test('curated media catalog exposes verified Drive source assets',async({page})=>{
   await page.goto('/index.html');
   await page.getByRole('button',{name:/Training/}).click();
   await page.getByRole('button',{name:/Videos & Audio/}).first().click();
@@ -69,11 +69,25 @@ test('curated media catalog exposes exact Drive source assets',async({page})=>{
   await expect(page.getByText('Formula For Handling Objections',{exact:true}).first()).toBeVisible();
   await expect(page.getByText('Definition of a Good Lead',{exact:true}).first()).toBeVisible();
   await expect(page.getByText('The Science of Successful Canvassing',{exact:true})).toBeVisible();
-  await expect(page.getByText('Audio Training Program',{exact:true})).toBeVisible();
+  await expect(page.getByText('Canvassing 101',{exact:true})).toBeVisible();
+  await expect(page.getByText('New Canvasser Training — Process',{exact:true})).toBeVisible();
   const hrefs=await page.locator('a.puSourceOpen').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
   expect(hrefs).toContain('https://drive.google.com/file/d/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn/view?usp=drivesdk');
   expect(hrefs).toContain('https://drive.google.com/file/d/1GCrveqXP0xgc8n2S9WPlVAd9wd9D2X5Y/view?usp=drivesdk');
-  expect(hrefs).toContain('https://drive.google.com/file/d/19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0/view?usp=drivesdk');
+  expect(hrefs).toContain('https://drive.google.com/file/d/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/view?usp=drivesdk');
+  expect(hrefs).toContain('https://drive.google.com/file/d/12hnKxDUE0nOO5kv_FuBb9fahiFGX4wty/view?usp=drivesdk');
+  expect(hrefs).not.toContain('https://drive.google.com/file/d/19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0/view?usp=drivesdk');
+});
+
+test('five commitments lesson links the exact Dave source',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await page.getByRole('button',{name:/Career Path/}).first().click();
+  await page.getByRole('button',{name:/3\. Certified Canvasser/}).click();
+  await page.getByRole('button',{name:/Five Appointment Commitments/}).click();
+  await page.getByText('Go deeper / source material').click();
+  const link=page.getByRole('link',{name:/Dave Yoho — The Five Commitments/});
+  await expect(link).toHaveAttribute('href','https://drive.google.com/file/d/1Au1PhatdFIG84Azy8LiNXh0QLnjLSuIs/view?usp=drivesdk');
 });
 
 test('Drive media opens in persistent Paradise player and survives app navigation',async({page})=>{
@@ -98,8 +112,9 @@ test('Drive media opens in persistent Paradise player and survives app navigatio
 test('player infrastructure includes custom speed seek resume path for future controlled streams',async({page})=>{
   await page.goto('/index.html');
   await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v1');
-  const has=await page.evaluate(()=>typeof window.puPlayerOpen==='function');
-  expect(has).toBeTruthy();
+  const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION}));
+  expect(state.player).toBeTruthy();
+  expect(state.version).toBe('2026.08.16-pu-v1-content-2');
 });
 
 test('practice hard stop says leave rather than rebut',async({page})=>{
