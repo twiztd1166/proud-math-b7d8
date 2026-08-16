@@ -21,7 +21,7 @@ test('clear refusal Quick Check marks continued questioning wrong',async({page})
 
 test('Sales Apprentice Quick Check preserves doorstep boundary',async({page})=>{
   await careerLesson(page,/5\. Sales Apprentice/,/Sales Apprentice: What Changes and What Does Not/);
-  await page.getByRole('button',{name:'No',{exact:true}).click();
+  await page.getByRole('button',{name:'No',exact:true}).click();
   await expect(page.getByText('✓ Correct',{exact:true})).toBeVisible();
   await expect(page.getByText(/does not expand doorstep authority/i)).toBeVisible();
 });
