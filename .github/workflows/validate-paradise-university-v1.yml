@@ -1,0 +1,83 @@
+name: Validate Paradise University v1
+on:
+  push:
+    branches: [agent/paradise-university-v1]
+concurrency:
+  group: paradise-university-v1-validation
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax and controlled-data boundary
+        shell: bash
+        run: |
+          node --check training-v1.js
+          node --check boot-v2.js
+          node --check core-v2.js
+          node --check lookup-v2.js
+          node --check sw.js
+          node --check scripts/build-canvass-site.mjs
+          node --check tests/training-smoke.spec.js
+          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
+          grep -q 'records.length!==78' boot-v2.js
+          grep -q 'db.meta.goCount!==76' boot-v2.js
+          grep -q 'db.meta.noGoCount!==2' boot-v2.js
+          grep -q 'training-v1.js' index.html
+          grep -q 'training-v1.css' index.html
+          grep -q 'training-v1.js' sw.js
+          grep -q 'training-v1.css' sw.js
+      - name: Recompute controlled dataset hash
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto'),vm=require('vm');
+          const src=fs.readFileSync('plain-data.js','utf8');
+          const ctx={window:{}};vm.createContext(ctx);vm.runInContext(src,ctx);
+          const obj=ctx.window.PCM_DATA;
+          if(!obj||!Array.isArray(obj.records))throw new Error('PCM data missing');
+          const hash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
+          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+          const go=obj.records.filter(r=>r.release==='GO').length;
+          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+          if(hash!==expected)throw new Error(`Dataset hash drift: ${hash}`);
+          if(obj.records.length!==78||go!==76||noGo!==2)throw new Error('Controlled count drift');
+          if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO drift');
+          console.log({hash,records:obj.records.length,go,noGo,stops});
+          NODE
+      - name: Build static production bundle
+        run: |
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/training-v1.js
+          test -f canvass-dist/training-v1.css
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-playwright"
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
+      - name: Start test server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+      - name: Run existing iPhone field regression
+        run: ./node_modules/.bin/playwright test tests/mobile-regression.spec.js --project=webkit-iphone --reporter=github
+      - name: Run existing iPhone offline regression
+        run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
+      - name: Run Paradise University smoke regression
+        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js --project=webkit-iphone --reporter=github
+      - name: Run device matrix regression
+        run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
