@@ -1,11 +1,8 @@
 # Paradise University v1 — AI Human-Review Evidence Map
 
-Status: AI PRE-REVIEW COMPLETE — HUMAN CURRENTNESS / APPROVAL STILL REQUIRED — NOT A PROMOTION AUTHORIZATION  
-Prepared: 2026-08-16  
+Status: AI PRE-REVIEW COMPLETE — ONE HUMAN CURRENTNESS APPROVAL REMAINS — NOT A PROMOTION AUTHORIZATION  
+Prepared / refreshed: 2026-08-16  
 Working branch: `agent/paradise-university-v1`  
-Proven green runtime candidate: `5670f98e8772184841ba3934a959b082db6d595b`  
-Green validator run: `31969848140`  
-Green content-hardening run: `31969848166`  
 Validated field base: `5e7efc40de524bef0e63c76595c3c518925888b9`  
 Controlled field counts: `78 records / 76 GO / 2 NO-GO`
 
@@ -13,91 +10,89 @@ Controlled field counts: `78 records / 76 GO / 2 NO-GO`
 
 This document narrows the required human curriculum/compliance review to the items that actually need human operational judgment or current Paradise approval. It does not replace `PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md`, the physical-iPhone acceptance record, or explicit promotion authorization.
 
-The software/runtime evidence remains green at the immutable runtime candidate above. Documentation-only work after that checkpoint does not itself convert the candidate into a release.
-
 ## Source-control boundary
 
 Layer 3 retrieval was re-verified before this audit:
 
 - `00_LAYER_3_START_HERE` identifies `Best-Practical 10/10 Master Prompt System — ACTIVE Working Master` as the controlling working source.
-- The exact ACTIVE Working Master was retrieved by stable Drive identity and remains the working/audit source.
+- The exact ACTIVE Working Master was retrieved by stable Drive identity.
 - No Layer 3 write was performed.
 
 Paradise operating sources inspected for this review included:
 
-- `Final 2026 Sales Representative Policies & Compensation Plan` — current Paradise-approved source used by the runtime for bounded Sales Rep controls.
-- `Canvass Training Manual` — Paradise internal canvass training document created/modified May 23, 2025; useful precedent for the opener and household/spouse write-up concepts, but not independently treated here as proof that those exact words remain current in 2026.
-- Runtime curriculum, Practice v2, Manager Academy, readiness/progress, and internal-media control files from the proven green candidate.
+- `Paradise Exteriors — Final 2026 Sales Representative Policies & Compensation Plan` — current Paradise-approved source used by the runtime for bounded Sales Rep controls and the current Missing Parties definition.
+- `Canvass Training Manual` — Paradise internal canvass training document created/modified May 23, 2025; useful Paradise precedent for the opener and older spouse/household write-up concepts, but not independently treated as proof that its exact canvass wording remains current in 2026.
+- Runtime curriculum, Practice v2, Manager Academy, readiness/progress, and internal-media control files.
 
 ## Section-by-section evidence disposition
 
 ### 1. Field authority / legal-control separation — AI evidence supports PASS
 
-Observed controls:
-
-- Live municipality Lookup is repeatedly stated as the operational authority.
+- Live municipality Lookup remains the operational authority.
 - Training separates canvassing permission from literature and courtesy-notice permission.
 - NO-GO scenarios prohibit manager workarounds.
-- Clear refusals and direct instructions to leave terminate the interaction.
+- Clear refusals and instructions to leave terminate the interaction.
 - HOA/security/government objections use stop + facts + escalation rather than legal debate.
 
-Human task: confirm this matches Paradise’s intended operating posture; do not re-litigate the automated field baseline inside the curriculum review.
+Human task: confirm this matches Paradise’s intended operating posture; do not re-perform the automated field baseline inside the curriculum review.
 
-### 2. Authority labels / source hierarchy — AI evidence supports PASS, subject to human approval of lesson language
+### 2. Authority labels / source hierarchy — AI evidence supports PASS WITH ONE EXPLICIT OPENER HOLD
 
-Observed controls:
+- Trainer media remains `REFERENCE` or `HISTORICAL` as applicable.
+- Internal playback does not convert trainer material into current Paradise policy.
+- Current Paradise policy and live Lookup outrank source/trainer examples.
+- The exact first-20-seconds candidate opener is now specially marked `CURRENT APPROVAL PENDING` in the runtime and is not presented as current field authority.
 
-- Trainer media is labeled `REFERENCE` or `HISTORICAL` as applicable.
-- Internal playback does not change trainer authority.
-- Lessons state that current Paradise field controls and live Lookup override source/trainer examples.
-- Device/source access does not convert Tony Hoty, Dave Yoho, or Grosso material into current Paradise policy.
+Human task: approve or replace the exact opener wording before release.
 
-Important approval boundary: lesson pages display `PARADISE APPROVED`. That label is acceptable for release only after the human reviewer approves the rewritten/adapted Paradise lesson language for the exact candidate. The open human gate is therefore part of the authority model, not optional paperwork.
+### 3. Canvasser curriculum — ONE CURRENTNESS APPROVAL REQUIRED
 
-### 3. Canvasser curriculum — TWO CURRENTNESS CONFIRMATIONS REQUIRED
+Most of the canvasser curriculum is conservatively bounded and avoids unsupported price, financing, technical, legal, or persistence claims.
 
-Most of the canvasser curriculum is conservatively bounded and avoids unsupported price, financing, technical, legal, or persistence claims. Two items need explicit human currentness approval:
+#### A. Exact first-20-seconds opener — OPEN
 
-#### A. Exact first-20-seconds opener
-
-The runtime currently teaches a base Paradise opener beginning with:
+The candidate wording begins:
 
 `I'm not here to sell you anything.`
 
-A Paradise internal `Canvass Training Manual` from May 23, 2025 contains the same core phrase and establishes that the wording is not an AI invention. However, the Drive review performed for this audit did not surface a newer 2026 canvass source independently confirming that the exact phrase remains Paradise’s current approved opener.
+A Paradise internal `Canvass Training Manual` from May 23, 2025 contains the same core phrase, establishing that the wording is Paradise precedent rather than an AI invention. The current Drive/Gmail sweep did not surface a newer 2026 canvass source approving those exact words.
 
-Human reviewer must choose one:
+The runtime therefore now treats that wording as a **candidate for current approval**, not as current operating authority. Employees are told to use only the current manager-approved canvass opening in the field until a named Paradise manager/compliance reviewer chooses one:
 
-- APPROVE — the current runtime opener remains Paradise’s approved 2026 operating language; or
-- REVISE — provide/approve replacement wording before promotion.
+- APPROVE — the candidate wording is the current Paradise opening; or
+- REVISE — supply/approve replacement wording before promotion.
 
 Do not infer current approval merely because the phrase existed in the 2025 Paradise manual.
 
-#### B. Household / participant information
+#### B. Household / decision-participant information — RESOLVED FROM CURRENT 2026 POLICY
 
-The runtime Practice model is appropriately cautious: it says to use the current Paradise appointment requirements and expressly prohibits inventing a spouse rule from legacy training.
+This is no longer an unresolved currentness question.
 
-The Manager Academy, however, references missing decision participants `under current policy`. The 2025 Paradise canvass manual contains spouse/household write-up concepts, so the idea has Paradise precedent, but this audit did not locate a newer 2026 source defining the exact current household/participant requirement.
+The current February 2026 Paradise Sales Representative policy expressly defines **Missing Parties** as a situation where one or more homeowners or decision makers are not present for the appointment and provides the sales/Dispatch response for that condition.
 
-Human reviewer must confirm the exact current rule. Until then, interpret the runtime narrowly: collect only household/participant information that the current Paradise appointment process actually requires; do not create a universal spouse/decision-maker rule from trainer precedent.
+Operational interpretation for University:
+
+- Appointment QA may legitimately identify required homeowners/decision makers and a Missing Parties condition.
+- Record the actual homeowner/decision-maker facts accurately.
+- Do **not** convert the rule into a blanket `spouse must be present` requirement when the spouse is not actually a required homeowner/decision maker.
+- The Manager Academy currentness hardening now cites the verified 2026 Paradise policy for this rule.
+
+`HOUSEHOLD_PARTICIPANT_CURRENTNESS = CLOSED_CURRENT_POLICY_SUPPORTED`
 
 ### 4. Practice v2 — AI evidence supports PASS
 
-Observed model:
-
-- 20 scenarios.
-- Four categories, five scenarios each.
+- 20 scenarios / four categories / five per category.
 - Hard-stop scenarios are explicit.
-- Accepted and prohibited response concepts are encoded.
+- Accepted and prohibited concepts are encoded.
 - Price/payment/discount/financing claims at the door are prohibited.
-- NO-GO, resident-leave, security/access, and jurisdiction-uncertainty scenarios all stop or escalate.
-- Appointment quality is based on accurate information rather than fabricated urgency or stronger-looking leads.
+- NO-GO, resident-leave, security/access, and jurisdiction-uncertainty scenarios stop or escalate.
+- Appointment quality uses accurate information rather than fabricated urgency or stronger-looking leads.
 
-Human task: sample for tone/coaching usefulness only.
+Human task: sample tone and coaching usefulness.
 
 ### 5. Sales Apprentice / Sales Rep boundaries — AI evidence supports PASS
 
-The verified 2026 Paradise policy directly supports the runtime’s bounded current controls, including:
+Verified 2026 Paradise policy supports the bounded current controls, including:
 
 - classroom training plus written and verbal testing;
 - 85% proficiency standard;
@@ -107,9 +102,10 @@ The verified 2026 Paradise policy directly supports the runtime’s bounded curr
 - Rilla Voice requirement;
 - full TO compliance;
 - disposition/result before leaving the driveway;
+- current Missing Parties handling;
 - net-sale conditions and minimum 10% deposit.
 
-The runtime correctly leaves the following detailed procedures unresolved/current-source-required rather than inventing them:
+The runtime continues to leave these detailed procedures unresolved/current-source-required rather than inventing them:
 
 1. exact price-presentation / current price-book / discount authority;
 2. financing presentation workflow, lender/program rules, and disclosures;
@@ -118,44 +114,37 @@ The runtime correctly leaves the following detailed procedures unresolved/curren
 5. cancellation / rescission handling procedure;
 6. final button-up / CRM handoff / full Sales Rep certification checklist.
 
-Human task: confirm the bounded current-policy interpretation; do not approve unsupported detailed procedures by implication.
+Human task: confirm the bounded current-policy interpretation and identify any superseding internal procedure not present in the controlled source set.
 
 ### 6. Sales readiness / certification boundary — AI evidence supports PASS
 
-Observed controls:
-
-- Device lesson completion is explicitly not the permanent HR/company certification record.
-- Quick Checks are separated from content completion.
+- Device lesson completion is not the permanent HR/company certification record.
+- Quick Checks are separate from content completion.
 - Sales Apprentice completion does not authorize doorstep pricing, financing, contracting, payment, or selling.
 - Sales Rep readiness remains tied to current company testing and Sales Manager release.
 - Manager certification remains separate from browser/device progress.
 
-Human task: confirm the company wants those advancement boundaries expressed this way.
-
-### 7. Manager Academy — AI evidence supports PASS WITH THE HOUSEHOLD/PARTICIPANT CURRENTNESS CHECK ABOVE
-
-Observed controls:
+### 7. Manager Academy — AI evidence supports PASS
 
 - Manager does not override NO-GO.
-- Coaching corrects observable behavior without rewriting approved scripts.
+- Coaching corrects observable behavior without inventing field exceptions.
 - Clear refusal is not rewarded as an objection opportunity.
 - Funnel coaching diagnoses the earliest weak conversion instead of defaulting to `knock more`.
 - Ride-along, appointment QA, huddles, route management, incident response, and future-rep development are present.
+- Appointment QA now anchors Missing Parties to current 2026 Paradise policy and expressly avoids a universal spouse rule.
 - Manager certification remains a human/field process.
 
-Human currentness check: confirm the exact household/participant information Paradise currently requires in appointment QA.
+Human task: judge usefulness, coaching style, KPI emphasis, and business fit.
 
 ### 8. Internal media — AI evidence supports PASS FOR CURRENT PROJECT SCOPE
 
-Current project scope treats the curated Tony Hoty / Dave Yoho / Grosso media as Paradise internal employee-training content, while preserving `REFERENCE` / `HISTORICAL` authority labels.
+The curated Tony Hoty / Dave Yoho / Grosso media remains internal employee-training content with `REFERENCE` / `HISTORICAL` authority preserved. Target/integrity auditing does not substitute for real Safari/PWA playback and is not a legal opinion on copyright or contract rights.
 
-The release gate separately records target/integrity auditing of the curated media. This does not substitute for real Safari/PWA playback and is not a legal opinion on copyright or contract rights.
-
-Human task: judge usefulness/category fit only. Physical playback remains part of the separate actual-iPhone gate.
+Human task: judge usefulness/category fit. Physical playback remains part of the actual-iPhone gate.
 
 ### 9. Progress / usability — machine evidence supports structure; human/device observation remains required
 
-Observed runtime structure:
+Runtime structure remains:
 
 - Continue Training
 - Practice
@@ -163,25 +152,19 @@ Observed runtime structure:
 - Videos & Audio
 - My Progress
 
-Observed controls:
+Device progress remains local training evidence only; knowledge checks, manager/field verification, and official certification remain distinct.
 
-- Device progress is local training evidence only.
-- Knowledge checks are distinct from content marked complete.
-- Manager/field verification is distinct from device progress.
-- Career Path describes role, skills, certification boundary, and next step.
-
-Human/physical task: confirm ordinary-employee clarity, touch usability, and the immediate return path to Lookup on an actual iPhone/PWA.
+Human/physical task: confirm ordinary-employee clarity, touch usability, and immediate return to Lookup on an actual iPhone/PWA.
 
 ## AI pre-review conclusion
 
-No additional runtime/software defect was established by this review.
+The prior two-question currentness gate has been reduced to **one** substantive currentness approval:
 
-The human curriculum/compliance gate is now concentrated on two substantive currentness approvals plus ordinary usability/tone judgment:
+1. Is the exact first-20-seconds candidate opener, including `I'm not here to sell you anything`, approved for current Paradise use, or should it be replaced?
 
-1. Is the exact current first-20-seconds opener, including `I'm not here to sell you anything`, approved for 2026 Paradise use?
-2. What exact household/participant information is currently required for a valid/high-quality canvass appointment and manager QA?
+The household/decision-participant issue is closed by the current 2026 Missing Parties policy.
 
-The 2025 Paradise Canvass Training Manual gives both topics internal Paradise precedent, but precedent is not automatically current 2026 policy.
+`AI_PRE_REVIEW = PASS_WITH_ONE_HUMAN_CURRENTNESS_APPROVAL_PLUS_USABILITY/TONE_JUDGMENT`
 
 ## Release boundary
 
