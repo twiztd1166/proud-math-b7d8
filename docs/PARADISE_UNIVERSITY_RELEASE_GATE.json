@@ -1,10 +1,10 @@
 {
-  "schemaVersion": "2026.08.16-pu-release-gate-v5",
+  "schemaVersion": "2026.08.16-pu-release-gate-v6",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "lastFullyGreenSoftwareCheckpoint": "5670f98e8772184841ba3934a959b082db6d595b",
-  "lastFullyGreenValidatorRun": 31969848140,
+  "lastFullyGreenSoftwareCheckpoint": "45b0b0f887beeeae50fb7e7652c616d2b6e34842",
+  "lastFullyGreenValidatorRun": 31973581353,
   "fieldBaseline": {
     "status": "PASS",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
@@ -21,10 +21,31 @@
     "automatedIPhoneField": "PASS",
     "automatedIPhoneOffline": "PASS",
     "automatedUniversityIPhone": "PASS",
+    "currentnessBrowserAcceptance": "PASS",
     "deviceMatrix": "PASS",
-    "validatorRun": 31969848140,
-    "testedCommit": "5670f98e8772184841ba3934a959b082db6d595b",
-    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance. Documentation-only commits after this checkpoint do not alter the tested runtime, but the final release candidate should still be identified explicitly before promotion."
+    "validatorRun": 31973581353,
+    "testedCommit": "45b0b0f887beeeae50fb7e7652c616d2b6e34842",
+    "currentnessControlVersion": "2026.08.16-pu-currentness-v1",
+    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance. The green checkpoint includes the refreshed offline cache, visible CURRENT APPROVAL PENDING treatment for the candidate opener, and current 2026 Missing Parties source behavior."
+  },
+  "curriculumCurrentness": {
+    "status": "ONE_HUMAN_APPROVAL_OPEN",
+    "missingParties": {
+      "status": "PASS_CURRENT_2026_POLICY_SUPPORTED",
+      "definition": "One or more homeowners or decision makers are not present for the appointment.",
+      "runtimeControlVersion": "2026.08.16-pu-currentness-v1",
+      "browserAcceptance": "PASS",
+      "note": "Supports appointment QA and Missing Parties coaching; does not create a blanket spouse-must-be-present rule."
+    },
+    "openingWording": {
+      "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
+      "candidate": "I'm not here to sell you anything. I'm [Name] with Paradise Exteriors. We're doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
+      "paradisePrecedent": "May 23, 2025 internal Canvass Training Manual contains the same core I'm not here to sell you anything phrase.",
+      "current2026SourceRecovered": false,
+      "runtimeDisplay": "CURRENT APPROVAL PENDING",
+      "fieldInstructionUntilDecision": "Use only the current manager-approved canvass opening in the field.",
+      "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md choosing APPROVE or REVISE for the exact candidate."
+    }
   },
   "practiceV2": {
     "status": "PASS",
@@ -67,7 +88,8 @@
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
-    "requiredEvidence": "Named human reviewer(s), date, exact candidate commit, and disposition covering curriculum accuracy, Paradise policy boundaries, field-authority separation, and sales procedure holds."
+    "currentnessDecision": "OPEN — exact canvass opener requires named human APPROVE or REVISE decision; Missing Parties currentness is already closed from current 2026 policy.",
+    "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md plus named human reviewer(s), date, exact candidate commit, and disposition in docs/PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md covering curriculum accuracy, Paradise policy boundaries, field-authority separation, sales procedure holds, tone, and usability."
   },
   "promotionAuthorization": {
     "status": "OPEN",
@@ -77,5 +99,5 @@
     "status": "NOT_APPLICABLE_UNTIL_PROMOTION",
     "requiredEvidence": "After authorized promotion, read back validated branch commit, dataset SHA, 78/76/2 guards, and operational URL behavior before calling the release live."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. Current blockers are physical-device acceptance, human curriculum/compliance review, and explicit promotion authorization; internal trainer-media rights are not a release blocker under the current project scope."
+  "hardRule": "A green software validator is necessary but not sufficient for release. Current blockers are one human opener-currentness approval within the broader human curriculum/compliance sign-off, physical-device acceptance, and explicit promotion authorization. Missing Parties currentness is source-supported and closed; internal trainer-media rights are not a release blocker under the current project scope."
 }
