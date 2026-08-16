@@ -163,7 +163,7 @@ test('contract cancellation and handoff controls confirm payment and result-rele
   await page.getByText('Current operational evidence',{exact:true}).click();
   await expect(page.getByText(/use the payment portal and process the current required appointment\/deposit amount/i)).toBeVisible();
   await expect(page.getByText(/release was needed so the job could be created in the system/i)).toBeVisible();
-  await expect(page.getByText(/PRIVACY CONTROL/i)).toBeVisible();
+  await expect(page.getByText(/PRIVACY CONTROL/i).last()).toBeVisible();
   await expect(page.getByText(/customer-specific contracts and email threads.*not linked/i)).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
