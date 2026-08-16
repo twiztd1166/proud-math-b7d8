@@ -5,7 +5,17 @@
   const allLessons=()=>[...(window.PU_CONTENT?.lessons||[]),...managerLessons()];
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
   const words=s=>norm(s).split(' ').filter(Boolean);
-  const operationalTerms=['permit','permission','no soliciting','soliciting','no go','refusal','leave property','hoa','security','police','code enforcement','hours','door hanger','courtesy notice','literature','price','pricing','financing','finance','contract','cancellation','rescission','appointment','roof','window','door','spouse','household','not interested'];
+  const operationalTerms=['permit','permission','no soliciting','soliciting','no go','refusal','leave property','hoa','security','police','code enforcement','hours','door hanger','courtesy notice','literature','price','pricing','financing','finance','contract','cancellation','rescission','appointment','roof','window','door','spouse','household','not interested','not now','estimate'];
+  const drillAliases={
+    'opening':'opening first 20 seconds introduction opener',
+    'not-interested':'not interested no interest objection decline hesitation',
+    'not-now':'not now later timing objection maybe later',
+    'already-estimate':'already estimate already had estimate previous estimate quote',
+    'price-at-door':'price pricing cost how much quote financing payment',
+    'appointment-close':'appointment close schedule scheduling weekday weekend time',
+    'leave-property':'leave property get off property refusal stop resident says leave',
+    'no-go':'no go nogo do not canvass prohibited municipality lookup'
+  };
   const isOperationalQuery=q=>{const n=norm(q);return operationalTerms.some(x=>n.includes(norm(x)))};
   const authorityRank=item=>{
     if(item.type==='lesson')return 0;
@@ -50,10 +60,19 @@
   }
   function searchIndex(){
     const lessons=allLessons().map(x=>({type:'lesson',id:x.id,title:x.title,text:[x.summary,x.learn,x.practice,x.pass].join(' '),tags:x.stage||'',stage:x.stage}));
-    const drills=(window.PU_CONTENT?.drills||[]).map(x=>({type:'drill',id:x.id,title:x.title,text:[x.prompt,x.answer].join(' '),tags:x.category||'',category:x.category}));
+    const drills=(window.PU_CONTENT?.drills||[]).map(x=>({type:'drill',id:x.id,title:x.title,text:[x.prompt,x.answer].join(' '),tags:[x.category||'',drillAliases[x.id]||''].join(' '),category:x.category}));
     const media=(window.PU_CONTENT?.media||[]).map(x=>({type:'media',id:x.id,title:x.title,text:[x.trainer,x.note].join(' '),tags:(x.topics||[]).join(' '),media:x}));
     const sources=Object.entries(window.PU_CONTENT?.sources||{}).map(([id,x])=>({type:'source',id,title:x.title,text:x.authority||'',tags:'source reference',source:x}));
     return[...lessons,...drills,...media,...sources];
+  }
+  function rankedHits(q){
+    const operational=isOperationalQuery(q);
+    const all=searchIndex().map(x=>({...x,_score:score(x,q)})).filter(x=>x._score>0);
+    all.sort((a,b)=>operational?(authorityRank(a)-authorityRank(b)||b._score-a._score||a.title.localeCompare(b.title)):(b._score-a._score||authorityRank(a)-authorityRank(b)||a.title.localeCompare(b.title)));
+    let hits=all.slice(0,20);
+    const matchingDrill=all.filter(x=>x.type==='drill').sort((a,b)=>b._score-a._score)[0];
+    if(matchingDrill&&!hits.some(x=>x.type==='drill'))hits=hits.length>=20?[...hits.slice(0,19),matchingDrill]:[...hits,matchingDrill];
+    return hits;
   }
   function resultMarkup(x){
     const label=x.type==='lesson'?'PARADISE LESSON':x.type==='drill'?'PRACTICE':x.type==='media'?'MEDIA':'SOURCE / REFERENCE';
@@ -66,8 +85,7 @@
     const input=document.getElementById('puSearchInput'),box=document.getElementById('puSearchResults');
     function draw(){
       const q=input.value.trim();if(!q){box.innerHTML='<div class="puEmpty">Type a word or phrase to search lessons, practice, media, and source material.</div>';return}
-      const operational=isOperationalQuery(q);
-      const hits=searchIndex().map(x=>({...x,_score:score(x,q)})).filter(x=>x._score>0).sort((a,b)=>operational?(authorityRank(a)-authorityRank(b)||b._score-a._score||a.title.localeCompare(b.title)):(b._score-a._score||authorityRank(a)-authorityRank(b)||a.title.localeCompare(b.title))).slice(0,20);
+      const hits=rankedHits(q);
       box.innerHTML=hits.length?hits.map(resultMarkup).join(''):'<div class="puEmpty">No training result found. Try a shorter term, or use Lookup for a municipality rule.</div>';
       box.querySelectorAll('[data-result-type]').forEach(b=>b.onclick=()=>{const t=b.dataset.resultType,id=b.dataset.resultId;if(t==='lesson')puSetPage('lesson:'+id);else if(t==='drill')puSetPage('practice');else if(t==='media')puPlayerOpen(id)})
     }
