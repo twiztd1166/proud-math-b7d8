@@ -94,8 +94,13 @@ test('player infrastructure remains available for future rights-cleared controll
   expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',rights:'2026.08.16-pu-media-rights-v1',gate:'2026.08.16-pu-media-player-rights-v1'});
 });
 
-test('practice hard stop says leave rather than rebut',async({page})=>{
-  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Practice/}).first().click();await page.getByRole('button',{name:/Field Rules/}).click();await page.getByRole('button',{name:/SHOW COACHING ANSWER/}).click();await expect(page.getByText(/Stop immediately and leave|Do not canvass/i)).toBeVisible();
+test('practice hard-stop model requires stopping instead of rebutting',async({page})=>{
+  await page.goto('/index.html');
+  const state=await page.evaluate(()=>{
+    const x=window.puPracticeScenarioPool().find(s=>s.id==='field-no-go');
+    return{id:x?.id,hardStop:x?.hardStop,answer:x?.answer,accepted:x?.acceptedResponseConcepts||[],prohibited:x?.prohibitedResponseConcepts||[]};
+  });
+  expect(state.id).toBe('field-no-go');expect(state.hardStop).toBeTruthy();expect(state.answer).toMatch(/Do not canvass/i);expect(state.accepted.join(' ')).toMatch(/does not canvass|follows live lookup/i);expect(state.prohibited.join(' ')).toMatch(/knocks anyway|manager override|workaround/i);
 });
 
 test('sales apprentice training preserves doorstep boundary',async({page})=>{
