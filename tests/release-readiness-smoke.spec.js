@@ -102,7 +102,9 @@ test('contract cancellation and handoff controls teach current boundaries withou
   await expect(page.getByText(/not authority for a sales rep to approve a cancellation, refund, deadline, or amount/i)).toBeVisible();
   await expect(page.getByText(/Verify the handoff succeeded/i)).toBeVisible();
   await expect(page.getByText(/If the normal system handoff fails, escalate the failure and confirm recovery/i)).toBeVisible();
+  await page.getByText('Current operational evidence',{exact:true}).click();
   await expect(page.getByText(/PRIVACY CONTROL/i)).toBeVisible();
+  await expect(page.getByText(/customer-specific contracts and email threads.*not linked/i)).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
 });
