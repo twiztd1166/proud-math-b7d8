@@ -20,6 +20,7 @@ jobs:
       - name: Syntax and controlled-data boundary
         shell: bash
         run: |
+          node --check training-content-v1.js
           node --check training-v1.js
           node --check boot-v2.js
           node --check core-v2.js
@@ -31,10 +32,34 @@ jobs:
           grep -q 'records.length!==78' boot-v2.js
           grep -q 'db.meta.goCount!==76' boot-v2.js
           grep -q 'db.meta.noGoCount!==2' boot-v2.js
+          grep -q 'training-content-v1.js' index.html
           grep -q 'training-v1.js' index.html
           grep -q 'training-v1.css' index.html
+          grep -q 'training-content-v1.js' sw.js
           grep -q 'training-v1.js' sw.js
           grep -q 'training-v1.css' sw.js
+          grep -q '2026.08.16-pu-v1-content-1' training-content-v1.js
+          grep -q 'Do not claim you are handing out notices where the live municipality screen says not to use them' training-content-v1.js
+          grep -q '1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn' training-content-v1.js
+          grep -q '1GCrveqXP0xgc8n2S9WPlVAd9wd9D2X5Y' training-content-v1.js
+          grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-v1.js
+      - name: Validate training content model
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const ctx={window:{}};vm.createContext(ctx);vm.runInContext(fs.readFileSync('training-content-v1.js','utf8'),ctx);
+          const u=ctx.window.PU_CONTENT;
+          if(!u||!Array.isArray(u.lessons)||!Array.isArray(u.media)||!Array.isArray(u.drills))throw new Error('Training content model missing');
+          const required=['foundation','field-ready','canvasser'];
+          for(const stage of required){if(u.lessons.filter(x=>x.stage===stage).length<4)throw new Error(`Insufficient ${stage} curriculum`)}
+          if(u.media.length<8)throw new Error('Curated media catalog too small');
+          if(!u.lessons.some(x=>/Certified Canvasser Readiness/i.test(x.title)))throw new Error('Certification readiness lesson missing');
+          if(!u.drills.some(x=>x.id==='leave-property'&&/stop immediately and leave/i.test(x.answer)))throw new Error('Clear-refusal drill missing');
+          const ids=new Set(u.media.map(x=>x.id));
+          for(const lesson of u.lessons)for(const id of lesson.media||[])if(!ids.has(id))throw new Error(`Unknown media ${id} in ${lesson.id}`);
+          console.log({version:u.version,lessons:u.lessons.length,media:u.media.length,drills:u.drills.length});
+          NODE
       - name: Recompute controlled dataset hash
         shell: bash
         run: |
@@ -57,6 +82,7 @@ jobs:
       - name: Build static production bundle
         run: |
           node scripts/build-canvass-site.mjs
+          test -f canvass-dist/training-content-v1.js
           test -f canvass-dist/training-v1.js
           test -f canvass-dist/training-v1.css
       - name: Install isolated Playwright runtime
