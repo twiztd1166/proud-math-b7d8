@@ -18,7 +18,9 @@ jobs:
       - name: Validate approved training boundaries
         run: |
           node --check scripts/validate-training-hardening.mjs
+          node --check scripts/validate-practice-model-v2.mjs
           node scripts/validate-training-hardening.mjs
+          node scripts/validate-practice-model-v2.mjs
       - name: Reconfirm controlled field baseline
         run: |
           grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
