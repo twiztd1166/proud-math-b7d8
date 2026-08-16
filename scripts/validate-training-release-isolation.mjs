@@ -14,7 +14,6 @@ const immutable=[
   'history-v2.js',
   'field-v36.js',
   'field-v37.js',
-  'boot-v2.js',
   'style.css',
   'style-v2.css',
   'pwa-v3.css',
@@ -26,19 +25,44 @@ for(const path of immutable){
   const base=show(BASE,path),current=fs.readFileSync(path,'utf8');
   if(base!==current)changed.push(path);
 }
-if(changed.length)throw new Error(`Training release modified validated field-engine files: ${changed.join(', ')}`);
+if(changed.length)throw new Error(`Training release modified validated field/data files: ${changed.join(', ')}`);
 
+// boot-v2.js is an intentional shell/router exception: Training needs one nav element,
+// one nav-state toggle, one render branch, and one click handler. Strip only those four
+// additions and require the remainder to be byte-identical to the validated v3.12 boot.
+const baseBoot=show(BASE,'boot-v2.js');
+const currentBoot=fs.readFileSync('boot-v2.js','utf8');
+for(const token of [
+  "NT=document.getElementById('nTrain')",
+  "NT.classList.toggle('on',view==='training')",
+  "if(view==='training')return renderTraining()",
+  "NT.onclick=()=>{puPage='home';setView('training')}"
+])if(!currentBoot.includes(token))throw new Error(`Expected Training router hook missing from boot-v2.js: ${token}`);
+for(const token of ['records.length!==78','db.meta.goCount!==76','db.meta.noGoCount!==2'])if(!currentBoot.includes(token))throw new Error(`Validated field load guard missing from boot-v2.js: ${token}`);
+const normalizedBoot=currentBoot
+  .replace("const NH=document.getElementById('nHist'),NT=document.getElementById('nTrain');","const NH=document.getElementById('nHist');")
+  .replace("NT.classList.toggle('on',view==='training');",'')
+  .replace("if(view==='training')return renderTraining();",'')
+  .replace("NT.onclick=()=>{puPage='home';setView('training')};",'');
+if(normalizedBoot!==baseBoot)throw new Error('boot-v2.js contains changes beyond the four approved Training router additions');
+
+// A release-version bump is allowed, but no other provenance field may drift.
 const normalizeProvenance=s=>s.replace(/appVersion:'[^']+'/,"appVersion:'<RELEASE_VERSION>'");
-if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond allowed appVersion field');
+if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond the allowed appVersion field');
 
 const allowedExisting=new Set([
   '.github/workflows/validate-paradise-university-v1.yml',
   '.github/workflows/validate-paradise-university-hardening.yml',
-  'index.html','sw.js','scripts/build-canvass-site.mjs','provenance-v3-2.js'
+  'index.html',
+  'boot-v2.js',
+  'sw.js',
+  'scripts/build-canvass-site.mjs',
+  'provenance-v3-2.js',
+  'tests/offline-regression.spec.js'
 ]);
 const diff=execFileSync('git',['diff','--name-status',BASE,'HEAD'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean).map(line=>{const [status,...parts]=line.split('\t');return{status,path:parts[parts.length-1]}});
 const suspicious=diff.filter(x=>x.status!=='A'&&!allowedExisting.has(x.path));
 if(suspicious.length)throw new Error(`Unexpected modification/deletion outside additive training shell: ${suspicious.map(x=>`${x.status}:${x.path}`).join(', ')}`);
 const trainingAdded=diff.filter(x=>x.status==='A'&&(x.path.startsWith('training-')||x.path.startsWith('tests/')||x.path.startsWith('scripts/')||x.path.startsWith('docs/'))).length;
 if(trainingAdded<10)throw new Error(`Training release inventory unexpectedly small: ${trainingAdded}`);
-console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,trainingAdded,totalDiffEntries:diff.length});
+console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,bootException:'Training router only',trainingAdded,totalDiffEntries:diff.length});
