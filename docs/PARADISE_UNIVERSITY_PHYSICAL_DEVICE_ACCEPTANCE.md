@@ -8,9 +8,15 @@ This checklist implements the physical-device requirement in `PARADISE_UNIVERSIT
 
 ## Current software baseline
 
-Last fully green software checkpoint before the internal-media policy change: `1e9ed36da001ea8bb80f6fc382bd7368d664b3a1`, validator run `31968623114`.
+Fully green internal-media runtime checkpoint: `5670f98e8772184841ba3934a959b082db6d595b`.
 
-The current branch has changed after that checkpoint to restore internal Tony Hoty / Dave Yoho / Grosso media. Reconfirm the exact current head is fully green before using it as a release candidate.
+Full validator run: `31969848140` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix.
+
+Use this immutable candidate URL for the physical test so later working-branch documentation edits cannot change the tested runtime:
+
+`https://raw.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
+
+The controlled jurisdiction baseline at this candidate remains SHA `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`, 78 records / 76 GO / 2 NO-GO.
 
 ## Hard rule
 
@@ -23,8 +29,8 @@ Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires
 - iPhone model: _________________________
 - iOS version: __________________________
 - Safari version if shown: ______________
-- Exact working-branch commit: __________
-- App URL tested: _______________________
+- Exact working-branch commit: `5670f98e8772184841ba3934a959b082db6d595b`
+- App URL tested: `https://raw.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
 - Installed to Home Screen: YES / NO
 - Network used for online pass: __________
 - Offline pass performed: YES / NO
@@ -82,6 +88,13 @@ Project note: internal-use treatment is an operating decision for this app, not 
 ## E. Physical media playback
 
 Use at least one internal audio item and one internal video item from the current curated catalog.
+
+Recommended minimum pair for this test because both Drive targets and local file integrity were independently confirmed during build closeout:
+
+- Audio: `grosso-tonality-audio` — Grosso University — Tonality and Body Language.
+- Video: `grosso-tonality-video` — Grosso University — Tonality and Body Language.
+
+Tony Hoty `tony-canvassing-101` was also independently confirmed as a valid MP3 and is a useful second audio check. Dave Yoho `dave-science-canvassing-video` is substantially larger, so test it as a secondary streaming/load check after the minimum pair rather than making the whole physical gate depend on it.
 
 ### Current Drive-embedded media path
 
@@ -154,7 +167,7 @@ PASS only if:
 ### Navigation / field isolation
 
 - Result: PASS / FAIL / NOT RUN
-- Tested commit: _________________________
+- Tested commit: `5670f98e8772184841ba3934a959b082db6d595b`
 - Tester: _______________________________
 - Date: _________________________________
 - Notes: _________________________________
