@@ -8,7 +8,7 @@ test('Videos & Audio exposes internal trainer media while preserving authority l
   await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   await expect(page.getByRole('heading',{name:'Videos & Audio'})).toBeVisible();
   for(const title of ['Continue Listening','Required for You','Canvasser Essentials','Future Sales Rep','Manager Training','Tony Hoty','Dave Yoho','Rick Grosso / Grosso University','Paradise Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)})).toBeVisible();
-  await expect(page.getByText(/INTERNAL TRAINING MEDIA/i)).toBeVisible();
+  await expect(page.getByText('INTERNAL TRAINING MEDIA:',{exact:true})).toBeVisible();
   await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
   await expect(page.getByRole('button',{name:/BROWSE FULL SOURCE LIBRARY/})).toBeVisible();
   await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_UI_VERSION)).toBe('2026.08.16-pu-media-ui-v5');
@@ -24,7 +24,7 @@ test('all 12 curated trainer recordings are available for internal training',asy
   await expect(playlist(page,'Tony Hoty').locator('.puMediaCard')).toHaveCount(3);
   await expect(playlist(page,'Dave Yoho').locator('.puMediaCard')).toHaveCount(1);
   await expect(playlist(page,'Rick Grosso / Grosso University').locator('.puMediaCard')).toHaveCount(3);
-  await expect(page.getByRole('button',{name:/PLAY|OPEN/}).first()).toBeVisible();
+  await expect(page.locator('[data-media]').first()).toBeVisible();
 });
 
 test('full source library retains trainer lineage and internal source access',async({page})=>{
@@ -38,7 +38,7 @@ test('full source library retains trainer lineage and internal source access',as
 test('direct player invocation opens internal Drive media in training player',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
   const root=page.locator('#puPlayerRoot');await expect(root.getByRole('dialog',{name:'Training player'})).toBeVisible();
-  await expect(root.locator('#puDrivePlayer')).toBeVisible();await expect(root.getByText(/SOURCE \/ REFERENCE|HISTORICAL SOURCE/)).toBeVisible();
+  await expect(root.locator('#puDrivePlayer')).toBeVisible();await expect(root.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
   await expect(root.getByRole('button',{name:/MARK COMPLETE|COMPLETED/})).toBeVisible();await expect(root.getByRole('button',{name:/SAVE FOR LATER|SAVED/})).toBeVisible();
   await root.getByRole('button',{name:'Close player'}).click();await expect(root).toBeEmpty();
 });
