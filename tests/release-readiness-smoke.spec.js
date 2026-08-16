@@ -65,10 +65,44 @@ test('pricing and financing control path uses live tools without unlocking dynam
   ]));
   await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByText(/Current pricing & financing control path/i)).toBeVisible();
-  await expect(page.getByText(/PARTIAL SOURCE CLOSURE/i)).toBeVisible();
+  await expect(page.getByText(/PARTIAL SOURCE CLOSURE/i).first()).toBeVisible();
   await expect(page.getByText(/Do not quote from memory or from a static training PDF/i)).toBeVisible();
   await expect(page.getByText(/Never bypass an approval indicator/i)).toBeVisible();
   await expect(page.getByText(/does not authorize a Leap Lending application workflow/i)).toBeVisible();
+  await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
+  await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
+});
+
+test('contract cancellation and handoff controls teach current boundaries without exposing customer records or unlocking legal procedure',async({page})=>{
+  await page.goto('/index.html');
+  const ctl=await page.evaluate(()=>window.PU_SALES_CONTRACT_HANDOFF_CONTROL);
+  expect(ctl?.status).toBe('PARTIAL_SOURCE_CLOSURE');
+  expect(ctl?.asOf).toBe('2026-08-16');
+  expect(ctl?.rules).toEqual(expect.arrayContaining([
+    expect.stringMatching(/review the actual job, product, measurement\/specification, price\/payment, and customer details before signature/i),
+    expect.stringMatching(/Do not alter the notice language/i),
+    expect.stringMatching(/not authority for a sales rep to approve a cancellation, refund, deadline, or amount/i),
+    expect.stringMatching(/RESULT\/RELEASE/i),
+    expect.stringMatching(/LeadPerfection upload-failure/i),
+    expect.stringMatching(/original sale\/job/i)
+  ]));
+  expect(ctl?.privacy).toMatch(/customer-specific contracts and email threads.*not linked/i);
+  expect(ctl?.unresolved).toEqual(expect.arrayContaining([
+    expect.stringMatching(/Field-by-field contract completion checklist/i),
+    expect.stringMatching(/Legal determination and timing for cancellation/i),
+    expect.stringMatching(/refund authorization/i),
+    expect.stringMatching(/LeadPerfection \/ CRM required fields/i),
+    expect.stringMatching(/Full button-up/i),
+    expect.stringMatching(/manager TO procedure/i)
+  ]));
+  await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
+  await expect(page.getByText(/Contract, cancellation & handoff controls/i)).toBeVisible();
+  await expect(page.getByText(/do not bypass review or hand-edit controlled legal pages/i)).toBeVisible();
+  await expect(page.getByText(/Do not alter the notice language/i)).toBeVisible();
+  await expect(page.getByText(/not authority for a sales rep to approve a cancellation, refund, deadline, or amount/i)).toBeVisible();
+  await expect(page.getByText(/Verify the handoff succeeded/i)).toBeVisible();
+  await expect(page.getByText(/If the normal system handoff fails, escalate the failure and confirm recovery/i)).toBeVisible();
+  await expect(page.getByText(/PRIVACY CONTROL/i)).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
 });
