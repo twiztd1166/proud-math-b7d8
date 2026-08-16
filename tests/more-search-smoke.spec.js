@@ -2,6 +2,7 @@ import {test,expect} from '@playwright/test';
 
 async function training(page){await page.goto('/index.html');await page.locator('#nTrain').click()}
 async function more(page){await training(page);await page.locator('#puMoreButton').click()}
+async function search(page,q){await more(page);await page.getByRole('button',{name:/Search Training/}).click();await page.getByPlaceholder(/Try: not interested/).fill(q);return page.locator('.puSearchResult')}
 
 test('five primary training actions remain simple and More stays secondary',async({page})=>{
   await training(page);
@@ -23,11 +24,22 @@ test('More exposes only secondary training tools',async({page})=>{
 });
 
 test('training search ranks a Paradise lesson before reference material',async({page})=>{
-  await more(page);await page.getByRole('button',{name:/Search Training/}).click();
-  await page.getByPlaceholder(/Try: not interested/).fill('permit');
-  const results=page.locator('.puSearchResult');
+  const results=await search(page,'permit');
   await expect(results.first()).toContainText('PARADISE LESSON');
   await expect(page.getByText(/Training search never replaces the live municipality result/)).toBeVisible();
+});
+
+test('operational search authority is deterministic across high-risk queries',async({page})=>{
+  for(const q of ['price','financing','no go','courtesy notice','refusal']){
+    const results=await search(page,q);
+    await expect(results.first(),`Expected Paradise lesson first for ${q}`).toContainText('PARADISE LESSON');
+    await page.locator('#puBack').click();
+  }
+});
+
+test('source-name searches remain relevance-first when the query is not operational',async({page})=>{
+  const results=await search(page,'Tony Hoty');
+  await expect(results.first()).toContainText(/SOURCE \/ REFERENCE|MEDIA/);
 });
 
 test('training search can find practice content',async({page})=>{
