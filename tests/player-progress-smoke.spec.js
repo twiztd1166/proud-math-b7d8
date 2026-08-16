@@ -48,5 +48,5 @@ test('player v2 exports explicit device-local media progress APIs',async({page})
   await page.goto('/index.html');
   await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v2');
   const api=await page.evaluate(()=>({status:typeof window.puMediaProgressStatus,complete:typeof window.puMediaMarkComplete,save:typeof window.puMediaSaveForLater,bookmark:typeof window.puMediaBookmarkPosition,mediaUi:window.PU_MEDIA_UI_VERSION}));
-  expect(api).toEqual({status:'function',complete:'function',save:'function',bookmark:'function',mediaUi:'2026.08.16-pu-media-ui-v2'});
+  expect(api).toEqual({status:'function',complete:'function',save:'function',bookmark:'function',mediaUi:'2026.08.16-pu-media-ui-v3'});
 });
