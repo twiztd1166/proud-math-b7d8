@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026.08.16-pu-release-gate-v3",
+  "schemaVersion": "2026.08.16-pu-release-gate-v4",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
@@ -42,12 +42,17 @@
     "rightsHold": 0,
     "mediaPolicyVersion": "2026.08.16-pu-media-internal-v2",
     "mediaUiVersion": "2026.08.16-pu-media-ui-v5",
-    "sourceTargetSpotCheck": {
-      "status": "PASS",
-      "grossoAudio": "Drive target resolved as audio/mpeg and local integrity probe passed",
-      "grossoVideo": "Drive target resolved as video/mp4 and local H.264/AAC integrity probe passed",
-      "tonyCanvassing101": "Drive target resolved as audio/mpeg and local integrity probe passed",
-      "daveScienceCanvassing": "Drive target resolves; file size exceeds connector download ceiling, so physical playback remains the functional acceptance check"
+    "curatedTargetAudit": {
+      "status": "PASS_TARGET_EXISTENCE_AND_TYPE_FOR_11_PLUS_OVERSIZE_EXISTENCE_FOR_1",
+      "catalogTargetsReviewed": 12,
+      "fullDriveMetadataReturned": 11,
+      "fullMetadataTypeMatchesCatalog": 11,
+      "nonzeroSizedFilesConfirmed": 11,
+      "expectedCatalogMix": "8 audio / 4 video",
+      "grossoSet": "6/6 targets resolved: 3 audio/mpeg + 3 video/mp4, all nonzero",
+      "tonySet": "5/5 targets resolved: 5 audio/mpeg, all nonzero",
+      "daveScienceCanvassing": "Target exists and reports 1,690,853,160 bytes; connector raw download is blocked by its 268,435,456-byte ceiling, so actual browser playback remains a physical acceptance item",
+      "note": "This target audit establishes that the curated catalog is not pointing at missing Drive objects. It does not substitute for real Safari/PWA playback."
     },
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy.",
     "note": "Internal-use treatment is a project operating choice, not a legal opinion. Media-rights documentation is not a Paradise University release gate under the current project scope."
