@@ -1,10 +1,10 @@
 {
-  "schemaVersion": "2026.08.16-pu-release-gate-v2",
+  "schemaVersion": "2026.08.16-pu-release-gate-v3",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "lastFullyGreenSoftwareCheckpoint": "1e9ed36da001ea8bb80f6fc382bd7368d664b3a1",
-  "lastFullyGreenValidatorRun": 31968623114,
+  "lastFullyGreenSoftwareCheckpoint": "5670f98e8772184841ba3934a959b082db6d595b",
+  "lastFullyGreenValidatorRun": 31969848140,
   "fieldBaseline": {
     "status": "PASS",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
@@ -13,7 +13,7 @@
     "noGo": 2
   },
   "softwareValidation": {
-    "status": "PASS_AT_LAST_GREEN_CHECKPOINT",
+    "status": "PASS",
     "syntaxBuildBoundary": "PASS",
     "trainingHardening": "PASS",
     "fieldReleaseIsolation": "PASS",
@@ -22,7 +22,9 @@
     "automatedIPhoneOffline": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "note": "The branch has changed after the last fully green checkpoint and must be revalidated before release. Automated WebKit/iPhone evidence is not physical-device acceptance."
+    "validatorRun": 31969848140,
+    "testedCommit": "5670f98e8772184841ba3934a959b082db6d595b",
+    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance. Documentation-only commits after this checkpoint do not alter the tested runtime, but the final release candidate should still be identified explicitly before promotion."
   },
   "practiceV2": {
     "status": "PASS",
@@ -34,9 +36,19 @@
     "offline": "PASS"
   },
   "internalTrainerMedia": {
-    "status": "NON_BLOCKING_INTERNAL_USE",
+    "status": "PASS_INTERNAL_USE_NON_BLOCKING",
     "curatedThirdPartyReviewed": 12,
-    "expectedPlayableAfterCurrentChange": 12,
+    "internallyPlayable": 12,
+    "rightsHold": 0,
+    "mediaPolicyVersion": "2026.08.16-pu-media-internal-v2",
+    "mediaUiVersion": "2026.08.16-pu-media-ui-v5",
+    "sourceTargetSpotCheck": {
+      "status": "PASS",
+      "grossoAudio": "Drive target resolved as audio/mpeg and local integrity probe passed",
+      "grossoVideo": "Drive target resolved as video/mp4 and local H.264/AAC integrity probe passed",
+      "tonyCanvassing101": "Drive target resolved as audio/mpeg and local integrity probe passed",
+      "daveScienceCanvassing": "Drive target resolves; file size exceeds connector download ceiling, so physical playback remains the functional acceptance check"
+    },
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy.",
     "note": "Internal-use treatment is a project operating choice, not a legal opinion. Media-rights documentation is not a Paradise University release gate under the current project scope."
   },
