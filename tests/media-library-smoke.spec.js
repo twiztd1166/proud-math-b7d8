@@ -2,14 +2,29 @@ import {test,expect} from '@playwright/test';
 
 async function training(page){await page.goto('/index.html');await page.locator('#nTrain').click()}
 async function sourceLibrary(page){await training(page);await page.locator('#puMoreButton').click();await page.getByRole('button',{name:/Source Library/}).click()}
+const playlist=(page,title)=>page.locator(`[data-playlist="${title}"]`);
 
-test('curated Videos & Audio does not dump full source archive',async({page})=>{
+test('Videos & Audio exposes the v1 playlist architecture without dumping the full archive',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   await expect(page.getByRole('heading',{name:'Videos & Audio'})).toBeVisible();
-  await expect(page.getByText('Tonality and Body Language',{exact:true}).first()).toBeVisible();
+  for(const title of ['Continue Listening','Required for You','Canvasser Essentials','Future Sales Rep','Manager Training','Tony Hoty','Dave Yoho','Rick Grosso / Grosso University','Paradise Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)})).toBeVisible();
   await expect(page.getByText('Canvassing DVD — Main',{exact:true})).toHaveCount(0);
   await expect(page.getByText('Extreme Sales Leadership',{exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:/BROWSE FULL SOURCE LIBRARY/})).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_UI_VERSION)).toBe('2026.08.16-pu-media-ui-v3');
+});
+
+test('role playlists are derived from controlled metadata and empty states stay truthful',async({page})=>{
+  await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
+  await expect(playlist(page,'Required for You')).toContainText(/No catalog item is separately marked required/i);
+  await expect(playlist(page,'Paradise Training')).toContainText(/No Paradise-approved media file is loaded/i);
+  await expect(playlist(page,'Canvasser Essentials').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Future Sales Rep').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Manager Training').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Tony Hoty').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Dave Yoho').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Rick Grosso / Grosso University').locator('.puMediaCard').first()).toBeVisible();
+  await expect(playlist(page,'Continue Listening')).toContainText(/Nothing unfinished yet/i);
 });
 
 test('full source library exposes verified Tony and Grosso media',async({page})=>{
