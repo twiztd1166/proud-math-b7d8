@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+async function expectCloseInViewport(page,player){
+  const close=player.getByRole('button',{name:'Close player'});await expect(close).toBeVisible();
+  const box=await close.boundingBox(),vp=page.viewportSize();
+  expect(box).not.toBeNull();expect(vp).not.toBeNull();
+  expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width).toBeLessThanOrEqual(vp.width);expect(box.y+box.height).toBeLessThanOrEqual(vp.height);
+  return close;
+}
+
 test('employee can Continue Training through lesson media completion and Next Lesson',async({page})=>{
   await page.goto('/index.html');
   await page.locator('#nTrain').click();
@@ -12,7 +21,7 @@ test('employee can Continue Training through lesson media completion and Next Le
   const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();
   await expect.poll(async()=>page.evaluate(()=>window.puPlayerCurrentId?.())).toBe('tony-welcome-onboarding');
   await player.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(player.getByRole('button',{name:/COMPLETED/})).toBeVisible();
-  await player.getByRole('button',{name:'Close player'}).click();
+  const close=await expectCloseInViewport(page,player);await close.click();
   await page.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(page.getByText('COMPLETE',{exact:true})).toBeVisible();
   const state=await page.evaluate(()=>({lesson:JSON.parse(localStorage.puProgress||'{}')['foundation-welcome'],media:window.puMediaProgressStatus?.('tony-welcome-onboarding')}));
   expect(state.lesson?.complete).toBeTruthy();expect(state.lesson?.completedAt).toBeTruthy();expect(state.media?.complete).toBeTruthy();
@@ -26,7 +35,7 @@ test('knowledge-gated lesson requires media practice check and content completio
   await expect(page.getByRole('heading',{name:'Refusal Is a Stop, Not an Objection'})).toBeVisible();
   for(const step of ['LEARN','WATCH / LISTEN','PRACTICE','PASS','QUICK CHECK'])await expect(page.getByText(step,{exact:true})).toBeVisible();
   const media=page.locator('.puMediaCard').filter({hasText:'Formula For Handling Objections'}).first();await expect(media).toBeVisible();await media.getByRole('button',{name:'PLAY'}).click();
-  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await player.getByRole('button',{name:'MARK COMPLETE'}).click();await player.getByRole('button',{name:'Close player'}).click();
+  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await player.getByRole('button',{name:'MARK COMPLETE'}).click();const close=await expectCloseInViewport(page,player);await close.click();
   expect(await page.evaluate(()=>window.puLessonTrainingReady?.('field-refusal'))).toBeFalsy();
   await page.getByRole('button',{name:'Leave immediately'}).click();await expect(page.getByText('✓ Correct',{exact:true})).toBeVisible();
   expect(await page.evaluate(()=>window.puQuickCheckPassed?.('field-refusal'))).toBeTruthy();expect(await page.evaluate(()=>window.puLessonTrainingReady?.('field-refusal'))).toBeFalsy();
