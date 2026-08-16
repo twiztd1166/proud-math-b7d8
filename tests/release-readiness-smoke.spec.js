@@ -44,6 +44,42 @@ test('Sales Rep Academy uses verified 2026 Paradise policy without weakening the
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
 });
 
+test('Sales Rep readiness and graduation controls preserve manager release authority without inventing certification artifacts',async({page})=>{
+  await page.goto('/index.html');
+  const ctl=await page.evaluate(()=>window.PU_SALES_READINESS_GRADUATION_CONTROL);
+  expect(ctl?.status).toBe('PARTIAL_SOURCE_CLOSURE');
+  expect(ctl?.source?.id).toBe('sales-manager-plan-2026');
+  expect(ctl?.source?.authority).toBe('PARADISE_APPROVED');
+  expect(ctl?.source?.revision).toBe('367');
+  expect(ctl?.rules).toEqual(expect.arrayContaining([
+    expect.stringMatching(/written and verbal test with an 85% proficiency standard/i),
+    expect.stringMatching(/Sales Manager determines readiness for independent issued appointments/i),
+    expect.stringMatching(/ride-along evaluations with written observation reports/i),
+    expect.stringMatching(/financing options, paperwork, pricing, POS\/DNS systems/i),
+    expect.stringMatching(/full compliance with sales tools, systems, processes/i),
+    expect.stringMatching(/Issuing assets does not by itself prove certification/i)
+  ]));
+  expect(ctl?.unresolved).toEqual(expect.arrayContaining([
+    expect.stringMatching(/written Sales Rep exam/i),
+    expect.stringMatching(/verbal-test script/i),
+    expect.stringMatching(/manager sign-off/i),
+    expect.stringMatching(/ride-alongs before release/i),
+    expect.stringMatching(/field-pass threshold/i),
+    expect.stringMatching(/system of record/i)
+  ]));
+  await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
+  await expect(page.getByText(/Sales Rep readiness & graduation controls/i)).toBeVisible();
+  await expect(page.getByText(/A device lesson, Quick Check, or local completion mark is not the company test/i)).toBeVisible();
+  await expect(page.getByText(/Paradise University does not self-certify or release a representative/i)).toBeVisible();
+  await expect(page.getByText(/written observation reports/i)).toBeVisible();
+  await expect(page.getByText(/Issuing assets does not by itself prove certification/i)).toBeVisible();
+  await expect(page.getByRole('link',{name:/Sales Manager Policies, Responsibilities & Compensation Plan/})).toHaveAttribute('href',/1e54fRhQv6vo8qRb6AP34bOsPKAms7EqR0hbZ34kSqJk/);
+  await page.getByText('Certification artifacts still missing',{exact:true}).click();
+  await expect(page.getByText(/Actual current written Sales Rep exam/i)).toBeVisible();
+  await expect(page.getByText(/Final combined Sales Rep certification checklist and system of record/i)).toBeVisible();
+  await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
+});
+
 test('pricing and financing control path uses live tools without unlocking dynamic procedures',async({page})=>{
   await page.goto('/index.html');
   const ctl=await page.evaluate(()=>window.PU_SALES_PRICING_FINANCE_CONTROL);
