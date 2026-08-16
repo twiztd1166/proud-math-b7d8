@@ -85,7 +85,7 @@ test('Drive media opens in persistent Paradise player and survives app navigatio
 });
 
 test('player infrastructure includes custom speed seek resume path for future controlled streams',async({page})=>{
-  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v1');const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION}));expect(state.player).toBeTruthy();expect(state.version).toBe('2026.08.16-pu-v1-content-5');
+  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v2');const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION}));expect(state.player).toBeTruthy();expect(state.version).toBe('2026.08.16-pu-v1-content-5');
 });
 
 test('practice hard stop says leave rather than rebut',async({page})=>{
