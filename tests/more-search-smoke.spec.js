@@ -52,10 +52,10 @@ test('source library visibly separates source material from current controls',as
   await more(page);await page.getByRole('button',{name:/Source Library/}).click();
   await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
   await expect(page.getByText(/SOURCE \/ REFERENCE MATERIAL:/)).toBeVisible();
-  await expect(page.getByText('Tony Hoty',{exact:true})).toBeVisible();
-  await expect(page.getByText('Dave Yoho',{exact:true})).toBeVisible();
-  await expect(page.getByText('Rick Grosso / Grosso University',{exact:true})).toBeVisible();
-  await expect(page.getByText('Paradise Current Reference',{exact:true})).toBeVisible();
+  await expect(page.locator('.puSection').filter({hasText:/^Tony Hoty$/})).toBeVisible();
+  await expect(page.locator('.puSection').filter({hasText:/^Dave Yoho$/})).toBeVisible();
+  await expect(page.locator('.puSection').filter({hasText:/^Rick Grosso \/ Grosso University$/})).toBeVisible();
+  await expect(page.locator('.puSection').filter({hasText:/^Paradise Current Reference$/})).toBeVisible();
   await expect(page.getByRole('button',{name:/Live Municipality Lookup/})).toBeVisible();
 });
 
