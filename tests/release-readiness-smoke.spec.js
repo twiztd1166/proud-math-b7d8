@@ -80,45 +80,63 @@ test('Sales Rep readiness and graduation controls preserve manager release autho
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
 });
 
-test('pricing and financing control path uses live tools without unlocking dynamic procedures',async({page})=>{
+test('pricing and financing control path preserves evaluated-but-not-active Leap status and live-tool authority',async({page})=>{
   await page.goto('/index.html');
   const ctl=await page.evaluate(()=>window.PU_SALES_PRICING_FINANCE_CONTROL);
   expect(ctl?.status).toBe('PARTIAL_SOURCE_CLOSURE');
   expect(ctl?.asOf).toBe('2026-08-16');
+  expect(ctl?.leapLendingStatus).toBe('EVALUATED_ENROLLED_NOT_ACTIVE');
   expect(ctl?.rules).toEqual(expect.arrayContaining([
     expect.stringMatching(/current Paradise-approved price configured in the live sales system/i),
     expect.stringMatching(/DealDesk and manager-approval controls/i),
+    expect.stringMatching(/not an active Paradise rep workflow/i),
     expect.stringMatching(/does not authorize a Leap Lending application workflow/i)
   ]));
   expect(ctl?.sources?.map(x=>x.id)).toEqual(expect.arrayContaining(['sales-workbook-v3','dealdeck-v191','sales-meeting-2026-03-16','vytex-price-book-2025-09-06']));
   expect(ctl?.sources?.every(x=>x.authority==='REFERENCE')).toBeTruthy();
+  expect(ctl?.implementationEvidence).toEqual(expect.arrayContaining([
+    expect.stringMatching(/implementation-design discussions/i),
+    expect.stringMatching(/June 16, 2026.*enrolled.*had not started using it/i),
+    expect.stringMatching(/August 5 and August 14, 2026/i)
+  ]));
+  expect(ctl?.implementationPrivacy).toMatch(/does not expose mailbox content.*credentials/i);
   expect(ctl?.unresolved).toEqual(expect.arrayContaining([
     expect.stringMatching(/discount authorization/i),
     expect.stringMatching(/lender application/i),
+    expect.stringMatching(/Qualification criteria.*beyond the recovered current TO script/i),
     expect.stringMatching(/Contract execution/i),
     expect.stringMatching(/cancellation \/ rescission/i),
     expect.stringMatching(/CRM handoff/i)
   ]));
+  expect((ctl?.unresolved||[]).join(' ')).not.toMatch(/exact manager TO procedure/i);
   await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByText(/Current pricing & financing control path/i)).toBeVisible();
-  await expect(page.getByText(/PARTIAL SOURCE CLOSURE/i).first()).toBeVisible();
+  await expect(page.getByText(/Leap Lending was evaluated\/enrolled but is not established as an active Paradise rep workflow/i)).toBeVisible();
   await expect(page.getByText(/Do not quote from memory or from a static training PDF/i)).toBeVisible();
   await expect(page.getByText(/Never bypass an approval indicator/i)).toBeVisible();
   await expect(page.getByText(/does not authorize a Leap Lending application workflow/i)).toBeVisible();
+  await page.getByText('Financing implementation status',{exact:true}).click();
+  await expect(page.getByText(/enrolled in Lending through Leap SalesPro but had not started using it yet/i)).toBeVisible();
+  await expect(page.getByText(/Paradise University does not expose mailbox content/i)).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
   await expect(page.getByRole('button',{name:/Retail Close|Qualification|Major Close|Button-Up/i})).toHaveCount(0);
 });
 
-test('contract cancellation and handoff controls teach current boundaries without exposing customer records or unlocking legal procedure',async({page})=>{
+test('contract cancellation and handoff controls confirm payment and result-release boundaries without inventing full button-up',async({page})=>{
   await page.goto('/index.html');
   const ctl=await page.evaluate(()=>window.PU_SALES_CONTRACT_HANDOFF_CONTROL);
   expect(ctl?.status).toBe('PARTIAL_SOURCE_CLOSURE');
   expect(ctl?.asOf).toBe('2026-08-16');
+  expect(ctl?.resultReleaseStatus).toBe('CURRENT_PROCESS_CONFIRMED');
+  expect(ctl?.paymentPortalStatus).toBe('CURRENT_CONTROL_CONFIRMED');
+  expect(ctl?.buttonUpStatus).toBe('PARTIAL_SOURCE_CLOSURE');
   expect(ctl?.rules).toEqual(expect.arrayContaining([
     expect.stringMatching(/review the actual job, product, measurement\/specification, price\/payment, and customer details before signature/i),
+    expect.stringMatching(/current Paradise payment portal/i),
+    expect.stringMatching(/date-sensitive and must not be memorized as evergreen policy/i),
     expect.stringMatching(/Do not alter the notice language/i),
     expect.stringMatching(/not authority for a sales rep to approve a cancellation, refund, deadline, or amount/i),
-    expect.stringMatching(/RESULT\/RELEASE/i),
+    expect.stringMatching(/office confirmation such as Done or Released is the closure signal/i),
     expect.stringMatching(/LeadPerfection upload-failure/i),
     expect.stringMatching(/original sale\/job/i)
   ]));
@@ -129,16 +147,22 @@ test('contract cancellation and handoff controls teach current boundaries withou
     expect.stringMatching(/refund authorization/i),
     expect.stringMatching(/LeadPerfection \/ CRM required fields/i),
     expect.stringMatching(/Full button-up/i),
-    expect.stringMatching(/manager TO procedure/i)
+    expect.stringMatching(/Qualification criteria.*recovered current TO script/i)
   ]));
+  expect((ctl?.unresolved||[]).join(' ')).not.toMatch(/manager TO procedure/i);
   await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByText(/Contract, cancellation & handoff controls/i)).toBeVisible();
+  await expect(page.getByText(/payment-portal\/deposit control and RESULT\/RELEASE\/recovery boundaries/i)).toBeVisible();
+  await expect(page.getByText(/current Paradise payment portal/i)).toBeVisible();
+  await expect(page.getByText(/date-sensitive and must not be memorized as evergreen policy/i)).toBeVisible();
   await expect(page.getByText(/do not bypass review or hand-edit controlled legal pages/i)).toBeVisible();
   await expect(page.getByText(/Do not alter the notice language/i)).toBeVisible();
   await expect(page.getByText(/not authority for a sales rep to approve a cancellation, refund, deadline, or amount/i)).toBeVisible();
-  await expect(page.getByText(/Verify the handoff succeeded/i)).toBeVisible();
+  await expect(page.getByText(/office confirmation such as Done or Released is the closure signal/i)).toBeVisible();
   await expect(page.getByText(/If the normal system handoff fails, escalate the failure and confirm recovery/i)).toBeVisible();
   await page.getByText('Current operational evidence',{exact:true}).click();
+  await expect(page.getByText(/use the payment portal and process the current required appointment\/deposit amount/i)).toBeVisible();
+  await expect(page.getByText(/release was needed so the job could be created in the system/i)).toBeVisible();
   await expect(page.getByText(/PRIVACY CONTROL/i)).toBeVisible();
   await expect(page.getByText(/customer-specific contracts and email threads.*not linked/i)).toBeVisible();
   await expect(page.getByText(/CURRENT POLICY REQUIRED — PROCEDURE GATE — HOLD/i)).toBeVisible();
