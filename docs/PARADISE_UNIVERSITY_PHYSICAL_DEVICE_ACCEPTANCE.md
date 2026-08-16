@@ -8,19 +8,34 @@ This checklist implements the physical-device requirement in `PARADISE_UNIVERSIT
 
 ## Current software baseline
 
-Fully green internal-media runtime checkpoint: `5670f98e8772184841ba3934a959b082db6d595b`.
+Current fully green runtime candidate: `45b0b0f887beeeae50fb7e7652c616d2b6e34842`.
 
-Full validator run: `31969848140` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix.
+Current runtime validator run: `31973581353` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, currentness browser acceptance, and device matrix.
 
-Use this immutable candidate URL for the physical test so later working-branch documentation edits cannot change the tested runtime. Because this URL is pinned to an exact commit, use RawGitHack's permanent-cache CDN form rather than the branch/development form:
+Current runtime content-hardening run: `31973581258` — PASS.
 
-`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
+Control/documentation head after that runtime was recorded: `57ac2089b1ceb093faf11b226d16e54b036564f9`. That docs/control head also independently passed full validator run `31973759999` and hardening run `31973759895`. It does not change the app runtime used for this physical test.
+
+Use this immutable runtime URL for the physical test so later working-branch documentation edits cannot change the tested app. Because this URL is pinned to an exact commit, use RawGitHack's permanent-cache CDN form rather than the branch/development form:
+
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/45b0b0f887beeeae50fb7e7652c616d2b6e34842/index.html`
 
 The controlled jurisdiction baseline at this candidate remains SHA `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`, 78 records / 76 GO / 2 NO-GO.
 
+## Currentness controls included in this candidate
+
+This runtime includes the currentness hardening validated after the original physical-device packet was written:
+
+- `Missing Parties` appointment QA is source-anchored to current Paradise 2026 Sales Representative policy: one or more homeowners or decision makers not being present for the appointment.
+- The app expressly does **not** convert that rule into a blanket `spouse must be present` rule.
+- The 2025-derived canvass opener remains visible for review but is labeled `CURRENT APPROVAL PENDING`.
+- The opener lesson tells employees not to deploy the candidate wording merely because it appears in Paradise University and to use only the current manager-approved canvass opening until a named Paradise reviewer approves or replaces the candidate.
+
+Physical-device acceptance verifies that these controls render and behave correctly on the actual phone. It does **not** itself approve the opener.
+
 ## Hard rule
 
-Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires a named tester, actual iPhone model, iOS version, browser/PWA mode, exact tested commit, date/time, and recorded results below.
+Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires a named tester, actual iPhone model, iOS version, browser/PWA mode, exact tested runtime commit, date/time, and recorded results below.
 
 ## Test device record
 
@@ -29,8 +44,9 @@ Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires
 - iPhone model: _________________________
 - iOS version: __________________________
 - Safari version if shown: ______________
-- Exact working-branch commit: `5670f98e8772184841ba3934a959b082db6d595b`
-- App URL tested: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
+- Exact runtime commit tested: `45b0b0f887beeeae50fb7e7652c616d2b6e34842`
+- Control packet head at preparation: `57ac2089b1ceb093faf11b226d16e54b036564f9`
+- App URL tested: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/45b0b0f887beeeae50fb7e7652c616d2b6e34842/index.html`
 - Installed to Home Screen: YES / NO
 - Network used for online pass: __________
 - Offline pass performed: YES / NO
@@ -70,6 +86,14 @@ Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires
 - [ ] Confirm device progress does not claim official HR/company certification.
 - [ ] Confirm Sales Apprentice still shows the doorstep sales-authority warning.
 - [ ] Confirm Sales Rep readiness still requires current company test / manager release.
+
+### Currentness visual acceptance
+
+- [ ] Open the field-opening lesson and confirm it visibly shows `CURRENT APPROVAL PENDING`.
+- [ ] Confirm the field-opening lesson visibly warns not to deploy the candidate script yet and tells employees to use only the current manager-approved canvass opening.
+- [ ] Confirm completing the field-opening lesson does not visually convert the candidate opener into approved/current field authority.
+- [ ] Open Manager Academy → Review Appointments / Appointment QA and confirm the current Missing Parties concept is expressed as homeowners or decision makers not being present.
+- [ ] Confirm the appointment-QA lesson does not present a blanket `spouse must be present` rule.
 
 ## D. Internal trainer-media behavior
 
@@ -132,7 +156,7 @@ Do not fail the current Drive-embedded catalog merely because iframe playback ca
 ## F. Offline installed-PWA test
 
 1. Open the app online from the Home Screen PWA.
-2. Visit Lookup, Training, Practice, Career Path, Progress, More, Source Library.
+2. Visit Lookup, Training, Practice, Career Path, Progress, More, Source Library, and the field-opening lesson once so the currentness runtime is exercised online.
 3. Enable Airplane Mode and disable Wi-Fi.
 4. Relaunch the installed PWA.
 
@@ -142,6 +166,7 @@ PASS only if:
 - [ ] Cached jurisdiction dataset / field behavior remains available exactly as designed.
 - [ ] Training home opens.
 - [ ] Core lessons open.
+- [ ] Field-opening lesson still shows `CURRENT APPROVAL PENDING` offline.
 - [ ] Practice opens with the 20-scenario model.
 - [ ] Career Path opens.
 - [ ] My Progress opens.
@@ -161,16 +186,25 @@ PASS only if:
 - [ ] No accidental double-tap is required.
 - [ ] No important control depends only on hover.
 - [ ] Long lesson/source titles wrap without hiding action buttons.
+- [ ] The `CURRENT APPROVAL PENDING` badge/notice is readable without obscuring lesson controls.
 
 ## H. Acceptance record
 
 ### Navigation / field isolation
 
 - Result: PASS / FAIL / NOT RUN
-- Tested commit: `5670f98e8772184841ba3934a959b082db6d595b`
+- Tested runtime commit: `45b0b0f887beeeae50fb7e7652c616d2b6e34842`
 - Tester: _______________________________
 - Date: _________________________________
 - Notes: _________________________________
+
+### Currentness rendering
+
+- Result: PASS / FAIL / NOT RUN
+- Opener shows `CURRENT APPROVAL PENDING`: YES / NO
+- Missing Parties wording is homeowner/decision-maker based: YES / NO
+- Blanket spouse rule absent: YES / NO
+- Notes: ________________________________
 
 ### Internal audio playback
 
@@ -203,4 +237,6 @@ Until one current internal audio item and one current internal video item are ph
 
 Neither status may be converted to PASS from Playwright/WebKit automation alone.
 
-Promotion to the validated branch remains separately controlled and requires explicit authorization plus validated-branch readback.
+This physical-device PASS, if achieved, does **not** approve the exact canvass opener. Opener currentness remains separately controlled by `docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md`.
+
+Promotion to the validated branch remains separately controlled and requires completed human curriculum/compliance review, explicit promotion authorization, and validated-branch readback.
