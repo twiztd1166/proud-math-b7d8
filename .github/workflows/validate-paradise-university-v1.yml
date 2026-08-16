@@ -23,8 +23,10 @@ jobs:
           node --check training-content-v1.js
           node --check training-content-sourcefix-v1.js
           node --check training-manager-v1-data.js
+          node --check training-sales-v1-data.js
           node --check training-v1.js
           node --check training-manager-v1-ui.js
+          node --check training-sales-v1-ui.js
           node --check training-player-v1.js
           node --check boot-v2.js
           node --check core-v2.js
@@ -40,14 +42,19 @@ jobs:
           grep -q 'training-content-v1.js' index.html
           grep -q 'training-content-sourcefix-v1.js' index.html
           grep -q 'training-manager-v1-data.js' index.html
+          grep -q 'training-sales-v1-data.js' index.html
           grep -q 'training-v1.js' index.html
           grep -q 'training-manager-v1-ui.js' index.html
+          grep -q 'training-sales-v1-ui.js' index.html
           grep -q 'training-player-v1.js' index.html
-          grep -q 'training-manager-v1-data.js' sw.js
-          grep -q 'training-manager-v1-ui.js' sw.js
-          grep -q 'pcm-field-v3-12-pu-v1-content4-2026-08-16' sw.js
+          grep -q 'training-sales-v1-data.js' sw.js
+          grep -q 'training-sales-v1-ui.js' sw.js
+          grep -q 'pcm-field-v3-12-pu-v1-content5-2026-08-16' sw.js
           grep -q '2026.08.16-pu-v1-content-3' training-content-sourcefix-v1.js
           grep -q '2026.08.16-pu-v1-content-4' training-manager-v1-data.js
+          grep -q '2026.08.16-pu-v1-content-5' training-sales-v1-data.js
+          grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
+          grep -q 'CURRENT POLICY REQUIRED' training-sales-v1-ui.js
           grep -q '2026.08.16-pu-player-v1' training-player-v1.js
           grep -q 'playbackRate' training-player-v1.js
           grep -q 'seekbackward' training-player-v1.js
@@ -55,8 +62,6 @@ jobs:
           grep -q 'Do not claim you are handing out notices where the live municipality screen says not to use them' training-content-v1.js
           grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
           grep -q 'The manager does not override the live municipality result' training-manager-v1-ui.js
-          grep -q '1cm2QPzwPRFPITk68fJmT8wc_z_OEPyTl' training-manager-v1-data.js
-          grep -q '1yMpnMW-9pwKt_g4jCzR_SBLMe4FRK3RU7-ZPYYc0wHo' training-manager-v1-data.js
           if grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-sourcefix-v1.js; then echo 'Unverified Tony media ID reintroduced'; exit 1; fi
       - name: Validate training content model
         shell: bash
@@ -64,18 +69,23 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),vm=require('vm');
           const ctx={window:{}};vm.createContext(ctx);
-          for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
+          for(const f of ['training-content-v1.js','training-content-sourcefix-v1.js','training-manager-v1-data.js','training-sales-v1-data.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx);
           const u=ctx.window.PU_CONTENT;
           if(!u||!Array.isArray(u.lessons)||!Array.isArray(u.media)||!Array.isArray(u.drills)||!Array.isArray(u.managerLessons))throw new Error('Training content model missing');
-          if(u.version!=='2026.08.16-pu-v1-content-4')throw new Error(`Unexpected training version ${u.version}`);
-          const minimum={foundation:4,'field-ready':7,canvasser:9,senior:6,'sales-apprentice':11};
+          if(u.version!=='2026.08.16-pu-v1-content-5')throw new Error(`Unexpected training version ${u.version}`);
+          const minimum={foundation:4,'field-ready':7,canvasser:9,senior:6,'sales-apprentice':11,'sales-rep':7};
           for(const [stage,min] of Object.entries(minimum)){const n=u.lessons.filter(x=>x.stage===stage).length;if(n<min)throw new Error(`Insufficient ${stage} curriculum: ${n}/${min}`)}
-          if(u.managerLessons.length<13)throw new Error(`Insufficient manager curriculum: ${u.managerLessons.length}/13`);
+          if(u.lessons.filter(x=>x.stage==='sales-rep').length!==7)throw new Error('Sales Rep Part 1 must contain exactly seven policy-neutral lessons');
+          if(u.managerLessons.length<14)throw new Error(`Insufficient manager curriculum: ${u.managerLessons.length}/14`);
           if(u.media.length<12)throw new Error('Curated media catalog too small');
-          if(!u.lessons.some(x=>/Certified Canvasser Readiness/i.test(x.title)))throw new Error('Certification readiness lesson missing');
+          if(u.salesPolicyGate?.status!=='CURRENT_POLICY_REQUIRED')throw new Error('Sales policy gate missing');
+          const forbidden=['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up','Financing','Contract','Rescission'];
+          const salesTitles=u.lessons.filter(x=>x.stage==='sales-rep').map(x=>x.title);
+          for(const term of forbidden)if(salesTitles.some(t=>t.toLowerCase().includes(term.toLowerCase())))throw new Error(`Policy-sensitive operational lesson published before current policy verification: ${term}`);
+          if(!u.lessons.some(x=>/Certified Canvasser Readiness/i.test(x.title)))throw new Error('Canvasser certification readiness lesson missing');
           if(!u.lessons.some(x=>x.id==='senior-sales-readiness'))throw new Error('Senior sales-readiness lesson missing');
-          if(!u.lessons.some(x=>x.id==='sales-process-map'))throw new Error('Sales process map missing');
-          if(!u.lessons.some(x=>x.id==='sales-shadowing'))throw new Error('Sales shadowing lesson missing');
+          if(!u.lessons.some(x=>x.id==='sales-process-map'))throw new Error('Sales Apprentice process map missing');
+          if(!u.lessons.some(x=>x.id==='sales-shadowing'))throw new Error('Sales Apprentice shadowing lesson missing');
           if(!u.managerLessons.some(x=>x.id==='manager-ridealong'))throw new Error('Manager ride-along lesson missing');
           if(!u.managerLessons.some(x=>x.id==='manager-future-sales'))throw new Error('Future-sales development lesson missing');
           if(!u.managerLessons.some(x=>x.id==='manager-incidents'))throw new Error('Manager incident lesson missing');
@@ -92,9 +102,11 @@ jobs:
           if(!five?.sources?.includes('daveFive'))throw new Error('Five Commitments lesson not linked to exact source');
           const apprentice=u.lessons.filter(x=>x.stage==='sales-apprentice').map(x=>`${x.title} ${x.learn} ${x.pass}`).join(' ');
           if(!/not authorization to sell at the door/i.test(apprentice))throw new Error('Sales Apprentice doorstep boundary missing');
+          const coreSales=u.lessons.filter(x=>x.stage==='sales-rep').map(x=>`${x.title} ${x.learn} ${x.pass}`).join(' ');
+          if(!/current Paradise|current approved|current product/i.test(coreSales))throw new Error('Sales Rep current-source accuracy boundary missing');
           const mg=u.managerLessons.map(x=>`${x.title} ${x.learn} ${x.pass}`).join(' ');
           if(!/do not improvise law|does not override the live municipality|NO-GO/i.test(mg))throw new Error('Manager compliance boundary missing');
-          console.log({version:u.version,lessons:u.lessons.length,managerLessons:u.managerLessons.length,media:u.media.length,drills:u.drills.length});
+          console.log({version:u.version,lessons:u.lessons.length,managerLessons:u.managerLessons.length,media:u.media.length,drills:u.drills.length,salesRep:salesTitles,policyGate:u.salesPolicyGate.status});
           NODE
       - name: Recompute controlled dataset hash
         shell: bash
@@ -121,8 +133,10 @@ jobs:
           test -f canvass-dist/training-content-v1.js
           test -f canvass-dist/training-content-sourcefix-v1.js
           test -f canvass-dist/training-manager-v1-data.js
+          test -f canvass-dist/training-sales-v1-data.js
           test -f canvass-dist/training-v1.js
           test -f canvass-dist/training-manager-v1-ui.js
+          test -f canvass-dist/training-sales-v1-ui.js
           test -f canvass-dist/training-player-v1.js
       - name: Install isolated Playwright runtime
         shell: bash
