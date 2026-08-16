@@ -6,27 +6,15 @@ As of: 2026-08-16
 
 This checklist implements the physical-device requirement in `PARADISE_UNIVERSITY_V1_SPEC.md`. Automated WebKit/iPhone regression is necessary but does **not** substitute for a real iPhone Safari + installed PWA test.
 
-## Current automated baseline
+## Current software baseline
 
-Runtime checkpoint `ca6c3c14ef8fd0878336554ef150c80dac39915c` passed the full `Validate Paradise University v1` workflow:
+Last fully green software checkpoint before the internal-media policy change: `1e9ed36da001ea8bb80f6fc382bd7368d664b3a1`, validator run `31968623114`.
 
-- syntax/build-boundary checks
-- training content/hardening
-- controlled field baseline
-- training release isolation
-- static production bundle
-- iPhone field regression
-- iPhone offline regression
-- Paradise University iPhone regression
-- device matrix
-
-The current branch may contain documentation-only commits after that runtime checkpoint. Reconfirm the exact branch head is green before using it as a release candidate.
+The current branch has changed after that checkpoint to restore internal Tony Hoty / Dave Yoho / Grosso media. Reconfirm the exact current head is fully green before using it as a release candidate.
 
 ## Hard rule
 
-Do not mark this gate PASS from simulator/WebKit evidence alone.
-
-A PASS requires a named tester, actual iPhone model, iOS version, browser/PWA mode, exact tested commit, date/time, and recorded results below.
+Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires a named tester, actual iPhone model, iOS version, browser/PWA mode, exact tested commit, date/time, and recorded results below.
 
 ## Test device record
 
@@ -42,8 +30,6 @@ A PASS requires a named tester, actual iPhone model, iOS version, browser/PWA mo
 - Offline pass performed: YES / NO
 
 ## A. Field-app regression on physical iPhone
-
-PASS only if all are true:
 
 - [ ] App opens normally in Safari.
 - [ ] App opens normally from installed Home Screen PWA.
@@ -65,102 +51,99 @@ PASS only if all are true:
 - [ ] My Progress is visible without nested navigation.
 - [ ] More remains secondary.
 - [ ] Returning to Lookup is obvious and immediate.
-- [ ] A new user can follow: `Training → Continue Training → lesson → Practice/Pass → Next Lesson` without explanation.
+- [ ] A new user can follow `Training → Continue Training → lesson → Practice/Pass → Next Lesson` without explanation.
 
-## C. Lesson/progress behavior
+## C. Lesson / knowledge / progress behavior
 
 - [ ] Open a lesson and confirm Learn / Watch-Listen / Practice / Pass order is readable.
 - [ ] Complete a non-Quick-Check lesson and confirm local completion records correctly.
-- [ ] Complete a Quick-Check lesson and confirm wrong answer does not falsely mark knowledge passed.
+- [ ] Complete a Quick-Check lesson and confirm a wrong answer does not falsely mark knowledge passed.
 - [ ] Complete the Quick Check correctly and confirm device knowledge state updates.
 - [ ] Close the PWA completely and reopen it.
 - [ ] Confirm lesson progress persists.
 - [ ] Confirm device progress does not claim official HR/company certification.
-- [ ] Confirm Sales Apprentice content still shows the doorstep sales-authority warning.
-- [ ] Confirm Sales Rep graduation/readiness language still requires current company test/manager release.
+- [ ] Confirm Sales Apprentice still shows the doorstep sales-authority warning.
+- [ ] Confirm Sales Rep readiness still requires current company test / manager release.
 
-## D. Media-rights behavior — current build
+## D. Internal trainer-media behavior
 
-Current controlled posture: the 12 curated Tony Hoty / Dave Yoho / Grosso copied media records are retained for lineage but are rights-held and not playable.
+Current project scope treats the curated Tony Hoty / Dave Yoho / Grosso recordings as internal Paradise employee-training content. Rights clearance is **not** a Paradise University release gate.
 
-- [ ] Videos & Audio visibly shows the media-rights gate.
-- [ ] The 12 rights-held items show `RIGHTS REVIEW` rather than Play.
-- [ ] No copied Drive URL is exposed from those cards.
-- [ ] Source Library retains trainer/source lineage without exposing the copied-file link.
-- [ ] Attempting a direct/stale media launch cannot produce a Drive iframe, HTML audio, or HTML video element for a rights-held asset.
-- [ ] Rights-held media does not block lesson completion or career progress.
-- [ ] The app remains stable when moving between Training and Lookup after viewing a rights-held item.
+- [ ] Videos & Audio shows `INTERNAL TRAINING MEDIA` rather than a rights-hold warning.
+- [ ] Tony Hoty, Dave Yoho, and Grosso media cards remain labeled REFERENCE or HISTORICAL as applicable.
+- [ ] Trainer media can be opened from Videos & Audio.
+- [ ] Trainer source links can be opened from Search / Source Library while online.
+- [ ] Opening trainer media never changes its authority classification to Paradise Approved.
+- [ ] Returning from media to Lookup is obvious and immediate.
+- [ ] A trainer recording never overrides a live municipality result or current Paradise-approved lesson.
 
-## E. Physical playback gate — cannot pass until cleared media exists
+Project note: internal-use treatment is an operating decision for this app, not a legal opinion.
 
-The v1 specification requires real-device audio/video playback tests. Because the current release-safe build intentionally has **0 playable third-party copied assets and 0 Paradise-owned approved media assets**, the full media acceptance gate is currently **OPEN**.
+## E. Physical media playback
 
-Before release, load at least:
+Use at least one internal audio item and one internal video item from the current curated catalog.
 
-- one rights-cleared or Paradise-owned audio item; and
-- one rights-cleared or Paradise-owned video item.
+### Current Drive-embedded media path
 
-Then test on the physical iPhone/PWA:
+The current trainer catalog uses Google Drive preview embeds rather than controlled `streamUrl` files. For those items:
 
-### Audio
+- [ ] Drive player loads reliably in Safari while online.
+- [ ] Drive player loads reliably in installed PWA while online.
+- [ ] Audio/video actually starts.
+- [ ] Pause/resume in the Drive player works.
+- [ ] Orientation change does not trap the player.
+- [ ] Close and minimize controls remain reachable.
+- [ ] `MARK COMPLETE` works and persists on device.
+- [ ] `SAVE FOR LATER` works and persists on device.
+- [ ] `NEXT ITEM` advances to the next curated item.
+- [ ] The UI accurately says exact Paradise-controlled speed / seek / resume is unavailable for Drive iframe playback.
 
-- [ ] Play starts reliably.
-- [ ] Pause works.
-- [ ] Resume works.
-- [ ] −15 seconds works.
-- [ ] +30 seconds works.
-- [ ] Scrub/seek works.
-- [ ] 1x / 1.25x / 1.5x / 2x work.
-- [ ] Elapsed/duration display updates.
-- [ ] Close/reopen returns to stored resume position.
-- [ ] Bookmark position works.
-- [ ] Transcript link works if supplied.
-- [ ] Chapters work if supplied.
-- [ ] Mark Complete works.
-- [ ] Next Item works.
-- [ ] Lock-screen/headset controls work if retained as supported behavior.
+### Controlled-stream path — only if a `streamUrl` item is added or claimed
 
-### Video
+If Paradise later loads a controlled audio/video stream and claims enhanced player controls, test:
 
-- [ ] Video starts reliably in Safari.
-- [ ] Video starts reliably in installed PWA.
-- [ ] Inline playback behaves acceptably.
-- [ ] Pause/resume works.
-- [ ] Seek works.
-- [ ] Playback speed works.
-- [ ] Resume position survives app close/reopen.
-- [ ] Orientation change does not trap controls.
-- [ ] Close/minimize player remains reachable in portrait and landscape.
-- [ ] Picture-in-picture is tested only if the product claims/supports it.
+- [ ] Play / pause.
+- [ ] −15 / +30.
+- [ ] Scrub / seek.
+- [ ] 1x / 1.25x / 1.5x / 2x.
+- [ ] Elapsed / duration display.
+- [ ] Close/reopen exact resume.
+- [ ] Bookmark position.
+- [ ] Transcript if supplied.
+- [ ] Chapters if supplied.
+- [ ] Lock-screen/headset controls if claimed.
+- [ ] Picture-in-picture only if claimed.
+
+Do not fail the current Drive-embedded catalog merely because iframe playback cannot expose Paradise-native seek/speed/resume controls; instead confirm the app describes that limitation accurately.
 
 ## F. Offline installed-PWA test
 
 1. Open the app online from the Home Screen PWA.
 2. Visit Lookup, Training, Practice, Career Path, Progress, More, Source Library.
-3. Confirm service worker is active by normal app behavior.
-4. Enable Airplane Mode and disable Wi-Fi.
-5. Relaunch the installed PWA.
+3. Enable Airplane Mode and disable Wi-Fi.
+4. Relaunch the installed PWA.
 
 PASS only if:
 
 - [ ] Core app opens offline.
-- [ ] Previously cached jurisdiction dataset/field behavior remains available exactly as designed.
+- [ ] Cached jurisdiction dataset / field behavior remains available exactly as designed.
 - [ ] Training home opens.
 - [ ] Core lessons open.
-- [ ] Practice opens.
+- [ ] Practice opens with the 20-scenario model.
 - [ ] Career Path opens.
 - [ ] My Progress opens.
 - [ ] Source Library metadata opens.
-- [ ] Rights-held trainer media remains blocked rather than failing into an exposed Drive URL.
+- [ ] Internal trainer-media cards / metadata remain visible.
+- [ ] External Google Drive media is **not represented as offline-cached media**; failed external playback while offline does not break the app shell.
 - [ ] No giant raw media library has been precached.
-- [ ] Returning online restores normal network behavior without clearing progress.
+- [ ] Returning online restores external media/source access without clearing progress.
 
 ## G. Visual / touch QA
 
 - [ ] No text clips under Dynamic Type at normal and one larger text setting.
 - [ ] Buttons have usable tap targets.
 - [ ] Bottom navigation remains reachable above the iPhone home indicator.
-- [ ] Player/rights-hold close control stays inside the viewport.
+- [ ] Player close/minimize controls stay inside the viewport.
 - [ ] No modal traps the user.
 - [ ] No accidental double-tap is required.
 - [ ] No important control depends only on hover.
@@ -168,26 +151,26 @@ PASS only if:
 
 ## H. Acceptance record
 
-### Current-build navigation / rights gate
+### Navigation / field isolation
 
 - Result: PASS / FAIL / NOT RUN
 - Tested commit: _________________________
 - Tester: _______________________________
 - Date: _________________________________
-- Defects / notes: _______________________
+- Notes: _________________________________
 
-### Rights-cleared audio playback
+### Internal audio playback
 
-- Result: PASS / FAIL / BLOCKED — NO CLEARED AUDIO
+- Result: PASS / FAIL / NOT RUN
 - Asset ID: _____________________________
-- Rights basis: PARADISE_OWNED / APPROVED_INTERNAL_HOSTING / EXTERNAL_LINK_ONLY (external link is not an in-app playback test)
+- Playback path: DRIVE EMBED / CONTROLLED STREAM
 - Notes: ________________________________
 
-### Rights-cleared video playback
+### Internal video playback
 
-- Result: PASS / FAIL / BLOCKED — NO CLEARED VIDEO
+- Result: PASS / FAIL / NOT RUN
 - Asset ID: _____________________________
-- Rights basis: PARADISE_OWNED / APPROVED_INTERNAL_HOSTING / EXTERNAL_LINK_ONLY (external link is not an in-app playback test)
+- Playback path: DRIVE EMBED / CONTROLLED STREAM
 - Notes: ________________________________
 
 ### Installed-PWA offline test
@@ -201,7 +184,7 @@ Until the physical device record is completed:
 
 `PHYSICAL_DEVICE_ACCEPTANCE = OPEN`
 
-Until one cleared/Paradise-owned audio and one cleared/Paradise-owned video are physically tested:
+Until one current internal audio item and one current internal video item are physically tested online on the actual iPhone/PWA:
 
 `MEDIA_PLAYBACK_ACCEPTANCE = OPEN`
 
