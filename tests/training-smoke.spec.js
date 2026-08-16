@@ -17,7 +17,7 @@ test('lesson completion persists on the device',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#puContinue').click();
   await expect(page.getByRole('heading',{name:'Welcome to Paradise University'})).toBeVisible();
   await page.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(page.getByText('COMPLETE',{exact:true})).toBeVisible();
-  await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/My Progress/}).first().click();await expect(page.getByText('1 complete',{exact:true})).toBeVisible();
+  await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/My Progress/}).first().click();await expect(page.getByRole('button',{name:/✓ Welcome to Paradise University/})).toBeVisible();
 });
 
 test('approved Paradise lesson is visually separate from reference source media',async({page})=>{
