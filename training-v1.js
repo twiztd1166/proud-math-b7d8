@@ -18,7 +18,7 @@ function puSetPage(page){puPage=page;renderTraining();scrollTo(0,0)}
 function puAuthorityClass(a){return a==='PARADISE_APPROVED'?'approved':a==='HISTORICAL'?'historical':'reference'}
 function puMediaByIds(ids=[]){return ids.map(id=>PU_MEDIA.find(m=>m.id===id)).filter(Boolean)}
 function puSourceByIds(ids=[]){return ids.map(id=>PU_SOURCES[id]).filter(Boolean)}
-function puMediaCard(m){return`<div class="puMediaCard"><div class="puMediaTop"><span class="puBadge ${puAuthorityClass(m.authority)}">${esc(m.authority==='HISTORICAL'?'HISTORICAL':m.authority)}</span><span class="puType">${m.type==='audio'?'AUDIO':'VIDEO'}</span></div><b>${esc(m.title)}</b><small>${esc(m.trainer)} · ${esc(m.note||'')}</small><a class="puOpen" href="${esc(m.url)}" target="_blank" rel="noopener">OPEN IN DRIVE ↗</a></div>`}
+function puMediaCard(m){return`<div class="puMediaCard"><div class="puMediaTop"><span class="puBadge ${puAuthorityClass(m.authority)}">${esc(m.authority==='HISTORICAL'?'HISTORICAL':m.authority)}</span><span class="puType">${m.type==='audio'?'AUDIO':'VIDEO'}</span></div><b>${esc(m.title)}</b><small>${esc(m.trainer)} · ${esc(m.note||'')}</small><div class="puPlayRow"><button class="puPlay" data-media="${esc(m.id)}">PLAY</button><a class="puSourceOpen" href="${esc(m.url)}" target="_blank" rel="noopener">SOURCE ↗</a></div></div>`}
 function puSourceLinks(ids=[]){let s=puSourceByIds(ids);if(!s.length)return'';return`<details class="puSources"><summary>Go deeper / source material</summary><div class="puSourceList">${s.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener"><span><b>${esc(x.title)}</b><small>${esc(x.authority)} · not current field authority</small></span><b>↗</b></a>`).join('')}</div></details>`}
 function puLessonMedia(ids=[]){let m=puMediaByIds(ids);if(!m.length)return'<p>No media is required for this lesson.</p>';return`<div class="puLessonMedia">${m.map(puMediaCard).join('')}</div>`}
 
@@ -62,8 +62,9 @@ function puCareer(){
 function puMedia(){
   const essentials=PU_MEDIA.filter(x=>x.priority==='ESSENTIAL');
   const optional=PU_MEDIA.filter(x=>x.priority!=='ESSENTIAL');
-  M.innerHTML=`<button class="back puBack" id="puBack">← Training</button><h2>Videos & Audio</h2><p class="sub">Curated source media, organized by the skills Paradise actually teaches.</p><div class="puNotice"><b>Important:</b> Original Tony Hoty, Dave Yoho, and Grosso material is reference training. Learn the useful method and concepts; current Paradise scripts, policies, and municipality instructions control.</div><div class="puSection">Canvasser essentials</div><section class="card">${essentials.map(puMediaCard).join('')}</section><div class="puSection">Optional / go deeper</div><section class="card">${optional.map(puMediaCard).join('')}</section><div class="puNotice">The dedicated player pass will add in-app resume, speed controls, seeking, playlists, chapters, and transcript hooks without copying these source files into the public app repository.</div>`;
+  M.innerHTML=`<button class="back puBack" id="puBack">← Training</button><h2>Videos & Audio</h2><p class="sub">Curated source media, organized by the skills Paradise actually teaches.</p><div class="puNotice"><b>Important:</b> Original Tony Hoty, Dave Yoho, and Grosso material is reference training. Learn the useful method and concepts; current Paradise scripts, policies, and municipality instructions control.</div><div class="puSection">Canvasser essentials</div><section class="card">${essentials.map(puMediaCard).join('')}</section><div class="puSection">Optional / go deeper</div><section class="card">${optional.map(puMediaCard).join('')}</section><div class="puNotice"><b>Playback:</b> Tap Play to keep the source in the Paradise player while you move around the app. Drive-only sources use the Drive player today; controlled stream URLs can use Paradise resume, speed, seek, and lock-screen controls without changing the training catalog.</div>`;
   document.getElementById('puBack').onclick=()=>puSetPage('home');
+  if(typeof puBindMediaButtons==='function')puBindMediaButtons(M);
 }
 
 function puProgress(){
@@ -84,6 +85,7 @@ function puLesson(id){
   document.getElementById('puBack').onclick=()=>puSetPage('home');
   document.getElementById('puDone').onclick=()=>{puMark(id,!done);puSetPage('lesson:'+id)};
   document.getElementById('puNext').onclick=()=>{let i=PU_LESSONS.findIndex(l=>l.id===id),n=PU_LESSONS[Math.min(i+1,PU_LESSONS.length-1)];puSetPage('lesson:'+n.id)};
+  if(typeof puBindMediaButtons==='function')puBindMediaButtons(M);
 }
 
 function renderTraining(){
