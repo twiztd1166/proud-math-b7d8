@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import vm from 'node:vm';
+
+const src=fs.readFileSync('plain-data.js','utf8');
+const ctx={window:{}};vm.createContext(ctx);vm.runInContext(src,ctx);
+const obj=ctx.window.PCM_DATA;
+if(!obj||!Array.isArray(obj.records)||!obj.meta)throw new Error('Controlled field dataset missing');
+const hash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
+const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+const go=obj.records.filter(r=>r.release==='GO').length;
+const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+if(hash!==expected)throw new Error(`Dataset hash drift: ${hash}`);
+if(obj.records.length!==78||go!==76||noGo!==2)throw new Error(`Controlled count drift: ${obj.records.length}/${go}/${noGo}`);
+if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error(`NO-GO drift: ${stops.join(', ')}`);
+const prov=fs.readFileSync('provenance-v3-2.js','utf8');
+if(!prov.includes(`datasetSha256:'${expected}'`))throw new Error('Provenance dataset hash drift');
+const boot=fs.readFileSync('boot-v2.js','utf8');
+for(const token of ['records.length!==78','db.meta.goCount!==76','db.meta.noGoCount!==2'])if(!boot.includes(token))throw new Error(`Boot guard missing: ${token}`);
+console.log({status:'PASS',hash,records:obj.records.length,go,noGo,stops});
