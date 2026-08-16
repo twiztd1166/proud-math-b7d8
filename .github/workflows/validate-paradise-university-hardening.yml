@@ -18,8 +18,10 @@ jobs:
       - name: Validate approved training boundaries
         run: |
           node --check scripts/validate-training-hardening.mjs
+          node --check scripts/validate-training-reconciliation.mjs
           node --check scripts/validate-practice-model-v2.mjs
           node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
           node scripts/validate-practice-model-v2.mjs
       - name: Reconfirm controlled field baseline
         run: |
