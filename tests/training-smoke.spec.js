@@ -85,7 +85,7 @@ test('Drive media opens in persistent Paradise player and survives app navigatio
   await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();
   await expect(player.locator('#puDrivePlayer')).toHaveAttribute('src',/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn\/preview/);
   await page.getByRole('button',{name:/Lookup/}).click();
-  await expect(player.getByText('Tonality and Body Language',{exact:true})).toBeVisible();
+  await expect(player.locator('.puPlayerTitle b')).toHaveText('Tonality and Body Language');
   await player.getByRole('button',{name:'Minimize player'}).click();
   await expect(player).toHaveClass(/minimized/);
   await expect(player.getByRole('button',{name:'Open training player'})).toBeVisible();
