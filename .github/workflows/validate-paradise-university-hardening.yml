@@ -1,0 +1,27 @@
+name: Validate Paradise University content hardening
+on:
+  push:
+    branches: [agent/paradise-university-v1]
+concurrency:
+  group: paradise-university-v1-hardening
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate approved training boundaries
+        run: |
+          node --check scripts/validate-training-hardening.mjs
+          node scripts/validate-training-hardening.mjs
+      - name: Reconfirm controlled field baseline
+        run: |
+          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
+          grep -q 'records.length!==78' boot-v2.js
+          grep -q 'db.meta.goCount!==76' boot-v2.js
+          grep -q 'db.meta.noGoCount!==2' boot-v2.js
