@@ -48,13 +48,15 @@ test('training search can find practice content',async({page})=>{
   await expect(page.locator('.puSearchResult.drill').first()).toBeVisible();
 });
 
-test('source library visibly separates source material from current controls',async({page})=>{
+test('source library visibly separates all source groups from current controls',async({page})=>{
   await more(page);await page.getByRole('button',{name:/Source Library/}).click();
   await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
   await expect(page.getByText(/SOURCE \/ REFERENCE MATERIAL:/)).toBeVisible();
   await expect(page.locator('.puSection').filter({hasText:/^Tony Hoty$/})).toBeVisible();
   await expect(page.locator('.puSection').filter({hasText:/^Dave Yoho$/})).toBeVisible();
   await expect(page.locator('.puSection').filter({hasText:/^Rick Grosso \/ Grosso University$/})).toBeVisible();
+  await expect(page.locator('.puSection').filter({hasText:/^Paradise Historical Training$/})).toBeVisible();
+  await expect(page.getByText(/No controlled historical Paradise training source is loaded in this build/)).toBeVisible();
   await expect(page.locator('.puSection').filter({hasText:/^Paradise Current Reference$/})).toBeVisible();
   await expect(page.getByRole('button',{name:/Live Municipality Lookup/})).toBeVisible();
 });
