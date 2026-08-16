@@ -5,6 +5,14 @@
   const allLessons=()=>[...(window.PU_CONTENT?.lessons||[]),...managerLessons()];
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
   const words=s=>norm(s).split(' ').filter(Boolean);
+  const operationalTerms=['permit','permission','no soliciting','soliciting','no go','refusal','leave property','hoa','security','police','code enforcement','hours','door hanger','courtesy notice','literature','price','pricing','financing','finance','contract','cancellation','rescission','appointment','roof','window','door','spouse','household','not interested'];
+  const isOperationalQuery=q=>{const n=norm(q);return operationalTerms.some(x=>n.includes(norm(x)))};
+  const authorityRank=item=>{
+    if(item.type==='lesson')return 0;
+    if(item.type==='drill')return 1;
+    if(item.type==='media')return item.media?.authority==='PARADISE_APPROVED'?2:item.media?.authority==='HISTORICAL'?4:3;
+    return item.source?.authority==='HISTORICAL'?4:3;
+  };
 
   function moreButton(){
     const notice=M.querySelector('.puNotice');
@@ -53,10 +61,16 @@
     return`<button class="puSearchResult ${x.type}" data-result-type="${x.type}" data-result-id="${esc(x.id)}"><span><small>${label}</small><b>${esc(x.title)}</b></span><strong>›</strong></button>`;
   }
   function puSearch(){
-    M.innerHTML=`<button class="back puBack" id="puBack">← More</button><h2>Search Training</h2><p class="sub">Current Paradise lessons are ranked before legacy/source material.</p><div class="puSearchBox"><span>⌕</span><input id="puSearchInput" type="search" autocomplete="off" placeholder="Try: not interested, permit, price…"></div><div class="puNotice"><b>Need the rule for a city?</b> Use Lookup. Training search never replaces the live municipality result.</div><div id="puSearchResults" class="puSearchResults"><div class="puEmpty">Type a word or phrase to search lessons, practice, media, and source material.</div></div>`;
+    M.innerHTML=`<button class="back puBack" id="puBack">← More</button><h2>Search Training</h2><p class="sub">Current Paradise lessons are ranked before legacy/source material for operational questions.</p><div class="puSearchBox"><span>⌕</span><input id="puSearchInput" type="search" autocomplete="off" placeholder="Try: not interested, permit, price…"></div><div class="puNotice"><b>Need the rule for a city?</b> Use Lookup. Training search never replaces the live municipality result.</div><div id="puSearchResults" class="puSearchResults"><div class="puEmpty">Type a word or phrase to search lessons, practice, media, and source material.</div></div>`;
     document.getElementById('puBack').onclick=()=>puSetPage('more');
     const input=document.getElementById('puSearchInput'),box=document.getElementById('puSearchResults');
-    function draw(){const q=input.value.trim();if(!q){box.innerHTML='<div class="puEmpty">Type a word or phrase to search lessons, practice, media, and source material.</div>';return}const hits=searchIndex().map(x=>({...x,_score:score(x,q)})).filter(x=>x._score>0).sort((a,b)=>b._score-a._score||a.title.localeCompare(b.title)).slice(0,20);box.innerHTML=hits.length?hits.map(resultMarkup).join(''):'<div class="puEmpty">No training result found. Try a shorter term, or use Lookup for a municipality rule.</div>';box.querySelectorAll('[data-result-type]').forEach(b=>b.onclick=()=>{const t=b.dataset.resultType,id=b.dataset.resultId;if(t==='lesson')puSetPage('lesson:'+id);else if(t==='drill')puSetPage('practice');else if(t==='media')puPlayerOpen(id)})}
+    function draw(){
+      const q=input.value.trim();if(!q){box.innerHTML='<div class="puEmpty">Type a word or phrase to search lessons, practice, media, and source material.</div>';return}
+      const operational=isOperationalQuery(q);
+      const hits=searchIndex().map(x=>({...x,_score:score(x,q)})).filter(x=>x._score>0).sort((a,b)=>operational?(authorityRank(a)-authorityRank(b)||b._score-a._score||a.title.localeCompare(b.title)):(b._score-a._score||authorityRank(a)-authorityRank(b)||a.title.localeCompare(b.title))).slice(0,20);
+      box.innerHTML=hits.length?hits.map(resultMarkup).join(''):'<div class="puEmpty">No training result found. Try a shorter term, or use Lookup for a municipality rule.</div>';
+      box.querySelectorAll('[data-result-type]').forEach(b=>b.onclick=()=>{const t=b.dataset.resultType,id=b.dataset.resultId;if(t==='lesson')puSetPage('lesson:'+id);else if(t==='drill')puSetPage('practice');else if(t==='media')puPlayerOpen(id)})
+    }
     input.oninput=draw;setTimeout(()=>input.focus(),20);
   }
 
