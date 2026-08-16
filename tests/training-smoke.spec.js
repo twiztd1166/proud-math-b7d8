@@ -14,13 +14,13 @@ test('lesson completion persists on the device',async({page})=>{
   await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/My Progress/}).first().click();await expect(page.getByRole('button',{name:/✓ Welcome to Paradise University/})).toBeVisible();
 });
 
-test('approved Paradise lessons stay separate from reference media and media rights',async({page})=>{
+test('approved Paradise lessons stay separate from internal reference media',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#puContinue').click();
   await expect(page.getByText('PARADISE APPROVED',{exact:true})).toBeVisible();await page.locator('#puBack').click();
   await page.getByRole('button',{name:/Videos & Audio/}).first().click();
-  await expect(page.getByText(/MEDIA RIGHTS GATE/i)).toBeVisible();
+  await expect(page.getByText(/INTERNAL TRAINING MEDIA/i)).toBeVisible();
   await expect(page.getByText('REFERENCE',{exact:true}).first()).toBeVisible();
-  await expect(page.getByText(/not launch-ready because the audit did not recover an explicit Paradise internal re-hosting grant/i)).toBeVisible();
+  await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
 });
 
 test('foundation field-ready and canvasser stages contain real curriculum',async({page})=>{
@@ -55,58 +55,44 @@ test('opening lesson does not misuse courtesy notice where route blocks it',asyn
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/2\. Field Ready/}).click();await page.getByRole('button',{name:/Opening & First 20 Seconds/}).click();await expect(page.getByText(/Do not claim you are handing out notices where the live municipality screen says not to use them/i)).toBeVisible();
 });
 
-test('12 curated third-party media records remain visible for lineage but cannot expose copied Drive links',async({page})=>{
+test('12 curated third-party media records are visible and internally playable',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   for(const title of ['Tonality and Body Language','Formula For Handling Objections','Definition of a Good Lead','The Science of Successful Canvassing','Canvassing 101','New Canvasser Training — Process'])await expect(page.getByText(title,{exact:true}).first()).toBeVisible();
-  await expect(page.locator('[data-playlist="Rights Review — Not Release Ready"] .puMediaCard')).toHaveCount(12);
-  await expect(page.getByRole('button',{name:'RIGHTS REVIEW'})).toHaveCount(12);
-  await expect(page.locator('a.puSourceOpen')).toHaveCount(0);
   const state=await page.evaluate(()=>({playable:window.PU_CURATED_MEDIA_IDS.length,hold:window.PU_RIGHTS_REVIEW_MEDIA_IDS.length,status:window.PU_MEDIA_RIGHTS_CONTROL.status}));
-  expect(state).toEqual({playable:0,hold:12,status:'RELEASE_BLOCKED_PENDING_RIGHTS'});
+  expect(state).toEqual({playable:12,hold:0,status:'INTERNAL_USE_NON_BLOCKING'});
 });
 
-test('Dave Five Commitments source lineage is retained but copied-file link is withheld pending rights',async({page})=>{
+test('Dave Five Commitments source lineage is retained with internal source access',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/3\. Certified Canvasser/}).click();await page.getByRole('button',{name:/Five Appointment Commitments/}).click();await page.getByText('Go deeper / source material').click();
-  const row=page.locator('.puMoreRow').filter({hasText:'Dave Yoho — The Five Commitments'});
-  await expect(row).toBeVisible();await expect(row).toContainText(/RIGHTS REVIEW/);await expect(page.getByRole('link',{name:/Dave Yoho — The Five Commitments/})).toHaveCount(0);
+  const link=page.getByRole('link',{name:/Dave Yoho — The Five Commitments/});await expect(link).toBeVisible();await expect(link).toHaveAttribute('href',/drive\.google\.com|docs\.google\.com/);
 });
 
-test('Grosso expanded source lineage is retained but copied-file link is withheld pending rights',async({page})=>{
+test('Grosso expanded source lineage is retained with internal source access',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await page.getByRole('button',{name:/Full Sales Process Map/}).click();await page.getByText('Go deeper / source material').click();
-  const row=page.locator('.puMoreRow').filter({hasText:/Grosso University — 11-Step Breakdown Expanded Edition/});
-  await expect(row).toBeVisible();await expect(row).toContainText(/RIGHTS REVIEW/);await expect(page.getByRole('link',{name:/11-Step Breakdown Expanded Edition/})).toHaveCount(0);
+  const link=page.getByRole('link',{name:/11-Step Breakdown Expanded Edition/});await expect(link).toBeVisible();await expect(link).toHaveAttribute('href',/drive\.google\.com|docs\.google\.com/);
 });
 
-test('Grosso ride-along source lineage is retained but copied-file link is withheld pending rights',async({page})=>{
+test('Grosso ride-along source lineage is retained with internal source access',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();await page.getByRole('button',{name:/Ride-Along Coaching/}).click();await page.getByText('Go deeper / source material').click();
-  const row=page.locator('.puMoreRow').filter({hasText:/Grosso University — Ride Along Evaluation Form/});await expect(row).toBeVisible();await expect(row).toContainText(/RIGHTS REVIEW/);await expect(page.getByRole('link',{name:/Ride Along Evaluation Form/})).toHaveCount(0);
+  const link=page.getByRole('link',{name:/Ride Along Evaluation Form/});await expect(link).toBeVisible();await expect(link).toHaveAttribute('href',/drive\.google\.com|docs\.google\.com/);
 });
 
-test('direct player call cannot bypass copied trainer media rights hold',async({page})=>{
+test('direct player call opens internal trainer media while preserving reference authority',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
-  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Media rights hold'})).toBeVisible();await expect(player.getByText(/PLAYBACK BLOCKED/)).toBeVisible();await expect(player.locator('iframe,video,audio')).toHaveCount(0);await expect(player.getByRole('link')).toHaveCount(0);
-  await page.locator('#nLook').click();await expect(player.getByRole('dialog',{name:'Media rights hold'})).toBeVisible();await player.getByRole('button',{name:'Close player'}).click();await expect(player).toBeEmpty();
+  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('#puDrivePlayer')).toBeVisible();await expect(player.getByText(/SOURCE \/ REFERENCE/)).toBeVisible();
+  await page.locator('#nLook').click();await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await player.getByRole('button',{name:'Close player'}).click();await expect(player).toBeEmpty();
 });
 
-test('player infrastructure remains available for future rights-cleared controlled streams',async({page})=>{
+test('player infrastructure remains available for internal media and future controlled streams',async({page})=>{
   await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v2');
-  const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION,rights:window.PU_MEDIA_RIGHTS_VERSION,gate:window.PU_MEDIA_PLAYER_RIGHTS_GATE_VERSION}));
-  expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',rights:'2026.08.16-pu-media-rights-v1',gate:'2026.08.16-pu-media-player-rights-v1'});
+  const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION,mediaPolicy:window.PU_MEDIA_RIGHTS_VERSION,gate:window.PU_MEDIA_PLAYER_RIGHTS_GATE_VERSION,control:window.PU_MEDIA_RIGHTS_CONTROL.status}));
+  expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',mediaPolicy:'2026.08.16-pu-media-internal-v2',gate:'2026.08.16-pu-media-player-rights-v1',control:'INTERNAL_USE_NON_BLOCKING'});
 });
 
 test('practice hard-stop model requires stopping instead of rebutting',async({page})=>{
-  await page.goto('/index.html');
-  const state=await page.evaluate(()=>{
-    const x=window.puPracticeScenarioPool().find(s=>s.id==='field-no-go');
-    return{id:x?.id,hardStop:x?.hardStop,answer:x?.answer,accepted:x?.acceptedResponseConcepts||[],prohibited:x?.prohibitedResponseConcepts||[]};
-  });
-  expect(state.id).toBe('field-no-go');expect(state.hardStop).toBeTruthy();expect(state.answer).toMatch(/Do not canvass/i);expect(state.accepted.join(' ')).toMatch(/does not canvass|follows live lookup/i);expect(state.prohibited.join(' ')).toMatch(/knocks anyway|manager override|workaround/i);
+  await page.goto('/index.html');const state=await page.evaluate(()=>{const x=window.puPracticeScenarioPool().find(s=>s.id==='field-no-go');return{id:x?.id,hardStop:x?.hardStop,answer:x?.answer,accepted:x?.acceptedResponseConcepts||[],prohibited:x?.prohibitedResponseConcepts||[]}});expect(state.id).toBe('field-no-go');expect(state.hardStop).toBeTruthy();expect(state.answer).toMatch(/Do not canvass/i);expect(state.accepted.join(' ')).toMatch(/does not canvass|follows live lookup/i);expect(state.prohibited.join(' ')).toMatch(/knocks anyway|manager override|workaround/i);
 });
 
-test('sales apprentice training preserves doorstep boundary',async({page})=>{
-  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
-});
+test('sales apprentice training preserves doorstep boundary',async({page})=>{await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible()});
 
-test('training does not weaken NO-GO field result',async({page})=>{
-  await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#nLook').click();await page.getByPlaceholder('Start typing a city…').fill('Tarpon Springs');await page.locator('.opt').filter({hasText:'Tarpon Springs'}).first().click();await expect(page.locator('.traffic')).toContainText(/NO — DO NOT CANVASS|NO-GO/);
-});
+test('training does not weaken NO-GO field result',async({page})=>{await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#nLook').click();await page.getByPlaceholder('Start typing a city…').fill('Tarpon Springs');await page.locator('.opt').filter({hasText:'Tarpon Springs'}).first().click();await expect(page.locator('.traffic')).toContainText(/NO — DO NOT CANVASS|NO-GO/)});
