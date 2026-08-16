@@ -12,9 +12,9 @@ Fully green internal-media runtime checkpoint: `5670f98e8772184841ba3934a959b082
 
 Full validator run: `31969848140` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix.
 
-Use this immutable candidate URL for the physical test so later working-branch documentation edits cannot change the tested runtime:
+Use this immutable candidate URL for the physical test so later working-branch documentation edits cannot change the tested runtime. Because this URL is pinned to an exact commit, use RawGitHack's permanent-cache CDN form rather than the branch/development form:
 
-`https://raw.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
 
 The controlled jurisdiction baseline at this candidate remains SHA `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`, 78 records / 76 GO / 2 NO-GO.
 
@@ -30,7 +30,7 @@ Do not mark this gate PASS from simulator/WebKit evidence alone. A PASS requires
 - iOS version: __________________________
 - Safari version if shown: ______________
 - Exact working-branch commit: `5670f98e8772184841ba3934a959b082db6d595b`
-- App URL tested: `https://raw.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
+- App URL tested: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5670f98e8772184841ba3934a959b082db6d595b/index.html`
 - Installed to Home Screen: YES / NO
 - Network used for online pass: __________
 - Offline pass performed: YES / NO
