@@ -52,6 +52,21 @@ test('foundation field-ready and canvasser stages contain real curriculum',async
   await expect(page.getByRole('button',{name:/Certified Canvasser Readiness/})).toBeVisible();
 });
 
+test('senior and sales apprentice stages are fully populated',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await page.getByRole('button',{name:/Career Path/}).first().click();
+  await page.getByRole('button',{name:/4\. Senior Canvasser/}).click();
+  await expect(page.getByRole('button',{name:/Advanced Listening & Questioning/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Sales Readiness Check/})).toBeVisible();
+  await page.getByRole('button',{name:/Career Path/}).click();
+  await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();
+  await expect(page.getByRole('button',{name:/Advanced Needs Analysis/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Full Sales Process Map/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/Sales Shadowing/})).toBeVisible();
+  await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
+});
+
 test('opening lesson does not misuse courtesy notice where route blocks it',async({page})=>{
   await page.goto('/index.html');
   await page.getByRole('button',{name:/Training/}).click();
@@ -90,6 +105,16 @@ test('five commitments lesson links the exact Dave source',async({page})=>{
   await expect(link).toHaveAttribute('href','https://drive.google.com/file/d/1Au1PhatdFIG84Azy8LiNXh0QLnjLSuIs/view?usp=drivesdk');
 });
 
+test('sales process map links the exact Grosso Expanded source',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await page.getByRole('button',{name:/Career Path/}).first().click();
+  await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();
+  await page.getByRole('button',{name:/Full Sales Process Map/}).click();
+  await page.getByText('Go deeper / source material').click();
+  await expect(page.getByRole('link',{name:/11-Step Breakdown Expanded Edition/})).toHaveAttribute('href','https://drive.google.com/file/d/100B1iq77BW00sH4HYMO6zPl80ctMsaam/view?usp=drivesdk');
+});
+
 test('Drive media opens in persistent Paradise player and survives app navigation',async({page})=>{
   await page.goto('/index.html');
   await page.getByRole('button',{name:/Training/}).click();
@@ -114,7 +139,7 @@ test('player infrastructure includes custom speed seek resume path for future co
   await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v1');
   const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION}));
   expect(state.player).toBeTruthy();
-  expect(state.version).toBe('2026.08.16-pu-v1-content-2');
+  expect(state.version).toBe('2026.08.16-pu-v1-content-3');
 });
 
 test('practice hard stop says leave rather than rebut',async({page})=>{
