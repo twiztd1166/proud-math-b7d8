@@ -37,7 +37,7 @@ test('Sales Rep Academy uses verified 2026 Paradise policy without weakening the
   expect(source.gate?.unresolved).toEqual(expect.arrayContaining([expect.stringMatching(/price-presentation/i),expect.stringMatching(/Financing presentation/i),expect.stringMatching(/Contract execution/i),expect.stringMatching(/cancellation \/ rescission/i),expect.stringMatching(/full Sales Rep certification/i)]));
   await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByText(/Verified Paradise sales-policy layer/i)).toBeVisible();
-  await expect(page.getByText(/Written \+ verbal test · 85% proficiency/i)).toBeVisible();
+  await expect(page.getByText(/Written \+ verbal test · 85% proficiency/i).first()).toBeVisible();
   await expect(page.getByText(/total average 2–3 hours/i)).toBeVisible();
   await expect(page.getByText(/PROCEDURE GATE — HOLD/)).toBeVisible();
   await expect(page.getByRole('link',{name:/Open verified Paradise policy source/})).toHaveAttribute('href',/138nsdiqs3XeSmq4PXlnGQNHFnDp2EJSe33ldrFu3TNQ/);
