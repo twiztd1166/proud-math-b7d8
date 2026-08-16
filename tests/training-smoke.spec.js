@@ -70,10 +70,36 @@ test('curated media catalog exposes exact Drive source assets',async({page})=>{
   await expect(page.getByText('Definition of a Good Lead',{exact:true}).first()).toBeVisible();
   await expect(page.getByText('The Science of Successful Canvassing',{exact:true})).toBeVisible();
   await expect(page.getByText('Audio Training Program',{exact:true})).toBeVisible();
-  const hrefs=await page.locator('a.puOpen').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
+  const hrefs=await page.locator('a.puSourceOpen').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
   expect(hrefs).toContain('https://drive.google.com/file/d/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn/view?usp=drivesdk');
   expect(hrefs).toContain('https://drive.google.com/file/d/1GCrveqXP0xgc8n2S9WPlVAd9wd9D2X5Y/view?usp=drivesdk');
   expect(hrefs).toContain('https://drive.google.com/file/d/19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0/view?usp=drivesdk');
+});
+
+test('Drive media opens in persistent Paradise player and survives app navigation',async({page})=>{
+  await page.goto('/index.html');
+  await page.getByRole('button',{name:/Training/}).click();
+  await page.getByRole('button',{name:/Videos & Audio/}).first().click();
+  await page.locator('.puMediaCard').filter({hasText:'Tonality and Body Language'}).first().getByRole('button',{name:'PLAY'}).click();
+  const player=page.locator('#puPlayerRoot');
+  await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();
+  await expect(player.locator('#puDrivePlayer')).toHaveAttribute('src',/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn\/preview/);
+  await page.getByRole('button',{name:/Lookup/}).click();
+  await expect(player.getByText('Tonality and Body Language',{exact:true})).toBeVisible();
+  await player.getByRole('button',{name:'Minimize player'}).click();
+  await expect(player).toHaveClass(/minimized/);
+  await expect(player.getByRole('button',{name:'Open training player'})).toBeVisible();
+  await player.getByRole('button',{name:'Open training player'}).click();
+  await expect(player).not.toHaveClass(/minimized/);
+  await player.getByRole('button',{name:'Close player'}).click();
+  await expect(player).toBeEmpty();
+});
+
+test('player infrastructure includes custom speed seek resume path for future controlled streams',async({page})=>{
+  await page.goto('/index.html');
+  await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v1');
+  const has=await page.evaluate(()=>typeof window.puPlayerOpen==='function');
+  expect(has).toBeTruthy();
 });
 
 test('practice hard stop says leave rather than rebut',async({page})=>{
