@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 async function openSalesControls(page){
   await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
-  const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await expect(controls).not.toHaveAttribute('open','');await controls.locator('summary').click();return controls;
+  const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await expect(controls).not.toHaveAttribute('open','');await controls.locator(':scope > summary').click();return controls;
 }
 
 test('future v3.13 code-only validated release requires app update before route while preserving current field rules',async({page})=>{
