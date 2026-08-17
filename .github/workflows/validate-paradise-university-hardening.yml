@@ -21,12 +21,15 @@ jobs:
           node --check scripts/validate-training-reconciliation.mjs
           node --check scripts/validate-deep-audit-controls.mjs
           node --check scripts/validate-practice-model-v2.mjs
+          node --check scripts/validate-training-experience-v2.mjs
           node --check training-deep-audit-fixes-v1.js
+          node --check training-experience-v2.js
           node scripts/validate-training-hardening.mjs
           node scripts/validate-training-reconciliation.mjs
           node scripts/validate-deep-audit-controls.mjs
           node scripts/validate-practice-model-v2.mjs
-      - name: Validate secure trainer playback boundary
+          node scripts/validate-training-experience-v2.mjs
+      - name: Validate secure trainer playback and simplified training boundary
         run: |
           node --check training-player-v1.js
           grep -q '2026.08.17-pu-player-v3-drive-top-level' training-player-v1.js
@@ -36,8 +39,12 @@ jobs:
           if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
           grep -q 'drivetoplevel1' sw.js
           grep -q 'deepaudit1' sw.js
+          grep -q 'trainingux2' sw.js
           grep -q '2026.08.17-pu-deep-audit-fixes-v1' training-deep-audit-fixes-v1.js
           grep -q '2026.08.17-pu-checks-v3-versioned' training-checks-v1.js
+          grep -q '2026.08.17-pu-training-experience-v2' training-experience-v2.js
+          grep -q 'CANVASSER_CORE' training-experience-v2.js
+          grep -q 'PASS QUICK CHECK FIRST' training-experience-v2.js
       - name: Reconfirm controlled field baseline
         run: |
           grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
