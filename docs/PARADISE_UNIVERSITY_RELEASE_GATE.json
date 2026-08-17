@@ -1,21 +1,21 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v17-daily-training1-closeout",
+  "schemaVersion": "2026.08.17-pu-release-gate-v18-machine-only-closeout",
   "status": "NOT_RELEASE_READY",
-  "auditMode": "AUTOMATED_DEEP_VALIDATION_PLUS_DAILY_TRAINING_V1_NO_CURRENT_RUNTIME_PHYSICAL_EVIDENCE",
+  "auditMode": "MAXIMUM_AUTOMATED_VALIDATION_DAILY_TRAINING_V1_HUMAN_AND_PHYSICAL_TESTING_DEFERRED",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
   "currentRuntimeCandidate": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
   "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html",
   "lastBrowserRuntimeChange": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
-  "fullyGreenPreCloseoutControlHead": "625500fc66bd340fb8545c21180c553d07095849",
+  "fullyGreenPreCloseoutControlHead": "6db5159d8dd31f6829521fbd78369bc04234ded4",
   "exactGreenRuns": {
-    "fullValidator": 32050933375,
-    "contentHardening": 32050933365,
-    "uxPolishAndDailyTraining": 32050933377,
-    "adversarialRedTeam": 32050933330
+    "fullValidator": 32067563486,
+    "contentHardening": 32067563549,
+    "uxPolishAndDailyTraining": 32067563555,
+    "adversarialRedTeam": 32067563478
   },
   "dailyTrainingV1": {
-    "status": "PASS_AUTOMATED",
+    "status": "PASS_AUTOMATED_MAXIMUM_CURRENT_COVERAGE",
     "version": "2026.08.17-pu-daily-training-v1",
     "purpose": "Give an employee a clear recommended training plan each distinct training day without creating manager assignments, deadlines, HR records, certification authority, or future-role authorization.",
     "estimatedDailyTime": "10-15 minutes",
@@ -36,10 +36,14 @@
     "distinctDaySequencing": true,
     "missedCalendarDaysDoNotSkipTrainingDays": true,
     "sameDayReopenDoesNotAdvanceTrainingDay": true,
+    "sameDayReopenAutomatedRegression": true,
+    "skippedCalendarGapAutomatedRegression": true,
+    "allThreeDailyActionsRouteAutomatedRegression": true,
     "currentTrackOnlySkillSelection": true,
     "futureSalesOrManagerAutoQueue": false,
     "weakAreaPreferenceRequiresActualDeviceAttemptEvidence": true,
     "cleanStateFabricatesWeakAreas": false,
+    "correctRetryCanClearWeakArea": true,
     "day6UsesCuratedCoachingLibrary": true,
     "trainerAuthorityBoundaryPreserved": true,
     "recommendationOnly": true,
@@ -47,7 +51,10 @@
     "dueDatesOrOverdueBadges": false,
     "officialCertificationClaim": false,
     "dailyCadenceIncludedInManualProgressTransfer": false,
-    "offlineShellIncluded": true
+    "offlineShellIncluded": true,
+    "twoHundredPercentTextDeviceMatrix": "PASS",
+    "horizontalContainmentDeviceMatrix": "PASS",
+    "dailyActionMinimum44CssPixelGeometry": "PASS"
   },
   "automatedDeepRedTeam": {
     "status": "PASS",
@@ -61,9 +68,9 @@
       "WebKit small iPhone",
       "WebKit iPhone landscape",
       "WebKit iPad",
-      "Chromium Android"
+      "Chromium Android — full Chromium channel"
     ],
-    "exactGreenRun": 32050933330,
+    "exactGreenRun": 32067563478,
     "coveredThreats": [
       "prior-version completion cannot satisfy current readiness",
       "prior-version Quick Check cannot satisfy current readiness",
@@ -85,12 +92,17 @@
   "runtimeControlSeparation": {
     "status": "PASS_BY_GITHUB_COMPARE",
     "runtimeCommit": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
-    "validatedPreCloseoutHead": "625500fc66bd340fb8545c21180c553d07095849",
+    "validatedPreCloseoutHead": "6db5159d8dd31f6829521fbd78369bc04234ded4",
     "postRuntimeChangesThroughPreCloseoutHead": [
+      "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
+      "docs/PARADISE_UNIVERSITY_RELEASE_GATE.json",
+      "playwright.config.js",
       "scripts/validate-training-release-isolation.mjs",
       "tests/deep-audit-regression.spec.js",
+      "tests/matrix-smoke.spec.js",
       "tests/offline-regression.spec.js",
       "tests/service-worker-hardening-v1.spec.js",
+      "tests/training-experience-v3.spec.js",
       "tests/training-red-team-v1.spec.js"
     ],
     "browserRuntimeChangedAfterPinnedRuntime": false,
@@ -109,7 +121,7 @@
     ]
   },
   "softwareValidation": {
-    "status": "PASS_AUTOMATED",
+    "status": "PASS_AUTOMATED_MAXIMUM_CURRENT_COVERAGE",
     "syntaxBuildBoundary": "PASS",
     "trainingHardening": "PASS",
     "fieldReleaseIsolation": "PASS",
@@ -121,11 +133,14 @@
     "automatedDailyTrainingV1": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "fullValidatorRun": 32050933375,
-    "contentHardeningRun": 32050933365,
-    "uxPolishRun": 32050933377,
-    "adversarialRedTeamRun": 32050933330,
-    "validatedControlHead": "625500fc66bd340fb8545c21180c553d07095849",
+    "dailyTrainingTwoHundredPercentTextMatrix": "PASS",
+    "dailyTrainingHorizontalOverflowMatrix": "PASS",
+    "dailyTrainingMinimumActionGeometryMatrix": "PASS",
+    "fullValidatorRun": 32067563486,
+    "contentHardeningRun": 32067563549,
+    "uxPolishRun": 32067563555,
+    "adversarialRedTeamRun": 32067563478,
+    "validatedControlHead": "6db5159d8dd31f6829521fbd78369bc04234ded4",
     "testedRuntimeCommit": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
     "pwaCacheIdentity": "pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-trainingux5-experience3-redteam7-daily1",
     "progressTransferVersion": "2026.08.17-pu-progress-transfer-v2-hardened",
@@ -164,6 +179,18 @@
       "coreAdditionsTrainingAssetsOnly": true
     }
   },
+  "automatedCurriculumContentQA": {
+    "status": "PASS_MACHINE_DETECTABLE_CONTROLS",
+    "currentRoleAuthorityBoundaries": "PASS",
+    "liveMunicipalityLookupOverridesTraining": "PASS",
+    "clearRefusalStopBoundary": "PASS",
+    "noDoorstepPricingContractingOrSellingAuthorization": "PASS",
+    "noGoScenariosTeachNoWorkaround": "PASS",
+    "trainerReferenceHistoricalBoundary": "PASS",
+    "quickCheckCurrentVersionGate": "PASS",
+    "exactPendingOpenerPreserved": "PASS",
+    "note": "This is automated content/control QA only and is not represented as human curriculum or compliance judgment."
+  },
   "physicalFailureHistory": {
     "priorRuntime": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
     "status": "FAIL_DRIVE_IFRAME_ON_REAL_IPHONE",
@@ -180,11 +207,12 @@
     "carryForwardRule": "Historical physical evidence confirms the inherited top-level Drive design worked on a real iPhone; it is not physical acceptance of the current runtime."
   },
   "currentPhysicalAcceptance": {
-    "status": "NOT_RUN_CURRENT_RUNTIME_BY_USER_DIRECTION_UNASSERTED",
-    "requiredRuntime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
-    "reason": "Automated Daily Training and release validation cannot substitute for real iPhone Safari plus fresh installed Home Screen PWA acceptance on the current runtime.",
-    "dailyTrainingPhysicalChecksAdded": true,
-    "simulatorOrCiMisrepresentedAsPhysical": false
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "requiredRuntimeWhenResumed": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "reason": "User explicitly requested no human testing currently and maximum testing on the assistant side. Automated WebKit/iPhone, offline/PWA, device-matrix, Daily Training, and adversarial validation were therefore exhausted, but they are not represented as a real-iPhone physical PASS.",
+    "dailyTrainingPhysicalChecklistPreservedForLater": true,
+    "simulatorOrCiMisrepresentedAsPhysical": false,
+    "machineCloseoutMayProceedWithoutPhysicalPass": true
   },
   "curriculumCurrentness": {
     "status": "ONE_NAMED_DECISION_OPEN",
@@ -216,15 +244,22 @@
     },
     "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, recommended on coaching day, playable, bookmarked, noted, practiced, or transferred.",
     "driveAccessControlEvidence": {
-      "status": "UNVERIFIED",
-      "reason": "Available Drive metadata has not provided permission visibility sufficient to prove whether representative trainer-media sharing is restricted, domain-scoped, or anyone-with-link.",
+      "status": "MACHINE_UNRESOLVED_ACCESS_NOT_VERIFIED",
+      "representativeSharedDriveId": "0AMAf1G5ecwJZUk9PVA",
+      "representativeSharedDriveName": "Canvassing Docs",
+      "representativeTonyVideoId": "1BkukwBkZOQbzae4kwxL7i0Rq4xLxZG4B",
+      "representativeTonyFolderId": "1c2YrBSXSvJrW-rgWUxrb1rWOAZGW_DWR",
+      "authenticatedConnectedAccountAccess": "PASS",
+      "itemPermissionListVisibleToConnector": false,
+      "sourceVisibilityStatus": "access_not_verified",
+      "reason": "The connected Drive API can resolve the representative shared-drive assets but returns null/unavailable item permission and shared-visibility fields, so automation cannot prove restricted, domain-scoped, or anyone-with-link sharing.",
       "permissionsChangedByAudit": false,
-      "releaseImplication": "Do not represent trainer-media sharing as access-controlled until Drive sharing visibility is independently verified."
+      "releaseImplication": "Do not represent trainer-media sharing as access-controlled until item-level sharing visibility is independently available. Shared-drive location alone is not proof of restricted access."
     }
   },
   "humanCurriculumComplianceReview": {
-    "status": "NOT_RUN_BY_USER_DIRECTION_UNASSERTED",
-    "reason": "Automated validation does not synthesize human curriculum/compliance judgment.",
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "reason": "User requested no human testing currently. Automated curriculum/content controls were exhausted and passed, but machine validation is not represented as human curriculum/compliance judgment.",
     "automatedResultDoesNotSynthesizeHumanJudgment": true
   },
   "promotionAuthorization": {
@@ -234,7 +269,7 @@
   "validatedBranchReadback": {
     "status": "PASS_UNCHANGED_PRE_PROMOTION",
     "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-    "note": "No Paradise University promotion occurred during Daily Training v1 implementation or automated closeout."
+    "note": "No Paradise University promotion occurred during Daily Training v1 implementation or machine-only closeout."
   },
   "intermediateFailureHistory": {
     "redteam6HarnessFailure": {
@@ -257,18 +292,28 @@
       "cause": "Offline regression expected the prior redteam7 cache identity even though the new daily1 cache and all required assets were present.",
       "runtimeDefect": false
     },
-    "dailyTrainingRedTeamInfrastructureCrash": {
-      "status": "CLOSED_NON_PRODUCT_INFRASTRUCTURE_FAILURE",
-      "observed": "An earlier control head completed 89 of 90 adversarial executions before Chromium Android headless-shell SIGSEGV while creating a browser context.",
-      "runtimeAssertionReached": false,
-      "finalExactHeadRedTeam": "PASS"
-    },
     "dailyTrainingBroadSuiteSelector": {
       "status": "CLOSED_AS_STALE_TEST_SELECTOR",
       "cause": "Daily Training legitimately added a second visible Welcome to Paradise University button, making an old broad visible-text selector ambiguous. The regression was narrowed to the existing #puContinue control.",
       "runtimeDefect": false
+    },
+    "chromiumHeadlessShellInfrastructureCrash": {
+      "status": "CLOSED_BY_TEST_HARNESS_STABILIZATION",
+      "observed": "Chrome Headless Shell 151 repeatedly SIGSEGV'd on GitHub Ubuntu while creating one Chromium-Android browser context; application assertion was not reached.",
+      "remediation": "The Android automation profile now uses Playwright's installed full Chromium channel while preserving Android viewport, touch, mobile UA, and the same assertions.",
+      "runtimeChanged": false,
+      "releaseIsolationExplicitTestOnlyException": true,
+      "exactGreenRedTeamRunAfterStabilization": 32067563478
     }
   },
   "nonBlockingInfrastructureObservation": "GitHub Actions has warned that actions/checkout@v4 and actions/setup-node@v4 target the deprecated Node.js 20 action runtime and are currently forced to Node.js 24 by the runner. Validation passed; upgrade those actions when an appropriate supported major is available.",
-  "hardRule": "Automated validation for Paradise Daily Training v1 and the existing University stack is PASS with no blocking machine-detectable defect in the covered final matrix, but Paradise University remains NOT_RELEASE_READY. Automated results do not manufacture current-runtime physical acceptance, human curriculum/currentness approval, trainer-media sharing visibility, opener approval, or promotion authorization. The exact opener remains CURRENT APPROVAL PENDING, and production remains unchanged."
+  "machineOnlyCloseout": {
+    "status": "COMPLETE",
+    "head": "6db5159d8dd31f6829521fbd78369bc04234ded4",
+    "runtime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "allFourWorkflowsGreen": true,
+    "humanPhysicalEvidenceManufactured": false,
+    "knownMachineResolvableBlockingDefects": 0
+  },
+  "hardRule": "Maximum available machine validation for Paradise Daily Training v1 and the existing University stack is PASS with no blocking machine-detectable defect in the covered matrix. Paradise University nevertheless remains NOT_RELEASE_READY because automated results do not manufacture current-runtime physical acceptance, human curriculum/currentness approval, trainer-media sharing visibility, opener approval, or promotion authorization. Human and physical testing are currently deferred by user direction, the exact opener remains CURRENT APPROVAL PENDING, and production remains unchanged."
 }
