@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v9",
+  "schemaVersion": "2026.08.17-pu-release-gate-v10",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
@@ -53,12 +53,19 @@
       "actualAudioPlayback": "PASS",
       "reportedResult": "Opened Google Drive and plays. Works."
     },
-    "videoPlayback": "OPEN",
+    "tonyProcessVideo": {
+      "topLevelDriveLaunch": "PASS",
+      "pictureAndAudio": "PASS",
+      "pauseResume": "PASS",
+      "portraitLandscapePortrait": "PASS",
+      "returnToUniversity": "PASS",
+      "reportedResult": "Works."
+    },
     "nonTonyPlayback": "OPEN",
     "installedHomeScreenPWA": "OPEN",
     "physicalOfflineShell": "OPEN",
     "fieldGoNoGoRegression": "OPEN",
-    "note": "The successful Canvassing 101 retest proves the replacement top-level Drive path solves the specific physical iPhone iframe playback blocker for the tested audio asset. It does not complete the full physical-device gate."
+    "note": "The corrected top-level Drive path now has real-iPhone PASS evidence for both Tony audio and Tony video, including video controls/orientation/return. The full physical-device gate remains open for non-Tony, Home Screen PWA, offline-shell, and field GO/NO-GO checks."
   },
   "curriculumCurrentness": {
     "status": "ONE_HUMAN_APPROVAL_OPEN",
@@ -116,16 +123,16 @@
     },
     "mediaPolicyVersion": "2026.08.16-pu-media-internal-v2",
     "mediaUiVersion": "2026.08.16-pu-media-ui-v5",
-    "physicalPlaybackStatus": "PARTIAL_PASS_TONY_AUDIO_TOP_LEVEL_DRIVE",
+    "physicalPlaybackStatus": "PARTIAL_PASS_TONY_AUDIO_AND_VIDEO_TOP_LEVEL_DRIVE",
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
   },
   "physicalDeviceAcceptance": {
-    "status": "RETEST_IN_PROGRESS_TONY_AUDIO_PASS",
+    "status": "RETEST_IN_PROGRESS_TONY_AUDIO_VIDEO_PASS",
     "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
     "attemptRecord": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ATTEMPT_2026-08-17.md",
     "requiredRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-    "closedEvidence": "Tony Hoty Canvassing 101: top-level Google Drive launch PASS and actual physical audio playback PASS on the corrected runtime; known embedded-Drive blocker closed for the tested path.",
-    "remainingRequiredEvidence": "Complete the remaining named-human physical retest on an actual iPhone: Tony video playback, at least one non-Tony item, installed Home Screen PWA behavior, physical offline shell/library, field GO/NO-GO regression, and confirmation that no third-party-cookie workaround is required."
+    "closedEvidence": "Tony Hoty Canvassing 101 audio PASS; Tony Hoty New Canvasser Training — Process video PASS with picture/audio, pause/resume, portrait-landscape-portrait rotation, and return to Paradise University; known embedded-Drive blocker closed for the tested audio/video paths.",
+    "remainingRequiredEvidence": "Complete the remaining named-human physical retest on an actual iPhone: at least one non-Tony item, installed Home Screen PWA behavior, physical offline shell/library, field GO/NO-GO regression, and confirmation that no third-party-cookie workaround is required."
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
@@ -141,5 +148,5 @@
     "status": "NOT_APPLICABLE_UNTIL_PROMOTION",
     "requiredEvidence": "After authorized promotion, read back validated branch commit, dataset SHA, 78/76/2 guards, and operational URL behavior before calling the release live."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. The corrected real-iPhone Tony Canvassing 101 audio/top-level Drive path is now a physical PASS and the known iframe blocker is closed for that path. Remaining blockers are completion of the rest of the physical-device retest, the named human opener-currentness decision within the broader human curriculum/compliance sign-off, and explicit promotion authorization. Do not use Safari third-party-cookie weakening as an acceptance workaround."
+  "hardRule": "A green software validator is necessary but not sufficient for release. The corrected real-iPhone Tony audio and video top-level Drive paths are physical PASS, and the known iframe blocker is closed for those tested paths. Remaining blockers are completion of the non-Tony/Home Screen PWA/offline/field portions of the physical retest, the named human opener-currentness decision within the broader human curriculum/compliance sign-off, and explicit promotion authorization. Do not use Safari third-party-cookie weakening as an acceptance workaround."
 }
