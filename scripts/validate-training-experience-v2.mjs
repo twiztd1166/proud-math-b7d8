@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const req=(p)=>{if(!fs.existsSync(p))throw new Error(`missing ${p}`);return fs.readFileSync(p,'utf8')};
+const index=req('index.html'),exp=req('training-experience-v2.js'),practice=req('training-practice-data-v2.js');
+const fail=m=>{throw new Error(m)};
+if(!index.includes('<script src="training-experience-v2.js"></script>'))fail('training-experience-v2.js not loaded');
+if(index.indexOf('training-experience-v2.js')<index.indexOf('training-deep-audit-fixes-v1.js'))fail('Training Experience v2 must load after deep-audit fixes');
+for(const marker of ['PU_TRAINING_EXPERIENCE_VERSION','CANVASSER_CORE','sales-apprentice-intro','sales-process-map','sales-shadowing','sales-apprentice-ready','COMPLETE CANVASSING LIBRARY','PASS QUICK CHECK FIRST'])if(!exp.includes(marker))fail(`missing experience marker ${marker}`);
+for(const stage of ["'foundation'","'field-ready'","'canvasser'"])if(!exp.includes(stage))fail(`missing default-track stage ${stage}`);
+if(!exp.includes("['tony-new-canvasser-process','tony-canvassing-101'"))fail('Canvasser essentials do not start with Tony process + Canvassing 101');
+if(!exp.includes("v==='lesson:canvass-appointment'?'lesson:canvass-close':v"))fail('appointment lineage repair missing');
+if(!practice.includes("lesson:canvass-appointment"))fail('base practice lineage drifted; v2 repair should remain explicit until canonical source cleanup');
+console.log('Training Experience v2 static validation PASS');
