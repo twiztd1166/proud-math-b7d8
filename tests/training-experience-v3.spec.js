@@ -14,6 +14,24 @@ test('daily sequence counts distinct training days instead of calendar weekdays'
   await page.goto('/index.html');await page.evaluate(()=>localStorage.setItem('puDailyTrainingV1',JSON.stringify({days:['2000-01-01','2000-01-02']})));await page.locator('#nTrain').click();const p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(p.dayNumber).toBe(3);expect(p.cycleDay).toBe(3);expect(p.theme).toBe('Field Compliance');
 });
 
+test('daily same-day reopen is stable and skipped calendar dates do not skip training-day numbers',async({page})=>{
+  await page.goto('/index.html');await page.evaluate(()=>localStorage.removeItem('puDailyTrainingV1'));await page.locator('#nTrain').click();
+  const result=await page.evaluate(()=>{
+    const first=window.puDailyTrainingPlan(),second=window.puDailyTrainingPlan(),state=window.puDailyTrainingState();
+    localStorage.setItem('puDailyTrainingV1',JSON.stringify({days:['2000-01-01','2000-12-31',state.today]}));
+    const afterGap=window.puDailyTrainingPlan(),afterGapState=window.puDailyTrainingState();
+    return{first:first.dayNumber,second:second.dayNumber,firstDays:state.days,afterGap:afterGap.dayNumber,cycleDay:afterGap.cycleDay,theme:afterGap.theme,afterGapDays:afterGapState.days};
+  });
+  expect(result.first).toBe(1);expect(result.second).toBe(1);expect(result.firstDays).toHaveLength(1);expect(result.afterGap).toBe(3);expect(result.cycleDay).toBe(3);expect(result.theme).toBe('Field Compliance');expect(result.afterGapDays).toHaveLength(3);
+});
+
+test('all three daily activities route into their intended training destinations',async({page})=>{
+  await training(page);const kinds=await page.evaluate(()=>{const p=window.puDailyTrainingPlan();return[p.review.kind,p.skill.kind,p.application.kind]});expect(kinds).toEqual(['practice','lesson','practice']);
+  await page.locator('[data-daily-index="0"]').click();expect(await page.evaluate(()=>puPage)).toBe('practice');
+  await page.evaluate(()=>puSetPage('home'));await page.locator('[data-daily-index="1"]').click();expect(await page.evaluate(()=>puPage)).toMatch(/^lesson:/);
+  await page.evaluate(()=>puSetPage('home'));await page.locator('[data-daily-index="2"]').click();expect(await page.evaluate(()=>puPage)).toBe('practice');
+});
+
 test('daily current skill stays inside the controlled core track',async({page})=>{
   await training(page);const p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(['foundation','field-ready','canvasser']).toContain(p.skill.stage);expect(String(p.skill.stage)).not.toMatch(/sales|manager/i);
 });
