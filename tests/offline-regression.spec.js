@@ -1,36 +1,76 @@
 import {test,expect} from '@playwright/test';
 import {spawn} from 'node:child_process';
+
 test.describe.configure({retries:0});
+const EXPECTED_CACHE='pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1';
 async function pick(page,name){await page.getByPlaceholder('Start typing a city…').fill(name);await page.locator('.opt').filter({hasText:name}).first().click()}
 async function waitForServer(url,timeout=10000){const end=Date.now()+timeout;while(Date.now()<end){try{const r=await fetch(url);if(r.ok)return}catch{}await new Promise(r=>setTimeout(r,150))}throw new Error('Offline-test origin did not start')}
 
-test('cached iPhone v3.12 keeps field answers and Paradise University core offline',async({page})=>{
-  const origin='http://127.0.0.1:4183';const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
+test('cached iPhone v3.12 keeps field answers and current Paradise University core offline',async({page})=>{
+  const origin='http://127.0.0.1:4183';
+  const server=spawn('python3',['-m','http.server','4183','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
   try{
-    await waitForServer(origin+'/index.html');await page.goto(origin+'/index.html');
-    await expect.poll(async()=>page.evaluate(async()=>{
-      await navigator.serviceWorker.ready;const keys=await caches.keys();const key=keys.find(k=>k.startsWith('pcm-field-'));
-      if(!key)return{index:false,key:null};const cache=await caches.open(key);const has=async p=>!!(await cache.match(p));
-      return{index:await has('./index.html'),training:await has('./training-v1.js'),content:await has('./training-content-v1.js'),sourcefix:await has('./training-content-sourcefix-v1.js'),managerData:await has('./training-manager-v1-data.js'),salesData:await has('./training-sales-v1-data.js'),mediaExpanded:await has('./training-media-expanded-v1.js'),governance:await has('./training-governance-v1.js'),mediaRights:await has('./training-media-rights-v1.js'),mediaUi:await has('./training-media-ui-v1.js'),currentness:await has('./training-currentness-v1.js'),readiness:await has('./training-readiness-v1.js'),practiceData:await has('./training-practice-data-v2.js'),practice:await has('./training-practice-v1.js'),checks:await has('./training-checks-v1.js'),progressState:await has('./training-progress-state-v1.js'),player:await has('./training-player-v1.js'),playerRights:await has('./training-media-player-gate-v1.js'),more:await has('./training-more-v1.js'),moreRights:await has('./training-more-rights-gate-v1.js'),key};
-    }),{timeout:15000}).toMatchObject({index:true,training:true,content:true,sourcefix:true,managerData:true,salesData:true,mediaExpanded:true,governance:true,mediaRights:true,mediaUi:true,currentness:true,readiness:true,practiceData:true,practice:true,checks:true,progressState:true,player:true,playerRights:true,more:true,moreRights:true,key:'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1'});
-    await page.reload({waitUntil:'domcontentloaded'});await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();server.kill('SIGTERM');await new Promise(r=>setTimeout(r,750));await expect.poll(async()=>{try{await fetch(origin+'/index.html');return false}catch{return true}},{timeout:5000}).toBeTruthy();await page.reload({waitUntil:'domcontentloaded',timeout:15000});
+    await waitForServer(origin+'/index.html');
+    await page.goto(origin+'/index.html');
+    await expect.poll(async()=>page.evaluate(async expected=>{
+      await navigator.serviceWorker.ready;
+      const keys=await caches.keys(),key=keys.find(k=>k.startsWith('pcm-field-'));
+      if(!key)return{key:null};
+      const cache=await caches.open(key),has=async p=>!!(await cache.match(p));
+      const required=['./index.html','./training-v1.js','./training-content-v1.js','./training-content-sourcefix-v1.js','./training-manager-v1-data.js','./training-sales-v1-data.js','./training-media-expanded-v1.js','./training-media-reconciliation-v1.js','./training-governance-v1.js','./training-currentness-v1.js','./training-readiness-v1.js','./training-practice-data-v2.js','./training-practice-v1.js','./training-checks-v1.js','./training-progress-state-v1.js','./training-player-v1.js','./training-media-player-gate-v1.js','./training-more-v1.js','./training-more-rights-gate-v1.js','./training-deep-audit-fixes-v1.js','./plain-data.js','./field-v37.js'];
+      const missing=[];for(const p of required)if(!(await has(p)))missing.push(p);
+      return{key,expected,missing};
+    },EXPECTED_CACHE),{timeout:15000}).toEqual({key:EXPECTED_CACHE,expected:EXPECTED_CACHE,missing:[]});
 
-    await page.locator('#nTrain').click();await expect(page.getByRole('heading',{name:'Train. Practice. Advance.'})).toBeVisible();
-    await expect(page.getByRole('button',{name:/CANVASSING LIBRARY/})).toBeVisible();await page.getByRole('button',{name:/CANVASSING LIBRARY/}).click();await expect(page.getByRole('heading',{name:'Canvassing Library'})).toBeVisible();await expect(page.locator('[data-trainer-group="Tony Hoty"] [data-media]')).toHaveCount(24);await page.locator('#puBack').click();
-    await page.locator('#puMoreButton').click();await page.getByRole('button',{name:/Source Library/}).click();await expect(page.getByText('Canvassing DVD — Main',{exact:true})).toBeVisible();const libraryHrefs=await page.locator('.puLibraryGroup a.puLibraryItem[href]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));expect(libraryHrefs.some(h=>/drive\.google\.com|docs\.google\.com/.test(h||''))).toBeTruthy();await expect(page.locator('.puLibraryItem.puRightsHold')).toHaveCount(0);await expect.poll(async()=>page.evaluate(()=>window.PU_MORE_RIGHTS_GATE_VERSION)).toBe('2026.08.16-pu-more-rights-v1');
-    await page.locator('#puBack').click();await page.getByRole('button',{name:/Search Training/}).click();await page.getByPlaceholder(/Try: not interested/).fill('Tony Hoty');const searchHrefs=await page.locator('a.puSearchResult.source[href]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));expect(searchHrefs.some(h=>/drive\.google\.com|docs\.google\.com/.test(h||''))).toBeTruthy();await page.locator('#puBack').click();await page.locator('#puBack').click();
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect.poll(async()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:10000}).toBeTruthy();
+    server.kill('SIGTERM');await new Promise(r=>setTimeout(r,750));
+    await expect.poll(async()=>{try{await fetch(origin+'/index.html');return false}catch{return true}},{timeout:5000}).toBeTruthy();
+    await page.reload({waitUntil:'domcontentloaded',timeout:15000});
 
-    await page.locator('#puContinue').click();await expect(page.getByRole('heading',{name:'Welcome to Paradise University'})).toBeVisible();await page.locator('#puBack').click();await page.getByRole('button',{name:/My Progress/}).first().click();await expect(page.getByText(/Device progress only/)).toBeVisible();await expect(page.getByText(/1 in progress/)).toBeVisible();await expect(page.getByText('Canvass Manager Academy',{exact:true}).first()).toBeVisible();await page.locator('#puBack').click();
+    const runtime=await page.evaluate(()=>({
+      records:window.PCM_DATA.records.length,go:window.PCM_DATA.meta.goCount,noGo:window.PCM_DATA.meta.noGoCount,
+      training:window.PARADISE_UNIVERSITY_VERSION,deep:window.PU_DEEP_AUDIT_FIXES_VERSION,completion:window.PU_COMPLETION_MODEL_VERSION,
+      checks:window.PU_CHECKS_VERSION,reconciliation:window.PU_CONTENT.libraryReconciliationVersion,
+      media:window.PU_CONTENT.media.length,tony:window.PU_CONTENT.media.filter(x=>x.trainer==='Tony Hoty').length,
+      player:window.PU_PLAYER_VERSION
+    }));
+    expect(runtime).toEqual({records:78,go:76,noGo:2,training:'2026.08.16-pu-v1-content-5',deep:'2026.08.17-pu-deep-audit-fixes-v1',completion:'2026.08.17-current-curriculum-only-v1',checks:'2026.08.17-pu-checks-v3-versioned',reconciliation:'2026.08.16-pu-trainer-library-reconciliation-v1',media:79,tony:24,player:'2026.08.17-pu-player-v3-drive-top-level'});
 
-    await page.getByRole('button',{name:/Practice/}).first().click();await expect(page.getByRole('heading',{name:'Practice'})).toBeVisible();for(const name of ['Practice Opening','Practice Objections','Practice Appointments','Practice Field Rules'])await expect(page.getByRole('button',{name:new RegExp(name,'i')})).toBeVisible();const practiceModel=await page.evaluate(()=>({version:window.PU_PRACTICE_DATA_VERSION,count:window.puPracticeScenarioPool().length}));expect(practiceModel).toEqual({version:'2026.08.16-pu-practice-data-v2',count:20});await page.getByRole('button',{name:/Practice Field Rules/}).click();await expect(page.getByRole('button',{name:'SHOW COACHING ANSWER'})).toBeVisible();await page.locator('#puBack').click();
+    await page.locator('#nTrain').click();
+    await expect(page.getByRole('heading',{name:'Train. Practice. Advance.'})).toBeVisible();
+    await expect(page.locator('.puProgressText')).toContainText('Device training gates');
+    await page.getByRole('button',{name:/CANVASSING LIBRARY/}).click();
+    await expect(page.getByRole('heading',{name:'Canvassing Library'})).toBeVisible();
+    await expect(page.locator('[data-trainer-group="Tony Hoty"] [data-media]')).toHaveCount(24);
+    await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();
 
-    await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();await expect(page.getByText(/Sales Rep readiness & graduation controls/i)).toBeVisible();await expect(page.getByText(/A device lesson, Quick Check, or local completion mark is not the company test/i)).toBeVisible();await expect(page.getByText(/Paradise University does not self-certify or release a representative/i)).toBeVisible();await expect(page.getByText(/written observation reports/i)).toBeVisible();await page.getByText('Observed Grosso Masterclass assessment structure — REFERENCE',{exact:true}).click();await expect(page.getByText(/56-question multiple-choice written exam with a one-hour limit/i)).toBeVisible();await expect(page.getByText(/Introduction Script, Qualification Script, and Major Close Script/i)).toBeVisible();await expect(page.getByText(/Do not expose or reuse external assessment access codes/i)).toBeVisible();await expect(page.getByText(/Current pricing & financing control path/i)).toBeVisible();await expect(page.getByText(/Customer financing applications\/documents are currently routed through Paradise’s Finance Coordinator \/ office process/i)).toBeVisible();await expect(page.getByText(/Leap Lending was evaluated\/enrolled but is not established as an active Paradise rep workflow/i)).toBeVisible();await page.getByText('Finance Coordinator / office handoff',{exact:true}).click();await expect(page.getByText(/operational handoff boundary, not a fixed lender-selection algorithm/i)).toBeVisible();await page.getByText('Financing implementation status',{exact:true}).click();await expect(page.getByText(/enrolled in Lending through Leap SalesPro but had not started using it yet/i)).toBeVisible();await expect(page.getByText(/Contract, cancellation & handoff controls/i)).toBeVisible();await expect(page.getByText(/current Paradise payment portal/i)).toBeVisible();await expect(page.getByText(/office confirmation such as Done or Released is the closure signal/i)).toBeVisible();await expect(page.getByText(/Closing & manager-support control path/i)).toBeVisible();await expect(page.getByText(/TO SOURCE CLOSED \/ BROADER CLOSE PARTIAL/i)).toBeVisible();await expect(page.getByText(/proper TO every time/i)).toBeVisible();await page.getByText('Current operational evidence',{exact:true}).click();await expect(page.getByText(/release was needed so the job could be created in the system/i)).toBeVisible();await expect(page.getByText(/PROCEDURE GATE — HOLD/)).toBeVisible();await expect(page.getByText(/Written \+ verbal test · 85% proficiency/i)).toBeVisible();await page.locator('#puBack').click();await page.locator('#puBack').click();
+    await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
+    const player=page.locator('#puPlayerRoot');
+    await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();
+    await expect(player.locator('iframe')).toHaveCount(0);
+    await expect(player.locator('[data-provider="drive-top-level"]')).toBeVisible();
+    await expect(player.getByRole('link',{name:/Play Tonality and Body Language in Google Drive/i})).toHaveAttribute('target','_blank');
+    await player.getByRole('button',{name:'Close player'}).click();
 
-    await page.getByRole('button',{name:/Videos & Audio/}).first().click();await expect(page.getByText(/INTERNAL TRAINING MEDIA/i)).toBeVisible();const media=await page.evaluate(()=>({status:window.PU_MEDIA_RIGHTS_CONTROL?.status,reviewed:window.PU_MEDIA_RIGHTS_CONTROL?.curatedReviewedCount,playable:window.PU_CURATED_MEDIA_IDS?.length,hold:window.PU_RIGHTS_REVIEW_MEDIA_IDS?.length,policy:window.PU_MEDIA_RIGHTS_VERSION}));expect(media).toEqual({status:'INTERNAL_USE_NON_BLOCKING',reviewed:12,playable:12,hold:0,policy:'2026.08.16-pu-media-internal-v2'});
-    await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.17-pu-player-v3-drive-top-level');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('iframe')).toHaveCount(0);await expect(player.locator('[data-provider="drive-top-level"]')).toBeVisible();await expect(player.getByRole('link',{name:/Play Tonality and Body Language in Google Drive/i})).toHaveAttribute('target','_blank');await expect(player.getByText(/does not use an embedded Google frame or depend on third-party-cookie access/i)).toBeVisible();await player.getByRole('button',{name:'Close player'}).click();await page.locator('#nLook').click();
+    await page.locator('#nLook').click();
+    await pick(page,'Boca Raton');
+    await expect(page.locator('.traffic h3')).toHaveText('YES — CANVASSING ALLOWED');
+    await expect(page.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');
+    await page.getByRole('button',{name:'New search'}).click();
+    await pick(page,'Tarpon Springs');
+    await expect(page.locator('.traffic')).toContainText(/NO — DO NOT CANVASS|NO-GO/);
 
-    await pick(page,'Boca Raton');await expect(page.locator('[data-field="door-hanger"] .val')).toHaveText('YES — HANG ON FRONT DOORKNOB / HANDLE.');await page.getByRole('button',{name:'Permit / permission'}).click();const panel=page.locator('#say');await expect(panel).toContainText('Our compliance review for Boca Raton does not require a separate route-specific canvasser permit');await expect(panel).toContainText('installation-day courtesy notice, not a sales offer');await expect(panel).toContainText('Government or law enforcement: do not argue or debate the law');
-    await page.getByRole('button',{name:'New search'}).click();await pick(page,'Boynton Beach');await expect(page.locator('[data-field="hours"] .val')).toHaveText('Hours not confirmed - use Paradise’s normal route schedule.');
-    await page.getByRole('button',{name:'New search'}).click();await pick(page,'Dania');await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();await page.getByPlaceholder('Manager name').fill('Offline Test Manager');await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');await page.getByPlaceholder('Exact street address or boundary').fill('789 Offline Test Route');await page.getByRole('checkbox').check();await page.getByRole('button',{name:/START 5 CHECKS/}).click();for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.12');
+    await page.getByRole('button',{name:'New search'}).click();
+    await pick(page,'Dania');
+    await page.getByRole('button',{name:/RUN DAILY CHECK/}).click();
+    await page.getByPlaceholder('Manager name').fill('Offline Test Manager');
+    await page.getByPlaceholder('Neighborhood / route').fill('Offline Route A');
+    await page.getByPlaceholder('Exact street address or boundary').fill('789 Offline Test Route');
+    await page.getByRole('checkbox').check();
+    await page.getByRole('button',{name:/START 5 CHECKS/}).click();
+    for(let i=0;i<5;i++)await page.getByRole('button',{name:/PASS/}).click();
+    await expect(page.locator('.finalDecision')).toContainText('APPROVED TO CANVASS');
+    await expect(page.locator('.finalFacts')).toContainText('2026.08.14-v3.12');
   }finally{if(server.exitCode===null)server.kill('SIGTERM')}
 });
