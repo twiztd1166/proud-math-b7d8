@@ -77,7 +77,7 @@ test('forged device progress cannot create an official certification claim',asyn
     window.puApplyProgressTransfer({type:'PARADISE_UNIVERSITY_PROGRESS_TRANSFER',version:window.PU_PROGRESS_TRANSFER_VERSION,trainingVersion:PU_VERSION,data:{puProgress:JSON.stringify(progress),puQuickChecksV1:JSON.stringify(checks)}});
     puSetPage('progress');
   });
-  await expect(page.getByText('OFFICIAL CERTIFICATION')).toBeVisible();await expect(page.getByText('Not stored on this device')).toBeVisible();
+  await expect(page.getByText('OFFICIAL CERTIFICATION',{exact:true})).toBeVisible();await expect(page.getByText('Not stored on this device',{exact:true})).toBeVisible();
   await expect(page.getByText(/Manager demonstration, field verification, and current Paradise requirements remain separate/i)).toBeVisible();
 });
 
