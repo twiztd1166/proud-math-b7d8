@@ -24,6 +24,7 @@ jobs:
           node --check scripts/validate-practice-model-v2.mjs
           node --check scripts/validate-training-experience-v2.mjs
           node --check scripts/validate-training-experience-v3.mjs
+          node --check scripts/validate-release-workflow-controls.mjs
           node --check training-deep-audit-fixes-v1.js
           node --check training-experience-v2.js
           node --check training-ux-polish-v1.js
@@ -35,6 +36,7 @@ jobs:
           node scripts/validate-practice-model-v2.mjs
           node scripts/validate-training-experience-v2.mjs
           node scripts/validate-training-experience-v3.mjs
+          node scripts/validate-release-workflow-controls.mjs
       - name: Validate secure trainer playback and simplified training boundary
         run: |
           node --check training-player-v1.js
