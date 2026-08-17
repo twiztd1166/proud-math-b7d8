@@ -98,7 +98,8 @@ test('Canvassing Library visibly exposes every indexed Tony recording and manual
   await expect(tony.getByText(/Tony Hoty Canvassing Manual/i).first()).toBeVisible();
   await expect(tony.getByText(/Tony Hoty Master Training Manual/i).first()).toBeVisible();
   await expect(tony.getByText('PARADISE APPROVED',{exact:true})).toHaveCount(0);
-  await expect(page.getByText(/existing Paradise canvass script/i)).toBeVisible();
+  await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();
+  await expect(page.getByText(/existing Paradise canvass script/i)).toHaveCount(0);
   await expect(page.getByText(/Advanced sales training does not authorize pricing/i)).toBeVisible();
   await page.getByRole('button',{name:/VIEW ALL TRAINER SOURCE MATERIAL/}).click();
   await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
