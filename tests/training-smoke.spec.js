@@ -41,7 +41,7 @@ test('Sales Rep Academy publishes bounded Part 1 and keeps procedure controls co
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByRole('heading',{name:'Sales Rep'})).toBeVisible();
   await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();await expect(page.getByRole('button',{name:/3\. Survey \/ Needs Analysis/})).toBeVisible();await expect(page.getByRole('button',{name:/7\. Product Presentation/})).toBeVisible();
-  const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await controls.locator('summary').click();await expect(page.getByText(/CURRENT POLICY REQUIRED/)).toBeVisible();
+  const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await controls.locator(':scope > summary').click();await expect(page.getByText(/CURRENT POLICY REQUIRED/)).toBeVisible();
   for(const term of ['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up'])await expect(page.getByRole('button',{name:new RegExp(term,'i')})).toHaveCount(0);
 });
 
