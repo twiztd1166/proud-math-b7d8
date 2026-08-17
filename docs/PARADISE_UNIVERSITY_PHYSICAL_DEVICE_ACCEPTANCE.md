@@ -103,6 +103,7 @@ A current PASS requires a named tester, actual iPhone model, iOS version, Safari
 - [ ] The default Canvasser experience presents one obvious current-role queue rather than multiple competing course lists.
 - [ ] Future-role Sales Apprentice / Sales Rep material is not silently auto-queued for an ordinary Canvasser.
 - [ ] Future-role material remains intentionally discoverable through Career Path when appropriate.
+- [ ] The complete Canvassing Library is **not** a competing home-screen action; it is intentionally one level deeper under Videos & Audio / More Training Tools.
 - [ ] Returning to Lookup is obvious and immediate.
 
 ## C. Quick Check / completion ordering
@@ -125,11 +126,12 @@ Use a required-Quick-Check lesson.
 - [ ] Opening Sales Controls & References makes the underlying evidence/control material reachable.
 - [ ] Collapsing evidence for usability has not removed or changed the substantive controls.
 
-## E. Canvassing Library reachability
+## E. Canvassing Library reachability — intentionally one level deeper
 
-- [ ] Canvassing Library is reachable from **Training home**.
+- [ ] No separate Canvassing Library button competes with the four primary actions on Training home.
 - [ ] Canvassing Library is reachable from **Videos & Audio**.
 - [ ] Canvassing Library is reachable from **More Training Tools**.
+- [ ] The employee can reach the complete library from either route without confusion or a dead end.
 - [ ] Source Library remains available but secondary to the daily employee training path.
 
 ## F. Complete Tony Hoty visibility and deduplication
@@ -210,7 +212,7 @@ The existing candidate opener must remain exactly:
 ## K. Offline installed-PWA test
 
 1. Load the exact current runtime online and refresh/reinstall the Home Screen PWA so cache `trainingux3` is active.
-2. Visit Lookup, Training, Practice, Career Path, My Progress, Canvassing Library, More, Source Library, and the field-opening lesson.
+2. Visit Lookup, Training, Practice, Career Path, My Progress, Canvassing Library through Videos & Audio or More, Source Library, and the field-opening lesson.
 3. Enable Airplane Mode and disable Wi-Fi.
 4. Relaunch the installed PWA.
 
@@ -258,6 +260,8 @@ PASS only if:
 - Quick Check before forward navigation: PASS / FAIL / NOT RUN
 - Manager Quick Check forward guard: PASS / FAIL / NOT RUN
 - Sales Apprentice four-item bridge: YES / NO
+- Library absent from Training home by design: YES / NO
+- Library reachable from Videos & Audio and More: YES / NO
 - Notes: _________________________________
 
 ### Canvassing Library completeness
