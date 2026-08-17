@@ -1,10 +1,10 @@
 # Paradise University v1 — Physical iPhone / PWA Acceptance Gate
 
-Status: **OPEN — CURRENT DAILY TRAINING v1 / TRAINING EXPERIENCE v3 RUNTIME RETEST REQUIRED — NOT PRODUCTION AUTHORIZED**
+Status: **DEFERRED — USER REQUESTED MACHINE-ONLY TESTING — CURRENT RUNTIME PHYSICAL PASS NOT ASSERTED — NOT PRODUCTION AUTHORIZED**
 
 As of: 2026-08-17
 
-Automated WebKit/iPhone regression is necessary but does **not** substitute for a real iPhone Safari + installed Home Screen PWA test.
+User direction is to perform all currently available validation on the machine side and not require human testing now. Automated WebKit/iPhone regression is necessary but does **not** substitute for a real iPhone Safari + installed Home Screen PWA test. The physical checklist below is preserved for later use; current-runtime physical acceptance is neither PASS nor FAIL while deferred.
 
 ## Controlled candidate
 
@@ -12,26 +12,28 @@ Immutable browser runtime candidate:
 
 `3cbbbf5006eb27926c362a97ee959ddadb8b227e`
 
-Exact physical-test URL:
+Exact physical-test URL for any later resumed device pass:
 
 `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html`
 
-Fully green test/control head before this control-document repin:
+Fully green machine test/control head before this control-document repin:
 
-`625500fc66bd340fb8545c21180c553d07095849`
+`6db5159d8dd31f6829521fbd78369bc04234ded4`
 
 Green runs on that exact control head:
 
-- Full validator: `32050933375` — PASS
-- Content hardening: `32050933365` — PASS
-- UX polish + Paradise Daily Training v1: `32050933377` — PASS
-- Adversarial red team: `32050933330` — PASS
+- Full validator: `32067563486` — PASS
+- Content hardening: `32067563549` — PASS
+- UX polish + Paradise Daily Training v1: `32067563555` — PASS
+- Adversarial red team: `32067563478` — PASS
 
-The full validator passed syntax/build boundary, training hardening, the 78 / 76 / 2 field baseline, field-release isolation, production bundle, iPhone field regression, strengthened offline regression, Training Experience v2 red-team, Training Experience v3 including Daily Training v1 regressions, the broader Paradise University iPhone suite, and device matrix.
+The full validator passed syntax/build boundary, training hardening, the 78 / 76 / 2 field baseline, field-release isolation, production bundle, iPhone field regression, strengthened offline regression, Training Experience v2 red-team, Training Experience v3 including expanded Daily Training v1 regressions, the broader Paradise University iPhone suite, and device matrix.
 
-The adversarial red-team gate passed the final five-profile matrix, including progress-transfer/recoverability hardening, exact-queryless service-worker behavior, field-release isolation, authority boundaries, and secure top-level Drive playback.
+The adversarial red-team gate passed the final five-profile matrix. The Android profile now uses Playwright's installed full Chromium channel rather than the Chrome Headless Shell process that had repeatedly crashed before an application assertion could run; viewport, touch/mobile behavior, user agent, and assertions remain unchanged.
 
-The runtime/control separation is deliberate: browser-runtime changes stop at `3cbbbf5…`; GitHub compare proves the five commits through the fully green `625500fc…` pre-closeout head changed only tests or a validator, not browser-runtime files.
+Machine-only Daily Training closeout now also exercises same-day reopen stability, skipped-calendar-day continuity, routing from all three daily activities, actual weak-area evidence and clearing, the Day 6 coaching route, offline rendering, and a five-profile device matrix with 200% text, horizontal containment, and minimum 44 CSS-pixel Daily Training action geometry.
+
+The runtime/control separation is deliberate: browser-runtime changes stop at `3cbbbf5…`; GitHub compare through the fully green `6db5159…` machine test head shows only documentation, Playwright/test configuration, validators, or test files after that immutable runtime.
 
 Paradise Daily Training v1 is a **recommendation layer only**. It does not create manager assignments, due dates, overdue status, HR records, official certification, or future-role authorization. It recommends about 10–15 minutes made of a Quick Review, a current-track Today’s Skill, and an applied Practice/Coaching action. The seven-day cycle advances only on distinct days this device opens Training; skipped calendar days do not skip training days.
 
@@ -46,7 +48,7 @@ Validated production branch remains separate and unchanged at:
 
 `5e7efc40de524bef0e63c76595c3c518925888b9`
 
-This acceptance pass does **not** promote Paradise University.
+Machine-only closeout does **not** promote Paradise University.
 
 ## Prior physical evidence — preserve, do not overstate
 
@@ -69,7 +71,7 @@ Real-iPhone evidence already recorded on that checkpoint:
 
 That evidence remains valid historical evidence for the inherited secure playback design. It is **not** complete physical acceptance of the current Daily Training v1 / Training Experience v3 runtime.
 
-## Test device record
+## Test device record — preserved for later resumed physical acceptance
 
 - Tester: ______________________________
 - Role: ________________________________
@@ -268,10 +270,12 @@ PASS only if:
 
 ## Release disposition
 
-Until the current-runtime checks are completed with a named tester/device and no blocking physical defect remains:
+Current user direction defers the real-device pass while retaining this checklist for later resumption:
 
-`PHYSICAL_DEVICE_ACCEPTANCE = OPEN_CURRENT_RUNTIME_RETEST_REQUIRED`
+`PHYSICAL_DEVICE_ACCEPTANCE = DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST`
+
+This is **not** a physical PASS and **not** a physical FAIL. Maximum available machine-side WebKit/iPhone, offline/PWA, Daily Training, adversarial, and device-matrix validation has been completed separately.
 
 Prior `ac353…` playback evidence remains preserved as historical evidence of the secure Drive path, but it does not convert this Daily Training v1 / Training Experience v3 physical gate to PASS.
 
-Physical PASS does **not** itself approve the canvass opener, complete human curriculum/compliance review, certify employees, prove trainer-media sharing access control, or authorize promotion.
+A future physical PASS would still not itself approve the canvass opener, complete human curriculum/compliance review, certify employees, prove trainer-media sharing access control, or authorize promotion.
