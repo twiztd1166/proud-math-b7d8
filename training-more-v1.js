@@ -125,3 +125,90 @@
   };
   window.PU_MORE_VERSION='2026.08.16-pu-more-v2';
 })();
+
+(()=>{
+  if(typeof puHome!=='function'||typeof puMedia!=='function'||typeof renderTraining!=='function')return;
+  const baseHome=puHome,baseMedia=puMedia,baseRender=renderTraining;
+  const allMedia=()=>window.PU_CONTENT?.media||[];
+  const allSources=()=>window.PU_CONTENT?.sources||{};
+  const norm=s=>String(s||'').toLowerCase();
+  const topicSet=m=>new Set((m.topics||[]).map(norm));
+  const blob=m=>`${m.title||''} ${(m.topics||[]).join(' ')}`.toLowerCase();
+  const mediaRow=m=>`<button class="puLibraryItem puCanvassMedia" data-media="${esc(m.id)}"><span><small>${m.type==='audio'?'AUDIO':'VIDEO'} · ${esc(m.authority==='HISTORICAL'?'HISTORICAL':'REFERENCE')}</small><b>${esc(m.title)}</b><em>${esc(m.trainer||'')}</em></span><strong>▶</strong></button>`;
+  const sourceRow=s=>`<a class="puLibraryItem" href="${esc(s.url)}" target="_blank" rel="noopener"><span><small>${esc(s.authority==='HISTORICAL'?'HISTORICAL SOURCE':'SOURCE / REFERENCE')}</small><b>${esc(s.title)}</b></span><strong>↗</strong></a>`;
+  const group=(title,items,empty='No matching material in this build.')=>`<div class="puSection">${esc(title)} · ${items.length}</div><section class="card puLibraryGroup">${items.length?items.map(mediaRow).join(''):`<div class="puEmpty">${esc(empty)}</div>`}</section>`;
+  const sourceGroup=(title,items)=>`<div class="puSection">${esc(title)} · ${items.length}</div><section class="card puLibraryGroup">${items.length?items.map(sourceRow).join(''):'<div class="puEmpty">No source documents in this group.</div>'}</section>`;
+
+  function tonyBucket(m){
+    const x=blob(m);
+    if(/recruit|manager/.test(x))return'Manager & Recruiting';
+    if(/call back|callback/.test(x))return'Follow-Up & Callbacks';
+    if(/senior/.test(x))return'Senior Canvassing';
+    if(/sound-bite|storm|xactimate|solara|patio|french|entry door|gutter|multi-product/.test(x))return'Specialized & Sound-Bite Examples';
+    if(/dvd|full-program|audio program|video clips/.test(x))return'Full Programs';
+    if(/onboarding|new canvasser|canvassing 101|process/.test(x))return'Start Here / Fundamentals';
+    return'Opening & Appointment Setting';
+  }
+  const tonyOrder=['Start Here / Fundamentals','Opening & Appointment Setting','Follow-Up & Callbacks','Senior Canvassing','Full Programs','Specialized & Sound-Bite Examples','Manager & Recruiting'];
+  function tonyMedia(){return allMedia().filter(x=>x.trainer==='Tony Hoty')}
+  function daveMedia(){return allMedia().filter(x=>x.trainer==='Dave Yoho')}
+  function grossoCanvassMedia(){
+    const supportive=new Set(['tonality','body-language','objections','appointment-quality','lead-quality','delivery','canvassing','communication','mindset','success']);
+    const advanced=new Set(['advanced-selling','rick-grosso-bootcamp','product-demo','company-demo','thermal-titan','virtual-closers']);
+    return allMedia().filter(x=>{
+      if(x.trainer!=='Grosso University')return false;
+      const t=topicSet(x);if([...advanced].some(k=>t.has(k)))return false;
+      return [...supportive].some(k=>t.has(k))||/definition of a good lead|tonality|body language|objection/i.test(x.title||'');
+    });
+  }
+  function trainerSources(name){
+    const rx=name==='Tony Hoty'?/tony hoty/i:name==='Dave Yoho'?/dave yoho/i:/grosso/i;
+    return Object.values(allSources()).filter(x=>rx.test(x.title||''));
+  }
+  function libraryModel(){
+    const tony=tonyMedia(),dave=daveMedia(),grosso=grossoCanvassMedia();
+    return{tonyTotal:tony.length,daveTotal:dave.length,grossoSupportTotal:grosso.length,totalCanvassingMedia:tony.length+dave.length+grosso.length,tonySourceTotal:trainerSources('Tony Hoty').length};
+  }
+  window.puCanvassingLibraryModel=libraryModel;
+
+  function addHomeEntry(){
+    if(document.getElementById('puCanvassingLibraryHome'))return;
+    const grid=M.querySelector('.puGrid');if(!grid)return;
+    const wrap=document.createElement('div');wrap.id='puCanvassingLibraryHome';wrap.className='puMoreWrap';
+    wrap.innerHTML='<button class="puMoreButton" data-canvass-library>CANVASSING LIBRARY <span>›</span></button>';
+    grid.insertAdjacentElement('afterend',wrap);wrap.querySelector('[data-canvass-library]').onclick=()=>puSetPage('canvassing-library');
+  }
+  puHome=function(){baseHome();addHomeEntry()};
+
+  function addMediaEntry(){
+    if(document.getElementById('puCanvassingLibraryMedia'))return;
+    const full=document.getElementById('puFullSourceLibrary');if(!full)return;
+    const b=document.createElement('button');b.id='puCanvassingLibraryMedia';b.className='puMoreButton puMediaLibraryButton';b.innerHTML='OPEN COMPLETE CANVASSING LIBRARY <span>›</span>';b.onclick=()=>puSetPage('canvassing-library');
+    full.parentNode.insertBefore(b,full);
+  }
+  puMedia=function(){baseMedia();addMediaEntry()};
+
+  function addMoreEntry(){
+    if(M.querySelector('[data-more="canvassing-library"]'))return;
+    const list=M.querySelector('.puMoreList');if(!list)return;
+    const b=document.createElement('button');b.className='puMoreRow';b.dataset.more='canvassing-library';b.innerHTML='<span><b>Canvassing Library</b><small>Complete Tony canvassing library plus supporting Yoho and Grosso material.</small></span><strong>›</strong>';b.onclick=()=>puSetPage('canvassing-library');
+    list.insertBefore(b,list.children[1]||null);
+  }
+
+  function puCanvassingLibrary(){
+    const tony=tonyMedia(),dave=daveMedia(),grosso=grossoCanvassMedia(),model=libraryModel();
+    const tonyGroups=tonyOrder.map(name=>({name,items:tony.filter(x=>tonyBucket(x)===name)})).filter(x=>x.items.length);
+    const tonySources=trainerSources('Tony Hoty').sort((a,b)=>{const r=x=>/canvassing manual/i.test(x.title||'')?0:/master training manual/i.test(x.title||'')?1:/audio library/i.test(x.title||'')?2:3;return r(a)-r(b)||(a.title||'').localeCompare(b.title||'')});
+    M.innerHTML=`<button class="back puBack" id="puBack">← Training</button><h2>Canvassing Library</h2><p class="sub">The complete canvassing reference library, organized so field employees can actually find and use it.</p><div class="puNotice"><b>SOURCE / REFERENCE:</b> Trainer recordings and manuals support learning. Current Paradise-approved lessons, the existing Paradise canvass script, manager direction, and the live municipality Lookup remain the operational authority.</div><section class="card"><div class="row"><div class="lab">TONY HOTY</div><div class="val strong">${model.tonyTotal} indexed recordings</div></div><div class="row"><div class="lab">DAVE YOHO</div><div class="val strong">${model.daveTotal} canvassing / lead-generation media</div></div><div class="row"><div class="lab">GROSSO SUPPORT</div><div class="val strong">${model.grossoSupportTotal} field-skill references</div></div></section><div data-trainer-group="Tony Hoty"><div class="puSection">Tony Hoty — Complete Canvassing Library</div><p class="sub">Every indexed Tony canvassing recording is shown below. Historical product examples remain examples, not current Paradise claims or scripts.</p>${tonyGroups.map(x=>group(x.name,x.items)).join('')}${sourceGroup('Tony Manuals & Source Material',tonySources)}</div><div data-trainer-group="Dave Yoho"><div class="puSection">Dave Yoho — Canvassing & Lead Generation</div><p class="sub">Canvassing, lead-generation, and supporting business-development material.</p>${group('Dave Yoho Media',dave)}${sourceGroup('Dave Yoho Source Material',trainerSources('Dave Yoho'))}</div><div data-trainer-group="Grosso University"><div class="puSection">Grosso University — Supporting Canvassing Skills</div><p class="sub">Tonality, objections, communication, and lead-quality material that supports canvassing. Advanced in-home sales programs stay in Career Path / Full Source Library.</p>${group('Grosso Canvassing Support',grosso)}</div><button id="puAllTrainerSource" class="puMoreButton puMediaLibraryButton">VIEW ALL TRAINER SOURCE MATERIAL <span>›</span></button><div class="puNotice"><b>Role boundary:</b> Advanced sales training does not authorize pricing, financing, contracting, closing, or selling at the door.</div>`;
+    document.getElementById('puBack').onclick=()=>puSetPage('home');
+    document.getElementById('puAllTrainerSource').onclick=()=>puSetPage('library');
+    if(typeof puBindMediaButtons==='function')puBindMediaButtons(M);
+  }
+
+  renderTraining=function(){
+    if(view!=='training')return;
+    if(puPage==='canvassing-library')return puCanvassingLibrary();
+    const out=baseRender();if(puPage==='more')addMoreEntry();return out;
+  };
+  window.PU_CANVASSING_LIBRARY_VERSION='2026.08.16-pu-canvassing-library-v1';
+})();
