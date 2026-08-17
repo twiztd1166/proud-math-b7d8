@@ -8,20 +8,23 @@
   const coreStages=Array.isArray(window.PU_DEFAULT_TRACK_STAGES)?[...window.PU_DEFAULT_TRACK_STAGES]:['foundation','field-ready','canvasser'];
   const coreLessons=()=>PU_LESSONS.filter(x=>coreStages.includes(x.stage));
   const ready=x=>typeof window.puLessonTrainingReady==='function'?window.puLessonTrainingReady(x.id):puLessonDone(x.id);
+  const rawCompletion=id=>typeof window.puLessonRawCompletion==='function'?window.puLessonRawCompletion(id):!!puRead()[id]?.complete;
   const completionCurrent=id=>typeof window.puLessonCompletionCurrent==='function'?window.puLessonCompletionCurrent(id):puLessonDone(id);
   const stageName=id=>PU_PATH.find(x=>x.id===id)?.name||id;
   const currentCoreLesson=()=>typeof puNextLesson==='function'?puNextLesson():coreLessons().find(x=>!ready(x))||null;
   const stageLessons=id=>PU_LESSONS.filter(x=>x.stage===id&&coreStages.includes(id));
   const remainingInStage=id=>stageLessons(id).filter(x=>!ready(x)).length;
-  const escHtml=s=>typeof esc==='function'?esc(s):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const escHtml=s=>typeof esc==='function'?esc(s):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
   function lessonObj(id){return PU_LESSONS.find(x=>x.id===id)||(window.PU_CONTENT?.managerLessons||[]).find(x=>x.id===id)}
   function lessonSteps(x,id){
     const steps=['Learn'];if(Array.isArray(x.media)&&x.media.length)steps.push('Watch / Listen');steps.push('Practice');if(typeof puQuickCheckRequired==='function'&&puQuickCheckRequired(id))steps.push('Quick Check');steps.push('Complete');return steps;
   }
   function syncPriorVersionCompletion(id){
-    const done=puLessonDone(id),current=completionCurrent(id);if(!done||current)return;
-    const badge=M.querySelector('.head .puBadge');if(badge&&/COMPLETE/i.test(badge.textContent||'')){badge.textContent='PRIOR VERSION';badge.classList.remove('approved');badge.classList.add('historical')}
+    const rawDone=rawCompletion(id),current=completionCurrent(id);if(!rawDone||current)return;
+    const head=M.querySelector('.head');let badge=head?.querySelector('.puBadge');
+    if(!badge&&head){badge=document.createElement('span');badge.className='puBadge historical';head.appendChild(badge)}
+    if(badge){badge.textContent='PRIOR VERSION';badge.classList.remove('approved');badge.classList.add('historical')}
     const doneBtn=document.getElementById('puDone'),nextBtn=document.getElementById('puNext'),checkRequired=typeof puQuickCheckRequired==='function'&&puQuickCheckRequired(id),passed=!checkRequired||(typeof puQuickCheckPassed==='function'&&puQuickCheckPassed(id));
     if(nextBtn)nextBtn.disabled=true;
     if(doneBtn){doneBtn.disabled=checkRequired&&!passed;doneBtn.textContent=checkRequired&&!passed?'PASS QUICK CHECK FIRST':'MARK COMPLETE FOR CURRENT VERSION';doneBtn.onclick=()=>{puMark(id,true);puSetPage('lesson:'+id)}}
