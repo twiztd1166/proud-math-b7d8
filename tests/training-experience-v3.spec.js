@@ -2,8 +2,28 @@ import {test,expect} from '@playwright/test';
 async function training(page){await page.goto('/index.html');await page.locator('#nTrain').click()}
 
 test('polished home keeps four actions and adds useful milestone context',async({page})=>{
-  await training(page);await expect.poll(async()=>page.evaluate(()=>({polish:window.PU_TRAINING_UX_POLISH_VERSION,v3:window.PU_TRAINING_EXPERIENCE_V3_VERSION}))).toEqual({polish:'2026.08.17-pu-training-ux-polish-v1',v3:'2026.08.17-pu-training-experience-v3'});
+  await training(page);await expect.poll(async()=>page.evaluate(()=>({polish:window.PU_TRAINING_UX_POLISH_VERSION,v3:window.PU_TRAINING_EXPERIENCE_V3_VERSION,daily:window.PU_DAILY_TRAINING_VERSION}))).toEqual({polish:'2026.08.17-pu-training-ux-polish-v1',v3:'2026.08.17-pu-training-experience-v3',daily:'2026.08.17-pu-daily-training-v1'});
   await expect(page.locator('#puContinue small')).toContainText(/NEXT UP · \d+ MIN · 1 OF \d+ · FOUNDATION/i);await expect(page.locator('.puGrid .puTile')).toHaveCount(4);await expect(page.getByRole('button',{name:/CANVASSING LIBRARY/i})).toHaveCount(0);
+});
+
+test('daily training is recommendation-only and gives three useful activities',async({page})=>{
+  await training(page);const daily=page.locator('.puDailyTraining');await expect(daily).toBeVisible();await expect(daily).toContainText('RECOMMENDED FOR TODAY');await expect(daily).toContainText(/Training Day 1/i);await expect(daily.locator('[data-daily-index]')).toHaveCount(3);await expect(daily.getByRole('button',{name:/START TODAY'S TRAINING/i})).toBeVisible();await expect(daily).toContainText(/Recommendation only/i);await expect(daily).not.toContainText(/overdue|required today|deadline assigned/i);
+});
+
+test('daily sequence counts distinct training days instead of calendar weekdays',async({page})=>{
+  await page.goto('/index.html');await page.evaluate(()=>localStorage.setItem('puDailyTrainingV1',JSON.stringify({days:['2000-01-01','2000-01-02']})));await page.locator('#nTrain').click();const p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(p.dayNumber).toBe(3);expect(p.cycleDay).toBe(3);expect(p.theme).toBe('Field Compliance');
+});
+
+test('daily current skill stays inside the controlled core track',async({page})=>{
+  await training(page);const p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(['foundation','field-ready','canvasser']).toContain(p.skill.stage);expect(String(p.skill.stage)).not.toMatch(/sales|manager/i);
+});
+
+test('daily application prefers actual weak-area evidence without fabricating it',async({page})=>{
+  await training(page);let p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(p.application.weak).toBe(false);await page.getByRole('button',{name:/Practice/}).first().click();await page.getByRole('button',{name:/Practice Objections/}).click();await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:/NEED MORE PRACTICE/}).click();await page.locator('#puBack').click();p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(p.application.kind).toBe('practice');expect(p.application.weak).toBe(true);expect(p.application.title).toBe('Practice My Weak Areas');
+});
+
+test('daily day six uses curated coaching rather than auto-queuing future curriculum',async({page})=>{
+  await page.goto('/index.html');await page.evaluate(()=>localStorage.setItem('puDailyTrainingV1',JSON.stringify({days:['2000-01-01','2000-01-02','2000-01-03','2000-01-04','2000-01-05']})));await page.locator('#nTrain').click();const p=await page.evaluate(()=>window.puDailyTrainingPlan());expect(p.dayNumber).toBe(6);expect(p.theme).toBe('Coaching & Library');expect(p.application.kind).toBe('media');
 });
 
 test('lesson overview shows time and learning steps before content',async({page})=>{
