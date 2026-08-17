@@ -64,6 +64,13 @@ test('required Quick Check sits in PASS and completion sequence cannot skip it',
   await page.locator('#puDone').click();await expect(page.getByText('COMPLETE',{exact:true})).toBeVisible();await expect(page.locator('#puNext')).toBeEnabled();
 });
 
+test('manager required Quick Check also blocks forward navigation until passed and completed',async({page})=>{
+  await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();await page.getByRole('button',{name:/Compliance Leadership/}).click();
+  await expect(page.getByText('QUICK CHECK',{exact:true})).toBeVisible();await expect(page.locator('#puDone')).toBeDisabled();await expect(page.locator('#puNext')).toBeDisabled();
+  await page.getByRole('button',{name:/Do not canvass; verify through the current compliance process/}).click();await expect(page.locator('#puDone')).toBeEnabled();await expect(page.locator('#puNext')).toBeDisabled();
+  await page.locator('#puDone').click();await expect(page.locator('#puNext')).toBeEnabled();
+});
+
 test('lesson with no media removes empty WATCH LISTEN block',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/1\. Foundation/}).click();await page.getByRole('button',{name:/Your Job at the Door/}).click();
   await expect(page.getByText('No media is required for this lesson.')).toHaveCount(0);await expect(page.getByText('WATCH / LISTEN',{exact:true})).toHaveCount(0);
