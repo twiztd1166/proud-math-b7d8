@@ -1,6 +1,7 @@
 (()=>{
   const STORE='puPracticeStatsV1';
   const VERSION='2026.08.17-pu-practice-v3-adaptive';
+  const RETRY_VERSION='2026.08.17-pu-practice-v4-retry';
   const WEAK_MODE='__weak__';
   const cats=[
     {id:'Opening',label:'Practice Opening',icon:'◉',help:'First 20 seconds, pace, confidence, delivery.'},
@@ -45,10 +46,11 @@
     document.getElementById('puReveal').onclick=()=>{
       const dims=Array.isArray(activeDrill.scoreDimensions)&&activeDrill.scoreDimensions.length?`<small>FOCUS: ${esc(activeDrill.scoreDimensions.join(' · '))}</small>`:'';
       const coach=activeDrill.coachingNote?`<p class="puPracticeCoachNote"><b>Coaching focus:</b> ${esc(activeDrill.coachingNote)}</p>`:'';
-      document.getElementById('puPracticeAnswer').innerHTML=`<div class="puCoachAnswer"><small>COACHING ANSWER</small><p>${esc(activeDrill.answer)}</p>${dims}${coach}<div class="puRate"><button data-rate="got">✓ GOT IT</button><button data-rate="more">↻ NEED MORE PRACTICE</button></div><button id="puNextScenario" class="btn secondary">NEXT SCENARIO</button></div>`;
+      document.getElementById('puPracticeAnswer').innerHTML=`<div class="puCoachAnswer"><small>COACHING ANSWER</small><p>${esc(activeDrill.answer)}</p>${dims}${coach}<div class="puRate"><button data-rate="got">✓ GOT IT</button><button data-rate="more">↻ NEED MORE PRACTICE</button></div><div class="puPracticeNav"><button id="puRetryScenario" class="btn secondary">TRY THIS ONE AGAIN</button><button id="puNextScenario" class="btn secondary">NEXT SCENARIO</button></div></div>`;
       document.getElementById('puReveal').disabled=true;
       let rated=false;
       document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{if(rated)return;rated=true;record(b.dataset.rate,activeDrill);document.querySelectorAll('[data-rate]').forEach(x=>x.disabled=true);b.classList.add('selected');renderStats();renderWeakEntry()});
+      document.getElementById('puRetryScenario').onclick=()=>scenario();
       document.getElementById('puNextScenario').onclick=()=>{activeDrill=pick(activeCat);scenario()};
     };
   }
@@ -58,6 +60,7 @@
     document.querySelectorAll('[data-practice-cat]').forEach(b=>b.onclick=()=>{activeCat=b.dataset.practiceCat;activeDrill=pick(activeCat);document.querySelectorAll('[data-practice-cat]').forEach(x=>x.classList.toggle('active',x===b));scenario()});
   };
   window.PU_PRACTICE_VERSION=VERSION;
+  window.PU_PRACTICE_RETRY_VERSION=RETRY_VERSION;
   window.puPracticeStats=stats;
   window.puPracticeScenarioPool=sourceScenarios;
   window.puPracticeCurrentScenario=()=>activeDrill;
