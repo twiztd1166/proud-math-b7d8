@@ -39,6 +39,7 @@ const approvedIndexAdditions=[
   '<link rel="stylesheet" href="training-checks-v1.css">',
   '<link rel="stylesheet" href="training-more-v1.css">',
   '<link rel="stylesheet" href="training-experience-v3.css">',
+  '<link rel="stylesheet" href="training-daily-v1.css">',
   '<button id="nTrain"><b>▶</b>Training</button>',
   '<script src="training-content-v1.js"></script>',
   '<script src="training-content-sourcefix-v1.js"></script>',
@@ -67,6 +68,7 @@ const approvedIndexAdditions=[
   '<script src="training-experience-v2.js"></script>',
   '<script src="training-ux-polish-v1.js"></script>',
   '<script src="training-experience-v3.js"></script>',
+  '<script src="training-daily-v1.js"></script>',
   '<script src="training-storage-hardening-v1.js"></script>'
 ];
 for(const token of approvedIndexAdditions){
