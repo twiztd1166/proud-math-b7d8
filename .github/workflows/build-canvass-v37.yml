@@ -7,6 +7,7 @@ concurrency:
   cancel-in-progress: true
 permissions:
   contents: write
+  actions: read
 jobs:
   validate:
     if: github.actor != 'github-actions[bot]'
@@ -112,6 +113,39 @@ jobs:
         run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
       - name: Run device matrix regression
         run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
+      - name: Require University same-SHA release gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED=(
+            'Validate Paradise University v1'
+            'Validate Paradise University content hardening'
+            'Validate Paradise University UX polish'
+            'Validate Paradise University adversarial red team'
+          )
+          DEADLINE=$((SECONDS + 900))
+          while true; do
+            gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" > /tmp/pu-runs.json
+            MISSING=0
+            PENDING=0
+            FAILED=0
+            for NAME in "${EXPECTED[@]}"; do
+              STATE="$(jq -r --arg n "$NAME" '[.workflow_runs[] | select(.name==$n)] | sort_by(.id) | last | if . == null then "MISSING" else (.status + ":" + (.conclusion // "")) end' /tmp/pu-runs.json)"
+              echo "$NAME => $STATE"
+              case "$STATE" in
+                MISSING) MISSING=$((MISSING + 1)) ;;
+                completed:success) ;;
+                completed:*) FAILED=$((FAILED + 1)) ;;
+                *) PENDING=$((PENDING + 1)) ;;
+              esac
+            done
+            if [ "$FAILED" -gt 0 ]; then echo 'A Paradise University release gate failed on this exact source SHA.'; exit 1; fi
+            if [ "$MISSING" -eq 0 ] && [ "$PENDING" -eq 0 ]; then break; fi
+            if [ "$SECONDS" -ge "$DEADLINE" ]; then echo 'Timed out waiting for exact-SHA Paradise University release gates.'; exit 1; fi
+            sleep 10
+          done
       - name: Publish validated snapshot artifacts and metadata
         shell: bash
         run: |
@@ -126,3 +160,4 @@ jobs:
           NODE
           git add latest.json
           if ! git diff --cached --quiet; then git commit -m 'Publish validated canvass app metadata'; git push origin HEAD:paradise-canvass-manager-public; fi
+          git push origin "$VALIDATED_SHA:refs/heads/paradise-canvass-manager-validated"
