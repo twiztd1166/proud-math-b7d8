@@ -41,7 +41,10 @@
       [/approved words/ig,'current manager-approved words']
     ];
     const rewrite=v=>replacements.reduce((s,[rx,to])=>String(s||'').replace(rx,to),v);
-    window.PU_PRACTICE_SCENARIOS=Object.freeze(window.PU_PRACTICE_SCENARIOS.map(x=>Object.freeze({...x,prompt:rewrite(x.prompt),answer:rewrite(x.answer),coachingNote:rewrite(x.coachingNote)})));
+    window.PU_PRACTICE_SCENARIOS=Object.freeze(window.PU_PRACTICE_SCENARIOS.map(x=>{
+      const sourceLineage=(x.sourceLineage||[]).map(v=>v==='lesson:canvass-appointment'?'lesson:canvass-close':v);
+      return Object.freeze({...x,prompt:rewrite(x.prompt),answer:rewrite(x.answer),coachingNote:rewrite(x.coachingNote),sourceLineage:Object.freeze(sourceLineage)});
+    }));
   }
 
   // When all device-training gates are current, there is no phantom "next" lesson.
