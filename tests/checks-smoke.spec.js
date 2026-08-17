@@ -35,7 +35,7 @@ test('Manager Quick Check prevents NO-GO override',async({page})=>{
 });
 
 test('knowledge evidence persists but remains separate from content progress and certification',async({page})=>{
-  await careerLesson(page,/3\. Certified Canvasser/,/Certified Canvasser Readiness/);
+  await careerLesson(page,/3\. Canvasser/,/Certified Canvasser Readiness/);
   await page.getByRole('button',{name:/No — manager demonstration and field verification still matter/}).click();
   let state=await page.evaluate(()=>({checks:window.puQuickCheckStats(),progress:JSON.parse(localStorage.puProgress||'{}'),required:window.puQuickCheckRequired('canvass-cert-ready'),passed:window.puQuickCheckPassed('canvass-cert-ready'),ready:window.puLessonTrainingReady('canvass-cert-ready')}));
   expect(state.checks['canvass-cert-ready'].correct).toBe(1);
@@ -54,11 +54,11 @@ test('knowledge evidence persists but remains separate from content progress and
 test('content completion alone leaves a required knowledge gate pending',async({page})=>{
   await careerLesson(page,/2\. Field Ready/,/Check the Municipality Before You Knock/);
   await page.getByRole('button',{name:'MARK COMPLETE'}).click();
-  await expect(page.getByText(/required Quick Check still pending/i)).toBeVisible();
+  await expect(page.getByText(/current-version Quick Check still pending/i)).toBeVisible();
   const state=await page.evaluate(()=>({done:!!JSON.parse(localStorage.puProgress||'{}')['field-lookup']?.complete,passed:window.puQuickCheckPassed('field-lookup'),ready:window.puLessonTrainingReady('field-lookup')}));
   expect(state.done).toBeTruthy();expect(state.passed).toBeFalsy();expect(state.ready).toBeFalsy();
 });
 
 test('Quick Check version is explicit',async({page})=>{
-  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_CHECKS_VERSION)).toBe('2026.08.16-pu-checks-v2');
+  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_CHECKS_VERSION)).toBe('2026.08.17-pu-checks-v3-versioned');
 });
