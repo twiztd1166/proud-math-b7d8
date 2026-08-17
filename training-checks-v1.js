@@ -16,7 +16,8 @@
   const write=v=>localStorage[STORE]=JSON.stringify(v);
   const required=id=>!!checks[id];
   const passed=id=>{const x=read()[id]||{};return!!x.passed&&x.checksVersion===VERSION&&x.trainingVersion===PU_VERSION};
-  const trainingReady=id=>puLessonDone(id)&&(!required(id)||passed(id));
+  const completionCurrent=id=>{const x=puRead()[id]||{};return!!x.complete&&x.trainingVersion===PU_VERSION};
+  const trainingReady=id=>completionCurrent(id)&&(!required(id)||passed(id));
   function save(id,correct){
     let s=read(),x=s[id]||{attempts:0,correct:0,passed:false};
     if(x.passed&&(x.checksVersion!==VERSION||x.trainingVersion!==PU_VERSION)){
@@ -51,12 +52,13 @@
   puLesson=function(id){
     baseLesson(id);inject(id);
     if(!PU_LESSONS.some(x=>x.id===id)&&!(window.PU_CONTENT?.managerLessons||[]).some(x=>x.id===id))return;
-    const done=puLessonDone(id),needs=required(id),ready=trainingReady(id),actions=document.querySelector('.puLessonActions');
-    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=done?(needs&&!ready?'Content marked complete; current-version Quick Check still pending.':'Content marked complete for the current training version on this device. Official certification remains separate.'):'Mark Complete records current-version content progress only; it is not official certification.';actions.appendChild(note)}
+    const done=puLessonDone(id),current=completionCurrent(id),needs=required(id),ready=trainingReady(id),actions=document.querySelector('.puLessonActions');
+    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=done&&!current?'Prior-version content completion is preserved as history; complete this lesson again for the current training version.':done?(needs&&!ready?'Content marked complete; current-version Quick Check still pending.':'Content marked complete for the current training version on this device. Official certification remains separate.'):'Mark Complete records current-version content progress only; it is not official certification.';actions.appendChild(note)}
   };
   window.PU_CHECKS_VERSION=VERSION;
   window.puQuickCheckStats=read;
   window.puQuickCheckRequired=required;
   window.puQuickCheckPassed=passed;
+  window.puLessonCompletionCurrent=completionCurrent;
   window.puLessonTrainingReady=trainingReady;
 })();
