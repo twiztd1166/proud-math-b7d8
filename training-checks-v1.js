@@ -1,5 +1,6 @@
 (()=>{
   const STORE='puQuickChecksV1';
+  const VERSION='2026.08.17-pu-checks-v3-versioned';
   const checks={
     'field-lookup':{q:'Training says a technique is allowed, but the live municipality lookup says NO-GO. What controls?',choices:['The training lesson','The live municipality lookup','Whichever the manager prefers'],correct:1,why:'The live municipality instructions control the actual route. Do not canvass a NO-GO area.'},
     'field-refusal':{q:'A resident says, “No. Leave my property.” What is the correct next step?',choices:['Ask one more qualifying question','Leave immediately','Give the courtesy notice first'],correct:1,why:'A clear refusal is a stop, not an objection to rebut.'},
@@ -14,19 +15,27 @@
   const read=()=>{try{return JSON.parse(localStorage[STORE]||'{}')}catch{return{}}};
   const write=v=>localStorage[STORE]=JSON.stringify(v);
   const required=id=>!!checks[id];
-  const passed=id=>!!read()[id]?.passed;
+  const passed=id=>{const x=read()[id]||{};return!!x.passed&&x.checksVersion===VERSION&&x.trainingVersion===PU_VERSION};
   const trainingReady=id=>puLessonDone(id)&&(!required(id)||passed(id));
-  function save(id,correct){let s=read(),x=s[id]||{attempts:0,correct:0,passed:false};x.attempts++;if(correct){x.correct++;x.passed=true}x.lastCorrect=correct;x.updatedAt=new Date().toISOString();s[id]=x;write(s)}
+  function save(id,correct){
+    let s=read(),x=s[id]||{attempts:0,correct:0,passed:false};
+    if(x.passed&&(x.checksVersion!==VERSION||x.trainingVersion!==PU_VERSION)){
+      const history=Array.isArray(x.versionHistory)?x.versionHistory.slice():[];
+      history.push({checksVersion:x.checksVersion||'',trainingVersion:x.trainingVersion||'',passedAt:x.updatedAt||''});
+      x={attempts:0,correct:0,passed:false,versionHistory:history.slice(-10)};
+    }
+    x.attempts=Number(x.attempts||0)+1;if(correct){x.correct=Number(x.correct||0)+1;x.passed=true}x.lastCorrect=correct;x.updatedAt=new Date().toISOString();x.checksVersion=VERSION;x.trainingVersion=PU_VERSION;s[id]=x;write(s)
+  }
   function inject(id){
     const c=checks[id];if(!c)return;
     const notices=M.querySelectorAll('.puNotice');const anchor=notices.length?notices[notices.length-1]:null;
-    const card=document.createElement('section');card.className='card puQuickCheck';card.innerHTML=`<div class="puLessonStep"><small>QUICK CHECK</small><h3>${esc(c.q)}</h3><div class="puCheckChoices">${c.choices.map((x,i)=>`<button data-pu-check="${i}">${esc(x)}</button>`).join('')}</div><div class="puCheckFeedback" aria-live="polite">${passed(id)?`<b>✓ Knowledge check passed on this device</b><p>Content progress and manager/field verification remain separate.</p>`:''}</div></div>`;
+    const card=document.createElement('section');card.className='card puQuickCheck';card.innerHTML=`<div class="puLessonStep"><small>QUICK CHECK</small><h3>${esc(c.q)}</h3><div class="puCheckChoices">${c.choices.map((x,i)=>`<button data-pu-check="${i}">${esc(x)}</button>`).join('')}</div><div class="puCheckFeedback" aria-live="polite">${passed(id)?`<b>✓ Knowledge check passed for the current training version on this device</b><p>Content progress and manager/field verification remain separate.</p>`:''}</div></div>`;
     if(anchor)M.insertBefore(card,anchor);else M.appendChild(card);
     const feedback=card.querySelector('.puCheckFeedback');let answered=false;
     card.querySelectorAll('[data-pu-check]').forEach(b=>b.onclick=()=>{
       if(answered)return;answered=true;const choice=Number(b.dataset.puCheck),ok=choice===c.correct;save(id,ok);
       card.querySelectorAll('[data-pu-check]').forEach((x,i)=>{x.disabled=true;if(i===c.correct)x.classList.add('correct');else if(x===b&&!ok)x.classList.add('wrong')});
-      feedback.innerHTML=`<b>${ok?'✓ Correct':'Review this one'}</b><p>${esc(c.why)}${ok?' This satisfies the device knowledge check only; it does not create official certification.':''}</p>`;
+      feedback.innerHTML=`<b>${ok?'✓ Correct':'Review this one'}</b><p>${esc(c.why)}${ok?' This satisfies the current-version device knowledge check only; it does not create official certification.':''}</p>`;
     });
   }
   const baseNext=puNextLesson;
@@ -43,9 +52,9 @@
     baseLesson(id);inject(id);
     if(!PU_LESSONS.some(x=>x.id===id)&&!(window.PU_CONTENT?.managerLessons||[]).some(x=>x.id===id))return;
     const done=puLessonDone(id),needs=required(id),ready=trainingReady(id),actions=document.querySelector('.puLessonActions');
-    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=done?(needs&&!ready?'Content marked complete; required Quick Check still pending.':'Content marked complete on this device. Official certification remains separate.'):'Mark Complete records content progress only; it is not official certification.';actions.appendChild(note)}
+    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=done?(needs&&!ready?'Content marked complete; current-version Quick Check still pending.':'Content marked complete for the current training version on this device. Official certification remains separate.'):'Mark Complete records current-version content progress only; it is not official certification.';actions.appendChild(note)}
   };
-  window.PU_CHECKS_VERSION='2026.08.16-pu-checks-v2';
+  window.PU_CHECKS_VERSION=VERSION;
   window.puQuickCheckStats=read;
   window.puQuickCheckRequired=required;
   window.puQuickCheckPassed=passed;
