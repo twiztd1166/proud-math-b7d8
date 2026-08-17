@@ -1,72 +1,93 @@
 # Paradise University v1 — Physical iPhone / PWA Acceptance Gate
 
-Status: REQUIRED HUMAN DEVICE GATE — NOT YET PASSED
+Status: RETEST REQUIRED AFTER DRIVE-IFRAME FIX — NOT YET PASSED
 
-As of: 2026-08-16
+As of: 2026-08-17
 
 This checklist implements the physical-device requirement in `PARADISE_UNIVERSITY_V1_SPEC.md`. Automated WebKit/iPhone regression is necessary but does **not** substitute for a real iPhone Safari + installed Home Screen PWA test.
 
 ## Current software baseline
 
-Current fully green runtime candidate: `5eb794090a0a20f13d63c34ab05ac2b68877147c`.
+Current fully green runtime candidate: `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`.
 
-Current full validator run: `31983974156` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix.
+Current full validator evidence: run `32010356293` — PASS through syntax/build boundary, training hardening, exact field baseline, release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone regression, and device matrix.
 
-Current content-hardening run: `31983974058` — PASS.
+Current content-hardening evidence: run `32010356249` — PASS, including the permanent secure trainer-playback boundary that fails if an embedded training `<iframe>` is reintroduced.
 
-Use this immutable runtime URL for the physical test:
+Use this immutable runtime URL for the physical retest:
 
-`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5eb794090a0a20f13d63c34ab05ac2b68877147c/index.html`
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ac353dcea74bbb8ca262e5f55deaa8c61ee08752/index.html`
 
 The controlled jurisdiction baseline remains SHA `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`, 78 records / 76 GO / 2 NO-GO.
 
-The validated production/manager branch remains separate at `5e7efc40de524bef0e63c76595c3c518925888b9`. This physical test does **not** promote the University runtime.
+The validated production/manager branch remains separate at `5e7efc40de524bef0e63c76595c3c518925888b9`. This physical retest does **not** promote the University runtime.
 
-## What changed since the prior physical packet
+## Prior physical attempt — FAILED / useful evidence
 
-This runtime adds the visible **Canvassing Library** while preserving the simple employee home screen.
+The prior physical test used runtime `5eb794090a0a20f13d63c34ab05ac2b68877147c` on a real iPhone.
 
-Acceptance expectations:
+Observed failure:
 
-- Canvassing Library is reachable from Training home, Videos & Audio, and More Training Tools.
-- All **24 indexed Tony Hoty recordings** are visible in the Canvassing Library.
-- Tony materials are organized into canvassing-focused sections instead of being hidden in a flat source dump.
-- `Tony Hoty Canvassing Manual` and `Tony Hoty Master Training Manual` are directly visible.
-- Dave Yoho and canvassing-relevant Grosso media remain available without converting advanced sales material into canvasser requirements.
-- Trainer material stays `REFERENCE` / `HISTORICAL`; it does not become `PARADISE APPROVED` merely because it is visible.
-- The existing Paradise canvass opener wording was **not changed** by this library update.
-- Live municipality Lookup remains operational authority for field behavior.
+- Paradise University opened the trainer-media modal correctly.
+- The embedded Google Drive player returned `Can't access your Google Account`.
+- Google directed the tester to storage/cookie troubleshooting and stated that some Google embeds require third-party-cookie access.
+- This established that the Drive iframe was not a reliable employee playback mechanism on the physical iPhone.
 
-## Tony media integrity already confirmed before physical test
+Controlled disposition:
 
-Two Tony items were re-fetched directly from the controlled Drive source and fully decoded without media errors:
+`PRIOR_DRIVE_IFRAME_PHYSICAL_PLAYBACK = FAIL`
+
+Do **not** pass the gate by weakening Safari privacy/cookie settings or by requiring an employee to troubleshoot third-party-cookie access.
+
+## Remediation now under test
+
+Runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752` removes Google Drive from the embedded-player path.
+
+For Drive-backed trainer media:
+
+- Paradise University must render **zero Google Drive iframes**.
+- The player presents `PLAY IN GOOGLE DRIVE ↗`.
+- That control opens the original controlled Drive file as a **top-level authorized Google Drive session** rather than embedding Google inside RawGitHack.
+- The original Drive file remains the controlled source/archive and its permissions remain in force.
+- Paradise does **not** mirror Tony Hoty, Dave Yoho, or Grosso media onto the public RawGitHack app origin.
+- Exact external Drive playback position/speed is not claimed by Paradise University.
+- `MARK COMPLETE` and `SAVE FOR LATER` remain device-local app state.
+- If a future protected `streamUrl` is supplied, the app retains its native HTML5 audio/video path.
+
+This architecture removes the known third-party-cookie iframe dependency without turning internally controlled trainer media into public CDN assets.
+
+## Tony media integrity already confirmed
+
+Preferred physical-test pair:
 
 1. `tony-canvassing-101` — **Tony Hoty Audio Canvassing 101.mp3**
    - MP3
    - 44.1 kHz stereo
-   - full decode: PASS
+   - full local decode: PASS
 
 2. `tony-video-process` — **New Canvasser Training - Process.mp4**
    - H.264 video + AAC audio
    - 1272×720
    - 44.1 kHz stereo audio
-   - full decode: PASS
+   - full local decode: PASS
 
-These are the preferred Tony audio/video pair for the real-device playback test. File-integrity PASS does not prove Safari/Drive-iframe behavior on the physical iPhone; that remains the purpose of this gate.
+File-integrity PASS does not prove top-level Drive playback on the physical iPhone. That is the purpose of this retest.
 
 ## Hard rule
 
-Do not mark this gate PASS from simulator, automated WebKit, Drive metadata, or file-decode evidence alone.
+Do not mark this gate PASS from simulator, automated WebKit, Drive metadata, local file decode, or the absence of an iframe alone.
 
 A PASS requires:
 
 - named human tester;
 - actual iPhone model;
 - iOS version;
-- Safari + Home Screen PWA test;
-- exact tested runtime commit;
-- online and offline results;
-- actual trainer audio and video playback.
+- Safari + installed Home Screen PWA test;
+- exact runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`;
+- online and offline app-shell results;
+- actual Tony audio and Tony video playback through the new top-level Drive launch;
+- at least one non-Tony trainer-media playback check;
+- no third-party-cookie workaround required.
 
 ## Test device record
 
@@ -76,8 +97,8 @@ A PASS requires:
 - iPhone model: _________________________
 - iOS version: __________________________
 - Safari version if shown: ______________
-- Exact runtime commit tested: `5eb794090a0a20f13d63c34ab05ac2b68877147c`
-- App URL tested: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5eb794090a0a20f13d63c34ab05ac2b68877147c/index.html`
+- Exact runtime commit tested: `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`
+- App URL tested: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ac353dcea74bbb8ca262e5f55deaa8c61ee08752/index.html`
 - Installed to Home Screen: YES / NO
 - Network used for online pass: __________
 - Offline pass performed: YES / NO
@@ -91,16 +112,14 @@ A PASS requires:
 - [ ] Search one known NO-GO jurisdiction and confirm NO-GO remains explicit.
 - [ ] Daily Check opens and can be completed.
 - [ ] History opens normally.
-- [ ] No Training screen replaces or obscures field failure/error behavior.
 - [ ] No horizontal clipping or unreachable controls in portrait orientation.
 
-## B. Training home and Canvassing Library navigation
+## B. Training home and Canvassing Library
 
 - [ ] Training opens in one obvious tap.
 - [ ] Continue Training remains the most prominent action.
 - [ ] Practice, Career Path, Videos & Audio, and My Progress remain easy to find.
-- [ ] More remains secondary.
-- [ ] Canvassing Library is visibly reachable from Training home.
+- [ ] Canvassing Library is reachable from Training home.
 - [ ] Canvassing Library is reachable from Videos & Audio.
 - [ ] Canvassing Library is reachable from More Training Tools.
 - [ ] Returning to Lookup is obvious and immediate.
@@ -109,119 +128,125 @@ A PASS requires:
 
 Open **Canvassing Library**.
 
-- [ ] Tony section reports / renders **24 media items**.
+- [ ] Tony section renders **24 media items**.
 - [ ] `Canvassing 101` is visible.
 - [ ] `New Canvasser Training — Process` is visible.
 - [ ] `10 Step Canvassing Approach` is visible.
-- [ ] `Canvass Set` is visible.
-- [ ] callback material is visible.
-- [ ] Tony full-program material is visible.
-- [ ] Tony sound-bite / specialized canvassing examples are visible.
+- [ ] callback / Canvass Set / full-program / sound-bite material is visible.
 - [ ] manager/recruiting Tony material is visible where categorized.
 - [ ] `Tony Hoty Canvassing Manual` is visible.
 - [ ] `Tony Hoty Master Training Manual` is visible.
-- [ ] Long titles wrap without hiding Play or Source controls.
-- [ ] No Tony item is relabeled `PARADISE APPROVED` merely because it appears in the library.
+- [ ] Long titles wrap without hiding controls.
+- [ ] Tony material remains REFERENCE / HISTORICAL as applicable rather than automatically becoming `PARADISE APPROVED`.
 
-## D. Lesson / knowledge / progress behavior
+## D. Secure player behavior — required before actual playback
 
-- [ ] Open a lesson and confirm Learn / Watch-Listen / Practice / Pass order is readable.
-- [ ] Complete a non-Quick-Check lesson and confirm local completion records correctly.
-- [ ] Confirm a wrong Quick-Check answer does not falsely mark knowledge passed.
-- [ ] Complete a Quick Check correctly and confirm device knowledge state updates.
-- [ ] Close the PWA completely and reopen it.
-- [ ] Confirm lesson progress persists.
-- [ ] Confirm device progress does not claim official HR/company certification.
-- [ ] Confirm Sales Apprentice still shows the doorstep sales-authority warning.
-- [ ] Confirm Sales Rep readiness still requires current company test / manager release.
+Open any Drive-backed trainer recording inside Paradise University.
 
-## E. Currentness / authority controls
+PASS only if:
 
-- [ ] Open the field-opening lesson and confirm the existing Paradise candidate opener wording has not been silently rewritten by this library update.
-- [ ] Confirm the opener authority/currentness label still matches the controlled currentness decision state.
-- [ ] Confirm completing the field-opening lesson does not turn trainer/source material into current field authority.
-- [ ] Open Manager Academy → Appointment QA and confirm Missing Parties is expressed as homeowners or decision makers not being present.
-- [ ] Confirm the appointment-QA lesson does not present a blanket `spouse must be present` rule.
-- [ ] Confirm trainer media never overrides current Paradise-approved lessons or live municipality Lookup.
+- [ ] The old embedded Google player does **not** appear.
+- [ ] The old `Can't access your Google Account` iframe screen does **not** appear inside the Paradise modal.
+- [ ] `PLAY IN GOOGLE DRIVE ↗` is visible.
+- [ ] The app explains that Drive opens as a top-level authorized session.
+- [ ] No prompt requires changing Safari third-party-cookie/privacy settings merely to use Paradise University.
+- [ ] `MARK COMPLETE` is reachable.
+- [ ] `SAVE FOR LATER` is reachable.
+- [ ] Minimize / Close remain reachable.
 
-## F. Physical Tony audio playback — required
+## E. Tony audio playback — REQUIRED
 
 Preferred asset: `tony-canvassing-101` — **Canvassing 101**.
 
-Online Safari:
+### Safari
 
-- [ ] Open Canvassing Library → Tony Hoty → Canvassing 101.
-- [ ] Paradise player/modal opens correctly.
-- [ ] Drive embed loads.
+1. Open Canvassing Library → Tony Hoty → Canvassing 101.
+2. Confirm the Paradise modal shows `PLAY IN GOOGLE DRIVE ↗`, not an embedded Google frame.
+3. Tap `PLAY IN GOOGLE DRIVE ↗`.
+4. Confirm a top-level Google Drive/Safari/Drive-app session opens for the correct controlled file.
+5. Confirm the audio actually starts.
+6. Pause and resume once.
+7. Return to Paradise University.
+
+- [ ] Correct Tony file opens.
 - [ ] Audio actually starts.
-- [ ] Pause/resume works in the Drive player.
-- [ ] Close/minimize controls remain reachable.
-- [ ] `SAVE FOR LATER` works.
-- [ ] `MARK COMPLETE` works.
-- [ ] Reopen and confirm app progress state persists.
+- [ ] Pause/resume works in the top-level Drive session.
+- [ ] Return to Paradise University works normally.
+- [ ] No third-party-cookie setting change was required.
+- [ ] `SAVE FOR LATER` works in Paradise University.
+- [ ] `MARK COMPLETE` works in Paradise University.
 
-Installed Home Screen PWA:
+### Installed Home Screen PWA
 
-- [ ] Repeat playback and confirm audio starts.
-- [ ] No viewport trap or blank player state.
+Repeat the same flow from the installed PWA.
 
-## G. Physical Tony video playback — required
+- [ ] `PLAY IN GOOGLE DRIVE ↗` launches the correct controlled file.
+- [ ] Audio starts.
+- [ ] Return to the installed Paradise University PWA works normally.
+- [ ] No viewport trap / dead app state occurs.
+- [ ] No third-party-cookie setting change was required.
+
+## F. Tony video playback — REQUIRED
 
 Preferred asset: `tony-video-process` — **New Canvasser Training — Process (Video)**.
 
-Online Safari:
+### Safari
 
-- [ ] Open the video from Canvassing Library.
-- [ ] Drive embed loads.
-- [ ] Video actually starts with picture and audio.
+- [ ] Paradise modal shows the top-level Drive launch, not an iframe.
+- [ ] `PLAY IN GOOGLE DRIVE ↗` opens the correct controlled video.
+- [ ] Video starts with picture and audio.
 - [ ] Pause/resume works.
-- [ ] Rotate portrait ↔ landscape once and confirm controls remain reachable.
-- [ ] Return to portrait without being trapped.
-- [ ] Close the player and return to the library.
+- [ ] Portrait ↔ landscape works in the playback session.
+- [ ] Return to Paradise University works normally.
+- [ ] No third-party-cookie setting change was required.
 
-Installed Home Screen PWA:
+### Installed Home Screen PWA
 
-- [ ] Repeat playback and confirm video starts.
-- [ ] No blank iframe / permanent loading state.
+- [ ] The same video opens from the installed PWA.
+- [ ] Picture + audio start.
+- [ ] Return to Paradise University works normally.
+- [ ] No blank embedded-player state appears.
 
-## H. Additional trainer-media smoke check
+## G. Additional trainer-media smoke check
 
-Use at least one non-Tony item so the physical test covers another trainer path.
+Use at least one non-Tony item.
 
-Recommended:
+Recommended: `grosso-tonality-audio` or `grosso-tonality-video`.
 
-- `grosso-tonality-audio` or `grosso-tonality-video`.
-
-Optional large-stream check:
-
-- `dave-science-canvassing-video` — use as a secondary load/stream check; do not make the whole gate depend on its larger file size.
-
-- [ ] Non-Tony trainer media opens.
+- [ ] Paradise modal is iframe-free.
+- [ ] `PLAY IN GOOGLE DRIVE ↗` opens the correct controlled source.
+- [ ] Playback starts.
 - [ ] Authority remains REFERENCE / HISTORICAL as applicable.
-- [ ] Returning from media to Lookup is obvious.
+- [ ] Returning to Paradise University and Lookup is obvious.
+
+Optional secondary load/stream check: Dave Yoho `The Science of Successful Canvassing`.
+
+## H. Lesson / currentness / authority controls
+
+- [ ] Existing Paradise canvass opener wording is unchanged.
+- [ ] Opener still shows the controlled currentness state rather than silently becoming current-approved.
+- [ ] Missing Parties remains homeowners/decision makers, not a blanket spouse rule.
+- [ ] Sales Apprentice still states advanced sales training does not authorize pricing/selling at the door.
+- [ ] Trainer material does not override Paradise-approved curriculum or live municipality Lookup.
+- [ ] Device completion does not claim official HR/company certification.
 
 ## I. Offline installed-PWA test
 
-1. Open the app online from the Home Screen PWA.
+1. Open the current runtime online from the installed Home Screen PWA so the refreshed cache is active.
 2. Visit Lookup, Training, Practice, Career Path, My Progress, Canvassing Library, More, Source Library, and the field-opening lesson.
-3. Confirm the current build has refreshed after the older installed version.
-4. Enable Airplane Mode and disable Wi-Fi.
-5. Relaunch the installed PWA.
+3. Enable Airplane Mode and disable Wi-Fi.
+4. Relaunch the installed PWA.
 
 PASS only if:
 
 - [ ] Core app opens offline.
 - [ ] Cached jurisdiction dataset / field behavior remains available exactly as designed.
-- [ ] Training home opens.
-- [ ] Core lessons open.
-- [ ] Practice opens.
-- [ ] Career Path opens.
-- [ ] My Progress opens.
+- [ ] Training home, core lessons, Practice, Career Path, and My Progress open.
 - [ ] **Canvassing Library opens offline.**
 - [ ] **All 24 Tony media records remain visible offline as metadata/cards.**
 - [ ] Tony manuals/source records remain visible as metadata.
-- [ ] External Google Drive playback is **not** represented as offline-cached media.
-- [ ] Failed external playback while offline does not break the app shell.
+- [ ] `PLAY IN GOOGLE DRIVE ↗` or external source access is not falsely represented as offline-cached playback.
+- [ ] Failed external access while offline does not break the app shell.
 - [ ] No giant raw trainer-media library has been precached.
 - [ ] Returning online restores external media/source access without clearing progress.
 
@@ -231,11 +256,9 @@ PASS only if:
 - [ ] Repeat one key screen at one larger Dynamic Type setting.
 - [ ] Buttons have usable tap targets.
 - [ ] Bottom navigation remains reachable above the iPhone home indicator.
-- [ ] Player close/minimize controls stay inside the viewport.
+- [ ] Player close/minimize and `PLAY IN GOOGLE DRIVE ↗` remain inside the viewport.
 - [ ] No modal traps the user.
-- [ ] No important control depends on hover.
 - [ ] Long Tony titles wrap correctly.
-- [ ] Canvassing Library sections remain scannable on a normal iPhone-width screen.
 
 ## Acceptance record
 
@@ -247,6 +270,13 @@ PASS only if:
 - Result: PASS / FAIL / NOT RUN
 - Tony rendered count: ______ / 24
 - Both Tony manuals visible: YES / NO
+- Notes: _________________________________
+
+### Secure player / old iframe regression
+- Result: PASS / FAIL / NOT RUN
+- Old embedded Google player absent: YES / NO
+- `PLAY IN GOOGLE DRIVE ↗` visible: YES / NO
+- Third-party-cookie workaround required: YES / NO
 - Notes: _________________________________
 
 ### Tony audio playback
@@ -261,6 +291,11 @@ PASS only if:
 - Asset tested: __________________________
 - Safari: PASS / FAIL
 - Home Screen PWA: PASS / FAIL
+- Notes: _________________________________
+
+### Non-Tony playback
+- Result: PASS / FAIL / NOT RUN
+- Asset tested: __________________________
 - Notes: _________________________________
 
 ### Offline installed-PWA test
@@ -279,16 +314,16 @@ PASS only if:
 
 ## Release disposition
 
-Until this real-device record is completed:
+Until this retest is completed:
 
-`PHYSICAL_DEVICE_ACCEPTANCE = OPEN`
+`PHYSICAL_DEVICE_ACCEPTANCE = RETEST_REQUIRED_AFTER_DRIVE_IFRAME_FIX`
 
-Until at least one Tony audio and one Tony video item are physically played online in both Safari and the installed PWA:
+Until at least one Tony audio and one Tony video item are physically played through the new top-level Drive path in both Safari and the installed PWA:
 
 `MEDIA_PLAYBACK_ACCEPTANCE = OPEN`
 
-Neither status may be converted to PASS from Playwright/WebKit automation, Drive metadata, or local decode testing alone.
+Neither status may be converted to PASS from Playwright/WebKit automation, Drive metadata, local decode testing, or the absence of an iframe alone.
 
-A physical-device PASS does **not** itself approve or revise the Paradise canvass opener, does not perform human curriculum/compliance signoff, and does not authorize promotion.
+A physical-device PASS does **not** itself approve or revise the Paradise canvass opener, complete human curriculum/compliance signoff, or authorize promotion.
 
 Promotion to the validated branch remains separately controlled and requires the remaining human gates plus explicit promotion authorization and validated-branch readback.
