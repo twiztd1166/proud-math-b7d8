@@ -27,7 +27,7 @@ test('media adds local notes and a Practice-this-skill bridge without invented t
 });
 
 test('lesson completion gives subtle feedback and no gamification',async({page})=>{
-  await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/1\. Foundation/}).click();await page.getByRole('button',{name:/Your Job at the Door/}).click();await page.locator('#puDone').click();await expect(page.locator('#puExperienceToast')).toContainText(/Lesson complete/);await expect(page.getByText(/XP|streak|leaderboard/i)).toHaveCount(0);
+  await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/1\. Foundation/}).click();await page.getByRole('button',{name:/Your Job at the Door/}).click();await page.locator('#puDone').click();await expect(page.locator('#puExperienceToast')).toContainText(/Lesson complete/);await expect(page.getByText(/\bXP\b|\bstreaks?\b|\bleaderboards?\b/i)).toHaveCount(0);
 });
 
 test('manager-assigned training remains excluded',async({page})=>{await training(page);await expect(page.getByText(/manager-assigned|assigned training|due date/i)).toHaveCount(0)});
