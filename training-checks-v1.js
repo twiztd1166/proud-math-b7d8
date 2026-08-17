@@ -16,6 +16,7 @@
   const write=v=>localStorage[STORE]=JSON.stringify(v);
   const required=id=>!!checks[id];
   const passed=id=>{const x=read()[id]||{};return!!x.passed&&x.checksVersion===VERSION&&x.trainingVersion===PU_VERSION};
+  const rawCompletion=id=>{const x=puRead()[id]||{};return!!x.complete};
   const completionCurrent=id=>{const x=puRead()[id]||{};return!!x.complete&&x.trainingVersion===PU_VERSION};
   const trainingReady=id=>completionCurrent(id)&&(!required(id)||passed(id));
   function save(id,correct){
@@ -43,7 +44,7 @@
   puNextLesson=function(){return PU_LESSONS.find(x=>!trainingReady(x.id))||baseNext()};
   puStageStatus=function(stage){
     const lessons=PU_LESSONS.filter(x=>x.stage===stage);if(!lessons.length)return'future';
-    const ready=lessons.filter(x=>trainingReady(x.id)).length,content=lessons.filter(x=>puLessonDone(x.id)).length;
+    const ready=lessons.filter(x=>trainingReady(x.id)).length,content=lessons.filter(x=>completionCurrent(x.id)).length;
     if(ready===lessons.length)return'done';
     if(content>0||puNextLesson()?.stage===stage)return'current';
     return'future';
@@ -52,13 +53,14 @@
   puLesson=function(id){
     baseLesson(id);inject(id);
     if(!PU_LESSONS.some(x=>x.id===id)&&!(window.PU_CONTENT?.managerLessons||[]).some(x=>x.id===id))return;
-    const done=puLessonDone(id),current=completionCurrent(id),needs=required(id),ready=trainingReady(id),actions=document.querySelector('.puLessonActions');
-    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=done&&!current?'Prior-version content completion is preserved as history; complete this lesson again for the current training version.':done?(needs&&!ready?'Content marked complete; current-version Quick Check still pending.':'Content marked complete for the current training version on this device. Official certification remains separate.'):'Mark Complete records current-version content progress only; it is not official certification.';actions.appendChild(note)}
+    const rawDone=rawCompletion(id),current=completionCurrent(id),needs=required(id),ready=trainingReady(id),actions=document.querySelector('.puLessonActions');
+    if(actions){const note=document.createElement('small');note.className='puCompletionNote';note.textContent=rawDone&&!current?'Prior-version content completion is preserved as history; complete this lesson again for the current training version.':current?(needs&&!ready?'Content marked complete; current-version Quick Check still pending.':'Content marked complete for the current training version on this device. Official certification remains separate.'):'Mark Complete records current-version content progress only; it is not official certification.';actions.appendChild(note)}
   };
   window.PU_CHECKS_VERSION=VERSION;
   window.puQuickCheckStats=read;
   window.puQuickCheckRequired=required;
   window.puQuickCheckPassed=passed;
+  window.puLessonRawCompletion=rawCompletion;
   window.puLessonCompletionCurrent=completionCurrent;
   window.puLessonTrainingReady=trainingReady;
 })();
