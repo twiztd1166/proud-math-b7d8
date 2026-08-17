@@ -17,7 +17,14 @@ test('default Continue Training stops at Canvasser core and excludes future-role
   await page.goto('/index.html');
   const state=await page.evaluate(()=>({track:window.PU_DEFAULT_TRACK,stages:window.PU_DEFAULT_TRACK_STAGES,next:window.puNextLesson?.()?.id,all:window.PU_CONTENT.lessons.length,core:window.PU_CONTENT.lessons.filter(x=>window.PU_DEFAULT_TRACK_STAGES.includes(x.stage)).length}));
   expect(state.track).toBe('CANVASSER_CORE');expect(state.stages).toEqual(['foundation','field-ready','canvasser']);expect(state.core).toBeGreaterThan(0);expect(state.core).toBeLessThan(state.all);
-  const completion=await page.evaluate(()=>{const p={};for(const x of window.PU_CONTENT.lessons.filter(x=>window.PU_DEFAULT_TRACK_STAGES.includes(x.stage)))p[x.id]={complete:true,trainingVersion:window.PARADISE_UNIVERSITY_VERSION};localStorage.puProgress=JSON.stringify(p);return true});expect(completion).toBeTruthy();
+  await page.evaluate(()=>{
+    const p={},q={};
+    for(const x of window.PU_CONTENT.lessons.filter(x=>window.PU_DEFAULT_TRACK_STAGES.includes(x.stage))){
+      p[x.id]={complete:true,trainingVersion:window.PARADISE_UNIVERSITY_VERSION};
+      if(window.puQuickCheckRequired?.(x.id))q[x.id]={passed:true,checksVersion:window.PU_CHECKS_VERSION,trainingVersion:window.PARADISE_UNIVERSITY_VERSION};
+    }
+    localStorage.puProgress=JSON.stringify(p);localStorage.puQuickChecksV1=JSON.stringify(q);
+  });
   await page.reload();await page.locator('#nTrain').click();await expect(page.locator('#puContinue')).toContainText(/Core Training Complete/i);await expect(page.locator('#puContinue')).not.toContainText(/Senior|Sales Apprentice|Preparation/i);
 });
 
@@ -29,6 +36,11 @@ test('Sales Apprentice is a short bridge and detailed sales process stays in Sal
   await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();await expect(page.getByRole('button',{name:/3\. Survey \/ Needs Analysis/})).toBeVisible();await expect(page.getByRole('button',{name:/7\. Product Presentation/})).toBeVisible();
 });
 
+test('Sales Apprentice bridge Next never enters hidden duplicate lessons',async({page})=>{
+  await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await page.getByRole('button',{name:/What Changes and What Does Not/}).click();
+  await page.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(page.locator('#puNext')).toHaveText('NEXT BRIDGE LESSON');await page.locator('#puNext').click();await expect(page.getByRole('heading',{name:'The Full Sales Process Map'})).toBeVisible();
+});
+
 test('Videos & Audio shows each media item at most once and puts canvasser essentials first',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Videos & Audio/}).click();
   for(const title of ['Continue Listening','Canvasser Essentials','Future Role Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title}$`)})).toBeVisible();
@@ -38,24 +50,31 @@ test('Videos & Audio shows each media item at most once and puts canvasser essen
   await expect(page.getByRole('button',{name:/COMPLETE CANVASSING LIBRARY/})).toBeVisible();await expect(page.getByRole('button',{name:/FULL SOURCE LIBRARY/})).toBeVisible();
 });
 
-test('required Quick Check is inside PASS before completion and blocks Next until passed',async({page})=>{
+test('Continue Listening does not duplicate the same recording in another playlist',async({page})=>{
+  await page.goto('/index.html');await page.evaluate(()=>localStorage.puLastMedia='tony-canvassing-101');await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/Videos & Audio/}).click();
+  await expect(page.locator('[data-playlist="Continue Listening"] [data-media="tony-canvassing-101"]')).toHaveCount(1);await expect(page.locator('[data-playlist="Canvasser Essentials"] [data-media="tony-canvassing-101"]')).toHaveCount(0);
+  const ids=await page.locator('[data-media]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-media')));expect(new Set(ids).size).toBe(ids.length);
+});
+
+test('required Quick Check sits in PASS and completion sequence cannot skip it',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/2\. Field Ready/}).click();await page.getByRole('button',{name:/Refusal Is a Stop, Not an Objection/}).click();
   const passStep=page.locator('.puLessonStep').filter({has:page.getByText('PASS',{exact:true})});await expect(passStep.locator('.puQuickCheck')).toBeVisible();
   await expect(page.locator('#puDone')).toBeDisabled();await expect(page.locator('#puNext')).toBeDisabled();await expect(page.locator('#puDone')).toHaveText('PASS QUICK CHECK FIRST');
-  await page.getByRole('button',{name:'Leave immediately'}).click();await expect(page.locator('#puDone')).toBeEnabled();await expect(page.locator('#puNext')).toBeEnabled();
+  await page.getByRole('button',{name:'Leave immediately'}).click();await expect(page.locator('#puDone')).toBeEnabled();await expect(page.locator('#puNext')).toBeDisabled();
+  await page.locator('#puDone').click();await expect(page.getByText('COMPLETE',{exact:true})).toBeVisible();await expect(page.locator('#puNext')).toBeEnabled();
 });
 
 test('lesson with no media removes empty WATCH LISTEN block',async({page})=>{
-  await training(page);await page.locator('#puContinue').click();
-  await expect(page.getByRole('heading',{name:'Welcome to Paradise University'})).toBeVisible();
-  // Welcome has media. Navigate to a known no-media lesson.
-  await page.locator('#puBack').click();await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/1\. Foundation/}).click();await page.getByRole('button',{name:/Your Job at the Door/}).click();
-  // This lesson may have source material but no media.
-  await expect(page.getByText('No media is required for this lesson.')).toHaveCount(0);
+  await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/1\. Foundation/}).click();await page.getByRole('button',{name:/Your Job at the Door/}).click();
+  await expect(page.getByText('No media is required for this lesson.')).toHaveCount(0);await expect(page.getByText('WATCH / LISTEN',{exact:true})).toHaveCount(0);
 });
 
 test('practice lineage contains only valid lesson references for appointment scheduling',async({page})=>{
   await page.goto('/index.html');const state=await page.evaluate(()=>{const x=window.PU_PRACTICE_SCENARIOS.find(s=>s.id==='appointment-two-choices');return{x:x?.sourceLineage||[],exists:(x?.sourceLineage||[]).filter(v=>v.startsWith('lesson:')).every(v=>window.PU_CONTENT.lessons.some(l=>l.id===v.slice(7))||(window.PU_CONTENT.managerLessons||[]).some(l=>l.id===v.slice(7)))}});expect(state.x).toContain('lesson:canvass-close');expect(state.x).not.toContain('lesson:canvass-appointment');expect(state.exists).toBeTruthy();
+});
+
+test('Search hides archived duplicate Sales Apprentice lessons',async({page})=>{
+  await training(page);await page.locator('#puMoreButton').click();await page.getByRole('button',{name:/Search Training/}).click();const input=page.locator('#puSearchInput');await input.fill('Advanced Needs Analysis');await page.waitForTimeout(25);await expect(page.locator('[data-result-id="sales-needs-analysis"]')).toHaveCount(0);expect(await page.evaluate(()=>window.PU_HIDDEN_DUPLICATE_LESSON_IDS.includes('sales-needs-analysis'))).toBeTruthy();
 });
 
 test('Sales Rep keeps lessons visible and collapses control evidence below them',async({page})=>{
