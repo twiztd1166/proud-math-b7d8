@@ -155,8 +155,8 @@ test('catalog URL-bearing fields contain no active-content or insecure absolute 
 
 test('service worker excludes external Drive and only refreshes offline index from the actual app entry',async({page})=>{
   await training(page);const sw=await page.evaluate(()=>fetch('/sw.js').then(r=>r.text()));
-  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toMatch(/const CACHE='[^']*trainingux5-experience3-redteam7';/);
-  expect(sw).toContain("isAppEntry=(url.pathname===appIndex.pathname||url.pathname===appRoot.pathname)&&url.search==='' ".trim());expect(sw).toContain('if(isAppEntry&&r.ok&&html)');expect(sw).toContain('training-storage-hardening-v1.js');
+  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toMatch(/const CACHE='[^']*trainingux5-experience3-redteam7-daily1';/);
+  expect(sw).toContain("isAppEntry=(url.pathname===appIndex.pathname||url.pathname===appRoot.pathname)&&url.search==='' ".trim());expect(sw).toContain('if(isAppEntry&&r.ok&&html)');expect(sw).toContain('training-storage-hardening-v1.js');expect(sw).toContain('training-daily-v1.js');expect(sw).toContain('training-daily-v1.css');
 });
 
 test('red-team invariants preserve field authority, exact pending opener, and iframe-free Drive playback',async({page})=>{
