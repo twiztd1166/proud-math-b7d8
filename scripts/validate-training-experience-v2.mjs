@@ -8,7 +8,7 @@ if(index.indexOf('training-experience-v2.js')<index.indexOf('training-deep-audit
 if(index.indexOf('training-ux-polish-v1.js')<index.indexOf('training-experience-v2.js'))fail('UX polish must load after Training Experience v2');
 if(!sw.includes("'./training-experience-v2.js'"))fail('Training Experience v2 missing from offline core');
 if(!sw.includes("'./training-ux-polish-v1.js'"))fail('Training UX polish missing from offline core');
-if(!sw.includes('trainingux4-adaptive1-nav1'))fail('Training UX polish cache identity missing');
+if(!sw.includes('trainingux5-experience3'))fail('Current Training Experience cache identity missing');
 if(!build.includes("'training-experience-v2.js'"))fail('Training Experience v2 missing from production bundle');
 if(!build.includes("'training-ux-polish-v1.js'"))fail('Training UX polish missing from production bundle');
 for(const marker of ['PU_TRAINING_EXPERIENCE_VERSION','CANVASSER_CORE','sales-apprentice-intro','sales-process-map','sales-shadowing','sales-apprentice-ready','COMPLETE CANVASSING LIBRARY','PASS QUICK CHECK FIRST','PU_HIDDEN_DUPLICATE_LESSON_IDS'])if(!exp.includes(marker))fail(`missing experience marker ${marker}`);
@@ -21,4 +21,4 @@ for(const marker of ['2026.08.17-pu-practice-v3-adaptive','Practice My Weak Area
 if(!deep.includes("v==='lesson:canvass-appointment'?'lesson:canvass-close':v"))fail('appointment lineage repair missing from deep-audit controls');
 if(!practice.includes('lesson:canvass-appointment'))fail('base practice lineage unexpectedly changed; remove the compatibility repair only with a controlled canonical-source cleanup');
 if(/Required for You|Manager Training.*playlist\(|Tony Hoty.*playlist\(|Dave Yoho.*playlist\(/.test(exp))fail('duplicate legacy media playlist labels reintroduced into v2');
-console.log('Training Experience v2 + UX polish static validation PASS');
+console.log('Training Experience v2 + UX polish static validation PASS under current v3 cache generation');
