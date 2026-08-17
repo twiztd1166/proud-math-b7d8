@@ -1,20 +1,38 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v13",
+  "schemaVersion": "2026.08.17-pu-release-gate-v14-authorized-ux-polish",
   "status": "NOT_RELEASE_READY",
-  "workingBranch": "agent/paradise-university-v1",
+  "workingBranch": "agent/paradise-university-ux-polish-authorized",
+  "sourceWorkingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "currentRuntimeCandidate": "ae46fa6d5258146a357041bcd184b07031778043",
-  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ae46fa6d5258146a357041bcd184b07031778043/index.html",
-  "currentControlHeadBeforeCloseoutDocs": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-  "lastFullyGreenControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-  "lastFullyGreenValidatorRun": 32020240642,
-  "lastFullyGreenContentHardeningRun": 32020240685,
+  "currentRuntimeCandidate": "ce59d73a65f4b93edf6224e0739e1b81fdd0e805",
+  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ce59d73a65f4b93edf6224e0739e1b81fdd0e805/index.html",
+  "lastFullyGreenControlHeadBeforeCloseoutDocs": "f62eb3e67a9737bd869b5444f6ef666bead3ab1f",
+  "lastFullyGreenValidatorRun": 32027700434,
   "runtimeControlSeparation": {
     "status": "PASS",
-    "runtimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
-    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-    "postRuntimeChanges": "CI/workflow and regression-test controls only; no browser-runtime change after ae46fa6d5258146a357041bcd184b07031778043 through the green 0693890b3050b25ca4b94f0fe60974efc7c5441b control head.",
-    "rule": "Documentation/test-only commits after the runtime do not redefine the immutable runtime candidate."
+    "runtimeCommit": "ce59d73a65f4b93edf6224e0739e1b81fdd0e805",
+    "validatedControlHead": "f62eb3e67a9737bd869b5444f6ef666bead3ab1f",
+    "postRuntimeChanges": "Validation scripts, workflows, tests, and dormant future v3 assets only. The authorized runtime index, service-worker core, and production bundle do not load Training Experience v3.",
+    "rule": "Test, workflow, documentation, or dormant-unreferenced future files do not redefine the immutable browser runtime candidate."
+  },
+  "authorizedUxScope": {
+    "status": "PASS_AUTOMATED",
+    "scopeRule": "Only the three pre-release experience upgrades expressly selected for this pass are active.",
+    "activeFeatures": [
+      "Smarter Continue Training milestone messaging with lesson position, approximate minutes, stage, and remaining stage gates",
+      "Adaptive Practice that resurfaces latest NEEDS_PRACTICE scenarios and clears a weak flag after a GOT_IT retry",
+      "Context-preserving Training back navigation with prior page and scroll-position restoration"
+    ],
+    "managerAssignedTraining": "EXCLUDED_FOR_NOW",
+    "gamification": "NOT_ADDED",
+    "parallelTrainingExperienceV3": {
+      "status": "DORMANT_NOT_AUTHORIZED_FOR_THIS_CANDIDATE",
+      "filesMayExistInRepository": true,
+      "loadedByIndex": false,
+      "includedInOfflineCore": false,
+      "includedInControlledProductionBundle": false,
+      "releaseGuard": "Authorized-branch CI fails if training-experience-v3 becomes active in index.html or the controlled production bundle."
+    }
   },
   "fieldBaseline": {
     "status": "PASS",
@@ -25,22 +43,19 @@
   },
   "softwareValidation": {
     "status": "PASS",
-    "syntaxBuildBoundary": "PASS",
-    "trainingHardening": "PASS",
-    "fieldReleaseIsolation": "PASS",
-    "staticProductionBundle": "PASS",
+    "validatorRun": 32027700434,
+    "validatedControlHead": "f62eb3e67a9737bd869b5444f6ef666bead3ab1f",
+    "testedRuntimeCommit": "ce59d73a65f4b93edf6224e0739e1b81fdd0e805",
+    "pwaCacheIdentity": "trainingux4-adaptive1-nav1",
+    "syntaxAndControlledModel": "PASS",
+    "controlledStaticBundle": "PASS",
     "automatedIPhoneField": "PASS",
     "automatedIPhoneOffline": "PASS",
     "automatedTrainingExperienceV2RedTeam": "PASS",
-    "automatedUniversityIPhone": "PASS",
+    "authorizedUxPolishRegression": "PASS",
+    "fullUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "validatorRun": 32020240642,
-    "contentHardeningRun": 32020240685,
-    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-    "testedRuntimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
-    "pwaCacheIdentity": "trainingux3",
     "trainingExperienceV2": {
-      "status": "PASS_AUTOMATED",
       "roleAwareDefaultQueue": true,
       "futureRolesExcludedFromDefaultQueue": true,
       "salesApprenticeBridgeItems": 4,
@@ -49,72 +64,45 @@
       "managerQuickCheckForwardNavigationGuard": true,
       "curatedMediaDeduplicated": true,
       "salesControlsCollapsedByDefaultEvidenceStillReachable": true,
-      "practiceLineageCorrection": "PASS",
-      "canvassingLibraryNavigation": "INTENTIONALLY_ONE_LEVEL_DEEPER_VIA_VIDEOS_AUDIO_OR_MORE",
+      "canvassingLibraryNavigation": "ONE_LEVEL_DEEPER_VIA_VIDEOS_AUDIO_OR_MORE",
       "homeScreenLibraryButtonExpected": false
+    },
+    "uxPolish": {
+      "version": "2026.08.17-pu-training-ux-polish-v1",
+      "adaptivePracticeVersion": "2026.08.17-pu-practice-v3-adaptive",
+      "milestoneMessaging": "PASS",
+      "adaptiveWeakAreaReview": "PASS",
+      "weakFlagClearsAfterCorrectRetry": "PASS",
+      "priorScreenRestore": "PASS",
+      "scrollPositionRestore": "PASS",
+      "sameLessonPositionPreservation": "PASS"
     },
     "securePlaybackBoundary": {
       "driveIframeAllowed": false,
       "driveTopLevelLaunchRequired": true,
       "publicRawGitHackTrainerMediaMirroring": false,
-      "nativeProtectedStreamPathRetained": true,
-      "hardeningGuard": "CI fails if an embedded training <iframe> is reintroduced into the controlled training player."
+      "nativeProtectedStreamPathRetained": true
     }
-  },
-  "physicalFailureHistory": {
-    "priorRuntime": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
-    "status": "FAIL_DRIVE_IFRAME_ON_REAL_IPHONE",
-    "rootControlConclusion": "Do not require employees to weaken Safari privacy/third-party-cookie settings to make trainer playback work.",
-    "remediationRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-    "remediation": "Drive-backed trainer media opens the original controlled Drive file in a top-level authorized session rather than embedding Google inside the app."
   },
   "priorPhysicalPlaybackCheckpoint": {
     "runtime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
     "status": "PASS_FOR_RECORDED_PLAYBACK_PATHS_ONLY",
-    "evidencePreserved": true,
     "knownIframeBlocker": "CLOSED_BY_PHYSICAL_RETEST",
-    "tonyCanvassing101": {
-      "topLevelDriveLaunch": "PASS",
-      "actualAudioPlayback": "PASS"
-    },
-    "tonyProcessVideo": {
-      "topLevelDriveLaunch": "PASS",
-      "pictureAndAudio": "PASS",
-      "pauseResume": "PASS",
-      "portraitLandscapePortrait": "PASS",
-      "returnToUniversity": "PASS"
-    },
-    "nonTonyPlayback": {
-      "status": "PASS_TESTED_PATHS",
-      "reportedResult": "They all work.",
-      "scopeControl": "This does not assert that every one of the 79 indexed media files was individually played."
-    },
-    "carryForwardRule": "This is valid historical evidence that the inherited top-level Drive playback path worked on a real iPhone. It is not full physical acceptance of the newer Training Experience v2 runtime ae46fa6d5258146a357041bcd184b07031778043."
+    "tonyCanvassing101": "PASS_ACTUAL_AUDIO_PLAYBACK",
+    "tonyProcessVideo": "PASS_PICTURE_AUDIO_PAUSE_RESUME_ROTATION_RETURN",
+    "nonTonyPlayback": "PASS_TESTED_PATHS",
+    "scopeControl": "Historical evidence proves the inherited top-level Drive playback path worked on a real iPhone; it does not constitute current-runtime physical acceptance."
   },
   "currentPhysicalAcceptance": {
     "status": "OPEN_CURRENT_RUNTIME_RETEST_REQUIRED",
-    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
+    "requiredRuntime": "ce59d73a65f4b93edf6224e0739e1b81fdd0e805",
     "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
-    "priorAttemptRecord": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ATTEMPT_2026-08-17.md",
-    "requiredDeviceScope": [
-      "Safari and installed Home Screen PWA on the exact current runtime",
-      "online and Airplane Mode/offline shell behavior",
-      "one GO and one NO-GO Lookup check",
-      "Daily Check and History",
-      "simplified Training Experience v2 home and role-aware queue",
-      "Quick Check before completion and forward navigation, including manager path",
-      "four-item Sales Apprentice bridge",
-      "collapsed Sales Controls & References with evidence still reachable",
-      "Canvassing Library intentionally absent from the simplified Training home and reachable one level deeper from Videos & Audio and More Training Tools",
-      "Tony 24 exactly once, both Tony manuals visible, Dave 4 visible",
-      "REFERENCE/HISTORICAL authority labels with no accidental trainer PARADISE APPROVED state",
-      "spot-check actual trainer playback under the exact current runtime",
-      "existing opener wording and CURRENT APPROVAL PENDING state",
-      "Missing Parties homeowner/decision-maker boundary with no blanket spouse rule",
-      "no fake offline trainer playback and no giant trainer-media precache",
-      "touch, viewport, Dynamic Type, orientation, and navigation QA"
-    ],
-    "rule": "Prior ac353 playback evidence is preserved but does not substitute for current-runtime physical acceptance."
+    "newUxChecksRequired": [
+      "Continue Training milestone text is concise and understandable on a real iPhone",
+      "My Progress next milestone and remaining-gate messaging is understandable",
+      "NEEDS PRACTICE creates Practice My Weak Areas and a correct retry clears the weak flag",
+      "Back from a lesson returns to the actual prior Training context and preserves useful scroll position"
+    ]
   },
   "curriculumCurrentness": {
     "status": "ONE_HUMAN_APPROVAL_OPEN",
@@ -125,64 +113,45 @@
     "openingWording": {
       "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
       "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
-      "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library/playback work.",
       "runtimeDisplay": "CURRENT APPROVAL PENDING",
-      "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md choosing APPROVE or REVISE for the exact candidate."
+      "rule": "Generic continuation instructions do not approve or revise this wording."
     }
   },
-  "practiceV2": {
+  "practice": {
     "status": "PASS",
     "scenarioCount": 20,
     "categories": 4,
     "scenariosPerCategory": 5,
-    "minimumHardStops": 6,
-    "schemaValidator": "PASS",
-    "offline": "PASS",
-    "invalidLessonLineageCorrection": "PASS"
+    "adaptiveReview": "ACTIVE",
+    "officialCertificationClaim": false
   },
   "internalTrainerMedia": {
     "status": "PASS_INTERNAL_USE_NON_BLOCKING",
-    "libraryReconciliationVersion": "2026.08.16-pu-trainer-library-reconciliation-v1",
-    "catalog": {
-      "indexedTotal": 79,
-      "curatedEmployeeFacing": 12,
-      "sourceLibrary": 67,
-      "byTrainer": {
-        "Tony Hoty": 24,
-        "Dave Yoho": 4,
-        "Grosso University": 51
-      },
-      "confirmedNewReconciliationRecords": 49,
-      "unexplainedMissingConfirmedCanonicalMedia": 0
+    "indexedTotal": 79,
+    "curatedEmployeeFacing": 12,
+    "sourceLibrary": 67,
+    "byTrainer": {
+      "Tony Hoty": 24,
+      "Dave Yoho": 4,
+      "Grosso University": 51
     },
-    "canvassingLibrary": {
-      "tonyIndexed": 24,
-      "daveIndexed": 4,
-      "tonyManualsRequiredVisible": [
-        "Tony Hoty Canvassing Manual",
-        "Tony Hoty Master Training Manual"
-      ],
-      "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable.",
-      "navigationBoundary": "Complete library is intentionally one level deeper than Training home to keep the default employee path focused; access is through Videos & Audio and More Training Tools."
-    },
-    "physicalPlaybackStatus": "PRIOR_AC353_TESTED_PATHS_PASS_CURRENT_AE46_SPOT_CHECK_OPEN",
-    "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
+    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable."
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
     "packet": "docs/PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md",
-    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
-    "v2ReviewRequired": true,
+    "requiredRuntime": "ce59d73a65f4b93edf6224e0739e1b81fdd0e805",
+    "uxPolishReviewRequired": true,
     "currentnessDecision": "OPEN — exact canvass opener requires named human APPROVE or REVISE decision."
   },
   "promotionAuthorization": {
     "status": "OPEN",
-    "requiredEvidence": "Explicit authorization to advance the validated branch after all other gates are PASS."
+    "requiredEvidence": "Explicit authorization to advance the validated branch after every other hard gate is PASS."
   },
   "validatedBranchReadback": {
     "status": "PASS_UNCHANGED_PRE_PROMOTION",
     "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
     "note": "No University promotion has occurred."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. The current immutable browser runtime is ae46fa6d5258146a357041bcd184b07031778043 and the later green 0693890b3050b25ca4b94f0fe60974efc7c5441b head is test/control-only. Prior ac353 real-iPhone playback evidence is preserved but does not pass the current v2 physical matrix. Remaining blockers are exact-current-runtime physical iPhone/PWA acceptance, human curriculum/compliance review, the named opener-currentness decision, and explicit promotion authorization."
+  "hardRule": "The authorized immutable browser runtime is ce59d73a65f4b93edf6224e0739e1b81fdd0e805. Automated validation is fully green but is not physical iPhone acceptance, human curriculum/currentness approval, employee certification, or promotion authorization. Training Experience v3 remains dormant and outside this candidate."
 }
