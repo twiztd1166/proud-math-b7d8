@@ -4,28 +4,28 @@ async function training(page){await page.goto('/index.html');await page.locator(
 async function sourceLibrary(page){await training(page);await page.locator('#puMoreButton').click();await page.getByRole('button',{name:/Source Library/}).click()}
 const playlist=(page,title)=>page.locator(`[data-playlist="${title}"]`);
 
-test('Videos & Audio exposes internal trainer media while preserving authority labels',async({page})=>{
+test('Videos & Audio exposes prioritized internal trainer media while preserving authority labels',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   await expect(page.getByRole('heading',{name:'Videos & Audio'})).toBeVisible();
-  for(const title of ['Continue Listening','Required for You','Canvasser Essentials','Future Sales Rep','Manager Training','Tony Hoty','Dave Yoho','Rick Grosso / Grosso University','Paradise Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)})).toBeVisible();
-  await expect(page.getByText('INTERNAL TRAINING MEDIA:',{exact:true})).toBeVisible();
-  await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
-  await expect(page.getByRole('button',{name:/OPEN COMPLETE CANVASSING LIBRARY/})).toBeVisible();
-  await expect(page.getByRole('button',{name:/BROWSE FULL SOURCE LIBRARY/})).toBeVisible();
+  for(const title of ['Continue Listening','Canvasser Essentials','Future Role Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title}$`)})).toBeVisible();
+  for(const old of ['Required for You','Manager Training','Tony Hoty','Dave Yoho','Rick Grosso / Grosso University','Paradise Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${old.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)})).toHaveCount(0);
+  await expect(page.getByText('REFERENCE MEDIA:',{exact:true})).toBeVisible();
+  await expect(page.getByText(/Paradise-approved lessons, current manager direction, and live municipality instructions control/i)).toBeVisible();
+  await expect(page.getByRole('button',{name:/COMPLETE CANVASSING LIBRARY/})).toBeVisible();
+  await expect(page.getByRole('button',{name:/FULL SOURCE LIBRARY/})).toBeVisible();
   await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_UI_VERSION)).toBe('2026.08.16-pu-media-ui-v5');
   await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_RIGHTS_VERSION)).toBe('2026.08.16-pu-media-internal-v2');
+  await expect.poll(async()=>page.evaluate(()=>window.PU_TRAINING_EXPERIENCE_VERSION)).toBe('2026.08.17-pu-training-experience-v2');
 });
 
-test('all 12 curated trainer recordings are available for internal training',async({page})=>{
+test('all 12 curated trainer recordings remain available without duplicate curated-screen cards',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   const state=await page.evaluate(()=>({control:window.PU_MEDIA_RIGHTS_CONTROL,launch:window.PU_CURATED_MEDIA_IDS,hold:window.PU_RIGHTS_REVIEW_MEDIA_IDS}));
   expect(state.control?.status).toBe('INTERNAL_USE_NON_BLOCKING');
   expect(state.control?.curatedReviewedCount).toBe(12);expect(state.control?.curatedPlayableCount).toBe(12);expect(state.control?.curatedRightsHoldCount).toBe(0);
   expect(state.launch).toHaveLength(12);expect(state.hold).toHaveLength(0);
-  await expect(playlist(page,'Tony Hoty').locator('.puMediaCard')).toHaveCount(3);
-  await expect(playlist(page,'Dave Yoho').locator('.puMediaCard')).toHaveCount(1);
-  await expect(playlist(page,'Rick Grosso / Grosso University').locator('.puMediaCard')).toHaveCount(3);
-  await expect(page.locator('[data-media]').first()).toBeVisible();
+  const ids=await page.locator('[data-media]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-media')));expect(ids.length).toBeGreaterThan(0);expect(new Set(ids).size).toBe(ids.length);
+  const essentials=playlist(page,'Canvasser Essentials').locator('[data-media]');await expect(essentials.first()).toHaveAttribute('data-media','tony-new-canvasser-process');
 });
 
 test('full source library retains trainer lineage and internal source access',async({page})=>{
@@ -84,23 +84,16 @@ test('trainer library reconciliation accounts for all confirmed canonical media 
 });
 
 test('Canvassing Library visibly exposes every indexed Tony recording and manuals',async({page})=>{
-  await training(page);
-  await expect(page.getByRole('button',{name:/CANVASSING LIBRARY/})).toBeVisible();
-  await page.getByRole('button',{name:/CANVASSING LIBRARY/}).click();
+  await training(page);await page.getByRole('button',{name:/Videos & Audio/}).first().click();
+  await expect(page.getByRole('button',{name:/COMPLETE CANVASSING LIBRARY/})).toBeVisible();await page.getByRole('button',{name:/COMPLETE CANVASSING LIBRARY/}).click();
   await expect(page.getByRole('heading',{name:'Canvassing Library'})).toBeVisible();
   await expect.poll(async()=>page.evaluate(()=>window.PU_CANVASSING_LIBRARY_VERSION)).toBe('2026.08.16-pu-canvassing-library-v1');
   const model=await page.evaluate(()=>window.puCanvassingLibraryModel());
   expect(model.tonyTotal).toBe(24);expect(model.daveTotal).toBe(4);expect(model.grossoSupportTotal).toBeGreaterThan(0);expect(model.tonySourceTotal).toBeGreaterThanOrEqual(2);
   const tony=page.locator('[data-trainer-group="Tony Hoty"]');
   await expect(tony.locator('[data-media]')).toHaveCount(24);
-  const ids=await tony.locator('[data-media]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-media')));
-  expect(new Set(ids).size).toBe(24);
-  await expect(tony.getByText(/Tony Hoty Canvassing Manual/i).first()).toBeVisible();
-  await expect(tony.getByText(/Tony Hoty Master Training Manual/i).first()).toBeVisible();
-  await expect(tony.getByText('PARADISE APPROVED',{exact:true})).toHaveCount(0);
-  await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();
-  await expect(page.getByText(/existing Paradise canvass script/i)).toHaveCount(0);
-  await expect(page.getByText(/Advanced sales training does not authorize pricing/i)).toBeVisible();
-  await page.getByRole('button',{name:/VIEW ALL TRAINER SOURCE MATERIAL/}).click();
-  await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
+  const ids=await tony.locator('[data-media]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-media')));expect(new Set(ids).size).toBe(24);
+  await expect(tony.getByText(/Tony Hoty Canvassing Manual/i).first()).toBeVisible();await expect(tony.getByText(/Tony Hoty Master Training Manual/i).first()).toBeVisible();
+  await expect(tony.getByText('PARADISE APPROVED',{exact:true})).toHaveCount(0);await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();await expect(page.getByText(/existing Paradise canvass script/i)).toHaveCount(0);await expect(page.getByText(/Advanced sales training does not authorize pricing/i)).toBeVisible();
+  await page.getByRole('button',{name:/VIEW ALL TRAINER SOURCE MATERIAL/}).click();await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
 });
