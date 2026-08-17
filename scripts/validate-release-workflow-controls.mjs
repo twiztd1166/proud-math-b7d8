@@ -9,6 +9,7 @@ const full=read('.github/workflows/validate-paradise-university-v1.yml');
 const hardening=read('.github/workflows/validate-paradise-university-hardening.yml');
 const ux=read('.github/workflows/validate-paradise-university-ux-polish.yml');
 const red=read('.github/workflows/validate-paradise-university-red-team.yml');
+const premerge=read('.github/workflows/validate-paradise-public-pr.yml');
 
 for(const [label,source,group] of [
   ['full University validator',full,'paradise-university-v1-validation-${{ github.ref_name }}'],
@@ -44,9 +45,51 @@ for(const name of [
 forbidToken(build,'--force','field release');
 forbidToken(build,'-f origin','field release');
 
+requireToken(premerge,'name: Validate Paradise public premerge gate','public premerge workflow');
+requireToken(premerge,'pull_request:','public premerge trigger');
+requireToken(premerge,'branches: [paradise-canvass-manager-public]','public premerge target');
+requireToken(premerge,'branches: [agent/paradise-university-v1]','public premerge parser-check trigger');
+requireToken(premerge,'group: paradise-public-premerge-${{ github.event.pull_request.number || github.ref_name }}','public premerge concurrency');
+requireToken(premerge,'name: Paradise public premerge gate','public premerge required-check name');
+requireToken(premerge,"if: github.event_name == 'pull_request'",'public premerge execution boundary');
+requireToken(premerge,'contents: read','public premerge permissions');
+requireToken(premerge,'fetch-depth: 0','public premerge release-isolation history');
+for(const validator of [
+  'scripts/validate-training-model-v1.mjs',
+  'scripts/validate-practice-model-v2.mjs',
+  'scripts/validate-training-hardening.mjs',
+  'scripts/validate-training-reconciliation.mjs',
+  'scripts/validate-deep-audit-controls.mjs',
+  'scripts/validate-training-experience-v2.mjs',
+  'scripts/validate-training-experience-v3.mjs',
+  'scripts/validate-release-workflow-controls.mjs',
+  'scripts/validate-field-baseline-v1.mjs',
+  'scripts/validate-training-release-isolation.mjs'
+])requireToken(premerge,validator,'public premerge validator coverage');
+for(const test of [
+  'tests/mobile-regression.spec.js',
+  'tests/offline-regression.spec.js',
+  'tests/training-experience-v2.spec.js',
+  'tests/training-experience-v3.spec.js',
+  'tests/training-smoke.spec.js',
+  'tests/training-ux-polish.spec.js',
+  'tests/matrix-smoke.spec.js',
+  'tests/training-red-team-v1.spec.js',
+  'tests/service-worker-hardening-v1.spec.js',
+  'tests/progress-transfer-recovery-v1.spec.js'
+])requireToken(premerge,test,'public premerge test coverage');
+requireToken(premerge,'--project=webkit-iphone --retries=0 --reporter=github','public premerge iPhone gate');
+requireToken(premerge,'tests/matrix-smoke.spec.js --retries=0 --reporter=github','public premerge device matrix');
+requireToken(premerge,'tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js tests/progress-transfer-recovery-v1.spec.js --retries=0 --reporter=github','public premerge adversarial matrix');
+forbidToken(premerge,'pull_request_target:','public premerge workflow');
+forbidToken(premerge,'contents: write','public premerge workflow');
+forbidToken(premerge,'git push','public premerge workflow');
+
 console.log({
   status:'PASS',
   universityWorkflows:4,
+  publicPremergeProtectionGate:true,
+  publicPremergeRequiredCheck:'Paradise public premerge gate',
   publicSameShaGate:true,
   boundedWaitSeconds:900,
   stalePublicHeadGuard:true,
