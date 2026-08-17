@@ -24,10 +24,11 @@ jobs:
           node --check tests/training-red-team-v1.spec.js
           node --check scripts/validate-training-experience-v3.mjs
           node scripts/validate-training-experience-v3.mjs
+          grep -q 'puLessonRawCompletion' training-checks-v1.js
           grep -q 'puLessonCompletionCurrent' training-checks-v1.js
           grep -q '2026.08.17-pu-progress-transfer-v2-hardened' training-experience-v3.js
           grep -q 'puValidateProgressTransfer' training-experience-v3.js
-          grep -q 'trainingux5-experience3-redteam1' sw.js
+          grep -q 'trainingux5-experience3-redteam2' sw.js
           if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
       - name: Reconfirm controlled field baseline
         run: node scripts/validate-field-baseline-v1.mjs
