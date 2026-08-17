@@ -1,7 +1,7 @@
 name: Validate canvass register
 on:
   push:
-    branches: [paradise-canvass-manager-public]
+    branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
 concurrency:
   group: paradise-canvass-manager-public-validation
   cancel-in-progress: true
@@ -10,7 +10,7 @@ permissions:
   actions: read
 jobs:
   validate:
-    if: github.actor != 'github-actions[bot]'
+    if: github.actor != 'github-actions[bot]' && github.ref_name == 'paradise-canvass-manager-public'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
