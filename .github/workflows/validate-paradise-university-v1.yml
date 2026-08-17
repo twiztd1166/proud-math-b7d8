@@ -21,11 +21,13 @@ jobs:
       - name: Syntax and build-boundary checks
         shell: bash
         run: |
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js boot-v2.js core-v2.js lookup-v2.js sw.js scripts/build-canvass-site.mjs scripts/validate-training-model-v1.mjs scripts/validate-practice-model-v2.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-release-isolation.mjs tests/training-smoke.spec.js tests/currentness-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/manager-home-smoke.spec.js tests/lesson-flow-acceptance.spec.js tests/release-readiness-smoke.spec.js tests/sales-closing-smoke.spec.js tests/offline-regression.spec.js; do node --check "$f"; done
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js; do grep -q "$f" index.html; done
-          for f in training-media-expanded-v1.js training-governance-v1.js training-media-rights-v1.js training-media-ui-v1.js training-currentness-v1.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js; do grep -q "$f" sw.js; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-media-reconciliation-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js training-deep-audit-fixes-v1.js boot-v2.js core-v2.js lookup-v2.js sw.js scripts/build-canvass-site.mjs scripts/validate-training-model-v1.mjs scripts/validate-practice-model-v2.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-reconciliation.mjs scripts/validate-deep-audit-controls.mjs scripts/validate-training-release-isolation.mjs tests/training-smoke.spec.js tests/currentness-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/manager-home-smoke.spec.js tests/lesson-flow-acceptance.spec.js tests/release-readiness-smoke.spec.js tests/sales-closing-smoke.spec.js tests/deep-audit-regression.spec.js tests/offline-regression.spec.js; do node --check "$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-media-reconciliation-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js training-deep-audit-fixes-v1.js; do grep -q "$f" index.html; done
+          for f in training-media-expanded-v1.js training-media-reconciliation-v1.js training-governance-v1.js training-media-rights-v1.js training-media-ui-v1.js training-currentness-v1.js training-sales-closing-v1.js training-readiness-v1.js training-practice-data-v2.js training-practice-v1.js training-checks-v1.js training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-more-v1.js training-more-rights-gate-v1.js training-deep-audit-fixes-v1.js; do grep -q "$f" sw.js; done
           grep -q 'pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17' sw.js
+          grep -q 'deepaudit1' sw.js
           grep -q '2026.08.16-pu-media-expanded-v1' training-media-expanded-v1.js
+          grep -q '2026.08.16-pu-trainer-library-reconciliation-v1' training-media-reconciliation-v1.js
           grep -q '2026.08.16-pu-governance-v1' training-governance-v1.js
           grep -q '2026.08.16-pu-media-internal-v2' training-media-rights-v1.js
           grep -q 'INTERNAL_USE_NON_BLOCKING' training-media-rights-v1.js
@@ -46,19 +48,23 @@ jobs:
           grep -q '2026.08.16-pu-more-rights-v1' training-more-rights-gate-v1.js
           grep -q '2026.08.16-pu-practice-data-v2' training-practice-data-v2.js
           grep -q '2026.08.16-pu-practice-v2' training-practice-v1.js
+          grep -q '2026.08.17-pu-checks-v3-versioned' training-checks-v1.js
+          grep -q '2026.08.17-pu-deep-audit-fixes-v1' training-deep-audit-fixes-v1.js
           grep -q '2026.08.16-pu-sales-closing-v2' training-sales-closing-v1.js
           grep -q 'puMediaProgressV2' training-player-v1.js
           grep -q 'CURRENT_POLICY_REQUIRED' training-sales-v1-data.js
           grep -q 'SALES TRAINING IS NOT AUTHORIZATION TO SELL AT THE DOOR' training-content-sourcefix-v1.js
           grep -q 'Training search never replaces the live municipality result' training-more-v1.js
           grep -q 'SOURCE / REFERENCE MATERIAL' training-more-v1.js
-          if grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-sourcefix-v1.js training-media-expanded-v1.js; then echo 'Unverified Tony media ID reintroduced'; exit 1; fi
+          if grep -q '19CvExmu1fCyaq3SpLprsn8TVIQq-Bzt0' training-content-sourcefix-v1.js training-media-expanded-v1.js training-media-reconciliation-v1.js; then echo 'Unverified Tony media ID reintroduced'; exit 1; fi
 
       - name: Validate training content and hardening
         run: |
           node scripts/validate-training-model-v1.mjs
           node scripts/validate-practice-model-v2.mjs
           node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
+          node scripts/validate-deep-audit-controls.mjs
 
       - name: Reconfirm controlled field baseline
         run: node scripts/validate-field-baseline-v1.mjs
@@ -69,7 +75,7 @@ jobs:
       - name: Build static production bundle
         run: |
           node scripts/build-canvass-site.mjs
-          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-readiness-v1.css training-practice-data-v2.js training-practice-v1.js training-practice-v1.css training-checks-v1.js training-checks-v1.css training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-player-v1.css training-more-v1.js training-more-rights-gate-v1.js training-more-v1.css; do test -f "canvass-dist/$f"; done
+          for f in training-content-v1.js training-content-sourcefix-v1.js training-manager-v1-data.js training-sales-v1-data.js training-media-expanded-v1.js training-media-reconciliation-v1.js training-governance-v1.js training-v1.js training-media-rights-v1.js training-media-ui-v1.js training-manager-v1-ui.js training-currentness-v1.js training-sales-v1-ui.js training-sales-closing-v1.js training-readiness-v1.js training-readiness-v1.css training-practice-data-v2.js training-practice-v1.js training-practice-v1.css training-checks-v1.js training-checks-v1.css training-progress-state-v1.js training-player-v1.js training-media-player-gate-v1.js training-player-v1.css training-more-v1.js training-more-rights-gate-v1.js training-more-v1.css training-deep-audit-fixes-v1.js; do test -f "canvass-dist/$f"; done
 
       - name: Install isolated Playwright runtime
         shell: bash
@@ -94,7 +100,7 @@ jobs:
         run: ./node_modules/.bin/playwright test tests/offline-regression.spec.js --project=webkit-iphone --retries=0 --reporter=github
 
       - name: Run Paradise University iPhone regression
-        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/currentness-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/manager-home-smoke.spec.js tests/lesson-flow-acceptance.spec.js tests/release-readiness-smoke.spec.js tests/sales-closing-smoke.spec.js --project=webkit-iphone --reporter=github
+        run: ./node_modules/.bin/playwright test tests/training-smoke.spec.js tests/currentness-smoke.spec.js tests/readiness-smoke.spec.js tests/practice-smoke.spec.js tests/checks-smoke.spec.js tests/more-search-smoke.spec.js tests/media-library-smoke.spec.js tests/player-progress-smoke.spec.js tests/manager-home-smoke.spec.js tests/lesson-flow-acceptance.spec.js tests/release-readiness-smoke.spec.js tests/sales-closing-smoke.spec.js tests/deep-audit-regression.spec.js --project=webkit-iphone --reporter=github
 
       - name: Run device matrix regression
         run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --reporter=github
