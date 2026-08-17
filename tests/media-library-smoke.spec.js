@@ -36,12 +36,21 @@ test('full source library retains trainer lineage and internal source access',as
   await expect(page.locator('.puLibraryItem.puRightsHold')).toHaveCount(0);
 });
 
-test('direct player invocation opens internal Drive media in training player',async({page})=>{
+test('direct player invocation uses top-level Drive launch with no embedded Google iframe',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
   const root=page.locator('#puPlayerRoot');await expect(root.getByRole('dialog',{name:'Training player'})).toBeVisible();
-  await expect(root.locator('#puDrivePlayer')).toBeVisible();await expect(root.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
+  await expect(root.locator('iframe')).toHaveCount(0);await expect(root.locator('[data-provider="drive-top-level"]')).toBeVisible();
+  const launch=root.getByRole('link',{name:/Play Tonality and Body Language in Google Drive/i});await expect(launch).toBeVisible();await expect(launch).toHaveAttribute('target','_blank');await expect(launch).toHaveAttribute('href',/drive\.google\.com\/file\/d\/1WNQ6ItT6Ar_HXGKNutWEvEFeHm14RjKn/);
+  await expect(root.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
   await expect(root.getByRole('button',{name:/MARK COMPLETE|COMPLETED/})).toBeVisible();await expect(root.getByRole('button',{name:/SAVE FOR LATER|SAVED/})).toBeVisible();
   await root.getByRole('button',{name:'Close player'}).click();await expect(root).toBeEmpty();
+});
+
+test('all Drive-backed trainer media avoid embedded Google playback',async({page})=>{
+  await page.goto('/index.html');
+  const ids=await page.evaluate(()=>window.PU_CONTENT.media.filter(x=>/drive\.google\.com\/file\//.test(x.url||'')&&!x.streamUrl).map(x=>x.id));
+  expect(ids.length).toBeGreaterThan(0);
+  for(const id of ids){await page.evaluate(mediaId=>window.puPlayerOpen(mediaId),id);const root=page.locator('#puPlayerRoot');await expect(root.locator('iframe')).toHaveCount(0);await expect(root.locator('[data-provider="drive-top-level"]')).toBeVisible();await expect(root.locator('#puDriveLaunch')).toHaveAttribute('target','_blank');await page.evaluate(()=>window.puPlayerOpen(''))}
 });
 
 test('internal-use control remains separate from Paradise authority classification',async({page})=>{
