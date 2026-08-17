@@ -1,6 +1,6 @@
 # Paradise University v1 — Physical Device Attempt Record — 2026-08-17
 
-Status: **CORRECTED-RUNTIME RETEST IN PROGRESS — AUDIO DRIVE PATH PASS / FULL GATE OPEN**
+Status: **CORRECTED-RUNTIME RETEST IN PROGRESS — TONY AUDIO + VIDEO DRIVE PATHS PASS / FULL GATE OPEN**
 
 This record preserves both the physical-device failure that triggered the secure trainer-player correction and the subsequent real-device retest evidence. It is evidence for release control only; it is **not** yet a completed physical-device acceptance record and it does **not** authorize promotion.
 
@@ -87,16 +87,36 @@ Controlled disposition for this tested path:
 
 `KNOWN_DRIVE_IFRAME_BLOCKER = CLOSED_BY_PHYSICAL_RETEST`
 
-This is the first physical evidence that the replacement architecture solves the specific real-iPhone playback blocker. It does **not** by itself establish that every trainer-media file plays, that video rotation works, that the installed Home Screen PWA path is complete, or that the offline shell has passed physical acceptance.
-
 No requirement to weaken Safari privacy or third-party-cookie settings is recorded for this successful retest.
+
+### Tony Hoty — New Canvasser Training — Process video
+
+The user then performed the requested real-iPhone video retest on the same immutable corrected runtime and reported that it **works**. The confirmation applies to the requested video acceptance sequence immediately preceding that response:
+
+- the top-level Google Drive launch opened the controlled video;
+- picture and audio played;
+- pause / resume worked;
+- portrait → landscape → portrait rotation remained usable;
+- return to Paradise University worked without a navigation trap.
+
+Controlled disposition for this tested path:
+
+`TONY_PROCESS_VIDEO_TOP_LEVEL_DRIVE_LAUNCH = PASS`
+
+`TONY_PROCESS_VIDEO_PHYSICAL_PICTURE_AND_AUDIO = PASS`
+
+`TONY_PROCESS_VIDEO_PAUSE_RESUME = PASS`
+
+`TONY_PROCESS_VIDEO_ROTATION = PASS`
+
+`TONY_PROCESS_VIDEO_RETURN_TO_UNIVERSITY = PASS`
+
+Together, the Tony audio and Tony video physical checks establish that the corrected top-level Drive architecture works for both media types on the tested real iPhone. This still does **not** establish Home Screen PWA acceptance, offline-shell acceptance, non-Tony playback, or field GO/NO-GO physical regression.
 
 ## Remaining physical retest
 
 The full physical gate remains OPEN. The corrected runtime still needs physical confirmation of the remaining required items, including at minimum:
 
-- trainer **video** playback through the new top-level Drive launch;
-- return from Drive to Paradise University without a navigation trap;
 - at least one non-Tony trainer-media playback check;
 - installed Home Screen PWA behavior;
 - PWA offline shell / cached field and curriculum behavior;
@@ -108,6 +128,6 @@ Current controlled state:
 
 `PHYSICAL_DEVICE_ACCEPTANCE = OPEN / RETEST IN PROGRESS`
 
-`MEDIA_PLAYBACK_ACCEPTANCE = PARTIAL PASS — TONY AUDIO PASS / VIDEO + ADDITIONAL PATHS OPEN`
+`MEDIA_PLAYBACK_ACCEPTANCE = PARTIAL PASS — TONY AUDIO + VIDEO PASS / NON-TONY + PWA PATHS OPEN`
 
 This physical evidence does not approve the canvass opener, does not complete human curriculum/compliance sign-off, and does not authorize promotion.
