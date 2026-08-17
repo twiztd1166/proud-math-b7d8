@@ -50,6 +50,18 @@ test('malformed transfer is rejected before any device progress is overwritten',
   expect(result.threw).toBe(true);expect(result.message).toMatch(/Invalid stored progress data: puProgress/);expect(result.value).toBe(before);
 });
 
+test('progress transfer replaces the transfer snapshot instead of merging destination-only readiness state',async({page})=>{
+  await training(page);const id='field-lookup';
+  const result=await page.evaluate(id=>{
+    localStorage.puQuickChecksV1=JSON.stringify({[id]:{passed:true,checksVersion:window.PU_CHECKS_VERSION,trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()}});
+    localStorage.puLastMedia='destination-only-media';
+    const imported=JSON.stringify({[id]:{complete:true,trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()}});
+    window.puApplyProgressTransfer({type:'PARADISE_UNIVERSITY_PROGRESS_TRANSFER',version:window.PU_PROGRESS_TRANSFER_VERSION,trainingVersion:PU_VERSION,data:{puProgress:imported}});
+    return{progress:localStorage.puProgress,checks:localStorage.getItem('puQuickChecksV1'),lastMedia:localStorage.getItem('puLastMedia'),ready:window.puLessonTrainingReady(id),checkPassed:window.puQuickCheckPassed(id)};
+  },id);
+  expect(result.progress).toContain(id);expect(result.checks).toBeNull();expect(result.lastMedia).toBeNull();expect(result.checkPassed).toBe(false);expect(result.ready).toBe(false);
+});
+
 test('transfer allowlist rejects unexpected fields and export does not leak unrelated localStorage',async({page})=>{
   await training(page);await page.evaluate(()=>{localStorage.secretToken='DO_NOT_EXPORT';localStorage.puLastMedia='tony-canvassing-101'});
   const exported=await page.evaluate(()=>window.puProgressTransferPayload());
@@ -107,9 +119,20 @@ test('trainer catalog denominator is exact and public RawGitHack media mirroring
   expect(audit).toEqual({total:79,unique:79,tony:24,dave:4,grosso:51,source:67,curated:12,badProtocol:[],publicMirror:[]});
 });
 
-test('service worker never precaches or intercepts external Drive media',async({page})=>{
+test('catalog URL-bearing fields contain no active-content or insecure absolute schemes',async({page})=>{
+  await training(page);
+  const bad=await page.evaluate(()=>{
+    const hits=[];
+    const walk=(v,path='PU_CONTENT')=>{if(!v||typeof v!=='object')return;for(const [k,x] of Object.entries(v)){const p=`${path}.${k}`;if(typeof x==='string'&&/url$/i.test(k)){const s=x.trim();if(/^\w+:/i.test(s)&&!/^https:/i.test(s))hits.push(`${p}=${s}`);if(/^\s*(?:javascript|data|vbscript|file):/i.test(s))hits.push(`${p}=ACTIVE:${s}`)}else if(x&&typeof x==='object')walk(x,p)}};
+    walk(window.PU_CONTENT);return hits;
+  });
+  expect(bad).toEqual([]);
+});
+
+test('service worker excludes external Drive and only refreshes offline index from the actual app entry',async({page})=>{
   await training(page);const sw=await page.evaluate(()=>fetch('/sw.js').then(r=>r.text()));
-  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toContain('trainingux5-experience3-redteam2');
+  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toContain('trainingux5-experience3-redteam3');
+  expect(sw).toContain("isAppEntry=url.pathname===appIndex.pathname||url.pathname===appRoot.pathname");expect(sw).toContain('if(isAppEntry&&r.ok&&html)');
 });
 
 test('red-team invariants preserve field authority, exact pending opener, and iframe-free Drive playback',async({page})=>{
