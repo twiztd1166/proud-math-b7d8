@@ -119,7 +119,7 @@
     const sync=()=>{
       const done=puLessonDone(id),passed=!checkRequired||(typeof puQuickCheckPassed==='function'&&puQuickCheckPassed(id));
       if(doneBtn&&checkRequired){doneBtn.disabled=!passed&&!done;doneBtn.textContent=done?'MARK INCOMPLETE':passed?'MARK COMPLETE':'PASS QUICK CHECK FIRST'}
-      if(nextBtn&&(trackOrder.includes(lessonObj.stage)||apprenticeKeep.has(id)))nextBtn.disabled=!(done&&passed);
+      if(nextBtn&&(trackOrder.includes(lessonObj.stage)||apprenticeKeep.has(id)||checkRequired))nextBtn.disabled=!(done&&passed);
     };
     sync();if(checkRequired)M.querySelectorAll('[data-pu-check]').forEach(b=>b.addEventListener('click',()=>setTimeout(sync,0)));
     if(nextBtn&&trackOrder.includes(lessonObj.stage)){
