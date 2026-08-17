@@ -23,6 +23,15 @@ jobs:
           node scripts/validate-training-hardening.mjs
           node scripts/validate-training-reconciliation.mjs
           node scripts/validate-practice-model-v2.mjs
+      - name: Validate secure trainer playback boundary
+        run: |
+          node --check training-player-v1.js
+          grep -q '2026.08.17-pu-player-v3-drive-top-level' training-player-v1.js
+          grep -q 'data-provider="drive-top-level"' training-player-v1.js
+          grep -q 'PLAY IN GOOGLE DRIVE' training-player-v1.js
+          grep -q 'third-party-cookie' training-player-v1.js
+          if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
+          grep -q 'drivetoplevel1' sw.js
       - name: Reconfirm controlled field baseline
         run: |
           grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
