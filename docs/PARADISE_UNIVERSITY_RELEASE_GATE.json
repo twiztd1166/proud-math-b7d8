@@ -1,11 +1,21 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v11",
+  "schemaVersion": "2026.08.17-pu-release-gate-v12",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "lastFullyGreenSoftwareCheckpoint": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-  "lastFullyGreenValidatorRun": 32010356293,
-  "lastFullyGreenContentHardeningRun": 32010356249,
+  "currentRuntimeCandidate": "ae46fa6d5258146a357041bcd184b07031778043",
+  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ae46fa6d5258146a357041bcd184b07031778043/index.html",
+  "currentControlHeadBeforeCloseoutDocs": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
+  "lastFullyGreenControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
+  "lastFullyGreenValidatorRun": 32020240642,
+  "lastFullyGreenContentHardeningRun": 32020240685,
+  "runtimeControlSeparation": {
+    "status": "PASS",
+    "runtimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
+    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
+    "postRuntimeChanges": "CI/workflow and regression-test controls only; no browser-runtime change after ae46fa6d5258146a357041bcd184b07031778043 through the green 0693890b3050b25ca4b94f0fe60974efc7c5441b control head.",
+    "rule": "Documentation/test-only commits after the runtime do not redefine the immutable runtime candidate."
+  },
   "fieldBaseline": {
     "status": "PASS",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
@@ -21,18 +31,32 @@
     "staticProductionBundle": "PASS",
     "automatedIPhoneField": "PASS",
     "automatedIPhoneOffline": "PASS",
+    "automatedTrainingExperienceV2RedTeam": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "validatorRun": 32010356293,
-    "contentHardeningRun": 32010356249,
-    "testedRuntimeCommit": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-    "playerVersion": "2026.08.17-pu-player-v3-drive-top-level",
+    "validatorRun": 32020240642,
+    "contentHardeningRun": 32020240685,
+    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
+    "testedRuntimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
+    "pwaCacheIdentity": "trainingux3",
+    "trainingExperienceV2": {
+      "status": "PASS_AUTOMATED",
+      "roleAwareDefaultQueue": true,
+      "futureRolesExcludedFromDefaultQueue": true,
+      "salesApprenticeBridgeItems": 4,
+      "quickCheckRequiredBeforeCompletion": true,
+      "quickCheckRequiredBeforeForwardNavigation": true,
+      "managerQuickCheckForwardNavigationGuard": true,
+      "curatedMediaDeduplicated": true,
+      "salesControlsCollapsedByDefaultEvidenceStillReachable": true,
+      "practiceLineageCorrection": "PASS"
+    },
     "securePlaybackBoundary": {
       "driveIframeAllowed": false,
       "driveTopLevelLaunchRequired": true,
       "publicRawGitHackTrainerMediaMirroring": false,
       "nativeProtectedStreamPathRetained": true,
-      "hardeningGuard": "CI fails if an embedded training <iframe> is reintroduced into training-player-v1.js."
+      "hardeningGuard": "CI fails if an embedded training <iframe> is reintroduced into the controlled training player."
     }
   },
   "physicalFailureHistory": {
@@ -40,11 +64,12 @@
     "status": "FAIL_DRIVE_IFRAME_ON_REAL_IPHONE",
     "rootControlConclusion": "Do not require employees to weaken Safari privacy/third-party-cookie settings to make trainer playback work.",
     "remediationRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-    "remediation": "Drive-backed trainer media now opens the original controlled Drive file in a top-level authorized session via PLAY IN GOOGLE DRIVE rather than embedding Google inside the app."
+    "remediation": "Drive-backed trainer media opens the original controlled Drive file in a top-level authorized session rather than embedding Google inside the app."
   },
-  "physicalRetestProgress": {
-    "status": "IN_PROGRESS",
+  "priorPhysicalPlaybackCheckpoint": {
     "runtime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
+    "status": "PASS_FOR_RECORDED_PLAYBACK_PATHS_ONLY",
+    "evidencePreserved": true,
     "knownIframeBlocker": "CLOSED_BY_PHYSICAL_RETEST",
     "tonyCanvassing101": {
       "topLevelDriveLaunch": "PASS",
@@ -60,12 +85,34 @@
     "nonTonyPlayback": {
       "status": "PASS_TESTED_PATHS",
       "reportedResult": "They all work.",
-      "scopeControl": "This does not assert that every one of the 79 indexed media files was individually played unless separately enumerated."
+      "scopeControl": "This does not assert that every one of the 79 indexed media files was individually played."
     },
-    "installedHomeScreenPWA": "OPEN",
-    "physicalOfflineShell": "OPEN",
-    "fieldGoNoGoRegression": "OPEN",
-    "note": "Real-iPhone playback now passes for the tested Tony audio, Tony video, and additional non-Tony trainer paths. Remaining physical work is Home Screen PWA, offline shell/library behavior, and one GO plus one NO-GO Lookup check."
+    "carryForwardRule": "This is valid historical evidence that the inherited top-level Drive playback path worked on a real iPhone. It is not full physical acceptance of the newer Training Experience v2 runtime ae46fa6d5258146a357041bcd184b07031778043."
+  },
+  "currentPhysicalAcceptance": {
+    "status": "OPEN_CURRENT_RUNTIME_RETEST_REQUIRED",
+    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
+    "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
+    "priorAttemptRecord": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ATTEMPT_2026-08-17.md",
+    "requiredDeviceScope": [
+      "Safari and installed Home Screen PWA on the exact current runtime",
+      "online and Airplane Mode/offline shell behavior",
+      "one GO and one NO-GO Lookup check",
+      "Daily Check and History",
+      "simplified Training Experience v2 home and role-aware queue",
+      "Quick Check before completion and forward navigation, including manager path",
+      "four-item Sales Apprentice bridge",
+      "collapsed Sales Controls & References with evidence still reachable",
+      "Canvassing Library from Training home, Videos & Audio, and More",
+      "Tony 24 exactly once, both Tony manuals visible, Dave 4 visible",
+      "REFERENCE/HISTORICAL authority labels with no accidental trainer PARADISE APPROVED state",
+      "spot-check actual trainer playback under the exact current runtime",
+      "existing opener wording and CURRENT APPROVAL PENDING state",
+      "Missing Parties homeowner/decision-maker boundary with no blanket spouse rule",
+      "no fake offline trainer playback and no giant trainer-media precache",
+      "touch, viewport, Dynamic Type, orientation, and navigation QA"
+    ],
+    "rule": "Prior ac353 playback evidence is preserved but does not substitute for current-runtime physical acceptance."
   },
   "curriculumCurrentness": {
     "status": "ONE_HUMAN_APPROVAL_OPEN",
@@ -75,7 +122,7 @@
     },
     "openingWording": {
       "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
-      "candidate": "I'm not here to sell you anything. I'm [Name] with Paradise Exteriors. We're doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
+      "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
       "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library/playback work.",
       "runtimeDisplay": "CURRENT APPROVAL PENDING",
       "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md choosing APPROVE or REVISE for the exact candidate."
@@ -88,7 +135,8 @@
     "scenariosPerCategory": 5,
     "minimumHardStops": 6,
     "schemaValidator": "PASS",
-    "offline": "PASS"
+    "offline": "PASS",
+    "invalidLessonLineageCorrection": "PASS"
   },
   "internalTrainerMedia": {
     "status": "PASS_INTERNAL_USE_NON_BLOCKING",
@@ -105,20 +153,23 @@
       "confirmedNewReconciliationRecords": 49,
       "unexplainedMissingConfirmedCanonicalMedia": 0
     },
-    "physicalPlaybackStatus": "PASS_FOR_TESTED_TONY_AUDIO_VIDEO_AND_NON_TONY_PATHS",
+    "canvassingLibrary": {
+      "tonyIndexed": 24,
+      "daveIndexed": 4,
+      "tonyManualsRequiredVisible": [
+        "Tony Hoty Canvassing Manual",
+        "Tony Hoty Master Training Manual"
+      ],
+      "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable."
+    },
+    "physicalPlaybackStatus": "PRIOR_AC353_TESTED_PATHS_PASS_CURRENT_AE46_SPOT_CHECK_OPEN",
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
-  },
-  "physicalDeviceAcceptance": {
-    "status": "RETEST_IN_PROGRESS_MEDIA_PATHS_PASS",
-    "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
-    "attemptRecord": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ATTEMPT_2026-08-17.md",
-    "requiredRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
-    "closedEvidence": "Tony audio PASS; Tony video PASS including picture/audio, pause/resume, rotation and return; additional tested non-Tony trainer playback paths PASS; known embedded-Drive blocker closed.",
-    "remainingRequiredEvidence": "Installed Home Screen PWA behavior, physical offline shell/library behavior, and one GO plus one NO-GO Lookup check on the real iPhone."
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
     "packet": "docs/PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md",
+    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
+    "v2ReviewRequired": true,
     "currentnessDecision": "OPEN — exact canvass opener requires named human APPROVE or REVISE decision."
   },
   "promotionAuthorization": {
@@ -126,7 +177,9 @@
     "requiredEvidence": "Explicit authorization to advance the validated branch after all other gates are PASS."
   },
   "validatedBranchReadback": {
-    "status": "NOT_APPLICABLE_UNTIL_PROMOTION"
+    "status": "PASS_UNCHANGED_PRE_PROMOTION",
+    "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+    "note": "No University promotion has occurred."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. Real-iPhone trainer playback has passed for tested Tony audio/video and additional non-Tony paths. Remaining blockers are the Home Screen PWA/offline/field portions of the physical retest, the named human opener-currentness decision within the broader human curriculum/compliance sign-off, and explicit promotion authorization."
+  "hardRule": "A green software validator is necessary but not sufficient for release. The current immutable browser runtime is ae46fa6d5258146a357041bcd184b07031778043 and the later green 0693890b3050b25ca4b94f0fe60974efc7c5441b head is test/control-only. Prior ac353 real-iPhone playback evidence is preserved but does not pass the current v2 physical matrix. Remaining blockers are exact-current-runtime physical iPhone/PWA acceptance, human curriculum/compliance review, the named opener-currentness decision, and explicit promotion authorization."
 }
