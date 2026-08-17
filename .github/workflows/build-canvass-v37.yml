@@ -3,7 +3,7 @@ on:
   push:
     branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
 concurrency:
-  group: paradise-canvass-manager-public-validation
+  group: paradise-canvass-manager-public-validation-${{ github.ref_name }}
   cancel-in-progress: true
 permissions:
   contents: write
