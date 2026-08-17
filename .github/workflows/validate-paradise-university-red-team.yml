@@ -32,7 +32,7 @@ jobs:
           grep -q 'A transfer file is a snapshot of the transfer domain, not a merge patch' training-experience-v3.js
           grep -q '2026.08.17-pu-storage-hardening-v1' training-storage-hardening-v1.js
           grep -q 'puSanitizeTrainingStorage' training-storage-hardening-v1.js
-          grep -q 'trainingux5-experience3-redteam4' sw.js
+          grep -q 'trainingux5-experience3-redteam5' sw.js
           grep -q 'training-storage-hardening-v1.js' sw.js
           grep -q 'isAppEntry&&r.ok&&html' sw.js
           if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
