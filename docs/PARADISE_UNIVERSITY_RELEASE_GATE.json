@@ -1,21 +1,22 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v15-deep-red-team",
+  "schemaVersion": "2026.08.17-pu-release-gate-v16-redteam7-closeout",
   "status": "NOT_RELEASE_READY",
   "auditMode": "AUTOMATED_DEEP_RED_TEAM_NO_HUMAN_CHECK_REQUESTED",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "currentRuntimeCandidate": "c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea",
-  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea/index.html",
-  "lastBrowserRuntimeChange": "c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea",
-  "fullyGreenPreCloseoutControlHead": "579bc8e36894bd835f07f79db177f5c617df67f3",
+  "currentRuntimeCandidate": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/8a74bd78bb57369dbaeb4f6708a82db538bc19f7/index.html",
+  "lastBrowserRuntimeChange": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+  "fullyGreenPreCloseoutControlHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
   "automatedDeepRedTeam": {
     "status": "PASS",
     "blockingMachineDetectableDefectsInCoveredMatrix": 0,
     "auditDocument": "docs/PARADISE_UNIVERSITY_DEEP_RED_TEAM_AUDIT_2026-08-17.md",
-    "adversarialTests": 12,
+    "adversarialTestsPerProfile": 18,
     "deviceBrowserProfiles": 5,
-    "adversarialExecutions": 60,
-    "adversarialPassed": 60,
+    "adversarialExecutions": 90,
+    "adversarialPassed": 90,
+    "retries": 0,
     "profiles": [
       "WebKit iPhone",
       "WebKit small iPhone",
@@ -24,10 +25,10 @@
       "Chromium Android"
     ],
     "exactGreenRuns": {
-      "fullValidator": 32034062002,
-      "contentHardening": 32034062037,
-      "uxPolish": 32034062054,
-      "adversarialRedTeam": 32034062129
+      "fullValidator": 32042429862,
+      "contentHardening": 32042429860,
+      "uxPolish": 32042430006,
+      "adversarialRedTeam": 32042429868
     },
     "coveredThreats": [
       "prior-version completion cannot satisfy current-version readiness",
@@ -36,27 +37,37 @@
       "unexpected transfer fields rejected",
       "prototype-pollution-style transfer key rejected",
       "oversized transfer rejected without replacing existing state",
+      "progress transfer replaces the transfer-domain snapshot instead of merging destination-only readiness state",
+      "destructive progress import requires explicit confirmation when destination transfer state exists",
+      "canceling destructive progress import performs zero writes and preserves existing transfer-domain state",
+      "confirming destructive progress import retains snapshot-replacement semantics and does not merge stale destination state",
+      "valid JSON with invalid local-storage object shape is discarded fail-closed and cannot create readiness",
       "forged local device progress cannot create official certification authority",
       "imported media-note markup/script injection remains inert",
       "corrupt contextual navigation fails closed",
       "trainer catalog denominator/uniqueness and no public RawGitHack media mirroring",
       "service worker same-origin boundary and no external Drive media precache",
+      "service worker offline-shell refresh is limited to the exact queryless app entry",
+      "validated field-shell index and service-worker inventories remain release-isolated from Training changes",
       "exact pending opener, iframe-free Drive playback, canonical top-level Drive action"
     ],
-    "importantFindingClassification": "Existing deep-audit logic already rejected prior-version completion for current readiness. The red-team pass added explicit raw-history/current-readiness separation and hardened UI/test controls; it did not close a live stale-readiness bypass.",
+    "importantFindingClassification": "The deep red-team sequence found and closed defense-in-depth and recoverability defects without changing field classifications or the canvass opener. The destructive-import issue could erase local device-training history but could not manufacture readiness or official certification authority.",
     "transferTrustBoundary": "Manual/local progress JSON is not a cryptographically trusted certification credential. Device progress may be edited by a device owner; official certification therefore remains separate and requires current Paradise human/field authority.",
     "intermediateFailuresPreserved": true
   },
   "runtimeControlSeparation": {
-    "status": "PASS",
-    "runtimeCommit": "c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea",
-    "validatedPreCloseoutHead": "579bc8e36894bd835f07f79db177f5c617df67f3",
+    "status": "PASS_BY_COMMIT_CHAIN_AND_FILE_CLASSIFICATION",
+    "runtimeCommit": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+    "validatedPreCloseoutHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
     "postRuntimeChangesThroughPreCloseoutHead": [
-      ".github/workflows/validate-paradise-university-red-team.yml",
+      "tests/service-worker-hardening-v1.spec.js",
+      "tests/offline-regression.spec.js",
+      "tests/training-red-team-v1.spec.js",
       "scripts/validate-training-experience-v3.mjs",
-      "tests/training-red-team-v1.spec.js"
+      ".github/workflows/validate-paradise-university-red-team.yml"
     ],
     "browserRuntimeChangedAfterPinnedRuntime": false,
+    "compareApiNote": "A GitHub compare attempt for this runtime/control interval returned 404, so this closeout does not falsely claim compare-API proof. Separation is recorded from the known sequential commit chain and the exact files changed after the runtime commit.",
     "rule": "Test/workflow/static-validator/documentation commits do not redefine the immutable runtime candidate."
   },
   "fieldBaseline": {
@@ -82,14 +93,16 @@
     "automatedTrainingExperienceV3": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "fullValidatorRun": 32034062002,
-    "contentHardeningRun": 32034062037,
-    "uxPolishRun": 32034062054,
-    "adversarialRedTeamRun": 32034062129,
-    "validatedControlHead": "579bc8e36894bd835f07f79db177f5c617df67f3",
-    "testedRuntimeCommit": "c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea",
-    "pwaCacheIdentity": "trainingux5-experience3-redteam2",
+    "fullValidatorRun": 32042429862,
+    "contentHardeningRun": 32042429860,
+    "uxPolishRun": 32042430006,
+    "adversarialRedTeamRun": 32042429868,
+    "validatedControlHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
+    "testedRuntimeCommit": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+    "pwaCacheIdentity": "pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-trainingux5-experience3-redteam7",
     "progressTransferVersion": "2026.08.17-pu-progress-transfer-v2-hardened",
+    "progressImportGuardVersion": "2026.08.17-pu-progress-import-guard-v1",
+    "storageHardeningVersion": "2026.08.17-pu-storage-hardening-v1",
     "quickCheckVersion": "2026.08.17-pu-checks-v3-versioned",
     "trainingExperienceV3": {
       "milestoneGuidance": true,
@@ -101,6 +114,10 @@
       "sourceBoundTranscriptChapterHooks": true,
       "completionFeedback": true,
       "manualCrossDeviceProgressTransfer": true,
+      "snapshotReplacementTransfer": true,
+      "destructiveImportConfirmation": true,
+      "destructiveImportCancelZeroWrite": true,
+      "invalidShapeStorageRecovery": true,
       "centralAccountSyncClaimed": false,
       "managerAssignedTraining": false,
       "gamificationXpStreakLeaderboard": false
@@ -111,6 +128,12 @@
       "publicRawGitHackTrainerMediaMirroring": false,
       "nativeProtectedStreamPathRetained": true,
       "serviceWorkerExternalDriveCaching": false
+    },
+    "serviceWorkerBoundary": {
+      "sameOriginOnly": true,
+      "offlineIndexRefreshExactQuerylessAppEntryOnly": true,
+      "validatedFieldCoreAssetsPreserved": true,
+      "coreAdditionsTrainingAssetsOnly": true
     }
   },
   "physicalFailureHistory": {
@@ -130,8 +153,8 @@
   },
   "currentPhysicalAcceptance": {
     "status": "NOT_RUN_CURRENT_RUNTIME_BY_USER_DIRECTION_UNASSERTED",
-    "requiredRuntime": "c862244e15b5aba620ebf1afebe2a4d2ee1aa9ea",
-    "reason": "User requested no human check and a deep automated red-team pass instead.",
+    "requiredRuntime": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+    "reason": "The requested work remained an automated deep-red-team pass; no new physical-device acceptance evidence was generated for the current runtime.",
     "simulatorOrCiMisrepresentedAsPhysical": false
   },
   "curriculumCurrentness": {
@@ -162,11 +185,17 @@
         "Grosso University": 51
       }
     },
-    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, playable, bookmarked, noted, practiced, or transferred."
+    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, playable, bookmarked, noted, practiced, or transferred.",
+    "driveAccessControlEvidence": {
+      "status": "UNVERIFIED",
+      "reason": "The public app catalog necessarily exposes Drive URLs/IDs. Connected Drive metadata reads for representative Tony files and the Tony root did not return permission visibility sufficient to prove whether access is restricted, domain-scoped, or anyone-with-link.",
+      "permissionsChangedByAudit": false,
+      "releaseImplication": "Do not represent trainer-media sharing as access-controlled until Drive sharing visibility is independently verified."
+    }
   },
   "humanCurriculumComplianceReview": {
     "status": "NOT_RUN_BY_USER_DIRECTION_UNASSERTED",
-    "reason": "User requested no human check; automated red-team assurance was performed instead.",
+    "reason": "Automated red-team assurance does not synthesize human curriculum/compliance judgment.",
     "automatedResultDoesNotSynthesizeHumanJudgment": true
   },
   "promotionAuthorization": {
@@ -176,8 +205,24 @@
   "validatedBranchReadback": {
     "status": "PASS_UNCHANGED_PRE_PROMOTION",
     "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-    "note": "No Paradise University promotion occurred during the deep red-team audit."
+    "note": "No Paradise University promotion occurred during the deep red-team audit or redteam7 closeout."
   },
-  "nonBlockingInfrastructureObservation": "GitHub Actions warned that actions/checkout@v4 and actions/setup-node@v4 target the deprecated Node.js 20 action runtime and are currently forced to Node.js 24 by the runner. Validation still passed; upgrade those actions when an appropriate supported major is available.",
-  "hardRule": "Automated deep red-team assurance is PASS with no blocking machine-detectable defect in the covered matrix. This does not manufacture physical-device or human-judgment evidence. The exact opener remains CURRENT APPROVAL PENDING, production promotion remains separately controlled, and no promotion has occurred."
+  "intermediateFailureHistory": {
+    "redteam6HarnessFailure": {
+      "status": "CLOSED_AS_TEST_HARNESS_DEFECT",
+      "observed": "79 of 85 browser executions passed before correction.",
+      "cause": "Five stale redteam5/string assertions plus one Chromium headless-shell crash in a redundant static service-worker inventory test.",
+      "remediation": "Assertions were pinned to redteam6 behavior and the redundant browser-only static inventory test was removed because release isolation already proves that inventory mechanically.",
+      "correctedCheckpoint": "5f4538329a98900f90abe4247e9a40e0d0a5b8a4"
+    },
+    "redteam7RecoverabilityFinding": {
+      "status": "CLOSED_AUTOMATED",
+      "finding": "A valid empty or sparse progress backup could replace existing device progress without warning.",
+      "risk": "Local device-training history loss; not a readiness or certification-elevation bypass.",
+      "remediationRuntime": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
+      "proof": "Cancel and Continue paths are browser-tested across all five configured profiles as part of the 90/90 red-team matrix."
+    }
+  },
+  "nonBlockingInfrastructureObservation": "GitHub Actions warned that actions/checkout@v4 and actions/setup-node@v4 target the deprecated Node.js 20 action runtime and are currently forced to Node.js 24 by the runner. Validation passed; upgrade those actions when an appropriate supported major is available.",
+  "hardRule": "Automated deep red-team assurance is PASS with no blocking machine-detectable defect in the covered matrix, but Paradise University remains NOT_RELEASE_READY. Automated results do not manufacture current-runtime physical acceptance, human curriculum/currentness approval, trainer-media sharing visibility, or promotion authorization. The exact opener remains CURRENT APPROVAL PENDING, and production remains unchanged."
 }
