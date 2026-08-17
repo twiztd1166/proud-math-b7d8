@@ -4,6 +4,7 @@ test('training home is simple and field lookup stays one tap away',async({page})
   await page.goto('/index.html');await page.locator('#nTrain').click();
   await expect(page.getByRole('heading',{name:'Train. Practice. Advance.'})).toBeVisible();
   for(const name of [/Continue|Welcome to Paradise University/,/Practice/,/Career Path/,/Videos & Audio/,/My Progress/])await expect(page.getByRole('button',{name}).first()).toBeVisible();
+  await expect(page.locator('.puGrid .puTile')).toHaveCount(4);await expect(page.locator('.puPath')).toHaveCount(0);
   await page.locator('#nLook').click();await expect(page.getByRole('heading',{name:'Can I canvass here?'})).toBeVisible();
 });
 
@@ -18,9 +19,9 @@ test('approved Paradise lessons stay separate from internal reference media',asy
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.locator('#puContinue').click();
   await expect(page.getByText('PARADISE APPROVED',{exact:true})).toBeVisible();await page.locator('#puBack').click();
   await page.getByRole('button',{name:/Videos & Audio/}).first().click();
-  await expect(page.getByText('INTERNAL TRAINING MEDIA:',{exact:true})).toBeVisible();
+  await expect(page.getByText('REFERENCE MEDIA:',{exact:true})).toBeVisible();
   await expect(page.getByText('REFERENCE',{exact:true}).first()).toBeVisible();
-  await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
+  await expect(page.getByText(/Paradise-approved lessons, current manager direction, and live municipality instructions control/i)).toBeVisible();
 });
 
 test('foundation field-ready and canvasser stages contain real curriculum',async({page})=>{
@@ -30,17 +31,17 @@ test('foundation field-ready and canvasser stages contain real curriculum',async
   await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/3\. Canvasser/}).click();await expect(page.getByRole('button',{name:/Appointment Quality/})).toBeVisible();await expect(page.getByRole('button',{name:/Certified Canvasser Readiness/})).toBeVisible();
 });
 
-test('senior and sales apprentice stages are fully populated',async({page})=>{
+test('senior remains populated and Sales Apprentice is intentionally a short bridge',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();
   await page.getByRole('button',{name:/4\. Senior Canvasser/}).click();await expect(page.getByRole('button',{name:/Advanced Listening & Questioning/})).toBeVisible();await expect(page.getByRole('button',{name:/Sales Readiness Check/})).toBeVisible();
-  await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await expect(page.getByRole('button',{name:/Advanced Needs Analysis/})).toBeVisible();await expect(page.getByRole('button',{name:/Full Sales Process Map/})).toBeVisible();await expect(page.getByRole('button',{name:/Sales Shadowing/})).toBeVisible();await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
+  await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await expect(page.locator('[data-lesson]')).toHaveCount(4);await expect(page.getByRole('button',{name:/Full Sales Process Map/})).toBeVisible();await expect(page.getByRole('button',{name:/Sales Shadowing/})).toBeVisible();await expect(page.getByRole('button',{name:/Advanced Needs Analysis/})).toHaveCount(0);await expect(page.getByText(/not authorization to price or sell at the door/i)).toBeVisible();
 });
 
-test('Sales Rep Academy publishes only bounded Part 1 and preserves procedure gate',async({page})=>{
+test('Sales Rep Academy publishes bounded Part 1 and keeps procedure controls collapsed below lessons',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
   await expect(page.getByRole('heading',{name:'Sales Rep'})).toBeVisible();
   await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();await expect(page.getByRole('button',{name:/3\. Survey \/ Needs Analysis/})).toBeVisible();await expect(page.getByRole('button',{name:/7\. Product Presentation/})).toBeVisible();
-  await expect(page.getByText(/CURRENT POLICY REQUIRED/)).toBeVisible();
+  const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await controls.locator('summary').click();await expect(page.getByText(/CURRENT POLICY REQUIRED/)).toBeVisible();
   for(const term of ['Retail Close','Qualification','Major Close','Sub-Step Close','Button-Up'])await expect(page.getByRole('button',{name:new RegExp(term,'i')})).toHaveCount(0);
 });
 
@@ -55,11 +56,10 @@ test('opening lesson does not misuse courtesy notice where route blocks it',asyn
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/2\. Field Ready/}).click();await page.getByRole('button',{name:/Opening & First 20 Seconds/}).click();await expect(page.getByText(/Do not claim you are handing out notices where the live municipality screen says not to use them/i)).toBeVisible();
 });
 
-test('12 curated third-party media records are visible and internally playable',async({page})=>{
+test('12 curated third-party media records remain internally playable while priority media is visible',async({page})=>{
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Videos & Audio/}).first().click();
   for(const title of ['Tonality and Body Language','Formula For Handling Objections','Definition of a Good Lead','The Science of Successful Canvassing','Canvassing 101','New Canvasser Training — Process'])await expect(page.getByText(title,{exact:true}).first()).toBeVisible();
-  const state=await page.evaluate(()=>({playable:window.PU_CURATED_MEDIA_IDS.length,hold:window.PU_RIGHTS_REVIEW_MEDIA_IDS.length,status:window.PU_MEDIA_RIGHTS_CONTROL.status}));
-  expect(state).toEqual({playable:12,hold:0,status:'INTERNAL_USE_NON_BLOCKING'});
+  const state=await page.evaluate(()=>({playable:window.PU_CURATED_MEDIA_IDS.length,hold:window.PU_RIGHTS_REVIEW_MEDIA_IDS.length,status:window.PU_MEDIA_RIGHTS_CONTROL.status}));expect(state).toEqual({playable:12,hold:0,status:'INTERNAL_USE_NON_BLOCKING'});
 });
 
 test('Dave Five Commitments source lineage is retained with internal source access',async({page})=>{
@@ -85,8 +85,7 @@ test('direct player call opens internal trainer media while preserving reference
 
 test('player infrastructure remains available for internal media and future controlled streams',async({page})=>{
   await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.17-pu-player-v3-drive-top-level');
-  const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION,mediaPolicy:window.PU_MEDIA_RIGHTS_VERSION,gate:window.PU_MEDIA_PLAYER_RIGHTS_GATE_VERSION,control:window.PU_MEDIA_RIGHTS_CONTROL.status}));
-  expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',mediaPolicy:'2026.08.16-pu-media-internal-v2',gate:'2026.08.16-pu-media-player-rights-v1',control:'INTERNAL_USE_NON_BLOCKING'});
+  const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION,mediaPolicy:window.PU_MEDIA_RIGHTS_VERSION,gate:window.PU_MEDIA_PLAYER_RIGHTS_GATE_VERSION,control:window.PU_MEDIA_RIGHTS_CONTROL.status}));expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',mediaPolicy:'2026.08.16-pu-media-internal-v2',gate:'2026.08.16-pu-media-player-rights-v1',control:'INTERNAL_USE_NON_BLOCKING'});
 });
 
 test('practice hard-stop model requires stopping instead of rebutting',async({page})=>{
