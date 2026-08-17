@@ -83,7 +83,7 @@
   "rulesetPreparation": {
     "status": "PREPARED_NOT_APPLIED_CONNECTED_SETTINGS_WRITE_UNAVAILABLE",
     "setupDocument": "docs/PARADISE_PUBLIC_RULESET_SETUP.md",
-    "primaryRuleset": {
+    "branchRuleset": {
       "name": "Paradise Public Release Protection",
       "target": "paradise-canvass-manager-public",
       "requirePullRequest": true,
@@ -95,19 +95,19 @@
       "githubActionsBypassNeededForControlledPostValidationPublication": true,
       "ordinaryHumanAlwaysBypassRecommended": false
     },
-    "secondaryRuleset": {
-      "name": "Paradise Release Control Files",
-      "purpose": "Protect workflow, validator, build, and test-control paths from routine modification while allowing intentional owner changes through pull requests.",
-      "githubActionsBypassRecommended": false,
-      "ownerBypassMode": "PULL_REQUESTS_ONLY"
+    "controlFilePathRuleset": {
+      "status": "NOT_APPLICABLE_TO_CURRENT_PUBLIC_PERSONAL_REPOSITORY",
+      "reason": "GitHub documents Restrict file paths as a push-ruleset capability; push rulesets are not the applicable repository-level mechanism for this public personal repository under the current plan/surface.",
+      "incorrectSecondaryBranchRulesetRecommendationRemoved": true
     },
+    "administrativeTrustBoundary": "A sufficiently privileged repository owner can intentionally change repository rules or control code. Current machine controls detect ordinary release-control drift but do not claim to eliminate the repository-owner trust boundary.",
     "governanceClosed": false
   },
   "branchProtection": {
     "publicRulesetApplied": false,
     "validatedBranchProtectionApplied": false,
     "connectedToolCanSetProtectionOrRuleset": false,
-    "residualRisk": "Repository settings still permit sufficiently privileged direct/manual ref changes until the prepared rulesets are applied and read back."
+    "residualRisk": "Repository settings still permit sufficiently privileged direct/manual ref changes until the prepared public branch ruleset is applied and read back."
   },
   "currentPhysicalAcceptance": {
     "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
