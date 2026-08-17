@@ -79,12 +79,12 @@ test('Grosso ride-along source lineage is retained with internal source access',
 
 test('direct player call opens internal trainer media while preserving reference authority',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>window.puPlayerOpen('grosso-tonality-audio'));
-  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('#puDrivePlayer')).toBeVisible();await expect(player.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
+  const player=page.locator('#puPlayerRoot');await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await expect(player.locator('iframe')).toHaveCount(0);await expect(player.locator('[data-provider="drive-top-level"]')).toBeVisible();await expect(player.getByRole('link',{name:/Play Tonality and Body Language in Google Drive/i})).toHaveAttribute('target','_blank');await expect(player.locator('.puPlayerAuthority')).toHaveText('SOURCE / REFERENCE');
   await page.locator('#nLook').click();await expect(player.getByRole('dialog',{name:'Training player'})).toBeVisible();await player.getByRole('button',{name:'Close player'}).click();await expect(player).toBeEmpty();
 });
 
 test('player infrastructure remains available for internal media and future controlled streams',async({page})=>{
-  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.16-pu-player-v2');
+  await page.goto('/index.html');await expect.poll(async()=>page.evaluate(()=>window.PU_PLAYER_VERSION)).toBe('2026.08.17-pu-player-v3-drive-top-level');
   const state=await page.evaluate(()=>({player:typeof window.puPlayerOpen==='function',version:window.PARADISE_UNIVERSITY_VERSION,mediaPolicy:window.PU_MEDIA_RIGHTS_VERSION,gate:window.PU_MEDIA_PLAYER_RIGHTS_GATE_VERSION,control:window.PU_MEDIA_RIGHTS_CONTROL.status}));
   expect(state).toEqual({player:true,version:'2026.08.16-pu-v1-content-5',mediaPolicy:'2026.08.16-pu-media-internal-v2',gate:'2026.08.16-pu-media-player-rights-v1',control:'INTERNAL_USE_NON_BLOCKING'});
 });
