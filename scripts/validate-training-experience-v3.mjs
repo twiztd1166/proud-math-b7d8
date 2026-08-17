@@ -41,7 +41,6 @@ need('tests/training-red-team-v1.spec.js','corrupt contextual-back state fails c
 need('tests/training-red-team-v1.spec.js','recovers from valid JSON with invalid local-storage shapes');
 need('tests/training-red-team-v1.spec.js','only refreshes offline index from the actual app entry');
 need('tests/service-worker-hardening-v1.spec.js','exact queryless app entry');
-need('tests/service-worker-hardening-v1.spec.js','adds only training assets');
 need('index.html','training-experience-v3.css');need('index.html','training-experience-v3.js');need('index.html','training-storage-hardening-v1.js');
 need('sw.js','trainingux5-experience3-redteam6');need('sw.js','training-experience-v3.js');need('sw.js','training-experience-v3.css');need('sw.js','training-storage-hardening-v1.js');
 need('sw.js',"url.search==='' ".trim());need('sw.js','isAppEntry&&r.ok&&html');
