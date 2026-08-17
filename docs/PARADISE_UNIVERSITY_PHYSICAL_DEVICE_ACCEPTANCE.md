@@ -1,6 +1,6 @@
 # Paradise University v1 — Physical iPhone / PWA Acceptance Gate
 
-Status: **OPEN — CURRENT TRAINING EXPERIENCE v3 RUNTIME RETEST REQUIRED — NOT PRODUCTION AUTHORIZED**
+Status: **OPEN — CURRENT DAILY TRAINING v1 / TRAINING EXPERIENCE v3 RUNTIME RETEST REQUIRED — NOT PRODUCTION AUTHORIZED**
 
 As of: 2026-08-17
 
@@ -10,28 +10,30 @@ Automated WebKit/iPhone regression is necessary but does **not** substitute for 
 
 Immutable browser runtime candidate:
 
-`8a74bd78bb57369dbaeb4f6708a82db538bc19f7`
+`3cbbbf5006eb27926c362a97ee959ddadb8b227e`
 
 Exact physical-test URL:
 
-`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/8a74bd78bb57369dbaeb4f6708a82db538bc19f7/index.html`
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html`
 
 Fully green test/control head before this control-document repin:
 
-`2a5acb8f5936cfacbd59de4775167ad7228d78d3`
+`625500fc66bd340fb8545c21180c553d07095849`
 
 Green runs on that exact control head:
 
-- Full validator: `32042896247` — PASS
-- Content hardening: `32042896223` — PASS
-- UX polish: `32042896230` — PASS
-- Adversarial red team: `32042896234` — PASS
+- Full validator: `32050933375` — PASS
+- Content hardening: `32050933365` — PASS
+- UX polish + Paradise Daily Training v1: `32050933377` — PASS
+- Adversarial red team: `32050933330` — PASS
 
-The full validator passed syntax/build boundary, training hardening, the 78 / 76 / 2 field baseline, field-release isolation, production bundle, iPhone field regression, strengthened offline regression, Training Experience v2 red-team, Training Experience v3 experience regression, the broader Paradise University iPhone suite, and device matrix.
+The full validator passed syntax/build boundary, training hardening, the 78 / 76 / 2 field baseline, field-release isolation, production bundle, iPhone field regression, strengthened offline regression, Training Experience v2 red-team, Training Experience v3 including Daily Training v1 regressions, the broader Paradise University iPhone suite, and device matrix.
 
-The adversarial red-team gate also passed the redteam7 recoverability and service-worker hardening matrix, including destructive-import confirmation/cancel behavior, snapshot-replacement transfer semantics, invalid-shape storage recovery, exact-queryless app-entry cache refresh, and field-release isolation.
+The adversarial red-team gate passed the final five-profile matrix, including progress-transfer/recoverability hardening, exact-queryless service-worker behavior, field-release isolation, authority boundaries, and secure top-level Drive playback.
 
-The runtime/control separation is deliberate: browser-runtime changes stop at `8a74bd…`; later commits through the fully green `2a5acb…` control head are tests, validators, workflow, or documentation/control changes rather than browser-runtime changes.
+The runtime/control separation is deliberate: browser-runtime changes stop at `3cbbbf5…`; GitHub compare proves the five commits through the fully green `625500fc…` pre-closeout head changed only tests or a validator, not browser-runtime files.
+
+Paradise Daily Training v1 is a **recommendation layer only**. It does not create manager assignments, due dates, overdue status, HR records, official certification, or future-role authorization. It recommends about 10–15 minutes made of a Quick Review, a current-track Today’s Skill, and an applied Practice/Coaching action. The seven-day cycle advances only on distinct days this device opens Training; skipped calendar days do not skip training days.
 
 Controlled field baseline remains:
 
@@ -65,7 +67,7 @@ Real-iPhone evidence already recorded on that checkpoint:
 - Additional tested non-Tony paths — reported PASS.
 - Old iframe blocker — CLOSED for the tested playback path.
 
-That evidence remains valid historical evidence for the inherited secure playback design. It is **not** complete physical acceptance of the current v3 runtime because the training experience changed afterward.
+That evidence remains valid historical evidence for the inherited secure playback design. It is **not** complete physical acceptance of the current Daily Training v1 / Training Experience v3 runtime.
 
 ## Test device record
 
@@ -75,7 +77,7 @@ That evidence remains valid historical evidence for the inherited secure playbac
 - iPhone model: _________________________
 - iOS version: __________________________
 - Safari version if shown: ______________
-- Exact runtime tested: `8a74bd78bb57369dbaeb4f6708a82db538bc19f7`
+- Exact runtime tested: `3cbbbf5006eb27926c362a97ee959ddadb8b227e`
 - Installed to Home Screen fresh from this URL: YES / NO
 - Online pass performed: YES / NO
 - Airplane Mode/offline pass performed: YES / NO
@@ -95,18 +97,38 @@ That evidence remains valid historical evidence for the inherited secure playbac
 
 ## B. Training Experience v3 — simple employee path
 
-- [ ] Continue Training remains the primary action.
+- [ ] Continue Training remains obvious and useful below the Daily Training recommendation.
 - [ ] Practice, Career Path, Videos & Audio, and My Progress remain easy to find.
 - [ ] Current-role queue remains obvious.
 - [ ] Future Sales Apprentice / Sales Rep material is not silently auto-queued for an ordinary Canvasser.
 - [ ] Career Path still makes future roles discoverable without self-authorizing them.
 - [ ] Milestone guidance is useful and not noisy.
 - [ ] **What You Need Next** gives clear advancement steps.
-- [ ] No manager-assigned training, due-date queue, or assignment inbox appears.
+- [ ] No manager-assigned training, due-date queue, overdue badge, or assignment inbox appears.
+
+## B1. Paradise Daily Training v1 — current-runtime physical checks
+
+The Daily Training card must remain recommendation-only and truthful to device-local evidence.
+
+- [ ] `RECOMMENDED FOR TODAY` is visible on Training home.
+- [ ] The card shows exactly three activities: Quick Review, Today’s Skill, and Apply/Coach.
+- [ ] The displayed estimate is approximately 10–15 minutes.
+- [ ] A same-day exit/reopen does **not** advance Training Day.
+- [ ] The next distinct day the device opens Training advances exactly one Training Day.
+- [ ] Skipping one or more calendar days does not skip Training Day numbers.
+- [ ] The seven-day focus sequence is understandable: Foundation & Standards → Door Approach → Field Compliance → Conversation Skills → Product & Appointment Knowledge → Coaching & Library → Weekly Review.
+- [ ] Today’s Skill remains inside the ordinary Canvasser core/current track.
+- [ ] Daily Training never silently auto-queues Sales Apprentice, Sales Rep, or manager curriculum.
+- [ ] On a clean/new state, Daily Training does not claim weak-area evidence exists.
+- [ ] After a real `NEED MORE PRACTICE` attempt, the Apply action can recommend `Practice My Weak Areas`.
+- [ ] A correct retry can clear the relevant weak-area flag as designed.
+- [ ] Day 6 routes to the curated coaching/media library rather than converting trainer material into current Paradise policy.
+- [ ] The card does not create a due date, overdue state, completion obligation, HR record, certification claim, or manager assignment.
+- [ ] Daily Training cadence is not falsely represented as cloud-synced or as a readiness credential.
 
 ## C. Context-preserving Back
 
-Exercise at least three routes, including one nested library/lesson route.
+Exercise at least three routes, including one Daily Training-launched lesson and one nested library/lesson route.
 
 - [ ] Back returns to the actual prior training context rather than always forcing Training Home.
 - [ ] Back never traps the user.
@@ -140,7 +162,7 @@ Use a required-Quick-Check lesson.
 - [ ] Sales Apprentice remains a four-item bridge.
 - [ ] Advanced sales training does **not** authorize pricing, financing, contracting, closing, or selling at the door.
 - [ ] Sales Controls & References remain collapsed by default but fully reachable.
-- [ ] Human manager/release requirements are not replaced by device completion.
+- [ ] Human manager/release requirements are not replaced by device completion or Daily Training completion.
 
 ## G. Canvassing Library / authority boundaries
 
@@ -152,7 +174,7 @@ Use a required-Quick-Check lesson.
 - [ ] Dave Yoho renders 4 indexed media records.
 - [ ] Grosso supporting material is discoverable where appropriate.
 - [ ] Trainer material remains `REFERENCE` / `HISTORICAL` as applicable.
-- [ ] Playability, notes, bookmarks, or practice actions do not convert trainer material into `PARADISE APPROVED`.
+- [ ] Daily Coaching, playability, notes, bookmarks, or practice actions do not convert trainer material into `PARADISE APPROVED`.
 
 ## H. Media Learning Tools
 
@@ -168,7 +190,7 @@ Use at least one trainer item.
 
 ## I. Manual cross-device progress transfer
 
-This feature is a manual transfer tool, **not** an employee account, central manager dashboard, HR record, or official certification record.
+This feature is a manual transfer tool, **not** an employee account, central manager dashboard, HR record, or official certification record. Daily Training cadence is intentionally not a readiness credential.
 
 - [ ] Export/transfer produces the expected progress payload.
 - [ ] Import/restore on a second clean test context restores supported device-local progress.
@@ -183,7 +205,7 @@ This feature is a manual transfer tool, **not** an employee account, central man
 
 ## J. Secure trainer playback — current-runtime spot-check
 
-Open at least one Tony item and one non-Tony item. Repeat at least one from the installed PWA.
+Open at least one Tony item and one non-Tony item. Repeat at least one from the installed PWA, and use the Day 6 coaching route if practical.
 
 PASS only if:
 
@@ -204,15 +226,15 @@ The candidate opener must remain exactly:
 
 - [ ] Exact wording is unchanged.
 - [ ] `CURRENT APPROVAL PENDING` remains visible until the separate named human decision is completed.
-- [ ] No trainer script silently replaces it.
+- [ ] No trainer script or Daily Training recommendation silently replaces it.
 - [ ] Missing Parties remains one or more homeowners or decision makers not present.
 - [ ] No blanket spouse-presence rule appears.
 
 ## L. Offline installed-PWA test
 
 1. Load the exact current runtime online and install/refresh the Home Screen PWA.
-2. Confirm service-worker cache generation `trainingux5-experience3-redteam7`.
-3. Visit Lookup, Training, Practice, Career Path, My Progress, Canvassing Library, a core lesson, and a media Learning Tools view.
+2. Confirm service-worker cache generation ends `trainingux5-experience3-redteam7-daily1`.
+3. Visit Lookup, Training, Daily Training card, Practice, Career Path, My Progress, Canvassing Library, a core lesson, and a media Learning Tools view.
 4. Enable Airplane Mode and disable Wi-Fi.
 5. Relaunch the installed PWA.
 
@@ -221,6 +243,7 @@ PASS only if:
 - [ ] Core app opens offline.
 - [ ] Cached field dataset/Lookup remains available as designed.
 - [ ] Training Experience v3 home opens offline.
+- [ ] `RECOMMENDED FOR TODAY` and its three Daily Training activities render offline.
 - [ ] Core lessons, Practice, Career Path, My Progress, and Learning Tools shell open offline.
 - [ ] Canvassing Library metadata opens offline.
 - [ ] Tony 24 and both Tony manuals remain visible as metadata.
@@ -232,6 +255,7 @@ PASS only if:
 
 ## M. Visual / touch QA
 
+- [ ] Daily Training card is readable without crowding or confusing Continue Training.
 - [ ] Normal Dynamic Type has no clipping.
 - [ ] Repeat key screens at one larger Dynamic Type setting.
 - [ ] Tap targets are usable.
@@ -248,6 +272,6 @@ Until the current-runtime checks are completed with a named tester/device and no
 
 `PHYSICAL_DEVICE_ACCEPTANCE = OPEN_CURRENT_RUNTIME_RETEST_REQUIRED`
 
-Prior `ac353…` playback evidence remains preserved as historical evidence of the secure Drive path, but it does not convert this v3 physical gate to PASS.
+Prior `ac353…` playback evidence remains preserved as historical evidence of the secure Drive path, but it does not convert this Daily Training v1 / Training Experience v3 physical gate to PASS.
 
-Physical PASS does **not** itself approve the canvass opener, complete human curriculum/compliance review, certify employees, or authorize promotion.
+Physical PASS does **not** itself approve the canvass opener, complete human curriculum/compliance review, certify employees, prove trainer-media sharing access control, or authorize promotion.
