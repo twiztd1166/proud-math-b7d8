@@ -1,7 +1,7 @@
 name: Validate Paradise University adversarial red team
 on:
   push:
-    branches: [agent/paradise-university-v1]
+    branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
 concurrency:
   group: paradise-university-red-team-validation
   cancel-in-progress: true
@@ -9,6 +9,7 @@ permissions:
   contents: read
 jobs:
   red-team:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
