@@ -1,16 +1,18 @@
 # Paradise University v1 — Canvass Opener Decision Support
 
 Status: DECISION SUPPORT ONLY — NOT CURRENT POLICY — NOT A PROMOTION AUTHORIZATION  
-Prepared: 2026-08-16  
-Pinned green runtime candidate: `5eb794090a0a20f13d63c34ab05ac2b68877147c`
+Prepared: 2026-08-17  
+Pinned green runtime candidate: `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`
 
 ## Current direction
 
-Preserve the existing Paradise University candidate opener exactly as written. Do **not** rewrite, shorten, replace, or substitute alternate wording during unrelated curriculum, media-library, compliance, or release work:
+Preserve the existing Paradise University candidate opener exactly as written. Do **not** rewrite, shorten, replace, or substitute alternate wording during unrelated curriculum, media-library, playback, compliance, or release work:
 
 > “I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?”
 
-This document previously recommended replacement wording. That recommendation is withdrawn to conform to the later controlling user direction: **do not change the script from what we had before.**
+This document previously recommended replacement wording. That recommendation is withdrawn to conform to the later controlling direction: **do not change the script from what we had before.**
+
+The iframe-free trainer-playback remediation in runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752` did not modify this script.
 
 ## Important approval boundary
 
@@ -27,7 +29,7 @@ A generic continuation instruction such as `Go` is not treated as the named curr
 
 ## Why the wording is being preserved
 
-The controlling product/content instruction is to retain the existing script. The release architecture therefore separates two questions that should not be conflated:
+The release architecture separates two questions:
 
 1. **Text stability:** keep the exact candidate wording unchanged.
 2. **Current authority:** require the separate named human APPROVE / REVISE decision before treating that wording as current Paradise operating policy.
@@ -36,7 +38,7 @@ This lets curriculum, media, UI, physical-device testing, and other release work
 
 ## Compliance / factual-use caution
 
-Preservation of the script is not a legal opinion and does not establish that every sentence is factually appropriate on every route. In particular, any field use remains subject to current Paradise management direction, live municipality controls, truthful representations, and the circumstances of the route.
+Preservation of the script is not a legal opinion and does not establish that every sentence is factually appropriate on every route. Any field use remains subject to current Paradise management direction, live municipality controls, truthful representations, and route circumstances.
 
 Nothing in this memo authorizes a canvasser to override:
 
