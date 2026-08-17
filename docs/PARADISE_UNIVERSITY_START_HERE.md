@@ -45,7 +45,7 @@ Paradise now has a unique consolidated premerge check:
 - repository permission: `contents: read`
 - browser release retries: `0`
 
-A draft **DO NOT MERGE / validation-only** PR #2 was created only to exercise the real `pull_request` event. GitHub produced synthetic merge commit `2d16674d52072a97caac2d4331d9eaf541bc5232`, incorporating the current public metadata-only child with the University branch. Workflow run `32073705223` passed the complete gate on that merge result:
+A draft **DO NOT MERGE / validation-only** PR #2 was created only to exercise the real `pull_request` event. GitHub produced a synthetic merge result incorporating the current public metadata-only child with the University branch. The first complete real-event proof, workflow run `32073705223`, passed:
 
 - release-control static validation — PASS
 - controlled 78 / 76 / 2 field baseline and Training/field release isolation — PASS
@@ -54,7 +54,7 @@ A draft **DO NOT MERGE / validation-only** PR #2 was created only to exercise th
 - device matrix — PASS
 - adversarial/service-worker/progress-transfer matrix — PASS
 
-The fixture is not release authorization and must be closed without merge after final-head readback.
+The validation fixture is not release authorization and must be closed without merge after the final-head readback.
 
 ## Human / physical testing direction
 
@@ -106,14 +106,15 @@ The current candidate now enforces these release controls:
 
 ## Repository ruleset preparation
 
-The remaining repository-settings gap is now reduced to a concrete, tested configuration step. Read `PARADISE_PUBLIC_RULESET_SETUP.md` before changing GitHub Settings.
+The remaining repository-settings gap is reduced to a concrete, current-GitHub configuration step. Read `PARADISE_PUBLIC_RULESET_SETUP.md` before changing GitHub Settings.
 
-Prepared design:
+Prepared design: one branch ruleset named **Paradise Public Release Protection** targeting `paradise-canvass-manager-public`. It should require pull requests, require the exact `Paradise public premerge gate`, require the branch to be up to date, prevent deletion, and block force pushes. The GitHub Actions app needs the narrow `Always allow` bypass only because the controlled post-validation workflow legitimately writes generated artifacts/metadata back to public. Do not grant ordinary human/user always-bypass access.
 
-- **Paradise Public Release Protection** — target `paradise-canvass-manager-public`; require PRs, require the exact `Paradise public premerge gate`, require up-to-date branch status, prevent deletion, and block force pushes. The GitHub Actions app needs the narrow publication bypass only because the already-controlled post-validation workflow legitimately writes generated artifacts/metadata back to public.
-- **Paradise Release Control Files** — protect workflow, validator, test and build/control paths from routine modification. GitHub Actions should not bypass this file-path ruleset; the repository owner should use PR-only bypass for intentional control changes.
+A previously considered second branch ruleset using **Restrict file paths** was rejected after current GitHub documentation review. GitHub documents file-path restriction as a **push-ruleset** capability, and push rulesets are not the applicable repository-level mechanism for this public personal repository under the current plan/surface. That incorrect recommendation has been removed from v21 and the setup guide.
 
-The connected GitHub surface does **not** expose repository-ruleset/branch-protection writes, so these settings are **PREPARED, NOT APPLIED**. Do not call repository governance closed until GitHub Settings readback shows the rules active and an ordinary PR is blocked without the required premerge check.
+Control-code integrity instead relies on the PR requirement, the real premerge validation, the machine-enforced release-control invariants, and the independent post-merge exact-SHA release barrier. A sufficiently privileged repository owner can still intentionally change repository rules or control code; that administrative trust root is not represented as machine-eliminated.
+
+The connected GitHub surface does **not** expose repository-ruleset/branch-protection writes, so the branch ruleset is **PREPARED, NOT APPLIED**. Do not call repository governance closed until GitHub Settings readback shows it active and an ordinary PR is blocked without the required premerge check.
 
 ## Required future promotion method
 
@@ -146,4 +147,4 @@ Preserve older audit and review records as historical evidence. Where an older d
 
 ## Hard rule
 
-Paradise University is **not production authorized** merely because machine tests are green. Current machine testing is saturated for the frozen runtime and the real public-target PR gate is proven, but the exact opener remains pending, trainer-media sharing visibility remains unresolved, human/physical review is deferred rather than passed, repository rulesets are prepared rather than applied, and production promotion requires a separate explicit authorization.
+Paradise University is **not production authorized** merely because machine tests are green. Current machine testing is saturated for the frozen runtime and the real public-target PR gate is proven, but the exact opener remains pending, trainer-media sharing visibility remains unresolved, human/physical review is deferred rather than passed, the public branch ruleset is prepared rather than applied, and production promotion requires a separate explicit authorization.
