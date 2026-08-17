@@ -8,9 +8,10 @@ test('Practice stays simple with four skill choices',async({page})=>{
   await expect(page.getByText(/Practice only/)).toBeVisible();
   await expect(page.getByText(/not an official certification or manager verification/i)).toBeVisible();
   await expect(page.locator('[data-practice-cat]')).toHaveCount(4);
+  await expect(page.getByRole('button',{name:/Practice My Weak Areas/i})).toHaveCount(0);
 });
 
-test('Practice v2 exposes 20 governed scenarios with five per category',async({page})=>{
+test('Practice v2 data exposes 20 governed scenarios with five per category',async({page})=>{
   const model=await page.evaluate(()=>{
     const all=window.puPracticeScenarioPool();
     const categories=Object.fromEntries(['Opening','Objections','Appointments','Field Rules'].map(c=>[c,all.filter(x=>x.category===c).length]));
@@ -32,8 +33,15 @@ test('field-rule scenario reveals governed coaching and records a practice attem
 test('practice count persists on device and does not mark lessons complete',async({page})=>{
   await page.getByRole('button',{name:/Practice Objections/}).click();await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:'↻ NEED MORE PRACTICE'}).click();
   const before=await page.evaluate(()=>({practice:window.puPracticeStats(),progress:JSON.parse(localStorage.puProgress||'{}')}));
-  expect(before.practice.total).toBe(1);expect(before.practice.history[0].outcome).toBe('NEEDS_PRACTICE');expect(Object.keys(before.progress)).toHaveLength(0);
-  await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/Practice/}).first().click();await expect(page.locator('#puPracticeStats')).toContainText('1 total');
+  expect(before.practice.total).toBe(1);expect(before.practice.history[0].outcome).toBe('NEEDS_PRACTICE');expect(before.practice.weakCount).toBe(1);expect(Object.keys(before.progress)).toHaveLength(0);
+  await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/Practice/}).first().click();await expect(page.locator('#puPracticeStats')).toContainText('1 total');await expect(page.getByRole('button',{name:/Practice My Weak Areas/i})).toBeVisible();
+});
+
+test('Needs Practice creates adaptive review and a correct retry clears the weak flag',async({page})=>{
+  await page.getByRole('button',{name:/Practice Objections/}).click();const first=await page.evaluate(()=>window.puPracticeCurrentScenario().id);await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:'↻ NEED MORE PRACTICE'}).click();
+  await expect(page.getByRole('button',{name:/Practice My Weak Areas/i})).toBeVisible();expect(await page.evaluate(()=>window.puPracticeWeakScenarioIds())).toEqual([first]);
+  await page.getByRole('button',{name:/Practice My Weak Areas/i}).click();expect(await page.evaluate(()=>window.puPracticeCurrentScenario().id)).toBe(first);await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:'✓ GOT IT'}).click();
+  expect(await page.evaluate(()=>window.puPracticeWeakScenarioIds())).toEqual([]);await expect(page.getByRole('button',{name:/Practice My Weak Areas/i})).toHaveCount(0);
 });
 
 test('next scenario remains inside selected practice category and avoids immediate repeat',async({page})=>{
@@ -47,5 +55,5 @@ test('hard-stop metadata prohibits continuation concepts',async({page})=>{
 });
 
 test('Practice engine and data versions are explicit',async({page})=>{
-  await expect.poll(async()=>page.evaluate(()=>({engine:window.PU_PRACTICE_VERSION,data:window.PU_PRACTICE_DATA_VERSION}))).toEqual({engine:'2026.08.16-pu-practice-v2',data:'2026.08.16-pu-practice-data-v2'});
+  await expect.poll(async()=>page.evaluate(()=>({engine:window.PU_PRACTICE_VERSION,data:window.PU_PRACTICE_DATA_VERSION}))).toEqual({engine:'2026.08.17-pu-practice-v3-adaptive',data:'2026.08.16-pu-practice-data-v2'});
 });
