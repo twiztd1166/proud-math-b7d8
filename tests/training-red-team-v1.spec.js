@@ -11,19 +11,21 @@ async function noCheckCoreLesson(page){
   });
 }
 
-test('prior-version completion is history only and cannot satisfy current readiness',async({page})=>{
+test('prior-version completion is preserved as history but cannot satisfy current readiness',async({page})=>{
   await training(page);const lesson=await noCheckCoreLesson(page);
-  await page.evaluate(({id})=>{localStorage.puProgress=JSON.stringify({[id]:{complete:true,trainingVersion:'prior-version',updatedAt:'2025-01-01T00:00:00.000Z'}})},lesson);
-  expect(await page.evaluate(id=>puLessonDone(id),lesson.id)).toBe(true);
-  expect(await page.evaluate(id=>window.puLessonCompletionCurrent(id),lesson.id)).toBe(false);
-  expect(await page.evaluate(id=>window.puLessonTrainingReady(id),lesson.id)).toBe(false);
+  await page.evaluate(({id})=>{localStorage.setItem('puProgress',JSON.stringify({[id]:{complete:true,trainingVersion:'prior-version',updatedAt:'2025-01-01T00:00:00.000Z'}}))},lesson);
+  const seeded=await page.evaluate(id=>({raw:puRead()[id],done:puLessonDone(id),rawDone:window.puLessonRawCompletion(id),current:window.puLessonCompletionCurrent(id),ready:window.puLessonTrainingReady(id)}),lesson.id);
+  expect(seeded.raw.complete).toBe(true);expect(seeded.raw.trainingVersion).toBe('prior-version');expect(seeded.rawDone).toBe(true);
+  expect(seeded.done).toBe(false);expect(seeded.current).toBe(false);expect(seeded.ready).toBe(false);
   await page.evaluate(id=>puSetPage('lesson:'+id),lesson.id);
   await expect(page.locator('.head .puBadge')).toHaveText('PRIOR VERSION');
+  await expect(page.locator('.puCompletionNote')).toContainText('Prior-version content completion is preserved as history');
   await expect(page.locator('#puNext')).toBeDisabled();
   await expect(page.locator('#puDone')).toHaveText('MARK COMPLETE FOR CURRENT VERSION');
   await page.locator('#puDone').click();
   expect(await page.evaluate(id=>window.puLessonCompletionCurrent(id),lesson.id)).toBe(true);
   expect(await page.evaluate(id=>window.puLessonTrainingReady(id),lesson.id)).toBe(true);
+  const history=await page.evaluate(id=>puRead()[id].completionHistory||[],lesson.id);expect(history.some(x=>x.trainingVersion==='prior-version')).toBe(true);
 });
 
 test('malformed transfer is rejected before any device progress is overwritten',async({page})=>{
@@ -71,5 +73,6 @@ test('red-team invariants preserve field authority, exact pending opener, and if
   const opener="I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?";
   expect(await page.evaluate(text=>{const x=PU_LESSONS.find(l=>l.id==='field-opening');return JSON.stringify(x).includes(text)},opener)).toBe(true);
   await page.evaluate(()=>puSetPage('lesson:field-opening'));await expect(page.getByText(/CURRENT APPROVAL PENDING/i)).toBeVisible();
-  await page.evaluate(()=>window.puPlayerOpen('tony-canvassing-101'));await expect(page.locator('iframe')).toHaveCount(0);await expect(page.getByRole('link',{name:/PLAY IN GOOGLE DRIVE/i})).toBeVisible();
+  await page.evaluate(()=>window.puPlayerOpen('tony-canvassing-101'));const player=page.locator('#puPlayerRoot');await expect(player.locator('iframe')).toHaveCount(0);
+  const drive=player.locator('#puDriveLaunch');await expect(drive).toBeVisible();await expect(drive).toHaveText(/PLAY IN GOOGLE DRIVE/i);await expect(drive).toHaveAttribute('target','_blank');await expect(drive).toHaveAttribute('href',/drive\.google\.com\/file\/d\/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/);
 });
