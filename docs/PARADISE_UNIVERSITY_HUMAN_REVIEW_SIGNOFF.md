@@ -1,37 +1,46 @@
 # Paradise University v1 — Human Curriculum / Compliance Review Sign-Off
 
-Status: HUMAN REVIEW REQUIRED — AI PRE-REVIEW COMPLETE — NOT A PROMOTION AUTHORIZATION  
+Status: **HUMAN REVIEW REQUIRED — AI PRE-REVIEW COMPLETE — NOT A PROMOTION AUTHORIZATION**  
 Working branch: `agent/paradise-university-v1`  
-Proven green runtime candidate: `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`  
-Green runtime main validator run: `32010356293`  
-Green runtime content-hardening run: `32010356249`  
+Current immutable runtime candidate: `ae46fa6d5258146a357041bcd184b07031778043`  
+Immutable candidate URL: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ae46fa6d5258146a357041bcd184b07031778043/index.html`  
+Last green test/control head before closeout documents: `0693890b3050b25ca4b94f0fe60974efc7c5441b`  
+Full validator run: `32020240642` — PASS  
+Content-hardening run: `32020240685` — PASS  
 Validated field base: `5e7efc40de524bef0e63c76595c3c518925888b9`  
 Controlled dataset SHA-256: `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`  
 Controlled counts: `78 records / 76 GO / 2 NO-GO`
 
 ## Purpose
 
-This is the finite human curriculum/compliance review required before Paradise University v1 can be considered for promotion.
+This is the finite human curriculum/compliance review required before Paradise University v1 can be considered for production promotion.
 
-It does **not** replace the physical-iPhone/PWA acceptance gate, approve or revise the canvass opener by itself, certify an employee, or authorize promotion.
+It does **not** replace the physical-iPhone/PWA acceptance gate, approve or revise the canvass opener by itself, certify an employee, change live field rules, or authorize promotion.
 
-The runtime reviewed here is pinned to `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`. Later test/workflow/documentation commits do not redefine that runtime.
+The runtime reviewed here is pinned to `ae46fa6d5258146a357041bcd184b07031778043`. Later test/workflow/documentation commits do not redefine that immutable browser runtime.
 
 ## AI pre-review bottom line
 
 `AI_PRE_REVIEW = PASS_WITH_HUMAN_JUDGMENT_GATES`
 
-Automated evidence passes syntax/build boundary, training hardening, exact 78 / 76 / 2 field baseline, training/field release isolation, production bundle, iPhone field regression, iPhone offline regression, Paradise University iPhone suite, device matrix, trainer-library reconciliation, complete Tony visibility, and the iframe-free trainer-playback software boundary.
+The exact software/control stack passed automated syntax/build boundary, training hardening, 78 / 76 / 2 field baseline, training/field release isolation, production bundle, iPhone field regression, strengthened offline/PWA regression, dedicated Training Experience v2 red-team regression, the broader Paradise University iPhone suite, and device matrix.
 
-Human review should focus on meaning, tone, operational appropriateness, currentness, coaching quality, and whether source/reference material is presented the way Paradise wants employees to use it.
+Human review should focus on meaning, tone, operational appropriateness, role sequencing, currentness, coaching quality, and whether source/reference material is presented the way Paradise wants employees to use it.
 
-## Physical playback issue is separate and still open
+## Runtime / control-head distinction
 
-The prior real-iPhone attempt on runtime `5eb794090a0a20f13d63c34ab05ac2b68877147c` found that the embedded Google Drive player failed with `Can't access your Google Account` and Google storage/cookie-access guidance.
+- Browser runtime: `ae46fa6d5258146a357041bcd184b07031778043`
+- Green test/control head: `0693890b3050b25ca4b94f0fe60974efc7c5441b`
+- Changes after the runtime through that green control head were test/CI controls only.
+- Documentation commits made during release closeout do not become a new browser-runtime candidate unless runtime assets actually change and are separately validated.
 
-Runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752` removes Google Drive from the embedded-player path and uses `PLAY IN GOOGLE DRIVE ↗` to open the original controlled Drive file as a top-level authorized session. CI now fails if a training iframe is reintroduced.
+## Physical playback evidence is preserved but separate
 
-This human curriculum review does **not** convert that remediation into a physical playback PASS. Complete `docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md` separately.
+A prior real-iPhone attempt on runtime `5eb794090a0a20f13d63c34ab05ac2b68877147c` proved the embedded Google Drive player was not reliable and must not be rescued by asking employees to weaken Safari privacy/cookie settings.
+
+Runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752` then moved Drive-backed trainer media to the top-level `PLAY IN GOOGLE DRIVE ↗` path. Real-iPhone evidence recorded on that checkpoint includes Tony audio PASS, Tony video PASS with picture/audio, pause/resume, rotation and return, plus additional tested non-Tony playback paths reported PASS.
+
+That evidence remains useful and is preserved. It does **not** constitute complete physical acceptance of the newer Training Experience v2 runtime `ae46fa6…`. Complete the current packet in `docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md` separately.
 
 ## Currentness boundary
 
@@ -41,18 +50,20 @@ Current Paradise 2026 Sales Representative policy supports `Missing Parties` as 
 
 - [ ] Appointment QA uses homeowners / decision makers.
 - [ ] Training does not create a blanket `spouse must be present` rule.
+- [ ] No manager lesson creates a stronger spouse-specific rule by implication.
 
 ### Exact canvass opener — separate named decision still required
 
-The runtime preserves the existing candidate wording exactly:
+The runtime must preserve the existing candidate wording exactly:
 
-> “I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?”
+> I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?
 
 Before overall human review can be marked PASS for release consideration, `docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md` must carry the named APPROVE or REVISE disposition required by that control. A generic continuation instruction is not the formal approval record.
 
 - [ ] Exact candidate wording is unchanged.
-- [ ] No trainer recording or legacy manual silently replaces it.
-- [ ] Its authority/currentness state matches the separate currentness control.
+- [ ] Runtime still shows the controlled `CURRENT APPROVAL PENDING` state until the separate decision is completed.
+- [ ] No trainer recording or legacy manual silently replaces the candidate.
+- [ ] Reviewer agrees the opener decision is independent from trainer-library approval.
 
 ## Controlled trainer-library denominator
 
@@ -64,15 +75,15 @@ The controlled trainer catalog contains **79 indexed individual media records**:
 - Curated employee-facing media: **12**
 - Full Source Library / source-only media: **67**
 
-The visible Canvassing Library exists to make canvassing study material discoverable while preserving the distinction between Paradise-approved curriculum and REFERENCE/HISTORICAL source material.
+The Canvassing Library exists to make canvassing study material discoverable while preserving the distinction between Paradise-approved curriculum and `REFERENCE` / `HISTORICAL` source material.
 
 ## Reviewer record
 
 Reviewer name: ______________________________  
 Role: ______________________________________  
 Review date: ________________________________  
-Exact runtime candidate reviewed: `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`  
-Physical-device retest separately completed: YES / NO  
+Exact runtime candidate reviewed: `ae46fa6d5258146a357041bcd184b07031778043`  
+Physical-device acceptance separately completed: YES / NO  
 Currentness decision separately completed: YES / NO  
 
 Disposition — check one:
@@ -89,6 +100,7 @@ Disposition — check one:
 - [ ] Clear resident refusal ends the interaction.
 - [ ] NO-GO scenarios never teach a workaround or manager override.
 - [ ] Manager training does not suggest that a manager can override live Lookup.
+- [ ] Training Experience v2 simplification does not hide the route back to Lookup.
 
 Human notes: ________________________________________________________________
 
@@ -96,14 +108,41 @@ Human notes: ________________________________________________________________
 
 - [ ] `PARADISE APPROVED`, `REFERENCE`, `HISTORICAL`, and the controlled opener-currentness state are meaningfully distinct.
 - [ ] Tony Hoty, Dave Yoho, and Grosso University material remains source/reference/historical unless Paradise explicitly adopts operating language.
-- [ ] Playability does not convert trainer material into current Paradise policy.
+- [ ] Playability or library prominence does not convert trainer material into current Paradise policy.
 - [ ] Current Paradise lesson content outranks source/reference material for operational questions.
 - [ ] Canvassing Library improves discovery without changing authority.
 - [ ] Source Library remains secondary to Continue Training and live Lookup.
+- [ ] Advanced sales/reference material does not grant field authority merely because an employee can open it.
 
 Human notes: ________________________________________________________________
 
-## 3. Canvasser curriculum — Foundation through Senior
+## 3. Training Experience v2 — role-aware employee path
+
+The simplified employee experience is intentionally different from the full reference library. Review it as an operational training product, not just a content inventory.
+
+- [ ] A new Canvasser sees one obvious current-role training path.
+- [ ] The default queue is appropriately limited to the employee’s current path rather than mixing future roles into daily work.
+- [ ] Sales Apprentice / Sales Rep material is not silently auto-queued for an ordinary Canvasser.
+- [ ] Future roles remain discoverable through Career Path without creating pressure to self-authorize advanced work.
+- [ ] Continue Training remains the dominant next action.
+- [ ] My Progress is understandable without presenting every library item as required.
+- [ ] Practice and media/library discovery support the core path rather than competing with it.
+- [ ] Reviewer agrees the simplified role-aware sequencing is appropriate for Paradise onboarding and ongoing field use.
+
+Human notes: ________________________________________________________________
+
+## 4. Quick Check / completion behavior
+
+- [ ] Required Quick Checks occur before lesson completion.
+- [ ] Required Quick Checks also prevent forward/next-lesson navigation until satisfied.
+- [ ] The same rule applies to required manager Quick Checks.
+- [ ] Quick Check language is understandable to an employee without training-system jargon.
+- [ ] Local Quick Check / completion state is not represented as permanent HR certification.
+- [ ] Reviewer agrees the gating is strict enough for required material without making optional reference media falsely mandatory.
+
+Human notes: ________________________________________________________________
+
+## 5. Canvasser curriculum — Foundation through Senior
 
 - [ ] Job-at-the-door description is accurate for Paradise.
 - [ ] Opening / first-20-seconds lesson matches the separately controlled opener decision.
@@ -115,11 +154,11 @@ Human notes: ________________________________________________________________
 
 Human notes: ________________________________________________________________
 
-## 4. Complete Canvassing Library — required review
+## 6. Complete Canvassing Library — required review
 
 ### Tony Hoty
 
-- [ ] Tony section visibly exposes **24 indexed media items**.
+- [ ] Tony section visibly exposes **24 indexed media items** exactly once each in the organized Tony rendering.
 - [ ] `Canvassing 101` is easy to find.
 - [ ] `New Canvasser Training — Process` is easy to find.
 - [ ] `10 Step Canvassing Approach`, Canvass Set, callback, full-program, specialized/sound-bite, and manager/recruiting material are sensibly organized.
@@ -136,35 +175,50 @@ Human notes: ________________________________________________________________
 
 ### Grosso University
 
-- [ ] Grosso material remains visibly REFERENCE/HISTORICAL as applicable.
+- [ ] Grosso supporting canvassing material is discoverable where useful.
+- [ ] Grosso material remains visibly `REFERENCE` / `HISTORICAL` as applicable.
 - [ ] Objection material does not teach continuing after a clear refusal.
 - [ ] Definition-of-a-Good-Lead material does not override current Paradise appointment QA.
-- [ ] Deeper in-home selling, closing, qualification, product-demo, Thermal Titan, company-story, and bootcamp content remains separated from ordinary canvasser authority.
+- [ ] Deeper in-home selling, closing, qualification, product-demo, Thermal Titan, company-story, virtual-closer and bootcamp content remains separated from ordinary Canvasser authority.
 
 Human notes: ________________________________________________________________
 
-## 5. Videos & Audio curation vs full library
+## 7. Videos & Audio curation vs full library
 
-- [ ] Curated screen is not overwhelming.
+- [ ] Curated Videos & Audio screen is not overwhelming.
+- [ ] A media item is not needlessly repeated across multiple curated sections.
 - [ ] Important canvassing material is discoverable through Canvassing Library.
 - [ ] Full library does not imply every source recording is mandatory.
-- [ ] Completion tracking does not imply every historical/source item is required for certification.
+- [ ] Completion tracking does not imply every historical/source item is required for promotion or certification.
+- [ ] The distinction between curated learning and complete source archive is clear enough for ordinary employees.
 
 Human notes: ________________________________________________________________
 
-## 6. Practice / coaching
+## 8. Practice / coaching
 
 - [ ] Opening examples sound like Paradise.
 - [ ] Objection examples distinguish hesitation from refusal.
 - [ ] Appointment examples reinforce quality rather than count at any cost.
 - [ ] Field Rules examples are operationally safe.
 - [ ] Accepted/prohibited concepts match Paradise manager coaching expectations.
+- [ ] Corrected practice-to-lesson lineage points to a valid current training lesson rather than a stale/nonexistent lesson ID.
 
 Human notes: ________________________________________________________________
 
-## 7. Sales Apprentice / Sales Rep boundaries
+## 9. Sales Apprentice — four-item bridge
 
-- [ ] Sales Apprentice clearly says advanced sales training is not authorization to price or sell at the door.
+Training Experience v2 intentionally shortens Sales Apprentice into a focused bridge rather than a long pre-Sales-Rep course wall.
+
+- [ ] The **four-item Sales Apprentice bridge** is the right amount of pre-transition training for Paradise.
+- [ ] It clearly states that advanced sales training does **not** authorize pricing, financing, contracting, closing, or selling at the door.
+- [ ] The bridge prepares an employee to understand the next role without self-releasing them into it.
+- [ ] No omitted legacy/reference item is actually required before an employee may be considered for the next human-managed step.
+- [ ] Reviewer agrees that deeper reference material belongs in Career Path / Source Library rather than the default Apprentice bridge.
+
+Human notes: ________________________________________________________________
+
+## 10. Sales Rep policy boundaries and collapsed controls
+
 - [ ] Verified 2026 Paradise policy layer is represented accurately.
 - [ ] Pricing / financing training points to current Paradise tools / approval paths rather than memorized dynamic values.
 - [ ] Finance Coordinator / office handoff is represented as a control boundary.
@@ -172,22 +226,25 @@ Human notes: ________________________________________________________________
 - [ ] Contract / cancellation / rescission material does not grant unsupported rep authority.
 - [ ] Source-incomplete procedures remain gated rather than invented.
 - [ ] Device lessons do not self-certify or independently release a Sales Rep.
+- [ ] **Sales Controls & References** being collapsed by default improves usability without hiding material a rep/manager needs to inspect.
+- [ ] Opening Sales Controls & References exposes the substantive evidence/control detail.
+- [ ] Reviewer is comfortable with evidence being secondary in presentation but fully reachable.
 
 Human notes: ________________________________________________________________
 
-## 8. Sales readiness / certification
+## 11. Sales readiness / certification
 
 - [ ] Paradise’s current written + verbal readiness standard is represented accurately.
 - [ ] Current proficiency threshold is represented accurately.
-- [ ] Sales Manager release remains required.
+- [ ] Sales Manager readiness/release remains required.
 - [ ] Grosso assessment structures are visibly REFERENCE rather than Paradise release authority.
 - [ ] Local lesson completion / Quick Checks are not permanent HR certification.
 
 Human notes: ________________________________________________________________
 
-## 9. Manager Academy
+## 12. Manager Academy
 
-Confirm the seven primary manager jobs are useful:
+Confirm the seven primary manager jobs remain useful:
 
 - [ ] Train a Rep
 - [ ] Coach in the Field
@@ -197,19 +254,40 @@ Confirm the seven primary manager jobs are useful:
 - [ ] Compliance Help
 - [ ] Develop Future Sales Reps
 
-Also confirm Missing Parties is homeowner/decision-maker based, escalation guidance is appropriately conservative, and manager certification remains a human/field process.
+Also confirm:
+
+- [ ] Missing Parties is homeowner/decision-maker based.
+- [ ] Escalation guidance is appropriately conservative.
+- [ ] Manager certification remains a human/field process.
+- [ ] Manager Quick Checks cannot be skipped with forward navigation.
+- [ ] Manager content cannot override live Lookup or convert trainer references into policy.
 
 Human notes: ________________________________________________________________
 
-## 10. Real employee usability
+## 13. Real employee usability
 
-- [ ] New employee understands where to start.
+- [ ] New employee understands where to start within a few seconds.
 - [ ] Continue Training remains the primary path.
 - [ ] Practice feels useful rather than academic.
 - [ ] Career Path makes advancement understandable.
 - [ ] Canvassing Library makes complete canvassing material discoverable without cluttering the home screen.
 - [ ] Returning to Lookup is always obvious.
 - [ ] Labels and warnings are understandable without compliance expertise.
+- [ ] My Progress communicates useful progress without implying source-library completion is required.
+- [ ] The employee experience feels simpler than the underlying control/source architecture.
+
+Human notes: ________________________________________________________________
+
+## 14. Physical playback / media-authority review
+
+This section is about curriculum meaning, not replacing the device packet.
+
+- [ ] `PLAY IN GOOGLE DRIVE ↗` is understandable as an external controlled-source launch.
+- [ ] Trainer playback does not imply public-distribution rights.
+- [ ] Trainer playback does not imply current Paradise policy approval.
+- [ ] Prior `ac353…` physical playback evidence is treated as historical evidence, not current-v2 physical signoff.
+- [ ] Current physical packet requires a spot-check on exact runtime `ae46fa6…`.
+- [ ] No employee should be instructed to weaken browser privacy/cookie settings merely to access training.
 
 Human notes: ________________________________________________________________
 
@@ -235,7 +313,7 @@ ______________________________________________________________________________
 
 ## Final human attestation
 
-A PASS or PASS WITH COMMENTS confirms curriculum/content boundaries for runtime `ac353dcea74bbb8ca262e5f55deaa8c61ee08752`. It does not by itself pass the physical-iPhone/PWA retest, formally approve/revise the opener unless the separate currentness record is completed, certify employees, or authorize production promotion.
+A PASS or PASS WITH COMMENTS confirms curriculum/content boundaries for runtime `ae46fa6d5258146a357041bcd184b07031778043`. It does not by itself pass the physical-iPhone/PWA gate, formally approve/revise the canvass opener unless the separate currentness record is completed, certify employees, or authorize production promotion.
 
 Reviewer signature: ______________________________  
 Date: ___________________________________________
@@ -246,8 +324,16 @@ Until this record is completed:
 
 `HUMAN_CURRICULUM_COMPLIANCE_REVIEW = OPEN`
 
-Until the new real-device retest packet is completed:
+Until the exact-current-runtime real-device packet is completed:
 
-`PHYSICAL_DEVICE_ACCEPTANCE = RETEST_REQUIRED_AFTER_DRIVE_IFRAME_FIX`
+`PHYSICAL_DEVICE_ACCEPTANCE = OPEN_CURRENT_RUNTIME_RETEST_REQUIRED`
 
-Promotion remains separately controlled and requires all remaining gates plus explicit promotion authorization and validated-branch readback.
+Until a named human chooses APPROVE or REVISE in the separate currentness decision record:
+
+`CANVASS_OPENER_CURRENT_APPROVAL = OPEN`
+
+Until explicit production authorization is given after all other gates pass:
+
+`PROMOTION_AUTHORIZATION = OPEN`
+
+Promotion remains separately controlled and requires all hard gates plus explicit promotion authorization and validated-branch readback.
