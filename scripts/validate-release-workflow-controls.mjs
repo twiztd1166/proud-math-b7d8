@@ -5,11 +5,21 @@ function requireToken(source,token,label){if(!source.includes(token))throw new E
 function forbidToken(source,token,label){if(source.includes(token))throw new Error(`${label} contains forbidden control: ${token}`);}
 
 const build=read('.github/workflows/build-canvass-v37.yml');
+const cloudflare=read('.github/workflows/deploy-canvass-cloudflare.yml');
 const full=read('.github/workflows/validate-paradise-university-v1.yml');
 const hardening=read('.github/workflows/validate-paradise-university-hardening.yml');
 const ux=read('.github/workflows/validate-paradise-university-ux-polish.yml');
 const red=read('.github/workflows/validate-paradise-university-red-team.yml');
 const premerge=read('.github/workflows/validate-paradise-public-pr.yml');
+
+// Ruleset design intentionally permits GitHub Actions to perform the controlled post-validation
+// publication push. Keep that bypass narrow by proving that only the release workflow has
+// repository write permission; every other workflow must remain read-only or permissionless.
+const workflowFiles=fs.readdirSync('.github/workflows').filter(name=>/\.ya?ml$/i.test(name)).sort();
+const writeWorkflows=workflowFiles.filter(name=>/\bcontents:\s*write\b/.test(read(`.github/workflows/${name}`)));
+if(JSON.stringify(writeWorkflows)!==JSON.stringify(['build-canvass-v37.yml']))throw new Error(`Unexpected GitHub Actions contents-write surface: ${writeWorkflows.join(', ')||'NONE'}`);
+requireToken(cloudflare,'contents: read','manual Cloudflare deployment');
+forbidToken(cloudflare,'contents: write','manual Cloudflare deployment');
 
 for(const [label,source,group] of [
   ['full University validator',full,'paradise-university-v1-validation-${{ github.ref_name }}'],
@@ -84,6 +94,7 @@ requireToken(premerge,'tests/training-red-team-v1.spec.js tests/service-worker-h
 forbidToken(premerge,'pull_request_target:','public premerge workflow');
 forbidToken(premerge,'contents: write','public premerge workflow');
 forbidToken(premerge,'git push','public premerge workflow');
+forbidToken(premerge,'secrets.','public premerge workflow');
 
 console.log({
   status:'PASS',
@@ -95,5 +106,8 @@ console.log({
   stalePublicHeadGuard:true,
   validatedBranchNormalPush:true,
   branchScopedConcurrency:true,
-  botPublicationRecursionGuard:true
+  botPublicationRecursionGuard:true,
+  workflowCount:workflowFiles.length,
+  contentsWriteWorkflows:writeWorkflows,
+  premergeUsesSecrets:false
 });
