@@ -1,7 +1,7 @@
 name: Validate Paradise University v1
 on:
   push:
-    branches: [agent/paradise-university-v1]
+    branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
 concurrency:
   group: paradise-university-v1-validation
   cancel-in-progress: true
@@ -9,6 +9,7 @@ permissions:
   contents: read
 jobs:
   validate:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
