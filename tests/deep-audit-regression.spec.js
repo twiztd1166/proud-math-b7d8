@@ -8,8 +8,9 @@ test('opener authority is consistent outside the pending-currentness lesson',asy
   await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();
   await expect(page.getByText(/existing Paradise canvass script/i)).toHaveCount(0);
   const scenarios=await page.evaluate(()=>window.puPracticeScenarioPool().filter(x=>x.category==='Opening').map(x=>`${x.prompt} ${x.answer} ${x.coachingNote||''}`));
-  expect(scenarios.join(' ')).not.toMatch(/Paradise base opening|base Paradise opening|approved neutral project question|approved words/i);
-  expect(scenarios.join(' ')).toMatch(/current manager-approved/i);
+  const scenarioText=scenarios.join(' ');
+  expect(scenarioText).not.toMatch(/Paradise base opening|base Paradise opening|approved neutral project question|Fix observable delivery before rewriting approved words/i);
+  expect(scenarioText).toMatch(/current manager-approved/i);
   await page.getByRole('button',{name:/← Training/}).click();
   await page.getByRole('button',{name:/Career Path/}).first().click();
   await page.getByRole('button',{name:/Canvass Manager Academy/}).click();
