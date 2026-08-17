@@ -10,25 +10,28 @@ Automated WebKit/iPhone regression is necessary but does **not** substitute for 
 
 Immutable browser runtime candidate:
 
-`4a412c0b21ef246e5ef9049c0f01c34faed06f15`
+`8a74bd78bb57369dbaeb4f6708a82db538bc19f7`
 
 Exact physical-test URL:
 
-`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/4a412c0b21ef246e5ef9049c0f01c34faed06f15/index.html`
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/8a74bd78bb57369dbaeb4f6708a82db538bc19f7/index.html`
 
-Fully green test/control head before this closeout update:
+Fully green test/control head before this control-document repin:
 
-`1bd8ad9952410c4473b35811622cd86364360380`
+`2a5acb8f5936cfacbd59de4775167ad7228d78d3`
 
 Green runs on that exact control head:
 
-- Full validator: `32028149021` — PASS
-- Content hardening: `32028149033` — PASS
-- UX polish: `32028149087` — PASS
+- Full validator: `32042896247` — PASS
+- Content hardening: `32042896223` — PASS
+- UX polish: `32042896230` — PASS
+- Adversarial red team: `32042896234` — PASS
 
 The full validator passed syntax/build boundary, training hardening, the 78 / 76 / 2 field baseline, field-release isolation, production bundle, iPhone field regression, strengthened offline regression, Training Experience v2 red-team, Training Experience v3 experience regression, the broader Paradise University iPhone suite, and device matrix.
 
-The runtime/control separation is deliberate: no browser-runtime asset changed after `4a412c0…` through the fully green `1bd8ad995…` control head.
+The adversarial red-team gate also passed the redteam7 recoverability and service-worker hardening matrix, including destructive-import confirmation/cancel behavior, snapshot-replacement transfer semantics, invalid-shape storage recovery, exact-queryless app-entry cache refresh, and field-release isolation.
+
+The runtime/control separation is deliberate: browser-runtime changes stop at `8a74bd…`; later commits through the fully green `2a5acb…` control head are tests, validators, workflow, or documentation/control changes rather than browser-runtime changes.
 
 Controlled field baseline remains:
 
@@ -72,7 +75,7 @@ That evidence remains valid historical evidence for the inherited secure playbac
 - iPhone model: _________________________
 - iOS version: __________________________
 - Safari version if shown: ______________
-- Exact runtime tested: `4a412c0b21ef246e5ef9049c0f01c34faed06f15`
+- Exact runtime tested: `8a74bd78bb57369dbaeb4f6708a82db538bc19f7`
 - Installed to Home Screen fresh from this URL: YES / NO
 - Online pass performed: YES / NO
 - Airplane Mode/offline pass performed: YES / NO
@@ -170,6 +173,9 @@ This feature is a manual transfer tool, **not** an employee account, central man
 - [ ] Export/transfer produces the expected progress payload.
 - [ ] Import/restore on a second clean test context restores supported device-local progress.
 - [ ] Invalid or unrelated payload is rejected safely.
+- [ ] If transfer-domain progress already exists on the destination, import gives an explicit replacement warning before destructive replacement.
+- [ ] Canceling that warning performs zero transfer-domain writes and preserves the existing destination state.
+- [ ] Continuing the confirmed import replaces the supported transfer-domain snapshot rather than merging stale destination readiness state.
 - [ ] The UI does not claim automatic cloud sync.
 - [ ] The UI does not claim manager visibility of transferred progress.
 - [ ] The UI does not claim official certification.
@@ -205,7 +211,7 @@ The candidate opener must remain exactly:
 ## L. Offline installed-PWA test
 
 1. Load the exact current runtime online and install/refresh the Home Screen PWA.
-2. Confirm service-worker cache generation `trainingux5-experience3`.
+2. Confirm service-worker cache generation `trainingux5-experience3-redteam7`.
 3. Visit Lookup, Training, Practice, Career Path, My Progress, Canvassing Library, a core lesson, and a media Learning Tools view.
 4. Enable Airplane Mode and disable Wi-Fi.
 5. Relaunch the installed PWA.
