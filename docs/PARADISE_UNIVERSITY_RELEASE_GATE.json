@@ -1,11 +1,11 @@
 {
-  "schemaVersion": "2026.08.16-pu-release-gate-v7",
+  "schemaVersion": "2026.08.17-pu-release-gate-v8",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "lastFullyGreenSoftwareCheckpoint": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
-  "lastFullyGreenValidatorRun": 31983974156,
-  "lastFullyGreenContentHardeningRun": 31983974058,
+  "lastFullyGreenSoftwareCheckpoint": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
+  "lastFullyGreenValidatorRun": 32010356293,
+  "lastFullyGreenContentHardeningRun": 32010356249,
   "fieldBaseline": {
     "status": "PASS",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
@@ -23,11 +23,26 @@
     "automatedIPhoneOffline": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "validatorRun": 31983974156,
-    "contentHardeningRun": 31983974058,
-    "testedCommit": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
-    "currentnessControlVersion": "2026.08.16-pu-currentness-v1",
-    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance. This green runtime includes the complete trainer-library reconciliation, visible Canvassing Library, offline Canvassing Library acceptance, current opener-authority treatment, and current 2026 Missing Parties behavior while preserving the controlled field baseline."
+    "validatorRun": 32010356293,
+    "contentHardeningRun": 32010356249,
+    "testedRuntimeCommit": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
+    "playerVersion": "2026.08.17-pu-player-v3-drive-top-level",
+    "securePlaybackBoundary": {
+      "driveIframeAllowed": false,
+      "driveTopLevelLaunchRequired": true,
+      "publicRawGitHackTrainerMediaMirroring": false,
+      "nativeProtectedStreamPathRetained": true,
+      "hardeningGuard": "CI fails if an embedded training <iframe> is reintroduced into training-player-v1.js."
+    },
+    "note": "Automated WebKit/iPhone evidence is not physical-device acceptance. This green runtime removes the Drive iframe that failed on the real iPhone, preserves the complete trainer library and offline app shell, and keeps the controlled field baseline unchanged."
+  },
+  "physicalFailureHistory": {
+    "priorRuntime": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
+    "status": "FAIL_DRIVE_IFRAME_ON_REAL_IPHONE",
+    "observed": "The embedded Google Drive player displayed Can't access your Google Account and Google directed the tester to storage/cookie access troubleshooting.",
+    "rootControlConclusion": "Do not require employees to weaken Safari privacy/third-party-cookie settings to make trainer playback work.",
+    "remediationRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
+    "remediation": "Drive-backed trainer media now opens the original controlled Drive file in a top-level authorized session via PLAY IN GOOGLE DRIVE rather than embedding Google inside the app."
   },
   "curriculumCurrentness": {
     "status": "ONE_HUMAN_APPROVAL_OPEN",
@@ -41,8 +56,7 @@
     "openingWording": {
       "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
       "candidate": "I'm not here to sell you anything. I'm [Name] with Paradise Exteriors. We're doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
-      "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library work.",
-      "paradisePrecedent": "May 23, 2025 internal Canvass Training Manual contains the same core I'm not here to sell you anything phrase.",
+      "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library/playback work.",
       "current2026SourceRecovered": false,
       "runtimeDisplay": "CURRENT APPROVAL PENDING",
       "fieldInstructionUntilDecision": "Use only the current manager-approved canvass opening in the field.",
@@ -75,11 +89,6 @@
     },
     "canvassingLibrary": {
       "status": "PASS_AUTOMATED_VISIBILITY_AND_OFFLINE",
-      "reachableFrom": [
-        "Training home",
-        "Videos & Audio",
-        "More Training Tools"
-      ],
       "tonyRenderedCountRequired": 24,
       "tonyRenderedCountAutomated": 24,
       "tonyManualsVisible": [
@@ -89,65 +98,22 @@
       "offlineMetadataAcceptance": "PASS",
       "authorityRule": "Trainer items remain REFERENCE/HISTORICAL as applicable and do not become Paradise Approved because they are visible or playable."
     },
-    "curatedThirdPartyReviewed": 12,
-    "internallyPlayable": 12,
-    "rightsHold": 0,
     "mediaPolicyVersion": "2026.08.16-pu-media-internal-v2",
     "mediaUiVersion": "2026.08.16-pu-media-ui-v5",
-    "curatedTargetAudit": {
-      "status": "PASS_TARGET_EXISTENCE_PLUS_LOCAL_INTEGRITY_FOR_RETRIEVABLE_SET",
-      "catalogTargetsReviewed": 12,
-      "fullDriveMetadataReturned": 11,
-      "fullMetadataTypeMatchesCatalog": 11,
-      "nonzeroSizedFilesConfirmed": 11,
-      "expectedCatalogMix": "8 audio / 4 video",
-      "grossoSet": "6/6 targets resolved: 3 audio/mpeg + 3 video/mp4, all nonzero",
-      "tonySet": "5/5 original curated Tony targets resolved: 5 audio/mpeg, all nonzero",
-      "localProbe": "11/11 retrieved files opened successfully in ffprobe with readable duration/stream metadata",
-      "localDecodeIntegrity": "11/11 retrieved files completed full ffmpeg decode with -xerror and no decode errors",
-      "retrievedVideoCodecs": "3/3 retrieved Grosso videos = H.264 video + AAC audio",
-      "retrievedAudioCodecs": "8/8 retrieved audio files = MP3, 44.1 kHz stereo",
-      "daveScienceCanvassing": "Target exists and reports 1,690,853,160 bytes; connector raw download is blocked by its 268,435,456-byte ceiling, so actual browser playback remains a physical acceptance item",
-      "note": "This target audit establishes that the original curated catalog is not pointing at missing Drive objects and that every retrievable curated file is structurally decodable. It does not substitute for real Safari/PWA playback."
-    },
-    "postReconciliationTonyIntegrityCheck": {
-      "status": "PASS_LOCAL_FILE_INTEGRITY",
-      "audio": {
-        "catalogId": "tony-canvassing-101",
-        "driveTitle": "Tony Hoty Audio Canvassing 101.mp3",
-        "mimeType": "audio/mpeg",
-        "codec": "MP3",
-        "sampleRateHz": 44100,
-        "channels": 2,
-        "fullDecode": "PASS"
-      },
-      "video": {
-        "catalogId": "tony-video-process",
-        "driveTitle": "New Canvasser Training - Process.mp4",
-        "mimeType": "video/mp4",
-        "videoCodec": "H.264",
-        "audioCodec": "AAC",
-        "dimensions": "1272x720",
-        "audioSampleRateHz": 44100,
-        "audioChannels": 2,
-        "fullDecode": "PASS"
-      },
-      "note": "Direct Drive retrieval and full local decode prove file integrity for the recommended Tony physical-test pair. They do not prove Drive iframe playback in physical iPhone Safari/PWA."
-    },
-    "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy.",
-    "note": "Internal-use treatment is a project operating choice, not a legal opinion. Media-rights documentation is not a Paradise University release gate under the current project scope."
+    "physicalPlaybackStatus": "RETEST_REQUIRED_ON_NEW_TOP_LEVEL_DRIVE_PATH",
+    "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
   },
   "physicalDeviceAcceptance": {
-    "status": "OPEN",
+    "status": "RETEST_REQUIRED_AFTER_DRIVE_IFRAME_FIX",
     "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
-    "requiredRuntime": "5eb794090a0a20f13d63c34ab05ac2b68877147c",
-    "requiredEvidence": "Named human physical test on an actual iPhone in Safari and installed Home Screen PWA, including field regression, 24/24 Tony Canvassing Library visibility, both Tony manuals, offline metadata/library behavior, and actual Tony audio/video playback."
+    "requiredRuntime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
+    "requiredEvidence": "Named human physical retest on an actual iPhone in Safari and installed Home Screen PWA. Must confirm the old embedded Google error is absent, PLAY IN GOOGLE DRIVE opens the correct controlled source, actual Tony audio and Tony video play, at least one non-Tony item plays, no third-party-cookie workaround is required, and the offline app shell/library remains correct."
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
     "packet": "docs/PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md",
     "currentnessDecision": "OPEN — exact canvass opener requires named human APPROVE or REVISE decision; Missing Parties currentness is already closed from current 2026 policy.",
-    "requiredEvidence": "Completed currentness decision plus named human reviewer, date, exact candidate commit, and disposition covering curriculum accuracy, complete Tony/Yoho/Grosso library presentation, Paradise policy boundaries, field-authority separation, sales procedure holds, tone, and usability."
+    "requiredEvidence": "Completed currentness decision plus named human reviewer, date, exact candidate runtime, and disposition covering curriculum accuracy, complete Tony/Yoho/Grosso library presentation, Paradise policy boundaries, field-authority separation, sales procedure holds, tone, and usability."
   },
   "promotionAuthorization": {
     "status": "OPEN",
@@ -157,5 +123,5 @@
     "status": "NOT_APPLICABLE_UNTIL_PROMOTION",
     "requiredEvidence": "After authorized promotion, read back validated branch commit, dataset SHA, 78/76/2 guards, and operational URL behavior before calling the release live."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. Current blockers are the named human opener-currentness decision within the broader human curriculum/compliance sign-off, physical-device acceptance, and explicit promotion authorization. Missing Parties currentness is source-supported and closed; the complete trainer-library software/catalog reconciliation is PASS; internal trainer-media rights are not a release blocker under the current project scope."
+  "hardRule": "A green software validator is necessary but not sufficient for release. Current blockers are the real-iPhone playback retest on the new iframe-free top-level Drive path, the named human opener-currentness decision within the broader human curriculum/compliance sign-off, and explicit promotion authorization. Do not use Safari third-party-cookie weakening as an acceptance workaround."
 }
