@@ -1,4 +1,0 @@
-Paradise University Training Experience v2 validation fixture.
-Default employee track: Foundation -> Field Ready -> Canvasser.
-Future-role content remains explorable, not automatically required.
-This file is non-runtime documentation for validator traceability.
