@@ -2,6 +2,7 @@
   if(typeof puProgress!=='function'||typeof puLesson!=='function'||typeof renderTraining!=='function')return;
   const VERSION='2026.08.17-pu-training-experience-v3';
   const TRANSFER_VERSION='2026.08.17-pu-progress-transfer-v2-hardened';
+  const IMPORT_GUARD_VERSION='2026.08.17-pu-progress-import-guard-v1';
   const TRANSFER_MAX_BYTES=750000;
   const TRANSFER_STORE_MAX_BYTES=500000;
   const MEDIA_NOTES_STORE='puMediaNotesV1';
@@ -81,7 +82,13 @@
     }
     return{version:payload.version||'',trainingVersion:payload.trainingVersion||'',exportedAt:payload.exportedAt||''}
   }
-  function wireImport(input){input.onchange=async()=>{const f=input.files?.[0];if(!f)return;try{if(f.size>TRANSFER_MAX_BYTES)throw new Error('Progress file is too large to import safely');const payload=JSON.parse(await f.text()),meta=applyTransfer(payload);showToast('Progress imported',meta.trainingVersion===String(window.PARADISE_UNIVERSITY_VERSION||PU_VERSION)?'Current-version device progress restored.':'Older history imported; current-version gates still control readiness.');setTimeout(()=>puSetPage('progress'),250)}catch(e){showToast('Import failed',e?.message||'The selected file is not a valid Paradise University progress backup.')}finally{input.value=''}}}
+  function hasTransferState(){return transferKeys().some(k=>localStorage.getItem(k)!=null)}
+  function confirmTransferReplacement(){
+    if(!hasTransferState())return true;
+    if(typeof window.confirm!=='function')return false;
+    return window.confirm('Importing this progress file will replace Paradise University progress stored on this device. This manual device progress is not an official certification record. Continue?');
+  }
+  function wireImport(input){input.onchange=async()=>{const f=input.files?.[0];if(!f)return;try{if(f.size>TRANSFER_MAX_BYTES)throw new Error('Progress file is too large to import safely');const payload=validateTransfer(JSON.parse(await f.text()));if(!confirmTransferReplacement()){showToast('Import canceled','Existing device progress was not changed.');return}const meta=applyTransfer(payload);showToast('Progress imported',meta.trainingVersion===String(window.PARADISE_UNIVERSITY_VERSION||PU_VERSION)?'Current-version device progress restored.':'Older history imported; current-version gates still control readiness.');setTimeout(()=>puSetPage('progress'),250)}catch(e){showToast('Import failed',e?.message||'The selected file is not a valid Paradise University progress backup.')}finally{input.value=''}}}
 
   const baseProgress=puProgress;
   puProgress=function(){
@@ -120,9 +127,11 @@
 
   window.PU_TRAINING_EXPERIENCE_V3_VERSION=VERSION;
   window.PU_PROGRESS_TRANSFER_VERSION=TRANSFER_VERSION;
+  window.PU_PROGRESS_IMPORT_GUARD_VERSION=IMPORT_GUARD_VERSION;
   window.PU_PROGRESS_TRANSFER_MAX_BYTES=TRANSFER_MAX_BYTES;
   window.puProgressTransferPayload=transferPayload;
   window.puValidateProgressTransfer=validateTransfer;
   window.puApplyProgressTransfer=applyTransfer;
+  window.puProgressImportNeedsConfirmation=hasTransferState;
   window.puMediaLearningNote=id=>noteFor(id);
 })();
