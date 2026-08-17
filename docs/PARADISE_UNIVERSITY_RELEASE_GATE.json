@@ -1,19 +1,20 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v13",
+  "schemaVersion": "2026.08.17-pu-release-gate-v14",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "currentRuntimeCandidate": "ae46fa6d5258146a357041bcd184b07031778043",
-  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/ae46fa6d5258146a357041bcd184b07031778043/index.html",
-  "currentControlHeadBeforeCloseoutDocs": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-  "lastFullyGreenControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-  "lastFullyGreenValidatorRun": 32020240642,
-  "lastFullyGreenContentHardeningRun": 32020240685,
+  "currentRuntimeCandidate": "4a412c0b21ef246e5ef9049c0f01c34faed06f15",
+  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/4a412c0b21ef246e5ef9049c0f01c34faed06f15/index.html",
+  "currentControlHeadBeforeCloseoutDocs": "1bd8ad9952410c4473b35811622cd86364360380",
+  "lastFullyGreenControlHead": "1bd8ad9952410c4473b35811622cd86364360380",
+  "lastFullyGreenValidatorRun": 32028149021,
+  "lastFullyGreenContentHardeningRun": 32028149033,
+  "lastFullyGreenUxPolishRun": 32028149087,
   "runtimeControlSeparation": {
     "status": "PASS",
-    "runtimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
-    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-    "postRuntimeChanges": "CI/workflow and regression-test controls only; no browser-runtime change after ae46fa6d5258146a357041bcd184b07031778043 through the green 0693890b3050b25ca4b94f0fe60974efc7c5441b control head.",
+    "runtimeCommit": "4a412c0b21ef246e5ef9049c0f01c34faed06f15",
+    "validatedControlHead": "1bd8ad9952410c4473b35811622cd86364360380",
+    "postRuntimeChanges": "Validation/workflow/regression-test controls only; no browser-runtime asset changed after 4a412c0b21ef246e5ef9049c0f01c34faed06f15 through the fully green 1bd8ad9952410c4473b35811622cd86364360380 control head.",
     "rule": "Documentation/test-only commits after the runtime do not redefine the immutable runtime candidate."
   },
   "fieldBaseline": {
@@ -21,7 +22,11 @@
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
     "records": 78,
     "go": 76,
-    "noGo": 2
+    "noGo": 2,
+    "noGoJurisdictions": [
+      "Punta Gorda",
+      "Tarpon Springs"
+    ]
   },
   "softwareValidation": {
     "status": "PASS",
@@ -32,26 +37,29 @@
     "automatedIPhoneField": "PASS",
     "automatedIPhoneOffline": "PASS",
     "automatedTrainingExperienceV2RedTeam": "PASS",
+    "automatedTrainingExperienceV3": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "validatorRun": 32020240642,
-    "contentHardeningRun": 32020240685,
-    "validatedControlHead": "0693890b3050b25ca4b94f0fe60974efc7c5441b",
-    "testedRuntimeCommit": "ae46fa6d5258146a357041bcd184b07031778043",
-    "pwaCacheIdentity": "trainingux3",
-    "trainingExperienceV2": {
+    "validatorRun": 32028149021,
+    "contentHardeningRun": 32028149033,
+    "uxPolishRun": 32028149087,
+    "validatedControlHead": "1bd8ad9952410c4473b35811622cd86364360380",
+    "testedRuntimeCommit": "4a412c0b21ef246e5ef9049c0f01c34faed06f15",
+    "pwaCacheIdentity": "trainingux5-experience3",
+    "trainingExperienceV3": {
       "status": "PASS_AUTOMATED",
-      "roleAwareDefaultQueue": true,
-      "futureRolesExcludedFromDefaultQueue": true,
-      "salesApprenticeBridgeItems": 4,
-      "quickCheckRequiredBeforeCompletion": true,
-      "quickCheckRequiredBeforeForwardNavigation": true,
-      "managerQuickCheckForwardNavigationGuard": true,
-      "curatedMediaDeduplicated": true,
-      "salesControlsCollapsedByDefaultEvidenceStillReachable": true,
-      "practiceLineageCorrection": "PASS",
-      "canvassingLibraryNavigation": "INTENTIONALLY_ONE_LEVEL_DEEPER_VIA_VIDEOS_AUDIO_OR_MORE",
-      "homeScreenLibraryButtonExpected": false
+      "milestoneGuidance": true,
+      "adaptiveWeakAreaPractice": true,
+      "contextPreservingBack": true,
+      "compactLessonOverview": true,
+      "advancementRequirements": true,
+      "mediaLearningTools": true,
+      "sourceBoundTranscriptChapterHooks": true,
+      "completionFeedback": true,
+      "manualCrossDeviceProgressTransfer": true,
+      "centralAccountSyncClaimed": false,
+      "managerAssignedTraining": false,
+      "gamificationXpStreakLeaderboard": false
     },
     "securePlaybackBoundary": {
       "driveIframeAllowed": false,
@@ -72,7 +80,6 @@
     "runtime": "ac353dcea74bbb8ca262e5f55deaa8c61ee08752",
     "status": "PASS_FOR_RECORDED_PLAYBACK_PATHS_ONLY",
     "evidencePreserved": true,
-    "knownIframeBlocker": "CLOSED_BY_PHYSICAL_RETEST",
     "tonyCanvassing101": {
       "topLevelDriveLaunch": "PASS",
       "actualAudioPlayback": "PASS"
@@ -89,30 +96,33 @@
       "reportedResult": "They all work.",
       "scopeControl": "This does not assert that every one of the 79 indexed media files was individually played."
     },
-    "carryForwardRule": "This is valid historical evidence that the inherited top-level Drive playback path worked on a real iPhone. It is not full physical acceptance of the newer Training Experience v2 runtime ae46fa6d5258146a357041bcd184b07031778043."
+    "carryForwardRule": "Historical evidence confirms the inherited top-level Drive design worked on a real iPhone. It does not equal full physical acceptance of the current Training Experience v3 runtime."
   },
   "currentPhysicalAcceptance": {
     "status": "OPEN_CURRENT_RUNTIME_RETEST_REQUIRED",
-    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
+    "requiredRuntime": "4a412c0b21ef246e5ef9049c0f01c34faed06f15",
     "packet": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
-    "priorAttemptRecord": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ATTEMPT_2026-08-17.md",
     "requiredDeviceScope": [
-      "Safari and installed Home Screen PWA on the exact current runtime",
+      "Safari and freshly installed Home Screen PWA on the exact current runtime",
       "online and Airplane Mode/offline shell behavior",
       "one GO and one NO-GO Lookup check",
       "Daily Check and History",
-      "simplified Training Experience v2 home and role-aware queue",
-      "Quick Check before completion and forward navigation, including manager path",
-      "four-item Sales Apprentice bridge",
-      "collapsed Sales Controls & References with evidence still reachable",
-      "Canvassing Library intentionally absent from the simplified Training home and reachable one level deeper from Videos & Audio and More Training Tools",
-      "Tony 24 exactly once, both Tony manuals visible, Dave 4 visible",
-      "REFERENCE/HISTORICAL authority labels with no accidental trainer PARADISE APPROVED state",
-      "spot-check actual trainer playback under the exact current runtime",
+      "Training Experience v3 milestones and What You Need Next",
+      "context-preserving Back behavior",
+      "adaptive Practice My Weak Areas behavior",
+      "lesson overview and advancement requirements",
+      "media Learning Tools and note persistence",
+      "manual progress export/import transfer with no false account-sync claim",
+      "completion feedback",
+      "Quick Check completion/forward guards including manager path",
+      "Sales Apprentice four-item bridge and current sales authority boundaries",
+      "complete Canvassing Library denominator and authority labels",
+      "current-runtime trainer playback spot-check",
       "existing opener wording and CURRENT APPROVAL PENDING state",
       "Missing Parties homeowner/decision-maker boundary with no blanket spouse rule",
-      "no fake offline trainer playback and no giant trainer-media precache",
-      "touch, viewport, Dynamic Type, orientation, and navigation QA"
+      "no fake offline trainer playback or giant trainer-media precache",
+      "touch, viewport, Dynamic Type, orientation, and navigation QA",
+      "no manager-assigned training experience"
     ],
     "rule": "Prior ac353 playback evidence is preserved but does not substitute for current-runtime physical acceptance."
   },
@@ -125,20 +135,10 @@
     "openingWording": {
       "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
       "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
-      "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library/playback work.",
+      "userDirection": "Preserve the existing candidate wording; do not rewrite it during unrelated curriculum/library/playback/experience work.",
       "runtimeDisplay": "CURRENT APPROVAL PENDING",
       "requiredEvidence": "Completed docs/PARADISE_UNIVERSITY_HUMAN_CURRENTNESS_DECISION.md choosing APPROVE or REVISE for the exact candidate."
     }
-  },
-  "practiceV2": {
-    "status": "PASS",
-    "scenarioCount": 20,
-    "categories": 4,
-    "scenariosPerCategory": 5,
-    "minimumHardStops": 6,
-    "schemaValidator": "PASS",
-    "offline": "PASS",
-    "invalidLessonLineageCorrection": "PASS"
   },
   "internalTrainerMedia": {
     "status": "PASS_INTERNAL_USE_NON_BLOCKING",
@@ -155,24 +155,14 @@
       "confirmedNewReconciliationRecords": 49,
       "unexplainedMissingConfirmedCanonicalMedia": 0
     },
-    "canvassingLibrary": {
-      "tonyIndexed": 24,
-      "daveIndexed": 4,
-      "tonyManualsRequiredVisible": [
-        "Tony Hoty Canvassing Manual",
-        "Tony Hoty Master Training Manual"
-      ],
-      "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable.",
-      "navigationBoundary": "Complete library is intentionally one level deeper than Training home to keep the default employee path focused; access is through Videos & Audio and More Training Tools."
-    },
-    "physicalPlaybackStatus": "PRIOR_AC353_TESTED_PATHS_PASS_CURRENT_AE46_SPOT_CHECK_OPEN",
-    "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
+    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, playable, bookmarked, noted, or practiced.",
+    "physicalPlaybackStatus": "PRIOR_AC353_TESTED_PATHS_PASS_CURRENT_V3_SPOT_CHECK_OPEN"
   },
   "humanCurriculumComplianceReview": {
     "status": "OPEN",
     "packet": "docs/PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md",
-    "requiredRuntime": "ae46fa6d5258146a357041bcd184b07031778043",
-    "v2ReviewRequired": true,
+    "requiredRuntime": "4a412c0b21ef246e5ef9049c0f01c34faed06f15",
+    "v3ReviewRequired": true,
     "currentnessDecision": "OPEN — exact canvass opener requires named human APPROVE or REVISE decision."
   },
   "promotionAuthorization": {
@@ -184,5 +174,5 @@
     "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
     "note": "No University promotion has occurred."
   },
-  "hardRule": "A green software validator is necessary but not sufficient for release. The current immutable browser runtime is ae46fa6d5258146a357041bcd184b07031778043 and the later green 0693890b3050b25ca4b94f0fe60974efc7c5441b head is test/control-only. Prior ac353 real-iPhone playback evidence is preserved but does not pass the current v2 physical matrix. Remaining blockers are exact-current-runtime physical iPhone/PWA acceptance, human curriculum/compliance review, the named opener-currentness decision, and explicit promotion authorization."
+  "hardRule": "All automated validation is green for Training Experience v3, but software PASS is not release authorization. Remaining blockers are exact-current-runtime physical iPhone/PWA acceptance, human curriculum/compliance review, the named opener-currentness decision, and explicit promotion authorization. Manager-assigned training is intentionally excluded."
 }
