@@ -28,6 +28,20 @@ test('prior-version completion is preserved as history but cannot satisfy curren
   const history=await page.evaluate(id=>puRead()[id].completionHistory||[],lesson.id);expect(history.some(x=>x.trainingVersion==='prior-version')).toBe(true);
 });
 
+test('prior-version Quick Check cannot satisfy a current-version completed lesson',async({page})=>{
+  await training(page);const id='field-lookup';
+  await page.evaluate(id=>{
+    localStorage.puProgress=JSON.stringify({[id]:{complete:true,trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()}});
+    localStorage.puQuickChecksV1=JSON.stringify({[id]:{passed:true,checksVersion:'prior-check-version',trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()}});
+  },id);
+  expect(await page.evaluate(id=>window.puLessonCompletionCurrent(id),id)).toBe(true);
+  expect(await page.evaluate(id=>window.puQuickCheckPassed(id),id)).toBe(false);
+  expect(await page.evaluate(id=>window.puLessonTrainingReady(id),id)).toBe(false);
+  await page.evaluate(id=>puSetPage('lesson:'+id),id);await expect(page.locator('#puNext')).toBeDisabled();
+  const choices=page.locator('[data-pu-check]');await expect(choices).toHaveCount(3);await choices.nth(1).click();
+  expect(await page.evaluate(id=>window.puQuickCheckPassed(id),id)).toBe(true);expect(await page.evaluate(id=>window.puLessonTrainingReady(id),id)).toBe(true);
+});
+
 test('malformed transfer is rejected before any device progress is overwritten',async({page})=>{
   await training(page);
   const before=JSON.stringify({safe:{complete:true,trainingVersion:await page.evaluate(()=>PU_VERSION)}});
@@ -44,10 +58,27 @@ test('transfer allowlist rejects unexpected fields and export does not leak unre
   expect(result).toBe(true);expect(await page.evaluate(()=>localStorage.secretToken)).toBe('DO_NOT_EXPORT');
 });
 
+test('prototype-pollution style transfer key is rejected without object pollution',async({page})=>{
+  await training(page);
+  const result=await page.evaluate(()=>{const payload=JSON.parse('{"type":"PARADISE_UNIVERSITY_PROGRESS_TRANSFER","data":{"__proto__":"polluted"}}');try{window.puApplyProgressTransfer(payload);return{threw:false,polluted:Object.prototype.polluted}}catch(e){return{threw:true,message:String(e.message||e),polluted:Object.prototype.polluted}}});
+  expect(result.threw).toBe(true);expect(result.message).toMatch(/Unexpected progress field: __proto__/);expect(result.polluted).toBeUndefined();
+});
+
 test('oversized transfer is rejected without changing existing device state',async({page})=>{
   await training(page);await page.evaluate(()=>localStorage.puLastMedia='safe-media');
   const result=await page.evaluate(()=>{try{window.puApplyProgressTransfer({type:'PARADISE_UNIVERSITY_PROGRESS_TRANSFER',data:{puLastMedia:'x'.repeat(501)}});return{threw:false,value:localStorage.puLastMedia}}catch(e){return{threw:true,message:String(e.message||e),value:localStorage.puLastMedia,max:window.PU_PROGRESS_TRANSFER_MAX_BYTES}}});
   expect(result.threw).toBe(true);expect(result.message).toMatch(/Invalid last-media value/);expect(result.value).toBe('safe-media');expect(result.max).toBeGreaterThan(1000);
+});
+
+test('forged device progress cannot create an official certification claim',async({page})=>{
+  await training(page);
+  await page.evaluate(()=>{
+    const progress={},checks={};for(const x of PU_LESSONS){progress[x.id]={complete:true,trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()};if(window.puQuickCheckRequired(x.id))checks[x.id]={passed:true,checksVersion:window.PU_CHECKS_VERSION,trainingVersion:PU_VERSION,updatedAt:new Date().toISOString()}}
+    window.puApplyProgressTransfer({type:'PARADISE_UNIVERSITY_PROGRESS_TRANSFER',version:window.PU_PROGRESS_TRANSFER_VERSION,trainingVersion:PU_VERSION,data:{puProgress:JSON.stringify(progress),puQuickChecksV1:JSON.stringify(checks)}});
+    puSetPage('progress');
+  });
+  await expect(page.getByText('OFFICIAL CERTIFICATION')).toBeVisible();await expect(page.getByText('Not stored on this device')).toBeVisible();
+  await expect(page.getByText(/Manager demonstration, field verification, and current Paradise requirements remain separate/i)).toBeVisible();
 });
 
 test('imported media note is rendered inert and cannot inject markup or script',async({page})=>{
@@ -68,11 +99,22 @@ test('corrupt contextual-back state fails closed to a safe training page',async(
   expect(dialogs).toBe(0);expect(await page.evaluate(()=>puPage)).toBe('home');
 });
 
+test('trainer catalog denominator is exact and public RawGitHack media mirroring is absent',async({page})=>{
+  await training(page);
+  const audit=await page.evaluate(()=>{const media=window.PU_CONTENT.media||[],counts={};for(const m of media)counts[m.trainer]=(counts[m.trainer]||0)+1;const ids=media.map(x=>x.id);return{total:media.length,unique:new Set(ids).size,tony:counts['Tony Hoty']||0,dave:counts['Dave Yoho']||0,grosso:counts['Grosso University']||0,source:media.filter(x=>x.priority==='SOURCE_LIBRARY').length,curated:media.filter(x=>x.priority!=='SOURCE_LIBRARY').length,badProtocol:media.filter(x=>x.url&&!/^https:\/\//i.test(x.url)).map(x=>x.id),publicMirror:media.filter(x=>/raw(?:cdn\.)?githack|raw\.githubusercontent/i.test(`${x.url||''} ${x.streamUrl||''}`)).map(x=>x.id)}});
+  expect(audit).toEqual({total:79,unique:79,tony:24,dave:4,grosso:51,source:67,curated:12,badProtocol:[],publicMirror:[]});
+});
+
+test('service worker never precaches or intercepts external Drive media',async({page})=>{
+  await training(page);const sw=await page.evaluate(()=>fetch('/sw.js').then(r=>r.text()));
+  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toContain('trainingux5-experience3-redteam2');
+});
+
 test('red-team invariants preserve field authority, exact pending opener, and iframe-free Drive playback',async({page})=>{
   await training(page);
   const opener="I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?";
   expect(await page.evaluate(text=>{const x=PU_LESSONS.find(l=>l.id==='field-opening');return JSON.stringify(x).includes(text)},opener)).toBe(true);
   await page.evaluate(()=>puSetPage('lesson:field-opening'));await expect(page.getByText(/CURRENT APPROVAL PENDING/i)).toBeVisible();
   await page.evaluate(()=>window.puPlayerOpen('tony-canvassing-101'));const player=page.locator('#puPlayerRoot');await expect(player.locator('iframe')).toHaveCount(0);
-  const drive=player.locator('#puDriveLaunch');await expect(drive).toBeVisible();await expect(drive).toHaveText(/PLAY IN GOOGLE DRIVE/i);await expect(drive).toHaveAttribute('target','_blank');await expect(drive).toHaveAttribute('href',/drive\.google\.com\/file\/d\/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/);
+  const drive=player.locator('#puDriveLaunch');await expect(drive).toBeVisible();await expect(drive).toHaveText(/PLAY IN GOOGLE DRIVE/i);await expect(drive).toHaveAttribute('target','_blank');await expect(drive).toHaveAttribute('rel',/noopener/);await expect(drive).toHaveAttribute('href',/drive\.google\.com\/file\/d\/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/);
 });
