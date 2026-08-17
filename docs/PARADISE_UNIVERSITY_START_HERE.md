@@ -5,6 +5,8 @@ As of: 2026-08-17
 
 This is the current in-repository status pointer for Paradise University v1. Read it before relying on older review, physical-test, opener-decision, red-team, or closeout records.
 
+Current machine gate: `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V20.json`.
+
 ## Current controlled candidate
 
 - Working branch: `agent/paradise-university-v1`
@@ -15,7 +17,7 @@ This is the current in-repository status pointer for Paradise University v1. Rea
 - Field denominator: 78 jurisdictions / 76 GO / 2 NO-GO
 - NO-GO jurisdictions: Punta Gorda; Tarpon Springs
 
-No browser-runtime asset was changed by the current release-path hardening work.
+No browser-runtime asset was changed by the release-path hardening work.
 
 ## Machine validation status
 
@@ -26,7 +28,7 @@ Paradise University / Daily Training machine coverage remains PASS for the froze
 - UX polish / Daily Training — `32069575272` — PASS
 - Adversarial red team — `32069575300` — PASS
 
-The subsequent release-isolation/control repair head `3f4e4e65ab72ca8de27d9f44f2ffd691cf364c07` re-approved only the controlled public-release workflow path inside the release-isolation validator after that validator correctly rejected the new release-workflow modification. On that repair head, the full University validator passed release isolation and the complete iPhone/offline/Training/device matrix. No app-runtime or field-data exception was added.
+Subsequent release-path work changed only workflows, validators, tests, and documentation. The release-isolation validator continued to enforce the frozen field/runtime boundary. The v20 architecture also has an executable release-workflow validator in `scripts/validate-release-workflow-controls.mjs`; content hardening fails if the exact-SHA gates, bounded wait, stale-head guard, non-force validated-branch push, bot recursion guard, or branch-scoped concurrency drift.
 
 The applicable machine-coverage statement remains: maximum available automated validation is PASS for the covered matrix; this does not manufacture physical-device evidence, human policy judgment, trainer-media sharing visibility, opener approval, or promotion authorization.
 
@@ -75,13 +77,16 @@ The pre-promotion audit found that the four University workflows previously ran 
 The isolated candidate now hardens that architecture as follows:
 
 1. All four Paradise University validation workflows are configured for both `agent/paradise-university-v1` and `paradise-canvass-manager-public`.
-2. Bot-generated publication commits are excluded from recursively running the expensive University jobs.
-3. The `Validate canvass register` public-release workflow still performs the controlled field rebuild, field integrity checks, iPhone field/offline tests, and device matrix.
-4. Before publishing, the field release workflow polls GitHub Actions for the exact public source SHA and requires all four University workflow names to be present and `completed:success`.
-5. A missing, pending beyond the bounded wait, or failed University gate causes the release workflow to fail closed.
-6. Only after the field and University gates succeed may generated controlled artifacts/metadata be published.
-7. The workflow then uses a normal, non-force push to advance `paradise-canvass-manager-validated` to the validated artifact SHA.
-8. A non-fast-forward validated-branch update therefore fails rather than rewriting stable validated history.
+2. All four University workflows and the field release workflow use branch-scoped concurrency, so isolated-branch work cannot cancel a public release run merely by sharing a concurrency key.
+3. Bot-generated publication commits are excluded from recursively running the expensive University jobs.
+4. The `Validate canvass register` public-release workflow still performs the controlled field rebuild, field integrity checks, iPhone field/offline tests, and device matrix.
+5. Before publishing, the field release workflow polls GitHub Actions for the exact public source SHA and requires all four University workflow names to be present and `completed:success`.
+6. A missing, pending beyond the 900-second bounded wait, or failed University gate causes the release workflow to fail closed.
+7. The public branch head is re-read before publishing; a newer source commit prevents a stale run from publishing.
+8. Only after the field and University gates succeed may generated controlled artifacts/metadata be published.
+9. The workflow uses a normal, non-force push to advance `paradise-canvass-manager-validated`; a non-fast-forward update fails rather than rewriting stable validated history.
+10. `latest.json` is not broadly exempted from release isolation. Only validated, internally consistent pre-release metadata from the known baseline lineage is accepted; dataset/hash/count/change-control/URL/time consistency is enforced.
+11. `scripts/validate-release-workflow-controls.mjs` statically enforces these release controls inside content hardening.
 
 The release workflow is also configured to parse on the isolated University branch while skipping its publishing job there. GitHub accepted that workflow and created the skipped isolated-branch run, proving parser acceptance without executing a production publish.
 
@@ -92,10 +97,11 @@ The release workflow is also configured to parse on the isolated University bran
 When promotion is separately authorized, the safe path is:
 
 1. normal PR/merge from the University branch into `paradise-canvass-manager-public`;
-2. let the resulting public merge SHA run the four University workflows plus the field release workflow;
-3. require the exact-SHA gates to succeed;
-4. allow the release workflow to publish any generated controlled metadata/artifacts and fast-forward `paradise-canvass-manager-validated`;
-5. read back both public and validated branch SHAs after completion.
+2. preserve/resolve the existing public `latest.json` as the validated baseline-consistent metadata record;
+3. let the resulting public merge SHA run the four University workflows plus the field release workflow;
+4. require the exact-SHA gates to succeed;
+5. allow the release workflow to publish any generated controlled metadata/artifacts and fast-forward `paradise-canvass-manager-validated`;
+6. read back both public and validated branch SHAs after completion.
 
 No production merge or branch advance has been authorized or performed by this pre-promotion work.
 
@@ -109,14 +115,15 @@ Do not weaken the release workflow to compensate for the missing settings capabi
 
 ## Older records / supersession rule
 
-Preserve older audit and review records as historical evidence. Where an older document pins an earlier runtime/head or states that human/physical testing is presently required, this START HERE file plus the current physical acceptance record and current pre-promotion gate supersede that old **current-status** statement only. The historical evidence itself remains intact.
+Preserve older audit and review records as historical evidence. Where an older document pins an earlier runtime/head or states that human/physical testing is presently required, this START HERE file plus the current physical acceptance record and v20 pre-promotion gate supersede that old **current-status** statement only. The historical evidence itself remains intact.
 
 In particular:
 
 - `PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md` — retained checklist/template; older runtime pin is historical.
 - `PARADISE_UNIVERSITY_AI_HUMAN_REVIEW_EVIDENCE_MAP.md` — retained evidence map; current human/physical disposition is deferred.
 - `PARADISE_UNIVERSITY_OPENER_DECISION_SUPPORT.md` — exact opener-preservation rule remains useful; its older runtime pin is historical.
-- `PARADISE_UNIVERSITY_RELEASE_GATE.json` — machine-only closeout snapshot; use the newer pre-promotion gate for current release-path status.
+- `PARADISE_UNIVERSITY_RELEASE_GATE.json` — machine-only closeout snapshot.
+- `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V19.json` — prior pre-promotion snapshot; v20 is current.
 
 ## Hard rule
 
