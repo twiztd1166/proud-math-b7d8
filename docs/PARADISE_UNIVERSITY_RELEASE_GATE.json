@@ -1,22 +1,61 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v16-redteam7-closeout",
+  "schemaVersion": "2026.08.17-pu-release-gate-v17-daily-training1-closeout",
   "status": "NOT_RELEASE_READY",
-  "auditMode": "AUTOMATED_DEEP_RED_TEAM_NO_HUMAN_CHECK_REQUESTED",
+  "auditMode": "AUTOMATED_DEEP_VALIDATION_PLUS_DAILY_TRAINING_V1_NO_CURRENT_RUNTIME_PHYSICAL_EVIDENCE",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-  "currentRuntimeCandidate": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/8a74bd78bb57369dbaeb4f6708a82db538bc19f7/index.html",
-  "lastBrowserRuntimeChange": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-  "fullyGreenPreCloseoutControlHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
+  "currentRuntimeCandidate": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+  "currentRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html",
+  "lastBrowserRuntimeChange": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+  "fullyGreenPreCloseoutControlHead": "625500fc66bd340fb8545c21180c553d07095849",
+  "exactGreenRuns": {
+    "fullValidator": 32050933375,
+    "contentHardening": 32050933365,
+    "uxPolishAndDailyTraining": 32050933377,
+    "adversarialRedTeam": 32050933330
+  },
+  "dailyTrainingV1": {
+    "status": "PASS_AUTOMATED",
+    "version": "2026.08.17-pu-daily-training-v1",
+    "purpose": "Give an employee a clear recommended training plan each distinct training day without creating manager assignments, deadlines, HR records, certification authority, or future-role authorization.",
+    "estimatedDailyTime": "10-15 minutes",
+    "dailyActivities": [
+      "Quick Review — 2-3 minutes",
+      "Today's Skill — current Canvasser-core lesson",
+      "Apply / Coach — 3-5 minutes"
+    ],
+    "sevenDayCycle": [
+      "Foundation & Standards",
+      "Door Approach",
+      "Field Compliance",
+      "Conversation Skills",
+      "Product & Appointment Knowledge",
+      "Coaching & Library",
+      "Weekly Review"
+    ],
+    "distinctDaySequencing": true,
+    "missedCalendarDaysDoNotSkipTrainingDays": true,
+    "sameDayReopenDoesNotAdvanceTrainingDay": true,
+    "currentTrackOnlySkillSelection": true,
+    "futureSalesOrManagerAutoQueue": false,
+    "weakAreaPreferenceRequiresActualDeviceAttemptEvidence": true,
+    "cleanStateFabricatesWeakAreas": false,
+    "day6UsesCuratedCoachingLibrary": true,
+    "trainerAuthorityBoundaryPreserved": true,
+    "recommendationOnly": true,
+    "managerAssignedTraining": false,
+    "dueDatesOrOverdueBadges": false,
+    "officialCertificationClaim": false,
+    "dailyCadenceIncludedInManualProgressTransfer": false,
+    "offlineShellIncluded": true
+  },
   "automatedDeepRedTeam": {
     "status": "PASS",
     "blockingMachineDetectableDefectsInCoveredMatrix": 0,
-    "auditDocument": "docs/PARADISE_UNIVERSITY_DEEP_RED_TEAM_AUDIT_2026-08-17.md",
     "adversarialTestsPerProfile": 18,
     "deviceBrowserProfiles": 5,
     "adversarialExecutions": 90,
     "adversarialPassed": 90,
-    "retries": 0,
     "profiles": [
       "WebKit iPhone",
       "WebKit small iPhone",
@@ -24,51 +63,39 @@
       "WebKit iPad",
       "Chromium Android"
     ],
-    "exactGreenRuns": {
-      "fullValidator": 32042429862,
-      "contentHardening": 32042429860,
-      "uxPolish": 32042430006,
-      "adversarialRedTeam": 32042429868
-    },
+    "exactGreenRun": 32050933330,
     "coveredThreats": [
-      "prior-version completion cannot satisfy current-version readiness",
-      "prior-version Quick Check cannot satisfy current-version readiness",
-      "malformed progress transfer rejected before writes",
-      "unexpected transfer fields rejected",
-      "prototype-pollution-style transfer key rejected",
-      "oversized transfer rejected without replacing existing state",
-      "progress transfer replaces the transfer-domain snapshot instead of merging destination-only readiness state",
-      "destructive progress import requires explicit confirmation when destination transfer state exists",
-      "canceling destructive progress import performs zero writes and preserves existing transfer-domain state",
-      "confirming destructive progress import retains snapshot-replacement semantics and does not merge stale destination state",
-      "valid JSON with invalid local-storage object shape is discarded fail-closed and cannot create readiness",
-      "forged local device progress cannot create official certification authority",
-      "imported media-note markup/script injection remains inert",
+      "prior-version completion cannot satisfy current readiness",
+      "prior-version Quick Check cannot satisfy current readiness",
+      "malformed or unexpected progress transfer data is rejected before unsafe writes",
+      "snapshot-replacement transfer does not merge stale destination readiness",
+      "destructive import requires explicit confirmation and Cancel performs zero transfer-domain writes",
+      "invalid-shape local storage recovers fail-closed",
+      "forged device progress cannot create official certification authority",
+      "imported note markup/script remains inert",
       "corrupt contextual navigation fails closed",
-      "trainer catalog denominator/uniqueness and no public RawGitHack media mirroring",
-      "service worker same-origin boundary and no external Drive media precache",
-      "service worker offline-shell refresh is limited to the exact queryless app entry",
-      "validated field-shell index and service-worker inventories remain release-isolated from Training changes",
-      "exact pending opener, iframe-free Drive playback, canonical top-level Drive action"
+      "trainer catalog denominator and no public RawGitHack trainer-media mirroring",
+      "service worker remains same-origin and does not precache external Drive media",
+      "offline-shell refresh is limited to the exact queryless app entry",
+      "field release isolation remains intact",
+      "exact pending opener and iframe-free top-level Drive playback remain intact"
     ],
-    "importantFindingClassification": "The deep red-team sequence found and closed defense-in-depth and recoverability defects without changing field classifications or the canvass opener. The destructive-import issue could erase local device-training history but could not manufacture readiness or official certification authority.",
-    "transferTrustBoundary": "Manual/local progress JSON is not a cryptographically trusted certification credential. Device progress may be edited by a device owner; official certification therefore remains separate and requires current Paradise human/field authority.",
-    "intermediateFailuresPreserved": true
+    "transferTrustBoundary": "Manual/local progress JSON is not a cryptographically trusted certification credential. Official certification remains separate and requires current Paradise human/field authority."
   },
   "runtimeControlSeparation": {
-    "status": "PASS_BY_COMMIT_CHAIN_AND_FILE_CLASSIFICATION",
-    "runtimeCommit": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-    "validatedPreCloseoutHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
+    "status": "PASS_BY_GITHUB_COMPARE",
+    "runtimeCommit": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "validatedPreCloseoutHead": "625500fc66bd340fb8545c21180c553d07095849",
     "postRuntimeChangesThroughPreCloseoutHead": [
-      "tests/service-worker-hardening-v1.spec.js",
+      "scripts/validate-training-release-isolation.mjs",
+      "tests/deep-audit-regression.spec.js",
       "tests/offline-regression.spec.js",
-      "tests/training-red-team-v1.spec.js",
-      "scripts/validate-training-experience-v3.mjs",
-      ".github/workflows/validate-paradise-university-red-team.yml"
+      "tests/service-worker-hardening-v1.spec.js",
+      "tests/training-red-team-v1.spec.js"
     ],
     "browserRuntimeChangedAfterPinnedRuntime": false,
-    "compareApiNote": "A GitHub compare attempt for this runtime/control interval returned 404, so this closeout does not falsely claim compare-API proof. Separation is recorded from the known sequential commit chain and the exact files changed after the runtime commit.",
-    "rule": "Test/workflow/static-validator/documentation commits do not redefine the immutable runtime candidate."
+    "compareApiProof": true,
+    "rule": "Test, validator, workflow, and documentation commits do not redefine the immutable browser runtime candidate."
   },
   "fieldBaseline": {
     "status": "PASS",
@@ -91,15 +118,16 @@
     "automatedIPhoneOffline": "PASS",
     "automatedTrainingExperienceV2RedTeam": "PASS",
     "automatedTrainingExperienceV3": "PASS",
+    "automatedDailyTrainingV1": "PASS",
     "automatedUniversityIPhone": "PASS",
     "deviceMatrix": "PASS",
-    "fullValidatorRun": 32042429862,
-    "contentHardeningRun": 32042429860,
-    "uxPolishRun": 32042430006,
-    "adversarialRedTeamRun": 32042429868,
-    "validatedControlHead": "5f3ae08dda63f3ca5785b233ffe50cfc1c685262",
-    "testedRuntimeCommit": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-    "pwaCacheIdentity": "pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-trainingux5-experience3-redteam7",
+    "fullValidatorRun": 32050933375,
+    "contentHardeningRun": 32050933365,
+    "uxPolishRun": 32050933377,
+    "adversarialRedTeamRun": 32050933330,
+    "validatedControlHead": "625500fc66bd340fb8545c21180c553d07095849",
+    "testedRuntimeCommit": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "pwaCacheIdentity": "pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-trainingux5-experience3-redteam7-daily1",
     "progressTransferVersion": "2026.08.17-pu-progress-transfer-v2-hardened",
     "progressImportGuardVersion": "2026.08.17-pu-progress-import-guard-v1",
     "storageHardeningVersion": "2026.08.17-pu-storage-hardening-v1",
@@ -153,8 +181,9 @@
   },
   "currentPhysicalAcceptance": {
     "status": "NOT_RUN_CURRENT_RUNTIME_BY_USER_DIRECTION_UNASSERTED",
-    "requiredRuntime": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-    "reason": "The requested work remained an automated deep-red-team pass; no new physical-device acceptance evidence was generated for the current runtime.",
+    "requiredRuntime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "reason": "Automated Daily Training and release validation cannot substitute for real iPhone Safari plus fresh installed Home Screen PWA acceptance on the current runtime.",
+    "dailyTrainingPhysicalChecksAdded": true,
     "simulatorOrCiMisrepresentedAsPhysical": false
   },
   "curriculumCurrentness": {
@@ -167,7 +196,7 @@
       "status": "OPEN_HUMAN_APPROVE_OR_REVISE",
       "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
       "runtimeDisplay": "CURRENT APPROVAL PENDING",
-      "scriptChangedByRedTeam": false,
+      "scriptChangedByDailyTraining": false,
       "genericContinuationCountsAsApproval": false
     }
   },
@@ -185,17 +214,17 @@
         "Grosso University": 51
       }
     },
-    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, playable, bookmarked, noted, practiced, or transferred.",
+    "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible, recommended on coaching day, playable, bookmarked, noted, practiced, or transferred.",
     "driveAccessControlEvidence": {
       "status": "UNVERIFIED",
-      "reason": "The public app catalog necessarily exposes Drive URLs/IDs. Connected Drive metadata reads for representative Tony files and the Tony root did not return permission visibility sufficient to prove whether access is restricted, domain-scoped, or anyone-with-link.",
+      "reason": "Available Drive metadata has not provided permission visibility sufficient to prove whether representative trainer-media sharing is restricted, domain-scoped, or anyone-with-link.",
       "permissionsChangedByAudit": false,
       "releaseImplication": "Do not represent trainer-media sharing as access-controlled until Drive sharing visibility is independently verified."
     }
   },
   "humanCurriculumComplianceReview": {
     "status": "NOT_RUN_BY_USER_DIRECTION_UNASSERTED",
-    "reason": "Automated red-team assurance does not synthesize human curriculum/compliance judgment.",
+    "reason": "Automated validation does not synthesize human curriculum/compliance judgment.",
     "automatedResultDoesNotSynthesizeHumanJudgment": true
   },
   "promotionAuthorization": {
@@ -205,24 +234,41 @@
   "validatedBranchReadback": {
     "status": "PASS_UNCHANGED_PRE_PROMOTION",
     "commit": "5e7efc40de524bef0e63c76595c3c518925888b9",
-    "note": "No Paradise University promotion occurred during the deep red-team audit or redteam7 closeout."
+    "note": "No Paradise University promotion occurred during Daily Training v1 implementation or automated closeout."
   },
   "intermediateFailureHistory": {
     "redteam6HarnessFailure": {
       "status": "CLOSED_AS_TEST_HARNESS_DEFECT",
-      "observed": "79 of 85 browser executions passed before correction.",
-      "cause": "Five stale redteam5/string assertions plus one Chromium headless-shell crash in a redundant static service-worker inventory test.",
-      "remediation": "Assertions were pinned to redteam6 behavior and the redundant browser-only static inventory test was removed because release isolation already proves that inventory mechanically.",
-      "correctedCheckpoint": "5f4538329a98900f90abe4247e9a40e0d0a5b8a4"
+      "cause": "Stale cache/string assertions plus one Chromium headless-shell crash in a redundant browser-only static inventory test."
     },
     "redteam7RecoverabilityFinding": {
       "status": "CLOSED_AUTOMATED",
       "finding": "A valid empty or sparse progress backup could replace existing device progress without warning.",
       "risk": "Local device-training history loss; not a readiness or certification-elevation bypass.",
-      "remediationRuntime": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7",
-      "proof": "Cancel and Continue paths are browser-tested across all five configured profiles as part of the 90/90 red-team matrix."
+      "remediationRuntime": "8a74bd78bb57369dbaeb4f6708a82db538bc19f7"
+    },
+    "dailyTrainingReleaseIsolationHarness": {
+      "status": "CLOSED_AS_STALE_ADDITIVE_ASSET_ALLOWLIST",
+      "cause": "Release-isolation normalization did not yet recognize the two newly approved additive Daily Training JS/CSS assets.",
+      "runtimeDefect": false
+    },
+    "dailyTrainingOfflineCacheAssertion": {
+      "status": "CLOSED_AS_STALE_CACHE_PIN",
+      "cause": "Offline regression expected the prior redteam7 cache identity even though the new daily1 cache and all required assets were present.",
+      "runtimeDefect": false
+    },
+    "dailyTrainingRedTeamInfrastructureCrash": {
+      "status": "CLOSED_NON_PRODUCT_INFRASTRUCTURE_FAILURE",
+      "observed": "An earlier control head completed 89 of 90 adversarial executions before Chromium Android headless-shell SIGSEGV while creating a browser context.",
+      "runtimeAssertionReached": false,
+      "finalExactHeadRedTeam": "PASS"
+    },
+    "dailyTrainingBroadSuiteSelector": {
+      "status": "CLOSED_AS_STALE_TEST_SELECTOR",
+      "cause": "Daily Training legitimately added a second visible Welcome to Paradise University button, making an old broad visible-text selector ambiguous. The regression was narrowed to the existing #puContinue control.",
+      "runtimeDefect": false
     }
   },
-  "nonBlockingInfrastructureObservation": "GitHub Actions warned that actions/checkout@v4 and actions/setup-node@v4 target the deprecated Node.js 20 action runtime and are currently forced to Node.js 24 by the runner. Validation passed; upgrade those actions when an appropriate supported major is available.",
-  "hardRule": "Automated deep red-team assurance is PASS with no blocking machine-detectable defect in the covered matrix, but Paradise University remains NOT_RELEASE_READY. Automated results do not manufacture current-runtime physical acceptance, human curriculum/currentness approval, trainer-media sharing visibility, or promotion authorization. The exact opener remains CURRENT APPROVAL PENDING, and production remains unchanged."
+  "nonBlockingInfrastructureObservation": "GitHub Actions has warned that actions/checkout@v4 and actions/setup-node@v4 target the deprecated Node.js 20 action runtime and are currently forced to Node.js 24 by the runner. Validation passed; upgrade those actions when an appropriate supported major is available.",
+  "hardRule": "Automated validation for Paradise Daily Training v1 and the existing University stack is PASS with no blocking machine-detectable defect in the covered final matrix, but Paradise University remains NOT_RELEASE_READY. Automated results do not manufacture current-runtime physical acceptance, human curriculum/currentness approval, trainer-media sharing visibility, opener approval, or promotion authorization. The exact opener remains CURRENT APPROVAL PENDING, and production remains unchanged."
 }
