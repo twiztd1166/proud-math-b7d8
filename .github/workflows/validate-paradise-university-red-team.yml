@@ -24,16 +24,19 @@ jobs:
           node --check training-storage-hardening-v1.js
           node --check tests/training-red-team-v1.spec.js
           node --check tests/service-worker-hardening-v1.spec.js
+          node --check tests/progress-transfer-recovery-v1.spec.js
           node --check scripts/validate-training-experience-v3.mjs
           node scripts/validate-training-experience-v3.mjs
           grep -q 'puLessonRawCompletion' training-checks-v1.js
           grep -q 'puLessonCompletionCurrent' training-checks-v1.js
           grep -q '2026.08.17-pu-progress-transfer-v2-hardened' training-experience-v3.js
+          grep -q '2026.08.17-pu-progress-import-guard-v1' training-experience-v3.js
+          grep -q 'puProgressImportNeedsConfirmation' training-experience-v3.js
           grep -q 'puValidateProgressTransfer' training-experience-v3.js
           grep -q 'A transfer file is a snapshot of the transfer domain, not a merge patch' training-experience-v3.js
           grep -q '2026.08.17-pu-storage-hardening-v1' training-storage-hardening-v1.js
           grep -q 'puSanitizeTrainingStorage' training-storage-hardening-v1.js
-          grep -q 'trainingux5-experience3-redteam6' sw.js
+          grep -q 'trainingux5-experience3-redteam7' sw.js
           grep -q "url.search===''" sw.js
           grep -q 'training-storage-hardening-v1.js' sw.js
           grep -q 'isAppEntry&&r.ok&&html' sw.js
@@ -57,4 +60,4 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-red-team-http.log 2>&1 &
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
       - name: Run adversarial browser matrix
-        run: ./node_modules/.bin/playwright test tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js --retries=0 --reporter=github
+        run: ./node_modules/.bin/playwright test tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js tests/progress-transfer-recovery-v1.spec.js --retries=0 --reporter=github
