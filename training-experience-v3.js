@@ -69,8 +69,16 @@
   }
   function applyTransfer(payload){
     validateTransfer(payload);const keys=transferKeys(),snapshot={};for(const k of keys)if(localStorage[k]!=null)snapshot[k]=localStorage[k];
-    try{for(const k of keys)if(Object.prototype.hasOwnProperty.call(payload.data,k))localStorage[k]=payload.data[k]}
-    catch(e){try{for(const k of keys)localStorage.removeItem(k);for(const [k,v] of Object.entries(snapshot))localStorage[k]=v}catch{}throw new Error('Progress import could not be saved safely; existing device progress was restored')}
+    try{
+      // A transfer file is a snapshot of the transfer domain, not a merge patch. Clear destination-only
+      // state first so unrelated device progress cannot survive and combine with the imported snapshot.
+      for(const k of keys)localStorage.removeItem(k);
+      for(const k of keys)if(Object.prototype.hasOwnProperty.call(payload.data,k))localStorage[k]=payload.data[k];
+    }catch(e){
+      let restored=true;
+      try{for(const k of keys)localStorage.removeItem(k);for(const [k,v] of Object.entries(snapshot))localStorage[k]=v}catch{restored=false}
+      throw new Error(restored?'Progress import could not be saved safely; existing device progress was restored':'Progress import failed and restoration of the prior device snapshot could not be confirmed');
+    }
     return{version:payload.version||'',trainingVersion:payload.trainingVersion||'',exportedAt:payload.exportedAt||''}
   }
   function wireImport(input){input.onchange=async()=>{const f=input.files?.[0];if(!f)return;try{if(f.size>TRANSFER_MAX_BYTES)throw new Error('Progress file is too large to import safely');const payload=JSON.parse(await f.text()),meta=applyTransfer(payload);showToast('Progress imported',meta.trainingVersion===String(window.PARADISE_UNIVERSITY_VERSION||PU_VERSION)?'Current-version device progress restored.':'Older history imported; current-version gates still control readiness.');setTimeout(()=>puSetPage('progress'),250)}catch(e){showToast('Import failed',e?.message||'The selected file is not a valid Paradise University progress backup.')}finally{input.value=''}}}
