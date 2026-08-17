@@ -14,7 +14,7 @@ test('My Progress separates device training evidence from official certification
   await expect(page.getByText('OFFICIAL CERTIFICATION',{exact:true})).toBeVisible();
   await expect(page.getByText('Not stored on this device',{exact:true})).toBeVisible();
   await expect(page.getByText('NEXT CAREER STAGE',{exact:true})).toBeVisible();
-  for(const label of ['Foundation','Field Ready','Certified Canvasser','Senior Canvasser','Sales Apprentice','Sales Rep Academy — Part 1','Canvass Manager Academy'])await expect(page.getByText(label,{exact:true}).first()).toBeVisible();
+  for(const label of ['Foundation','Field Ready','Canvasser','Senior Canvasser','Sales Apprentice','Sales Rep Academy — Part 1','Canvass Manager Academy'])await expect(page.getByText(label,{exact:true}).first()).toBeVisible();
   await expect(page.getByText(/manager role-play and field verification required/i)).toBeVisible();
   await expect(page.getByText(/current Paradise policy modules are still required before full Sales Rep certification/i)).toBeVisible();
 });
@@ -33,7 +33,7 @@ test('opening a lesson creates in-progress state without completing it',async({p
 
 test('content marked complete does not satisfy a required knowledge gate',async({page})=>{
   await page.goto('/index.html');
-  await page.evaluate(()=>{localStorage.puProgress=JSON.stringify({'field-lookup':{complete:true,updatedAt:new Date().toISOString(),trainingVersion:'test'}})});
+  await page.evaluate(()=>{localStorage.puProgress=JSON.stringify({'field-lookup':{complete:true,startedAt:new Date().toISOString(),updatedAt:new Date().toISOString(),trainingVersion:window.PARADISE_UNIVERSITY_VERSION}})});
   await page.reload();await page.locator('#nTrain').click();await page.getByRole('button',{name:/My Progress/}).first().click();
   await expect(page.getByText(/1 of \d+/).first()).toBeVisible();
   await expect(page.getByText(/0 of \d+ passed/)).toBeVisible();
