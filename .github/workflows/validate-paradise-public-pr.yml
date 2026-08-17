@@ -1,0 +1,95 @@
+name: Validate Paradise public premerge gate
+on:
+  pull_request:
+    branches: [paradise-canvass-manager-public]
+  push:
+    branches: [agent/paradise-university-v1]
+concurrency:
+  group: paradise-public-premerge-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  premerge:
+    name: Paradise public premerge gate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Validate static release and training controls
+        shell: bash
+        run: |
+          for f in scripts/validate-training-model-v1.mjs scripts/validate-practice-model-v2.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-reconciliation.mjs scripts/validate-deep-audit-controls.mjs scripts/validate-training-experience-v2.mjs scripts/validate-training-experience-v3.mjs scripts/validate-training-release-isolation.mjs scripts/validate-release-workflow-controls.mjs scripts/build-canvass-site.mjs; do node --check "$f"; done
+          node scripts/validate-training-model-v1.mjs
+          node scripts/validate-practice-model-v2.mjs
+          node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
+          node scripts/validate-deep-audit-controls.mjs
+          node scripts/validate-training-experience-v2.mjs
+          node scripts/validate-training-experience-v3.mjs
+          node scripts/validate-release-workflow-controls.mjs
+
+      - name: Reconfirm controlled field baseline and release isolation
+        run: |
+          node scripts/validate-field-baseline-v1.mjs
+          node scripts/validate-training-release-isolation.mjs
+
+      - name: Build static production bundle
+        run: |
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/index.html
+          test -f canvass-dist/field-v37.js
+          test -f canvass-dist/sw.js
+          test -f canvass-dist/training-experience-v3.js
+
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-premerge-playwright"
+          rm -rf "$PLAYWRIGHT_ROOT" node_modules
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
+
+      - name: Start isolated test server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-premerge-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+
+      - name: Run iPhone field, offline, Training and UX regressions
+        run: >-
+          ./node_modules/.bin/playwright test
+          tests/mobile-regression.spec.js
+          tests/offline-regression.spec.js
+          tests/training-experience-v2.spec.js
+          tests/training-experience-v3.spec.js
+          tests/training-smoke.spec.js
+          tests/currentness-smoke.spec.js
+          tests/readiness-smoke.spec.js
+          tests/practice-smoke.spec.js
+          tests/checks-smoke.spec.js
+          tests/more-search-smoke.spec.js
+          tests/media-library-smoke.spec.js
+          tests/player-progress-smoke.spec.js
+          tests/manager-home-smoke.spec.js
+          tests/lesson-flow-acceptance.spec.js
+          tests/release-readiness-smoke.spec.js
+          tests/sales-closing-smoke.spec.js
+          tests/deep-audit-regression.spec.js
+          tests/training-ux-polish.spec.js
+          --project=webkit-iphone --retries=0 --reporter=github
+
+      - name: Run device matrix regression
+        run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --retries=0 --reporter=github
+
+      - name: Run adversarial browser matrix
+        run: ./node_modules/.bin/playwright test tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js tests/progress-transfer-recovery-v1.spec.js --retries=0 --reporter=github
