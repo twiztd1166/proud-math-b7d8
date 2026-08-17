@@ -10,6 +10,7 @@ test('Videos & Audio exposes internal trainer media while preserving authority l
   for(const title of ['Continue Listening','Required for You','Canvasser Essentials','Future Sales Rep','Manager Training','Tony Hoty','Dave Yoho','Rick Grosso / Grosso University','Paradise Training'])await expect(page.locator('.puSection').filter({hasText:new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)})).toBeVisible();
   await expect(page.getByText('INTERNAL TRAINING MEDIA:',{exact:true})).toBeVisible();
   await expect(page.getByText(/do not override current Paradise policy or the live municipality Lookup/i)).toBeVisible();
+  await expect(page.getByRole('button',{name:/OPEN COMPLETE CANVASSING LIBRARY/})).toBeVisible();
   await expect(page.getByRole('button',{name:/BROWSE FULL SOURCE LIBRARY/})).toBeVisible();
   await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_UI_VERSION)).toBe('2026.08.16-pu-media-ui-v5');
   await expect.poll(async()=>page.evaluate(()=>window.PU_MEDIA_RIGHTS_VERSION)).toBe('2026.08.16-pu-media-internal-v2');
@@ -71,4 +72,25 @@ test('trainer library reconciliation accounts for all confirmed canonical media 
   expect(state.total).toBe(79);expect(state.sourceOnly).toBe(67);expect(state.curated).toBe(12);
   expect(state.expectedCount).toBe(49);expect(state.missing).toEqual([]);expect(state.wrongPriority).toEqual([]);expect(state.paradiseApproved).toEqual([]);
   expect(state.trainers).toEqual({tony:24,dave:4,grosso:51});
+});
+
+test('Canvassing Library visibly exposes every indexed Tony recording and manuals',async({page})=>{
+  await training(page);
+  await expect(page.getByRole('button',{name:/CANVASSING LIBRARY/})).toBeVisible();
+  await page.getByRole('button',{name:/CANVASSING LIBRARY/}).click();
+  await expect(page.getByRole('heading',{name:'Canvassing Library'})).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>window.PU_CANVASSING_LIBRARY_VERSION)).toBe('2026.08.16-pu-canvassing-library-v1');
+  const model=await page.evaluate(()=>window.puCanvassingLibraryModel());
+  expect(model.tonyTotal).toBe(24);expect(model.daveTotal).toBe(4);expect(model.grossoSupportTotal).toBeGreaterThan(0);expect(model.tonySourceTotal).toBeGreaterThanOrEqual(2);
+  const tony=page.locator('[data-trainer-group="Tony Hoty"]');
+  await expect(tony.locator('[data-media]')).toHaveCount(24);
+  const ids=await tony.locator('[data-media]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-media')));
+  expect(new Set(ids).size).toBe(24);
+  await expect(tony.getByText(/Tony Hoty Canvassing Manual/i).first()).toBeVisible();
+  await expect(tony.getByText(/Tony Hoty Master Training Manual/i).first()).toBeVisible();
+  await expect(tony.getByText('PARADISE APPROVED',{exact:true})).toHaveCount(0);
+  await expect(page.getByText(/existing Paradise canvass script/i)).toBeVisible();
+  await expect(page.getByText(/Advanced sales training does not authorize pricing/i)).toBeVisible();
+  await page.getByRole('button',{name:/VIEW ALL TRAINER SOURCE MATERIAL/}).click();
+  await expect(page.getByRole('heading',{name:'Source Library'})).toBeVisible();
 });
