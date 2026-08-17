@@ -38,7 +38,7 @@ test('Sales Apprentice is a short bridge and detailed sales process stays in Sal
 
 test('Sales Apprentice bridge Next never enters hidden duplicate lessons',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/5\. Sales Apprentice/}).click();await page.getByRole('button',{name:/What Changes and What Does Not/}).click();
-  await page.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(page.locator('#puNext')).toHaveText('NEXT BRIDGE LESSON');await page.locator('#puNext').click();await expect(page.getByRole('heading',{name:'The Full Sales Process Map'})).toBeVisible();
+  await expect(page.locator('#puDone')).toHaveText('PASS QUICK CHECK FIRST');await page.getByRole('button',{name:'No',exact:true}).click();await page.getByRole('button',{name:'MARK COMPLETE'}).click();await expect(page.locator('#puNext')).toHaveText('NEXT BRIDGE LESSON');await page.locator('#puNext').click();await expect(page.getByRole('heading',{name:'The Full Sales Process Map'})).toBeVisible();
 });
 
 test('Videos & Audio shows each media item at most once and puts canvasser essentials first',async({page})=>{
@@ -86,5 +86,5 @@ test('Search hides archived duplicate Sales Apprentice lessons',async({page})=>{
 
 test('Sales Rep keeps lessons visible and collapses control evidence below them',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/6\. Sales Rep/}).click();
-  await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await expect(controls).not.toHaveAttribute('open','');await expect(controls.locator('summary')).toHaveText('Sales Controls & References');
+  await expect(page.getByRole('button',{name:/1\. Preparation/})).toBeVisible();const controls=page.locator('details.puSalesControls');await expect(controls).toBeVisible();await expect(controls).not.toHaveAttribute('open','');await expect(controls.locator(':scope > summary')).toHaveText('Sales Controls & References');
 });
