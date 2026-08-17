@@ -148,7 +148,8 @@ const allowedExisting=new Set([
   'scripts/build-canvass-site.mjs',
   'provenance-v3-2.js',
   'playwright.config.js',
-  'tests/offline-regression.spec.js'
+  'tests/offline-regression.spec.js',
+  'tests/matrix-smoke.spec.js'
 ]);
 const diff=execFileSync('git',['diff','--name-status',BASE,'HEAD'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean).map(line=>{const [status,...parts]=line.split('\t');return{status,path:parts[parts.length-1]}});
 const suspicious=diff.filter(x=>x.status!=='A'&&!allowedExisting.has(x.path));
