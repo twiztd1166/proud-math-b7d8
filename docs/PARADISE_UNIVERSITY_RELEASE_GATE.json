@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026.08.17-pu-release-gate-v12",
+  "schemaVersion": "2026.08.17-pu-release-gate-v13",
   "status": "NOT_RELEASE_READY",
   "workingBranch": "agent/paradise-university-v1",
   "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
@@ -49,7 +49,9 @@
       "managerQuickCheckForwardNavigationGuard": true,
       "curatedMediaDeduplicated": true,
       "salesControlsCollapsedByDefaultEvidenceStillReachable": true,
-      "practiceLineageCorrection": "PASS"
+      "practiceLineageCorrection": "PASS",
+      "canvassingLibraryNavigation": "INTENTIONALLY_ONE_LEVEL_DEEPER_VIA_VIDEOS_AUDIO_OR_MORE",
+      "homeScreenLibraryButtonExpected": false
     },
     "securePlaybackBoundary": {
       "driveIframeAllowed": false,
@@ -103,7 +105,7 @@
       "Quick Check before completion and forward navigation, including manager path",
       "four-item Sales Apprentice bridge",
       "collapsed Sales Controls & References with evidence still reachable",
-      "Canvassing Library from Training home, Videos & Audio, and More",
+      "Canvassing Library intentionally absent from the simplified Training home and reachable one level deeper from Videos & Audio and More Training Tools",
       "Tony 24 exactly once, both Tony manuals visible, Dave 4 visible",
       "REFERENCE/HISTORICAL authority labels with no accidental trainer PARADISE APPROVED state",
       "spot-check actual trainer playback under the exact current runtime",
@@ -160,7 +162,8 @@
         "Tony Hoty Canvassing Manual",
         "Tony Hoty Master Training Manual"
       ],
-      "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable."
+      "authorityBoundary": "Trainer material remains REFERENCE/HISTORICAL and does not become current Paradise policy by being visible or playable.",
+      "navigationBoundary": "Complete library is intentionally one level deeper than Training home to keep the default employee path focused; access is through Videos & Audio and More Training Tools."
     },
     "physicalPlaybackStatus": "PRIOR_AC353_TESTED_PATHS_PASS_CURRENT_AE46_SPOT_CHECK_OPEN",
     "scope": "Paradise employee/internal training only; preserve REFERENCE/HISTORICAL authority labels and do not treat trainer media as current Paradise policy."
