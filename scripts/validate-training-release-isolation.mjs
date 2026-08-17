@@ -138,6 +138,21 @@ if(/drive\.google\.com|googleusercontent\.com/i.test(currentSw))throw new Error(
 // A release-version bump is allowed, but no other provenance field may drift.
 const normalizeProvenance=s=>s.replace(/appVersion:'[^']+'/,"appVersion:'<RELEASE_VERSION>'");
 if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond the allowed appVersion field');
+const currentVersion=(fs.readFileSync('provenance-v3-2.js','utf8').match(/appVersion:'([^']+)'/)||[])[1];
+
+// The public release branch has one expected metadata-only child after the validated base.
+// A normal future merge must be allowed to retain that newer latest.json, but only if the
+// metadata remains internally consistent with this exact controlled 78 / 76 / 2 dataset.
+const baseLatest=JSON.parse(show(BASE,'latest.json'));
+const latest=JSON.parse(fs.readFileSync('latest.json','utf8'));
+const allowedLatestShas=new Set([baseLatest.sha,BASE]);
+const allowedLatestVersions=new Set([baseLatest.version,currentVersion]);
+if(!allowedLatestShas.has(latest.sha))throw new Error(`latest.json points to an unexpected pre-release SHA: ${latest.sha}`);
+if(!allowedLatestVersions.has(latest.version))throw new Error(`latest.json contains an unexpected pre-release version: ${latest.version}`);
+if(latest.snapshot!=='2026-08-14'||latest.datasetSha256!=='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'||latest.records!==78||latest.go!==76||latest.noGo!==2)throw new Error('latest.json controlled field baseline drift detected');
+if(latest.validated!==true||latest.changeControl?.datasetChanged!==false||latest.changeControl?.jurisdictionChangeCount!==0||latest.changeControl?.classificationChanges!==0)throw new Error('latest.json validation/change-control state is not fail-closed');
+if(latest.url!==`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${latest.sha}/index.html`)throw new Error('latest.json immutable URL does not match its SHA');
+if(!Number.isFinite(Date.parse(latest.publishedAt)))throw new Error('latest.json publishedAt is invalid');
 
 const allowedExisting=new Set([
   '.github/workflows/build-canvass-v37.yml',
@@ -146,6 +161,7 @@ const allowedExisting=new Set([
   'index.html',
   'boot-v2.js',
   'sw.js',
+  'latest.json',
   'scripts/build-canvass-site.mjs',
   'provenance-v3-2.js',
   'playwright.config.js',
@@ -157,4 +173,4 @@ const suspicious=diff.filter(x=>x.status!=='A'&&!allowedExisting.has(x.path));
 if(suspicious.length)throw new Error(`Unexpected modification/deletion outside additive training shell: ${suspicious.map(x=>`${x.status}:${x.path}`).join(', ')}`);
 const trainingAdded=diff.filter(x=>x.status==='A'&&(x.path.startsWith('training-')||x.path.startsWith('tests/')||x.path.startsWith('scripts/')||x.path.startsWith('docs/'))).length;
 if(trainingAdded<10)throw new Error(`Training release inventory unexpectedly small: ${trainingAdded}`);
-console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',serviceWorkerException:'Validated field cache + training-only CORE + exact queryless navigation hardening',serviceWorkerTrainingAssets:swTrainingExtras.length,trainingAdded,totalDiffEntries:diff.length});
+console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',serviceWorkerException:'Validated field cache + training-only CORE + exact queryless navigation hardening',latestMetadataException:'Only validated baseline-consistent pre-release metadata accepted',serviceWorkerTrainingAssets:swTrainingExtras.length,trainingAdded,totalDiffEntries:diff.length});
