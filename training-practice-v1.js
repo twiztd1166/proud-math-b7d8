@@ -10,7 +10,7 @@
   let activeCat='',activeDrill=null,lastByCat={};
   const readStats=()=>{try{return JSON.parse(localStorage[STORE]||'{}')}catch{return{}}};
   const writeStats=v=>localStorage[STORE]=JSON.stringify(v);
-  const today=()=>new Date().toISOString().slice(0,10);
+  const today=()=>{const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`};
   const sourceScenarios=()=>Array.isArray(window.PU_PRACTICE_SCENARIOS)&&window.PU_PRACTICE_SCENARIOS.length?window.PU_PRACTICE_SCENARIOS:(window.PU_CONTENT?.drills||[]);
   function stats(){const s=readStats();return{total:Number(s.total||0),today:s.date===today()?Number(s.today||0):0,got:Number(s.got||0),more:Number(s.more||0),byCategory:s.byCategory||{},history:Array.isArray(s.history)?s.history:[]}}
   function record(kind,drill){
