@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "2026.08.17-pu-prepromotion-v21",
+  "status": "NOT_RELEASE_READY",
+  "mode": "MACHINE_ONLY_PREPROMOTION_PUBLIC_PR_GATE_PROVEN",
+  "workingBranch": "agent/paradise-university-v1",
+  "immutableRuntime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html",
+  "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+  "fieldBaseline": {
+    "status": "PASS_UNCHANGED",
+    "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+    "records": 78,
+    "go": 76,
+    "noGo": 2,
+    "noGoJurisdictions": ["Punta Gorda", "Tarpon Springs"]
+  },
+  "runtimeFreeze": {
+    "status": "PASS",
+    "lastBrowserRuntimeChange": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "postRuntimeWorkTypes": ["workflow controls", "validators", "tests", "documentation"],
+    "fieldDatasetChangedByGovernanceHardening": false
+  },
+  "standardBranchValidationCheckpoint": {
+    "head": "9343423b311285dba9ef5e33be071f131f162cf7",
+    "fullValidator": 32073329727,
+    "contentHardening": 32073329730,
+    "uxPolish": 32073329728,
+    "adversarialRedTeam": 32073329713,
+    "allGreen": true
+  },
+  "realPublicPremergeProof": {
+    "fixturePullRequest": 2,
+    "fixtureIntent": "DRAFT_DO_NOT_MERGE_VALIDATION_ONLY",
+    "fixtureHead": "9343423b311285dba9ef5e33be071f131f162cf7",
+    "publicBase": "ebe0505d338d80ff57f60f9b041f1c55d4fce7d0",
+    "syntheticMergeCommit": "2d16674d52072a97caac2d4331d9eaf541bc5232",
+    "workflowRun": 32073705223,
+    "requiredCheckContext": "Paradise public premerge gate",
+    "result": "PASS",
+    "staticReleaseControls": "PASS",
+    "fieldBaselineAndReleaseIsolation": "PASS",
+    "staticProductionBuild": "PASS",
+    "iphoneFieldOfflineTrainingUx": "PASS",
+    "deviceMatrix": "PASS",
+    "adversarialServiceWorkerProgressTransfer": "PASS",
+    "productionMergePerformed": false,
+    "publicBranchMovedByFixture": false,
+    "validatedBranchMovedByFixture": false
+  },
+  "premergeWorkflow": {
+    "path": ".github/workflows/validate-paradise-public-pr.yml",
+    "workflowName": "Validate Paradise public premerge gate",
+    "requiredJobName": "Paradise public premerge gate",
+    "targetBranch": "paradise-canvass-manager-public",
+    "repositoryContentsPermission": "read",
+    "pullRequestTargetUsed": false,
+    "repositorySecretsUsed": false,
+    "pushOrPublishStepPresent": false,
+    "browserRetries": 0,
+    "releaseIsolationHistoryCheckout": "fetch-depth: 0"
+  },
+  "actionsWriteSurface": {
+    "status": "MACHINE_CONSTRAINED",
+    "controlCodeHead": "5ba99f06c44809bc8cf567278d7cba1150f3919b",
+    "validator": "scripts/validate-release-workflow-controls.mjs",
+    "allowedContentsWriteWorkflows": ["build-canvass-v37.yml"],
+    "unexpectedContentsWriteWorkflowFailsHardening": true,
+    "premergeSecretsForbidden": true,
+    "premergePushForbidden": true,
+    "premergePullRequestTargetForbidden": true,
+    "manualCloudflareWorkflowContentsPermission": "read"
+  },
+  "postMergeReleaseBarrier": {
+    "status": "PASS_FAIL_CLOSED",
+    "fourUniversityExactPublicSourceShaGatesRequired": true,
+    "controlledFieldGateRequired": true,
+    "boundedWaitSeconds": 900,
+    "stalePublicHeadGuard": true,
+    "botPublicationRecursionGuard": true,
+    "validatedBranchAdvance": "NORMAL_NON_FORCE_PUSH",
+    "forceResetPublicAllowed": false
+  },
+  "rulesetPreparation": {
+    "status": "PREPARED_NOT_APPLIED_CONNECTED_SETTINGS_WRITE_UNAVAILABLE",
+    "setupDocument": "docs/PARADISE_PUBLIC_RULESET_SETUP.md",
+    "primaryRuleset": {
+      "name": "Paradise Public Release Protection",
+      "target": "paradise-canvass-manager-public",
+      "requirePullRequest": true,
+      "requiredStatusCheck": "Paradise public premerge gate",
+      "requireBranchUpToDate": true,
+      "blockForcePushes": true,
+      "restrictDeletion": true,
+      "mergeMethod": "merge",
+      "githubActionsBypassNeededForControlledPostValidationPublication": true,
+      "ordinaryHumanAlwaysBypassRecommended": false
+    },
+    "secondaryRuleset": {
+      "name": "Paradise Release Control Files",
+      "purpose": "Protect workflow, validator, build, and test-control paths from routine modification while allowing intentional owner changes through pull requests.",
+      "githubActionsBypassRecommended": false,
+      "ownerBypassMode": "PULL_REQUESTS_ONLY"
+    },
+    "governanceClosed": false
+  },
+  "branchProtection": {
+    "publicRulesetApplied": false,
+    "validatedBranchProtectionApplied": false,
+    "connectedToolCanSetProtectionOrRuleset": false,
+    "residualRisk": "Repository settings still permit sufficiently privileged direct/manual ref changes until the prepared rulesets are applied and read back."
+  },
+  "currentPhysicalAcceptance": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "result": "NOT_PASS_NOT_FAIL",
+    "requiredRuntimeIfResumed": "3cbbbf5006eb27926c362a97ee959ddadb8b227e"
+  },
+  "humanCurriculumComplianceReview": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "automatedContentQa": "PASS_MACHINE_DETECTABLE_CONTROLS",
+    "humanJudgmentSynthesizedByAutomation": false
+  },
+  "opener": {
+    "status": "OPEN_EXPLICIT_APPROVE_OR_REVISE",
+    "runtimeDisplay": "CURRENT APPROVAL PENDING",
+    "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
+    "genericGoOrContinueCountsAsApproval": false,
+    "machineLegalTruthfulnessDisposition": "CONTEXT_DEPENDENT_NO_AUTO_APPROVAL_NO_AUTOMATIC_REWRITE"
+  },
+  "trainerMediaVisibility": {
+    "status": "MACHINE_UNRESOLVED_ACCESS_NOT_VERIFIED",
+    "representativeSharedDriveName": "Canvassing Docs",
+    "representativeTonyVideoId": "1BkukwBkZOQbzae4kwxL7i0Rq4xLxZG4B",
+    "representativeTitle": "New Canvasser Training - Process.mp4",
+    "authenticatedAccess": "PASS",
+    "itemPermissionListVisible": false,
+    "anonymousExposureTest": "INCONCLUSIVE_TOOLING_BOUNDARY",
+    "sharedDriveLocationTreatedAsProofOfRestrictedAccess": false
+  },
+  "currentStatusAuthority": {
+    "readFirst": "docs/PARADISE_UNIVERSITY_START_HERE.md",
+    "currentMachineGate": "docs/PARADISE_UNIVERSITY_PREPROMOTION_GATE_V21.json",
+    "priorMachineGate": "docs/PARADISE_UNIVERSITY_PREPROMOTION_GATE_V20.json",
+    "rulesetSetup": "docs/PARADISE_PUBLIC_RULESET_SETUP.md",
+    "physicalDisposition": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md"
+  },
+  "promotionAuthorization": {
+    "status": "OPEN",
+    "promotionPerformed": false,
+    "draftValidationPrCountsAsPromotionAuthorization": false
+  },
+  "hardRule": "Do not merge the validation-only PR and do not force/reset production branches. A separately authorized release must use a normal PR/merge into paradise-canvass-manager-public, pass the public premerge check, then pass the controlled field gate and all four University gates on the exact public source SHA before any normal non-force validated-branch advance. Machine PASS does not manufacture physical acceptance, human approval, trainer-media sharing visibility, opener approval, repository-settings enforcement, or promotion authorization."
+}
