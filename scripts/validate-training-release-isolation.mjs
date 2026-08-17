@@ -95,6 +95,44 @@ const normalizedBoot=currentBoot
   .replace("NT.onclick=()=>{puPage='home';setView('training')};",'');
 if(normalizedBoot!==baseBoot)throw new Error('boot-v2.js contains changes beyond the four approved Training router additions');
 
+// sw.js is also a controlled exception, but not a broad one. Every validated field-shell
+// cache asset must survive exactly once; all additions must be training-* assets; install,
+// activation, origin boundary, and non-navigation cache-first behavior stay pinned; only
+// the navigation branch is allowed the explicit fail-closed app-entry hardening below.
+const baseSw=show(BASE,'sw.js');
+const currentSw=fs.readFileSync('sw.js','utf8');
+function parseCore(source,label){
+  const m=source.match(/const CORE=\[(.*?)\];/s);
+  if(!m)throw new Error(`${label} service worker CORE inventory missing`);
+  return[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
+}
+const baseCore=parseCore(baseSw,'Validated base'),currentCore=parseCore(currentSw,'Current');
+const duplicates=currentCore.filter((x,i)=>currentCore.indexOf(x)!==i);
+if(duplicates.length)throw new Error(`Service-worker CORE contains duplicate assets: ${[...new Set(duplicates)].join(', ')}`);
+for(const asset of baseCore){
+  if(currentCore.filter(x=>x===asset).length!==1)throw new Error(`Validated field-shell cache asset missing or duplicated in service worker: ${asset}`);
+}
+const baseCoreSet=new Set(baseCore),swTrainingExtras=currentCore.filter(x=>!baseCoreSet.has(x));
+const badSwExtras=swTrainingExtras.filter(x=>!/^\.\/training-[^/]+\.(?:js|css)$/.test(x));
+if(badSwExtras.length)throw new Error(`Non-training asset added to service-worker CORE: ${badSwExtras.join(', ')}`);
+if(!swTrainingExtras.length)throw new Error('Service-worker CORE unexpectedly contains no Paradise University assets');
+const exactSwTokens=[
+  "self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));",
+  "self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('pcm-field-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));",
+  "if(req.method!=='GET')return",
+  "if(url.origin!==self.location.origin)return",
+  "event.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{if(r&&r.ok){let x=r.clone();caches.open(CACHE).then(c=>c.put(req,x))}return r})))",
+  "isAppEntry=(url.pathname===appIndex.pathname||url.pathname===appRoot.pathname)&&url.search===''",
+  "if(isAppEntry&&r.ok&&html)",
+  "catch(()=>caches.match('./index.html'))"
+];
+for(const token of exactSwTokens)if(!currentSw.includes(token))throw new Error(`Service-worker control missing or drifted: ${token}`);
+for(const eventName of ['install','activate','fetch']){
+  const count=currentSw.split(`self.addEventListener('${eventName}'`).length-1;
+  if(count!==1)throw new Error(`Service worker must contain exactly one ${eventName} handler; found ${count}`);
+}
+if(/drive\.google\.com|googleusercontent\.com/i.test(currentSw))throw new Error('External Google/Drive media must never be cached by the service worker');
+
 // A release-version bump is allowed, but no other provenance field may drift.
 const normalizeProvenance=s=>s.replace(/appVersion:'[^']+'/,"appVersion:'<RELEASE_VERSION>'");
 if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond the allowed appVersion field');
@@ -114,4 +152,4 @@ const suspicious=diff.filter(x=>x.status!=='A'&&!allowedExisting.has(x.path));
 if(suspicious.length)throw new Error(`Unexpected modification/deletion outside additive training shell: ${suspicious.map(x=>`${x.status}:${x.path}`).join(', ')}`);
 const trainingAdded=diff.filter(x=>x.status==='A'&&(x.path.startsWith('training-')||x.path.startsWith('tests/')||x.path.startsWith('scripts/')||x.path.startsWith('docs/'))).length;
 if(trainingAdded<10)throw new Error(`Training release inventory unexpectedly small: ${trainingAdded}`);
-console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',trainingAdded,totalDiffEntries:diff.length});
+console.log({status:'PASS',base:BASE,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',serviceWorkerException:'Validated field cache + training-only CORE + exact queryless navigation hardening',serviceWorkerTrainingAssets:swTrainingExtras.length,trainingAdded,totalDiffEntries:diff.length});
