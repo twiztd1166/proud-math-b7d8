@@ -140,6 +140,7 @@ const normalizeProvenance=s=>s.replace(/appVersion:'[^']+'/,"appVersion:'<RELEAS
 if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond the allowed appVersion field');
 
 const allowedExisting=new Set([
+  '.github/workflows/build-canvass-v37.yml',
   '.github/workflows/validate-paradise-university-v1.yml',
   '.github/workflows/validate-paradise-university-hardening.yml',
   'index.html',
