@@ -113,6 +113,30 @@ test('corrupt contextual-back state fails closed to a safe training page',async(
   expect(dialogs).toBe(0);expect(await page.evaluate(()=>puPage)).toBe('home');
 });
 
+test('recovers from valid JSON with invalid local-storage shapes without creating readiness',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(String(e.message||e)));
+  await page.goto('/index.html');
+  await page.evaluate(()=>{
+    localStorage.puProgress='null';
+    localStorage.puQuickChecksV1='[]';
+    localStorage.puMediaProgressV2='"text"';
+    localStorage.puMediaResume='42';
+    localStorage.puPracticeStatsV1='null';
+    localStorage.puMediaNotesV1='[]';
+  });
+  await page.reload();await page.locator('#nTrain').click();
+  const state=await page.evaluate(()=>({
+    removed:[...window.PU_STORAGE_RECOVERY_LAST],
+    keys:['puProgress','puQuickChecksV1','puMediaProgressV2','puMediaResume','puPracticeStatsV1','puMediaNotesV1'].map(k=>[k,localStorage.getItem(k)]),
+    ready:window.puLessonTrainingReady('field-lookup'),check:window.puQuickCheckPassed('field-lookup'),version:window.PU_STORAGE_HARDENING_VERSION
+  }));
+  expect(state.version).toBe('2026.08.17-pu-storage-hardening-v1');expect(state.removed.sort()).toEqual(['puMediaNotesV1','puMediaProgressV2','puMediaResume','puPracticeStatsV1','puProgress','puQuickChecksV1'].sort());
+  expect(state.keys.every(([,v])=>v===null)).toBe(true);expect(state.ready).toBe(false);expect(state.check).toBe(false);
+  await page.evaluate(()=>puSetPage('practice'));await expect(page.getByText('Practice',{exact:true})).toBeVisible();
+  await page.evaluate(()=>window.puPlayerOpen('tony-canvassing-101'));await expect(page.locator('#puDriveLaunch')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('trainer catalog denominator is exact and public RawGitHack media mirroring is absent',async({page})=>{
   await training(page);
   const audit=await page.evaluate(()=>{const media=window.PU_CONTENT.media||[],counts={};for(const m of media)counts[m.trainer]=(counts[m.trainer]||0)+1;const ids=media.map(x=>x.id);return{total:media.length,unique:new Set(ids).size,tony:counts['Tony Hoty']||0,dave:counts['Dave Yoho']||0,grosso:counts['Grosso University']||0,source:media.filter(x=>x.priority==='SOURCE_LIBRARY').length,curated:media.filter(x=>x.priority!=='SOURCE_LIBRARY').length,badProtocol:media.filter(x=>x.url&&!/^https:\/\//i.test(x.url)).map(x=>x.id),publicMirror:media.filter(x=>/raw(?:cdn\.)?githack|raw\.githubusercontent/i.test(`${x.url||''} ${x.streamUrl||''}`)).map(x=>x.id)}});
@@ -131,8 +155,8 @@ test('catalog URL-bearing fields contain no active-content or insecure absolute 
 
 test('service worker excludes external Drive and only refreshes offline index from the actual app entry',async({page})=>{
   await training(page);const sw=await page.evaluate(()=>fetch('/sw.js').then(r=>r.text()));
-  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toContain('trainingux5-experience3-redteam3');
-  expect(sw).toContain("isAppEntry=url.pathname===appIndex.pathname||url.pathname===appRoot.pathname");expect(sw).toContain('if(isAppEntry&&r.ok&&html)');
+  expect(sw).toContain("if(url.origin!==self.location.origin)return");expect(sw).not.toMatch(/drive\.google\.com|googleusercontent\.com/i);expect(sw).toContain('trainingux5-experience3-redteam4');
+  expect(sw).toContain("isAppEntry=url.pathname===appIndex.pathname||url.pathname===appRoot.pathname");expect(sw).toContain('if(isAppEntry&&r.ok&&html)');expect(sw).toContain('training-storage-hardening-v1.js');
 });
 
 test('red-team invariants preserve field authority, exact pending opener, and iframe-free Drive playback',async({page})=>{
