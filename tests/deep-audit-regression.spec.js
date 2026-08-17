@@ -14,6 +14,7 @@ test('opener authority is consistent outside the pending-currentness lesson',asy
   await page.getByRole('button',{name:/← Training/}).click();
   await page.getByRole('button',{name:/Career Path/}).first().click();
   await page.getByRole('button',{name:/Canvass Manager Academy/}).click();
+  await page.locator('.puManagerCurriculum summary').click();
   await page.getByRole('button',{name:/Coach the Opening & Conversation/}).click();
   await expect(page.getByText(/current manager-approved Paradise opening/i).first()).toBeVisible();
   await expect(page.getByText(/approved Paradise script/i)).toHaveCount(0);
