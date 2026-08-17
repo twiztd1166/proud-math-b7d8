@@ -27,7 +27,7 @@ test('foundation field-ready and canvasser stages contain real curriculum',async
   await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();
   await page.getByRole('button',{name:/1\. Foundation/}).click();await expect(page.getByRole('button',{name:/Your Job at the Door/})).toBeVisible();
   await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/2\. Field Ready/}).click();await expect(page.getByRole('button',{name:/Opening & First 20 Seconds/})).toBeVisible();
-  await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/3\. Certified Canvasser/}).click();await expect(page.getByRole('button',{name:/Appointment Quality/})).toBeVisible();await expect(page.getByRole('button',{name:/Certified Canvasser Readiness/})).toBeVisible();
+  await page.getByRole('button',{name:/Career Path/}).click();await page.getByRole('button',{name:/3\. Canvasser/}).click();await expect(page.getByRole('button',{name:/Appointment Quality/})).toBeVisible();await expect(page.getByRole('button',{name:/Certified Canvasser Readiness/})).toBeVisible();
 });
 
 test('senior and sales apprentice stages are fully populated',async({page})=>{
@@ -63,7 +63,7 @@ test('12 curated third-party media records are visible and internally playable',
 });
 
 test('Dave Five Commitments source lineage is retained with internal source access',async({page})=>{
-  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/3\. Certified Canvasser/}).click();await page.getByRole('button',{name:/Five Appointment Commitments/}).click();await page.getByText('Go deeper / source material').click();
+  await page.goto('/index.html');await page.locator('#nTrain').click();await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/3\. Canvasser/}).click();await page.getByRole('button',{name:/Five Appointment Commitments/}).click();await page.getByText('Go deeper / source material').click();
   const link=page.getByRole('link',{name:/Dave Yoho — The Five Commitments/});await expect(link).toBeVisible();await expect(link).toHaveAttribute('href',/drive\.google\.com|docs\.google\.com/);
 });
 
