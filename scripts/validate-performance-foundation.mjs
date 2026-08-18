@@ -11,6 +11,8 @@ const audit = read('docs/PARADISE_PERFORMANCE_V1_DEEP_AUDIT_2026-08-18.md');
 const sql = read('supabase/migrations/20260818072700_paradise_performance_v1_foundation.sql');
 const hardening = read('supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql');
 const security = read('supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql');
+const advisor = read('supabase/migrations/20260818081500_paradise_performance_v1_advisor_hardening.sql');
+const indexes = read('supabase/migrations/20260818083000_paradise_performance_v1_index_hardening.sql');
 const math = read('performance/shared/performance-math.mjs');
 const events = read('performance/shared/performance-events.mjs');
 const location = read('performance/native/performance-location-contract.mjs');
@@ -55,12 +57,35 @@ requireText(hardening, /visibility parity is SELECT parity, never mutation parit
 for (const fn of ['performance_current_employee_id', 'performance_current_role', 'performance_is_manager', 'performance_is_admin']) {
   requireText(security, new RegExp(`revoke execute on function public\\.${fn}\\(\\) from public, anon`, 'i'), `Default PUBLIC/anon EXECUTE not revoked for ${fn}`);
   requireText(security, new RegExp(`grant execute on function public\\.${fn}\\(\\) to authenticated`, 'i'), `Authenticated EXECUTE grant missing for ${fn}`);
+  requireText(advisor, new RegExp(`alter function public\\.${fn}\\(\\) security invoker`, 'i'), `SECURITY INVOKER hardening missing for ${fn}`);
 }
 requireText(security, /performance_correction_requests_update_authorized[\s\S]*resolved_by = public\.performance_current_employee_id\(\)[\s\S]*resolved_at is not null/i, 'Correction resolution must bind resolved_by to the actual manager actor');
+requireText(security, /revoke create on schema public from anon/i, 'Anon public-schema CREATE revoke missing');
+requireText(security, /revoke create on schema public from authenticated/i, 'Authenticated public-schema CREATE revoke missing');
 requireText(security, /Security invariant: privileged helper execution and manager attribution/i, 'Security-hardening invariant missing');
 
-if (/insert\s+into\s+public\.performance_kpi_standard_versions/i.test(sql + hardening + security)) fail('Migrations must not seed invented KPI standards');
-if (/insert\s+into\s+public\.performance_pay_plan_versions/i.test(sql + hardening + security)) fail('Migrations must not seed invented pay rules');
+requireText(advisor, /captured_at >= s\.started_at[\s\S]*captured_at <= s\.finished_at/i, 'Event/location shift-time boundary missing');
+requireText(advisor, /set_captured_at >= s\.started_at[\s\S]*set_captured_at <= s\.finished_at/i, 'Set shift-time boundary missing');
+requireText(advisor, /Off-shift location cannot be attached later/i, 'Off-shift backend-attribution invariant missing');
+
+requireText(indexes, /auth_user_id = \(select auth\.uid\(\)\)/i, 'RLS auth.uid() init-plan hardening missing');
+for (const indexName of [
+  'performance_audit_corrections_changed_by_idx',
+  'performance_commissions_employee_id_idx',
+  'performance_correction_requests_employee_id_idx',
+  'performance_devices_employee_id_idx',
+  'performance_events_employee_time_idx',
+  'performance_location_device_id_idx',
+  'performance_sets_created_device_id_idx',
+  'performance_shifts_device_id_idx',
+  'performance_shifts_territory_id_idx'
+]) {
+  requireText(indexes, new RegExp(`create index if not exists ${indexName}`, 'i'), `Advisor index missing: ${indexName}`);
+}
+
+const migrations = [sql, hardening, security, advisor, indexes].join('\n');
+if (/insert\s+into\s+public\.performance_kpi_standard_versions/i.test(migrations)) fail('Migrations must not seed invented KPI standards');
+if (/insert\s+into\s+public\.performance_pay_plan_versions/i.test(migrations)) fail('Migrations must not seed invented pay rules');
 
 requireText(math, /STANDARD_NOT_CONFIGURED/, 'KPI engine must represent unconfigured standards explicitly');
 requireText(math, /MEETS_OR_EXCEEDS_MINIMUM/, 'Single-minimum KPI semantics missing');
@@ -75,7 +100,9 @@ const secretScanFiles = [
   'performance/native/performance-location-contract.mjs',
   'supabase/migrations/20260818072700_paradise_performance_v1_foundation.sql',
   'supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql',
-  'supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql'
+  'supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql',
+  'supabase/migrations/20260818081500_paradise_performance_v1_advisor_hardening.sql',
+  'supabase/migrations/20260818083000_paradise_performance_v1_index_hardening.sql'
 ];
 const forbiddenSecretPatterns = [
   /service[_-]?role\s*[:=]\s*['"][A-Za-z0-9._-]{12,}/i,
