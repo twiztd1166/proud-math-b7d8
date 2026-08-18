@@ -7,14 +7,14 @@ on:
     paths:
       - 'performance/**'
       - 'supabase/**'
-      - 'scripts/validate-performance-foundation.mjs'
+      - 'scripts/validate-performance-*.mjs'
       - 'docs/PARADISE_PERFORMANCE_V1_*'
       - '.github/workflows/validate-paradise-performance-foundation.yml'
   pull_request:
     paths:
       - 'performance/**'
       - 'supabase/**'
-      - 'scripts/validate-performance-foundation.mjs'
+      - 'scripts/validate-performance-*.mjs'
       - 'docs/PARADISE_PERFORMANCE_V1_*'
       - '.github/workflows/validate-paradise-performance-foundation.yml'
 
@@ -41,6 +41,9 @@ jobs:
 
       - name: Static foundation controls
         run: node scripts/validate-performance-foundation.mjs
+
+      - name: Enrollment and stale-session controls
+        run: node scripts/validate-performance-enrollment-security.mjs
 
       - name: Performance contract tests
         run: node --test performance/tests/*.test.mjs
