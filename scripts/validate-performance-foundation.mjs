@@ -133,12 +133,22 @@ requireText(enrollmentMint, /sha256Hex\(token\)/, 'Enrollment mint must hash tok
 requireText(enrollmentRedeem, /auth\.admin\.createUser/i, 'Hidden device Auth user creation missing');
 requireText(enrollmentRedeem, /performance_finalize_device_enrollment/i, 'Enrollment redeem must use atomic finalizer');
 requireText(enrollmentRedeem, /signInWithPassword/i, 'Enrollment redeem session issuance missing');
-if (/return responseJson\(\{[\s\S]{0,1200}hiddenPassword/.test(enrollmentRedeem)) fail('Hidden device password must never be returned');
+const hiddenPasswordRefs = enrollmentRedeem.match(/\bhiddenPassword\b/g) ?? [];
+if (hiddenPasswordRefs.length !== 3) fail('Hidden device password source references changed; inspect for accidental output');
+const sessionOutputStart = enrollmentRedeem.indexOf('session: {');
+if (sessionOutputStart < 0) fail('Enrollment redeem session response missing');
+if (enrollmentRedeem.slice(sessionOutputStart, sessionOutputStart + 600).includes('hiddenPassword')) fail('Hidden device password must never be returned');
+requireText(enrollmentRedeem, /session:\s*\{[\s\S]{0,300}accessToken:\s*signedIn\.session\.access_token[\s\S]{0,300}refreshToken:\s*signedIn\.session\.refresh_token/i, 'Enrollment redeem must return only the Supabase session tokens needed by the device');
 requireText(deviceRevoke, /performance_revoke_device/i, 'Device revocation RPC missing');
 requireText(deviceRevoke, /ban_duration/i, 'Auth refresh/sign-in ban missing after device revoke');
 
-for (const name of ['performance-enrollment-mint', 'performance-enrollment-redeem', 'performance-device-revoke']) {
-  requireText(supabaseConfig, new RegExp(`\\[functions\\.${name.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\][\\s\\S]{0,80}verify_jwt\\s*=\\s*false`, 'i'), `Current-key verify_jwt=false config missing for ${name}`);
+const expectedJwtModes = {
+  'performance-enrollment-mint': true,
+  'performance-enrollment-redeem': false,
+  'performance-device-revoke': true,
+};
+for (const [name, expected] of Object.entries(expectedJwtModes)) {
+  requireText(supabaseConfig, new RegExp(`\\[functions\\.${name}\\][\\s\\S]{0,160}verify_jwt\\s*=\\s*${expected}`, 'i'), `verify_jwt=${expected} config missing for ${name}`);
 }
 
 const secretScanFiles = [
