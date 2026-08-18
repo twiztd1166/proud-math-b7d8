@@ -5,11 +5,11 @@ test('core lookup remains usable across device matrix',async({page})=>{await pag
 
 test('200 percent text including script remains contained',async({page})=>{await page.goto('/index.html');await page.evaluate(()=>document.documentElement.style.fontSize='200%');await pick(page,'Boca Raton');await page.getByRole('button',{name:'Permit / permission'}).click();expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(2);await expect(page.locator('#say')).toContainText('IF THEY ASK ABOUT A PERMIT')});
 
-test('Daily Training remains contained and usable at 200 percent text across device matrix',async({page})=>{
+test('Daily Training v4 remains contained and usable at 200 percent text across device matrix',async({page})=>{
   await page.goto('/index.html');await page.evaluate(()=>document.documentElement.style.fontSize='200%');await page.locator('#nTrain').click();
-  const daily=page.locator('.puDailyTraining');await expect(daily).toBeVisible();await expect(daily.locator('[data-daily-index]')).toHaveCount(3);await expect(daily.getByRole('button',{name:/START TODAY'S TRAINING/i})).toBeVisible();
-  const geometry=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,activities:[...document.querySelectorAll('.puDailyActivity')].map(x=>x.getBoundingClientRect().height),start:document.getElementById('puStartDaily')?.getBoundingClientRect().height||0}));
-  expect(geometry.overflow).toBeLessThanOrEqual(2);expect(geometry.activities.every(h=>h>=44)).toBeTruthy();expect(geometry.start).toBeGreaterThanOrEqual(44);
+  const daily=page.locator('.puDailyTraining');await expect(daily).toBeVisible();await expect(daily.locator('[data-daily-index]')).toHaveCount(3);await expect(daily.getByRole('button',{name:/START TODAY'S TRAINING/i})).toBeVisible();await expect.poll(async()=>page.evaluate(()=>window.PU_TRAINING_EXPERIENCE_V4_VERSION)).toBe('2026.08.17-pu-training-experience-v4');
+  const geometry=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,activities:[...document.querySelectorAll('.puDailyOpen')].map(x=>x.getBoundingClientRect().height),marks:[...document.querySelectorAll('.puDailyMark')].map(x=>x.getBoundingClientRect().height),start:document.getElementById('puStartDaily')?.getBoundingClientRect().height||0}));
+  expect(geometry.overflow).toBeLessThanOrEqual(2);expect(geometry.activities).toHaveLength(3);expect(geometry.activities.every(h=>h>=44)).toBeTruthy();expect(geometry.marks.every(h=>h>=44)).toBeTruthy();expect(geometry.start).toBeGreaterThanOrEqual(44);
 });
 
 test('all 78 records resolve to explicit field and objection answers',async({page})=>{
