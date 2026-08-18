@@ -1,0 +1,46 @@
+name: Validate Paradise Performance foundation
+
+on:
+  push:
+    branches:
+      - agent/paradise-performance-v1
+    paths:
+      - 'performance/**'
+      - 'supabase/**'
+      - 'scripts/validate-performance-foundation.mjs'
+      - 'docs/PARADISE_PERFORMANCE_V1_*'
+      - '.github/workflows/validate-paradise-performance-foundation.yml'
+  pull_request:
+    paths:
+      - 'performance/**'
+      - 'supabase/**'
+      - 'scripts/validate-performance-foundation.mjs'
+      - 'docs/PARADISE_PERFORMANCE_V1_*'
+      - '.github/workflows/validate-paradise-performance-foundation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-performance-foundation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    name: Paradise Performance foundation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Static foundation controls
+        run: node scripts/validate-performance-foundation.mjs
+
+      - name: Performance contract tests
+        run: node --test performance/tests/*.test.mjs
