@@ -1,7 +1,8 @@
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const PERFORMANCE_SYNC_VERSION = '2026.08.18-performance-sync-v1';
+export const PERFORMANCE_SYNC_VERSION = '2026.08.18-performance-sync-v2';
 export const PERFORMANCE_WRITE_KINDS = Object.freeze(['EVENT', 'LOCATION', 'SET']);
+export const PERFORMANCE_QUEUE_STATES = Object.freeze(['PENDING', 'AUTH_BLOCKED', 'REJECTED']);
 
 function iso(value) {
   const d = new Date(value);
@@ -21,12 +22,16 @@ export function createQueuedWrite({ id, kind, capturedAt, payload }) {
   });
 }
 
+function cloneRow(row) {
+  return structuredClone(row);
+}
+
 export function createMemoryQueueStore(initial = []) {
-  const rows = new Map(initial.map(row => [row.id, structuredClone(row)]));
+  const rows = new Map(initial.map(row => [row.id, cloneRow(row)]));
   return {
-    async put(row) { rows.set(row.id, structuredClone(row)); },
-    async get(id) { return rows.has(id) ? structuredClone(rows.get(id)) : null; },
-    async list() { return Array.from(rows.values()).map(structuredClone); },
+    async put(row) { rows.set(row.id, cloneRow(row)); },
+    async get(id) { return rows.has(id) ? cloneRow(rows.get(id)) : null; },
+    async list() { return Array.from(rows.values()).map(row => cloneRow(row)); },
     async remove(id) { rows.delete(id); },
     async clear() { rows.clear(); },
   };
@@ -147,6 +152,11 @@ export function createSupabaseSyncTransport(supabase) {
   };
 }
 
+function validateWrite(write) {
+  if (!write || typeof write !== 'object') throw new Error('queued write is required');
+  return createQueuedWrite(write);
+}
+
 export class PerformanceSyncQueue {
   constructor({ store, transport, now = () => new Date() }) {
     if (!store?.put || !store?.list || !store?.remove) throw new Error('queue store contract is incomplete');
@@ -157,10 +167,12 @@ export class PerformanceSyncQueue {
   }
 
   async enqueue(write) {
-    const existing = await this.store.get?.(write.id);
+    const validated = validateWrite(write);
+    const existing = await this.store.get?.(validated.id);
     if (existing) return existing;
     const row = {
-      ...write,
+      ...validated,
+      payload: { ...validated.payload },
       state: 'PENDING',
       attempts: 0,
       nextAttemptAt: null,
@@ -174,6 +186,7 @@ export class PerformanceSyncQueue {
   async flush({ limit = 100 } = {}) {
     const now = this.now();
     const rows = (await this.store.list())
+      .filter(row => (row.state ?? 'PENDING') === 'PENDING')
       .filter(row => !row.nextAttemptAt || new Date(row.nextAttemptAt) <= now)
       .sort((a, b) => new Date(a.capturedAt) - new Date(b.capturedAt))
       .slice(0, limit);
@@ -193,7 +206,7 @@ export class PerformanceSyncQueue {
           continue;
         }
         if (disposition === 'AUTH_BLOCKED') {
-          await this.store.put({ ...row, state: 'AUTH_BLOCKED', lastError: safeError(error) });
+          await this.store.put({ ...row, state: 'AUTH_BLOCKED', nextAttemptAt: null, lastError: safeError(error) });
           result.blockedAuth = true;
           break;
         }
@@ -215,6 +228,15 @@ export class PerformanceSyncQueue {
     }
     return Object.freeze(result);
   }
+
+  async releaseAuthBlocked() {
+    const rows = await this.store.list();
+    for (const row of rows) {
+      if (row.state === 'AUTH_BLOCKED') {
+        await this.store.put({ ...row, state: 'PENDING', nextAttemptAt: null, lastError: null });
+      }
+    }
+  }
 }
 
 export const PerformanceSyncInvariants = Object.freeze([
@@ -222,6 +244,7 @@ export const PerformanceSyncInvariants = Object.freeze([
   'capturedAt never changes to server retry time',
   'duplicate-key replay is acknowledged rather than duplicated',
   'authorization failures stop replay instead of silently dropping field work',
+  'rejected records stay visible and do not retry automatically',
   'transient failures remain queued with bounded exponential backoff',
   'Lookup remains usable even if the Performance queue is blocked or offline',
 ]);
