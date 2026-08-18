@@ -33,11 +33,16 @@ if (/create policy\s+\w+_read_all[\s\S]{0,120}using\s*\(\s*true\s*\)/i.test(read
 requireText(readSession, /generic authenticated Supabase user or a revoked device JWT must not retain team reads/i, 'Stale-JWT hardening invariant missing');
 
 requireText(edgeAuth, /PERFORMANCE_EDGE_VERSION = '2026\.08\.18-performance-edge-v2'/i, 'Current Edge auth contract missing');
-requireText(edgeAuth, /auth\.getUser\(token\)/i, 'User JWT must be validated inside Edge handler');
+requireText(edgeAuth, /auth\.getUser\(token\)/i, 'User JWT must be validated inside protected Edge handlers');
 requireText(edgeAuth, /performance_current_employee_id/i, 'Edge actor authorization must verify current Performance enrollment');
 
-for (const fn of ['performance-enrollment-mint', 'performance-enrollment-redeem', 'performance-device-revoke']) {
-  requireText(config, new RegExp(`\\[functions\\.${fn}\\][\\s\\S]{0,80}verify_jwt\\s*=\\s*false`, 'i'), `verify_jwt=false missing for ${fn}`);
+const expectedJwtModes = {
+  'performance-enrollment-mint': true,
+  'performance-enrollment-redeem': false,
+  'performance-device-revoke': true,
+};
+for (const [fn, expected] of Object.entries(expectedJwtModes)) {
+  requireText(config, new RegExp(`\\[functions\\.${fn}\\][\\s\\S]{0,100}verify_jwt\\s*=\\s*${expected}`, 'i'), `verify_jwt=${expected} missing for ${fn}`);
 }
 
 console.log('Paradise Performance enrollment/read-session security validation: PASS');
