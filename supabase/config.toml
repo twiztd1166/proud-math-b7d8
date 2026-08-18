@@ -1,0 +1,11 @@
+# Paradise Performance v1 — non-production Edge Function auth configuration.
+# Supabase's current publishable/secret key model uses handler-level auth here.
+
+[functions.performance-enrollment-mint]
+verify_jwt = false
+
+[functions.performance-enrollment-redeem]
+verify_jwt = false
+
+[functions.performance-device-revoke]
+verify_jwt = false
