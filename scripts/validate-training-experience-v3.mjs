@@ -61,6 +61,9 @@ need('training-storage-hardening-v1.js',"Today's Training ·");
 need('training-storage-hardening-v1.js','PU_OFFLINE_READY_CACHE');
 need('training-storage-hardening-v1.js','puOfflineReadyProbe');
 need('training-storage-hardening-v1.js','OFFLINE_CRITICAL');
+need('training-storage-hardening-v1.js',"eyebrow(x)==='WATCH / LISTEN'");
+need('training-storage-hardening-v1.js','if(watch)steps.push');
+need('training-storage-hardening-v1.js',"M.querySelector('.puQuickCheck')");
 need('tests/training-red-team-v1.spec.js','prior-version completion is preserved as history');
 need('tests/training-red-team-v1.spec.js','malformed transfer is rejected');
 need('tests/training-red-team-v1.spec.js','replaces the transfer snapshot instead of merging destination-only readiness state');
@@ -83,7 +86,7 @@ need('tests/training-ux-polish.spec.js','v4 Practice retry repeats the same scen
 need('tests/training-ux-polish.spec.js','v4 critical training controls meet 44px minimum target size');
 need('tests/offline-regression.spec.js','puOfflineReadyProbe');
 need('index.html','training-experience-v3.css');need('index.html','training-experience-v3.js');need('index.html','training-daily-v1.css');need('index.html','training-daily-v1.js');need('index.html','training-storage-hardening-v1.js');
-need('sw.js','experience4ready1-trainingux5-experience3-redteam7-daily1');need('sw.js','training-experience-v3.js');need('sw.js','training-experience-v3.css');need('sw.js','training-daily-v1.js');need('sw.js','training-daily-v1.css');need('sw.js','training-storage-hardening-v1.js');
+need('sw.js','experience4ready2-trainingux5-experience3-redteam7-daily1');need('sw.js','training-experience-v3.js');need('sw.js','training-experience-v3.css');need('sw.js','training-daily-v1.js');need('sw.js','training-daily-v1.css');need('sw.js','training-storage-hardening-v1.js');
 need('sw.js',"url.search==='' ".trim());need('sw.js','isAppEntry&&r.ok&&html');
 need('scripts/build-canvass-site.mjs','training-experience-v3.js');need('scripts/build-canvass-site.mjs','training-experience-v3.css');need('scripts/build-canvass-site.mjs','training-daily-v1.js');need('scripts/build-canvass-site.mjs','training-daily-v1.css');need('scripts/build-canvass-site.mjs','training-storage-hardening-v1.js');
 need('scripts/build-canvass-site.mjs','Built production HTML references missing asset');
@@ -91,4 +94,4 @@ need('scripts/build-canvass-site.mjs','Service-worker CORE references missing bu
 const combined=fs.readFileSync('training-ux-polish-v1.js','utf8')+fs.readFileSync('training-experience-v3.js','utf8')+fs.readFileSync('training-daily-v1.js','utf8')+fs.readFileSync('training-storage-hardening-v1.js','utf8');
 if(/manager-assigned|assign(?:ed)? training|due date/i.test(combined))throw new Error('Manager-assigned training was reintroduced');
 if(/sales-apprentice|sales-rep|stage:manager/i.test(fs.readFileSync('training-daily-v1.js','utf8')))throw new Error('Daily training directly auto-queued a future role');
-console.log('Training Experience v4 validated: v3 milestones/adaptive/contextual-back/transfer controls preserved + recommendation-only seven-day Daily Training + same-day Today 0/3 persistence/resume + focused lesson-step persistence with Quick Check forward gate + immediate same-scenario Practice retry without synthetic attempts + 44px critical Training controls + exact-current-cache Offline Ready proof; manager-assigned training absent.');
+console.log('Training Experience v4 validated: v3 milestones/adaptive/contextual-back/transfer controls preserved + recommendation-only seven-day Daily Training + same-day Today 0/3 persistence/resume + semantic optional-media lesson-step persistence with Quick Check forward gate + immediate same-scenario Practice retry without synthetic attempts + 44px critical Training controls + exact-current-cache Offline Ready proof; manager-assigned training absent.');
