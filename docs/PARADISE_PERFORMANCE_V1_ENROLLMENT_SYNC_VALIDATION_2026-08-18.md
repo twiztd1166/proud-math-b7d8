@@ -65,29 +65,13 @@ Current shared-read rule:
 
 Synthetic, non-real identities were used to exercise RLS directly.
 
-**Enrolled synthetic canvasser:**
+**Enrolled synthetic canvasser:** current employee and role resolved correctly and shared team Performance data was visible as designed.
 
-- current employee resolved correctly;
-- current role resolved as canvasser;
-- shared employee/device Performance data was visible as designed.
+**Generic authenticated synthetic stranger:** current Performance employee/role were null and visible employee/device/Set counts were all 0.
 
-**Generic authenticated synthetic stranger:**
+**Same synthetic canvasser identity after device/actor revocation:** current Performance employee/role were null and visible employee/device/Set counts were all 0.
 
-- current Performance employee: null;
-- current Performance role: null;
-- visible employees: 0;
-- visible devices: 0;
-- visible Sets: 0.
-
-**Same synthetic canvasser identity after device/actor revocation:**
-
-- current Performance employee: null;
-- current Performance role: null;
-- visible employees: 0;
-- visible devices: 0;
-- visible Sets: 0.
-
-This proves that a still-authenticated/replayable user JWT does not preserve Performance data access after Performance device revocation.
+This proves that a still-authenticated user JWT does not preserve Performance data access after Performance device revocation.
 
 ## 4. Enrollment privilege proof
 
@@ -111,37 +95,25 @@ Deployed non-production Edge Functions:
 - `performance-enrollment-redeem`
 - `performance-device-revoke`
 
-All three were compiled and deployed to ACTIVE status.
+All three are ACTIVE.
 
 ### Final JWT verification modes
 
-The final modes intentionally differ by caller type:
-
 | Function | `verify_jwt` | Reason |
 |---|---:|---|
-| `performance-enrollment-mint` | `true` | Called only by a signed-in manager/admin user. Platform validates the user session JWT first; handler independently validates `auth.getUser()` plus current Performance role. |
-| `performance-enrollment-redeem` | `false` | No user identity exists yet. The high-entropy short-lived one-time QR token is the enrollment credential; handler/database enforce token validity and single use. |
-| `performance-device-revoke` | `true` | Called only by a signed-in manager/admin user. Platform JWT precheck is followed by handler current-Performance-role validation. |
+| `performance-enrollment-mint` | `true` | Signed-in manager/admin only. Platform validates the user session JWT; handler also validates `auth.getUser()` and current Performance role. |
+| `performance-enrollment-redeem` | `false` | No user session exists yet. The high-entropy, short-lived, one-time QR token is the enrollment credential. |
+| `performance-device-revoke` | `true` | Signed-in manager/admin only. Platform JWT precheck plus handler current-role validation. |
 
-This configuration matches the specific Supabase Authorization-header model for requests that carry a real signed-in user JWT in `Authorization` and the API key separately as `apikey`.
+This matches Supabase's specific Authorization-header model where a signed-in client sends its user JWT in `Authorization` and the application key separately in `apikey`.
 
-### Handler authorization
-
-Protected manager endpoints do not rely on the platform check alone. They also:
-
-1. parse the user access JWT;
-2. call Supabase Auth `getUser()`;
-3. resolve the current active Performance employee;
-4. resolve the current authoritative Performance role;
-5. require manager/admin where appropriate.
-
-Thus removal/revocation of the Performance mapping fails closed even if the user JWT itself is still within its normal expiry window.
+Protected manager endpoints do not rely on the platform check alone: handler authorization also validates the Auth user, current active Performance employee, and current authoritative role.
 
 ## 6. Edge HTTP integration boundary
 
 The functions are compiled, deployed, and ACTIVE in the connected non-production project.
 
-A full authenticated HTTP invocation could not be exercised from the available execution container because that environment could not resolve the Supabase project hostname. The Supabase connector available in this workflow can deploy/read/log Edge Functions but does not expose a direct authenticated function-invocation action.
+A full authenticated HTTP invocation could not be exercised from the available execution container because that environment could not resolve the Supabase project hostname. The connected Supabase tool can deploy/read/log Edge Functions but does not expose a direct authenticated function-invocation action.
 
 Therefore:
 
@@ -150,52 +122,38 @@ Therefore:
 - **Edge source/static contract: PASS**
 - **actual external HTTP POST enrollment flow: NOT YET PROVEN in this tool environment**
 
-This limitation must remain open until native/runtime integration testing can issue real function requests. No result in this record should be interpreted as a passed physical-device enrollment flow.
+This remains open for app-runtime/native integration validation. It is not represented as a passed physical-device enrollment flow.
 
 ## 7. Offline sync queue
 
-Implemented:
-
-- `performance/client/performance-sync.mjs`
-- current contract: `2026.08.18-performance-sync-v2`
+Implemented `performance/client/performance-sync.mjs`, current contract `2026.08.18-performance-sync-v2`.
 
 Hard invariants:
 
-- each field write receives a stable client UUID before network submission;
-- retry never changes the client UUID;
-- retry never changes the original device `capturedAt` timestamp;
-- SQL duplicate/idempotency rejection is treated as a successful replay acknowledgment rather than creating a second record;
-- authentication/RLS failure moves the record to `AUTH_BLOCKED` and stops later replay;
-- `AUTH_BLOCKED` data is preserved rather than silently discarded;
-- permanent non-auth 4xx rejection becomes `REJECTED` and is not automatically retried forever;
-- transient/network failures remain `PENDING` with bounded exponential backoff;
-- replay order is by original captured time;
-- Lookup remains independent and usable when the Performance queue is offline/blocked.
+- stable client UUID before submission and across retries;
+- original device `capturedAt` survives retries;
+- duplicate DB rejection is treated as replay acknowledgment rather than duplication;
+- auth/RLS failure becomes `AUTH_BLOCKED`, is preserved, and stops later replay;
+- non-auth permanent 4xx becomes `REJECTED` and does not retry forever;
+- transient failures remain `PENDING` with bounded backoff;
+- replay is ordered by original captured time;
+- Lookup remains independently usable when Performance is offline/blocked.
 
-### Regression defects closed during implementation
-
-Two subtle queue defects were caught before live employee use:
-
-1. terminal `AUTH_BLOCKED` / `REJECTED` rows could have been reconsidered on every flush;
-2. the in-memory queue cloning implementation passed `Array.map`'s index into `structuredClone`.
-
-Both were corrected and locked by tests.
+Two defects were caught and closed during implementation: terminal `AUTH_BLOCKED`/`REJECTED` rows no longer auto-retry each flush, and the in-memory queue no longer passes `Array.map` index arguments into `structuredClone`.
 
 ## 8. Trusted-device client session
 
-Implemented:
+Implemented `performance/client/performance-session.mjs`.
 
-- `performance/client/performance-session.mjs`
+Machine-tested behavior:
 
-Machine-tested behaviors:
-
-- enrollment response is handed directly to Supabase `auth.setSession()`;
+- enrollment response hands access/refresh tokens to Supabase `auth.setSession()`;
 - startup verifies both Supabase Auth and current Performance employee/role mapping;
 - revoked/unmapped session becomes `REVOKED_OR_UNENROLLED` and is locally signed out;
 - no employee password-reset UX is required;
-- production native refresh-token persistence requires an OS-protected storage adapter.
+- production native refresh-token persistence requires OS-protected secure storage.
 
-Native secure-storage implementation is still an implementation requirement; the current module defines/enforces the contract but does not claim Keychain/Keystore physical validation.
+Actual Keychain/Keystore implementation and physical validation remain open.
 
 ## 9. Shared native location bridge
 
@@ -204,33 +162,31 @@ Implemented:
 - `performance/native/performance-location-contract.mjs`
 - `performance/native/capacitor-location-bridge.mjs`
 
-The shared orchestration is cross-platform and designed for a Capacitor native plugin implementation on iOS and Android.
-
 Machine-tested behavior:
 
-- tracking cannot start without an explicit `Start My Day` user action;
-- one bridge instance binds to one active shift;
-- duplicate start for the same shift is idempotent;
-- a different shift cannot silently take over an active tracking session;
-- permission denied creates `PERMISSION_REQUIRED` and does not start tracking;
-- approximate location is represented as `LIMITED`, not precise;
-- app relaunch may attach to a native session only when that same shift is already active;
-- app relaunch does not invent/restart a location session when the native layer reports none;
-- `captureNow()` enters the same offline/idempotent queue path;
-- each native location keeps the original native timestamp and a stable client point UUID;
-- Finish Day removes listeners and stops native tracking;
-- if the app has no active shift but finds orphan native tracking, it force-stops it.
+- location cannot start without explicit `Start My Day` initiation;
+- one bridge instance binds one active shift;
+- same-shift duplicate start is idempotent;
+- another shift cannot take over silently;
+- denied permission yields `PERMISSION_REQUIRED` without tracking;
+- approximate permission yields `LIMITED`;
+- relaunch may attach only to the same already-active native shift;
+- relaunch does not invent a location session;
+- `captureNow()` uses the same idempotent offline queue;
+- native device timestamp and stable client point UUID are preserved;
+- Finish Day detaches listeners and stops native tracking;
+- orphan native tracking is force-stopped when the app has no active shift.
 
-This shared bridge is not a claim that iOS Core Location or Android foreground-service background tracking has been physically implemented or accepted yet. Those platform layers remain the next native implementation stage.
+Actual iOS Core Location and Android foreground-service plugin implementations remain the next native slice.
 
 ## 10. Database advisor status
 
-Final non-production advisor readback after this slice:
+Final non-production readback:
 
 - **Security advisor: 0 lints**
-- Performance advisor: only expected `unused_index` INFO notices on an empty/no-workload database.
+- Performance advisor: only expected `unused_index` INFO notices on the empty/no-workload database.
 
-At final readback the only unused-index notices were for:
+At final readback the only notices were:
 
 - `performance_enrollment_tokens_expires_idx`
 - `performance_shifts_territory_id_idx`
@@ -241,19 +197,15 @@ No security warning or missing-FK-index warning remains.
 
 The non-production migration ledger temporarily contained two identical history entries for `paradise_performance_v1_device_enrollment`.
 
-The stored SQL MD5 for both entries was identical:
+Both stored SQL statements had the same MD5:
 
 `7e3c23cfc5781ef979d02084518264a3`
 
-The migration itself was idempotent and therefore did not create duplicate schema objects, but duplicate history was not accepted as a clean control state. The later duplicate history row was removed after hash equality was verified.
-
-Final ledger contains one enrollment migration and eight unique Performance migrations total through `paradise_performance_v1_read_session_hardening`.
+The later duplicate history entry was removed only after equality was verified. Final readback contains **8 unique Performance migration records** and exactly **1** enrollment migration record.
 
 ## 12. Synthetic-data cleanup
 
-All synthetic enrollment/security test data was removed.
-
-Final live readback:
+Final live readback after all tests:
 
 - Auth users: **0**
 - Performance employees: **0**
@@ -269,55 +221,53 @@ No real Paradise employee, customer, KPI, territory, CRM, compensation, or produ
 
 ## 13. GitHub machine gate
 
-The reconciled implementation head before this validation-record commit was:
+Exact validated implementation/control head before this final record update:
 
-`7c0cf0d48926d12d3bce1ccdf9a706120735ccb2`
+`7f7e24da7422322584caa7806559a5825a457431`
 
 GitHub Actions run:
 
-`32139742059` — `Validate Paradise Performance foundation`
+`32139970870` — `Validate Paradise Performance foundation`
 
 Result: **COMPLETED / SUCCESS**
 
-Passed stages:
+Passed:
 
 1. Static foundation controls
 2. Enrollment and stale-session controls
 3. Performance contract tests
 
-The gate includes the offline replay/session regressions and shared native-location bridge tests.
-
-A new exact-head run is expected after this validation record is committed because the workflow watches Performance validation documentation.
+The final record update itself is documentation-only and will receive its own normal watched-path validation run.
 
 ## 14. Hard boundaries preserved
 
 Nothing in this slice changes or authorizes:
 
-- the controlled **78 jurisdictions / 76 GO / 2 NO-GO** field baseline;
+- controlled **78 jurisdictions / 76 GO / 2 NO-GO** field baseline;
 - live municipality Lookup authority;
-- current exact canvass opener approval status;
+- exact canvass opener approval status;
 - Paradise University certification authority;
 - manager-assigned-training exclusion;
 - production/public/validated branches;
-- any numeric KPI standard;
-- any pay-plan value;
+- numeric KPI standards;
+- pay-plan values;
 - real employee enrollment;
 - real customer data;
 - physical iOS/Android acceptance;
 - production background GPS.
 
-GPS remains operational/performance evidence only. It cannot independently authorize canvassing or reinterpret controlled Lookup instructions.
+GPS remains operational/performance evidence only and cannot independently authorize canvassing or reinterpret controlled Lookup instructions.
 
 ## Final conclusion
 
 **Enrollment/session + offline sync + shared native bridge foundation: GREEN at the isolated machine/non-production level.**
 
-The next implementation slice should build the actual platform-native location plugins and secure session storage:
+Next isolated slice:
 
-- iOS Core Location background implementation + Keychain-backed session storage;
+- iOS Core Location background plugin + Keychain-backed session storage;
 - Android foreground location service + Keystore-backed session storage;
 - real device lifecycle/restart/background tests;
-- actual authenticated Edge HTTP enrollment/revocation invocation from the app runtime;
+- authenticated Edge HTTP enrollment/revocation from the app runtime;
 - then the first visible Performance UI shell.
 
 No production promotion is authorized by this record.
