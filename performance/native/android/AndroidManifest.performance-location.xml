@@ -1,0 +1,17 @@
+<!--
+  Paradise Performance v1 integration fragment.
+  Merge these declarations into the generated Capacitor Android app manifest.
+  This fragment alone does not prove Gradle compilation or physical-device behavior.
+-->
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+<application>
+  <service
+      android:name="com.paradise.performance.PerformanceLocationService"
+      android:exported="false"
+      android:stopWithTask="false"
+      android:foregroundServiceType="location" />
+</application>
