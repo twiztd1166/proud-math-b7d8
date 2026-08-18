@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.111.0';
 
-export const PERFORMANCE_EDGE_VERSION = '2026.08.18-performance-edge-v1';
+export const PERFORMANCE_EDGE_VERSION = '2026.08.18-performance-edge-v2';
 
 export const corsHeaders = Object.freeze({
   'Access-Control-Allow-Origin': '*',
@@ -59,26 +59,33 @@ export type PerformanceActor = {
   role: 'canvasser' | 'manager' | 'admin';
 };
 
+export function responseJson(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+  });
+}
+
 export async function authenticatePerformanceActor(req: Request): Promise<{
   actor: PerformanceActor;
   supabase: SupabaseClient;
   admin: SupabaseClient;
 }> {
   const authorization = req.headers.get('Authorization') ?? '';
-  if (!authorization.startsWith('Bearer ')) throw new Response('Unauthorized', { status: 401 });
+  if (!authorization.startsWith('Bearer ')) throw responseJson({ error: 'UNAUTHORIZED' }, 401);
   const token = authorization.slice(7).trim();
-  if (!token) throw new Response('Unauthorized', { status: 401 });
+  if (!token) throw responseJson({ error: 'UNAUTHORIZED' }, 401);
 
   const supabase = userClient(req);
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData.user) throw new Response('Unauthorized', { status: 401 });
+  if (userError || !userData.user) throw responseJson({ error: 'UNAUTHORIZED' }, 401);
 
   const [{ data: employeeId, error: employeeError }, { data: role, error: roleError }] = await Promise.all([
     supabase.rpc('performance_current_employee_id'),
     supabase.rpc('performance_current_role'),
   ]);
   if (employeeError || roleError || !employeeId || !['canvasser', 'manager', 'admin'].includes(role)) {
-    throw new Response('Performance device is not enrolled or has been revoked', { status: 403 });
+    throw responseJson({ error: 'PERFORMANCE_DEVICE_REVOKED_OR_UNENROLLED' }, 403);
   }
 
   return {
@@ -86,13 +93,6 @@ export async function authenticatePerformanceActor(req: Request): Promise<{
     supabase,
     admin: adminClient(),
   };
-}
-
-export function responseJson(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  });
 }
 
 export function preflight(req: Request): Response | null {
