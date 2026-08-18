@@ -1,4 +1,4 @@
-export const PERFORMANCE_LOCATION_BRIDGE_VERSION = '2026.08.18-location-bridge-v2';
+export const PERFORMANCE_LOCATION_BRIDGE_VERSION = '2026.08.18-location-bridge-v3';
 
 export const LOCATION_TRACKING_STATES = Object.freeze([
   'STOPPED',
@@ -71,14 +71,19 @@ export const PerformanceLocationBridgeContract = Object.freeze({
     'stopShiftTracking',
     'getTrackingStatus',
     'getCurrentLocation',
+    'drainPendingLocations',
+    'ackPendingLocations',
     'addLocationListener',
     'removeLocationListener'
   ]),
   invariants: Object.freeze([
     'startShiftTracking is initiated from the visible Start My Day flow',
-    'reattachShiftTracking may resume only a persisted matching shift and may never invent a shift',
+    'reattachShiftTracking may resume only a persisted matching employee/device/shift context and may never invent a shift',
     'tracking is bound to one active shift identity',
-    'Finish Day stops background/live tracking',
+    'native GPS is durably spooled with a stable clientPointId before listener delivery',
+    'native spool acknowledgement occurs only after the JavaScript idempotent queue accepts the same clientPointId',
+    'pending native GPS can be recovered after relaunch or after the authoritative shift has already finished',
+    'Finish Day stops background/live tracking before final native spool drainage',
     'app launch with no active shift does not start tracking',
     'raw capturedAt is retained independently from server receivedAt',
     'accuracy is retained and displayed as estimate',
