@@ -100,7 +100,10 @@ public final class PerformanceLocationPlugin: CAPPlugin, CAPBridgedPlugin, CLLoc
             call.reject("shiftId, employeeId, and deviceId are required")
             return
         }
-        guard persistedContext() == (shiftId, employeeId, deviceId) else {
+        guard let persisted = persistedContext(),
+              persisted.0 == shiftId,
+              persisted.1 == employeeId,
+              persisted.2 == deviceId else {
             call.reject("No persisted matching shift/device context may be reattached")
             return
         }
