@@ -221,13 +221,13 @@ No real Paradise employee, customer, KPI, territory, CRM, compensation, or produ
 
 ## 13. GitHub machine gate
 
-Exact validated implementation/control head before this final record update:
+The implementation/control head containing the complete slice before this final run-record-only commit was:
 
-`7f7e24da7422322584caa7806559a5825a457431`
+`5cfe242151d3ad4a3d26e3c8033c32dcf112fa2b`
 
 GitHub Actions run:
 
-`32139970870` — `Validate Paradise Performance foundation`
+`32140178189` — `Validate Paradise Performance foundation`
 
 Result: **COMPLETED / SUCCESS**
 
@@ -237,7 +237,7 @@ Passed:
 2. Enrollment and stale-session controls
 3. Performance contract tests
 
-The final record update itself is documentation-only and will receive its own normal watched-path validation run.
+This final amendment only records the exact successful run; no implementation/schema/runtime behavior is changed by it.
 
 ## 14. Hard boundaries preserved
 
