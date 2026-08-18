@@ -1,4 +1,4 @@
-export const PERFORMANCE_LOCATION_BRIDGE_VERSION = '2026.08.18-location-bridge-v1';
+export const PERFORMANCE_LOCATION_BRIDGE_VERSION = '2026.08.18-location-bridge-v2';
 
 export const LOCATION_TRACKING_STATES = Object.freeze([
   'STOPPED',
@@ -67,6 +67,7 @@ export const PerformanceLocationBridgeContract = Object.freeze({
     'getPermissionState',
     'requestShiftLocationPermission',
     'startShiftTracking',
+    'reattachShiftTracking',
     'stopShiftTracking',
     'getTrackingStatus',
     'getCurrentLocation',
@@ -75,6 +76,7 @@ export const PerformanceLocationBridgeContract = Object.freeze({
   ]),
   invariants: Object.freeze([
     'startShiftTracking is initiated from the visible Start My Day flow',
+    'reattachShiftTracking may resume only a persisted matching shift and may never invent a shift',
     'tracking is bound to one active shift identity',
     'Finish Day stops background/live tracking',
     'app launch with no active shift does not start tracking',
