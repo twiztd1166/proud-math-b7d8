@@ -143,8 +143,13 @@ requireText(redeem, /refreshToken:\s*signedIn\.session\.refresh_token/i, 'Refres
 requireText(revoke, /performance_revoke_device/i, 'Device revoke RPC missing');
 requireText(revoke, /ban_duration/i, 'Auth user ban after revoke missing');
 
-for (const name of ['performance-enrollment-mint','performance-enrollment-redeem','performance-device-revoke']) {
-  requireText(config, new RegExp(`\\[functions\\.${name}\\][\\s\\S]{0,160}verify_jwt\\s*=\\s*false`, 'i'), `verify_jwt=false config missing for ${name}`);
+const expectedJwtModes = {
+  'performance-enrollment-mint': true,
+  'performance-enrollment-redeem': false,
+  'performance-device-revoke': true,
+};
+for (const [name, expected] of Object.entries(expectedJwtModes)) {
+  requireText(config, new RegExp(`\\[functions\\.${name}\\][\\s\\S]{0,160}verify_jwt\\s*=\\s*${expected}`, 'i'), `verify_jwt=${expected} config missing for ${name}`);
 }
 
 const secretScanFiles = [
