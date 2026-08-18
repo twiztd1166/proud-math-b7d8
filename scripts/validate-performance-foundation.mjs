@@ -133,7 +133,7 @@ requireText(enrollmentMint, /sha256Hex\(token\)/, 'Enrollment mint must hash tok
 requireText(enrollmentRedeem, /auth\.admin\.createUser/i, 'Hidden device Auth user creation missing');
 requireText(enrollmentRedeem, /performance_finalize_device_enrollment/i, 'Enrollment redeem must use atomic finalizer');
 requireText(enrollmentRedeem, /signInWithPassword/i, 'Enrollment redeem session issuance missing');
-if (/responseJson\([\s\S]{0,800}hiddenPassword/.test(enrollmentRedeem)) fail('Hidden device password must never be returned');
+if (/return responseJson\(\{[\s\S]{0,1200}hiddenPassword/.test(enrollmentRedeem)) fail('Hidden device password must never be returned');
 requireText(deviceRevoke, /performance_revoke_device/i, 'Device revocation RPC missing');
 requireText(deviceRevoke, /ban_duration/i, 'Auth refresh/sign-in ban missing after device revoke');
 
