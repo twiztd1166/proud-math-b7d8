@@ -10,6 +10,7 @@ raise 'Generated Capacitor iOS project is missing; run npx cap add ios --package
 
 sources = %w[
   PerformanceLocationPlugin.swift
+  PerformanceLocationSpool.swift
   PerformanceSecureStoragePlugin.swift
   PerformanceBridgeViewController.swift
 ]
@@ -53,4 +54,4 @@ sources.each do |name|
 end
 raise 'iOS background location mode was not applied' unless Xcodeproj::Plist.read_from_path(plist_path).fetch('UIBackgroundModes', []).include?('location')
 
-puts 'Prepared generated iOS shell with registered Performance location + Keychain secure-storage plugins.'
+puts 'Prepared generated iOS shell with registered Performance location + durable spool + Keychain secure-storage plugins.'
