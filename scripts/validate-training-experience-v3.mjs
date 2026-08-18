@@ -57,6 +57,7 @@ need('training-storage-hardening-v1.js','2026.08.17-pu-training-experience-v4');
 need('training-storage-hardening-v1.js','puDailyExperienceV4State');
 need('training-storage-hardening-v1.js','puLessonFocusState');
 need('training-storage-hardening-v1.js','PASS QUICK CHECK TO CONTINUE');
+need('training-storage-hardening-v1.js','TRY QUICK CHECK AGAIN');
 need('training-storage-hardening-v1.js',"Today's Training ·");
 need('training-storage-hardening-v1.js','PU_OFFLINE_READY_CACHE');
 need('training-storage-hardening-v1.js','puOfflineReadyProbe');
@@ -82,11 +83,12 @@ need('tests/training-experience-v3.spec.js','daily day six uses curated coaching
 need('tests/training-ux-polish.spec.js','v4 Today card persists same-day progress and resumes the next activity');
 need('tests/training-ux-polish.spec.js','v4 lesson flow remembers the active lesson step on this device');
 need('tests/training-ux-polish.spec.js','v4 focused lesson navigation cannot bypass a required Quick Check');
+need('tests/training-ux-polish.spec.js','v4 wrong Quick Check offers an immediate retry on the same step');
 need('tests/training-ux-polish.spec.js','v4 Practice retry repeats the same scenario without inventing another attempt');
 need('tests/training-ux-polish.spec.js','v4 critical training controls meet 44px minimum target size');
 need('tests/offline-regression.spec.js','puOfflineReadyProbe');
 need('index.html','training-experience-v3.css');need('index.html','training-experience-v3.js');need('index.html','training-daily-v1.css');need('index.html','training-daily-v1.js');need('index.html','training-storage-hardening-v1.js');
-need('sw.js','experience4ready2-trainingux5-experience3-redteam7-daily1');need('sw.js','training-experience-v3.js');need('sw.js','training-experience-v3.css');need('sw.js','training-daily-v1.js');need('sw.js','training-daily-v1.css');need('sw.js','training-storage-hardening-v1.js');
+need('sw.js','experience4ready3-trainingux5-experience3-redteam7-daily1');need('sw.js','training-experience-v3.js');need('sw.js','training-experience-v3.css');need('sw.js','training-daily-v1.js');need('sw.js','training-daily-v1.css');need('sw.js','training-storage-hardening-v1.js');
 need('sw.js',"url.search==='' ".trim());need('sw.js','isAppEntry&&r.ok&&html');
 need('scripts/build-canvass-site.mjs','training-experience-v3.js');need('scripts/build-canvass-site.mjs','training-experience-v3.css');need('scripts/build-canvass-site.mjs','training-daily-v1.js');need('scripts/build-canvass-site.mjs','training-daily-v1.css');need('scripts/build-canvass-site.mjs','training-storage-hardening-v1.js');
 need('scripts/build-canvass-site.mjs','Built production HTML references missing asset');
@@ -94,4 +96,4 @@ need('scripts/build-canvass-site.mjs','Service-worker CORE references missing bu
 const combined=fs.readFileSync('training-ux-polish-v1.js','utf8')+fs.readFileSync('training-experience-v3.js','utf8')+fs.readFileSync('training-daily-v1.js','utf8')+fs.readFileSync('training-storage-hardening-v1.js','utf8');
 if(/manager-assigned|assign(?:ed)? training|due date/i.test(combined))throw new Error('Manager-assigned training was reintroduced');
 if(/sales-apprentice|sales-rep|stage:manager/i.test(fs.readFileSync('training-daily-v1.js','utf8')))throw new Error('Daily training directly auto-queued a future role');
-console.log('Training Experience v4 validated: v3 milestones/adaptive/contextual-back/transfer controls preserved + recommendation-only seven-day Daily Training + same-day Today 0/3 persistence/resume + semantic optional-media lesson-step persistence with Quick Check forward gate + immediate same-scenario Practice retry without synthetic attempts + 44px critical Training controls + exact-current-cache Offline Ready proof; manager-assigned training absent.');
+console.log('Training Experience v4 validated: v3 milestones/adaptive/contextual-back/transfer controls preserved + recommendation-only seven-day Daily Training + same-day Today 0/3 persistence/resume + semantic optional-media lesson-step persistence with Quick Check forward gate + immediate wrong-answer Quick Check retry + immediate same-scenario Practice retry without synthetic attempts + 44px critical Training controls + exact-current-cache Offline Ready proof; manager-assigned training absent.');
