@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "2026.08.17-pu-prepromotion-v22-training-experience-v4",
+  "status": "NOT_RELEASE_READY",
+  "workingBranch": "agent/paradise-university-v1",
+  "immutableBrowserRuntime": "e93b0487290c16874010b1fc3181c1226f4ff0ad",
+  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/e93b0487290c16874010b1fc3181c1226f4ff0ad/index.html",
+  "pwaCacheIdentity": "pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-experience4ready3-trainingux5-experience3-redteam7-daily1",
+  "validatedTestControlHead": "3aa85faa43b1602dddea9cb0d8d0d926d9b7a947",
+  "runtimeControlSeparation": {
+    "status": "PASS_BY_GITHUB_COMPARE",
+    "postRuntimeFilesOnly": [
+      "scripts/validate-training-experience-v3.mjs",
+      "tests/offline-regression.spec.js",
+      "tests/training-ux-polish.spec.js"
+    ],
+    "browserRuntimeChangedAfterPinnedRuntime": false
+  },
+  "realPublicMergeGate": {
+    "status": "PASS",
+    "validationOnlyDraftPr": 3,
+    "prMerged": false,
+    "publicBaseSha": "ebe0505d338d80ff57f60f9b041f1c55d4fce7d0",
+    "syntheticMergeSha": "5b4d5c79f6a992fb5efac23dd19751fdefed87a1",
+    "workflowRun": 32085373096,
+    "releaseAndTrainingStaticControls": "PASS",
+    "fieldBaselineAndReleaseIsolation": "PASS",
+    "productionBundle": "PASS",
+    "combinedIPhoneFieldOfflineTrainingUx": "PASS",
+    "deviceMatrix": "PASS",
+    "adversarialServiceWorkerProgressTransferMatrix": "PASS",
+    "releaseRetries": 0
+  },
+  "trainingExperienceV4": {
+    "status": "PASS_AUTOMATED_MAXIMUM_CURRENT_COVERAGE",
+    "version": "2026.08.17-pu-training-experience-v4",
+    "todayThreeActivityProgress": true,
+    "sameDayTodayProgressPersists": true,
+    "resumeNextUnfinishedTodayActivity": true,
+    "dailyRecommendationRemainsNonAuthoritative": true,
+    "currentCurriculumSkillCannotBeManuallyBypassed": true,
+    "focusedLessonStepNavigation": true,
+    "lessonStepPositionPersistsOnDevice": true,
+    "watchListenStepOptionalWhenNoMediaExists": true,
+    "quickCheckStepDiscoveredSemantically": true,
+    "quickCheckBlocksForwardNavigationUntilPassed": true,
+    "wrongQuickCheckImmediateRetry": true,
+    "quickCheckVersionOrCorrectAnswerChanged": false,
+    "practiceSameScenarioImmediateRetry": true,
+    "practiceRetryDoesNotCreateSyntheticAttempt": true,
+    "criticalTrainingControlsMinimum44CssPixels": true,
+    "twoHundredPercentTextDeviceMatrix": "PASS",
+    "horizontalContainmentDeviceMatrix": "PASS",
+    "exactCurrentCacheRequiredBeforeOfflineReady": true,
+    "offlineReadyCriticalAssetsVerified": [
+      "./index.html",
+      "./training-storage-hardening-v1.js",
+      "./training-practice-v1.js",
+      "./field-v37.js"
+    ],
+    "offlineReadyDoesNotRelyOnServiceWorkerReadyAlone": true,
+    "managerAssignedTraining": false,
+    "dueDatesOrOverdueBadges": false,
+    "officialCertificationClaim": false,
+    "futureRoleAutoAuthorization": false
+  },
+  "fieldBaseline": {
+    "status": "PASS_UNCHANGED",
+    "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+    "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+    "records": 78,
+    "go": 76,
+    "noGo": 2,
+    "noGoJurisdictions": ["Punta Gorda", "Tarpon Springs"]
+  },
+  "deferredOrHumanAuthorityGates": {
+    "physicalIPhonePwaAcceptance": "DEFERRED_NOT_PASS_NOT_FAIL",
+    "humanCurriculumComplianceReview": "DEFERRED_NOT_PASS",
+    "exactCanvassOpener": "CURRENT_APPROVAL_PENDING",
+    "trainerMediaItemLevelSharingVisibility": "MACHINE_UNRESOLVED_ACCESS_NOT_VERIFIED",
+    "publicBranchRuleset": "PREPARED_NOT_APPLIED",
+    "productionPromotionAuthorization": "OPEN_EXPLICIT_AUTHORIZATION_REQUIRED"
+  },
+  "productionState": {
+    "publicBranchExpectedPrePromotion": "ebe0505d338d80ff57f60f9b041f1c55d4fce7d0",
+    "validatedBranchExpectedPrePromotion": "5e7efc40de524bef0e63c76595c3c518925888b9",
+    "promotionPerformed": false
+  },
+  "layer3Readback": {
+    "status": "PASS_READ_ONLY",
+    "startHereFileId": "1eR19Dy1rsloQC2OVtoPj867g9Dka8zZ-uqGilDZpdIg",
+    "activeWorkingMasterFileId": "1ZAXIJ51UA0ufpW8VuFKxbI2918xBa0QIqftK2J9jsuk",
+    "activeStatus": "ACTIVE WORKING SOURCE — NATIVE GOOGLE DOC — NOT PROMOTED",
+    "layer3WritePerformed": false
+  },
+  "hardRule": "Machine validation, including the real public-target merge-result gate, does not manufacture physical evidence, human approval, trainer-media sharing visibility, repository-settings enforcement, opener approval, or production-promotion authorization."
+}
