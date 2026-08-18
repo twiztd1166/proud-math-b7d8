@@ -53,7 +53,7 @@ test('v4 lesson flow remembers the active lesson step on this device',async({pag
 });
 
 test('v4 focused lesson navigation cannot bypass a required Quick Check',async({page})=>{
-  await training(page);await page.evaluate(()=>puSetPage('lesson:field-lookup'));await page.getByRole('button',{name:/4\. Quick Check/}).click();await expect(page.locator('#puFocusNext')).toBeDisabled();await expect(page.locator('#puFocusNext')).toHaveText(/PASS QUICK CHECK TO CONTINUE/);
+  await training(page);await page.evaluate(()=>puSetPage('lesson:field-lookup'));await page.locator('.puLessonFocusSteps [data-pu-focus]').filter({hasText:'Quick Check'}).click();await expect(page.locator('#puFocusNext')).toBeDisabled();await expect(page.locator('#puFocusNext')).toHaveText(/PASS QUICK CHECK TO CONTINUE/);
   await page.getByRole('button',{name:'The live municipality lookup'}).click();await expect(page.locator('#puFocusNext')).toBeEnabled();await expect(page.locator('#puFocusNext')).toHaveText('CONTINUE →');
 });
 
