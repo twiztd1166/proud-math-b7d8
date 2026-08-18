@@ -10,6 +10,7 @@ on:
       - 'scripts/build-canvass-site.mjs'
       - 'scripts/prepare-performance-android-shell.mjs'
       - 'scripts/prepare-performance-ios-shell.rb'
+      - 'docs/PARADISE_PERFORMANCE_V1_TRANSPORT_VALIDATION_*'
       - '.github/workflows/validate-paradise-performance-native.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'scripts/build-canvass-site.mjs'
       - 'scripts/prepare-performance-android-shell.mjs'
       - 'scripts/prepare-performance-ios-shell.rb'
+      - 'docs/PARADISE_PERFORMANCE_V1_TRANSPORT_VALIDATION_*'
       - '.github/workflows/validate-paradise-performance-native.yml'
 
 permissions:
