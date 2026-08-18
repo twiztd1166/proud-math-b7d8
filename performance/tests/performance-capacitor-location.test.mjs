@@ -23,7 +23,7 @@ function sample(overrides = {}) {
 }
 
 function pluginMock({ permission = 'GRANTED_PRECISE', status = { active: false, shiftId: null } } = {}) {
-  const calls = { request: 0, start: [], stop: [], add: 0, remove: 0, current: 0 };
+  const calls = { request: 0, start: [], reattach: [], stop: [], add: 0, remove: 0, current: 0 };
   let listener = null;
   let trackingStatus = { ...status };
   return {
@@ -32,6 +32,10 @@ function pluginMock({ permission = 'GRANTED_PRECISE', status = { active: false, 
     async getPermissionState() { return permission; },
     async requestShiftLocationPermission() { calls.request += 1; return permission; },
     async startShiftTracking(args) { calls.start.push(args); trackingStatus = { active: true, shiftId: args.shiftId }; },
+    async reattachShiftTracking(args) {
+      calls.reattach.push(args);
+      if (!trackingStatus.active || trackingStatus.shiftId !== args.shiftId) throw new Error('no matching persisted shift');
+    },
     async stopShiftTracking(args) { calls.stop.push(args); trackingStatus = { active: false, shiftId: null }; },
     async getTrackingStatus() { return { ...trackingStatus }; },
     async getCurrentLocation() { calls.current += 1; return sample(); },
@@ -62,6 +66,7 @@ test('explicit start binds one shift and queues normalized native samples', asyn
   const state = await b.startShift({ shiftId, employeeId, deviceId, initiatedByUser: true });
   assert.equal(state.state, 'ACTIVE');
   assert.equal(plugin.calls.start.length, 1);
+  assert.equal(plugin.calls.start[0].initiatedByUser, true);
   assert.equal(plugin.calls.add, 1);
 
   await plugin.emit(sample());
@@ -101,12 +106,14 @@ test('approximate permission is explicitly LIMITED, not presented as precise', a
   assert.equal(plugin.calls.start[0].accuracyMode, 'approximate');
 });
 
-test('app relaunch may attach to existing native shift without starting a new one', async () => {
+test('app relaunch resumes only the existing native shift and never creates a new one', async () => {
   const plugin = pluginMock({ status: { active: true, shiftId } });
   const b = bridge(plugin);
   const state = await b.attachToAlreadyActiveShift({ shiftId, employeeId, deviceId });
   assert.equal(state.state, 'ACTIVE');
   assert.equal(plugin.calls.start.length, 0);
+  assert.equal(plugin.calls.reattach.length, 1);
+  assert.equal(plugin.calls.reattach[0].shiftId, shiftId);
   assert.equal(plugin.calls.add, 1);
 });
 
@@ -116,6 +123,7 @@ test('app relaunch never invents tracking when native shift is not already activ
   const state = await b.attachToAlreadyActiveShift({ shiftId, employeeId, deviceId });
   assert.equal(state.state, 'STOPPED');
   assert.equal(plugin.calls.start.length, 0);
+  assert.equal(plugin.calls.reattach.length, 0);
   assert.equal(plugin.calls.add, 0);
 });
 
