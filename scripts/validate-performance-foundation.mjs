@@ -10,6 +10,7 @@ const spec = read('docs/PARADISE_PERFORMANCE_V1_SPEC.md');
 const audit = read('docs/PARADISE_PERFORMANCE_V1_DEEP_AUDIT_2026-08-18.md');
 const sql = read('supabase/migrations/20260818072700_paradise_performance_v1_foundation.sql');
 const hardening = read('supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql');
+const security = read('supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql');
 const math = read('performance/shared/performance-math.mjs');
 const events = read('performance/shared/performance-events.mjs');
 const location = read('performance/native/performance-location-contract.mjs');
@@ -49,11 +50,17 @@ requireText(hardening, /performance_location_insert_own[\s\S]*performance_shifts
 requireText(hardening, /performance_sets_insert_own[\s\S]*origin_shift_id[\s\S]*s\.employee_id = public\.performance_current_employee_id\(\)/i, 'Set-to-own-shift hardening missing');
 requireText(hardening, /revoke insert, update, delete on public\.performance_commissions from authenticated/i, 'Commission client-mutation prohibition missing');
 requireText(hardening, /revoke insert, update, delete on public\.performance_period_snapshots from authenticated/i, 'Final standings client-mutation prohibition missing');
-requireText(hardening, /performance_correction_requests_update_authorized[\s\S]*performance_is_manager\(\)/i, 'Correction resolution must remain manager/admin controlled');
 requireText(hardening, /visibility parity is SELECT parity, never mutation parity/i, 'Visibility/mutation boundary missing');
 
-if (/insert\s+into\s+public\.performance_kpi_standard_versions/i.test(sql + hardening)) fail('Migrations must not seed invented KPI standards');
-if (/insert\s+into\s+public\.performance_pay_plan_versions/i.test(sql + hardening)) fail('Migrations must not seed invented pay rules');
+for (const fn of ['performance_current_employee_id', 'performance_current_role', 'performance_is_manager', 'performance_is_admin']) {
+  requireText(security, new RegExp(`revoke execute on function public\\.${fn}\\(\\) from public, anon`, 'i'), `Default PUBLIC/anon EXECUTE not revoked for ${fn}`);
+  requireText(security, new RegExp(`grant execute on function public\\.${fn}\\(\\) to authenticated`, 'i'), `Authenticated EXECUTE grant missing for ${fn}`);
+}
+requireText(security, /performance_correction_requests_update_authorized[\s\S]*resolved_by = public\.performance_current_employee_id\(\)[\s\S]*resolved_at is not null/i, 'Correction resolution must bind resolved_by to the actual manager actor');
+requireText(security, /Security invariant: privileged helper execution and manager attribution/i, 'Security-hardening invariant missing');
+
+if (/insert\s+into\s+public\.performance_kpi_standard_versions/i.test(sql + hardening + security)) fail('Migrations must not seed invented KPI standards');
+if (/insert\s+into\s+public\.performance_pay_plan_versions/i.test(sql + hardening + security)) fail('Migrations must not seed invented pay rules');
 
 requireText(math, /STANDARD_NOT_CONFIGURED/, 'KPI engine must represent unconfigured standards explicitly');
 requireText(math, /MEETS_OR_EXCEEDS_MINIMUM/, 'Single-minimum KPI semantics missing');
@@ -67,7 +74,8 @@ const secretScanFiles = [
   'performance/shared/performance-events.mjs',
   'performance/native/performance-location-contract.mjs',
   'supabase/migrations/20260818072700_paradise_performance_v1_foundation.sql',
-  'supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql'
+  'supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql',
+  'supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql'
 ];
 const forbiddenSecretPatterns = [
   /service[_-]?role\s*[:=]\s*['"][A-Za-z0-9._-]{12,}/i,
