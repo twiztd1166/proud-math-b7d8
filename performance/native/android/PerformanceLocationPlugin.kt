@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationCompat
 import com.getcapacitor.JSObject
@@ -29,6 +30,10 @@ import java.util.UUID
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             ],
         ),
+        Permission(
+            alias = "notifications",
+            strings = [Manifest.permission.POST_NOTIFICATIONS],
+        ),
     ],
 )
 class PerformanceLocationPlugin : Plugin() {
@@ -37,6 +42,7 @@ class PerformanceLocationPlugin : Plugin() {
     private val activeEmployeeKey = "activeEmployeeId"
     private val activeDeviceKey = "activeDeviceId"
     private val askedPermissionKey = "askedLocationPermission"
+    private val askedNotificationPermissionKey = "askedNotificationPermission"
     private val spool by lazy { PerformanceLocationSpool(context.applicationContext) }
 
     override fun load() {
@@ -58,16 +64,24 @@ class PerformanceLocationPlugin : Plugin() {
 
     @PluginMethod
     fun requestShiftLocationPermission(call: PluginCall) {
-        if (permissionGranted()) {
+        val aliases = mutableListOf<String>()
+        if (!locationPermissionGranted()) {
+            preferences().edit().putBoolean(askedPermissionKey, true).apply()
+            aliases.add("location")
+        }
+        if (!notificationPermissionGranted()) {
+            preferences().edit().putBoolean(askedNotificationPermissionKey, true).apply()
+            aliases.add("notifications")
+        }
+        if (aliases.isEmpty()) {
             call.resolve(JSObject().put("state", permissionState()))
             return
         }
-        preferences().edit().putBoolean(askedPermissionKey, true).apply()
-        requestPermissionForAlias("location", call, "locationPermissionCallback")
+        requestPermissionForAliases(aliases.toTypedArray(), call, "shiftPermissionCallback")
     }
 
     @PermissionCallback
-    private fun locationPermissionCallback(call: PluginCall) {
+    private fun shiftPermissionCallback(call: PluginCall) {
         call.resolve(JSObject().put("state", permissionState()))
     }
 
@@ -84,11 +98,14 @@ class PerformanceLocationPlugin : Plugin() {
             call.reject("shiftId, employeeId, and deviceId are required")
             return
         }
-        if (!permissionGranted()) {
+        if (!locationPermissionGranted()) {
             call.reject("Location permission is required")
             return
         }
-
+        if (!notificationPermissionGranted()) {
+            call.reject("Notification permission is required for visible active-shift location")
+            return
+        }
         val persisted = persistedContext()
         if (persisted != null && persisted != Triple(shiftId, employeeId, deviceId)) {
             call.reject("Another shift or device context is already tracking")
@@ -109,8 +126,12 @@ class PerformanceLocationPlugin : Plugin() {
             call.reject("shiftId, employeeId, and deviceId are required")
             return
         }
-        if (!permissionGranted()) {
+        if (!locationPermissionGranted()) {
             call.reject("Location permission is required")
+            return
+        }
+        if (!notificationPermissionGranted()) {
+            call.reject("Notification permission is required for visible active-shift location")
             return
         }
         if (persistedContext() != Triple(shiftId, employeeId, deviceId)) {
@@ -151,13 +172,11 @@ class PerformanceLocationPlugin : Plugin() {
             call.reject("No active shift location context")
             return
         }
-
         val latest = PerformanceLocationService.lastRecord()
         if (latest != null && latest.shiftId == active.first && latest.employeeId == active.second && latest.deviceId == active.third) {
             call.resolve(latest.toJson())
             return
         }
-
         val location = lastKnownLocation()
         if (location == null) {
             call.reject("No current native location sample is available yet")
@@ -227,12 +246,18 @@ class PerformanceLocationPlugin : Plugin() {
             .put("deviceId", persisted?.third)
             .put("running", PerformanceLocationService.isRunningFor(shiftId))
             .put("pendingNativeLocations", runCatching { spool.pendingCount() }.getOrDefault(-1))
+            .put("notificationVisiblePermission", notificationPermissionGranted())
     }
 
-    private fun permissionGranted(): Boolean {
+    private fun locationPermissionGranted(): Boolean {
         val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val coarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         return fine || coarse
+    }
+
+    private fun notificationPermissionGranted(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun permissionState(): String {
@@ -240,15 +265,20 @@ class PerformanceLocationPlugin : Plugin() {
         if (!manager.isLocationEnabled) return "RESTRICTED"
         val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val coarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        if (fine) return "GRANTED_PRECISE"
-        if (coarse) return "GRANTED_APPROXIMATE"
-        val asked = preferences().getBoolean(askedPermissionKey, false)
-        return if (asked || getPermissionState("location") == PermissionState.DENIED) "DENIED" else "NOT_DETERMINED"
+        if (!fine && !coarse) {
+            val asked = preferences().getBoolean(askedPermissionKey, false)
+            return if (asked || getPermissionState("location") == PermissionState.DENIED) "DENIED" else "NOT_DETERMINED"
+        }
+        if (!notificationPermissionGranted()) {
+            val asked = preferences().getBoolean(askedNotificationPermissionKey, false)
+            return if (asked || getPermissionState("notifications") == PermissionState.DENIED) "DENIED" else "NOT_DETERMINED"
+        }
+        return if (fine) "GRANTED_PRECISE" else "GRANTED_APPROXIMATE"
     }
 
     @Suppress("MissingPermission")
     private fun lastKnownLocation(): Location? {
-        if (!permissionGranted()) return null
+        if (!locationPermissionGranted()) return null
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return manager.getProviders(true)
             .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }

@@ -6,6 +6,13 @@ const androidRoot = path.join(root, 'android');
 const appRoot = path.join(androidRoot, 'app');
 if (!fs.existsSync(appRoot)) throw new Error('Generated Capacitor Android project is missing; run npx cap add android first');
 
+const capacitorConfigPath = path.join(root, 'capacitor.config.json');
+const capacitorConfig = JSON.parse(fs.readFileSync(capacitorConfigPath, 'utf8'));
+const appId = String(capacitorConfig.appId || '');
+if (!/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)+$/.test(appId)) {
+  throw new Error(`capacitor.config.json appId is not a valid Java package: ${appId || '(missing)'}`);
+}
+
 const packageDir = path.join(appRoot, 'src', 'main', 'java', 'com', 'paradise', 'performance');
 fs.mkdirSync(packageDir, { recursive: true });
 for (const name of [
@@ -20,9 +27,9 @@ for (const name of [
   );
 }
 
-const mainActivity = path.join(appRoot, 'src', 'main', 'java', 'com', 'paradiseexteriors', 'performance', 'MainActivity.java');
+const mainActivity = path.join(appRoot, 'src', 'main', 'java', ...appId.split('.'), 'MainActivity.java');
 fs.mkdirSync(path.dirname(mainActivity), { recursive: true });
-fs.writeFileSync(mainActivity, `package com.paradiseexteriors.performance;
+fs.writeFileSync(mainActivity, `package ${appId};
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
@@ -65,6 +72,7 @@ let manifest = fs.readFileSync(manifestPath, 'utf8');
 const permissions = [
   'android.permission.ACCESS_COARSE_LOCATION',
   'android.permission.ACCESS_FINE_LOCATION',
+  'android.permission.POST_NOTIFICATIONS',
   'android.permission.FOREGROUND_SERVICE',
   'android.permission.FOREGROUND_SERVICE_LOCATION',
 ];
@@ -90,5 +98,8 @@ for (const required of [
 ]) {
   if (!fs.existsSync(required)) throw new Error(`Missing integrated Android source: ${required}`);
 }
+for (const permission of permissions) {
+  if (!manifest.includes(permission)) throw new Error(`Generated Android manifest missing ${permission}`);
+}
 
-console.log('Prepared generated Android shell with registered Performance location + durable spool + secure-storage plugins.');
+console.log(`Prepared generated Android shell (${appId}) with registered Performance location + durable spool + secure-storage plugins and visible active-shift notification permission.`);
