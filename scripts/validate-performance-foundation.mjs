@@ -13,9 +13,16 @@ const hardening = read('supabase/migrations/20260818074500_paradise_performance_
 const security = read('supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql');
 const advisor = read('supabase/migrations/20260818081500_paradise_performance_v1_advisor_hardening.sql');
 const indexes = read('supabase/migrations/20260818083000_paradise_performance_v1_index_hardening.sql');
+const enrollment = read('supabase/migrations/20260818084500_paradise_performance_v1_device_enrollment.sql');
 const math = read('performance/shared/performance-math.mjs');
 const events = read('performance/shared/performance-events.mjs');
 const location = read('performance/native/performance-location-contract.mjs');
+const session = read('performance/client/performance-session.mjs');
+const sync = read('performance/client/performance-sync.mjs');
+const edgeAuth = read('supabase/functions/_shared/performance-auth.ts');
+const enrollmentMint = read('supabase/functions/performance-enrollment-mint/index.ts');
+const enrollmentRedeem = read('supabase/functions/performance-enrollment-redeem/index.ts');
+const deviceRevoke = read('supabase/functions/performance-device-revoke/index.ts');
 
 requireText(spec, /START MY DAY → WORK → QUICK SET \/ \+ SET → FINISH DAY/, 'Primary employee loop drifted');
 requireText(spec, /78 jurisdictions \/ 76 GO \/ 2 NO-GO/, 'Field baseline control missing from Performance spec');
@@ -83,7 +90,20 @@ for (const indexName of [
   requireText(indexes, new RegExp(`create index if not exists ${indexName}`, 'i'), `Advisor index missing: ${indexName}`);
 }
 
-const migrations = [sql, hardening, security, advisor, indexes].join('\n');
+requireText(enrollment, /create table if not exists public\.performance_enrollment_tokens/i, 'Enrollment-token table missing');
+requireText(enrollment, /token_hash text primary key/i, 'Enrollment token hash key missing');
+requireText(enrollment, /check \(length\(token_hash\) = 64\)/i, 'SHA-256 enrollment-token hash constraint missing');
+if (/\btoken\s+text\b/i.test(enrollment)) fail('Plaintext enrollment token column must not exist');
+requireText(enrollment, /alter table public\.performance_enrollment_tokens enable row level security/i, 'Enrollment-token RLS missing');
+requireText(enrollment, /revoke all on table public\.performance_enrollment_tokens from public, anon, authenticated/i, 'Enrollment-token client access must be revoked');
+requireText(enrollment, /performance_finalize_device_enrollment[\s\S]*security definer/i, 'Atomic enrollment finalizer missing');
+requireText(enrollment, /revoke execute on function public\.performance_finalize_device_enrollment[\s\S]*from public, anon, authenticated/i, 'Enrollment finalizer must not be client executable');
+requireText(enrollment, /grant execute on function public\.performance_finalize_device_enrollment[\s\S]*to service_role/i, 'Enrollment finalizer server grant missing');
+requireText(enrollment, /performance_revoke_device[\s\S]*update public\.performance_actor_identities[\s\S]*revoked_at/i, 'Immediate RLS device revocation missing');
+requireText(enrollment, /select e\.role[\s\S]*join public\.performance_employees/i, 'Current role must derive from authoritative employee row');
+requireText(enrollment, /Trusted-device identity authorizes Performance data only[\s\S]*field Lookup/i, 'Enrollment/Lookup authority boundary missing');
+
+const migrations = [sql, hardening, security, advisor, indexes, enrollment].join('\n');
 if (/insert\s+into\s+public\.performance_kpi_standard_versions/i.test(migrations)) fail('Migrations must not seed invented KPI standards');
 if (/insert\s+into\s+public\.performance_pay_plan_versions/i.test(migrations)) fail('Migrations must not seed invented pay rules');
 
@@ -93,16 +113,45 @@ requireText(events, /stable UUID reused for retries/, 'Retry identity contract m
 requireText(location, /Finish Day stops background\/live tracking/, 'Tracking-stop invariant missing');
 requireText(location, /GPS never authorizes or overrides field Lookup/, 'Native GPS authority boundary missing');
 requireText(location, /off-shift Performance location is not collected/, 'Off-shift GPS prohibition missing');
+requireText(session, /OS-protected secure storage/i, 'Native secure-session-storage invariant missing');
+requireText(session, /REVOKED_OR_UNENROLLED/i, 'Revoked-device client state missing');
+requireText(session, /supabase\.auth\.setSession/i, 'Supabase trusted-device session handoff missing');
+requireText(sync, /PERFORMANCE_SYNC_VERSION = '2026\.08\.18-performance-sync-v2'/i, 'Current offline-sync version missing');
+requireText(sync, /DUPLICATE_ACK/i, 'Duplicate replay acknowledgment missing');
+requireText(sync, /AUTH_BLOCKED/i, 'Authorization-blocked queue state missing');
+requireText(sync, /row\.state \?\? 'PENDING'\) === 'PENDING'/i, 'Terminal queue states must not auto-retry');
+requireText(sync, /capturedAt never changes to server retry time/i, 'Original captured-time replay invariant missing');
+requireText(sync, /Lookup remains usable even if the Performance queue is blocked or offline/i, 'Performance/Lookup outage isolation missing');
+
+const edgeBundle = [edgeAuth, enrollmentMint, enrollmentRedeem, deviceRevoke].join('\n');
+requireText(edgeAuth, /npm:@supabase\/supabase-js@2\.111\.0/, 'Supabase Edge dependency must remain pinned');
+requireText(edgeAuth, /SUPABASE_PUBLISHABLE_KEYS/, 'Current publishable-key environment support missing');
+requireText(edgeAuth, /SUPABASE_SECRET_KEYS/, 'Current secret-key environment support missing');
+requireText(enrollmentMint, /\['manager', 'admin'\]\.includes\(actor\.role\)/, 'Enrollment mint must be manager/admin only');
+requireText(enrollmentMint, /sha256Hex\(token\)/, 'Enrollment mint must hash token before storage');
+requireText(enrollmentRedeem, /auth\.admin\.createUser/i, 'Hidden device Auth user creation missing');
+requireText(enrollmentRedeem, /performance_finalize_device_enrollment/i, 'Enrollment redeem must use atomic finalizer');
+requireText(enrollmentRedeem, /signInWithPassword/i, 'Enrollment redeem session issuance missing');
+if (/hiddenPassword\s*[,}]/.test(enrollmentRedeem) && /responseJson\([\s\S]{0,800}hiddenPassword/.test(enrollmentRedeem)) fail('Hidden device password must never be returned');
+requireText(deviceRevoke, /performance_revoke_device/i, 'Device revocation RPC missing');
+requireText(deviceRevoke, /ban_duration/i, 'Auth refresh/sign-in ban missing after device revoke');
 
 const secretScanFiles = [
   'performance/shared/performance-math.mjs',
   'performance/shared/performance-events.mjs',
   'performance/native/performance-location-contract.mjs',
+  'performance/client/performance-session.mjs',
+  'performance/client/performance-sync.mjs',
+  'supabase/functions/_shared/performance-auth.ts',
+  'supabase/functions/performance-enrollment-mint/index.ts',
+  'supabase/functions/performance-enrollment-redeem/index.ts',
+  'supabase/functions/performance-device-revoke/index.ts',
   'supabase/migrations/20260818072700_paradise_performance_v1_foundation.sql',
   'supabase/migrations/20260818074500_paradise_performance_v1_rls_hardening.sql',
   'supabase/migrations/20260818080000_paradise_performance_v1_security_hardening.sql',
   'supabase/migrations/20260818081500_paradise_performance_v1_advisor_hardening.sql',
-  'supabase/migrations/20260818083000_paradise_performance_v1_index_hardening.sql'
+  'supabase/migrations/20260818083000_paradise_performance_v1_index_hardening.sql',
+  'supabase/migrations/20260818084500_paradise_performance_v1_device_enrollment.sql'
 ];
 const forbiddenSecretPatterns = [
   /service[_-]?role\s*[:=]\s*['"][A-Za-z0-9._-]{12,}/i,
