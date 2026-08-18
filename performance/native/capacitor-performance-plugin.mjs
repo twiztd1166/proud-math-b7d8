@@ -11,6 +11,8 @@ export function createCapacitorPerformanceLocationPlugin(nativePlugin) {
     'stopShiftTracking',
     'getTrackingStatus',
     'getCurrentLocation',
+    'drainPendingLocations',
+    'ackPendingLocations',
     'addListener',
   ]) {
     if (typeof nativePlugin[method] !== 'function') throw new Error(`PerformanceLocation native plugin missing ${method}`);
@@ -24,6 +26,8 @@ export function createCapacitorPerformanceLocationPlugin(nativePlugin) {
     stopShiftTracking: options => nativePlugin.stopShiftTracking(options),
     getTrackingStatus: () => nativePlugin.getTrackingStatus(),
     getCurrentLocation: () => nativePlugin.getCurrentLocation(),
+    drainPendingLocations: options => nativePlugin.drainPendingLocations(options ?? {}),
+    ackPendingLocations: options => nativePlugin.ackPendingLocations(options),
     async addLocationListener(callback) {
       if (typeof callback !== 'function') throw new Error('location callback is required');
       return nativePlugin.addListener(PERFORMANCE_NATIVE_LOCATION_EVENT, callback);
