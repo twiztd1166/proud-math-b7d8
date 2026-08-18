@@ -1,13 +1,14 @@
 # Paradise Performance v1 — non-production Edge Function auth configuration.
-# Manager operations require a valid user JWT at the platform and handler layers.
-# Enrollment redemption intentionally accepts no prior user JWT because the high-entropy,
-# short-lived, single-use QR token is the enrollment credential.
+# Current Supabase publishable/secret keys are not JWTs. All three functions therefore
+# disable legacy platform JWT verification and authorize inside the handler instead.
+# Mint/revoke validate the caller's user access JWT with auth.getUser() plus current
+# Performance enrollment/role checks. Redeem uses the high-entropy one-time QR credential.
 
 [functions.performance-enrollment-mint]
-verify_jwt = true
+verify_jwt = false
 
 [functions.performance-enrollment-redeem]
 verify_jwt = false
 
 [functions.performance-device-revoke]
-verify_jwt = true
+verify_jwt = false
