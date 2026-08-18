@@ -5,6 +5,7 @@ import {
   createCapacitorSecureStorageAdapter,
   registerCapacitorSecureStorage,
 } from '../native/capacitor-secure-storage.mjs';
+import { createNativePerformanceSupabaseOptions } from '../client/performance-native-session.mjs';
 
 function nativeMock() {
   const values = new Map();
@@ -55,8 +56,24 @@ test('register helper binds the expected Capacitor plugin name', async () => {
   assert.equal(await storage.getItem('session'), 'value');
 });
 
+test('native Supabase options use the same protected adapter for persisted Auth', async () => {
+  const plugin = nativeMock();
+  const nativeSession = createNativePerformanceSupabaseOptions({
+    registerPlugin(name) {
+      assert.equal(name, PERFORMANCE_SECURE_STORAGE_PLUGIN_NAME);
+      return plugin;
+    },
+  });
+  assert.equal(nativeSession.supabaseOptions.auth.persistSession, true);
+  assert.equal(nativeSession.supabaseOptions.auth.autoRefreshToken, true);
+  assert.equal(nativeSession.supabaseOptions.auth.detectSessionInUrl, false);
+  assert.equal(nativeSession.supabaseOptions.auth.storage, nativeSession.storage);
+  await nativeSession.storage.setItem('supabase-auth-token', 'protected-refresh-token');
+  assert.equal(await nativeSession.storage.getItem('supabase-auth-token'), 'protected-refresh-token');
+});
+
 test('adapter contract does not depend on browser localStorage', async () => {
-  const prior = globalThis.localStorage;
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     get() { throw new Error('localStorage must not be touched'); },
@@ -66,7 +83,7 @@ test('adapter contract does not depend on browser localStorage', async () => {
     await storage.setItem('session', 'secret');
     assert.equal(await storage.getItem('session'), 'secret');
   } finally {
-    if (prior === undefined) delete globalThis.localStorage;
-    else Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: prior });
+    if (descriptor) Object.defineProperty(globalThis, 'localStorage', descriptor);
+    else delete globalThis.localStorage;
   }
 });
