@@ -8,7 +8,12 @@ if (!fs.existsSync(appRoot)) throw new Error('Generated Capacitor Android projec
 
 const packageDir = path.join(appRoot, 'src', 'main', 'java', 'com', 'paradise', 'performance');
 fs.mkdirSync(packageDir, { recursive: true });
-for (const name of ['PerformanceLocationPlugin.kt', 'PerformanceLocationService.kt', 'PerformanceSecureStoragePlugin.kt']) {
+for (const name of [
+  'PerformanceLocationPlugin.kt',
+  'PerformanceLocationService.kt',
+  'PerformanceLocationSpool.kt',
+  'PerformanceSecureStoragePlugin.kt',
+]) {
   fs.copyFileSync(
     path.join(root, 'performance', 'native', 'android', name),
     path.join(packageDir, name),
@@ -80,9 +85,10 @@ for (const required of [
   mainActivity,
   path.join(packageDir, 'PerformanceLocationPlugin.kt'),
   path.join(packageDir, 'PerformanceLocationService.kt'),
+  path.join(packageDir, 'PerformanceLocationSpool.kt'),
   path.join(packageDir, 'PerformanceSecureStoragePlugin.kt'),
 ]) {
   if (!fs.existsSync(required)) throw new Error(`Missing integrated Android source: ${required}`);
 }
 
-console.log('Prepared generated Android shell with registered Performance location + secure-storage plugins.');
+console.log('Prepared generated Android shell with registered Performance location + durable spool + secure-storage plugins.');
