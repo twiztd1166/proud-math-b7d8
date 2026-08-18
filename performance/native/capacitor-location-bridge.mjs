@@ -2,7 +2,7 @@ import { normalizeLocationSample, PerformanceLocationBridgeContract } from './pe
 import { createQueuedWrite } from '../client/performance-sync.mjs';
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const CAPACITOR_LOCATION_ADAPTER_VERSION = '2026.08.18-capacitor-location-adapter-v1';
+export const CAPACITOR_LOCATION_ADAPTER_VERSION = '2026.08.18-capacitor-location-adapter-v2';
 
 export const LOCATION_PERMISSION_STATES = Object.freeze([
   'NOT_DETERMINED',
@@ -61,11 +61,13 @@ export class CapacitorPerformanceLocationBridge {
     assertContext({ shiftId, employeeId, deviceId });
     if (initiatedByUser !== true) throw new Error('Shift location may only start from visible Start My Day action');
 
-    if (this.state === 'ACTIVE') {
+    if (this.state === 'ACTIVE' || this.state === 'LIMITED') {
       if (this.context?.shiftId !== shiftId) throw new Error('Another shift is already tracking');
       return this.getState();
     }
-    if (this.state === 'STARTING' || this.state === 'STOPPING') throw new Error(`Location bridge busy: ${this.state}`);
+    if (this.state === 'STARTING' || this.state === 'RECONNECTING' || this.state === 'STOPPING') {
+      throw new Error(`Location bridge busy: ${this.state}`);
+    }
 
     this.state = 'STARTING';
     let permission = await this.getPermissionState();
@@ -83,6 +85,7 @@ export class CapacitorPerformanceLocationBridge {
       await this.plugin.startShiftTracking({
         shiftId,
         accuracyMode: permission === 'GRANTED_PRECISE' ? 'precise' : 'approximate',
+        initiatedByUser: true,
       });
       await this.#attachListener();
       this.state = permission === 'GRANTED_PRECISE' ? 'ACTIVE' : 'LIMITED';
@@ -101,7 +104,7 @@ export class CapacitorPerformanceLocationBridge {
 
     const status = await this.plugin.getTrackingStatus();
     if (!status?.active || status?.shiftId !== shiftId) {
-      // Critical: app launch must not silently start native location here.
+      // Critical: app launch must not silently create or adopt native location here.
       return Object.freeze({ ...this.getState(), state: 'STOPPED' });
     }
 
@@ -111,9 +114,21 @@ export class CapacitorPerformanceLocationBridge {
     }
 
     this.context = { shiftId, employeeId, deviceId, permission };
-    await this.#attachListener();
-    this.state = permission === 'GRANTED_PRECISE' ? 'ACTIVE' : 'LIMITED';
-    return this.getState();
+    this.state = 'RECONNECTING';
+    try {
+      await this.plugin.reattachShiftTracking({
+        shiftId,
+        accuracyMode: permission === 'GRANTED_PRECISE' ? 'precise' : 'approximate',
+      });
+      await this.#attachListener();
+      this.state = permission === 'GRANTED_PRECISE' ? 'ACTIVE' : 'LIMITED';
+      return this.getState();
+    } catch (error) {
+      await this.#detachListener().catch(() => undefined);
+      this.context = null;
+      this.state = 'ERROR';
+      throw error;
+    }
   }
 
   async captureNow() {
@@ -200,7 +215,7 @@ export class CapacitorPerformanceLocationBridge {
 export const CapacitorLocationAdapterInvariants = Object.freeze([
   'native tracking starts only from an explicit Start My Day action',
   'one bridge instance is bound to one active shift at a time',
-  'app relaunch may reattach to an already-active native shift but never invent a new shift',
+  'app relaunch may resume only an already-active matching native shift and never invent a new shift',
   'no active shift means native tracking is forced stopped',
   'every accepted location keeps the device capturedAt timestamp',
   'every queued GPS write has a stable client UUID for retry idempotency',
