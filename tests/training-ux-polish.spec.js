@@ -37,3 +37,30 @@ test('same-page lesson refresh preserves reading position',async({page})=>{
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));const before=await page.evaluate(()=>window.scrollY);expect(before).toBeGreaterThan(0);await page.locator('#puDone').click();
   await expect.poll(async()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(Math.max(0,before-160));
 });
+
+test('v4 Today card persists same-day progress and resumes the next activity',async({page})=>{
+  await training(page);await expect.poll(async()=>page.evaluate(()=>window.PU_TRAINING_EXPERIENCE_V4_VERSION)).toBe('2026.08.17-pu-training-experience-v4');
+  const daily=page.locator('.puDailyTraining');await expect(daily).toContainText("Today's Training · 0 of 3 complete");
+  await daily.locator('[data-daily-done="0"]').click();await expect(daily).toContainText("Today's Training · 1 of 3 complete");await expect(daily.locator('#puStartDaily')).toHaveText("CONTINUE TODAY'S TRAINING");
+  const saved=await page.evaluate(()=>window.puDailyExperienceV4State());expect(saved.done).toEqual([true,false,false]);
+  await page.reload();await page.locator('#nTrain').click();await expect(page.locator('.puDailyTraining')).toContainText("Today's Training · 1 of 3 complete");expect((await page.evaluate(()=>window.puDailyExperienceV4State())).done).toEqual([true,false,false]);
+});
+
+test('v4 lesson flow remembers the active lesson step on this device',async({page})=>{
+  await training(page);await page.evaluate(()=>puSetPage('lesson:foundation-welcome'));await expect(page.locator('.puLessonFocusNav')).toBeVisible();await expect(page.locator('.puLessonFocusMeta')).toContainText(/Step 1 of/);
+  await page.locator('#puFocusNext').click();await page.locator('#puFocusNext').click();expect((await page.evaluate(()=>window.puLessonFocusState('foundation-welcome'))).index).toBe(2);
+  await page.evaluate(()=>puSetPage('home'));await page.evaluate(()=>puSetPage('lesson:foundation-welcome'));await expect(page.locator('.puLessonFocusMeta')).toContainText(/Step 3 of/);expect((await page.evaluate(()=>window.puLessonFocusState('foundation-welcome'))).index).toBe(2);
+});
+
+test('v4 focused lesson navigation cannot bypass a required Quick Check',async({page})=>{
+  await training(page);await page.evaluate(()=>puSetPage('lesson:field-lookup'));await page.getByRole('button',{name:/4\. Quick Check/}).click();await expect(page.locator('#puFocusNext')).toBeDisabled();await expect(page.locator('#puFocusNext')).toHaveText(/PASS QUICK CHECK TO CONTINUE/);
+  await page.getByRole('button',{name:'The live municipality lookup'}).click();await expect(page.locator('#puFocusNext')).toBeEnabled();await expect(page.locator('#puFocusNext')).toHaveText('CONTINUE →');
+});
+
+test('v4 Practice retry repeats the same scenario without inventing another attempt',async({page})=>{
+  await training(page);await page.getByRole('button',{name:/Practice/}).first().click();await expect.poll(async()=>page.evaluate(()=>window.PU_PRACTICE_RETRY_VERSION)).toBe('2026.08.17-pu-practice-v4-retry');await page.getByRole('button',{name:/Practice Objections/}).click();const first=await page.evaluate(()=>window.puPracticeCurrentScenario().id);await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:/NEED MORE PRACTICE/}).click();expect((await page.evaluate(()=>window.puPracticeStats())).total).toBe(1);await page.getByRole('button',{name:'TRY THIS ONE AGAIN'}).click();expect(await page.evaluate(()=>window.puPracticeCurrentScenario().id)).toBe(first);await expect(page.getByRole('button',{name:'SHOW COACHING ANSWER'})).toBeVisible();expect((await page.evaluate(()=>window.puPracticeStats())).total).toBe(1);
+});
+
+test('v4 critical training controls meet 44px minimum target size',async({page})=>{
+  await training(page);const geometry=await page.evaluate(()=>({daily:[...document.querySelectorAll('.puDailyOpen,.puDailyMark')].map(x=>x.getBoundingClientRect().height),start:document.getElementById('puStartDaily')?.getBoundingClientRect().height||0,back:[...document.querySelectorAll('.puBack')].map(x=>x.getBoundingClientRect().height)}));expect(geometry.daily.length).toBeGreaterThanOrEqual(3);expect(geometry.daily.every(h=>h>=44)).toBeTruthy();expect(geometry.start).toBeGreaterThanOrEqual(44);expect(geometry.back.every(h=>h>=44)).toBeTruthy();
+});
