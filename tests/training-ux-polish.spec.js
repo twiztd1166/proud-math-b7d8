@@ -57,6 +57,12 @@ test('v4 focused lesson navigation cannot bypass a required Quick Check',async({
   await page.getByRole('button',{name:'The live municipality lookup'}).click();await expect(page.locator('#puFocusNext')).toBeEnabled();await expect(page.locator('#puFocusNext')).toHaveText('CONTINUE →');
 });
 
+test('v4 wrong Quick Check offers an immediate retry on the same step',async({page})=>{
+  await training(page);await page.evaluate(()=>puSetPage('lesson:field-lookup'));await page.locator('.puLessonFocusSteps [data-pu-focus]').filter({hasText:'Quick Check'}).click();
+  await page.getByRole('button',{name:'The training lesson'}).click();await expect(page.getByRole('button',{name:'TRY QUICK CHECK AGAIN'})).toBeVisible();await expect(page.locator('#puFocusNext')).toBeDisabled();
+  const before=await page.evaluate(()=>window.puLessonFocusState('field-lookup').index);await page.getByRole('button',{name:'TRY QUICK CHECK AGAIN'}).click();await expect(page.locator('.puLessonFocusMeta')).toContainText(/Step \d+ of/);expect((await page.evaluate(()=>window.puLessonFocusState('field-lookup'))).index).toBe(before);await expect(page.getByRole('button',{name:'The live municipality lookup'})).toBeEnabled();await expect(page.getByRole('button',{name:'TRY QUICK CHECK AGAIN'})).toHaveCount(0);
+});
+
 test('v4 Practice retry repeats the same scenario without inventing another attempt',async({page})=>{
   await training(page);await page.getByRole('button',{name:/Practice/}).first().click();await expect.poll(async()=>page.evaluate(()=>window.PU_PRACTICE_RETRY_VERSION)).toBe('2026.08.17-pu-practice-v4-retry');await page.getByRole('button',{name:/Practice Objections/}).click();const first=await page.evaluate(()=>window.puPracticeCurrentScenario().id);await page.getByRole('button',{name:'SHOW COACHING ANSWER'}).click();await page.getByRole('button',{name:/NEED MORE PRACTICE/}).click();expect((await page.evaluate(()=>window.puPracticeStats())).total).toBe(1);await page.getByRole('button',{name:'TRY THIS ONE AGAIN'}).click();expect(await page.evaluate(()=>window.puPracticeCurrentScenario().id)).toBe(first);await expect(page.getByRole('button',{name:'SHOW COACHING ANSWER'})).toBeVisible();expect((await page.evaluate(()=>window.puPracticeStats())).total).toBe(1);
 });
