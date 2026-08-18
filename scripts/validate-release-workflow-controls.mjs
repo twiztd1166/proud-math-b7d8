@@ -5,6 +5,7 @@ function requireToken(source,token,label){if(!source.includes(token))throw new E
 function forbidToken(source,token,label){if(source.includes(token))throw new Error(`${label} contains forbidden control: ${token}`);}
 
 const build=read('.github/workflows/build-canvass-v37.yml');
+const unified=read('.github/workflows/validate-paradise-unified-release-v2.yml');
 const cloudflare=read('.github/workflows/deploy-canvass-cloudflare.yml');
 const full=read('.github/workflows/validate-paradise-university-v1.yml');
 const hardening=read('.github/workflows/validate-paradise-university-hardening.yml');
@@ -12,12 +13,15 @@ const ux=read('.github/workflows/validate-paradise-university-ux-polish.yml');
 const red=read('.github/workflows/validate-paradise-university-red-team.yml');
 const premerge=read('.github/workflows/validate-paradise-public-pr.yml');
 
-// Ruleset design intentionally permits GitHub Actions to perform the controlled post-validation
-// publication push. Keep that bypass narrow by proving that only the release workflow has
-// repository write permission; every other workflow must remain read-only or permissionless.
+// Ruleset design intentionally permits GitHub Actions to perform controlled post-validation
+// publication pushes. Keep that bypass narrow by proving that only the two explicitly named
+// release workflows have repository write permission; every other workflow must remain read-only
+// or permissionless. The unified v2 workflow is a self-contained release-control fallback while
+// the original sibling-workflow orchestrator remains preserved for history/redundant evidence.
 const workflowFiles=fs.readdirSync('.github/workflows').filter(name=>/\.ya?ml$/i.test(name)).sort();
 const writeWorkflows=workflowFiles.filter(name=>/\bcontents:\s*write\b/.test(read(`.github/workflows/${name}`)));
-if(JSON.stringify(writeWorkflows)!==JSON.stringify(['build-canvass-v37.yml']))throw new Error(`Unexpected GitHub Actions contents-write surface: ${writeWorkflows.join(', ')||'NONE'}`);
+const expectedWriteWorkflows=['build-canvass-v37.yml','validate-paradise-unified-release-v2.yml'];
+if(JSON.stringify(writeWorkflows)!==JSON.stringify(expectedWriteWorkflows))throw new Error(`Unexpected GitHub Actions contents-write surface: ${writeWorkflows.join(', ')||'NONE'}`);
 requireToken(cloudflare,'contents: read','manual Cloudflare deployment');
 forbidToken(cloudflare,'contents: write','manual Cloudflare deployment');
 
@@ -54,6 +58,44 @@ for(const name of [
 ])requireToken(build,`'${name}'`,'field release required workflow set');
 forbidToken(build,'--force','field release');
 forbidToken(build,'-f origin','field release');
+
+requireToken(unified,'name: Validate Paradise unified release v2','unified release v2');
+requireToken(unified,'branches: [paradise-canvass-manager-public]','unified release v2 trigger');
+requireToken(unified,'workflow_dispatch:','unified release v2 manual recovery trigger');
+requireToken(unified,'group: paradise-unified-release-v2-${{ github.ref_name }}','unified release v2 concurrency');
+requireToken(unified,"if: github.actor != 'github-actions[bot]' && github.ref_name == 'paradise-canvass-manager-public'",'unified release v2 recursion guard');
+requireToken(unified,'contents: write','unified release v2 permissions');
+requireToken(unified,'ref: ${{ github.sha }}','unified release v2 exact-SHA checkout');
+for(const validator of [
+  'scripts/validate-training-model-v1.mjs',
+  'scripts/validate-practice-model-v2.mjs',
+  'scripts/validate-training-hardening.mjs',
+  'scripts/validate-training-reconciliation.mjs',
+  'scripts/validate-deep-audit-controls.mjs',
+  'scripts/validate-training-experience-v2.mjs',
+  'scripts/validate-training-experience-v3.mjs',
+  'scripts/validate-release-workflow-controls.mjs',
+  'scripts/validate-field-baseline-v1.mjs',
+  'scripts/validate-training-release-isolation.mjs'
+])requireToken(unified,validator,'unified release v2 validator coverage');
+for(const test of [
+  'tests/mobile-regression.spec.js',
+  'tests/offline-regression.spec.js',
+  'tests/training-experience-v2.spec.js',
+  'tests/training-experience-v3.spec.js',
+  'tests/training-smoke.spec.js',
+  'tests/training-ux-polish.spec.js',
+  'tests/matrix-smoke.spec.js',
+  'tests/training-red-team-v1.spec.js',
+  'tests/service-worker-hardening-v1.spec.js',
+  'tests/progress-transfer-recovery-v1.spec.js'
+])requireToken(unified,test,'unified release v2 test coverage');
+requireToken(unified,'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200','unified release v2 dataset pin');
+requireToken(unified,'REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"','unified release v2 stale-head guard');
+requireToken(unified,'if [ "$REMOTE_SHA" != "$GITHUB_SHA" ]; then','unified release v2 stale-head guard');
+requireToken(unified,'git push origin "$VALIDATED_SHA:refs/heads/paradise-canvass-manager-validated"','unified release v2 validated branch advance');
+forbidToken(unified,'--force','unified release v2');
+forbidToken(unified,'-f origin','unified release v2');
 
 requireToken(premerge,'name: Validate Paradise public premerge gate','public premerge workflow');
 requireToken(premerge,'pull_request:','public premerge trigger');
@@ -102,6 +144,7 @@ console.log({
   publicPremergeProtectionGate:true,
   publicPremergeRequiredCheck:'Paradise public premerge gate',
   publicSameShaGate:true,
+  selfContainedUnifiedReleaseV2:true,
   boundedWaitSeconds:900,
   stalePublicHeadGuard:true,
   validatedBranchNormalPush:true,
