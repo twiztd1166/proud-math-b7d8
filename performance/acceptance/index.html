@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Paradise Performance · Physical Acceptance</title>
+  <link rel="stylesheet" href="acceptance.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="flag">NON-PRODUCTION DEVICE ACCEPTANCE</p>
+      <h1>Paradise Performance</h1>
+      <p id="acceptance-version" class="muted"></p>
+      <p class="warning">This build exists only to prove trusted-device, background-location, offline replay, and Finish Day behavior on physical iPhone and Android hardware. It does not authorize field activity.</p>
+    </header>
+
+    <section id="enrollment-panel" class="card">
+      <h2>Enroll this test device</h2>
+      <p>Use a short-lived QR token created for a synthetic acceptance employee in the isolated Supabase project.</p>
+      <label for="enrollment-token">Enrollment token</label>
+      <input id="enrollment-token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste token">
+      <button id="redeem-enrollment" type="button">REDEEM TEST ENROLLMENT</button>
+    </section>
+
+    <section class="card">
+      <h2>Today flow</h2>
+      <div id="performance-today-root"></div>
+    </section>
+
+    <section class="card diagnostics">
+      <h2>Acceptance controls</h2>
+      <div class="button-grid">
+        <button id="validate-session" type="button">VALIDATE SESSION</button>
+        <button id="refresh-auth-session" type="button">REFRESH AUTH SESSION</button>
+        <button id="capture-now" type="button">CAPTURE NOW</button>
+        <button id="flush-queue" type="button">FLUSH QUEUE</button>
+        <button id="refresh-diagnostics" type="button">REFRESH STATUS</button>
+        <button id="copy-evidence" type="button">COPY EVIDENCE JSON</button>
+        <button id="clear-local-state" type="button" class="secondary">CLEAR LOCAL TEST STATE</button>
+      </div>
+
+      <dl>
+        <div><dt>Network</dt><dd id="network-state">—</dd></div>
+        <div><dt>Session</dt><dd id="session-state">—</dd></div>
+        <div><dt>Native GPS</dt><dd id="native-state">—</dd></div>
+        <div><dt>Offline queue</dt><dd id="queue-state">—</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Evidence log</h2>
+      <p class="muted">No access token, refresh token, hidden password, or enrollment token is written to this log.</p>
+      <pre id="evidence-log" aria-live="polite"></pre>
+    </section>
+  </main>
+  <script type="module" src="acceptance-app.js"></script>
+</body>
+</html>

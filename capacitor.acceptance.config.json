@@ -1,0 +1,5 @@
+{
+  "appId": "com.paradiseexteriors.performance.acceptance",
+  "appName": "Paradise Performance TEST",
+  "webDir": "performance-acceptance-dist"
+}
