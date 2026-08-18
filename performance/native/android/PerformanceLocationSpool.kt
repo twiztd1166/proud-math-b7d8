@@ -1,6 +1,7 @@
 package com.paradise.performance
 
 import android.content.Context
+import com.getcapacitor.JSObject
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -32,7 +33,7 @@ data class PerformanceLocationRecord(
     val speedMetersPerSecond: Double? = null,
     val headingDegrees: Double? = null,
 ) {
-    fun toJson(): JSONObject = JSONObject()
+    fun toJson(): JSObject = JSObject()
         .put("clientPointId", clientPointId)
         .put("employeeId", employeeId)
         .put("deviceId", deviceId)
