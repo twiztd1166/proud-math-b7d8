@@ -1,150 +1,111 @@
 # Paradise University v1 — START HERE
 
-Status: **MACHINE-ONLY PRE-PROMOTION CONTROL — NOT PRODUCTION AUTHORIZED**  
+Status: **MACHINE-ONLY PRE-PROMOTION CONTROL — TRAINING EXPERIENCE v4 — NOT PRODUCTION AUTHORIZED**  
 As of: 2026-08-17
 
-This is the current in-repository status pointer for Paradise University v1. Read it before relying on older review, physical-test, opener-decision, red-team, or closeout records.
+This is the current in-repository status pointer. It supersedes older documents only for **current status/runtime pins**; historical test, review, remediation, and release evidence remains preserved in Git history and the earlier controlled records.
 
-Current machine gate: `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V21.json`.
+Current machine gate: `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V22.json`  
+Current release gate: `PARADISE_UNIVERSITY_RELEASE_GATE.json`  
+Current deferred physical record: `PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE_V4.md`
 
 ## Current controlled candidate
 
 - Working branch: `agent/paradise-university-v1`
-- Immutable browser runtime: `3cbbbf5006eb27926c362a97ee959ddadb8b227e`
-- Immutable runtime URL: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html`
-- Validated field baseline commit: `5e7efc40de524bef0e63c76595c3c518925888b9`
-- Validated field dataset SHA-256: `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`
-- Field denominator: 78 jurisdictions / 76 GO / 2 NO-GO
-- NO-GO jurisdictions: Punta Gorda; Tarpon Springs
+- Immutable browser runtime: `e93b0487290c16874010b1fc3181c1226f4ff0ad`
+- Runtime URL: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/e93b0487290c16874010b1fc3181c1226f4ff0ad/index.html`
+- Runtime-following test/control head before v22 documentation: `3aa85faa43b1602dddea9cb0d8d0d926d9b7a947`
+- Validated field baseline: `5e7efc40de524bef0e63c76595c3c518925888b9`
+- Dataset SHA-256: `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`
+- Field denominator: **78 jurisdictions / 76 GO / 2 NO-GO**
+- NO-GO: **Punta Gorda; Tarpon Springs**
 
-No browser-runtime asset was changed by the release-path or repository-governance hardening work.
+GitHub compare confirms that after the immutable v4 runtime, the pre-documentation changes are test/validator-only; they do not redefine the browser runtime.
 
-## Machine validation status
+## Training Experience v4
 
-Paradise University / Daily Training machine coverage remains PASS for the frozen runtime. The repository-governance control checkpoint `9343423b311285dba9ef5e33be071f131f162cf7` passed all four University workflows on the same head:
+v4 is a narrow employee-experience pass. It does not change field rules, curriculum authority, the exact opener, certification authority, future-role authorization, or the manager-assigned-training exclusion.
 
-- Full Paradise University validator — `32073329727` — PASS
-- Content hardening — `32073329730` — PASS
-- UX polish / Daily Training — `32073329728` — PASS
-- Adversarial red team — `32073329713` — PASS
+Machine-validated v4 behavior includes:
 
-Subsequent governance work changes only workflows, validators and documentation. The release-isolation validator continues to enforce the frozen field/runtime boundary.
+- `Today's Training · 0 of 3 complete` with same-day progress persistence and resume to the next unfinished activity;
+- the current-curriculum Today skill remains governed by the actual lesson/Quick Check gate and cannot be bypassed by the Today card;
+- focused lesson navigation with persistent lesson-step position;
+- semantic lesson steps: Learn → optional Watch/Listen when media exists → Practice → Quick Check when required → Complete;
+- Quick Check blocks forward navigation until passed;
+- a wrong Quick Check offers `TRY QUICK CHECK AGAIN` and returns to the same Quick Check step with choices available again;
+- Practice offers `TRY THIS ONE AGAIN` after `NEED MORE PRACTICE`, returning the same scenario without manufacturing another attempt before re-rating;
+- critical Training controls are hardened to at least 44 CSS pixels where applicable;
+- 200% text/device-matrix containment is validated;
+- `OFFLINE READY` requires the exact current v4 cache plus critical cached assets, not merely an active service worker.
 
-The v21 architecture also machine-constrains the GitHub Actions write surface. `scripts/validate-release-workflow-controls.mjs` fails unless `.github/workflows/build-canvass-v37.yml` is the only workflow with repository `contents: write`; all validation workflows and the manual Cloudflare deployment remain read-only. The public premerge workflow is additionally forbidden from using repository secrets, `pull_request_target`, or `git push`.
+Current cache generation:
 
-The applicable machine-coverage statement remains: maximum available automated validation is PASS for the covered matrix; this does not manufacture physical-device evidence, human policy judgment, trainer-media sharing visibility, opener approval, repository-settings enforcement, or promotion authorization.
+`pcm-field-v3-12-pu-v1-content5-readiness2-practice1-checks2-more1-media1-mediaui2-player3-progress1-managerhome1-governance1-2026-08-17-playerlayout1-mediaplaylists1-salespolicy1-pricingfinance1-contracthandoff1-salesgrad1-salesclose2-salesui7-financeimpl1-financeoffice1-handoff2-assessref1-mediarights1-morelinkrights1-practice2-internalmedia1-currentness1-canvasslib1-drivetoplevel1-deepaudit1-experience4ready3-trainingux5-experience3-redteam7-daily1`
 
-## Public premerge gate — real PR event proven
+## Real public-target merge proof
 
-Paradise now has a unique consolidated premerge check:
+Draft PR #3 is a **DO NOT MERGE / validation-only** fixture targeting `paradise-canvass-manager-public`. On the final v4 test/control head, GitHub generated synthetic merge SHA `5b4d5c79f6a992fb5efac23dd19751fdefed87a1` and workflow run `32085373096` passed end to end:
 
-- workflow: `.github/workflows/validate-paradise-public-pr.yml`
-- workflow name: `Validate Paradise public premerge gate`
-- required job/check context: **`Paradise public premerge gate`**
-- target: pull requests into `paradise-canvass-manager-public`
-- repository permission: `contents: read`
-- browser release retries: `0`
-
-A draft **DO NOT MERGE / validation-only** PR #2 was created only to exercise the real `pull_request` event. GitHub produced a synthetic merge result incorporating the current public metadata-only child with the University branch. The first complete real-event proof, workflow run `32073705223`, passed:
-
-- release-control static validation — PASS
+- release/training static controls — PASS
 - controlled 78 / 76 / 2 field baseline and Training/field release isolation — PASS
-- static production build — PASS
+- static production bundle — PASS
 - combined iPhone field + offline + Training/UX suite — PASS
 - device matrix — PASS
 - adversarial/service-worker/progress-transfer matrix — PASS
+- release retries — 0
 
-The validation fixture is not release authorization and must be closed without merge after the final-head readback.
+The fixture is not release authorization and must be closed **without merge** after final documentation-head readback.
 
-## Human / physical testing direction
+## Release-path controls
 
-Current direction is machine-only validation. Therefore:
+The current release architecture remains fail-closed:
+
+1. The four University validation workflows run on the isolated University branch and the public branch.
+2. The public PR gate is read-only and exercises field, offline, Training/UX, device, and adversarial coverage.
+3. The public release workflow requires the four University workflows to be `completed:success` on the exact public source SHA before controlled publication.
+4. A bounded wait, stale-public-head recheck, controlled metadata rules, and normal non-force validated-branch advancement remain enforced.
+5. `scripts/validate-release-workflow-controls.mjs` machine-checks the release path and GitHub Actions write surface.
+6. The only workflow permitted repository `contents: write` is the controlled field/publication workflow.
+
+Repository ruleset preparation remains **PREPARED — NOT APPLIED**. The intended branch ruleset is `Paradise Public Release Protection`, requiring PRs and the unique `Paradise public premerge gate`, an up-to-date branch, deletion protection, and force-push blocking, with only the necessary GitHub Actions app publication bypass if the GitHub settings surface permits it.
+
+## Human / physical / authority gates
+
+Current direction remains machine-only testing. Therefore:
 
 - Physical iPhone/PWA acceptance: **DEFERRED — NOT PASS, NOT FAIL**
 - Human curriculum/compliance review: **DEFERRED — NOT PASS**
-- The preserved physical checklist remains available for later use but is not a current testing request.
+- Trainer-media item-level sharing visibility: **MACHINE UNRESOLVED — ACCESS NOT VERIFIED**
+- Public branch ruleset: **PREPARED — NOT APPLIED**
+- Production promotion authorization: **OPEN — explicit separate authorization required**
 
-`PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md` contains the current physical-test disposition. Older human-review templates remain preserved as historical/checklist material; their older runtime pins do not override this file.
+Automated validation must not be represented as a substitute for any of those gates.
 
 ## Exact canvass opener
 
-The exact candidate remains:
+Candidate remains unchanged:
 
 > I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?
 
-Current status: **CURRENT APPROVAL PENDING — EXPLICIT APPROVE OR REVISE DECISION OPEN**.
+Status: **CURRENT APPROVAL PENDING — explicit APPROVE or REVISE decision open.**
 
-A generic instruction such as `Go`, `Continue`, or permission to keep testing does not approve this wording.
+Generic `Go`, `Continue`, testing authorization, or v4 experience approval does not approve the opener.
 
-Machine legal/truthfulness audit disposition: **CONTEXT_DEPENDENT — NO AUTO-APPROVAL AND NO AUTOMATIC REWRITE**. The wording may not misrepresent the reason for solicitation or create a materially misleading overall impression, and the statement that Paradise is doing work in the neighborhood must be factually true when used. Preserve the exact candidate until a separate intentional approve/revise decision is made.
+## Layer‑3 readback
 
-This record is decision support, not a legal opinion.
+Immediately before v22 closeout, connected Google Drive readback reconfirmed:
 
-## Trainer media access-control visibility
+- `00_LAYER_3_START_HERE` file ID `1eR19Dy1rsloQC2OVtoPj867g9Dka8zZ-uqGilDZpdIg`
+- ACTIVE Working Master file ID `1ZAXIJ51UA0ufpW8VuFKxbI2918xBa0QIqftK2J9jsuk`
+- ACTIVE status: **ACTIVE WORKING SOURCE — NATIVE GOOGLE DOC — NOT PROMOTED**
 
-Machine status: **UNRESOLVED — ACCESS NOT VERIFIED**.
+No Layer‑3 write occurred.
 
-Representative media `New Canvasser Training - Process.mp4` is accessible through the authenticated Paradise Drive connection and lives in the `Canvassing Docs` shared drive, but the available Drive connector does not expose the item-level permission list/shared-visibility fields needed to prove whether the item is restricted, domain-scoped, or anyone-with-link. An anonymous-access probe could not be completed because the available unauthenticated web/container paths could not reach the connector-derived Google URL; that tooling limitation is not evidence that the file is private.
+## Promotion boundary
 
-Do not describe trainer-media sharing as access-controlled until item-level visibility can be independently verified. Shared-drive location alone is not proof of restricted access.
-
-## Release-path hardening
-
-The current candidate now enforces these release controls:
-
-1. All four Paradise University validation workflows run on both the isolated University branch and the public branch.
-2. All four University workflows and the field release workflow use branch-scoped concurrency, so isolated work cannot cancel a public release run.
-3. Bot-generated controlled publication commits are excluded from recursively running the expensive University jobs.
-4. The `Validate canvass register` public-release workflow performs the controlled field rebuild, field integrity checks, iPhone field/offline tests, and device matrix.
-5. Before publishing, the field release workflow polls GitHub Actions for the exact public source SHA and requires all four University workflows to be `completed:success`.
-6. Missing, failed, or still-pending gates after the 900-second bounded wait fail closed.
-7. The public head is re-read before publication; a newer source commit prevents stale publication.
-8. Only after field + University gates succeed may generated controlled artifacts/metadata be published.
-9. `paradise-canvass-manager-validated` advances only by a normal, non-force push; non-fast-forward failure is preserved rather than rewriting validated history.
-10. `latest.json` has only a narrow validated-baseline-consistent exception in release isolation; arbitrary metadata drift remains blocked.
-11. `scripts/validate-release-workflow-controls.mjs` statically enforces the release path, public premerge gate, and bounded GitHub Actions write surface inside content hardening.
-
-## Repository ruleset preparation
-
-The remaining repository-settings gap is reduced to a concrete, current-GitHub configuration step. Read `PARADISE_PUBLIC_RULESET_SETUP.md` before changing GitHub Settings.
-
-Prepared design: one branch ruleset named **Paradise Public Release Protection** targeting `paradise-canvass-manager-public`. It should require pull requests, require the exact `Paradise public premerge gate`, require the branch to be up to date, prevent deletion, and block force pushes. The GitHub Actions app needs the narrow `Always allow` bypass only because the controlled post-validation workflow legitimately writes generated artifacts/metadata back to public. Do not grant ordinary human/user always-bypass access.
-
-A previously considered second branch ruleset using **Restrict file paths** was rejected after current GitHub documentation review. GitHub documents file-path restriction as a **push-ruleset** capability, and push rulesets are not the applicable repository-level mechanism for this public personal repository under the current plan/surface. That incorrect recommendation has been removed from v21 and the setup guide.
-
-Control-code integrity instead relies on the PR requirement, the real premerge validation, the machine-enforced release-control invariants, and the independent post-merge exact-SHA release barrier. A sufficiently privileged repository owner can still intentionally change repository rules or control code; that administrative trust root is not represented as machine-eliminated.
-
-The connected GitHub surface does **not** expose repository-ruleset/branch-protection writes, so the branch ruleset is **PREPARED, NOT APPLIED**. Do not call repository governance closed until GitHub Settings readback shows it active and an ordinary PR is blocked without the required premerge check.
-
-## Required future promotion method
-
-`agent/paradise-university-v1` and `paradise-canvass-manager-public` diverge at the validated baseline because public contains one later metadata-only publication commit. The validation fixture proved that GitHub can construct a normal merge result and the complete premerge gate passes on that merged tree.
-
-When promotion is separately authorized, the safe path is:
-
-1. normal PR/merge from the University branch into `paradise-canvass-manager-public` — never reset or force-move public;
-2. require `Paradise public premerge gate` to pass on the PR merge result;
-3. preserve the existing validated-baseline-consistent `latest.json` relationship through the merge;
-4. after merge, run the four University workflows plus the field release workflow on the exact public merge SHA;
-5. require all exact-SHA gates to succeed;
-6. allow only the controlled publication workflow to create any generated public artifact/metadata commits;
-7. fast-forward `paradise-canvass-manager-validated` only through the normal non-force release path;
-8. read back both public and validated branch SHAs.
-
-No production merge or branch advance has been authorized or performed by this pre-promotion work.
-
-## Older records / supersession rule
-
-Preserve older audit and review records as historical evidence. Where an older document pins an earlier runtime/head or states that human/physical testing is presently required, this START HERE file plus the current physical acceptance record and v21 pre-promotion gate supersede that old **current-status** statement only. Historical evidence remains intact.
-
-- `PARADISE_UNIVERSITY_HUMAN_REVIEW_SIGNOFF.md` — retained checklist/template; older runtime pin is historical.
-- `PARADISE_UNIVERSITY_AI_HUMAN_REVIEW_EVIDENCE_MAP.md` — retained evidence map; current human/physical disposition is deferred.
-- `PARADISE_UNIVERSITY_OPENER_DECISION_SUPPORT.md` — exact opener-preservation rule remains useful; its older runtime pin is historical.
-- `PARADISE_UNIVERSITY_RELEASE_GATE.json` — machine-only closeout snapshot.
-- `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V19.json` — historical pre-promotion snapshot.
-- `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V20.json` — prior pre-promotion snapshot; v21 is current.
-- `PARADISE_PUBLIC_RULESET_SETUP.md` — current controlled repository-settings recipe; prepared, not applied.
+No production merge or branch advancement is authorized by this work. A future promotion requires a normal PR/merge into `paradise-canvass-manager-public`, the required public premerge check on that merge result, exact-public-SHA post-merge gates, controlled publication, and normal non-force advancement of `paradise-canvass-manager-validated`—and only after separate explicit production-promotion authorization.
 
 ## Hard rule
 
-Paradise University is **not production authorized** merely because machine tests are green. Current machine testing is saturated for the frozen runtime and the real public-target PR gate is proven, but the exact opener remains pending, trainer-media sharing visibility remains unresolved, human/physical review is deferred rather than passed, the public branch ruleset is prepared rather than applied, and production promotion requires a separate explicit authorization.
+**Paradise University is not production authorized merely because v4 machine testing is green.** Machine validation does not manufacture physical-device evidence, human judgment, opener approval, trainer-media sharing verification, repository-settings enforcement, or production-promotion authorization.
