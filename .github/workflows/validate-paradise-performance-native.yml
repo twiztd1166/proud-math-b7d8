@@ -1,0 +1,116 @@
+name: Validate Paradise Performance native shell
+
+on:
+  push:
+    branches:
+      - agent/paradise-performance-v1
+    paths:
+      - 'capacitor.config.json'
+      - 'performance/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/prepare-performance-android-shell.mjs'
+      - 'scripts/prepare-performance-ios-shell.rb'
+      - '.github/workflows/validate-paradise-performance-native.yml'
+  pull_request:
+    paths:
+      - 'capacitor.config.json'
+      - 'performance/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/prepare-performance-android-shell.mjs'
+      - 'scripts/prepare-performance-ios-shell.rb'
+      - '.github/workflows/validate-paradise-performance-native.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-performance-native-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CAPACITOR_VERSION: '8.5.0'
+
+jobs:
+  android-native:
+    name: Android native shell compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Build controlled web bundle
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Install isolated Capacitor toolchain
+        run: npm install --no-save --package-lock=false @capacitor/core@${CAPACITOR_VERSION} @capacitor/cli@${CAPACITOR_VERSION} @capacitor/android@${CAPACITOR_VERSION}
+
+      - name: Generate Android shell
+        run: npx cap add android
+
+      - name: Integrate Performance native sources
+        run: node scripts/prepare-performance-android-shell.mjs
+
+      - name: Compile Android debug shell
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+  ios-native:
+    name: iOS native shell compile
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Build controlled web bundle
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Install isolated Capacitor toolchain
+        run: npm install --no-save --package-lock=false @capacitor/core@${CAPACITOR_VERSION} @capacitor/cli@${CAPACITOR_VERSION} @capacitor/ios@${CAPACITOR_VERSION}
+
+      - name: Generate iOS SPM shell
+        run: npx cap add ios --packagemanager SPM
+
+      - name: Install Xcode project helper
+        run: gem install xcodeproj --no-document
+
+      - name: Integrate Performance native sources
+        run: ruby scripts/prepare-performance-ios-shell.rb
+
+      - name: Resolve iOS package dependencies
+        run: xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+
+      - name: Compile unsigned iOS Simulator shell
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Debug
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath build/paradise-performance-ios
+          CODE_SIGNING_ALLOWED=NO
+          build
