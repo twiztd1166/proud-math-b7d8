@@ -83,7 +83,8 @@ test('Android runtime uses a location foreground service with persist-before-del
   assert.match(service, /ACTION_STOP/);
   assert.match(service, /EXTRA_EMPLOYEE_ID/);
   assert.match(service, /EXTRA_DEVICE_ID/);
-  assert.match(service, /spool\.append\(record\)[\s\S]*sampleListener\?\.invoke\(record\)/);
+  assert.match(service, /val record = persistLocation\(location\) \?: return[\s\S]*sampleListener\?\.invoke\(record\)/);
+  assert.match(service, /spool\.append\(record\)/);
   assert.match(spool, /clientPointId/);
   assert.match(spool, /output\.fd\.sync\(\)/);
   assert.match(spool, /refusing to discard pending GPS/);
@@ -95,8 +96,12 @@ test('Android runtime uses a location foreground service with persist-before-del
 test('native durable spool is evidence transport only and never changes field authority', async () => {
   const androidSpool = await read('android/PerformanceLocationSpool.kt');
   const iosSpool = await read('ios/PerformanceLocationSpool.swift');
-  assert.match(androidSpool, /never.*authorization source.*Lookup/i);
-  assert.match(iosSpool, /never grants authorization.*Lookup authority/i);
+  assert.match(androidSpool, /evidence transport only/i);
+  assert.match(androidSpool, /authorization source/i);
+  assert.match(androidSpool, /field Lookup decision/i);
+  assert.match(iosSpool, /transport evidence only/i);
+  assert.match(iosSpool, /never grants authorization/i);
+  assert.match(iosSpool, /field Lookup authority/i);
 });
 
 test('Android technical sample interval is explicitly not a KPI or compensation standard', async () => {
