@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "2026.08.17-pu-prepromotion-v19",
+  "status": "NOT_RELEASE_READY",
+  "mode": "MACHINE_ONLY_PREPROMOTION_HARDENING",
+  "workingBranch": "agent/paradise-university-v1",
+  "immutableRuntime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html",
+  "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+  "lastCompleteFourWorkflowFunctionalCheckpoint": {
+    "head": "d4b0080c6d80d2b93a372a91222f581fcf949fb2",
+    "fullValidator": 32069575291,
+    "contentHardening": 32069575250,
+    "uxPolish": 32069575272,
+    "adversarialRedTeam": 32069575300,
+    "allGreen": true
+  },
+  "releaseIsolationControlRepair": {
+    "head": "3f4e4e65ab72ca8de27d9f44f2ffd691cf364c07",
+    "cause": "The release-isolation validator correctly rejected modification of .github/workflows/build-canvass-v37.yml until that exact control-plane path was explicitly approved.",
+    "repair": "Added only .github/workflows/build-canvass-v37.yml to the existing release-control/test-only exception set.",
+    "runtimeChanged": false,
+    "fieldDataChanged": false,
+    "immutableFieldFilesStillByteLocked": true,
+    "fullValidatorAfterRepair": "PASS"
+  },
+  "fieldBaseline": {
+    "status": "PASS_UNCHANGED",
+    "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+    "records": 78,
+    "go": 76,
+    "noGo": 2,
+    "noGoJurisdictions": ["Punta Gorda", "Tarpon Springs"]
+  },
+  "machineValidation": {
+    "status": "PASS_MAXIMUM_COVERED_RUNTIME_MATRIX",
+    "dailyTraining": "PASS",
+    "iPhoneField": "PASS",
+    "iPhoneOffline": "PASS",
+    "trainingExperienceV2": "PASS",
+    "trainingExperienceV3": "PASS",
+    "universityIPhone": "PASS",
+    "deviceMatrix": "PASS",
+    "adversarialMatrixAtLastCompleteFourWorkflowCheckpoint": "PASS",
+    "simulatorOrCiMisrepresentedAsPhysical": false
+  },
+  "releasePathHardening": {
+    "universityWorkflowsConfiguredOnPublicBranch": true,
+    "universityWorkflowNamesRequired": [
+      "Validate Paradise University v1",
+      "Validate Paradise University content hardening",
+      "Validate Paradise University UX polish",
+      "Validate Paradise University adversarial red team"
+    ],
+    "botPublicationCommitsExcludedFromRecursiveUniversityRuns": true,
+    "fieldReleaseWaitsForExactSourceShaUniversityRuns": true,
+    "missingGateFailsClosed": true,
+    "failedGateFailsClosed": true,
+    "boundedWaitTimeoutFailsClosed": true,
+    "validatedBranchAdvance": "NORMAL_NON_FORCE_PUSH_AFTER_FIELD_AND_UNIVERSITY_GATES",
+    "nonFastForwardValidatedUpdateFailsClosed": true,
+    "selfParseOnAgentBranch": "PASS_WORKFLOW_ACCEPTED_JOB_SKIPPED",
+    "publicAgentAncestry": "DIVERGED_ONE_PUBLIC_METADATA_COMMIT_FROM_VALIDATED_MERGE_BASE",
+    "requiredPromotionMethod": "NORMAL_PR_OR_MERGE_INTO_PUBLIC_NO_FORCE_RESET",
+    "publishPathExecutedPrePromotion": false,
+    "publishPathExecutionReason": "Intentionally not executed before separate production promotion authorization."
+  },
+  "branchProtection": {
+    "workingBranchProtected": false,
+    "publicBranchProtected": false,
+    "validatedBranchProtected": false,
+    "connectedToolCanSetProtectionOrRuleset": false,
+    "residualRisk": "A sufficiently privileged direct/manual branch update can bypass the normal fail-closed workflow until repository protection/rulesets are separately configured."
+  },
+  "currentPhysicalAcceptance": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "result": "NOT_PASS_NOT_FAIL",
+    "requiredRuntimeIfResumed": "3cbbbf5006eb27926c362a97ee959ddadb8b227e"
+  },
+  "humanCurriculumComplianceReview": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "automatedContentQa": "PASS_MACHINE_DETECTABLE_CONTROLS",
+    "humanJudgmentSynthesizedByAutomation": false
+  },
+  "opener": {
+    "status": "OPEN_EXPLICIT_APPROVE_OR_REVISE",
+    "runtimeDisplay": "CURRENT APPROVAL PENDING",
+    "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
+    "genericGoOrContinueCountsAsApproval": false,
+    "machineLegalTruthfulnessDisposition": "CONTEXT_DEPENDENT_NO_AUTO_APPROVAL_NO_AUTOMATIC_REWRITE",
+    "keyContextRisks": [
+      "The commercial reason for solicitation must not be misrepresented or materially obscured by the overall impression.",
+      "The statement that Paradise is doing work in the neighborhood must be factually true when used."
+    ]
+  },
+  "trainerMediaVisibility": {
+    "status": "MACHINE_UNRESOLVED_ACCESS_NOT_VERIFIED",
+    "representativeSharedDriveName": "Canvassing Docs",
+    "representativeSharedDriveId": "0AMAf1G5ecwJZUk9PVA",
+    "representativeTonyVideoId": "1BkukwBkZOQbzae4kwxL7i0Rq4xLxZG4B",
+    "authenticatedAccess": "PASS",
+    "itemPermissionListVisible": false,
+    "sharedDriveLocationTreatedAsProofOfRestrictedAccess": false
+  },
+  "productionState": {
+    "publicBranchBeforePromotion": "ebe0505d338d80ff57f60f9b041f1c55d4fce7d0",
+    "validatedBranchBeforePromotion": "5e7efc40de524bef0e63c76595c3c518925888b9",
+    "promotionAuthorized": false,
+    "promotionPerformed": false
+  },
+  "currentStatusAuthority": {
+    "readFirst": "docs/PARADISE_UNIVERSITY_START_HERE.md",
+    "currentMachineGate": "docs/PARADISE_UNIVERSITY_PREPROMOTION_GATE_V19.json",
+    "physicalDisposition": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
+    "priorMachineCloseoutSnapshot": "docs/PARADISE_UNIVERSITY_RELEASE_GATE.json",
+    "olderHumanAndOpenerDocuments": "HISTORICAL_CHECKLIST_OR_DECISION_SUPPORT_WHERE_RUNTIME_PINS_CONFLICT"
+  },
+  "hardRule": "Do not promote from the isolated University branch by force/reset. A separately authorized release must merge normally into paradise-canvass-manager-public, run the exact-source-SHA University and field gates, and allow only the fail-closed workflow to fast-forward paradise-canvass-manager-validated. Machine PASS does not manufacture physical acceptance, human approval, trainer-media sharing visibility, opener approval, or promotion authorization."
+}

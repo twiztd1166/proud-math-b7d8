@@ -1,0 +1,14 @@
+# Paradise Performance v1 — non-production Edge Function auth configuration.
+# Mint and revoke are called only by signed-in Performance managers/admins: the platform
+# verifies the user session JWT first, then the handler independently validates auth.getUser()
+# plus the current Performance employee/role mapping. Enrollment redemption intentionally
+# has no prior user JWT; its short-lived high-entropy one-time QR token is the credential.
+
+[functions.performance-enrollment-mint]
+verify_jwt = true
+
+[functions.performance-enrollment-redeem]
+verify_jwt = false
+
+[functions.performance-device-revoke]
+verify_jwt = true

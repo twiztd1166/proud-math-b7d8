@@ -1,0 +1,72 @@
+name: Validate Paradise University content hardening
+on:
+  push:
+    branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
+concurrency:
+  group: paradise-university-v1-hardening-${{ github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  hardening:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate approved training boundaries
+        run: |
+          node --check scripts/validate-training-hardening.mjs
+          node --check scripts/validate-training-reconciliation.mjs
+          node --check scripts/validate-deep-audit-controls.mjs
+          node --check scripts/validate-practice-model-v2.mjs
+          node --check scripts/validate-training-experience-v2.mjs
+          node --check scripts/validate-training-experience-v3.mjs
+          node --check scripts/validate-release-workflow-controls.mjs
+          node --check training-deep-audit-fixes-v1.js
+          node --check training-experience-v2.js
+          node --check training-ux-polish-v1.js
+          node --check training-experience-v3.js
+          node --check training-practice-v1.js
+          node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
+          node scripts/validate-deep-audit-controls.mjs
+          node scripts/validate-practice-model-v2.mjs
+          node scripts/validate-training-experience-v2.mjs
+          node scripts/validate-training-experience-v3.mjs
+          node scripts/validate-release-workflow-controls.mjs
+      - name: Validate secure trainer playback and simplified training boundary
+        run: |
+          node --check training-player-v1.js
+          grep -q '2026.08.17-pu-player-v3-drive-top-level' training-player-v1.js
+          grep -q 'data-provider="drive-top-level"' training-player-v1.js
+          grep -q 'PLAY IN GOOGLE DRIVE' training-player-v1.js
+          grep -q 'third-party-cookie' training-player-v1.js
+          if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
+          grep -q 'drivetoplevel1' sw.js
+          grep -q 'deepaudit1' sw.js
+          grep -q 'trainingux5-experience3' sw.js
+          grep -q '2026.08.17-pu-deep-audit-fixes-v1' training-deep-audit-fixes-v1.js
+          grep -q '2026.08.17-pu-checks-v3-versioned' training-checks-v1.js
+          grep -q '2026.08.17-pu-training-experience-v2' training-experience-v2.js
+          grep -q 'CANVASSER_CORE' training-experience-v2.js
+          grep -q 'PASS QUICK CHECK FIRST' training-experience-v2.js
+          grep -q '||checkRequired))nextBtn.disabled=!(done&&passed)' training-experience-v2.js
+          grep -q '2026.08.17-pu-training-ux-polish-v1' training-ux-polish-v1.js
+          grep -q 'puTrainingNavV1' training-ux-polish-v1.js
+          grep -q 'NEXT MILESTONE' training-ux-polish-v1.js
+          grep -q '2026.08.17-pu-practice-v3-adaptive' training-practice-v1.js
+          grep -q 'Practice My Weak Areas' training-practice-v1.js
+          grep -q '2026.08.17-pu-training-experience-v3' training-experience-v3.js
+          grep -q 'PARADISE_UNIVERSITY_PROGRESS_TRANSFER' training-experience-v3.js
+          grep -q 'PRACTICE THIS SKILL' training-experience-v3.js
+          grep -q 'Lesson complete ✓' training-experience-v3.js
+          if grep -Eqi 'manager-assigned|assigned training|due date' training-experience-v3.js training-ux-polish-v1.js; then echo 'Manager-assigned training reintroduced'; exit 1; fi
+      - name: Reconfirm controlled field baseline
+        run: |
+          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
+          grep -q 'records.length!==78' boot-v2.js
+          grep -q 'db.meta.goCount!==76' boot-v2.js
+          grep -q 'db.meta.noGoCount!==2' boot-v2.js

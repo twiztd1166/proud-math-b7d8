@@ -1,0 +1,48 @@
+name: Validate Paradise University UX polish
+on:
+  push:
+    branches: [agent/paradise-university-v1, paradise-canvass-manager-public]
+concurrency:
+  group: paradise-university-ux-polish-validation-${{ github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate UX polish static controls
+        run: |
+          node --check training-ux-polish-v1.js
+          node --check training-practice-v1.js
+          node --check training-experience-v3.js
+          node --check tests/training-ux-polish.spec.js
+          node --check tests/practice-smoke.spec.js
+          node --check tests/training-experience-v3.spec.js
+          node scripts/validate-training-experience-v2.mjs
+          node scripts/validate-training-experience-v3.mjs
+          grep -q '2026.08.17-pu-training-ux-polish-v1' training-ux-polish-v1.js
+          grep -q '2026.08.17-pu-practice-v3-adaptive' training-practice-v1.js
+          grep -q '2026.08.17-pu-training-experience-v3' training-experience-v3.js
+          grep -q 'trainingux5-experience3' sw.js
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-playwright"
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit
+      - name: Start test server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+      - name: Run milestone navigation and adaptive-practice regressions
+        run: ./node_modules/.bin/playwright test tests/training-ux-polish.spec.js tests/practice-smoke.spec.js tests/training-experience-v3.spec.js --project=webkit-iphone --reporter=github

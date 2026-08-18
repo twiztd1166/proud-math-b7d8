@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "2026.08.17-pu-prepromotion-v20",
+  "status": "NOT_RELEASE_READY",
+  "mode": "MACHINE_ONLY_PREPROMOTION_RELEASE_PATH_HARDENED",
+  "workingBranch": "agent/paradise-university-v1",
+  "immutableRuntime": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/3cbbbf5006eb27926c362a97ee959ddadb8b227e/index.html",
+  "validatedFieldBaseCommit": "5e7efc40de524bef0e63c76595c3c518925888b9",
+  "lastCompleteFourWorkflowFunctionalCheckpoint": {
+    "head": "d4b0080c6d80d2b93a372a91222f581fcf949fb2",
+    "fullValidator": 32069575291,
+    "contentHardening": 32069575250,
+    "uxPolish": 32069575272,
+    "adversarialRedTeam": 32069575300,
+    "allGreen": true
+  },
+  "releasePathControlHeadBeforeV20Docs": "92b22de03c93bec4085b3a468ad980115d5648cb",
+  "fieldBaseline": {
+    "status": "PASS_UNCHANGED",
+    "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+    "records": 78,
+    "go": 76,
+    "noGo": 2,
+    "noGoJurisdictions": ["Punta Gorda", "Tarpon Springs"]
+  },
+  "runtimeFreeze": {
+    "status": "PASS",
+    "lastBrowserRuntimeChange": "3cbbbf5006eb27926c362a97ee959ddadb8b227e",
+    "postRuntimeWorkTypes": ["workflow controls", "validators", "tests", "documentation"],
+    "fieldDatasetChangedByReleasePathHardening": false
+  },
+  "releaseIsolation": {
+    "status": "PASS_FAIL_CLOSED",
+    "immutableFieldFilesRemainByteLocked": true,
+    "approvedControlPlaneException": ".github/workflows/build-canvass-v37.yml",
+    "latestMetadataException": {
+      "status": "NARROW_VALIDATED_METADATA_ONLY",
+      "purpose": "Allow the existing public branch metadata-only child to survive a normal future merge without weakening field-data isolation.",
+      "allowedPreReleaseShaLineage": [
+        "fc23db9c139447e87e5ab3be46dcc4e3ecf74c28",
+        "5e7efc40de524bef0e63c76595c3c518925888b9"
+      ],
+      "requiredDatasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
+      "requiredCounts": {"records": 78, "go": 76, "noGo": 2},
+      "requiresValidatedTrue": true,
+      "requiresZeroDatasetJurisdictionClassificationChanges": true,
+      "requiresImmutableUrlToMatchSha": true,
+      "requiresValidPublishedAt": true,
+      "arbitraryMetadataDriftAllowed": false
+    }
+  },
+  "releasePathHardening": {
+    "universityWorkflowsConfiguredOnPublicBranch": true,
+    "requiredUniversityWorkflows": [
+      "Validate Paradise University v1",
+      "Validate Paradise University content hardening",
+      "Validate Paradise University UX polish",
+      "Validate Paradise University adversarial red team"
+    ],
+    "exactPublicSourceShaRequired": true,
+    "boundedWaitSeconds": 900,
+    "missingGateFailsClosed": true,
+    "failedGateFailsClosed": true,
+    "timeoutFailsClosed": true,
+    "publicHeadRecheckedBeforePublish": true,
+    "newerPublicHeadPreventsStalePublish": true,
+    "validatedBranchAdvance": "NORMAL_NON_FORCE_PUSH",
+    "nonFastForwardValidatedUpdateFailsClosed": true,
+    "botGeneratedPublicationCommitsExcludedFromRecursiveUniversityRuns": true,
+    "selfParseOnAgentBranch": "WORKFLOW_PARSES_PUBLISH_JOB_SKIPPED",
+    "publishPathExecutedBeforeAuthorization": false
+  },
+  "concurrencyIsolation": {
+    "status": "PASS_BRANCH_SCOPED",
+    "fieldRelease": "paradise-canvass-manager-public-validation-${{ github.ref_name }}",
+    "fullValidator": "paradise-university-v1-validation-${{ github.ref_name }}",
+    "contentHardening": "paradise-university-v1-hardening-${{ github.ref_name }}",
+    "uxPolish": "paradise-university-ux-polish-validation-${{ github.ref_name }}",
+    "adversarialRedTeam": "paradise-university-red-team-validation-${{ github.ref_name }}",
+    "agentPushCanCancelPublicReleaseRun": false
+  },
+  "releaseWorkflowStaticGuard": {
+    "status": "PASS_IN_CONTENT_HARDENING",
+    "validator": "scripts/validate-release-workflow-controls.mjs",
+    "enforces": [
+      "four exact required University workflow names",
+      "public + isolated workflow triggers",
+      "branch-scoped concurrency",
+      "bot publication recursion guard",
+      "exact-SHA Actions query",
+      "completed-success requirement",
+      "900-second bounded fail-closed wait",
+      "stale public-head guard",
+      "normal non-force validated-branch push"
+    ]
+  },
+  "promotionTopology": {
+    "publicBranchBeforePromotion": "ebe0505d338d80ff57f60f9b041f1c55d4fce7d0",
+    "validatedBranchBeforePromotion": "5e7efc40de524bef0e63c76595c3c518925888b9",
+    "publicAgentRelationship": "DIVERGED_FROM_VALIDATED_BASE_BY_ONE_PUBLIC_METADATA_ONLY_CHILD",
+    "forceResetPublicAllowed": false,
+    "requiredFutureMethod": "NORMAL_PR_OR_MERGE_FROM_AGENT_TO_PUBLIC",
+    "postMergeRequirement": "RUN_FIELD_PLUS_FOUR_UNIVERSITY_GATES_ON_EXACT_PUBLIC_MERGE_SHA",
+    "stableValidatedAdvance": "ONLY_AFTER_ALL_REQUIRED_GATES_PASS"
+  },
+  "branchProtection": {
+    "workingBranchProtected": false,
+    "publicBranchProtected": false,
+    "validatedBranchProtected": false,
+    "connectedToolCanSetProtectionOrRuleset": false,
+    "residualRisk": "A sufficiently privileged direct/manual ref update can bypass the normal workflow until repository branch protection or rulesets are configured through an authorized settings surface."
+  },
+  "machineValidation": {
+    "status": "PASS_MAXIMUM_COVERED_RUNTIME_MATRIX",
+    "dailyTraining": "PASS",
+    "iPhoneField": "PASS",
+    "iPhoneOffline": "PASS",
+    "trainingExperienceV2": "PASS",
+    "trainingExperienceV3": "PASS",
+    "universityIPhone": "PASS",
+    "deviceMatrix": "PASS",
+    "adversarialMatrix": "PASS_AT_LAST_COMPLETE_FOUR_WORKFLOW_CHECKPOINT",
+    "simulatorOrCiMisrepresentedAsPhysical": false
+  },
+  "currentPhysicalAcceptance": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "result": "NOT_PASS_NOT_FAIL",
+    "requiredRuntimeIfResumed": "3cbbbf5006eb27926c362a97ee959ddadb8b227e"
+  },
+  "humanCurriculumComplianceReview": {
+    "status": "DEFERRED_BY_USER_MACHINE_ONLY_TESTING_REQUEST",
+    "automatedContentQa": "PASS_MACHINE_DETECTABLE_CONTROLS",
+    "humanJudgmentSynthesizedByAutomation": false
+  },
+  "opener": {
+    "status": "OPEN_EXPLICIT_APPROVE_OR_REVISE",
+    "runtimeDisplay": "CURRENT APPROVAL PENDING",
+    "candidate": "I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?",
+    "genericGoOrContinueCountsAsApproval": false,
+    "machineLegalTruthfulnessDisposition": "CONTEXT_DEPENDENT_NO_AUTO_APPROVAL_NO_AUTOMATIC_REWRITE"
+  },
+  "trainerMediaVisibility": {
+    "status": "MACHINE_UNRESOLVED_ACCESS_NOT_VERIFIED",
+    "representativeSharedDriveName": "Canvassing Docs",
+    "representativeSharedDriveId": "0AMAf1G5ecwJZUk9PVA",
+    "representativeTonyVideoId": "1BkukwBkZOQbzae4kwxL7i0Rq4xLxZG4B",
+    "authenticatedAccess": "PASS",
+    "itemPermissionListVisible": false,
+    "sharedDriveLocationTreatedAsProofOfRestrictedAccess": false
+  },
+  "currentStatusAuthority": {
+    "readFirst": "docs/PARADISE_UNIVERSITY_START_HERE.md",
+    "currentMachineGate": "docs/PARADISE_UNIVERSITY_PREPROMOTION_GATE_V20.json",
+    "priorMachineGate": "docs/PARADISE_UNIVERSITY_PREPROMOTION_GATE_V19.json",
+    "physicalDisposition": "docs/PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE.md",
+    "olderHumanAndOpenerDocuments": "HISTORICAL_CHECKLIST_OR_DECISION_SUPPORT_WHERE_RUNTIME_PINS_CONFLICT"
+  },
+  "promotionAuthorization": {
+    "status": "OPEN",
+    "promotionPerformed": false
+  },
+  "hardRule": "Do not force/reset production branches. A separately authorized release must merge normally into paradise-canvass-manager-public, pass the controlled field gates and all four University gates on the exact public source SHA, and only then allow a normal non-force advance of paradise-canvass-manager-validated. Machine PASS does not manufacture physical acceptance, human approval, trainer-media sharing visibility, opener approval, or promotion authorization."
+}

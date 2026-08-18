@@ -1,0 +1,13 @@
+<!--
+  Paradise Performance v1 integration fragment.
+  Merge these keys into the generated Capacitor iOS app Info.plist.
+  This fragment alone does not prove Xcode capability configuration or physical-device behavior.
+-->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Paradise uses your location only while your Performance workday is active to record your field route and shift activity.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Paradise may continue recording your active Performance shift location when your phone is locked or the app is in the background. Tracking stops when you finish your day.</string>
+<key>UIBackgroundModes</key>
+<array>
+  <string>location</string>
+</array>
