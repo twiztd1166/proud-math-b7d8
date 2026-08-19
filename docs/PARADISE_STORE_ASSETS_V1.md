@@ -28,15 +28,21 @@ The image was visually checked before this tranche. It is an existing standalone
 
 Several files named `logo only` or `without lettering` were also checked and rejected for app-icon use because they still contained the full wordmark. Filenames are not treated as approval evidence.
 
+The recent Paradise brand-guidelines image was also visually checked. It shows the square house/P mark as an approved logo example on a white background; this tranche therefore uses white for the iOS opaque flatten and Android adaptive-icon background rather than inventing a new treatment.
+
 ## Source preservation
 
-The Drive favicon is private and is not anonymously downloadable by CI. To make the build reproducible without publishing the Drive source, the exact PNG bytes are preserved as five ordered base64 text chunks under:
+The Drive favicon is private and is not anonymously downloadable by CI. To make the build reproducible without publishing the Drive file itself, the exact PNG bytes are preserved as **17 ordered base64 text segments** under:
 
 `store/paradise-performance/brand/source/`
 
-`scripts/prepare-performance-store-assets.mjs` reconstructs those chunks and fails closed unless all of the following match the approved source record:
+The canonical encoded stream is exactly `59,904` base64 characters and decodes to exactly `44,927` bytes.
 
-- canonical base64 reconstruction;
+`scripts/prepare-performance-store-assets.mjs` reconstructs only the explicitly ordered segment list in `store-brand-assets-v1.json` and fails closed unless all of the following match the approved source record:
+
+- exactly 17 ordered source segments;
+- exact encoded length `59,904`;
+- canonical base64 round-trip;
 - exact byte count `44,927`;
 - exact SHA-256 `75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13`;
 - PNG signature / IHDR;
@@ -89,7 +95,7 @@ Adaptive foreground canvases:
 
 The complete existing Paradise mark is centered at the controlled adaptive safe-mark ratio; the mark itself is not cropped or redrawn. The adaptive background is white.
 
-A 512 x 512 Google Play listing-icon review derivative is generated under `store-build/`; it is not automatically submitted or published.
+A 512 x 512 32-bit PNG Google Play listing-icon review derivative is generated under `store-build/`; it is validated with alpha and is not automatically submitted or published.
 
 ## Launch / splash art
 
@@ -101,12 +107,14 @@ This tranche does not invent launch/splash artwork. A splash/launch composition 
 
 The PR must pass on its exact final head:
 
-- controlled Paradise source reconstruction / hash validation;
+- controlled Paradise source reconstruction / encoded-length / byte-count / hash validation;
 - native Performance/store controls;
 - unsigned Android Release AAB build with the generated Paradise launcher resources;
 - unsigned generic-iPhone Release build with the generated Paradise AppIcon;
 - full public field / offline / Paradise University / device / adversarial browser regression gate;
 - exact diff / zero-behind / merge-tree readback before merge.
+
+The generated Apple and Google icon-review artifacts must be visually inspected before merge. A machine PASS alone is not final visual approval.
 
 After merge, controlled publication remains a separate exact-SHA action. Do not move `paradise-canvass-manager-validated` manually.
 
