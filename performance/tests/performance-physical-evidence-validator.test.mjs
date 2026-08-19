@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PHYSICAL_ACCEPTANCE_CONTROL, REQUIRED_CASES, REQUIRED_CLEANUP_COUNTS, validateCleanupReadback, validatePhysicalAcceptanceGate, validatePhysicalEvidence, validatePhysicalEvidencePair } from '../acceptance/physical-evidence-validator.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { PHYSICAL_ACCEPTANCE_CONTROL, REQUIRED_CASES, REQUIRED_CLEANUP_COUNTS, validateCleanupReadback, validateEvidenceAttachments, validatePhysicalAcceptanceGate, validatePhysicalEvidence, validatePhysicalEvidencePair } from '../acceptance/physical-evidence-validator.mjs';
 
 const uuid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
@@ -114,7 +117,6 @@ test('non-zero isolated backend cleanup blocks final physical acceptance', () =>
 });
 
 test('repository privacy guard excludes raw physical evidence and private tokens', async () => {
-  const fs = await import('node:fs');
   const ignore = fs.readFileSync('.gitignore', 'utf8');
   assert.match(ignore, /performance\/acceptance\/private-evidence\//);
   assert.match(ignore, /PRIVATE_TEST_TOKENS/);
@@ -150,4 +152,42 @@ test('evidence must bind to the exact packaged platform artifact digest', () => 
   const result = validatePhysicalEvidence(ios, 'ios');
   assert.equal(result.pass, false);
   assert.ok(result.issues.some(v => v.code === 'ARTIFACT_DIGEST_MISMATCH'));
+});
+
+test('timestamps must be offset-aware rather than timezone-ambiguous', () => {
+  const doc = passing('ios', 1);
+  doc.testStartLocal = '2026-08-19T08:00:00';
+  doc.backgroundGps.firstCapturedAt = '2026-08-19T12:10:00';
+  const result = validatePhysicalEvidence(doc, 'ios');
+  assert.equal(result.pass, false);
+  assert.ok(result.issues.some(v => v.code === 'INVALID_TIMESTAMP' && v.field === 'testStartLocal'));
+  assert.ok(result.issues.some(v => v.code === 'MISSING_GPS_TIMESTAMP' && v.field === 'backgroundGps.firstCapturedAt'));
+});
+
+test('referenced screenshots and sanitized JSON must physically exist and be nonempty', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'paradise-evidence-'));
+  const evidencePath = path.join(dir, 'ios.json');
+  const doc = passing('ios', 1);
+  fs.writeFileSync(evidencePath, JSON.stringify(doc));
+  let result = validateEvidenceAttachments(doc, evidencePath);
+  assert.equal(result.pass, false);
+  assert.ok(result.issues.some(v => v.code === 'SCREENSHOT_FILE_MISSING'));
+  assert.ok(result.issues.some(v => v.code === 'EVIDENCE_JSON_MISSING'));
+
+  fs.writeFileSync(path.join(dir, 'ios-location.png'), Buffer.from([1, 2, 3]));
+  fs.writeFileSync(path.join(dir, 'ios-evidence.json'), JSON.stringify({ shiftId: 'safe', gpsRows: 4 }));
+  result = validateEvidenceAttachments(doc, evidencePath);
+  assert.equal(result.pass, true);
+});
+
+test('sanitized evidence attachment rejects credential fields and token-like secrets', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'paradise-evidence-secret-'));
+  const evidencePath = path.join(dir, 'android.json');
+  const doc = passing('android', 2);
+  fs.writeFileSync(evidencePath, JSON.stringify(doc));
+  fs.writeFileSync(path.join(dir, 'android-location.png'), Buffer.from([1]));
+  fs.writeFileSync(path.join(dir, 'android-evidence.json'), JSON.stringify({ refreshToken: 'do-not-retain', nested: { ok: true } }));
+  const result = validateEvidenceAttachments(doc, evidencePath);
+  assert.equal(result.pass, false);
+  assert.ok(result.issues.some(v => v.code === 'EVIDENCE_SECRET_FIELD_DETECTED'));
 });
