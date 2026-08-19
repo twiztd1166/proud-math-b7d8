@@ -2,11 +2,13 @@ import {test,expect} from '@playwright/test';
 
 async function openTraining(page){await page.goto('/index.html');await page.locator('#nTrain').click()}
 
-test('opener authority is consistent outside the pending-currentness lesson',async({page})=>{
+test('opener authority is consistent and approval-pending exact wording is not published',async({page})=>{
   await openTraining(page);await page.getByRole('button',{name:/Videos & Audio/}).click();await page.getByRole('button',{name:/COMPLETE CANVASSING LIBRARY/i}).click();
   await expect(page.getByText(/current manager-approved canvass opening/i).first()).toBeVisible();await expect(page.getByText(/existing Paradise canvass script/i)).toHaveCount(0);
   const scenarios=await page.evaluate(()=>window.puPracticeScenarioPool().filter(x=>x.category==='Opening').map(x=>`${x.prompt} ${x.answer} ${x.coachingNote||''}`));const scenarioText=scenarios.join(' ');expect(scenarioText).not.toMatch(/Paradise base opening|base Paradise opening|approved neutral project question|Fix observable delivery before rewriting approved words/i);expect(scenarioText).toMatch(/current manager-approved/i);
   await page.evaluate(()=>puSetPage('home'));await page.getByRole('button',{name:/Career Path/}).first().click();await page.getByRole('button',{name:/Canvass Manager Academy/}).click();await page.locator('.puManagerCurriculum summary').click();await page.getByRole('button',{name:/Coach the Opening & Conversation/}).click();await expect(page.getByText(/current manager-approved Paradise opening/i).first()).toBeVisible();await expect(page.getByText(/approved Paradise script/i)).toHaveCount(0);
+  const opener=await page.evaluate(()=>{const x=PU_LESSONS.find(v=>v.id==='field-opening');return{summary:x?.summary||'',learn:x?.learn||'',practice:x?.practice||'',pass:x?.pass||'',gate:window.PU_OPENER_APPROVAL_GATE_VERSION||null}});expect(opener.gate).toBe('2026.08.19-pu-opener-approval-gate-v1');expect(`${opener.summary} ${opener.learn} ${opener.practice} ${opener.pass}`).toMatch(/approval is pending|approval-pending|manager-approved/i);expect(`${opener.summary} ${opener.learn} ${opener.practice} ${opener.pass}`).not.toMatch(/I[’']m not here to sell you anything|Quick question.?have you ever gotten an estimate/i);
+  await page.evaluate(()=>puSetPage('lesson:field-opening'));await expect(page.getByText(/intentionally does not publish an exact canvass opener/i)).toBeVisible();await expect(page.getByText(/I[’']m not here to sell you anything/i)).toHaveCount(0);
 });
 
 test('stale lesson completion does not satisfy current curriculum and is retained as history on recompletion',async({page})=>{
