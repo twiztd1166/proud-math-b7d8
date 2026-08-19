@@ -31,5 +31,6 @@
   "finishDay": {"finishedAt": "", "postFinishCollectedGpsRows": null},
   "sanitizedEvidenceJsonFiles": [],
   "screenshots": [],
-  "finalDisposition": "NOT_RUN"
+  "finalDisposition": "NOT_RUN",
+  "artifactSha256": ""
 }
