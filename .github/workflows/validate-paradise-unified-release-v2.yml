@@ -117,9 +117,9 @@ jobs:
           rm -rf "$PLAYWRIGHT_ROOT" node_modules
           mkdir -p "$PLAYWRIGHT_ROOT"
           printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
-          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test@1.62.1
           ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
-          ./node_modules/.bin/playwright install --with-deps webkit chromium
+          timeout --signal=TERM 10m ./node_modules/.bin/playwright install webkit chromium
 
       - name: Start isolated test server
         shell: bash
