@@ -2,6 +2,10 @@ export const PHYSICAL_ACCEPTANCE_CONTROL = Object.freeze({
   controlHead: '783d0c11d20d9e72444a258ac55b2d22b1219692',
   acceptanceWorkflowRun: 32241534617,
   projectRef: 'taxlrlfsobtnbasjcnuf',
+  artifactSha256: Object.freeze({
+    android: '1b7860ddc62c1f469e70129323dbc2c3f4a5c005d3a2aaea33c09f18dd8efd68',
+    ios: '28521af3b38e7bf171f864606c1b98488e323089a785a081e9a33a682da4ebe2',
+  }),
 });
 
 export const REQUIRED_CLEANUP_COUNTS = Object.freeze([
@@ -59,6 +63,9 @@ export function validatePhysicalEvidence(doc, expectedPlatform) {
   const platform = String(doc.platform ?? '').toLowerCase();
   if (!['ios', 'android'].includes(platform)) issues.push(issue('INVALID_PLATFORM', 'platform', 'platform must be ios or android'));
   if (expectedPlatform && platform !== expectedPlatform) issues.push(issue('PLATFORM_MISMATCH', 'platform', `Expected ${expectedPlatform}`));
+  if (['ios', 'android'].includes(platform) && doc.artifactSha256 !== control.artifactSha256[platform]) {
+    issues.push(issue('ARTIFACT_DIGEST_MISMATCH', 'artifactSha256', `Expected exact ${platform} acceptance artifact SHA-256 ${control.artifactSha256[platform]}`));
+  }
 
   for (const field of ['deviceModel', 'osVersion', 'installMethod', 'tester', 'syntheticEmployeeId', 'performanceDeviceId', 'testStartLocal', 'testEndLocal']) {
     requireNonEmpty(doc, field, issues);
