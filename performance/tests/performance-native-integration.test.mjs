@@ -68,7 +68,7 @@ test('native Performance bundle is separate from public Canvass bundle by constr
   assert.equal(config.webDir, 'performance-dist');
   assert.match(builder, /canvass-dist/);
   assert.match(builder, /performance-dist/);
-  assert.match(builder, /id=\\"nPerf\\"/);
+  assert.match(builder, /id="nPerf"/);
   assert.match(builder, /performance-native-app\.js/);
   assert.doesNotMatch(sourceIndex, /performance-native-app\.js|id="nPerf"/);
   assert.match(entry, /validateNativePerformanceSession/);
