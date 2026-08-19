@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "status": "CONTROLLED_CAPTURE_PLAN_NOT_YET_CAPTURED",
+  "app": "Paradise Performance",
+  "bundleId": "com.paradiseexteriors.performance",
+  "validatedApplicationBaseline": "01778750b89817025d88f802608417dd155c7227",
+  "publicMetadataBaseline": "253d50eae5a4df2b83e5f70cf25e67b20412dd85",
+  "captureAuthority": {
+    "finalScreenshotsRequireSignedCandidate": true,
+    "unsignedCiShellMayBeUsedAsFinalScreenshotSource": false,
+    "simulatorOnlyMayBeUsedAsFinalScreenshotSource": false,
+    "realProductionEmployeeOrCustomerDataAllowed": false,
+    "syntheticReviewDataRequired": true
+  },
+  "apple": {
+    "deviceFamily": "IPHONE_ONLY",
+    "targetedDeviceFamilyBuildSetting": "1",
+    "orientation": "PORTRAIT",
+    "primaryDisplayClass": "6.9-inch iPhone",
+    "targetPixels": {
+      "width": 1320,
+      "height": 2868
+    },
+    "format": ["PNG", "JPEG"],
+    "alphaAllowed": false,
+    "minimumScreenshots": 1,
+    "maximumScreenshots": 10,
+    "useHighestResolutionSetForAutomaticScaling": true,
+    "ipadScreenshotSetRequiredByThisBuild": false,
+    "appleSiliconMacAvailability": "OPT_OUT_UNLESS_SEPARATELY_VALIDATED"
+  },
+  "googlePlay": {
+    "deviceType": "PHONE",
+    "orientation": "PORTRAIT",
+    "targetPixels": {
+      "width": 1080,
+      "height": 1920
+    },
+    "aspectRatio": "9:16",
+    "format": ["24-bit PNG", "JPEG"],
+    "alphaAllowed": false,
+    "minimumScreenshotsAcrossDeviceTypes": 2,
+    "maximumPhoneScreenshots": 8,
+    "controlledSetCount": 6,
+    "altTextRequiredByParadiseControl": true
+  },
+  "story": [
+    {
+      "order": 1,
+      "id": "secure-welcome",
+      "title": "Secure Welcome",
+      "state": "Authorized employee welcome / trusted-device enrollment entry state without revealing a token, QR secret, recovery value, email address, or real employee identity.",
+      "altText": "Paradise Performance secure employee welcome and trusted-device access screen."
+    },
+    {
+      "order": 2,
+      "id": "performance-today-idle",
+      "title": "Performance Today",
+      "state": "Idle/current-workday state before Start My Day, using synthetic employee identity and no production KPI/pay values.",
+      "altText": "Paradise Performance Today screen before the employee starts the workday."
+    },
+    {
+      "order": 3,
+      "id": "start-my-day",
+      "title": "Start My Day",
+      "state": "Employee-started active-workday flow showing the user action that begins the controlled workday/location function; do not expose exact real coordinates or a real route.",
+      "altText": "Paradise Performance employee-started Start My Day workday flow."
+    },
+    {
+      "order": 4,
+      "id": "lookup",
+      "title": "Field Lookup",
+      "state": "Lookup field/legal instruction view using non-sensitive controlled jurisdiction content and no customer information.",
+      "altText": "Paradise Performance field lookup screen with controlled operating guidance."
+    },
+    {
+      "order": 5,
+      "id": "university",
+      "title": "Paradise University",
+      "state": "Training/progress view using synthetic progress state and currently enabled training content only.",
+      "altText": "Paradise University training and progress screen inside Paradise Performance."
+    },
+    {
+      "order": 6,
+      "id": "finish-day",
+      "title": "Finish Day",
+      "state": "Completed-workday / Finish Day state from the same final signed binary, with synthetic workday values and no real route or employee data.",
+      "altText": "Paradise Performance completed workday and Finish Day screen."
+    }
+  ],
+  "forbiddenScreenshotContent": [
+    "real customer names, addresses, phone numbers or appointments",
+    "real employee names, emails, IDs, routes or precise locations",
+    "enrollment QR codes, one-time tokens, passwords, recovery values or signing credentials",
+    "customer SET or Quick Set surfaces not enabled in store v1",
+    "KPI pace labels, pay amounts, compensation rules or leaderboard surfaces not enabled in store v1",
+    "route-map surfaces unless enabled in the exact submitted binary",
+    "claims that physical-device acceptance passed",
+    "store ranking, award, price or download claims",
+    "device frames or marketing overlays in the controlled base capture"
+  ],
+  "preCaptureReadback": [
+    "exact signed binary version/build/bundle ID matches controlled release",
+    "iOS build metadata reports iPhone device family only",
+    "approved Paradise icon is present in the signed binary",
+    "synthetic review account is active and contains no production data",
+    "all six states are reachable in the exact submitted binary",
+    "screen contains no notifications, carrier/provider text requiring cleanup, or unrelated personal data"
+  ],
+  "postCaptureQc": [
+    "pixel dimensions and file format match platform target",
+    "no alpha/transparency in submitted screenshots",
+    "no stretching, distortion or invented UI",
+    "visual sequence tells the same six-state story on both platforms where the UI is equivalent",
+    "every screenshot is visually compared to the exact signed candidate UI",
+    "SHA-256 and source build identity are recorded for each final screenshot"
+  ]
+}
