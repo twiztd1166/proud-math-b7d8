@@ -1,25 +1,43 @@
 {
-  "schemaVersion": "2026.08.19-pu-release-gate-v23-production-closeout",
+  "schemaVersion": "2026.08.19-pu-release-gate-v24-self-updating-closeout",
   "status": "PRODUCTION_RELEASED_VALIDATED",
   "currentAuthority": "PARADISE_UNIVERSITY_RELEASE_GATE.json",
   "historicalPrePromotionAuthority": "PARADISE_UNIVERSITY_PREPROMOTION_GATE_V22.json",
   "stableValidatedBranch": "paradise-canvass-manager-validated",
-  "stableValidatedRuntime": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
-  "stableBranchUrl": "https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html",
-  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html",
-  "publicMetadataCommit": "6d54c7b75a57bfdb94dbfc596504ccb6f152ca75",
-  "productionRelease": {
+  "currentStableControlAuthority": {
+    "source": "latest.json + paradise-canvass-manager-validated branch ref",
+    "hardCodedSelfSha": false,
+    "rule": "The current stable control head is intentionally not hard-coded inside this file because changing this file changes the commit SHA. latest.json and the validated branch must agree exactly and are the authoritative current control-head pin."
+  },
+  "validatedApplicationRuntime": {
+    "sha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
+    "immutableUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html",
+    "stableManagerUrl": "https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html",
+    "applicationBytesUnchangedByPostReleaseControlCloseout": true,
+    "navigation": ["Lookup", "Training", "Daily Check", "History"],
+    "lookupRemainsAuthoritative": true,
+    "visiblePerformanceTab": false
+  },
+  "applicationReleaseEvidence": {
     "status": "PASS_RELEASED",
+    "validatedApplicationRuntimeSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
+    "initialMetadataCommitSha": "6d54c7b75a57bfdb94dbfc596504ccb6f152ca75",
     "publishedAt": "2026-08-19T07:19:34.462Z",
-    "validatedRuntimeSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
-    "metadataCommitSha": "6d54c7b75a57bfdb94dbfc596504ccb6f152ca75",
     "fullReadOnlyReleaseMirrorRun": 32227074297,
     "ancestryFailureDiagnosticRun": 32226496599,
     "ancestryCorrectedDiagnosticRun": 32226577491,
     "releaseControlRepairPr": 11,
-    "metadataOnlyChildConfirmed": true,
     "manualValidatedRefMovement": false,
     "forcePromotionUsed": false
+  },
+  "postReleaseControlCloseout": {
+    "status": "VALIDATED_CONTROL_OVERLAY",
+    "releaseStatusPointerPr": 13,
+    "staleValidatorDiscoveryRun": 32228101923,
+    "correctedPremergeRun": 32228244109,
+    "applicationRuntimeChanged": false,
+    "fieldDatasetChanged": false,
+    "currentControlHeadResolution": "latest.json + validated branch ref"
   },
   "trainingExperienceV4": {
     "status": "PASS_AUTOMATED_MAXIMUM_CURRENT_COVERAGE",
@@ -34,14 +52,8 @@
     "twoHundredPercentTextAndContainment": "PASS",
     "exactCurrentCacheOfflineReady": "PASS"
   },
-  "stableUiSurface": {
-    "navigation": ["Lookup", "Training", "Daily Check", "History"],
-    "lookupRemainsAuthoritative": true,
-    "visiblePerformanceTab": false
-  },
   "fieldBaseline": {
     "status": "PASS_UNCHANGED",
-    "validatedRuntimeSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
     "records": 78,
     "go": 76,
@@ -64,5 +76,5 @@
   },
   "productionPromotionAuthorization": "SATISFIED_AND_PERFORMED",
   "productionPromotionPerformed": true,
-  "hardRule": "Production release status does not manufacture physical-device evidence, human policy approval, opener approval, trainer-media sharing verification, repository-settings enforcement, or Paradise Performance physical-hardware acceptance. Deferred or waived controls remain explicitly not PASS unless separately evidenced."
+  "hardRule": "Production release status does not manufacture physical-device evidence, human policy approval, opener approval, trainer-media sharing verification, repository-settings enforcement, or Paradise Performance physical-hardware acceptance. Deferred or waived controls remain explicitly not PASS unless separately evidenced. Current control-head identity must be read from latest.json and the validated branch, which must agree exactly."
 }
