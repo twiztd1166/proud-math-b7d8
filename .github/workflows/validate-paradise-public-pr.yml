@@ -59,6 +59,28 @@ jobs:
           ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
           timeout --signal=TERM 10m ./node_modules/.bin/playwright install webkit chromium
 
+      - name: Diagnose Playwright WebKit runtime
+        shell: bash
+        run: |
+          set -u
+          WEBKIT_BIN="$(find "$HOME/.cache/ms-playwright" -path '*/minibrowser-gtk/bin/MiniBrowser' -type f -print -quit)"
+          if [ -z "$WEBKIT_BIN" ]; then
+            echo 'WebKit MiniBrowser executable was not found after Playwright install.'
+            find "$HOME/.cache/ms-playwright" -maxdepth 4 -type f -print | head -200 || true
+            exit 1
+          fi
+          WEBKIT_ROOT="$(dirname "$(dirname "$(dirname "$WEBKIT_BIN")")")"
+          echo "WEBKIT_BIN=$WEBKIT_BIN"
+          echo "WEBKIT_ROOT=$WEBKIT_ROOT"
+          file "$WEBKIT_BIN" || true
+          readelf -l "$WEBKIT_BIN" | grep -Ei 'interpreter|Requesting program interpreter' || true
+          echo '--- linked libraries ---'
+          ldd "$WEBKIT_BIN" || true
+          echo '--- common ELF loaders ---'
+          ls -l /lib64/ld-linux-x86-64.so.2 /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /lib/ld-linux-aarch64.so.1 2>&1 || true
+          echo '--- Playwright WebKit wrapper ---'
+          sed -n '1,80p' "$WEBKIT_ROOT/pw_run.sh" 2>&1 || true
+
       - name: Start isolated test server
         shell: bash
         run: |
