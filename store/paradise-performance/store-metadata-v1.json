@@ -1,0 +1,93 @@
+{
+  "status": "DRAFT_SUBMISSION_PACKAGE_NOT_SUBMITTED",
+  "app": {
+    "name": "Paradise Performance",
+    "bundleId": "com.paradiseexteriors.performance",
+    "version": "1.0.0",
+    "build": "1",
+    "company": "Paradise Exteriors LLC",
+    "supportUrl": "https://www.paradiseexteriors.com/contact/",
+    "marketingUrl": "https://www.paradiseexteriors.com/",
+    "privacyPolicyUrl": "BLOCKED_PENDING_APPROVED_EMPLOYEE_APP_PRIVACY_POLICY_URL"
+  },
+  "branding": {
+    "approvedSourceRequired": true,
+    "driveCandidates": [
+      {
+        "title": "Paradise Exteriors Logo - 2174x1060__f53cbf0cc5.png",
+        "driveFileId": "1zMrEBxsxkyooIxXbmmopda_yjsGXa96I"
+      },
+      {
+        "title": "Paradise Exteriors Brand Guidlines__c5af41dab6.png",
+        "driveFileId": "1FePJBk-RGlT3gtl15v2eiMaWo1iOt9ii"
+      }
+    ]
+  },
+  "apple": {
+    "distribution": "UNLISTED_APP_STORE",
+    "testFlightDependency": false,
+    "subtitle": "Field Performance & Training",
+    "promotionalText": "Private field tools, training, progress and trusted-device access for authorized Paradise Exteriors team members.",
+    "keywords": "employee,field,performance,training,canvassing,manager,progress,workday",
+    "description": "Paradise Performance is a private workforce application for authorized Paradise Exteriors team members. It brings field tools, training, progress, trusted-device access and active-workday functions into one controlled mobile experience.\n\nAuthorized employees can access company training and progress resources, use approved field workflows and start an active workday when their role requires it. Certain field functions may use device location during an employee-started active workday to support operational route and workday records. Location is not intended to begin merely because the app is opened.\n\nAccess is restricted to authorized Paradise personnel. Installing the app does not create an employee account or grant access by itself. Device enrollment and session controls remain part of the authorization boundary.\n\nParadise Performance is intended for company workforce use and is not a consumer sales, shopping or public canvassing application.",
+    "reviewNotes": "Paradise Performance is an employee-only workforce application intended for unlisted App Store distribution. Please do not treat the app as a public consumer product. Access to protected functions requires an authorized employee account and trusted-device enrollment.\n\nLocation behavior: the employee intentionally starts the active-workday flow from the foreground. The app requests When In Use location permission for this work function and may continue location updates while that employee-started workday is active and the app is backgrounded. The native implementation enables the visible iOS background-location indicator. Ordinary app launch is not intended to begin workday location tracking.\n\nThe app uses location for field/workday operational functionality, not advertising or cross-company tracking.\n\nREVIEW ACCESS BLOCKER: final App Review test account/enrollment instructions must be inserted here before submission. Do not submit while this blocker remains.",
+    "unlistedRequest": "Paradise Performance is designed for a limited workforce audience: authorized Paradise Exteriors employees, canvassers, managers and other company-approved personnel. The app is not intended for consumer discovery or general public use. Paradise needs a standard App Store link that can be sent directly to authorized team members using company-managed or employee-owned iPhones. The app itself enforces employee authorization and trusted-device controls, so possession of the download link alone does not grant access. Unlisted distribution is requested so authorized personnel can install and receive normal App Store updates without making this internal workforce tool searchable or promoted to the general public.",
+    "privacyDraft": {
+      "dataCollected": [
+        "Precise Location",
+        "Coarse Location",
+        "User ID",
+        "Device ID",
+        "Product Interaction / operational app activity where retained",
+        "Other Data needed for active workday and route evidence"
+      ],
+      "linkedToUser": true,
+      "tracking": false,
+      "purpose": "App Functionality",
+      "finalAnswersRequireReview": true
+    },
+    "reviewAccount": "BLOCKED_PENDING_APP_REVIEW_ACCOUNT_AND_TRUSTED_DEVICE_ENROLLMENT_INSTRUCTIONS"
+  },
+  "googlePlay": {
+    "track": "INTERNAL_TESTING",
+    "maxInitialTesters": 100,
+    "shortDescription": "Private field performance, training and workday tools for Paradise employees.",
+    "fullDescription": "Paradise Performance is a private workforce application for authorized Paradise Exteriors team members. It combines field tools, employee training, progress resources, trusted-device access and active-workday functions in one controlled mobile app.\n\nAuthorized employees can use approved field workflows and start an active workday when their role requires it. During an employee-started active workday, the Android app can use location through a visible foreground location service to support operational route and workday records. The controlled app does not request Android ACCESS_BACKGROUND_LOCATION.\n\nAccess is restricted to authorized Paradise personnel. Installing the app does not create an account or automatically grant company access.\n\nThis application is intended for Paradise workforce use and is not a public consumer application.",
+    "appAccess": "BLOCKED_PENDING_GOOGLE_PLAY_REVIEW_ACCOUNT_AND_ENROLLMENT_INSTRUCTIONS",
+    "foregroundServiceDeclaration": {
+      "type": "location",
+      "functionalityDescription": "An authorized employee starts the active-workday function from the foreground. While that workday is active, Paradise Performance uses a visible location foreground service to maintain operational route/workday location evidence even if the app is temporarily backgrounded.",
+      "userImpactIfDeferred": "The active workday could begin without timely route/location evidence, causing gaps in operational field records and reducing reliability of workday synchronization.",
+      "userImpactIfInterrupted": "Location evidence for the active workday could contain gaps until the service resumes, which may reduce the completeness of the employee's operational route/workday record.",
+      "video": "BLOCKED_PENDING_FINAL_BINARY_DEMONSTRATION_VIDEO_URL",
+      "useCase": "Employee-started long-running location sharing / operational field-work tracking"
+    },
+    "dataSafetyDraft": {
+      "dataCollected": [
+        "Location",
+        "User IDs",
+        "Device or other IDs",
+        "App activity / operational workday activity where retained"
+      ],
+      "sharedForAdvertising": false,
+      "sold": false,
+      "purposes": [
+        "App functionality",
+        "Security and fraud prevention",
+        "Account management"
+      ],
+      "finalAnswersRequireReview": true
+    }
+  },
+  "hardBlockersBeforeSubmission": [
+    "Apple Developer and App Store Connect access",
+    "Google Play Console access",
+    "Production signing configuration and protected credentials",
+    "Approved employee-app privacy policy URL",
+    "Approved retention and workforce-location notice language",
+    "Final App Review / Google Play review account and enrollment instructions",
+    "Approved app icon and screenshot set",
+    "Google Play foreground-service demonstration video",
+    "Final App Store privacy and Google Play Data Safety answer review"
+  ]
+}
