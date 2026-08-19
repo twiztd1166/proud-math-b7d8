@@ -9,6 +9,7 @@ function passing(platform, n) {
   return {
     ...PHYSICAL_ACCEPTANCE_CONTROL,
     platform,
+    artifactSha256: PHYSICAL_ACCEPTANCE_CONTROL.artifactSha256[platform],
     deviceModel: platform === 'ios' ? 'iPhone Test' : 'Android Test',
     osVersion: 'test-os',
     installMethod: 'physical-device test install',
@@ -141,4 +142,12 @@ test('null or blank zero-proof fields fail closed instead of coercing to zero', 
   assert.ok(cleanupResult.issues.some(v => v.code === 'CLEANUP_NOT_ZERO' && v.field === 'counts.devices'));
   assert.ok(cleanupResult.issues.some(v => v.code === 'CLEANUP_NOT_ZERO' && v.field === 'counts.authSessions'));
   assert.ok(cleanupResult.issues.some(v => v.code === 'SECURITY_ADVISOR_NOT_CLEAN'));
+});
+
+test('evidence must bind to the exact packaged platform artifact digest', () => {
+  const ios = passing('ios', 1);
+  ios.artifactSha256 = PHYSICAL_ACCEPTANCE_CONTROL.artifactSha256.android;
+  const result = validatePhysicalEvidence(ios, 'ios');
+  assert.equal(result.pass, false);
+  assert.ok(result.issues.some(v => v.code === 'ARTIFACT_DIGEST_MISMATCH'));
 });
