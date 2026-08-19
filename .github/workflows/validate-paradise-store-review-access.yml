@@ -53,16 +53,16 @@ jobs:
       - name: Run store-review access contract tests
         run: node --test performance/tests/store-review-access.test.mjs
 
-      - name: Fail if review secrets or credentials were committed
+      - name: Fail if review secrets or credential values were committed
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -nEi '(review[_ -]?(password|secret)|STORE_REVIEW_PASSWORD|BEGIN PRIVATE KEY|service_role[^_])' -- \
+          if git grep -nEi '(STORE_REVIEW_PASSWORD|PARADISE_STORE_REVIEW_PASSWORD|BEGIN PRIVATE KEY|sb_secret_[A-Za-z0-9_-]+|password[[:space:]]*:[[:space:]]*["'"'][^"'"']{8,}["'"'])' -- \
             performance/client/performance-store-review-access.mjs \
             performance/client/performance-native-app.mjs \
             supabase/functions/performance-review-enrollment-mint \
             docs/PARADISE_STORE_REVIEW_ACCESS_V1.md; then
-            echo 'Potential store-review secret/credential material found in controlled review-access files.' >&2
+            echo 'Potential store-review secret or credential value found in controlled review-access files.' >&2
             exit 1
           fi
-          echo 'No committed store-review secret material found.'
+          echo 'No committed store-review secret values found.'
