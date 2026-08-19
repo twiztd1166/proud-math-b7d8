@@ -38,6 +38,8 @@ assertLength('Google Play full description', metadata.googlePlay.fullDescription
 
 assert(metadata.apple.distribution === 'UNLISTED_APP_STORE', 'iPhone distribution must remain unlisted App Store');
 assert(metadata.apple.testFlightDependency === false, 'Submission package must not add a TestFlight dependency');
+assert(metadata.apple.unlistedRequestSequence.includes('Submit the final app to App Review'), 'Apple unlisted sequence must preserve App Review before the unlisted request');
+assert(metadata.apple.unlistedRequestSequence.includes('beta/prerelease'), 'Apple unlisted sequence must preserve the no-beta request boundary');
 assert(metadata.googlePlay.track === 'INTERNAL_TESTING', 'Android initial release must remain Internal testing');
 assert(metadata.googlePlay.maxInitialTesters === 100, 'Internal testing control must remain 100 testers');
 
@@ -58,14 +60,18 @@ assert(metadata.apple.privacyDraft.dataCollected.some(value => value.startsWith(
 assert(!metadata.apple.privacyDraft.dataCollected.some(value => value.includes('Product Interaction')), 'Do not classify operational shift/workday evidence as Apple Product Interaction without retained UI-interaction telemetry');
 assert(metadata.apple.privacyDraft.taxonomyNote.includes('launches, taps, clicks, scrolling and views'), 'Apple taxonomy note must preserve why Product Interaction is not used for operational workday evidence');
 
+assert(metadata.googlePlay.dataSafetyDraft.requiredForCurrentInitialInternalTestingTrack === false, 'Current Internal Testing-only release must preserve Google Data Safety exemption status');
+assert(metadata.googlePlay.dataSafetyDraft.currentTrackNote.includes('exempt from inclusion in the Data Safety section'), 'Google current-track note must preserve Internal Testing Data Safety exemption');
 assert(metadata.googlePlay.dataSafetyDraft.sharedForAdvertising === false, 'Google Data Safety draft must remain no advertising sharing');
 assert(metadata.googlePlay.dataSafetyDraft.sold === false, 'Google Data Safety draft must remain no sale of employee data');
-assert(metadata.googlePlay.dataSafetyDraft.finalAnswersRequireReview === true, 'Google Data Safety answers must remain explicitly draft/review-required');
+assert(metadata.googlePlay.dataSafetyDraft.finalAnswersRequireReview === true, 'Google Data Safety draft must remain review-required for any later applicable distribution mode');
 assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('Location'), 'Google draft must disclose Location');
 assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('User IDs'), 'Google draft must disclose User IDs');
 assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('Device or other IDs'), 'Google draft must disclose Device or other IDs');
 assert(metadata.googlePlay.dataSafetyDraft.dataCollected.some(value => value.startsWith('App activity > Other actions')), 'Google draft must classify retained Start/Finish workday actions under App activity > Other actions');
 assert(metadata.googlePlay.dataSafetyDraft.taxonomyNote.includes('Start/Finish workday actions'), 'Google taxonomy note must preserve the operational-action boundary');
+assert(!metadata.hardBlockersBeforeSubmission.some(value => value.includes('Google Play Data Safety')), 'Google Data Safety must not be labeled a hard blocker to the current Internal-Testing-only release');
+assert(metadata.conditionalBlockersBeforeBroaderDistribution.some(value => value.includes('Google Play Data Safety')), 'Google Data Safety must remain a conditional blocker for later distribution modes where required');
 
 assert(privacyDraft.includes('DRAFT / NOT LEGALLY APPROVED / DO NOT PUBLISH AS FINAL'), 'Privacy notice must remain visibly draft');
 assert(privacyDraft.includes('FINAL RETENTION POLICY NOT YET APPROVED'), 'Privacy notice must preserve unresolved retention blocker');
