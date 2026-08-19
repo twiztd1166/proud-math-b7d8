@@ -27,18 +27,37 @@ test('rolling windows use local calendar days and include the as-of day', () => 
   assert.equal(ninety.endDateExclusive, '2026-08-20');
 });
 
-test('week starts Monday and month/YTD boundaries are deterministic', () => {
-  const week = reportingWindow({ periodType: 'week', asOf: '2026-08-19T12:00:00Z', timeZone: TZ });
+test('weekly reporting requires an explicit Paradise week-start convention', () => {
+  assert.throws(
+    () => reportingWindow({ periodType: 'week', asOf: '2026-08-19T12:00:00Z', timeZone: TZ }),
+    /weekStartsOn must be explicitly configured/
+  );
+
+  const week = reportingWindow({ periodType: 'week', asOf: '2026-08-19T12:00:00Z', timeZone: TZ, weekStartsOn: 1 });
   assert.equal(week.startDate, '2026-08-17');
-  assert.equal(week.endDateExclusive, '2026-08-24');
+  assert.equal(week.endDateExclusive, '2026-08-20');
 
   const month = reportingWindow({ periodType: 'month', asOf: '2026-08-19T12:00:00Z', timeZone: TZ });
   assert.equal(month.startDate, '2026-08-01');
-  assert.equal(month.endDateExclusive, '2026-09-01');
+  assert.equal(month.endDateExclusive, '2026-08-20');
 
   const ytd = reportingWindow({ periodType: 'ytd', asOf: '2026-08-19T12:00:00Z', timeZone: TZ });
   assert.equal(ytd.startDate, '2026-01-01');
   assert.equal(ytd.endDateExclusive, '2026-08-20');
+});
+
+test('current week/month windows stop at the as-of day and exclude future-dated records', () => {
+  const aggregate = buildOriginCohortAggregate({
+    periodType: 'week',
+    asOf: '2026-08-19T20:00:00Z',
+    timeZone: TZ,
+    weekStartsOn: 1,
+    sets: [
+      { id: 'today', setCapturedAt: '2026-08-19T15:00:00Z', status: 'complete' },
+      { id: 'future-this-week', setCapturedAt: '2026-08-21T15:00:00Z', status: 'complete' },
+    ],
+  });
+  assert.equal(aggregate.aggregate.sets, 1);
 });
 
 test('origin cohort keeps later demo and sale attributed to the original set/work period', () => {
@@ -147,7 +166,7 @@ test('active current-day shift may accrue to as-of, but stale unfinished histori
   assert.equal(current.aggregate.hours, 4);
 
   const stale = buildOriginCohortAggregate({
-    periodType: 'week', asOf: '2026-08-19T18:00:00Z', timeZone: TZ,
+    periodType: 'week', asOf: '2026-08-19T18:00:00Z', timeZone: TZ, weekStartsOn: 1,
     shifts: [{ id: 'stale', status: 'active', startedAt: '2026-08-18T14:00:00Z', breakSeconds: 0 }],
   });
   assert.equal(stale.aggregate.hours, 0);
@@ -169,20 +188,29 @@ test('DST transition day uses actual elapsed timestamps rather than assuming 24-
   assert.equal(aggregate.aggregate.hours, 4);
 });
 
-test('effective standard selection respects effective dates and scope specificity', () => {
-  const standards = [
-    { versionLabel: 'GEN', metricKey: 'sets_per_hour', effectiveFrom: '2026-01-01T00:00:00Z', minimum: 0.5 },
-    { versionLabel: 'ROLE', metricKey: 'sets_per_hour', appliesToRole: 'canvasser', effectiveFrom: '2026-01-01T00:00:00Z', minimum: 0.6 },
-    { versionLabel: 'TEAM', metricKey: 'sets_per_hour', appliesToRole: 'canvasser', appliesToTeam: 'East A', effectiveFrom: '2026-08-01T00:00:00Z', minimum: 0.7 },
-  ];
+test('effective standard selection accepts one unambiguous active scoped rule', () => {
   const selected = selectEffectiveKpiStandard({
-    standards,
+    standards: [
+      { versionLabel: 'TEAM', metricKey: 'sets_per_hour', appliesToRole: 'canvasser', appliesToTeam: 'East A', effectiveFrom: '2026-08-01T00:00:00Z', minimum: 0.7 },
+    ],
     metricKey: 'sets_per_hour',
     at: '2026-08-19T12:00:00Z',
     scope: { role: 'canvasser', team: 'East A' },
   });
   assert.equal(selected.versionLabel, 'TEAM');
   assert.equal(selected.minimum, 0.7);
+});
+
+test('overlapping active KPI scopes fail closed rather than inventing precedence', () => {
+  assert.throws(() => selectEffectiveKpiStandard({
+    standards: [
+      { versionLabel: 'GEN', metricKey: 'sets_per_hour', effectiveFrom: '2026-01-01T00:00:00Z', minimum: 0.5 },
+      { versionLabel: 'TEAM', metricKey: 'sets_per_hour', appliesToTeam: 'East A', effectiveFrom: '2026-08-01T00:00:00Z', minimum: 0.7 },
+    ],
+    metricKey: 'sets_per_hour',
+    at: '2026-08-19T12:00:00Z',
+    scope: { team: 'East A' },
+  }), /Ambiguous KPI standard/);
 });
 
 test('no effective standard returns null instead of inventing a threshold', () => {
