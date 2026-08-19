@@ -6,6 +6,24 @@ const baseDir = 'canvass-dist';
 const outDir = 'performance-dist';
 const sourceIndex = path.join(baseDir, 'index.html');
 
+function assertNoPrivilegedSupabaseCredential(text, label) {
+  if (/sb_secret_[A-Za-z0-9_-]{20,}/.test(text)) {
+    throw new Error(`${label} contains a Supabase secret-key value`);
+  }
+  if (/SUPABASE_(?:SERVICE_ROLE|SECRET)_KEY/.test(text)) {
+    throw new Error(`${label} contains a privileged Supabase credential environment name`);
+  }
+  const jwtPattern = /\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
+  for (const token of text.match(jwtPattern) || []) {
+    try {
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+      if (payload?.role === 'service_role') throw new Error(`${label} contains a service-role JWT literal`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('service-role JWT literal')) throw error;
+    }
+  }
+}
+
 if (!fs.existsSync(sourceIndex)) throw new Error('Build canvass-dist before building the native Performance bundle');
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.cpSync(baseDir, outDir, { recursive: true });
@@ -57,8 +75,9 @@ for (const required of [
 ]) {
   if (!bundle.includes(required)) throw new Error(`Native Performance bundle missing runtime control: ${required}`);
 }
-for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE_KEY', 'performance_sets\").insert']) {
-  if (bundle.includes(forbidden)) throw new Error(`Native Performance bundle contains forbidden material: ${forbidden}`);
+assertNoPrivilegedSupabaseCredential(bundle, 'Native Performance bundle');
+if (bundle.includes('performance_sets')) {
+  throw new Error('Native Performance bundle contains dormant customer SET transport material');
 }
 
 console.log(`Built controlled native Performance bundle in ${outDir}; public ${baseDir} remained unchanged.`);
