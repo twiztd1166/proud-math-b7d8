@@ -8,7 +8,7 @@ Isolated project: `taxlrlfsobtnbasjcnuf`
 
 ## Purpose
 
-This gate prevents build/simulator evidence, incomplete real-device testing, wrong acceptance artifacts, or uncleared synthetic backend state from being promoted as a physical-device PASS.
+This gate prevents build/simulator evidence, incomplete real-device testing, wrong acceptance artifacts, missing retained evidence, unsafe credential retention, or uncleared synthetic backend state from being promoted as a physical-device PASS.
 
 It does not perform the hardware test. A real iPhone and a real Android phone must still execute the controlled A-L matrix.
 
@@ -51,13 +51,16 @@ The command returns PASS only when all of the following are true:
 - each platform carries the exact controlled artifact SHA-256 listed above;
 - one document is `ios` and the other is `android`;
 - each platform has a real device model, OS version, install method, tester, synthetic employee ID, Performance device ID, and valid start/end timestamps;
+- all timestamps are offset-aware ISO values (`Z` or explicit UTC offset), not timezone-ambiguous local strings;
 - every required A-L case is explicitly `pass: true`;
 - background GPS contains at least one accepted row and valid captured-time range;
 - offline replay proves at least one queued write, a final queue of zero, and zero duplicate client point IDs;
 - server revocation has a timestamp and zero accepted post-revoke GPS rows;
 - Finish Day has a timestamp and zero post-finish collected GPS rows;
 - required zero-proof fields must contain explicit numeric zero; `null`, blank, missing, and nonnumeric values fail closed;
-- screenshots/photos and sanitized evidence JSON filenames are retained;
+- every referenced screenshot/photo file actually exists, is nonempty, and has an accepted image extension;
+- every referenced sanitized evidence JSON file actually exists, is nonempty, and parses as JSON;
+- sanitized JSON is rejected if it retains credential fields such as access/refresh tokens, hidden credentials, passwords, service-role/secret keys, or token-like secret patterns;
 - each platform says `finalDisposition: "PASS"`;
 - iPhone and Android use independent synthetic employee/device fixtures;
 - final isolated-backend cleanup readback is zero for employees, actor identities, devices, enrollment tokens, shifts, events, GPS points, Sets, outcomes, commissions, KPI standards, pay plans, territories, Auth users, Auth sessions, and refresh tokens;
@@ -76,7 +79,7 @@ The public templates contain no tokens, access credentials, customer data, emplo
 
 ## Important limitation
 
-A successful GitHub Actions build, simulator run, generic iPhone-device compile, APK package, artifact checksum, or local validator unit test is **not** physical acceptance. The validator consumes evidence produced by the real-phone run; it cannot manufacture that evidence.
+A successful GitHub Actions build, simulator run, generic iPhone-device compile, APK package, artifact checksum, local validator unit test, or existence check of retained evidence is **not** physical acceptance. The validator consumes evidence produced by the real-phone run; it cannot prove the truth of a screenshot or manufacture real hardware behavior.
 
 ## Production boundary
 
