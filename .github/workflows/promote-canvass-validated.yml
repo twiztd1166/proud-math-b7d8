@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: paradise-canvass-manager-public
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Verify validated metadata and promote stable branch
         shell: bash
         run: |
@@ -33,4 +33,4 @@ jobs:
           VALIDATED_SHA="$(cat /tmp/validated_sha)"
           git cat-file -e "$VALIDATED_SHA^{commit}"
           git merge-base --is-ancestor "$VALIDATED_SHA" HEAD
-          git push --force origin "$VALIDATED_SHA:refs/heads/paradise-canvass-manager-validated"
+          git push origin "$VALIDATED_SHA:refs/heads/paradise-canvass-manager-validated"
