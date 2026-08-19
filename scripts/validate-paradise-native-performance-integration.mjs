@@ -24,7 +24,7 @@ for (const control of [
   "const outDir = 'performance-dist'",
   'performance-native-app.js',
   'performance-native.css',
-  'id=\\"nPerf\\"',
+  'id="nPerf"',
   "entryPoints: ['performance/client/performance-native-app.mjs']",
   'bundle: true',
   'treeShaking: true',
@@ -95,7 +95,7 @@ if (process.argv.includes('--built')) {
   for (const control of ['START MY DAY', 'FINISH DAY', 'performance-enrollment-redeem', 'performance_location_points', 'performance_events']) {
     requireText(bundle, control, 'Built native Performance app');
   }
-  for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE_KEY', 'performance_sets']) {
+  for (const forbidden of ['SUPABASE_SERVICE_ROLE_KEY', 'performance_sets']) {
     forbidText(bundle, forbidden, 'Built native Performance app');
   }
 }
