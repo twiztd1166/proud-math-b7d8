@@ -38,12 +38,12 @@
         "Coarse Location",
         "User ID",
         "Device ID",
-        "Product Interaction / operational app activity where retained",
-        "Other Data needed for active workday and route evidence"
+        "Other Data Types / operational shift and workday evidence"
       ],
       "linkedToUser": true,
       "tracking": false,
       "purpose": "App Functionality",
+      "taxonomyNote": "Do not declare Product Interaction solely for employee workday events. Apple defines Product Interaction as app-interaction telemetry such as launches, taps, clicks, scrolling and views. The current native store runtime retains operational shift/workday evidence rather than general UI-interaction analytics; classify that residual operational evidence under Other Data Types unless the final binary adds separately retained interaction telemetry.",
       "finalAnswersRequireReview": true
     },
     "reviewAccount": "BLOCKED_PENDING_APP_REVIEW_ACCOUNT_AND_TRUSTED_DEVICE_ENROLLMENT_INSTRUCTIONS"
@@ -67,7 +67,7 @@
         "Location",
         "User IDs",
         "Device or other IDs",
-        "App activity / operational workday activity where retained"
+        "App activity > Other actions / employee-started workday actions where retained"
       ],
       "sharedForAdvertising": false,
       "sold": false,
@@ -76,6 +76,7 @@
         "Security and fraud prevention",
         "Account management"
       ],
+      "taxonomyNote": "Google defines App activity > Other actions as other in-app user activity/actions that do not fit the listed subcategories. Use that category for retained employee Start/Finish workday actions; do not imply general app-interaction analytics unless the final binary actually collects them.",
       "finalAnswersRequireReview": true
     }
   },
