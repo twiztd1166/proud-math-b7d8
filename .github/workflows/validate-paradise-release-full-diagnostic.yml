@@ -1,0 +1,151 @@
+name: Paradise release full diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-full-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact public candidate
+        uses: actions/checkout@v4
+        with:
+          ref: c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270
+          fetch-depth: 0
+
+      - name: Verify exact refs and ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_SHA=c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          test "$REMOTE_SHA" = "$TARGET_SHA"
+          git fetch origin paradise-canvass-manager-validated:refs/remotes/origin/paradise-canvass-manager-validated
+          git merge-base --is-ancestor refs/remotes/origin/paradise-canvass-manager-validated "$TARGET_SHA"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Apply and validate controlled field payload
+        run: node scripts/apply-controlled-update.mjs
+
+      - name: Validate exact controlled baseline and change isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/change-control-report.mjs
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
+          const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const report=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          const canonical=JSON.stringify(obj);
+          const hash=crypto.createHash('sha256').update(canonical).digest('hex');
+          const go=obj.records.filter(r=>r.release==='GO').length;
+          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+          if(obj.records.length!==78||go!==76||noGo!==2)throw new Error('Controlled 78/76/2 baseline mismatch');
+          if(baseline.records!==78||baseline.go!==76||baseline.noGo!==2)throw new Error('Control baseline file drift');
+          if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO set drift');
+          if(hash!==expected||manifest.sha256!==expected)throw new Error('Controlled dataset hash-chain mismatch');
+          if(report.datasetChanged!==false||report.jurisdictionChangeCount!==0||(report.classificationChanges||[]).length!==0)throw new Error('Release candidate is not code-only');
+          NODE
+
+      - name: Validate static field and University controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in scripts/validate-training-model-v1.mjs scripts/validate-practice-model-v2.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-reconciliation.mjs scripts/validate-deep-audit-controls.mjs scripts/validate-training-experience-v2.mjs scripts/validate-training-experience-v3.mjs scripts/validate-training-release-isolation.mjs scripts/validate-release-workflow-controls.mjs scripts/build-canvass-site.mjs; do node --check "$f"; done
+          node scripts/validate-training-model-v1.mjs
+          node scripts/validate-practice-model-v2.mjs
+          node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
+          node scripts/validate-deep-audit-controls.mjs
+          node scripts/validate-training-experience-v2.mjs
+          node scripts/validate-training-experience-v3.mjs
+          node scripts/validate-release-workflow-controls.mjs
+          node scripts/validate-field-baseline-v1.mjs
+          node scripts/validate-training-release-isolation.mjs
+          node --check provenance-v3-2.js
+          node --check field-v37.js
+          node --check pwa-v3.js
+          node --check sw.js
+          grep -q "appVersion:'2026.08.14-v3.12'" provenance-v3-2.js
+          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
+          grep -q 'records.length!==78' boot-v2.js
+          grep -q 'db.meta.goCount!==76' boot-v2.js
+          grep -q 'db.meta.noGoCount!==2' boot-v2.js
+          if grep -Eqi 'manager-assigned|assigned training|due date' training-experience-v3.js training-ux-polish-v1.js; then echo 'Manager-assigned training reintroduced'; exit 1; fi
+          if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
+
+      - name: Validate Paradise Performance source foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-performance-foundation.mjs
+          node scripts/validate-performance-enrollment-security.mjs
+          node --test performance/tests/*.test.mjs
+
+      - name: Build static production bundle
+        run: |
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/index.html
+          test -f canvass-dist/field-v37.js
+          test -f canvass-dist/sw.js
+          test -f canvass-dist/training-experience-v3.js
+
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-release-full-diagnostic-playwright"
+          rm -rf "$PLAYWRIGHT_ROOT" node_modules
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
+
+      - name: Start isolated test server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-release-full-diagnostic-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+
+      - name: Run iPhone field, offline, University and UX regressions
+        run: >-
+          ./node_modules/.bin/playwright test
+          tests/mobile-regression.spec.js
+          tests/offline-regression.spec.js
+          tests/training-experience-v2.spec.js
+          tests/training-experience-v3.spec.js
+          tests/training-smoke.spec.js
+          tests/currentness-smoke.spec.js
+          tests/readiness-smoke.spec.js
+          tests/practice-smoke.spec.js
+          tests/checks-smoke.spec.js
+          tests/more-search-smoke.spec.js
+          tests/media-library-smoke.spec.js
+          tests/player-progress-smoke.spec.js
+          tests/manager-home-smoke.spec.js
+          tests/lesson-flow-acceptance.spec.js
+          tests/release-readiness-smoke.spec.js
+          tests/sales-closing-smoke.spec.js
+          tests/deep-audit-regression.spec.js
+          tests/training-ux-polish.spec.js
+          --project=webkit-iphone --retries=0 --reporter=github
+
+      - name: Run device matrix regression
+        run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --retries=0 --reporter=github
+
+      - name: Run adversarial browser matrix
+        run: ./node_modules/.bin/playwright test tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js tests/progress-transfer-recovery-v1.spec.js --retries=0 --reporter=github
