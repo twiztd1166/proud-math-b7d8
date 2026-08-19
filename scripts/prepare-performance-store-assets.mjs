@@ -28,12 +28,17 @@ const pngInfo = buffer => {
 
 function reconstructSource() {
   const source = manifest.source;
-  if (!Array.isArray(source.chunks) || source.chunks.length !== 5) throw new Error('Controlled Paradise favicon must remain split into exactly five ordered source chunks');
+  if (!Array.isArray(source.chunks) || source.chunks.length !== 17) {
+    throw new Error('Controlled Paradise favicon must remain split into exactly 17 ordered source segments');
+  }
   const encoded = source.chunks.map(relative => {
     const target = path.join(root, relative);
     if (!fs.existsSync(target)) throw new Error(`Controlled brand source chunk is missing: ${relative}`);
     return fs.readFileSync(target, 'utf8').replace(/\s+/g, '');
   }).join('');
+  if (encoded.length !== source.encodedChars) {
+    throw new Error(`Controlled Paradise favicon encoded-length mismatch: expected ${source.encodedChars}, got ${encoded.length}`);
+  }
   const buffer = Buffer.from(encoded, 'base64');
   if (buffer.toString('base64') !== encoded) throw new Error('Controlled Paradise favicon base64 is not canonical or was truncated');
   if (buffer.length !== source.bytes) throw new Error(`Controlled Paradise favicon byte count mismatch: expected ${source.bytes}, got ${buffer.length}`);
@@ -121,8 +126,8 @@ async function writeAndroid(sharp, sourceBuffer, report) {
   ensureDir(play);
   await sharp(sourceBuffer).resize(512, 512, { fit: 'fill', kernel: sharp.kernel.lanczos3 }).png({ compressionLevel: 9, adaptiveFiltering: false }).toFile(play);
   const playMeta = await sharp(play).metadata();
-  if (playMeta.width !== 512 || playMeta.height !== 512) throw new Error('Google Play review icon must be 512x512');
-  report.android = { generated, background: manifest.derivation.android.background, playReviewPath: path.relative(root, play), playSha256: sha256(fs.readFileSync(play)) };
+  if (playMeta.width !== 512 || playMeta.height !== 512 || !playMeta.hasAlpha) throw new Error('Google Play review icon must be a 512x512 PNG with alpha');
+  report.android = { generated, background: manifest.derivation.android.background, playReviewPath: path.relative(root, play), playHasAlpha: playMeta.hasAlpha, playSha256: sha256(fs.readFileSync(play)) };
 }
 
 const source = reconstructSource();
@@ -130,6 +135,8 @@ const report = {
   schemaVersion: 1,
   source: {
     driveFileId: manifest.source.driveFileId,
+    chunks: manifest.source.chunks.length,
+    encodedChars: manifest.source.encodedChars,
     bytes: source.buffer.length,
     sha256: source.digest,
     width: source.info.width,
