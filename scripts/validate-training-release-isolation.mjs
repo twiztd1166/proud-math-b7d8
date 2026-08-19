@@ -2,7 +2,7 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 
 const BASE='5e7efc40de524bef0e63c76595c3c518925888b9';
-const CURRENT_PRODUCTION_VALIDATED='c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270';
+const PUBLIC_REF='origin/paradise-canvass-manager-public';
 const immutable=[
   'controlled-register-source.json',
   'plain-data.js',
@@ -141,19 +141,29 @@ const normalizeProvenance=s=>s.replace(/appVersion:'[^']+'/,"appVersion:'<RELEAS
 if(normalizeProvenance(show(BASE,'provenance-v3-2.js'))!==normalizeProvenance(fs.readFileSync('provenance-v3-2.js','utf8')))throw new Error('provenance-v3-2.js changed beyond the allowed appVersion field');
 const currentVersion=(fs.readFileSync('provenance-v3-2.js','utf8').match(/appVersion:'([^']+)'/)||[])[1];
 
-// Public release work may retain latest.json from the validated field baseline or from the
-// exact current validated production runtime, but no arbitrary SHA is accepted. Metadata
-// must remain internally consistent with the controlled 78 / 76 / 2 dataset and URL pin.
+// Release work may retain either the frozen field-baseline metadata or the exact validated
+// metadata object currently published on paradise-canvass-manager-public. This avoids a
+// hand-maintained moving SHA allowlist without accepting arbitrary or rewritten metadata.
 const baseLatest=JSON.parse(show(BASE,'latest.json'));
 const latest=JSON.parse(fs.readFileSync('latest.json','utf8'));
-const allowedLatestShas=new Set([baseLatest.sha,BASE,CURRENT_PRODUCTION_VALIDATED]);
-const allowedLatestVersions=new Set([baseLatest.version,currentVersion]);
-if(!allowedLatestShas.has(latest.sha))throw new Error(`latest.json points to an unexpected controlled release SHA: ${latest.sha}`);
+let publicLatest=null;
+try{publicLatest=JSON.parse(show(PUBLIC_REF,'latest.json'));}catch{}
+const sameMetadata=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const acceptedMetadata=[baseLatest,...(publicLatest?[publicLatest]:[])];
+if(!acceptedMetadata.some(candidate=>sameMetadata(candidate,latest)))throw new Error(`latest.json does not exactly match the frozen baseline or current public validated metadata: ${latest.sha}`);
+const allowedLatestVersions=new Set([baseLatest.version,currentVersion,...(publicLatest?[publicLatest.version]:[])]);
 if(!allowedLatestVersions.has(latest.version))throw new Error(`latest.json contains an unexpected controlled release version: ${latest.version}`);
-if(latest.snapshot!=='2026-08-14'||latest.datasetSha256!=='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'||latest.records!==78||latest.go!==76||latest.noGo!==2)throw new Error('latest.json controlled field baseline drift detected');
-if(latest.validated!==true||latest.changeControl?.datasetChanged!==false||latest.changeControl?.jurisdictionChangeCount!==0||latest.changeControl?.classificationChanges!==0)throw new Error('latest.json validation/change-control state is not fail-closed');
-if(latest.url!==`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${latest.sha}/index.html`)throw new Error('latest.json immutable URL does not match its SHA');
-if(!Number.isFinite(Date.parse(latest.publishedAt)))throw new Error('latest.json publishedAt is invalid');
+function assertControlledMetadata(value,label){
+  if(value.snapshot!=='2026-08-14'||value.datasetSha256!=='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'||value.records!==78||value.go!==76||value.noGo!==2)throw new Error(`${label} controlled field baseline drift detected`);
+  if(value.validated!==true||value.changeControl?.datasetChanged!==false||value.changeControl?.jurisdictionChangeCount!==0||value.changeControl?.classificationChanges!==0)throw new Error(`${label} validation/change-control state is not fail-closed`);
+  if(value.url!==`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${value.sha}/index.html`)throw new Error(`${label} immutable URL does not match its SHA`);
+  if(!Number.isFinite(Date.parse(value.publishedAt)))throw new Error(`${label} publishedAt is invalid`);
+}
+assertControlledMetadata(latest,'latest.json');
+if(publicLatest){
+  assertControlledMetadata(publicLatest,'public latest.json');
+  try{execFileSync('git',['merge-base','--is-ancestor',publicLatest.sha,PUBLIC_REF],{stdio:'ignore'});}catch{throw new Error(`Current public latest.json SHA is not an ancestor of ${PUBLIC_REF}: ${publicLatest.sha}`);}
+}
 
 const allowedExisting=new Set([
   '.github/workflows/build-canvass-v37.yml',
@@ -174,4 +184,4 @@ const suspicious=diff.filter(x=>x.status!=='A'&&!allowedExisting.has(x.path));
 if(suspicious.length)throw new Error(`Unexpected modification/deletion outside additive training shell: ${suspicious.map(x=>`${x.status}:${x.path}`).join(', ')}`);
 const trainingAdded=diff.filter(x=>x.status==='A'&&(x.path.startsWith('training-')||x.path.startsWith('tests/')||x.path.startsWith('scripts/')||x.path.startsWith('docs/'))).length;
 if(trainingAdded<10)throw new Error(`Training release inventory unexpectedly small: ${trainingAdded}`);
-console.log({status:'PASS',base:BASE,currentProductionValidated:CURRENT_PRODUCTION_VALIDATED,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',serviceWorkerException:'Validated field cache + training-only CORE + exact queryless navigation hardening',latestMetadataException:'Only exact baseline/current-production validated metadata accepted',serviceWorkerTrainingAssets:swTrainingExtras.length,trainingAdded,totalDiffEntries:diff.length});
+console.log({status:'PASS',base:BASE,publicRef:PUBLIC_REF,publicValidatedSha:publicLatest?.sha||null,immutableFieldFiles:immutable.length,indexException:'Exact additive Training CSS/nav/scripts only',bootException:'Training router only',serviceWorkerException:'Validated field cache + training-only CORE + exact queryless navigation hardening',latestMetadataException:'Frozen baseline or exact current-public validated metadata object only',serviceWorkerTrainingAssets:swTrainingExtras.length,trainingAdded,totalDiffEntries:diff.length});

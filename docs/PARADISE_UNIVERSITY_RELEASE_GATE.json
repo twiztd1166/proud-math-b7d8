@@ -1,25 +1,38 @@
 {
-  "schemaVersion": "2026.08.19-pu-release-gate-v23-production-closeout",
+  "schemaVersion": "2026.08.19-pu-release-gate-v24-live-pointer",
   "status": "PRODUCTION_RELEASED_VALIDATED",
   "currentAuthority": "PARADISE_UNIVERSITY_RELEASE_GATE.json",
   "historicalPrePromotionAuthority": "PARADISE_UNIVERSITY_PREPROMOTION_GATE_V22.json",
-  "stableValidatedBranch": "paradise-canvass-manager-validated",
-  "stableValidatedRuntime": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
-  "stableBranchUrl": "https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html",
-  "immutableRuntimeUrl": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html",
-  "publicMetadataCommit": "6d54c7b75a57bfdb94dbfc596504ccb6f152ca75",
-  "productionRelease": {
+  "currentReleaseResolution": {
+    "canonicalMetadata": "latest.json",
+    "exactValidatedShaField": "sha",
+    "immutableRuntimeUrlField": "url",
+    "validatedRequired": true,
+    "stableValidatedBranch": "paradise-canvass-manager-validated",
+    "stableBranchUrl": "https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html",
+    "rule": "Resolve the current exact validated release SHA and immutable runtime URL from latest.json. Do not hard-code the moving stable head in this status file."
+  },
+  "initialUnifiedApplicationRelease": {
     "status": "PASS_RELEASED",
-    "publishedAt": "2026-08-19T07:19:34.462Z",
-    "validatedRuntimeSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
+    "validatedApplicationPayloadSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
     "metadataCommitSha": "6d54c7b75a57bfdb94dbfc596504ccb6f152ca75",
+    "publishedAt": "2026-08-19T07:19:34.462Z",
     "fullReadOnlyReleaseMirrorRun": 32227074297,
     "ancestryFailureDiagnosticRun": 32226496599,
     "ancestryCorrectedDiagnosticRun": 32226577491,
     "releaseControlRepairPr": 11,
     "metadataOnlyChildConfirmed": true,
     "manualValidatedRefMovement": false,
-    "forcePromotionUsed": false
+    "forcePromotionUsed": false,
+    "historicalEvidenceOnly": true
+  },
+  "documentationCloseoutEvidence": {
+    "pr": 13,
+    "premergeRun": 32228244109,
+    "validatedControlCommit": "f8ed532721a666a31c5f25a1239157fd2c9fd2c1",
+    "metadataCommit": "6e3194f571e86fac9f452426a6ea675ed3a19bbd",
+    "applicationRuntimeFilesChanged": false,
+    "historicalEvidenceOnly": true
   },
   "trainingExperienceV4": {
     "status": "PASS_AUTOMATED_MAXIMUM_CURRENT_COVERAGE",
@@ -41,7 +54,6 @@
   },
   "fieldBaseline": {
     "status": "PASS_UNCHANGED",
-    "validatedRuntimeSha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
     "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
     "records": 78,
     "go": 76,
