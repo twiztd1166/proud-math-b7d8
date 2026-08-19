@@ -1,6 +1,6 @@
 {
   "version": "2026.08.14-v3.12",
-  "sha": "5e7efc40de524bef0e63c76595c3c518925888b9",
+  "sha": "c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270",
   "snapshot": "2026-08-14",
   "datasetSha256": "a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200",
   "records": 78,
@@ -11,7 +11,7 @@
     "jurisdictionChangeCount": 0,
     "classificationChanges": 0
   },
-  "url": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/5e7efc40de524bef0e63c76595c3c518925888b9/index.html",
+  "url": "https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html",
   "validated": true,
-  "publishedAt": "2026-08-15T03:28:22.705Z"
+  "publishedAt": "2026-08-19T07:19:34.462Z"
 }
