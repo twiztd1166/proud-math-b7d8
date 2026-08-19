@@ -1,0 +1,202 @@
+name: Validate Paradise native store distribution
+
+on:
+  push:
+    branches:
+      - agent/paradise-native-store-distribution-v1
+    paths:
+      - 'capacitor.config.json'
+      - 'performance/native/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/prepare-performance-android-shell.mjs'
+      - 'scripts/prepare-performance-android-store.mjs'
+      - 'scripts/prepare-performance-ios-shell.rb'
+      - 'scripts/prepare-performance-ios-store.rb'
+      - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
+      - '.github/workflows/validate-paradise-native-store-distribution.yml'
+  pull_request:
+    paths:
+      - 'capacitor.config.json'
+      - 'performance/native/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/prepare-performance-android-shell.mjs'
+      - 'scripts/prepare-performance-android-store.mjs'
+      - 'scripts/prepare-performance-ios-shell.rb'
+      - 'scripts/prepare-performance-ios-store.rb'
+      - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
+      - '.github/workflows/validate-paradise-native-store-distribution.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-native-store-distribution-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CAPACITOR_VERSION: '8.5.0'
+  PARADISE_STORE_VERSION: '1.0.0'
+  PARADISE_STORE_BUILD: '1'
+
+jobs:
+  controls:
+    name: Store distribution controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Validate Performance foundation
+        run: node scripts/validate-performance-foundation.mjs
+
+      - name: Validate enrollment and stale-session controls
+        run: node scripts/validate-performance-enrollment-security.mjs
+
+      - name: Run Performance contract tests
+        run: node --test performance/tests/*.test.mjs
+
+      - name: Validate store distribution controls
+        run: node scripts/validate-paradise-store-distribution.mjs
+
+  android-store:
+    name: Android unsigned Play candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Build controlled production web bundle
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Install isolated Capacitor Android toolchain
+        run: >-
+          npm install --no-save --package-lock=false
+          @capacitor/core@${CAPACITOR_VERSION}
+          @capacitor/cli@${CAPACITOR_VERSION}
+          @capacitor/android@${CAPACITOR_VERSION}
+
+      - name: Generate Android shell
+        run: npx cap add android
+
+      - name: Integrate controlled Android native plugins
+        run: node scripts/prepare-performance-android-shell.mjs
+
+      - name: Apply Google Play store controls
+        run: node scripts/prepare-performance-android-store.mjs
+
+      - name: Compile unsigned Android Release AAB
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Verify Android AAB
+        run: test -f android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload Android unsigned candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: paradise-performance-android-store-candidate-UNSIGNED-NOT-FOR-DISTRIBUTION
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
+
+  ios-store:
+    name: iOS unsigned App Store candidate
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Build controlled production web bundle
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Install isolated Capacitor iOS toolchain
+        run: >-
+          npm install --no-save --package-lock=false
+          @capacitor/core@${CAPACITOR_VERSION}
+          @capacitor/cli@${CAPACITOR_VERSION}
+          @capacitor/ios@${CAPACITOR_VERSION}
+
+      - name: Generate iOS SPM shell
+        run: npx cap add ios --packagemanager SPM
+
+      - name: Install Xcode project helper
+        run: gem install xcodeproj --no-document
+
+      - name: Integrate controlled iOS native plugins and privacy manifest
+        run: ruby scripts/prepare-performance-ios-shell.rb
+
+      - name: Apply App Store identity and version controls
+        run: ruby scripts/prepare-performance-ios-store.rb
+
+      - name: Validate iOS 26+ SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          SDK_MAJOR="${SDK_VERSION%%.*}"
+          echo "iPhoneOS SDK: ${SDK_VERSION}"
+          if [[ ! "${SDK_MAJOR}" =~ ^[0-9]+$ ]] || (( SDK_MAJOR < 26 )); then
+            echo "App Store candidate requires iOS SDK 26 or later; found ${SDK_VERSION}" >&2
+            exit 1
+          fi
+
+      - name: Resolve iOS package dependencies
+        run: xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+
+      - name: Compile unsigned generic iPhone Release shell
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Release
+          -sdk iphoneos
+          -destination 'generic/platform=iOS'
+          -derivedDataPath build/paradise-performance-store-ios
+          CODE_SIGNING_ALLOWED=NO
+          build
+
+      - name: Package unsigned Xcode store candidate
+        run: tar -czf paradise-performance-ios-store-candidate-UNSIGNED-NOT-FOR-DISTRIBUTION.tar.gz ios/App
+
+      - name: Upload iOS unsigned candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: paradise-performance-ios-store-candidate-UNSIGNED-NOT-FOR-DISTRIBUTION
+          path: paradise-performance-ios-store-candidate-UNSIGNED-NOT-FOR-DISTRIBUTION.tar.gz
+          if-no-files-found: error
+          retention-days: 7
