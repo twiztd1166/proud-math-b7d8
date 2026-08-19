@@ -31,7 +31,7 @@
   const fieldOpening=(window.PU_CONTENT?.lessons||[]).find(x=>x.id==='field-opening');
   if(fieldOpening){
     fieldOpening.summary='Learn the structure and delivery of the opening without publishing unapproved exact wording.';
-    fieldOpening.learn='Use only the current manager-approved Paradise opening for your route. Paradise University intentionally does not publish an exact canvass opener while current wording approval is pending. Keep the opening brief, identify yourself and Paradise Exteriors, move to the current manager-approved project question, and do not add price, promotions, financing, legal claims, or other unapproved claims. If no current manager-approved opening has been issued for the route, stop and ask your manager before canvassing.';
+    fieldOpening.learn='Use only the current manager-approved Paradise opening for your route. Paradise University intentionally does not publish an exact canvass opener while current wording approval is pending. Keep the opening brief, identify yourself and Paradise Exteriors, move to the current manager-approved project question, and do not add price, promotions, financing, legal claims, or other unapproved claims. Do not claim you are handing out notices where the live municipality screen says not to use them. If no current manager-approved opening has been issued for the route, stop and ask your manager before canvassing.';
     fieldOpening.practice='Practice delivery using the current manager-approved opening supplied by your manager. Do not substitute a remembered, historical, or trainer-source script.';
     fieldOpening.pass='Demonstrate the current manager-approved route wording without adding price, promotions, financing, legal claims, or other unapproved claims.';
   }
