@@ -8,9 +8,18 @@ Isolated project: `taxlrlfsobtnbasjcnuf`
 
 ## Purpose
 
-This gate prevents build/simulator evidence, incomplete real-device testing, or uncleared synthetic backend state from being promoted as a physical-device PASS.
+This gate prevents build/simulator evidence, incomplete real-device testing, wrong acceptance artifacts, or uncleared synthetic backend state from being promoted as a physical-device PASS.
 
 It does not perform the hardware test. A real iPhone and a real Android phone must still execute the controlled A-L matrix.
+
+## Exact artifacts
+
+Evidence is bound to the independently verified install/source packages:
+
+- Android `app-debug.apk` SHA-256: `1b7860ddc62c1f469e70129323dbc2c3f4a5c005d3a2aaea33c09f18dd8efd68`
+- iOS `paradise-performance-ios-xcode-project.zip` SHA-256: `28521af3b38e7bf171f864606c1b98488e323089a785a081e9a33a682da4ebe2`
+
+A platform evidence file with a different or missing `artifactSha256` fails closed.
 
 ## Local evidence files
 
@@ -39,6 +48,7 @@ node scripts/validate-performance-physical-acceptance-evidence.mjs \
 The command returns PASS only when all of the following are true:
 
 - both documents are pinned to acceptance head `783d0c11d20d9e72444a258ac55b2d22b1219692`, workflow `32241534617`, and isolated project `taxlrlfsobtnbasjcnuf`;
+- each platform carries the exact controlled artifact SHA-256 listed above;
 - one document is `ios` and the other is `android`;
 - each platform has a real device model, OS version, install method, tester, synthetic employee ID, Performance device ID, and valid start/end timestamps;
 - every required A-L case is explicitly `pass: true`;
@@ -46,11 +56,12 @@ The command returns PASS only when all of the following are true:
 - offline replay proves at least one queued write, a final queue of zero, and zero duplicate client point IDs;
 - server revocation has a timestamp and zero accepted post-revoke GPS rows;
 - Finish Day has a timestamp and zero post-finish collected GPS rows;
+- required zero-proof fields must contain explicit numeric zero; `null`, blank, missing, and nonnumeric values fail closed;
 - screenshots/photos and sanitized evidence JSON filenames are retained;
 - each platform says `finalDisposition: "PASS"`;
 - iPhone and Android use independent synthetic employee/device fixtures;
 - final isolated-backend cleanup readback is zero for employees, actor identities, devices, enrollment tokens, shifts, events, GPS points, Sets, outcomes, commissions, KPI standards, pay plans, territories, Auth users, Auth sessions, and refresh tokens;
-- Security Advisor lint count is zero after cleanup.
+- Security Advisor lint count is explicitly zero after cleanup.
 
 Any failed or missing condition exits nonzero and prints the exact blocking fields.
 
@@ -65,7 +76,7 @@ The public templates contain no tokens, access credentials, customer data, emplo
 
 ## Important limitation
 
-A successful GitHub Actions build, simulator run, generic iPhone-device compile, APK package, or local validator unit test is **not** physical acceptance. The validator consumes evidence produced by the real-phone run; it cannot manufacture that evidence.
+A successful GitHub Actions build, simulator run, generic iPhone-device compile, APK package, artifact checksum, or local validator unit test is **not** physical acceptance. The validator consumes evidence produced by the real-phone run; it cannot manufacture that evidence.
 
 ## Production boundary
 
