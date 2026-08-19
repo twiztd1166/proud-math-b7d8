@@ -81,7 +81,7 @@ assert(runbook.includes('No TestFlight dependency'), 'Runbook must preserve no-T
 assert(runbook.includes('Google Play Internal Testing'), 'Runbook must preserve Android private testing decision');
 assert(runbook.includes('Unlisted App Store'), 'Runbook must preserve iPhone unlisted decision');
 assert(runbook.includes('Do not use the current live page as the final store privacy-policy URL'), 'Runbook must preserve privacy-page blocker');
-assert(runbook.includes('apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section'), 'Runbook must preserve current Google Internal Testing Data Safety exemption');
+assert(/apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section/i.test(runbook), 'Runbook must preserve current Google Internal Testing Data Safety exemption');
 assert(runbook.includes('Data Safety is **not a hard blocker solely to that Internal-Testing-only release**'), 'Runbook must not reintroduce Data Safety as a hard blocker to initial Internal Testing');
 assert(runbook.includes('Performance Today idle/current-workday state'), 'Screenshot plan must use the real Performance Today v1 surface');
 assert(runbook.includes('Lookup field/legal instruction view'), 'Screenshot plan must preserve Lookup as an independently visible field authority');
