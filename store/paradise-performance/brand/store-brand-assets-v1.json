@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "app": "Paradise Performance",
+  "bundleId": "com.paradiseexteriors.performance",
+  "status": "CONTROLLED_SOURCE_CANDIDATE_NOT_RELEASED",
+  "source": {
+    "driveFileName": "Paradise-png-Favicon-528.png",
+    "driveFileId": "1CsDZmKJWC6BUgszGD3NZ8BKG_m_B5Wz8",
+    "mimeType": "image/png",
+    "width": 528,
+    "height": 528,
+    "bytes": 44927,
+    "encodedChars": 59904,
+    "sha256": "75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13",
+    "visualIdentity": "Existing square Paradise house/P favicon mark; visually verified from Drive. No wordmark crop, redraw, recolor, or geometry edit.",
+    "chunks": [
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.part00",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg01",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg02",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg03",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg04",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail01",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail02",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail03",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail04",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail05",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail06",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail07",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail08",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail09",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail10",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail11",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail12"
+    ]
+  },
+  "derivation": {
+    "rule": "Only deterministic resize, centering, transparent padding, and iOS white flattening are permitted. Do not redraw, recolor, distort, crop into a new mark, or invent brand geometry.",
+    "ios": {
+      "generatedAppIcon": "1024x1024 RGB PNG derived from the exact 528x528 source with deterministic Lanczos3 resize and white flattening",
+      "generatedShellPath": "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
+    },
+    "android": {
+      "legacyLauncherPx": {
+        "mdpi": 48,
+        "hdpi": 72,
+        "xhdpi": 96,
+        "xxhdpi": 144,
+        "xxxhdpi": 192
+      },
+      "adaptiveForegroundCanvasPx": {
+        "mdpi": 108,
+        "hdpi": 162,
+        "xhdpi": 216,
+        "xxhdpi": 324,
+        "xxxhdpi": 432
+      },
+      "adaptiveSafeMarkRatio": 0.6111111111111112,
+      "background": "#FFFFFF",
+      "playListingIcon": "512x512 32-bit PNG derived from the exact source"
+    }
+  },
+  "openControls": [
+    "Final visual approval of generated iOS and Android icon previews",
+    "Launch/splash artwork remains separate and is not created by this control",
+    "Production signing and official-store submission remain separate blockers"
+  ]
+}
