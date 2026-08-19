@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "status": "ISOLATED_BACKEND_PARTIALLY_PROVISIONED_AUTH_USER_PENDING",
+  "project": {
+    "id": "taxlrlfsobtnbasjcnuf",
+    "name": "Canvass Project",
+    "environment": "ISOLATED_NON_PRODUCTION"
+  },
+  "edgeFunction": {
+    "slug": "performance-review-enrollment-mint",
+    "version": 1,
+    "status": "ACTIVE",
+    "verifyJwt": true,
+    "deploymentId": "2a916318-1ead-4c8c-bf24-ea41306d0230",
+    "deploymentSha256": "dfeeed1e7e5f4ed3cf1185cbfdbae59f3cbc993f6ef33570a0b9d72f6339abd9"
+  },
+  "syntheticFixtures": {
+    "issuer": {
+      "employeeId": "fd669519-c21a-4d2f-8b98-d1a1eae24893",
+      "displayName": "Paradise Store Review Issuer",
+      "role": "manager",
+      "active": true
+    },
+    "reviewEmployee": {
+      "employeeId": "1f8af617-73ef-4b0d-a741-23c9f062077e",
+      "displayName": "Paradise Store Review",
+      "role": "canvasser",
+      "managerEmployeeId": "fd669519-c21a-4d2f-8b98-d1a1eae24893",
+      "active": true
+    }
+  },
+  "reviewGateAuthUser": {
+    "status": "BLOCKED_PENDING_SUPPORTED_AUTH_ADMIN_CREATEUSER",
+    "performanceActorIdentityMustExist": false,
+    "requiredAppMetadata": {
+      "paradise_store_review": true,
+      "performance_review_employee_id": "1f8af617-73ef-4b0d-a741-23c9f062077e",
+      "performance_review_issuer_employee_id": "fd669519-c21a-4d2f-8b98-d1a1eae24893"
+    },
+    "credentialStorage": "APPLE_GOOGLE_REVIEW_CONSOLES_OR_APPROVED_SECRET_CHANNEL_ONLY",
+    "repositoryOrDriveCredentialStorageAllowed": false
+  },
+  "liveBoundaryReadbackAfterFunctionDeployment": {
+    "authUsers": 0,
+    "performanceEmployees": 2,
+    "actorIdentities": 0,
+    "devices": 0,
+    "enrollmentTokens": 0,
+    "shifts": 0,
+    "events": 0,
+    "locationPoints": 0,
+    "sets": 0,
+    "commissions": 0
+  },
+  "genericAuthenticatedNoIdentityRlsReadback": {
+    "simulatedAuthUserId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "performanceEmployeeRowsVisible": 0,
+    "result": "PASS"
+  },
+  "deployedEndToEndReviewTest": {
+    "status": "BLOCKED_PENDING_REVIEW_GATE_AUTH_USER",
+    "requiredFlow": "reusable reviewer sign-in -> performance-review-enrollment-mint -> fresh one-time token -> ordinary trusted-device redemption -> hidden device-bound session"
+  }
+}

@@ -3,6 +3,9 @@
 # verifies the user session JWT first, then the handler independently validates auth.getUser()
 # plus the current Performance employee/role mapping. Enrollment redemption intentionally
 # has no prior user JWT; its short-lived high-entropy one-time QR token is the credential.
+# Store-review mint is called only by a signed-in reusable marketplace-review gate account.
+# That account has no Performance actor identity; the handler validates auth.getUser() plus
+# admin-controlled review app_metadata and can mint only the configured synthetic canvasser.
 
 [functions.performance-enrollment-mint]
 verify_jwt = true
@@ -11,4 +14,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.performance-device-revoke]
+verify_jwt = true
+
+[functions.performance-review-enrollment-mint]
 verify_jwt = true
