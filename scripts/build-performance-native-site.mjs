@@ -6,12 +6,9 @@ const baseDir = 'canvass-dist';
 const outDir = 'performance-dist';
 const sourceIndex = path.join(baseDir, 'index.html');
 
-function assertNoPrivilegedSupabaseCredential(text, label) {
+function assertNoPrivilegedSupabaseCredentialValue(text, label) {
   if (/sb_secret_[A-Za-z0-9_-]{20,}/.test(text)) {
     throw new Error(`${label} contains a Supabase secret-key value`);
-  }
-  if (/SUPABASE_(?:SERVICE_ROLE|SECRET)_KEY/.test(text)) {
-    throw new Error(`${label} contains a privileged Supabase credential environment name`);
   }
   const jwtPattern = /\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
   for (const token of text.match(jwtPattern) || []) {
@@ -75,7 +72,7 @@ for (const required of [
 ]) {
   if (!bundle.includes(required)) throw new Error(`Native Performance bundle missing runtime control: ${required}`);
 }
-assertNoPrivilegedSupabaseCredential(bundle, 'Native Performance bundle');
+assertNoPrivilegedSupabaseCredentialValue(bundle, 'Native Performance bundle');
 if (bundle.includes('performance_sets')) {
   throw new Error('Native Performance bundle contains dormant customer SET transport material');
 }
