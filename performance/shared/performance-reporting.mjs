@@ -67,9 +67,14 @@ export function localDateKey(instant, timeZone = DEFAULT_REPORTING_TIME_ZONE) {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-export function reportingWindow({ periodType, asOf, timeZone = DEFAULT_REPORTING_TIME_ZONE, weekStartsOn = 1 }) {
+export function reportingWindow({ periodType, asOf, timeZone = DEFAULT_REPORTING_TIME_ZONE, weekStartsOn } = {}) {
   if (!SUPPORTED_PERIOD_TYPES.includes(periodType)) throw new Error(`Unsupported period type: ${periodType}`);
-  if (!Number.isInteger(weekStartsOn) || weekStartsOn < 0 || weekStartsOn > 6) throw new Error('weekStartsOn must be an integer from 0 to 6');
+  if (periodType === 'week' && (!Number.isInteger(weekStartsOn) || weekStartsOn < 0 || weekStartsOn > 6)) {
+    throw new Error('weekStartsOn must be explicitly configured as an integer from 0 to 6 for weekly reports');
+  }
+  if (periodType !== 'week' && weekStartsOn !== undefined && (!Number.isInteger(weekStartsOn) || weekStartsOn < 0 || weekStartsOn > 6)) {
+    throw new Error('weekStartsOn must be an integer from 0 to 6 when supplied');
+  }
 
   const asOfInstant = asDate(asOf, 'asOf');
   const asOfDate = localDateKey(asOfInstant, timeZone);
@@ -180,7 +185,7 @@ export function buildOriginCohortAggregate({
   periodType,
   asOf,
   timeZone = DEFAULT_REPORTING_TIME_ZONE,
-  weekStartsOn = 1,
+  weekStartsOn,
 } = {}) {
   const window = reportingWindow({ periodType, asOf, timeZone, weekStartsOn });
   const asOfInstant = asDate(asOf, 'asOf');
@@ -339,10 +344,6 @@ function scopeMatches(standard, scope = {}) {
   return true;
 }
 
-function scopeSpecificity(standard) {
-  return Number(Boolean(standard.appliesToRole)) + Number(Boolean(standard.appliesToOffice)) * 2 + Number(Boolean(standard.appliesToTeam)) * 4;
-}
-
 export function selectEffectiveKpiStandard({ standards = [], metricKey, at, scope = {} } = {}) {
   if (!metricKey) throw new Error('metricKey is required');
   const instant = asDate(at, 'at');
@@ -355,19 +356,13 @@ export function selectEffectiveKpiStandard({ standards = [], metricKey, at, scop
       const from = asDate(standard.effectiveFrom, 'standard.effectiveFrom');
       const to = standard.effectiveTo ? asDate(standard.effectiveTo, 'standard.effectiveTo') : null;
       return from <= instant && (!to || instant < to);
-    })
-    .sort((a, b) => {
-      const specificity = scopeSpecificity(b) - scopeSpecificity(a);
-      if (specificity !== 0) return specificity;
-      return asDate(b.effectiveFrom, 'standard.effectiveFrom') - asDate(a.effectiveFrom, 'standard.effectiveFrom');
     });
 
   if (candidates.length === 0) return null;
-  const top = candidates[0];
-  const ties = candidates.filter(candidate => scopeSpecificity(candidate) === scopeSpecificity(top)
-    && asDate(candidate.effectiveFrom, 'standard.effectiveFrom').getTime() === asDate(top.effectiveFrom, 'standard.effectiveFrom').getTime());
-  if (ties.length > 1) throw new Error(`Ambiguous KPI standard for ${metricKey}`);
-  return Object.freeze(top);
+  if (candidates.length > 1) {
+    throw new Error(`Ambiguous KPI standard for ${metricKey}; overlapping active scope rules require explicit Paradise configuration`);
+  }
+  return Object.freeze(candidates[0]);
 }
 
 export function resolvePinnedKpiStandards({ standards = [], versionLabels = [] } = {}) {
