@@ -90,11 +90,9 @@ export function reportingWindow({ periodType, asOf, timeZone = DEFAULT_REPORTING
     startDate = `${parts.year}-01-01`;
   }
 
-  const endDateExclusive = periodType === 'week'
-    ? addLocalDays(startDate, 7)
-    : periodType === 'month'
-      ? dateKeyFromParts(parts.month === 12 ? { year: parts.year + 1, month: 1, day: 1 } : { year: parts.year, month: parts.month + 1, day: 1 })
-      : addLocalDays(asOfDate, 1);
+  // A report is always bounded by its selected/current local as-of day.
+  // This prevents future-dated records later in the same week/month from leaking into a current-period result.
+  const endDateExclusive = addLocalDays(asOfDate, 1);
 
   return Object.freeze({
     periodType,
