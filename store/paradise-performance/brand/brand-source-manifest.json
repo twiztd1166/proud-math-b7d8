@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "product": "Paradise Performance",
+  "purpose": "Controlled native store icon and launch-asset source provenance",
+  "source": {
+    "driveFileId": "1CsDZmKJWC6BUgszGD3NZ8BKG_m_B5Wz8",
+    "driveName": "Paradise-png-Favicon-528.png",
+    "mimeType": "image/png",
+    "bytes": 44927,
+    "width": 528,
+    "height": 528,
+    "sha256": "75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13",
+    "repositoryEncoding": "store/paradise-performance/brand/source/paradise-favicon-528.b64.part*"
+  },
+  "playListingSource": {
+    "driveFileId": "1dRJ6LZYtf24bKwCYnApLTHkeI8NFYDmw",
+    "driveName": "cropped-Paradise-Png-Favicon-512.png",
+    "mimeType": "image/png",
+    "bytes": 41477,
+    "width": 512,
+    "height": 512,
+    "sha256": "29ae4b61e9ee3269092b75e489f572e5aac3afe3b03c722eb5dc659ff037ca33",
+    "note": "Existing Paradise Drive asset reserved as the Google Play listing-icon source; it is not silently regenerated or substituted by this tranche."
+  },
+  "brandGuidelines": {
+    "driveFileId": "1FePJBk-RGlT3gtl15v2eiMaWo1iOt9ii",
+    "driveName": "Paradise Exteriors Brand Guidlines__c5af41dab6.png",
+    "visualControl": "The guideline sheet visibly includes the square Paradise house/P mark as an acceptable logo example on a white background.",
+    "iconBackground": "#FFFFFF",
+    "splashBackground": "#FFFFFF"
+  },
+  "generation": {
+    "capacitorAssetsVersion": "3.0.5",
+    "mode": "Easy Mode from generated assets/logo.svg",
+    "workingCanvas": "1024x1024 SVG wrapper embedding the exact 528x528 PNG bytes",
+    "noCrop": true,
+    "noRecolor": true,
+    "noRedraw": true,
+    "noVectorization": true,
+    "backgroundFlattening": "#FFFFFF applied by the native asset generator",
+    "sourceResolutionDisclosure": "The approved origin is 528x528; the 1024 working canvas is a controlled raster upscale through the asset generator, not a native 1024 original."
+  },
+  "releaseBoundary": {
+    "scope": "store asset plumbing only",
+    "doesNotAuthorize": [
+      "App Store submission",
+      "Google Play rollout",
+      "production signing",
+      "employee deployment",
+      "field dataset changes",
+      "municipality classification changes",
+      "Paradise University changes",
+      "Performance runtime changes",
+      "KPI or pay changes",
+      "physical-device PASS"
+    ]
+  }
+}
