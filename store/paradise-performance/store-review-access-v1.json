@@ -52,6 +52,11 @@
     "sets": 0,
     "commissions": 0
   },
+  "genericAuthenticatedNoIdentityRlsReadback": {
+    "simulatedAuthUserId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "performanceEmployeeRowsVisible": 0,
+    "result": "PASS"
+  },
   "deployedEndToEndReviewTest": {
     "status": "BLOCKED_PENDING_REVIEW_GATE_AUTH_USER",
     "requiredFlow": "reusable reviewer sign-in -> performance-review-enrollment-mint -> fresh one-time token -> ordinary trusted-device redemption -> hidden device-bound session"
