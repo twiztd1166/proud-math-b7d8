@@ -27,7 +27,9 @@ export const REQUIRED_CASES = Object.freeze([
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const NON_EMPTY = value => typeof value === 'string' && value.trim().length > 0;
-const finiteNonNegative = value => Number.isFinite(Number(value)) && Number(value) >= 0;
+const presentNumber = value => value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '') && Number.isFinite(Number(value));
+const finiteNonNegative = value => presentNumber(value) && Number(value) >= 0;
+const exactZero = value => presentNumber(value) && Number(value) === 0;
 
 function issue(code, field, message) {
   return Object.freeze({ code, field, message });
@@ -89,16 +91,16 @@ export function validatePhysicalEvidence(doc, expectedPlatform) {
 
   const replay = doc.offlineReplay ?? {};
   if (!finiteNonNegative(replay.queueBefore) || Number(replay.queueBefore) < 1) issues.push(issue('OFFLINE_QUEUE_NOT_PROVEN', 'offlineReplay.queueBefore', 'queueBefore must prove at least one queued write'));
-  if (Number(replay.queueAfter) !== 0) issues.push(issue('OFFLINE_QUEUE_NOT_DRAINED', 'offlineReplay.queueAfter', 'queueAfter must equal 0'));
-  if (Number(replay.duplicateClientPointIds) !== 0) issues.push(issue('DUPLICATE_REPLAY_DETECTED', 'offlineReplay.duplicateClientPointIds', 'duplicateClientPointIds must equal 0'));
+  if (!exactZero(replay.queueAfter)) issues.push(issue('OFFLINE_QUEUE_NOT_DRAINED', 'offlineReplay.queueAfter', 'queueAfter must equal 0'));
+  if (!exactZero(replay.duplicateClientPointIds)) issues.push(issue('DUPLICATE_REPLAY_DETECTED', 'offlineReplay.duplicateClientPointIds', 'duplicateClientPointIds must equal 0'));
 
   const revoke = doc.revocation ?? {};
   if (!validInstant(revoke.revokedAt)) issues.push(issue('REVOCATION_NOT_PROVEN', 'revocation.revokedAt', 'revokedAt is required'));
-  if (Number(revoke.postRevokeAcceptedGpsRows) !== 0) issues.push(issue('POST_REVOKE_WRITE_DETECTED', 'revocation.postRevokeAcceptedGpsRows', 'postRevokeAcceptedGpsRows must equal 0'));
+  if (!exactZero(revoke.postRevokeAcceptedGpsRows)) issues.push(issue('POST_REVOKE_WRITE_DETECTED', 'revocation.postRevokeAcceptedGpsRows', 'postRevokeAcceptedGpsRows must equal 0'));
 
   const finish = doc.finishDay ?? {};
   if (!validInstant(finish.finishedAt)) issues.push(issue('FINISH_DAY_NOT_PROVEN', 'finishDay.finishedAt', 'finishedAt is required'));
-  if (Number(finish.postFinishCollectedGpsRows) !== 0) issues.push(issue('POST_FINISH_GPS_DETECTED', 'finishDay.postFinishCollectedGpsRows', 'postFinishCollectedGpsRows must equal 0'));
+  if (!exactZero(finish.postFinishCollectedGpsRows)) issues.push(issue('POST_FINISH_GPS_DETECTED', 'finishDay.postFinishCollectedGpsRows', 'postFinishCollectedGpsRows must equal 0'));
 
   if (!Array.isArray(doc.sanitizedEvidenceJsonFiles) || doc.sanitizedEvidenceJsonFiles.length < 1 || doc.sanitizedEvidenceJsonFiles.some(v => !NON_EMPTY(v))) {
     issues.push(issue('SANITIZED_EVIDENCE_MISSING', 'sanitizedEvidenceJsonFiles', 'At least one sanitized evidence JSON filename is required'));
@@ -136,10 +138,10 @@ export function validateCleanupReadback(doc) {
     issues.push(issue('CLEANUP_COUNTS_MISSING', 'counts', 'Cleanup row counts are required'));
   } else {
     for (const key of REQUIRED_CLEANUP_COUNTS) {
-      if (Number(doc.counts[key]) !== 0) issues.push(issue('CLEANUP_NOT_ZERO', `counts.${key}`, `${key} must equal 0 after cleanup`));
+      if (!exactZero(doc.counts[key])) issues.push(issue('CLEANUP_NOT_ZERO', `counts.${key}`, `${key} must equal 0 after cleanup`));
     }
   }
-  if (Number(doc.securityAdvisorLints) !== 0) issues.push(issue('SECURITY_ADVISOR_NOT_CLEAN', 'securityAdvisorLints', 'Security Advisor lint count must equal 0'));
+  if (!exactZero(doc.securityAdvisorLints)) issues.push(issue('SECURITY_ADVISOR_NOT_CLEAN', 'securityAdvisorLints', 'Security Advisor lint count must equal 0'));
   return Object.freeze({ pass: issues.length === 0, issues: Object.freeze(issues) });
 }
 
