@@ -3,9 +3,18 @@ import assert from 'node:assert/strict';
 import {
   calculatePerformance,
   classifyAgainstStandard,
+  finiteNonNegative,
   leaderboardEligibility,
   safeDivide
 } from '../shared/performance-math.mjs';
+
+test('null and blank values do not become fabricated numeric zero', () => {
+  assert.equal(finiteNonNegative(null), null);
+  assert.equal(finiteNonNegative(undefined), null);
+  assert.equal(finiteNonNegative(''), null);
+  assert.equal(finiteNonNegative('   '), null);
+  assert.equal(safeDivide(null, 5), null);
+});
 
 test('zero denominators are N/A rather than fabricated zero rates', () => {
   assert.equal(safeDivide(0, 0), null);
@@ -64,9 +73,20 @@ test('leaderboard ratios remain provisional until configured sample requirements
   const short = leaderboardEligibility({ hours: 1, opportunities: 1 }, { minimumHours: 5, minimumOpportunities: 3 });
   assert.equal(short.eligible, false);
   assert.equal(short.provisional, true);
+  assert.equal(short.configured, true);
   assert.deepEqual(short.reasons, ['MINIMUM_HOURS_NOT_MET', 'MINIMUM_OPPORTUNITIES_NOT_MET']);
 
   const mature = leaderboardEligibility({ hours: 8, opportunities: 4 }, { minimumHours: 5, minimumOpportunities: 3 });
   assert.equal(mature.eligible, true);
   assert.equal(mature.provisional, false);
+  assert.equal(mature.configured, true);
+});
+
+test('unconfigured leaderboard rule cannot create official eligibility', () => {
+  assert.deepEqual(leaderboardEligibility({ hours: 100, opportunities: 100 }, {}), {
+    eligible: false,
+    provisional: true,
+    configured: false,
+    reasons: ['ELIGIBILITY_RULE_NOT_CONFIGURED']
+  });
 });
