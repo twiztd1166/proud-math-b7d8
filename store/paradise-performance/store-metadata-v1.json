@@ -32,18 +32,19 @@
     "description": "Paradise Performance is a private workforce application for authorized Paradise Exteriors team members. It brings field tools, training, progress, trusted-device access and active-workday functions into one controlled mobile experience.\n\nAuthorized employees can access company training and progress resources, use approved field workflows and start an active workday when their role requires it. Certain field functions may use device location during an employee-started active workday to support operational route and workday records. Location is not intended to begin merely because the app is opened.\n\nAccess is restricted to authorized Paradise personnel. Installing the app does not create an employee account or grant access by itself. Device enrollment and session controls remain part of the authorization boundary.\n\nParadise Performance is intended for company workforce use and is not a consumer sales, shopping or public canvassing application.",
     "reviewNotes": "Paradise Performance is an employee-only workforce application intended for unlisted App Store distribution. Please do not treat the app as a public consumer product. Access to protected functions requires an authorized employee account and trusted-device enrollment.\n\nLocation behavior: the employee intentionally starts the active-workday flow from the foreground. The app requests When In Use location permission for this work function and may continue location updates while that employee-started workday is active and the app is backgrounded. The native implementation enables the visible iOS background-location indicator. Ordinary app launch is not intended to begin workday location tracking.\n\nThe app uses location for field/workday operational functionality, not advertising or cross-company tracking.\n\nREVIEW ACCESS BLOCKER: final App Review test account/enrollment instructions must be inserted here before submission. Do not submit while this blocker remains.",
     "unlistedRequest": "Paradise Performance is designed for a limited workforce audience: authorized Paradise Exteriors employees, canvassers, managers and other company-approved personnel. The app is not intended for consumer discovery or general public use. Paradise needs a standard App Store link that can be sent directly to authorized team members using company-managed or employee-owned iPhones. The app itself enforces employee authorization and trusted-device controls, so possession of the download link alone does not grant access. Unlisted distribution is requested so authorized personnel can install and receive normal App Store updates without making this internal workforce tool searchable or promoted to the general public.",
+    "unlistedRequestSequence": "Submit the final app to App Review with Review Notes stating that unlisted distribution is intended, then submit Apple's unlisted-app request. Do not represent a beta/prerelease build as eligible for the unlisted request.",
     "privacyDraft": {
       "dataCollected": [
         "Precise Location",
         "Coarse Location",
         "User ID",
         "Device ID",
-        "Product Interaction / operational app activity where retained",
-        "Other Data needed for active workday and route evidence"
+        "Other Data Types / operational shift and workday evidence"
       ],
       "linkedToUser": true,
       "tracking": false,
       "purpose": "App Functionality",
+      "taxonomyNote": "Do not declare Product Interaction solely for employee workday events. Apple defines Product Interaction as app-interaction telemetry such as launches, taps, clicks, scrolling and views. The current native store runtime retains operational shift/workday evidence rather than general UI-interaction analytics; classify that residual operational evidence under Other Data Types unless the final binary adds separately retained interaction telemetry.",
       "finalAnswersRequireReview": true
     },
     "reviewAccount": "BLOCKED_PENDING_APP_REVIEW_ACCOUNT_AND_TRUSTED_DEVICE_ENROLLMENT_INSTRUCTIONS"
@@ -63,11 +64,13 @@
       "useCase": "Employee-started long-running location sharing / operational field-work tracking"
     },
     "dataSafetyDraft": {
+      "requiredForCurrentInitialInternalTestingTrack": false,
+      "currentTrackNote": "Google Play states that apps exclusively active on Internal Testing are exempt from inclusion in the Data Safety section. Preserve this draft for any later distribution mode where Google requires Data Safety answers; do not treat it as a blocker to the initial Internal Testing release solely on Data Safety grounds.",
       "dataCollected": [
         "Location",
         "User IDs",
         "Device or other IDs",
-        "App activity / operational workday activity where retained"
+        "App activity > Other actions / employee-started workday actions where retained"
       ],
       "sharedForAdvertising": false,
       "sold": false,
@@ -76,6 +79,7 @@
         "Security and fraud prevention",
         "Account management"
       ],
+      "taxonomyNote": "Google defines App activity > Other actions as other in-app user activity/actions that do not fit the listed subcategories. Use that category for retained employee Start/Finish workday actions; do not imply general app-interaction analytics unless the final binary actually collects them.",
       "finalAnswersRequireReview": true
     }
   },
@@ -88,6 +92,9 @@
     "Final App Review / Google Play review account and enrollment instructions",
     "Approved app icon and screenshot set",
     "Google Play foreground-service demonstration video",
-    "Final App Store privacy and Google Play Data Safety answer review"
+    "Final App Store privacy answer review before Apple submission"
+  ],
+  "conditionalBlockersBeforeBroaderDistribution": [
+    "Google Play Data Safety answer review before any Google Play distribution mode for which Google requires Data Safety; the current Internal-Testing-only track is exempt"
   ]
 }
