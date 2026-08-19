@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - agent/paradise-performance-v1
+      - agent/paradise-native-performance-integration-v1
     paths:
       - 'capacitor.config.json'
       - 'performance/**'
       - 'scripts/build-canvass-site.mjs'
+      - 'scripts/build-performance-native-site.mjs'
       - 'scripts/prepare-performance-android-shell.mjs'
       - 'scripts/prepare-performance-ios-shell.rb'
+      - 'scripts/validate-paradise-native-performance-integration.mjs'
       - 'docs/PARADISE_PERFORMANCE_V1_TRANSPORT_VALIDATION_*'
       - '.github/workflows/validate-paradise-performance-native.yml'
   pull_request:
@@ -17,8 +20,10 @@ on:
       - 'capacitor.config.json'
       - 'performance/**'
       - 'scripts/build-canvass-site.mjs'
+      - 'scripts/build-performance-native-site.mjs'
       - 'scripts/prepare-performance-android-shell.mjs'
       - 'scripts/prepare-performance-ios-shell.rb'
+      - 'scripts/validate-paradise-native-performance-integration.mjs'
       - 'docs/PARADISE_PERFORMANCE_V1_TRANSPORT_VALIDATION_*'
       - '.github/workflows/validate-paradise-performance-native.yml'
 
@@ -31,12 +36,14 @@ concurrency:
 
 env:
   CAPACITOR_VERSION: '8.5.0'
+  SUPABASE_JS_VERSION: '2.112.3'
+  ESBUILD_VERSION: '0.28.2'
 
 jobs:
   android-native:
     name: Android native shell compile
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,11 +62,23 @@ jobs:
       - name: Install repository dependencies
         run: npm ci
 
-      - name: Build controlled web bundle
+      - name: Install pinned Capacitor and native web dependencies
+        run: >-
+          npm install --no-save --package-lock=false
+          @capacitor/core@${CAPACITOR_VERSION}
+          @capacitor/cli@${CAPACITOR_VERSION}
+          @capacitor/android@${CAPACITOR_VERSION}
+          @supabase/supabase-js@${SUPABASE_JS_VERSION}
+          esbuild@${ESBUILD_VERSION}
+
+      - name: Build controlled public Canvass bundle
         run: node scripts/build-canvass-site.mjs
 
-      - name: Install isolated Capacitor toolchain
-        run: npm install --no-save --package-lock=false @capacitor/core@${CAPACITOR_VERSION} @capacitor/cli@${CAPACITOR_VERSION} @capacitor/android@${CAPACITOR_VERSION}
+      - name: Build controlled native Performance bundle
+        run: node scripts/build-performance-native-site.mjs
+
+      - name: Validate built native Performance integration
+        run: node scripts/validate-paradise-native-performance-integration.mjs --built
 
       - name: Generate Android shell
         run: npx cap add android
@@ -74,7 +93,7 @@ jobs:
   ios-native:
     name: iOS native shell compile
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,11 +106,23 @@ jobs:
       - name: Install repository dependencies
         run: npm ci
 
-      - name: Build controlled web bundle
+      - name: Install pinned Capacitor and native web dependencies
+        run: >-
+          npm install --no-save --package-lock=false
+          @capacitor/core@${CAPACITOR_VERSION}
+          @capacitor/cli@${CAPACITOR_VERSION}
+          @capacitor/ios@${CAPACITOR_VERSION}
+          @supabase/supabase-js@${SUPABASE_JS_VERSION}
+          esbuild@${ESBUILD_VERSION}
+
+      - name: Build controlled public Canvass bundle
         run: node scripts/build-canvass-site.mjs
 
-      - name: Install isolated Capacitor toolchain
-        run: npm install --no-save --package-lock=false @capacitor/core@${CAPACITOR_VERSION} @capacitor/cli@${CAPACITOR_VERSION} @capacitor/ios@${CAPACITOR_VERSION}
+      - name: Build controlled native Performance bundle
+        run: node scripts/build-performance-native-site.mjs
+
+      - name: Validate built native Performance integration
+        run: node scripts/validate-paradise-native-performance-integration.mjs --built
 
       - name: Generate iOS SPM shell
         run: npx cap add ios --packagemanager SPM
