@@ -4,17 +4,19 @@ Status: **SUBMISSION PACKAGE PREP / NOT SUBMITTED / NOT PUBLICLY DISTRIBUTED**
 
 Date: 2026-08-19
 
-Stable validated native Performance integration baseline entering this store-control pass: `ffe3fe6d5e61484e19ac1919498d37eba29ef83b`.
+Stable validated application baseline entering this screenshot-readiness pass: `01778750b89817025d88f802608417dd155c7227`.
 
-Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at 78 / 76 / 2 with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `43dc5db4d704dd7b168e0edcf1d2b1bf4636b4f0`.
+Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at **78 / 76 / 2** with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `253d50eae5a4df2b83e5f70cf25e67b20412dd85`.
 
 ## Decision locked
 
-- Android: **Google Play Internal Testing** for the initial employee rollout.
+- Android: **Google Play Internal Testing** for the initial controlled employee pilot/test.
 - iPhone: **Unlisted App Store** distribution.
+- iOS store v1 device family: **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`).
 - **No TestFlight dependency.**
 - Do not publish Android to a public Production track without separate authorization.
 - Do not request ordinary public App Store discovery.
+- Opt out of Apple Silicon Mac availability unless Paradise separately validates and authorizes the Mac experience.
 
 ## Current store engineering foundation
 
@@ -22,65 +24,53 @@ The controlled repository now contains:
 
 - app/bundle identity `com.paradiseexteriors.performance`;
 - store version baseline `1.0.0` / build `1`;
-- a native-only `performance-dist` derived from the controlled Canvass/University bundle;
-- trusted-device enrollment/session validation mounted into the native Performance surface;
+- native-only `performance-dist` isolated from the public Canvass bundle;
+- trusted-device enrollment/session/revocation controls;
 - Performance Today `Start My Day` / `Finish Day` integration;
 - current native-store sync restricted to operational `EVENT` and `LOCATION` writes;
 - dormant customer `SET` transport excluded from the current native store bundle;
 - Android compile/target SDK 36 preparation;
 - unsigned Android Release AAB compilation;
 - iOS 26+ SDK validation;
-- unsigned generic physical-iPhone Release compilation;
+- unsigned generic-iPhone Release compilation;
 - iOS `PrivacyInfo.xcprivacy` integration;
 - employee-started location controls;
 - Android location foreground-service architecture without `ACCESS_BACKGROUND_LOCATION`;
-- trusted-device/session/revocation controls;
+- controlled Paradise iOS AppIcon and Android launcher assets;
+- visually approved Apple and Google icon-review evidence;
 - no signing secrets committed to GitHub.
 
 Unsigned CI artifacts remain engineering evidence only and must not be distributed to employees.
 
-## External policy anchors
+## Brand package — closed
 
-Apple:
+The controlled square app-icon origin is the existing Drive asset:
 
-- Unlisted distribution: `https://developer.apple.com/support/unlisted-app-distribution/`
-- App Store distribution methods: `https://developer.apple.com/help/app-store-connect/manage-your-apps-availability/set-distribution-methods`
-- App privacy details: `https://developer.apple.com/app-store/app-privacy-details/`
+- `Paradise-png-Favicon-528.png`
+- Drive file ID `1CsDZmKJWC6BUgszGD3NZ8BKG_m_B5Wz8`
+- 528 × 528
+- 44,927 bytes
+- SHA-256 `75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13`
 
-Google:
+The recent Paradise brand-guidelines image, Drive ID `1FePJBk-RGlT3gtl15v2eiMaWo1iOt9ii`, was visually reviewed and supports the square house/P mark on white.
 
-- Internal testing: `https://support.google.com/googleplay/android-developer/answer/9845334`
-- Prepare and roll out a release: `https://support.google.com/googleplay/android-developer/answer/9859348`
-- Data Safety: `https://support.google.com/googleplay/android-developer/answer/10787469`
-- Foreground-service declaration: `https://support.google.com/googleplay/android-developer/answer/13392821`
-- Android location foreground-service requirements: `https://developer.android.com/develop/background-work/services/fgs/service-types`
+The validated store-assets pipeline permits deterministic resize/centering and the required platform background/alpha treatment only. It does not redraw, recolor, distort, crop a wordmark into a new mark, or invent Paradise geometry.
+
+**App icon / launcher production is no longer a release blocker.**
+
+Launch/splash art remains separate. Do not invent launch artwork solely to create another asset.
 
 ## Critical privacy-policy finding
 
-Paradise currently publishes `https://www.paradiseexteriors.com/privacy-policy/`, but the live page presently exposes the Privacy Policy heading and site navigation/footer without substantive employee-app privacy terms.
-
-Therefore:
+Paradise currently publishes `https://www.paradiseexteriors.com/privacy-policy/`, but the currently retrievable page does not provide a verified substantive employee-app policy body.
 
 **Do not use the current live page as the final store privacy-policy URL until Paradise publishes approved substantive language that accurately covers the employee app.**
 
-A review draft is maintained at:
+The controlled working draft remains:
 
 `docs/PARADISE_PERFORMANCE_EMPLOYEE_APP_PRIVACY_NOTICE_DRAFT_2026-08-19.md`
 
-That draft intentionally leaves retention, workforce-monitoring notice, rights/process, and final contact decisions unresolved for management/counsel/HR approval.
-
-## Approved branding source candidates
-
-Do not invent a new Paradise logo.
-
-Google Drive currently contains company-source branding candidates including:
-
-- `Paradise Exteriors Logo - 2174x1060__f53cbf0cc5.png`
-  - Drive file ID: `1zMrEBxsxkyooIxXbmmopda_yjsGXa96I`
-- `Paradise Exteriors Brand Guidlines__c5af41dab6.png`
-  - Drive file ID: `1FePJBk-RGlT3gtl15v2eiMaWo1iOt9ii`
-
-Before submission, the final icon/screenshot designer should use the approved company brand source and produce store-compliant assets without altering the Paradise identity.
+Retention, workforce-monitoring notice, rights/process, and final privacy contact remain management/counsel/HR inputs. Do not fabricate them.
 
 ## Apple — exact submission sequence
 
@@ -90,14 +80,15 @@ Before submission, the final icon/screenshot designer should use the approved co
 2. Confirm App Store Connect access with a role capable of creating/submitting the app.
 3. Create the app record using bundle ID `com.paradiseexteriors.performance`.
 4. Use app name `Paradise Performance` unless management separately changes the naming decision.
-5. Use the standard App Store app record needed for Apple's unlisted-request process and do not choose Private / Custom App distribution for this release. Do not intentionally release the app as a normal public-discovery app before the unlisted request is decided.
+5. Keep the selected route **Unlisted App Store**, not Private / Custom App and not ordinary public discovery.
+6. Opt out of Apple Silicon Mac availability unless the Mac experience is separately validated.
 
-### B. Upload
+### B. Final signed build
 
 1. Create the final signed App Store archive from the exact controlled release source.
-2. Keep signing certificates/private keys/provisioning/App Store Connect API secrets outside GitHub.
-3. Upload through Apple's approved upload workflow.
-4. Confirm version `1.0.0`, build `1`, bundle ID, entitlements, privacy manifest, and location purpose strings from the uploaded binary.
+2. Keep signing certificates, private keys, provisioning material, and App Store Connect API secrets outside GitHub.
+3. Confirm version `1.0.0`, build `1`, bundle ID, entitlements, privacy manifest, location strings, Paradise icon, and `UIDeviceFamily = [1]` from the uploaded build.
+4. Do not upload a universal iPhone+iPad binary unless Paradise intentionally reopens iPad support and accepts its additional testing/screenshot obligations.
 
 ### C. App information
 
@@ -115,50 +106,44 @@ Required external additions before submission:
 - final approved privacy-policy URL;
 - final support/review contact;
 - final App Review account and trusted-device enrollment instructions;
-- screenshots and app icon;
+- final signed-build screenshots;
 - age-rating answers;
 - final app-privacy questionnaire.
 
+The app icon package is already controlled, machine-validated, visually approved, and present in the native-store build path.
+
 ### D. App privacy
 
-The final App Store Connect privacy answers must reflect the final production binary and backend behavior.
+The final App Store Connect privacy answers must reflect the final signed binary and backend behavior.
 
 Current controlled baseline indicates likely disclosure of at least:
 
 - Precise Location;
 - Coarse Location where applicable;
 - User ID;
-- Device ID / device-level trusted identifier;
+- Device ID / trusted-device identifier;
 - Other Data Types for residual operational shift/workday evidence that is not general UI-interaction telemetry.
 
-Do **not** label employee operational workday events as Apple `Product Interaction` merely because the employee used a button to create them. Apple uses Product Interaction for app-interaction telemetry such as launches, taps, clicks, scrolling, and views. If the final binary later retains that kind of UI-interaction telemetry separately, re-review the category.
+Do **not** label employee operational workday events as Apple `Product Interaction` merely because the employee used a button to create them. Re-review only if the final binary separately retains launches, taps, clicks, scrolling, views, or similar interaction telemetry.
 
-Current controlled intent:
+Current controlled intent remains linked to the employee/user, used for app functionality/security/account operation, and not used for advertising or cross-company tracking.
 
-- linked to the employee/user where operationally associated;
-- used for app functionality/security/account operation;
-- **not** used for advertising or cross-company tracking.
+### E. Review access
 
-Do not submit these as final answers until the privacy draft, retention policy, and final binary are reviewed together.
-
-### E. App Review notes
-
-App Review must receive usable access instructions. The current package intentionally contains a blocker instead of invented credentials.
-
-Before submission, add:
+App Review must receive usable synthetic access instructions. Before submission, add:
 
 - review username/account;
-- password or approved review-access mechanism;
-- exact trusted-device/enrollment steps;
-- any one-time token/QR process needed by the reviewer;
-- steps to reach Start My Day and demonstrate location behavior;
-- explanation that location begins from an employee-started foreground workday and is not advertising/tracking.
+- approved review password/access mechanism;
+- exact trusted-device enrollment steps;
+- any controlled one-time token/QR step needed by the reviewer;
+- steps to reach Start My Day and Finish Day;
+- explanation that location starts from an employee action and is not advertising/tracking.
+
+Never place a live password, recovery code, signing key, or reusable secret in the repository or screenshot package.
 
 ### F. Unlisted request
 
-Apple's current process requires the app to be ready for final distribution and submitted to App Review. Review Notes should state that the app is intended for unlisted distribution. Then submit the Unlisted App Distribution request.
-
-Use the controlled request rationale in `store-metadata-v1.json`.
+Submit the final app to App Review with Review Notes stating that unlisted distribution is intended. Then submit Apple's Unlisted App Distribution request using the controlled rationale in `store-metadata-v1.json`.
 
 Do not submit an unlisted request for a beta/prerelease build.
 
@@ -168,110 +153,102 @@ Do not submit an unlisted request for a beta/prerelease build.
 
 1. Confirm active Google Play Console developer account and permissions.
 2. Create the app record for `Paradise Performance` / `com.paradiseexteriors.performance`.
-3. Enable Google Play App Signing and establish protected upload-key custody according to the account owner's chosen signing workflow.
-4. Do not commit upload keys or keystores to GitHub.
+3. Establish Play App Signing/upload-key custody using the account owner's protected workflow.
+4. Do not commit upload keys, keystores, passwords, service-account secrets, or recovery material to GitHub.
 
-### B. Internal testing
+### B. Internal Testing
 
 1. Use **Testing > Internal testing**.
 2. Upload the final signed Android App Bundle derived from the controlled release.
 3. Add up to 100 authorized tester Google/Workspace accounts.
-4. Roll out only to the Internal testing track.
-5. Send employees the Play opt-in/tester URL after the release is accepted and available.
+4. Roll out only to the Internal Testing track.
+5. Send the controlled Play opt-in/tester route only after the release is accepted and available.
 
-Google currently states that an internal test supports up to 100 testers. Apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section.
+Google states that **apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section**. Data Safety is **not a hard blocker solely to that Internal-Testing-only release**. Preserve the controlled draft for any later distribution mode where Google requires it.
 
-If the eligible Android population later exceeds the internal-test limit, move to an appropriately controlled closed/private testing/distribution design rather than making the app publicly available by default.
+### C. Store listing / access
 
-### C. Store listing
+Use the controlled metadata package for the app name, short description, full description, support URL, approved icon, and screenshot plan.
 
-Use the controlled metadata package for:
+Google review must be able to access restricted functionality whenever the applicable Play workflow requires review access. Provide a synthetic review account and exact enrollment/trusted-device instructions. Do not claim the app is unrestricted.
 
-- app name;
-- short description;
-- full description;
-- support URL;
-- approved brand source.
+### D. Foreground-service declaration
 
-Do not use the current empty/substantively incomplete privacy page as the final privacy URL.
+The Android design uses the `location` foreground-service type for a user-started active workday.
 
-### D. App access
-
-Google review must be able to access restricted functionality whenever the applicable Play workflow requires review access.
-
-Before any such submission, provide a review account and exact enrollment/trusted-device instructions. Do not claim the app is unrestricted.
-
-### E. Foreground service declaration
-
-The controlled Android design uses the `location` foreground-service type for a user-started active workday.
-
-The Play Console declaration should truthfully describe:
+The Play Console declaration must truthfully describe:
 
 - what functionality uses the location foreground service;
 - why timely execution matters;
 - what happens if the service is interrupted;
-- the user action that starts the workday/location flow;
-- a reviewable demonstration video URL when required by the applicable Play flow.
+- the employee action that starts the workday/location flow;
+- a final-binary demonstration video URL when required by the applicable Play flow.
 
-Draft text is controlled in `store-metadata-v1.json`.
+Do not fabricate a video URL.
 
-The video must show the final production binary and the employee steps that trigger the feature. Do not fabricate a video URL.
+## Controlled screenshot plan
 
-### F. Data Safety
+The source of truth is:
 
-For the **current initial release that remains exclusively on Google Play Internal Testing**, Google currently exempts the app from inclusion in the Data Safety section. Therefore, completion of Data Safety is **not a hard blocker solely to that Internal-Testing-only release**.
+`store/paradise-performance/store-screenshot-plan-v1.json`
 
-Still maintain and review the controlled Data Safety draft because the answer set must be ready before any later Google Play distribution mode for which Google requires it.
+**Final screenshots must come from the final signed candidate.** The unsigned CI shell and simulator-only capture are validation aids, not final store screenshot sources under Paradise's release control.
 
-When Data Safety becomes applicable, reconcile it against:
+### Apple
 
-- the final signed binary;
-- the Supabase-backed production data flow;
-- the approved employee-app privacy notice;
-- actual retention/deletion policy;
-- any third-party SDKs in the final build.
+- device family: iPhone only;
+- primary portrait capture target: 6.9-inch iPhone, 1320 × 2868;
+- 1–10 screenshots permitted by App Store Connect;
+- submitted screenshot files must be JPEG/JPG/PNG without alpha/transparency;
+- iPad screenshots are not required by this controlled build because the build is locked to iPhone device family only.
 
-Current draft categories are maintained in `store-metadata-v1.json`. Retained employee Start/Finish workday actions are drafted under `App activity > Other actions`; do not imply general app-interaction analytics unless the final binary actually collects them.
+### Google Play
 
-## Screenshot plan
+- phone portrait target: 1080 × 1920, 9:16;
+- controlled set: six screenshots;
+- submitted base captures: JPEG or 24-bit PNG without alpha;
+- Paradise control requires concise alt text for every screenshot;
+- no device-frame marketing overlay is part of the controlled base capture.
 
-Use real production UI from the final signed release. Do not use mock screenshots that imply unavailable features or approved KPI/pay values.
+### Six-state story
 
-Recommended v1 screenshot story:
-
-1. Paradise Performance secure welcome/enrollment state.
-2. Performance Today idle/current-workday state.
-3. Start My Day employee-started location/workday flow.
-4. Lookup field/legal instruction view, showing that Lookup remains independently available.
+1. Secure welcome / trusted-device enrollment state.
+2. **Performance Today idle/current-workday state.**
+3. Start My Day employee-started active-workday flow.
+4. **Lookup field/legal instruction view** showing Lookup remains independently available.
 5. Paradise University training/progress view.
-6. Finish Day / completed-workday state from the final v1 binary.
+6. **Finish Day / completed-workday state** from the final v1 binary.
 
 Before capture:
 
 - use synthetic/review-only employee data;
-- remove real customer/employee PII;
+- remove real customer and employee PII;
 - do not display enrollment secrets/tokens;
+- do not show real precise coordinates or routes;
 - do not imply physical-device acceptance tests passed;
-- ensure the screenshot UI matches the submitted binary.
+- ensure every screenshot state exists in the exact submitted binary;
+- do not add screenshots for customer SET, Quick Set, KPI/pay, leaderboard, or route-map surfaces unless those features are actually enabled in that binary.
 
-## Final blockers — do not bypass
+After capture, record dimensions, format, SHA-256, source build identity, and visual QC for every image.
 
-For the current initial store rollout, actual employee-installable distribution remains blocked on:
+## Remaining blockers — do not bypass
+
+Actual employee-installable distribution remains blocked on:
 
 1. Apple Developer / App Store Connect access;
 2. Google Play Console access;
 3. protected production signing configuration;
-4. approved substantive employee-app privacy policy URL;
+4. approved substantive employee-app privacy-policy URL;
 5. approved retention and workforce-location notice language;
 6. final review accounts/enrollment instructions where required;
-7. approved icon/screenshots;
+7. final signed-build screenshot set;
 8. Google foreground-service demonstration video where required by the applicable Play submission flow;
-9. final App Store privacy answer review before Apple submission;
-10. successful official-store review/processing for the applicable platform/distribution path.
+9. final App Store privacy-answer review;
+10. successful official-store review/processing and explicit release authorization.
 
 Conditional later-distribution blocker:
 
-- Final Google Play Data Safety review before any Google Play distribution mode for which Google requires the Data Safety section. Do not label this as a blocker solely to the current Internal-Testing-only release while that exemption applies.
+- Final Google Play Data Safety review before any Google Play distribution mode for which Google requires the Data Safety section.
 
 ## Release rule
 

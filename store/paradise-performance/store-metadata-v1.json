@@ -12,6 +12,15 @@
   },
   "branding": {
     "approvedSourceRequired": true,
+    "controlledSquareIconSource": {
+      "title": "Paradise-png-Favicon-528.png",
+      "driveFileId": "1CsDZmKJWC6BUgszGD3NZ8BKG_m_B5Wz8",
+      "width": 528,
+      "height": 528,
+      "bytes": 44927,
+      "sha256": "75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13",
+      "status": "VALIDATED_AND_VISUALLY_APPROVED_FOR_NATIVE_ICON_DERIVATION"
+    },
     "driveCandidates": [
       {
         "title": "Paradise Exteriors Logo - 2174x1060__f53cbf0cc5.png",
@@ -21,10 +30,22 @@
         "title": "Paradise Exteriors Brand Guidlines__c5af41dab6.png",
         "driveFileId": "1FePJBk-RGlT3gtl15v2eiMaWo1iOt9ii"
       }
-    ]
+    ],
+    "nativeIconPackageStatus": "VALIDATED_VISUALLY_APPROVED_AND_PUBLISHED_IN_STABLE_SOURCE"
+  },
+  "screenshots": {
+    "plan": "store/paradise-performance/store-screenshot-plan-v1.json",
+    "status": "CONTROLLED_CAPTURE_PLAN_READY_FINAL_CAPTURE_BLOCKED_ON_SIGNED_CANDIDATE",
+    "states": 6,
+    "productionDataAllowed": false,
+    "syntheticReviewDataRequired": true
   },
   "apple": {
     "distribution": "UNLISTED_APP_STORE",
+    "deviceFamily": "IPHONE_ONLY",
+    "targetedDeviceFamilyBuildSetting": "1",
+    "ipadScreenshotsRequiredByCurrentBuild": false,
+    "appleSiliconMacAvailability": "OPT_OUT_UNLESS_SEPARATELY_VALIDATED",
     "testFlightDependency": false,
     "subtitle": "Field Performance & Training",
     "promotionalText": "Private field tools, training, progress and trusted-device access for authorized Paradise Exteriors team members.",
@@ -90,7 +111,7 @@
     "Approved employee-app privacy policy URL",
     "Approved retention and workforce-location notice language",
     "Final App Review / Google Play review account and enrollment instructions",
-    "Approved app icon and screenshot set",
+    "Final signed-build screenshot set",
     "Google Play foreground-service demonstration video",
     "Final App Store privacy answer review before Apple submission"
   ],

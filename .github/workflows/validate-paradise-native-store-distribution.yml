@@ -7,6 +7,7 @@ on:
       - agent/paradise-store-submission-package-v1
       - agent/paradise-native-performance-integration-v1
       - agent/paradise-store-assets-v1
+      - agent/paradise-store-screenshot-readiness-v1
     paths:
       - 'capacitor.config.json'
       - 'performance/client/**'
@@ -21,6 +22,7 @@ on:
       - 'scripts/prepare-performance-store-assets.mjs'
       - 'scripts/validate-paradise-native-performance-integration.mjs'
       - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'scripts/validate-paradise-store-screenshot-readiness.mjs'
       - 'scripts/validate-paradise-store-submission-package.mjs'
       - 'store/paradise-performance/**'
       - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
@@ -43,6 +45,7 @@ on:
       - 'scripts/prepare-performance-store-assets.mjs'
       - 'scripts/validate-paradise-native-performance-integration.mjs'
       - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'scripts/validate-paradise-store-screenshot-readiness.mjs'
       - 'scripts/validate-paradise-store-submission-package.mjs'
       - 'store/paradise-performance/**'
       - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
@@ -93,6 +96,9 @@ jobs:
 
       - name: Validate controlled Paradise brand source
         run: node scripts/prepare-performance-store-assets.mjs --source
+
+      - name: Validate store screenshot readiness controls
+        run: node scripts/validate-paradise-store-screenshot-readiness.mjs
 
       - name: Build controlled public Canvass bundle
         run: node scripts/build-canvass-site.mjs
@@ -240,7 +246,7 @@ jobs:
       - name: Integrate controlled iOS native plugins and privacy manifest
         run: ruby scripts/prepare-performance-ios-shell.rb
 
-      - name: Apply App Store identity and version controls
+      - name: Apply App Store identity, version, and device-family controls
         run: ruby scripts/prepare-performance-ios-store.rb
 
       - name: Apply controlled Paradise iOS AppIcon
@@ -272,6 +278,25 @@ jobs:
           -derivedDataPath build/paradise-performance-store-ios
           CODE_SIGNING_ALLOWED=NO
           build
+
+      - name: Verify built iPhone-only device family
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          import plistlib
+
+          plist_path = pathlib.Path('build/paradise-performance-store-ios/Build/Products/Release-iphoneos/App.app/Info.plist')
+          if not plist_path.exists():
+              raise SystemExit(f'Built App Info.plist missing: {plist_path}')
+          with plist_path.open('rb') as handle:
+              info = plistlib.load(handle)
+          families = info.get('UIDeviceFamily')
+          print(f'UIDeviceFamily: {families}')
+          if families != [1]:
+              raise SystemExit(f'Paradise Performance store v1 must be iPhone-only; built UIDeviceFamily={families!r}')
+          PY
 
       - name: Upload iOS brand review evidence
         uses: actions/upload-artifact@v4

@@ -95,14 +95,27 @@ for (const control of [
   "bundle_id = 'com.paradiseexteriors.performance'",
   "ENV.fetch('PARADISE_STORE_VERSION', '1.0.0')",
   "ENV.fetch('PARADISE_STORE_BUILD', '1')",
+  "targeted_device_family = '1'",
   "settings['PRODUCT_BUNDLE_IDENTIFIER'] = bundle_id",
+  "settings['TARGETED_DEVICE_FAMILY'] = targeted_device_family",
+  'iPhone-only',
   'signing intentionally external to repository',
 ]) requireText(iosStore, control, 'iOS store preparation');
+
+const screenshotPlan = JSON.parse(read('store/paradise-performance/store-screenshot-plan-v1.json'));
+if (screenshotPlan.apple?.deviceFamily !== 'IPHONE_ONLY' || screenshotPlan.apple?.targetedDeviceFamilyBuildSetting !== '1') {
+  throw new Error('Store screenshot plan must remain aligned to the iPhone-only build target');
+}
+if (screenshotPlan.captureAuthority?.finalScreenshotsRequireSignedCandidate !== true) {
+  throw new Error('Store screenshot plan must keep final capture blocked on the signed candidate');
+}
 
 const workflow = read('.github/workflows/validate-paradise-native-store-distribution.yml');
 for (const control of [
   'build-performance-native-site.mjs',
   'validate-paradise-native-performance-integration.mjs --built',
+  'validate-paradise-store-screenshot-readiness.mjs',
+  'Verify built iPhone-only device family',
   'bundleRelease',
   '-configuration Release',
   '-sdk iphoneos',
@@ -124,4 +137,4 @@ for (const control of [
   'https://www.paradiseexteriors.com/privacy-policy/',
 ]) requireText(doc, control, 'Distribution control record');
 
-console.log('Paradise native store distribution controls PASS: production identity pinned; real native Performance bundle required; iOS privacy manifest present; Android API 36 and visible FGS boundary enforced; signing/publication remain external and fail closed.');
+console.log('Paradise native store distribution controls PASS: production identity pinned; real native Performance bundle required; iPhone-only family pinned; iOS privacy manifest present; Android API 36 and visible FGS boundary enforced; signing/publication remain external and fail closed.');
