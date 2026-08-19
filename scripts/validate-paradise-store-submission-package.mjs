@@ -1,14 +1,16 @@
 import fs from 'node:fs';
 
 const metadataPath = 'store/paradise-performance/store-metadata-v1.json';
+const screenshotPlanPath = 'store/paradise-performance/store-screenshot-plan-v1.json';
 const privacyDraftPath = 'docs/PARADISE_PERFORMANCE_EMPLOYEE_APP_PRIVACY_NOTICE_DRAFT_2026-08-19.md';
 const runbookPath = 'docs/PARADISE_NATIVE_STORE_SUBMISSION_RUNBOOK_V1.md';
 
-for (const path of [metadataPath, privacyDraftPath, runbookPath]) {
+for (const path of [metadataPath, screenshotPlanPath, privacyDraftPath, runbookPath]) {
   if (!fs.existsSync(path)) throw new Error(`Missing required store submission file: ${path}`);
 }
 
 const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+const screenshotPlan = JSON.parse(fs.readFileSync(screenshotPlanPath, 'utf8'));
 const privacyDraft = fs.readFileSync(privacyDraftPath, 'utf8');
 const runbook = fs.readFileSync(runbookPath, 'utf8');
 
@@ -37,11 +39,32 @@ assertLength('Apple description', metadata.apple.description, 4000);
 assertLength('Google Play full description', metadata.googlePlay.fullDescription, 4000);
 
 assert(metadata.apple.distribution === 'UNLISTED_APP_STORE', 'iPhone distribution must remain unlisted App Store');
+assert(metadata.apple.deviceFamily === 'IPHONE_ONLY', 'Apple store v1 device family must remain iPhone-only');
+assert(metadata.apple.targetedDeviceFamilyBuildSetting === '1', 'Apple TARGETED_DEVICE_FAMILY must remain 1');
+assert(metadata.apple.ipadScreenshotsRequiredByCurrentBuild === false, 'iPad screenshots must remain out of scope only while the build is iPhone-only');
+assert(metadata.apple.appleSiliconMacAvailability === 'OPT_OUT_UNLESS_SEPARATELY_VALIDATED', 'Apple Silicon Mac availability must fail closed');
 assert(metadata.apple.testFlightDependency === false, 'Submission package must not add a TestFlight dependency');
 assert(metadata.apple.unlistedRequestSequence.includes('Submit the final app to App Review'), 'Apple unlisted sequence must preserve App Review before the unlisted request');
 assert(metadata.apple.unlistedRequestSequence.includes('beta/prerelease'), 'Apple unlisted sequence must preserve the no-beta request boundary');
 assert(metadata.googlePlay.track === 'INTERNAL_TESTING', 'Android initial release must remain Internal testing');
 assert(metadata.googlePlay.maxInitialTesters === 100, 'Internal testing control must remain 100 testers');
+
+assert(metadata.branding?.nativeIconPackageStatus === 'VALIDATED_VISUALLY_APPROVED_AND_PUBLISHED_IN_STABLE_SOURCE', 'Native icon package must remain recorded as validated and visually approved');
+assert(metadata.branding?.controlledSquareIconSource?.sha256 === '75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13', 'Controlled Paradise icon source SHA drift');
+assert(metadata.screenshots?.plan === screenshotPlanPath, 'Store metadata must point to the controlled screenshot plan');
+assert(metadata.screenshots?.status === 'CONTROLLED_CAPTURE_PLAN_READY_FINAL_CAPTURE_BLOCKED_ON_SIGNED_CANDIDATE', 'Screenshot status must remain blocked on final signed capture');
+assert(metadata.screenshots?.states === 6, 'Store metadata must preserve six screenshot states');
+assert(!metadata.hardBlockersBeforeSubmission.some(value => value.includes('app icon')), 'Validated app icon must not remain listed as a hard blocker');
+assert(metadata.hardBlockersBeforeSubmission.some(value => value.includes('signed-build screenshot')), 'Final signed-build screenshots must remain a hard blocker');
+
+assert(screenshotPlan.status === 'CONTROLLED_CAPTURE_PLAN_NOT_YET_CAPTURED', 'Screenshot plan must not claim final capture');
+assert(screenshotPlan.apple?.deviceFamily === 'IPHONE_ONLY', 'Screenshot plan must remain iPhone-only');
+assert(screenshotPlan.apple?.targetPixels?.width === 1320 && screenshotPlan.apple?.targetPixels?.height === 2868, 'Apple screenshot target drift');
+assert(screenshotPlan.googlePlay?.targetPixels?.width === 1080 && screenshotPlan.googlePlay?.targetPixels?.height === 1920, 'Google Play screenshot target drift');
+assert(Array.isArray(screenshotPlan.story) && screenshotPlan.story.length === 6, 'Screenshot story must remain six states');
+assert(screenshotPlan.captureAuthority?.finalScreenshotsRequireSignedCandidate === true, 'Final screenshots must remain blocked on the signed candidate');
+assert(screenshotPlan.captureAuthority?.syntheticReviewDataRequired === true, 'Synthetic review data must remain required');
+assert(screenshotPlan.captureAuthority?.realProductionEmployeeOrCustomerDataAllowed === false, 'Production PII must remain forbidden in screenshots');
 
 assert(metadata.app.privacyPolicyUrl.startsWith('BLOCKED_'), 'Do not silently promote the current website privacy page to final app privacy policy');
 assert(metadata.apple.reviewAccount.startsWith('BLOCKED_'), 'Apple review account must fail closed until configured');
@@ -88,7 +111,7 @@ assert(runbook.includes('Lookup field/legal instruction view'), 'Screenshot plan
 assert(runbook.includes('Finish Day / completed-workday state'), 'Screenshot plan must use the real Finish Day v1 surface');
 assert(!runbook.includes('Performance/progress view showing only configured/authorized information'), 'Screenshot plan must not imply an unavailable generic KPI/performance screen');
 
-const serialized = JSON.stringify(metadata) + '\n' + privacyDraft + '\n' + runbook;
+const serialized = JSON.stringify(metadata) + '\n' + JSON.stringify(screenshotPlan) + '\n' + privacyDraft + '\n' + runbook;
 const forbiddenSecretPatterns = [
   /BEGIN PRIVATE KEY/i,
   /BEGIN CERTIFICATE/i,
