@@ -3,19 +3,20 @@
 Status: **PRODUCTION RELEASED / VALIDATED — TRAINING EXPERIENCE v4 + PARADISE PERFORMANCE v1 SOFTWARE FOUNDATION**  
 As of: 2026-08-19
 
-This is the current in-repository status pointer. It supersedes older documents only for **current release status and runtime pins**. Historical pre-promotion gates, machine reviews, remediation records, and physical-device records remain preserved as historical evidence and must not be rewritten into PASS.
+This is the current in-repository status pointer. Historical pre-promotion gates, machine reviews, remediation records, and physical-device records remain preserved as historical evidence and must not be rewritten into PASS.
 
 Current release gate: `PARADISE_UNIVERSITY_RELEASE_GATE.json`  
+Current exact validated runtime authority: `latest.json`  
 Historical pre-promotion gate: `PARADISE_UNIVERSITY_PREPROMOTION_GATE_V22.json`  
 Deferred University physical record: `PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPTANCE_V4.md`
 
 ## Current validated production runtime
 
+The exact current validated SHA is **not duplicated here**, because every docs/control-only validated advancement would otherwise make this pointer stale again. Resolve the current SHA, immutable URL, publication timestamp, and 78 / 76 / 2 release metadata directly from `latest.json`.
+
 - Stable validated branch: `paradise-canvass-manager-validated`
-- Exact validated runtime SHA: `c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270`
 - Stable manager URL: `https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-canvass-manager-validated/index.html`
-- Immutable runtime URL: `https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html`
-- Public metadata commit: `6d54c7b75a57bfdb94dbfc596504ccb6f152ca75`
+- Exact current immutable runtime: use the `url` value in `latest.json`
 - Dataset SHA-256: `a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200`
 - Field denominator: **78 jurisdictions / 76 GO / 2 NO-GO**
 - NO-GO: **Punta Gorda; Tarpon Springs**
@@ -23,9 +24,19 @@ Deferred University physical record: `PARADISE_UNIVERSITY_PHYSICAL_DEVICE_ACCEPT
 
 The stable UI surface is **Lookup · Training · Daily Check · History**. Lookup remains authoritative. There is no visible Paradise Performance tab in this release.
 
+## Application payload checkpoint
+
+`c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270` is retained as the **first validated unified University v3 + Paradise Performance v1 software application-payload checkpoint**, not as a permanent alias for the mutable validated branch head.
+
+Immutable application-payload checkpoint:
+
+`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270/index.html`
+
+GitHub comparison confirms later validated closeout movement through PR #13 changed only release docs, `latest.json`, and the release-isolation validator; it did not change `index.html`, Training code, Lookup code, service-worker application payload, or controlled field data.
+
 ## Production release evidence
 
-The final release-control defect was a shallow Git checkout in the validated/public ancestry check. The validated SHA was genuinely an ancestor of the public candidate, but `fetch-depth: 2` prevented Git from proving it. The release-control fix changed ancestry checks to full history and removed the remaining legacy force-promotion path.
+The original release-control blocker was a shallow Git checkout in the validated/public ancestry check. The validated SHA was genuinely an ancestor of the public candidate, but `fetch-depth: 2` prevented Git from proving it. PR #11 changed ancestry checks to full history and removed the legacy force-promotion path.
 
 Controlled evidence:
 
@@ -33,16 +44,16 @@ Controlled evidence:
 - ancestry corrected read-only diagnostic: run `32226577491` — PASS;
 - full corrected read-only release mirror: run `32227074297` — PASS end to end;
 - release-control repair: PR #11;
-- production metadata publication: `6d54c7b75a57bfdb94dbfc596504ccb6f152ca75`;
-- stable validated advancement: normal non-force advancement to `c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270`;
+- initial production metadata publication: `6d54c7b75a57bfdb94dbfc596504ccb6f152ca75`;
+- production status closeout: PR #13;
 - manual validated-ref movement: **none**;
 - force promotion: **none**.
 
-The metadata publication commit is a one-commit child of the validated runtime and changes only `latest.json`.
+The current release pointer is `latest.json`; historical exact SHAs above remain evidence, not mutable-state aliases.
 
 ## Training Experience v4
 
-Training Experience v4 remains machine-validated for the current release, including:
+Training Experience v4 remains machine-validated for the released application payload, including:
 
 - same-day Today progress and resume;
 - focused lesson-step resume;
@@ -62,10 +73,11 @@ The release path remains fail-closed:
 
 1. Public PR validation is read-only and exercises field, offline, Training/UX, device, and adversarial coverage.
 2. Exact public candidates must satisfy the controlled 78 / 76 / 2 baseline and exact dataset hash.
-3. The corrected recovery path validates full Git ancestry with complete history before release.
-4. `latest.json` is generated only after successful exact-SHA validation.
-5. Stable validated promotion is a normal non-force advancement only.
-6. The legacy force-promotion path has been removed.
+3. Release ancestry checks use complete Git history.
+4. Existing `latest.json` must resolve only to the historical controlled field base or the exact current validated branch ref; no manually maintained production-SHA allowlist is used.
+5. `latest.json` is generated only after successful exact-SHA validation.
+6. Stable validated promotion is a normal non-force advancement only.
+7. The legacy force-promotion path has been removed.
 
 Repository ruleset preparation remains **PREPARED — NOT APPLIED**. This release does not claim GitHub-settings enforcement that has not actually been applied.
 
