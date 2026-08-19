@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 export const PHYSICAL_ACCEPTANCE_CONTROL = Object.freeze({
   controlHead: '783d0c11d20d9e72444a258ac55b2d22b1219692',
   acceptanceWorkflowRun: 32241534617,
@@ -29,6 +32,7 @@ export const REQUIRED_CASES = Object.freeze([
   'L_uninstall_reinstall',
 ]);
 
+const OFFSET_ISO_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const NON_EMPTY = value => typeof value === 'string' && value.trim().length > 0;
 const presentNumber = value => value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '') && Number.isFinite(Number(value));
@@ -40,7 +44,7 @@ function issue(code, field, message) {
 }
 
 function validInstant(value) {
-  if (!NON_EMPTY(value)) return false;
+  if (!NON_EMPTY(value) || !OFFSET_ISO_RE.test(value.trim())) return false;
   return Number.isFinite(new Date(value).getTime());
 }
 
@@ -72,8 +76,8 @@ export function validatePhysicalEvidence(doc, expectedPlatform) {
   }
   if (NON_EMPTY(doc.syntheticEmployeeId) && !UUID_RE.test(doc.syntheticEmployeeId)) issues.push(issue('INVALID_UUID', 'syntheticEmployeeId', 'syntheticEmployeeId must be a UUID'));
   if (NON_EMPTY(doc.performanceDeviceId) && !UUID_RE.test(doc.performanceDeviceId)) issues.push(issue('INVALID_UUID', 'performanceDeviceId', 'performanceDeviceId must be a UUID'));
-  if (NON_EMPTY(doc.testStartLocal) && !validInstant(doc.testStartLocal)) issues.push(issue('INVALID_TIMESTAMP', 'testStartLocal', 'testStartLocal must be an ISO-compatible timestamp'));
-  if (NON_EMPTY(doc.testEndLocal) && !validInstant(doc.testEndLocal)) issues.push(issue('INVALID_TIMESTAMP', 'testEndLocal', 'testEndLocal must be an ISO-compatible timestamp'));
+  if (NON_EMPTY(doc.testStartLocal) && !validInstant(doc.testStartLocal)) issues.push(issue('INVALID_TIMESTAMP', 'testStartLocal', 'testStartLocal must be an offset-aware ISO timestamp'));
+  if (NON_EMPTY(doc.testEndLocal) && !validInstant(doc.testEndLocal)) issues.push(issue('INVALID_TIMESTAMP', 'testEndLocal', 'testEndLocal must be an offset-aware ISO timestamp'));
   if (validInstant(doc.testStartLocal) && validInstant(doc.testEndLocal) && new Date(doc.testEndLocal) < new Date(doc.testStartLocal)) {
     issues.push(issue('INVALID_TIME_ORDER', 'testEndLocal', 'testEndLocal cannot precede testStartLocal'));
   }
@@ -90,8 +94,8 @@ export function validatePhysicalEvidence(doc, expectedPlatform) {
 
   const gps = doc.backgroundGps ?? {};
   if (!finiteNonNegative(gps.rowCount) || Number(gps.rowCount) < 1) issues.push(issue('BACKGROUND_GPS_NOT_PROVEN', 'backgroundGps.rowCount', 'At least one accepted background GPS row is required'));
-  if (!validInstant(gps.firstCapturedAt)) issues.push(issue('MISSING_GPS_TIMESTAMP', 'backgroundGps.firstCapturedAt', 'firstCapturedAt is required'));
-  if (!validInstant(gps.lastCapturedAt)) issues.push(issue('MISSING_GPS_TIMESTAMP', 'backgroundGps.lastCapturedAt', 'lastCapturedAt is required'));
+  if (!validInstant(gps.firstCapturedAt)) issues.push(issue('MISSING_GPS_TIMESTAMP', 'backgroundGps.firstCapturedAt', 'firstCapturedAt is required as an offset-aware timestamp'));
+  if (!validInstant(gps.lastCapturedAt)) issues.push(issue('MISSING_GPS_TIMESTAMP', 'backgroundGps.lastCapturedAt', 'lastCapturedAt is required as an offset-aware timestamp'));
   if (validInstant(gps.firstCapturedAt) && validInstant(gps.lastCapturedAt) && new Date(gps.lastCapturedAt) < new Date(gps.firstCapturedAt)) {
     issues.push(issue('INVALID_GPS_TIME_ORDER', 'backgroundGps.lastCapturedAt', 'lastCapturedAt cannot precede firstCapturedAt'));
   }
@@ -102,11 +106,11 @@ export function validatePhysicalEvidence(doc, expectedPlatform) {
   if (!exactZero(replay.duplicateClientPointIds)) issues.push(issue('DUPLICATE_REPLAY_DETECTED', 'offlineReplay.duplicateClientPointIds', 'duplicateClientPointIds must equal 0'));
 
   const revoke = doc.revocation ?? {};
-  if (!validInstant(revoke.revokedAt)) issues.push(issue('REVOCATION_NOT_PROVEN', 'revocation.revokedAt', 'revokedAt is required'));
+  if (!validInstant(revoke.revokedAt)) issues.push(issue('REVOCATION_NOT_PROVEN', 'revocation.revokedAt', 'revokedAt is required as an offset-aware timestamp'));
   if (!exactZero(revoke.postRevokeAcceptedGpsRows)) issues.push(issue('POST_REVOKE_WRITE_DETECTED', 'revocation.postRevokeAcceptedGpsRows', 'postRevokeAcceptedGpsRows must equal 0'));
 
   const finish = doc.finishDay ?? {};
-  if (!validInstant(finish.finishedAt)) issues.push(issue('FINISH_DAY_NOT_PROVEN', 'finishDay.finishedAt', 'finishedAt is required'));
+  if (!validInstant(finish.finishedAt)) issues.push(issue('FINISH_DAY_NOT_PROVEN', 'finishDay.finishedAt', 'finishedAt is required as an offset-aware timestamp'));
   if (!exactZero(finish.postFinishCollectedGpsRows)) issues.push(issue('POST_FINISH_GPS_DETECTED', 'finishDay.postFinishCollectedGpsRows', 'postFinishCollectedGpsRows must equal 0'));
 
   if (!Array.isArray(doc.sanitizedEvidenceJsonFiles) || doc.sanitizedEvidenceJsonFiles.length < 1 || doc.sanitizedEvidenceJsonFiles.some(v => !NON_EMPTY(v))) {
@@ -134,13 +138,71 @@ export function validatePhysicalEvidencePair(iosDoc, androidDoc) {
   return Object.freeze({ pass: issues.length === 0, ios, android, issues: Object.freeze(issues) });
 }
 
+const FORBIDDEN_EVIDENCE_KEY_RE = /^(?:access[_-]?token|refresh[_-]?token|hidden[_-]?(?:password|email)|password|service[_-]?role(?:[_-]?key)?|supabase[_-]?service[_-]?role[_-]?key|secret[_-]?key)$/i;
+const FORBIDDEN_EVIDENCE_TEXT_RE = /(?:sb_secret_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,})/;
+const SCREENSHOT_EXT_RE = /\.(?:png|jpe?g|webp|heic)$/i;
+
+function hasForbiddenEvidenceKey(value) {
+  if (Array.isArray(value)) return value.some(hasForbiddenEvidenceKey);
+  if (!value || typeof value !== 'object') return false;
+  return Object.entries(value).some(([key, nested]) => FORBIDDEN_EVIDENCE_KEY_RE.test(key) || hasForbiddenEvidenceKey(nested));
+}
+
+function attachmentPath(baseDir, reference) {
+  return path.isAbsolute(reference) ? reference : path.resolve(baseDir, reference);
+}
+
+export function validateEvidenceAttachments(doc, evidenceFilePath) {
+  const issues = [];
+  const baseDir = path.dirname(path.resolve(evidenceFilePath));
+
+  for (const reference of doc?.screenshots ?? []) {
+    if (!NON_EMPTY(reference)) continue;
+    const resolved = attachmentPath(baseDir, reference);
+    if (!SCREENSHOT_EXT_RE.test(reference)) {
+      issues.push(issue('INVALID_SCREENSHOT_EXTENSION', 'screenshots', `${reference} must be an image file`));
+      continue;
+    }
+    try {
+      const stat = fs.statSync(resolved);
+      if (!stat.isFile() || stat.size <= 0) issues.push(issue('SCREENSHOT_FILE_EMPTY', 'screenshots', `${reference} is missing or empty`));
+    } catch {
+      issues.push(issue('SCREENSHOT_FILE_MISSING', 'screenshots', `${reference} does not exist`));
+    }
+  }
+
+  for (const reference of doc?.sanitizedEvidenceJsonFiles ?? []) {
+    if (!NON_EMPTY(reference)) continue;
+    const resolved = attachmentPath(baseDir, reference);
+    if (!/\.json$/i.test(reference)) {
+      issues.push(issue('INVALID_EVIDENCE_JSON_EXTENSION', 'sanitizedEvidenceJsonFiles', `${reference} must end in .json`));
+      continue;
+    }
+    try {
+      const raw = fs.readFileSync(resolved, 'utf8');
+      if (!raw.trim()) {
+        issues.push(issue('EVIDENCE_JSON_EMPTY', 'sanitizedEvidenceJsonFiles', `${reference} is empty`));
+        continue;
+      }
+      if (FORBIDDEN_EVIDENCE_TEXT_RE.test(raw)) issues.push(issue('EVIDENCE_SECRET_PATTERN_DETECTED', 'sanitizedEvidenceJsonFiles', `${reference} contains a secret/token-like pattern`));
+      const parsed = JSON.parse(raw);
+      if (hasForbiddenEvidenceKey(parsed)) issues.push(issue('EVIDENCE_SECRET_FIELD_DETECTED', 'sanitizedEvidenceJsonFiles', `${reference} contains a forbidden credential field`));
+    } catch (error) {
+      if (error && error.code === 'ENOENT') issues.push(issue('EVIDENCE_JSON_MISSING', 'sanitizedEvidenceJsonFiles', `${reference} does not exist`));
+      else issues.push(issue('EVIDENCE_JSON_INVALID', 'sanitizedEvidenceJsonFiles', `${reference} must contain valid sanitized JSON`));
+    }
+  }
+
+  return Object.freeze({ pass: issues.length === 0, issues: Object.freeze(issues) });
+}
+
 export function validateCleanupReadback(doc) {
   const issues = [];
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
     return Object.freeze({ pass: false, issues: [issue('INVALID_CLEANUP_DOCUMENT', '$', 'Cleanup evidence must be a JSON object')] });
   }
   if (doc.projectRef !== PHYSICAL_ACCEPTANCE_CONTROL.projectRef) issues.push(issue('PROJECT_REF_MISMATCH', 'projectRef', `Expected ${PHYSICAL_ACCEPTANCE_CONTROL.projectRef}`));
-  if (!validInstant(doc.verifiedAt)) issues.push(issue('CLEANUP_TIMESTAMP_MISSING', 'verifiedAt', 'verifiedAt is required'));
+  if (!validInstant(doc.verifiedAt)) issues.push(issue('CLEANUP_TIMESTAMP_MISSING', 'verifiedAt', 'verifiedAt is required as an offset-aware timestamp'));
   if (!doc.counts || typeof doc.counts !== 'object') {
     issues.push(issue('CLEANUP_COUNTS_MISSING', 'counts', 'Cleanup row counts are required'));
   } else {
