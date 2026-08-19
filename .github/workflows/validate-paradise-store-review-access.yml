@@ -1,0 +1,68 @@
+name: Validate Paradise store review access
+
+on:
+  push:
+    branches:
+      - agent/paradise-store-review-access-v1
+    paths:
+      - 'performance/client/performance-native-app.mjs'
+      - 'performance/client/performance-store-review-access.mjs'
+      - 'performance/tests/store-review-access.test.mjs'
+      - 'supabase/config.toml'
+      - 'supabase/functions/_shared/performance-auth.ts'
+      - 'supabase/functions/performance-review-enrollment-mint/**'
+      - 'scripts/validate-performance-enrollment-security.mjs'
+      - 'docs/PARADISE_STORE_REVIEW_ACCESS_V1.md'
+      - '.github/workflows/validate-paradise-store-review-access.yml'
+  pull_request:
+    paths:
+      - 'performance/client/performance-native-app.mjs'
+      - 'performance/client/performance-store-review-access.mjs'
+      - 'performance/tests/store-review-access.test.mjs'
+      - 'supabase/config.toml'
+      - 'supabase/functions/_shared/performance-auth.ts'
+      - 'supabase/functions/performance-review-enrollment-mint/**'
+      - 'scripts/validate-performance-enrollment-security.mjs'
+      - 'docs/PARADISE_STORE_REVIEW_ACCESS_V1.md'
+      - '.github/workflows/validate-paradise-store-review-access.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-store-review-access-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review-access-controls:
+    name: Store review access controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate enrollment and review-access security controls
+        run: node scripts/validate-performance-enrollment-security.mjs
+
+      - name: Run store-review access contract tests
+        run: node --test performance/tests/store-review-access.test.mjs
+
+      - name: Fail if review secrets or credentials were committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nEi '(review[_ -]?(password|secret)|STORE_REVIEW_PASSWORD|BEGIN PRIVATE KEY|service_role[^_])' -- \
+            performance/client/performance-store-review-access.mjs \
+            performance/client/performance-native-app.mjs \
+            supabase/functions/performance-review-enrollment-mint \
+            docs/PARADISE_STORE_REVIEW_ACCESS_V1.md; then
+            echo 'Potential store-review secret/credential material found in controlled review-access files.' >&2
+            exit 1
+          fi
+          echo 'No committed store-review secret material found.'
