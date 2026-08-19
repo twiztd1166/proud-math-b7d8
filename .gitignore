@@ -26,3 +26,7 @@ pnpm-debug.log*
 # wrangler files
 .wrangler
 .dev.vars
+
+# Paradise Performance physical-device acceptance private evidence
+performance/acceptance/private-evidence/
+PRIVATE_TEST_TOKENS*

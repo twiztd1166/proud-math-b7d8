@@ -1,0 +1,23 @@
+{
+  "projectRef": "taxlrlfsobtnbasjcnuf",
+  "verifiedAt": "",
+  "counts": {
+    "employees": null,
+    "actorIdentities": null,
+    "devices": null,
+    "enrollmentTokens": null,
+    "shifts": null,
+    "events": null,
+    "locationPoints": null,
+    "sets": null,
+    "outcomes": null,
+    "commissions": null,
+    "kpiStandards": null,
+    "payPlans": null,
+    "territories": null,
+    "authUsers": null,
+    "authSessions": null,
+    "refreshTokens": null
+  },
+  "securityAdvisorLints": null
+}
