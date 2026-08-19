@@ -2,6 +2,7 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 import { createClient } from '@supabase/supabase-js';
 import { createNativePerformanceSupabaseOptions, ensureNativeInstallEnrollmentBoundary, validateNativePerformanceSession } from './performance-native-session.mjs';
 import { redeemTrustedDevice } from './performance-session.mjs';
+import { createStoreReviewSupabaseOptions, requestStoreReviewEnrollment } from './performance-store-review-access.mjs';
 import { createJsonStorageQueueStore, PerformanceSyncQueue } from './performance-sync.mjs';
 import { createSupabaseOperationalSyncTransport } from './performance-operational-sync.mjs';
 import { createSupabaseShiftTransport, PerformanceTodayController } from './performance-today.mjs';
@@ -83,6 +84,18 @@ function enrollmentMarkup(message = '') {
       <label for="performanceEnrollToken">Enrollment code</label>
       <input id="performanceEnrollToken" name="token" class="input" type="text" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" required>
       <button class="btn primary" type="submit">ENROLL DEVICE</button>
+    </form>
+  </div>
+  <div class="performance-native-card performance-review-card">
+    <p class="performance-eyebrow">STORE REVIEW ACCESS</p>
+    <h3>Marketplace reviewer sign-in</h3>
+    <p>For Apple App Review and Google Play review only. Use the reusable review credentials supplied in the store review console. They are used only to prepare a normal one-time trusted-device enrollment for synthetic review data.</p>
+    <form id="performanceReviewForm">
+      <label for="performanceReviewEmail">Review email</label>
+      <input id="performanceReviewEmail" name="email" class="input" type="email" inputmode="email" autocapitalize="off" autocomplete="username" spellcheck="false" required>
+      <label for="performanceReviewPassword">Review password</label>
+      <input id="performanceReviewPassword" name="password" class="input" type="password" autocomplete="current-password" required>
+      <button class="btn secondary" type="submit">APP REVIEW ACCESS</button>
     </form>
   </div>`);
 }
@@ -188,6 +201,12 @@ async function enrollDevice(token) {
   }
 }
 
+async function enrollStoreReviewer(email, password) {
+  const reviewClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, createStoreReviewSupabaseOptions());
+  const reviewEnrollment = await requestStoreReviewEnrollment({ reviewClient, email, password });
+  await enrollDevice(reviewEnrollment.token);
+}
+
 async function renderPerformance() {
   if (!main) return;
   setPerformanceNavActive(true);
@@ -213,6 +232,27 @@ async function renderPerformance() {
       } catch (error) {
         runtime.phase = 'ENROLL';
         runtime.error = `Enrollment did not complete. ${safeMessage(error)} If the one-time code was consumed, ask a manager for a new code.`;
+      }
+      await renderPerformance();
+    }, { once: true });
+
+    const reviewForm = document.getElementById('performanceReviewForm');
+    reviewForm?.addEventListener('submit', async event => {
+      event.preventDefault();
+      const emailInput = document.getElementById('performanceReviewEmail');
+      const passwordInput = document.getElementById('performanceReviewPassword');
+      const email = emailInput?.value || '';
+      const password = passwordInput?.value || '';
+      if (emailInput) emailInput.value = '';
+      if (passwordInput) passwordInput.value = '';
+      runtime.phase = 'ENROLLING';
+      runtime.error = null;
+      await renderPerformance();
+      try {
+        await enrollStoreReviewer(email, password);
+      } catch (error) {
+        runtime.phase = 'ENROLL';
+        runtime.error = `App Review access did not complete. ${safeMessage(error)}`;
       }
       await renderPerformance();
     }, { once: true });
@@ -304,6 +344,7 @@ export const ParadiseNativePerformanceIntegrationInvariants = Object.freeze([
   'native session refresh tokens use the OS-protected PerformanceSecureStorage plugin',
   'Start My Day remains the only path that may begin live native GPS',
   'the store runtime sync transport accepts EVENT and LOCATION only; customer SET writes are not enabled in this integration slice',
+  'store-review credentials use a separate non-persistent client and only mint an ordinary short-lived synthetic-device enrollment',
   'Performance failures never remove or redefine the existing Lookup tab',
   'no KPI target, pay value, territory assignment, retention duration, or customer record is invented by the native shell',
 ]);
