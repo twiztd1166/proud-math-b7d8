@@ -5,12 +5,16 @@ const root = process.cwd();
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const fail = message => { throw new Error(message); };
 const requireText = (text, pattern, message) => { if (!pattern.test(text)) fail(message); };
+const forbidText = (text, pattern, message) => { if (pattern.test(text)) fail(message); };
 
 const enrollment = read('supabase/migrations/20260818084500_paradise_performance_v1_device_enrollment.sql');
 const enrollmentAdvisor = read('supabase/migrations/20260818090000_paradise_performance_v1_enrollment_advisor_hardening.sql');
 const readSession = read('supabase/migrations/20260818091500_paradise_performance_v1_read_session_hardening.sql');
 const config = read('supabase/config.toml');
 const edgeAuth = read('supabase/functions/_shared/performance-auth.ts');
+const reviewMint = read('supabase/functions/performance-review-enrollment-mint/index.ts');
+const reviewClient = read('performance/client/performance-store-review-access.mjs');
+const nativeApp = read('performance/client/performance-native-app.mjs');
 
 requireText(enrollment, /token_hash text primary key/i, 'Enrollment token must be stored by hash');
 if (/\btoken\s+text\b/i.test(enrollment)) fail('Plaintext enrollment-token storage detected');
@@ -36,13 +40,44 @@ requireText(edgeAuth, /PERFORMANCE_EDGE_VERSION = '2026\.08\.18-performance-edge
 requireText(edgeAuth, /auth\.getUser\(token\)/i, 'User JWT must be validated inside protected Edge handlers');
 requireText(edgeAuth, /performance_current_employee_id/i, 'Edge actor authorization must verify current Performance enrollment');
 
+for (const required of [
+  /auth\.auth\.getUser\(jwt\)/i,
+  /paradise_store_review/i,
+  /performance_review_employee_id/i,
+  /performance_review_issuer_employee_id/i,
+  /reviewEmployee\.role !== 'canvasser'/i,
+  /\['manager', 'admin'\]\.includes\(issuer\.role\)/i,
+  /randomSecret\(32\)/i,
+  /sha256Hex\(token\)/i,
+  /REVIEW_TOKEN_MINUTES = 10/i,
+]) requireText(reviewMint, required, `Store-review mint security control missing: ${required}`);
+forbidText(reviewMint, /authenticatePerformanceActor\(/i, 'Reusable store-review gate must not be a normal Performance actor');
+forbidText(reviewMint, /body\?\.employeeId|body\.employeeId/i, 'Store-review caller must not choose the target employee');
+forbidText(reviewMint, /Deno\.env\.get\([^)]*(PASSWORD|REVIEW_PASSWORD)/i, 'Reusable review password must not be an Edge Function environment secret');
+
+for (const required of [
+  /persistSession:\s*false/i,
+  /autoRefreshToken:\s*false/i,
+  /signInWithPassword/i,
+  /performance-review-enrollment-mint/i,
+  /signOut\(\{ scope: 'local' \}\)/i,
+]) requireText(reviewClient, required, `Store-review client isolation control missing: ${required}`);
+forbidText(reviewClient, /localStorage|secureStorage|setItem\(/i, 'Store-review credentials/session must not be written to local or secure storage');
+
+requireText(nativeApp, /createStoreReviewSupabaseOptions/i, 'Native app must use isolated review Supabase options');
+requireText(nativeApp, /requestStoreReviewEnrollment/i, 'Native app must invoke the controlled review flow');
+requireText(nativeApp, /APP REVIEW ACCESS/i, 'Native app must expose the documented reviewer access path');
+requireText(nativeApp, /await enrollDevice\(reviewEnrollment\.token\)/i, 'Review flow must end in the ordinary trusted-device redemption path');
+forbidText(nativeApp, /setItem\([^)]*(ReviewEmail|ReviewPassword|review.*password)/i, 'Native app must not persist review credentials');
+
 const expectedJwtModes = {
   'performance-enrollment-mint': true,
   'performance-enrollment-redeem': false,
   'performance-device-revoke': true,
+  'performance-review-enrollment-mint': true,
 };
 for (const [fn, expected] of Object.entries(expectedJwtModes)) {
   requireText(config, new RegExp(`\\[functions\\.${fn}\\][\\s\\S]{0,100}verify_jwt\\s*=\\s*${expected}`, 'i'), `verify_jwt=${expected} missing for ${fn}`);
 }
 
-console.log('Paradise Performance enrollment/read-session security validation: PASS');
+console.log('Paradise Performance enrollment/read-session/store-review security validation: PASS');
