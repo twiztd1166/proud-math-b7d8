@@ -118,3 +118,27 @@ test('repository privacy guard excludes raw physical evidence and private tokens
   assert.match(ignore, /performance\/acceptance\/private-evidence\//);
   assert.match(ignore, /PRIVATE_TEST_TOKENS/);
 });
+
+test('null or blank zero-proof fields fail closed instead of coercing to zero', () => {
+  const doc = passing('ios', 1);
+  doc.offlineReplay.queueAfter = null;
+  doc.offlineReplay.duplicateClientPointIds = '';
+  doc.revocation.postRevokeAcceptedGpsRows = null;
+  doc.finishDay.postFinishCollectedGpsRows = undefined;
+  const evidence = validatePhysicalEvidence(doc, 'ios');
+  assert.equal(evidence.pass, false);
+  assert.ok(evidence.issues.some(v => v.code === 'OFFLINE_QUEUE_NOT_DRAINED'));
+  assert.ok(evidence.issues.some(v => v.code === 'DUPLICATE_REPLAY_DETECTED'));
+  assert.ok(evidence.issues.some(v => v.code === 'POST_REVOKE_WRITE_DETECTED'));
+  assert.ok(evidence.issues.some(v => v.code === 'POST_FINISH_GPS_DETECTED'));
+
+  const cleanup = cleanBackend();
+  cleanup.counts.devices = null;
+  cleanup.counts.authSessions = '';
+  cleanup.securityAdvisorLints = null;
+  const cleanupResult = validateCleanupReadback(cleanup);
+  assert.equal(cleanupResult.pass, false);
+  assert.ok(cleanupResult.issues.some(v => v.code === 'CLEANUP_NOT_ZERO' && v.field === 'counts.devices'));
+  assert.ok(cleanupResult.issues.some(v => v.code === 'CLEANUP_NOT_ZERO' && v.field === 'counts.authSessions'));
+  assert.ok(cleanupResult.issues.some(v => v.code === 'SECURITY_ADVISOR_NOT_CLEAN'));
+});
