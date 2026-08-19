@@ -18,6 +18,12 @@ sources.each do |name|
   FileUtils.cp(File.join(root, 'performance', 'native', 'ios', name), File.join(app_dir, name))
 end
 
+privacy_name = 'PrivacyInfo.xcprivacy'
+privacy_source = File.join(root, 'performance', 'native', 'ios', privacy_name)
+privacy_target = File.join(app_dir, privacy_name)
+raise 'Controlled iOS privacy manifest is missing' unless File.exist?(privacy_source)
+FileUtils.cp(privacy_source, privacy_target)
+
 project = Xcodeproj::Project.open(project_path)
 target = project.targets.find { |item| item.name == 'App' }
 raise 'Unable to find generated iOS App target' unless target
@@ -29,6 +35,11 @@ sources.each do |name|
   unless target.source_build_phase.files_references.include?(ref)
     target.source_build_phase.add_file_reference(ref, true)
   end
+end
+
+privacy_ref = app_group.files.find { |file| file.path == privacy_name } || app_group.new_file(privacy_name)
+unless target.resources_build_phase.files_references.include?(privacy_ref)
+  target.resources_build_phase.add_file_reference(privacy_ref, true)
 end
 project.save
 
@@ -52,6 +63,8 @@ File.write(storyboard_path, storyboard)
 sources.each do |name|
   raise "Missing integrated iOS source: #{name}" unless File.exist?(File.join(app_dir, name))
 end
+raise 'Generated iOS privacy manifest is missing' unless File.exist?(privacy_target)
+raise 'iOS privacy manifest is not in Copy Bundle Resources' unless target.resources_build_phase.files_references.any? { |ref| ref.path == privacy_name }
 raise 'iOS background location mode was not applied' unless Xcodeproj::Plist.read_from_path(plist_path).fetch('UIBackgroundModes', []).include?('location')
 
-puts 'Prepared generated iOS shell with registered Performance location + durable spool + Keychain secure-storage plugins.'
+puts 'Prepared generated iOS shell with Performance location + durable spool + Keychain secure-storage plugins and PrivacyInfo.xcprivacy resource.'
