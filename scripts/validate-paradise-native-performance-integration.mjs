@@ -8,9 +8,8 @@ const requireText = (text, needle, label) => {
 const forbidText = (text, needle, label) => {
   if (text.includes(needle)) throw new Error(`${label} contains forbidden control: ${needle}`);
 };
-function assertNoPrivilegedSupabaseCredential(text, label) {
+function assertNoPrivilegedSupabaseCredentialValue(text, label) {
   if (/sb_secret_[A-Za-z0-9_-]{20,}/.test(text)) throw new Error(`${label} contains a Supabase secret-key value`);
-  if (/SUPABASE_(?:SERVICE_ROLE|SECRET)_KEY/.test(text)) throw new Error(`${label} contains a privileged Supabase credential environment name`);
   const jwtPattern = /\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
   for (const token of text.match(jwtPattern) || []) {
     try {
@@ -64,6 +63,7 @@ for (const control of [
 for (const forbidden of [
   'service_role',
   'SUPABASE_SERVICE_ROLE_KEY',
+  'SUPABASE_SECRET_KEY',
   'createSupabaseSyncTransport',
   'customerName',
   'confirmedCustomerAddress',
@@ -72,7 +72,7 @@ for (const forbidden of [
   'BELOW STANDARD',
   'ABOVE STANDARD',
 ]) forbidText(entry, forbidden, 'Native Performance entrypoint');
-assertNoPrivilegedSupabaseCredential(entry, 'Native Performance entrypoint');
+assertNoPrivilegedSupabaseCredentialValue(entry, 'Native Performance entrypoint');
 
 const operational = read('performance/client/performance-operational-sync.mjs');
 for (const control of [
@@ -123,8 +123,8 @@ if (process.argv.includes('--built')) {
   for (const control of ['START MY DAY', 'FINISH DAY', 'performance-enrollment-redeem', 'performance_location_points', 'performance_events']) {
     requireText(bundle, control, 'Built native Performance app');
   }
-  assertNoPrivilegedSupabaseCredential(bundle, 'Built native Performance app');
+  assertNoPrivilegedSupabaseCredentialValue(bundle, 'Built native Performance app');
   forbidText(bundle, 'performance_sets', 'Built native Performance app');
 }
 
-console.log('Paradise native Performance integration controls PASS: native bundle is separate, trusted-device Today runtime is mounted, EVENT/LOCATION-only sync enforced, real privileged Supabase credentials are rejected, both native workflows build the real Performance candidate, and the public field bundle remains isolated.');
+console.log('Paradise native Performance integration controls PASS: native bundle is separate, trusted-device Today runtime is mounted, EVENT/LOCATION-only sync enforced, privileged Supabase credential values are rejected while harmless SDK vocabulary is tolerated, both native workflows build the real Performance candidate, and the public field bundle remains isolated.');
