@@ -4,9 +4,9 @@ Status: **SUBMISSION PACKAGE PREP / NOT SUBMITTED / NOT PUBLICLY DISTRIBUTED**
 
 Date: 2026-08-19
 
-Native Performance integration release candidate entering this store-control pass: `ffe3fe6d5e61484e19ac1919498d37eba29ef83b`.
+Stable validated native Performance integration baseline entering this store-control pass: `ffe3fe6d5e61484e19ac1919498d37eba29ef83b`.
 
-Do not treat that candidate as the stable validated release until `paradise-canvass-manager-validated` and public `latest.json` both pin it through the controlled publisher.
+Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at 78 / 76 / 2 with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `43dc5db4d704dd7b168e0edcf1d2b1bf4636b4f0`.
 
 ## Decision locked
 
