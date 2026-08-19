@@ -1,0 +1,214 @@
+name: Paradise release recovery
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact paradise-canvass-manager-public SHA to validate and release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: paradise-release-recovery
+  cancel-in-progress: false
+
+jobs:
+  validate-and-release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.actor == 'twiztd1166' &&
+       startsWith(github.event.comment.body, '/paradise-release '))
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Resolve exact release SHA
+        id: target
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          DISPATCH_SHA: ${{ inputs.target_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TARGET_SHA="$DISPATCH_SHA"
+          else
+            TARGET_SHA="$(printf '%s\n' "$COMMENT_BODY" | sed -nE 's#^/paradise-release ([0-9a-f]{40})$#\1#p')"
+          fi
+          if ! [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'Release command must contain exactly one 40-character lowercase SHA.' >&2
+            exit 1
+          fi
+          echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout exact public candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target.outputs.sha }}
+          fetch-depth: 2
+
+      - name: Verify candidate is still public head
+        shell: bash
+        env:
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          test "$REMOTE_SHA" = "$TARGET_SHA"
+          git merge-base --is-ancestor paradise-canvass-manager-validated "$TARGET_SHA" 2>/dev/null || {
+            git fetch origin paradise-canvass-manager-validated:refs/remotes/origin/paradise-canvass-manager-validated
+            git merge-base --is-ancestor refs/remotes/origin/paradise-canvass-manager-validated "$TARGET_SHA"
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Apply and validate controlled field payload
+        run: node scripts/apply-controlled-update.mjs
+
+      - name: Validate exact controlled baseline and change isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/change-control-report.mjs
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
+          const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const report=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          const canonical=JSON.stringify(obj);
+          const hash=crypto.createHash('sha256').update(canonical).digest('hex');
+          const go=obj.records.filter(r=>r.release==='GO').length;
+          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+          if(obj.records.length!==78||go!==76||noGo!==2)throw new Error('Controlled 78/76/2 baseline mismatch');
+          if(baseline.records!==78||baseline.go!==76||baseline.noGo!==2)throw new Error('Control baseline file drift');
+          if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO set drift');
+          if(hash!==expected||manifest.sha256!==expected)throw new Error('Controlled dataset hash-chain mismatch');
+          if(report.datasetChanged!==false||report.jurisdictionChangeCount!==0||(report.classificationChanges||[]).length!==0)throw new Error('Release candidate is not code-only');
+          NODE
+
+      - name: Validate static field and University controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in scripts/validate-training-model-v1.mjs scripts/validate-practice-model-v2.mjs scripts/validate-field-baseline-v1.mjs scripts/validate-training-hardening.mjs scripts/validate-training-reconciliation.mjs scripts/validate-deep-audit-controls.mjs scripts/validate-training-experience-v2.mjs scripts/validate-training-experience-v3.mjs scripts/validate-training-release-isolation.mjs scripts/validate-release-workflow-controls.mjs scripts/build-canvass-site.mjs; do node --check "$f"; done
+          node scripts/validate-training-model-v1.mjs
+          node scripts/validate-practice-model-v2.mjs
+          node scripts/validate-training-hardening.mjs
+          node scripts/validate-training-reconciliation.mjs
+          node scripts/validate-deep-audit-controls.mjs
+          node scripts/validate-training-experience-v2.mjs
+          node scripts/validate-training-experience-v3.mjs
+          node scripts/validate-release-workflow-controls.mjs
+          node scripts/validate-field-baseline-v1.mjs
+          node scripts/validate-training-release-isolation.mjs
+          node --check provenance-v3-2.js
+          node --check field-v37.js
+          node --check pwa-v3.js
+          node --check sw.js
+          grep -q "appVersion:'2026.08.14-v3.12'" provenance-v3-2.js
+          grep -q "datasetSha256:'a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200'" provenance-v3-2.js
+          grep -q 'records.length!==78' boot-v2.js
+          grep -q 'db.meta.goCount!==76' boot-v2.js
+          grep -q 'db.meta.noGoCount!==2' boot-v2.js
+          if grep -Eqi 'manager-assigned|assigned training|due date' training-experience-v3.js training-ux-polish-v1.js; then echo 'Manager-assigned training reintroduced'; exit 1; fi
+          if grep -q '<iframe' training-player-v1.js; then echo 'Embedded training iframe reintroduced'; exit 1; fi
+
+      - name: Validate Paradise Performance source foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-performance-foundation.mjs
+          node scripts/validate-performance-enrollment-security.mjs
+          node --test performance/tests/*.test.mjs
+
+      - name: Build static production bundle
+        run: |
+          node scripts/build-canvass-site.mjs
+          test -f canvass-dist/index.html
+          test -f canvass-dist/field-v37.js
+          test -f canvass-dist/sw.js
+          test -f canvass-dist/training-experience-v3.js
+
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLAYWRIGHT_ROOT="$RUNNER_TEMP/pcm-release-recovery-playwright"
+          rm -rf "$PLAYWRIGHT_ROOT" node_modules
+          mkdir -p "$PLAYWRIGHT_ROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PLAYWRIGHT_ROOT/package.json"
+          npm install --prefix "$PLAYWRIGHT_ROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PLAYWRIGHT_ROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install --with-deps webkit chromium
+
+      - name: Start isolated test server
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/pcm-release-recovery-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break; sleep 1; done
+
+      - name: Run iPhone field, offline, University and UX regressions
+        run: >-
+          ./node_modules/.bin/playwright test
+          tests/mobile-regression.spec.js
+          tests/offline-regression.spec.js
+          tests/training-experience-v2.spec.js
+          tests/training-experience-v3.spec.js
+          tests/training-smoke.spec.js
+          tests/currentness-smoke.spec.js
+          tests/readiness-smoke.spec.js
+          tests/practice-smoke.spec.js
+          tests/checks-smoke.spec.js
+          tests/more-search-smoke.spec.js
+          tests/media-library-smoke.spec.js
+          tests/player-progress-smoke.spec.js
+          tests/manager-home-smoke.spec.js
+          tests/lesson-flow-acceptance.spec.js
+          tests/release-readiness-smoke.spec.js
+          tests/sales-closing-smoke.spec.js
+          tests/deep-audit-regression.spec.js
+          tests/training-ux-polish.spec.js
+          --project=webkit-iphone --retries=0 --reporter=github
+
+      - name: Run device matrix regression
+        run: ./node_modules/.bin/playwright test tests/matrix-smoke.spec.js --retries=0 --reporter=github
+
+      - name: Run adversarial browser matrix
+        run: ./node_modules/.bin/playwright test tests/training-red-team-v1.spec.js tests/service-worker-hardening-v1.spec.js tests/progress-transfer-recovery-v1.spec.js --retries=0 --reporter=github
+
+      - name: Publish validated metadata and fast-forward stable branch
+        shell: bash
+        env:
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          if [ "$REMOTE_SHA" != "$TARGET_SHA" ]; then echo 'A newer public commit exists; refusing recovery publication.'; exit 1; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          TARGET_SHA="$TARGET_SHA" node <<'NODE'
+          const fs=require('fs');
+          const p=fs.readFileSync('provenance-v3-2.js','utf8');
+          const version=p.match(/appVersion:'([^']+)'/)[1];
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const report=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          const sha=process.env.TARGET_SHA;
+          const meta={version,sha,snapshot:manifest.snapshot,datasetSha256:manifest.sha256,records:manifest.records,go:manifest.go,noGo:manifest.noGo,changeControl:{datasetChanged:report.datasetChanged,jurisdictionChangeCount:report.jurisdictionChangeCount,classificationChanges:report.classificationChanges.length},url:`https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/${sha}/index.html`,validated:true,publishedAt:new Date().toISOString()};
+          fs.writeFileSync('latest.json',JSON.stringify(meta,null,2)+'\n');
+          NODE
+          git add latest.json
+          git commit -m 'Publish validated canvass app metadata'
+          git push origin HEAD:paradise-canvass-manager-public
+          git push origin "$TARGET_SHA:refs/heads/paradise-canvass-manager-validated"
