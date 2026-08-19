@@ -11,7 +11,28 @@ const forbidText = (text, needle, label) => {
 const config = JSON.parse(read('capacitor.config.json'));
 if (config.appId !== 'com.paradiseexteriors.performance') throw new Error(`Unexpected production appId: ${config.appId}`);
 if (config.appName !== 'Paradise Performance') throw new Error(`Unexpected production appName: ${config.appName}`);
-if (config.webDir !== 'canvass-dist') throw new Error(`Unexpected production webDir: ${config.webDir}`);
+if (config.webDir !== 'performance-dist') throw new Error(`Unexpected production webDir: ${config.webDir}`);
+
+const nativeBuilder = read('scripts/build-performance-native-site.mjs');
+for (const control of [
+  "const baseDir = 'canvass-dist'",
+  "const outDir = 'performance-dist'",
+  'performance-native-app.js',
+  'performance-native.css',
+]) requireText(nativeBuilder, control, 'Native Performance builder');
+
+const nativeEntrypoint = read('performance/client/performance-native-app.mjs');
+for (const control of [
+  'createNativePerformanceSupabaseOptions',
+  'validateNativePerformanceSession',
+  'redeemTrustedDevice',
+  'createSupabaseOperationalSyncTransport',
+  'PerformanceTodayController',
+  'mountPerformanceToday',
+]) requireText(nativeEntrypoint, control, 'Native Performance entrypoint');
+for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE_KEY', 'createSupabaseSyncTransport']) {
+  forbidText(nativeEntrypoint, forbidden, 'Native Performance entrypoint');
+}
 
 const iosPlugin = read('performance/native/ios/PerformanceLocationPlugin.swift');
 for (const control of [
@@ -80,6 +101,8 @@ for (const control of [
 
 const workflow = read('.github/workflows/validate-paradise-native-store-distribution.yml');
 for (const control of [
+  'build-performance-native-site.mjs',
+  'validate-paradise-native-performance-integration.mjs --built',
   'bundleRelease',
   '-configuration Release',
   '-sdk iphoneos',
@@ -101,4 +124,4 @@ for (const control of [
   'https://www.paradiseexteriors.com/privacy-policy/',
 ]) requireText(doc, control, 'Distribution control record');
 
-console.log('Paradise native store distribution controls PASS: production identity pinned; iOS privacy manifest present; Android API 36 and visible FGS boundary enforced; signing/publication remain external and fail closed.');
+console.log('Paradise native store distribution controls PASS: production identity pinned; real native Performance bundle required; iOS privacy manifest present; Android API 36 and visible FGS boundary enforced; signing/publication remain external and fail closed.');
