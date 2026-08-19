@@ -10,14 +10,27 @@
     "width": 528,
     "height": 528,
     "bytes": 44927,
+    "encodedChars": 59904,
     "sha256": "75e563729b9d0771335930a9e0c97eed3c2f37dd3b4a855f998201a8009f0c13",
     "visualIdentity": "Existing square Paradise house/P favicon mark; visually verified from Drive. No wordmark crop, redraw, recolor, or geometry edit.",
     "chunks": [
       "store/paradise-performance/brand/source/paradise-favicon-528.b64.part00",
-      "store/paradise-performance/brand/source/paradise-favicon-528.b64.part01",
-      "store/paradise-performance/brand/source/paradise-favicon-528.b64.part02",
-      "store/paradise-performance/brand/source/paradise-favicon-528.b64.part03",
-      "store/paradise-performance/brand/source/paradise-favicon-528.b64.part04"
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg01",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg02",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg03",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.seg04",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail01",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail02",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail03",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail04",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail05",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail06",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail07",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail08",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail09",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail10",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail11",
+      "store/paradise-performance/brand/source/paradise-favicon-528.b64.tail12"
     ]
   },
   "derivation": {
@@ -43,7 +56,7 @@
       },
       "adaptiveSafeMarkRatio": 0.6111111111111112,
       "background": "#FFFFFF",
-      "playListingIcon": "512x512 PNG derived from the exact source"
+      "playListingIcon": "512x512 32-bit PNG derived from the exact source"
     }
   },
   "openControls": [
