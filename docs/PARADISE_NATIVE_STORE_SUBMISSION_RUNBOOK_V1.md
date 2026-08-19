@@ -4,7 +4,9 @@ Status: **SUBMISSION PACKAGE PREP / NOT SUBMITTED / NOT PUBLICLY DISTRIBUTED**
 
 Date: 2026-08-19
 
-Validated engineering baseline entering this stage: `2a47c0c4166b11e68b945ad8f9399261cb3a6bd7`
+Native Performance integration release candidate entering this store-control pass: `ffe3fe6d5e61484e19ac1919498d37eba29ef83b`.
+
+Do not treat that candidate as the stable validated release until `paradise-canvass-manager-validated` and public `latest.json` both pin it through the controlled publisher.
 
 ## Decision locked
 
@@ -16,10 +18,15 @@ Validated engineering baseline entering this stage: `2a47c0c4166b11e68b945ad8f93
 
 ## Current store engineering foundation
 
-The validated repository already contains:
+The controlled repository now contains:
 
 - app/bundle identity `com.paradiseexteriors.performance`;
 - store version baseline `1.0.0` / build `1`;
+- a native-only `performance-dist` derived from the controlled Canvass/University bundle;
+- trusted-device enrollment/session validation mounted into the native Performance surface;
+- Performance Today `Start My Day` / `Finish Day` integration;
+- current native-store sync restricted to operational `EVENT` and `LOCATION` writes;
+- dormant customer `SET` transport excluded from the current native store bundle;
 - Android compile/target SDK 36 preparation;
 - unsigned Android Release AAB compilation;
 - iOS 26+ SDK validation;
@@ -44,6 +51,7 @@ Google:
 
 - Internal testing: `https://support.google.com/googleplay/android-developer/answer/9845334`
 - Prepare and roll out a release: `https://support.google.com/googleplay/android-developer/answer/9859348`
+- Data Safety: `https://support.google.com/googleplay/android-developer/answer/10787469`
 - Foreground-service declaration: `https://support.google.com/googleplay/android-developer/answer/13392821`
 - Android location foreground-service requirements: `https://developer.android.com/develop/background-work/services/fgs/service-types`
 
@@ -121,8 +129,9 @@ Current controlled baseline indicates likely disclosure of at least:
 - Coarse Location where applicable;
 - User ID;
 - Device ID / device-level trusted identifier;
-- operational app/workday activity where retained;
-- other route/workday evidence where applicable.
+- Other Data Types for residual operational shift/workday evidence that is not general UI-interaction telemetry.
+
+Do **not** label employee operational workday events as Apple `Product Interaction` merely because the employee used a button to create them. Apple uses Product Interaction for app-interaction telemetry such as launches, taps, clicks, scrolling, and views. If the final binary later retains that kind of UI-interaction telemetry separately, re-review the category.
 
 Current controlled intent:
 
@@ -170,6 +179,8 @@ Do not submit an unlisted request for a beta/prerelease build.
 4. Roll out only to the Internal testing track.
 5. Send employees the Play opt-in/tester URL after the release is accepted and available.
 
+Google currently states that an internal test supports up to 100 testers. Apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section.
+
 If the eligible Android population later exceeds the internal-test limit, move to an appropriately controlled closed/private testing/distribution design rather than making the app publicly available by default.
 
 ### C. Store listing
@@ -186,9 +197,9 @@ Do not use the current empty/substantively incomplete privacy page as the final 
 
 ### D. App access
 
-Google review must be able to access restricted functionality.
+Google review must be able to access restricted functionality whenever the applicable Play workflow requires review access.
 
-Before submission, provide a review account and exact enrollment/trusted-device instructions. Do not claim the app is unrestricted.
+Before any such submission, provide a review account and exact enrollment/trusted-device instructions. Do not claim the app is unrestricted.
 
 ### E. Foreground service declaration
 
@@ -200,7 +211,7 @@ The Play Console declaration should truthfully describe:
 - why timely execution matters;
 - what happens if the service is interrupted;
 - the user action that starts the workday/location flow;
-- a reviewable demonstration video URL.
+- a reviewable demonstration video URL when required by the applicable Play flow.
 
 Draft text is controlled in `store-metadata-v1.json`.
 
@@ -208,7 +219,11 @@ The video must show the final production binary and the employee steps that trig
 
 ### F. Data Safety
 
-The final Data Safety form must be reconciled against:
+For the **current initial release that remains exclusively on Google Play Internal Testing**, Google currently exempts the app from inclusion in the Data Safety section. Therefore, completion of Data Safety is **not a hard blocker solely to that Internal-Testing-only release**.
+
+Still maintain and review the controlled Data Safety draft because the answer set must be ready before any later Google Play distribution mode for which Google requires it.
+
+When Data Safety becomes applicable, reconcile it against:
 
 - the final signed binary;
 - the Supabase-backed production data flow;
@@ -216,20 +231,20 @@ The final Data Safety form must be reconciled against:
 - actual retention/deletion policy;
 - any third-party SDKs in the final build.
 
-The draft controlled categories are maintained in `store-metadata-v1.json`; they are not final legal/policy answers.
+Current draft categories are maintained in `store-metadata-v1.json`. Retained employee Start/Finish workday actions are drafted under `App activity > Other actions`; do not imply general app-interaction analytics unless the final binary actually collects them.
 
 ## Screenshot plan
 
 Use real production UI from the final signed release. Do not use mock screenshots that imply unavailable features or approved KPI/pay values.
 
-Recommended screenshot story:
+Recommended v1 screenshot story:
 
 1. Paradise Performance secure welcome/enrollment state.
-2. Main employee home / current-workday state.
-3. Start My Day location-permission/workday flow.
-4. Performance/progress view showing only configured/authorized information.
-5. Paradise University / training view.
-6. Manager or employee workflow representative of the authorized role.
+2. Performance Today idle/current-workday state.
+3. Start My Day employee-started location/workday flow.
+4. Lookup field/legal instruction view, showing that Lookup remains independently available.
+5. Paradise University training/progress view.
+6. Finish Day / completed-workday state from the final v1 binary.
 
 Before capture:
 
@@ -241,18 +256,22 @@ Before capture:
 
 ## Final blockers — do not bypass
 
-Actual employee-installable distribution remains blocked on:
+For the current initial store rollout, actual employee-installable distribution remains blocked on:
 
 1. Apple Developer / App Store Connect access;
 2. Google Play Console access;
 3. protected production signing configuration;
 4. approved substantive employee-app privacy policy URL;
 5. approved retention and workforce-location notice language;
-6. final review accounts/enrollment instructions;
+6. final review accounts/enrollment instructions where required;
 7. approved icon/screenshots;
-8. Google foreground-service demonstration video;
-9. final App Store privacy and Google Data Safety review;
-10. successful official-store review/processing.
+8. Google foreground-service demonstration video where required by the applicable Play submission flow;
+9. final App Store privacy answer review before Apple submission;
+10. successful official-store review/processing for the applicable platform/distribution path.
+
+Conditional later-distribution blocker:
+
+- Final Google Play Data Safety review before any Google Play distribution mode for which Google requires the Data Safety section. Do not label this as a blocker solely to the current Internal-Testing-only release while that exemption applies.
 
 ## Release rule
 
