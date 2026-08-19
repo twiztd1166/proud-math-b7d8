@@ -1,6 +1,8 @@
-export const PERFORMANCE_MATH_VERSION = '2026.08.18-performance-foundation-v1';
+export const PERFORMANCE_MATH_VERSION = '2026.08.19-performance-baseline-v2';
 
 export function finiteNonNegative(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string' && value.trim() === '') return null;
   const n = Number(value);
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
@@ -71,6 +73,16 @@ export function calculatePerformance(input = {}) {
 }
 
 export function leaderboardEligibility({ hours, opportunities }, rule = {}) {
+  const configured = rule.minimumHours !== undefined || rule.minimumOpportunities !== undefined;
+  if (!configured) {
+    return Object.freeze({
+      eligible: false,
+      provisional: true,
+      configured: false,
+      reasons: ['ELIGIBILITY_RULE_NOT_CONFIGURED']
+    });
+  }
+
   const h = finiteNonNegative(hours) ?? 0;
   const o = finiteNonNegative(opportunities) ?? 0;
   const minHours = finiteNonNegative(rule.minimumHours) ?? 0;
@@ -78,7 +90,7 @@ export function leaderboardEligibility({ hours, opportunities }, rule = {}) {
   const reasons = [];
   if (h < minHours) reasons.push('MINIMUM_HOURS_NOT_MET');
   if (o < minOpportunities) reasons.push('MINIMUM_OPPORTUNITIES_NOT_MET');
-  return Object.freeze({ eligible: reasons.length === 0, provisional: reasons.length > 0, reasons });
+  return Object.freeze({ eligible: reasons.length === 0, provisional: reasons.length > 0, configured: true, reasons });
 }
 
 export function explainKpi(metric, performance, standard = {}) {
