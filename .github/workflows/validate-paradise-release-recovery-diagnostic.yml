@@ -1,0 +1,73 @@
+name: Paradise release recovery diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact public candidate
+        uses: actions/checkout@v4
+        with:
+          ref: c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270
+          fetch-depth: 2
+
+      - name: Verify exact refs and ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_SHA=c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270
+          REMOTE_SHA="$(git ls-remote origin refs/heads/paradise-canvass-manager-public | cut -f1)"
+          test "$REMOTE_SHA" = "$TARGET_SHA"
+          git fetch origin paradise-canvass-manager-validated:refs/remotes/origin/paradise-canvass-manager-validated
+          git merge-base --is-ancestor refs/remotes/origin/paradise-canvass-manager-validated "$TARGET_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Reproduce recovery field and change-control gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/apply-controlled-update.mjs
+          node scripts/change-control-report.mjs
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const baseline=JSON.parse(fs.readFileSync('control-baseline.json','utf8'));
+          const obj=JSON.parse(fs.readFileSync('controlled-register-source.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('register-manifest.json','utf8'));
+          const report=JSON.parse(fs.readFileSync('change-control-report.json','utf8'));
+          const hash=crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
+          const go=obj.records.filter(r=>r.release==='GO').length;
+          const noGo=obj.records.filter(r=>r.release==='NO-GO').length;
+          const stops=obj.records.filter(r=>r.release==='NO-GO').map(r=>r.name).sort();
+          const expected='a98b8badf4c3df616fb091eb32ff85f70682f226e4fcd55591f3784b37abe200';
+          if(obj.records.length!==78||go!==76||noGo!==2)throw new Error('Controlled 78/76/2 baseline mismatch');
+          if(baseline.records!==78||baseline.go!==76||baseline.noGo!==2)throw new Error('Control baseline file drift');
+          if(JSON.stringify(stops)!==JSON.stringify(['Punta Gorda','Tarpon Springs']))throw new Error('NO-GO set drift');
+          if(hash!==expected||manifest.sha256!==expected)throw new Error('Controlled dataset hash-chain mismatch');
+          if(report.datasetChanged!==false||report.jurisdictionChangeCount!==0||(report.classificationChanges||[]).length!==0)throw new Error('Release candidate is not code-only');
+          NODE
+
+      - name: Reproduce recovery static controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-release-workflow-controls.mjs
+          node scripts/validate-field-baseline-v1.mjs
+          node scripts/validate-training-release-isolation.mjs
+
+      - name: Reproduce recovery Performance source gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-performance-foundation.mjs
+          node scripts/validate-performance-enrollment-security.mjs
+          node --test performance/tests/*.test.mjs
