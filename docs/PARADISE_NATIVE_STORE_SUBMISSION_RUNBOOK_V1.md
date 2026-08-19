@@ -90,7 +90,7 @@ Before submission, the final icon/screenshot designer should use the approved co
 2. Confirm App Store Connect access with a role capable of creating/submitting the app.
 3. Create the app record using bundle ID `com.paradiseexteriors.performance`.
 4. Use app name `Paradise Performance` unless management separately changes the naming decision.
-5. Set the distribution method initially as the publicly available App Store method required for the unlisted-request process; do **not** market or release it as a normal public-discovery app.
+5. Use the standard App Store app record needed for Apple's unlisted-request process and do not choose Private / Custom App distribution for this release. Do not intentionally release the app as a normal public-discovery app before the unlisted request is decided.
 
 ### B. Upload
 
