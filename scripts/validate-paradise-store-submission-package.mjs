@@ -76,10 +76,17 @@ assert(metadata.conditionalBlockersBeforeBroaderDistribution.some(value => value
 assert(privacyDraft.includes('DRAFT / NOT LEGALLY APPROVED / DO NOT PUBLISH AS FINAL'), 'Privacy notice must remain visibly draft');
 assert(privacyDraft.includes('FINAL RETENTION POLICY NOT YET APPROVED'), 'Privacy notice must preserve unresolved retention blocker');
 assert(privacyDraft.includes('COUNSEL/HR APPROVAL REQUIRED'), 'Privacy notice must preserve workforce/legal approval blocker');
+
 assert(runbook.includes('No TestFlight dependency'), 'Runbook must preserve no-TestFlight decision');
 assert(runbook.includes('Google Play Internal Testing'), 'Runbook must preserve Android private testing decision');
 assert(runbook.includes('Unlisted App Store'), 'Runbook must preserve iPhone unlisted decision');
 assert(runbook.includes('Do not use the current live page as the final store privacy-policy URL'), 'Runbook must preserve privacy-page blocker');
+assert(runbook.includes('apps exclusively active on the Internal Testing track are exempt from inclusion in the Data Safety section'), 'Runbook must preserve current Google Internal Testing Data Safety exemption');
+assert(runbook.includes('Data Safety is **not a hard blocker solely to that Internal-Testing-only release**'), 'Runbook must not reintroduce Data Safety as a hard blocker to initial Internal Testing');
+assert(runbook.includes('Performance Today idle/current-workday state'), 'Screenshot plan must use the real Performance Today v1 surface');
+assert(runbook.includes('Lookup field/legal instruction view'), 'Screenshot plan must preserve Lookup as an independently visible field authority');
+assert(runbook.includes('Finish Day / completed-workday state'), 'Screenshot plan must use the real Finish Day v1 surface');
+assert(!runbook.includes('Performance/progress view showing only configured/authorized information'), 'Screenshot plan must not imply an unavailable generic KPI/performance screen');
 
 const serialized = JSON.stringify(metadata) + '\n' + privacyDraft + '\n' + runbook;
 const forbiddenSecretPatterns = [
