@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: c76792c6202cb9d4e75b51dea4a6c8ba3c4e4270
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Verify exact refs and ancestry
         shell: bash
