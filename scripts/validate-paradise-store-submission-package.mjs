@@ -47,8 +47,25 @@ assert(metadata.googlePlay.appAccess.startsWith('BLOCKED_'), 'Google Play review
 assert(metadata.googlePlay.foregroundServiceDeclaration.video.startsWith('BLOCKED_'), 'Foreground-service video must fail closed until a real final-binary video exists');
 
 assert(metadata.apple.privacyDraft.tracking === false, 'Current controlled privacy intent must remain no advertising/cross-company tracking');
+assert(metadata.apple.privacyDraft.linkedToUser === true, 'Current operational privacy draft must remain linked to the employee/user');
+assert(metadata.apple.privacyDraft.purpose === 'App Functionality', 'Apple privacy purpose must remain App Functionality');
+assert(metadata.apple.privacyDraft.finalAnswersRequireReview === true, 'Apple privacy answers must remain explicitly draft/review-required');
+assert(metadata.apple.privacyDraft.dataCollected.includes('Precise Location'), 'Apple draft must disclose Precise Location');
+assert(metadata.apple.privacyDraft.dataCollected.includes('Coarse Location'), 'Apple draft must disclose Coarse Location');
+assert(metadata.apple.privacyDraft.dataCollected.includes('User ID'), 'Apple draft must disclose User ID');
+assert(metadata.apple.privacyDraft.dataCollected.includes('Device ID'), 'Apple draft must disclose Device ID');
+assert(metadata.apple.privacyDraft.dataCollected.some(value => value.startsWith('Other Data Types')), 'Apple draft must classify residual operational shift/workday evidence as Other Data Types');
+assert(!metadata.apple.privacyDraft.dataCollected.some(value => value.includes('Product Interaction')), 'Do not classify operational shift/workday evidence as Apple Product Interaction without retained UI-interaction telemetry');
+assert(metadata.apple.privacyDraft.taxonomyNote.includes('launches, taps, clicks, scrolling and views'), 'Apple taxonomy note must preserve why Product Interaction is not used for operational workday evidence');
+
 assert(metadata.googlePlay.dataSafetyDraft.sharedForAdvertising === false, 'Google Data Safety draft must remain no advertising sharing');
 assert(metadata.googlePlay.dataSafetyDraft.sold === false, 'Google Data Safety draft must remain no sale of employee data');
+assert(metadata.googlePlay.dataSafetyDraft.finalAnswersRequireReview === true, 'Google Data Safety answers must remain explicitly draft/review-required');
+assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('Location'), 'Google draft must disclose Location');
+assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('User IDs'), 'Google draft must disclose User IDs');
+assert(metadata.googlePlay.dataSafetyDraft.dataCollected.includes('Device or other IDs'), 'Google draft must disclose Device or other IDs');
+assert(metadata.googlePlay.dataSafetyDraft.dataCollected.some(value => value.startsWith('App activity > Other actions')), 'Google draft must classify retained Start/Finish workday actions under App activity > Other actions');
+assert(metadata.googlePlay.dataSafetyDraft.taxonomyNote.includes('Start/Finish workday actions'), 'Google taxonomy note must preserve the operational-action boundary');
 
 assert(privacyDraft.includes('DRAFT / NOT LEGALLY APPROVED / DO NOT PUBLISH AS FINAL'), 'Privacy notice must remain visibly draft');
 assert(privacyDraft.includes('FINAL RETENTION POLICY NOT YET APPROVED'), 'Privacy notice must preserve unresolved retention blocker');
