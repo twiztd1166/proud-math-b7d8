@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.target.outputs.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Verify candidate is still public head
         shell: bash
