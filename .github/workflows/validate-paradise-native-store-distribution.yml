@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/paradise-native-store-distribution-v1
+      - agent/paradise-store-submission-package-v1
     paths:
       - 'capacitor.config.json'
       - 'performance/native/**'
@@ -13,7 +14,11 @@ on:
       - 'scripts/prepare-performance-ios-shell.rb'
       - 'scripts/prepare-performance-ios-store.rb'
       - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'scripts/validate-paradise-store-submission-package.mjs'
+      - 'store/paradise-performance/**'
       - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
+      - 'docs/PARADISE_NATIVE_STORE_SUBMISSION_RUNBOOK_V1.md'
+      - 'docs/PARADISE_PERFORMANCE_EMPLOYEE_APP_PRIVACY_NOTICE_DRAFT_2026-08-19.md'
       - '.github/workflows/validate-paradise-native-store-distribution.yml'
   pull_request:
     paths:
@@ -25,7 +30,11 @@ on:
       - 'scripts/prepare-performance-ios-shell.rb'
       - 'scripts/prepare-performance-ios-store.rb'
       - 'scripts/validate-paradise-store-distribution.mjs'
+      - 'scripts/validate-paradise-store-submission-package.mjs'
+      - 'store/paradise-performance/**'
       - 'docs/PARADISE_NATIVE_STORE_DISTRIBUTION_V1.md'
+      - 'docs/PARADISE_NATIVE_STORE_SUBMISSION_RUNBOOK_V1.md'
+      - 'docs/PARADISE_PERFORMANCE_EMPLOYEE_APP_PRIVACY_NOTICE_DRAFT_2026-08-19.md'
       - '.github/workflows/validate-paradise-native-store-distribution.yml'
 
 permissions:
@@ -68,6 +77,9 @@ jobs:
 
       - name: Validate store distribution controls
         run: node scripts/validate-paradise-store-distribution.mjs
+
+      - name: Validate store submission package controls
+        run: node scripts/validate-paradise-store-submission-package.mjs
 
   android-store:
     name: Android unsigned Play candidate
