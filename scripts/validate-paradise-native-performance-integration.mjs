@@ -69,7 +69,7 @@ for (const forbidden of ['performance_sets', 'customer_name', 'customer_phone', 
   forbidText(operational, forbidden, 'Operational sync transport');
 }
 
-const workflow = read('.github/workflows/validate-paradise-native-store-distribution.yml');
+const storeWorkflow = read('.github/workflows/validate-paradise-native-store-distribution.yml');
 for (const control of [
   "SUPABASE_JS_VERSION: '2.112.3'",
   "ESBUILD_VERSION: '0.28.2'",
@@ -77,7 +77,19 @@ for (const control of [
   'validate-paradise-native-performance-integration.mjs --built',
   '@supabase/supabase-js@${SUPABASE_JS_VERSION}',
   'esbuild@${ESBUILD_VERSION}',
-]) requireText(workflow, control, 'Native store workflow');
+]) requireText(storeWorkflow, control, 'Native store workflow');
+
+const shellWorkflow = read('.github/workflows/validate-paradise-performance-native.yml');
+for (const control of [
+  "SUPABASE_JS_VERSION: '2.112.3'",
+  "ESBUILD_VERSION: '0.28.2'",
+  'build-performance-native-site.mjs',
+  'validate-paradise-native-performance-integration.mjs --built',
+  '@supabase/supabase-js@${SUPABASE_JS_VERSION}',
+  'esbuild@${ESBUILD_VERSION}',
+  'npx cap add android',
+  'npx cap add ios --packagemanager SPM',
+]) requireText(shellWorkflow, control, 'Native shell workflow');
 
 if (process.argv.includes('--built')) {
   const out = config.webDir;
@@ -100,4 +112,4 @@ if (process.argv.includes('--built')) {
   }
 }
 
-console.log('Paradise native Performance integration controls PASS: native bundle is separate, trusted-device Today runtime is mounted, EVENT/LOCATION-only sync enforced, public field bundle remains isolated.');
+console.log('Paradise native Performance integration controls PASS: native bundle is separate, trusted-device Today runtime is mounted, EVENT/LOCATION-only sync enforced, both native workflows build the real Performance candidate, and the public field bundle remains isolated.');
