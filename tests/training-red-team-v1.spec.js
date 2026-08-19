@@ -159,10 +159,11 @@ test('service worker excludes external Drive and only refreshes offline index fr
   expect(sw).toContain("isAppEntry=(url.pathname===appIndex.pathname||url.pathname===appRoot.pathname)&&url.search==='' ".trim());expect(sw).toContain('if(isAppEntry&&r.ok&&html)');expect(sw).toContain('training-storage-hardening-v1.js');expect(sw).toContain('training-daily-v1.js');expect(sw).toContain('training-daily-v1.css');
 });
 
-test('red-team invariants preserve field authority, exact pending opener, and iframe-free Drive playback',async({page})=>{
+test('red-team invariants preserve field authority, approval-pending opener gate, and iframe-free Drive playback',async({page})=>{
   await training(page);
   const opener="I’m not here to sell you anything. I’m [Name] with Paradise Exteriors. We’re doing some work here in the neighborhood. Quick question—have you ever gotten an estimate to replace your [windows / doors / roof]?";
-  expect(await page.evaluate(text=>{const x=PU_LESSONS.find(l=>l.id==='field-opening');return JSON.stringify(x).includes(text)},opener)).toBe(true);
+  const openerState=await page.evaluate(text=>{const x=PU_LESSONS.find(l=>l.id==='field-opening');return{hasCandidate:JSON.stringify(x).includes(text),gate:window.PU_OPENER_APPROVAL_GATE_VERSION,lesson:JSON.stringify(x)}},opener);
+  expect(openerState.hasCandidate).toBe(false);expect(openerState.gate).toBe('2026.08.19-pu-opener-approval-gate-v1');expect(openerState.lesson).toMatch(/manager-approved/i);expect(openerState.lesson).not.toMatch(/not here to sell you anything/i);expect(openerState.lesson).not.toMatch(/have you ever gotten an estimate/i);
   await page.evaluate(()=>puSetPage('lesson:field-opening'));await expect(page.getByText(/CURRENT APPROVAL PENDING/i)).toBeVisible();
   await page.evaluate(()=>window.puPlayerOpen('tony-canvassing-101'));const player=page.locator('#puPlayerRoot');await expect(player.locator('iframe')).toHaveCount(0);
   const drive=player.locator('#puDriveLaunch');await expect(drive).toBeVisible();await expect(drive).toHaveText(/PLAY IN GOOGLE DRIVE/i);await expect(drive).toHaveAttribute('target','_blank');await expect(drive).toHaveAttribute('rel',/noopener/);await expect(drive).toHaveAttribute('href',/drive\.google\.com\/file\/d\/1Z8wIrTrULa1g3In7_ucINtNZTV0eWczk/);
