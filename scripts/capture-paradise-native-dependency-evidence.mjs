@@ -7,23 +7,29 @@ import { build } from 'esbuild';
 const args = process.argv.slice(2);
 const variantIndex = args.indexOf('--variant');
 const variant = variantIndex >= 0 ? String(args[variantIndex + 1] || '').trim() : '';
-if (!['controls', 'android', 'ios'].includes(variant)) {
-  throw new Error('Use --variant controls|android|ios');
-}
+if (!['controls', 'android', 'ios'].includes(variant)) throw new Error('Use --variant controls|android|ios');
 
 const entryPoint = 'performance/client/performance-native-app.mjs';
 const builtBundlePath = 'performance-dist/performance-native-app.js';
 const evidenceDir = path.join('store-build', 'paradise-performance', 'dependency-evidence', variant);
 const reportPath = path.join(evidenceDir, 'dependency-evidence.json');
+const packageJsonPath = 'package.json';
+const packageLockPath = 'package-lock.json';
+const hiddenLockPath = path.join('node_modules', '.package-lock.json');
 
 function sha256Bytes(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
-
 function sha256File(file) {
   return sha256Bytes(fs.readFileSync(file));
 }
-
+function npmCommand(args, options = {}) {
+  return spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, {
+    encoding: 'utf8',
+    maxBuffer: 32 * 1024 * 1024,
+    ...options,
+  });
+}
 function packageNameFromInput(inputPath) {
   const normalized = inputPath.replaceAll('\\', '/');
   const marker = '/node_modules/';
@@ -34,7 +40,6 @@ function packageNameFromInput(inputPath) {
   if (!parts.length) return null;
   return parts[0].startsWith('@') && parts.length >= 2 ? `${parts[0]}/${parts[1]}` : parts[0];
 }
-
 function normalizeVia(via) {
   if (typeof via === 'string') return { dependency: via };
   if (!via || typeof via !== 'object') return { type: typeof via };
@@ -48,20 +53,74 @@ function normalizeVia(via) {
     range: via.range ?? null,
   };
 }
-
 function normalizeFixAvailable(value) {
   if (value === true || value === false || value == null) return value ?? null;
   if (typeof value !== 'object') return String(value);
+  return { name: value.name ?? null, version: value.version ?? null, isSemVerMajor: value.isSemVerMajor ?? null };
+}
+function parseAuditResult(result, label) {
+  if (!result.stdout?.trim()) return { available: false, label, exitCode: result.status, error: String(result.stderr || '').slice(0, 500) || 'no JSON output' };
+  let json;
+  try {
+    json = JSON.parse(result.stdout);
+  } catch (error) {
+    return { available: false, label, exitCode: result.status, error: `invalid JSON: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  if (!json || typeof json !== 'object' || (!json.metadata && !json.vulnerabilities)) {
+    return { available: false, label, exitCode: result.status, error: json?.error?.summary || json?.error?.code || 'npm audit did not return an audit report' };
+  }
+  return { available: true, label, exitCode: result.status, json };
+}
+function normalizeAudit(parsed, bundledPackageSet, packageInputs) {
+  if (!parsed.available) return parsed;
+  const vulnerabilities = Object.entries(parsed.json.vulnerabilities || {}).sort(([a], [b]) => a.localeCompare(b)).map(([name, item]) => ({
+    name,
+    severity: item?.severity ?? null,
+    isDirect: item?.isDirect ?? null,
+    range: item?.range ?? null,
+    nodes: Array.isArray(item?.nodes) ? [...item.nodes].sort() : [],
+    fixAvailable: normalizeFixAvailable(item?.fixAvailable),
+    via: Array.isArray(item?.via) ? item.via.map(normalizeVia) : [],
+    esbuildInputMatch: bundledPackageSet.has(name),
+    matchedBundleInputPaths: packageInputs.get(name) || [],
+  }));
   return {
-    name: value.name ?? null,
-    version: value.version ?? null,
-    isSemVerMajor: value.isSemVerMajor ?? null,
+    available: true,
+    label: parsed.label,
+    exitCode: parsed.exitCode,
+    metadata: parsed.json.metadata ?? null,
+    vulnerabilityPackageCount: vulnerabilities.length,
+    vulnerabilities,
+    exactPackageNameMatchesToEsbuildInputs: vulnerabilities.filter(item => item.esbuildInputMatch).map(item => item.name),
+  };
+}
+function installedVersions() {
+  const result = npmCommand(['ls', '--all', '--json']);
+  if (!result.stdout?.trim()) return { available: false, exitCode: result.status, error: String(result.stderr || '').slice(0, 500) };
+  let tree;
+  try { tree = JSON.parse(result.stdout); } catch (error) {
+    return { available: false, exitCode: result.status, error: `invalid npm ls JSON: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  const versions = new Map();
+  const walk = dependencies => {
+    for (const [name, node] of Object.entries(dependencies || {})) {
+      const values = versions.get(name) || new Set();
+      if (node?.version) values.add(String(node.version));
+      versions.set(name, values);
+      walk(node?.dependencies);
+    }
+  };
+  walk(tree.dependencies);
+  return {
+    available: true,
+    exitCode: result.status,
+    packageCount: versions.size,
+    versions: Object.fromEntries([...versions.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, values]) => [name, [...values].sort()])),
+    problems: Array.isArray(tree.problems) ? tree.problems : [],
   };
 }
 
-if (!fs.existsSync(builtBundlePath)) {
-  throw new Error(`Build ${builtBundlePath} before dependency evidence capture`);
-}
+if (!fs.existsSync(builtBundlePath)) throw new Error(`Build ${builtBundlePath} before dependency evidence capture`);
 
 const evidenceBuild = await build({
   entryPoints: [entryPoint],
@@ -77,25 +136,19 @@ const evidenceBuild = await build({
   metafile: true,
   write: false,
 });
-
 if (!evidenceBuild.outputFiles?.length) throw new Error('Esbuild evidence rebuild produced no output');
 const rebuiltBundle = Buffer.from(evidenceBuild.outputFiles[0].contents);
 const builtBundle = fs.readFileSync(builtBundlePath);
 const builtBundleSha256 = sha256Bytes(builtBundle);
 const rebuiltBundleSha256 = sha256Bytes(rebuiltBundle);
-if (!builtBundle.equals(rebuiltBundle)) {
-  throw new Error(`Dependency-evidence rebuild does not byte-match shipped web bundle: built=${builtBundleSha256} rebuilt=${rebuiltBundleSha256}`);
-}
+if (!builtBundle.equals(rebuiltBundle)) throw new Error(`Dependency-evidence rebuild does not byte-match built web bundle: built=${builtBundleSha256} rebuilt=${rebuiltBundleSha256}`);
 
 const inputPaths = Object.keys(evidenceBuild.metafile?.inputs || {}).sort();
 const packageInputs = new Map();
 const projectInputs = [];
 for (const input of inputPaths) {
   const packageName = packageNameFromInput(input);
-  if (!packageName) {
-    projectInputs.push(input);
-    continue;
-  }
+  if (!packageName) { projectInputs.push(input); continue; }
   const paths = packageInputs.get(packageName) || [];
   paths.push(input);
   packageInputs.set(packageName, paths);
@@ -103,41 +156,37 @@ for (const input of inputPaths) {
 const bundledPackages = [...packageInputs.keys()].sort();
 const bundledPackageSet = new Set(bundledPackages);
 
-const audit = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['audit', '--json'], {
-  encoding: 'utf8',
-  maxBuffer: 32 * 1024 * 1024,
-});
-if (!audit.stdout?.trim()) {
-  throw new Error(`npm audit produced no JSON output (exit ${audit.status ?? 'unknown'}): ${String(audit.stderr || '').slice(0, 500)}`);
-}
-let auditJson;
-try {
-  auditJson = JSON.parse(audit.stdout);
-} catch (error) {
-  throw new Error(`npm audit output was not valid JSON: ${error instanceof Error ? error.message : String(error)}`);
+const committedLockAudit = normalizeAudit(
+  parseAuditResult(npmCommand(['audit', '--json']), 'COMMITTED_ROOT_LOCKFILE_AUDIT'),
+  bundledPackageSet,
+  packageInputs,
+);
+
+let installedHiddenLockAudit = { available: false, label: 'POST_INSTALL_HIDDEN_LOCK_AUDIT', error: 'node_modules/.package-lock.json unavailable' };
+if (fs.existsSync(packageLockPath) && fs.existsSync(hiddenLockPath)) {
+  const originalRootLock = fs.readFileSync(packageLockPath);
+  const hiddenLock = fs.readFileSync(hiddenLockPath);
+  try {
+    fs.writeFileSync(packageLockPath, hiddenLock);
+    installedHiddenLockAudit = normalizeAudit(
+      parseAuditResult(npmCommand(['audit', '--json', '--package-lock-only']), 'POST_INSTALL_HIDDEN_LOCK_AUDIT'),
+      bundledPackageSet,
+      packageInputs,
+    );
+  } finally {
+    fs.writeFileSync(packageLockPath, originalRootLock);
+  }
 }
 
-const vulnerabilities = Object.entries(auditJson.vulnerabilities || {}).sort(([a], [b]) => a.localeCompare(b)).map(([name, item]) => ({
-  name,
-  severity: item?.severity ?? null,
-  isDirect: item?.isDirect ?? null,
-  range: item?.range ?? null,
-  nodes: Array.isArray(item?.nodes) ? [...item.nodes].sort() : [],
-  fixAvailable: normalizeFixAvailable(item?.fixAvailable),
-  via: Array.isArray(item?.via) ? item.via.map(normalizeVia) : [],
-  esbuildInputMatch: bundledPackageSet.has(name),
-  matchedBundleInputPaths: packageInputs.get(name) || [],
-}));
-
-const packageLockPath = 'package-lock.json';
-const packageJsonPath = 'package.json';
+const exactInstalledTree = installedVersions();
+const npmVersionResult = npmCommand(['--version']);
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   status: 'EVIDENCE_CAPTURE_ONLY_NOT_A_SECURITY_CLEARANCE',
   variant,
   sourceCommit: process.env.GITHUB_SHA || null,
   nodeVersion: process.version,
-  npmVersion: null,
+  npmVersion: npmVersionResult.status === 0 ? String(npmVersionResult.stdout || '').trim() || null : null,
   exactBundleByteMatch: true,
   bundle: {
     entryPoint,
@@ -149,31 +198,31 @@ const report = {
     bundledPackages,
     packageInputs: Object.fromEntries([...packageInputs.entries()].sort(([a], [b]) => a.localeCompare(b))),
   },
-  audit: {
-    command: 'npm audit --json',
-    exitCode: audit.status,
-    metadata: auditJson.metadata ?? null,
-    vulnerabilityCount: vulnerabilities.length,
-    vulnerabilities,
-    exactPackageNameMatchesToEsbuildInputs: vulnerabilities.filter(item => item.esbuildInputMatch).map(item => item.name),
-    interpretationBoundary: 'esbuildInputMatch means the advisory package name appears in the exact byte-matched browser bundle input graph. A non-match is evidence about this JavaScript bundle only; it does not by itself prove a native shell, build tool, server, repository, or transitive security issue is irrelevant.',
+  exactInstalledTree,
+  audits: {
+    committedLockAudit,
+    installedHiddenLockAudit,
+    interpretationBoundary: 'The committed-lock audit and post-install hidden-lock audit are separate evidence surfaces. Only an available POST_INSTALL_HIDDEN_LOCK_AUDIT may be treated as advisory identity evidence for the current no-save installed tree. esbuildInputMatch means the advisory package name appears in the exact byte-matched Performance browser bundle input graph; it is not exploitability proof. A non-match does not clear native shells, build tools, servers, repository dependencies, or other transitive/platform risks.',
   },
   sourceIntegrity: {
     packageJsonSha256: fs.existsSync(packageJsonPath) ? sha256File(packageJsonPath) : null,
-    packageLockSha256: fs.existsSync(packageLockPath) ? sha256File(packageLockPath) : null,
+    committedPackageLockSha256: fs.existsSync(packageLockPath) ? sha256File(packageLockPath) : null,
+    postInstallHiddenLockSha256: fs.existsSync(hiddenLockPath) ? sha256File(hiddenLockPath) : null,
   },
   controls: [
-    'No dependency version is modified by this evidence capture.',
+    'No dependency version is modified in source control by this evidence capture.',
     'The evidence rebuild must byte-match the already-built Performance JavaScript bundle.',
-    'npm audit findings are preserved as evidence and are not automatically classified as exploitable or non-exploitable.',
+    'Committed-lock audit identities must not be mislabeled as post-install no-save audit identities.',
+    'An unavailable hidden-lock audit remains OPEN rather than being inferred from aggregate install counts.',
+    'npm advisory findings are evidence and are not automatically classified as exploitable or non-exploitable.',
     'No secret, token, password, signing material, or environment-variable value is intentionally recorded.',
     'Final signed-binary dependency, secret, and platform review remains a separate submission gate.',
   ],
 };
 
-const npmVersionResult = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--version'], { encoding: 'utf8' });
-if (npmVersionResult.status === 0) report.npmVersion = String(npmVersionResult.stdout || '').trim() || null;
-
 fs.mkdirSync(evidenceDir, { recursive: true });
 fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-console.log(`Paradise native dependency evidence captured for ${variant}: ${vulnerabilities.length} npm advisory package records; ${report.audit.exactPackageNameMatchesToEsbuildInputs.length} exact package-name matches in the byte-matched Performance browser bundle; report ${reportPath}.`);
+const postInstallSummary = installedHiddenLockAudit.available
+  ? `${installedHiddenLockAudit.vulnerabilityPackageCount} post-install advisory package records; ${installedHiddenLockAudit.exactPackageNameMatchesToEsbuildInputs.length} exact bundle matches`
+  : `post-install advisory identities unavailable (${installedHiddenLockAudit.error || 'unknown'})`;
+console.log(`Paradise native dependency evidence captured for ${variant}: exact bundle byte-match PASS; ${postInstallSummary}; report ${reportPath}.`);
