@@ -4,9 +4,9 @@ Status: **SUBMISSION PACKAGE PREP / NOT SUBMITTED / NOT PUBLICLY DISTRIBUTED**
 
 Date: 2026-08-19
 
-Stable validated application baseline entering this screenshot-readiness pass: `01778750b89817025d88f802608417dd155c7227`.
+Current stable validated application baseline: `662e0716fda60003bac3800712c8d2910c3aa10b`.
 
-Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at **78 / 76 / 2** with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `253d50eae5a4df2b83e5f70cf25e67b20412dd85`.
+Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at **78 / 76 / 2** with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `be6d5e388490af3cffb39c6e57bcad49fb39ff59`.
 
 ## Decision locked
 
@@ -27,8 +27,9 @@ The controlled repository now contains:
 - native-only `performance-dist` isolated from the public Canvass bundle;
 - trusted-device enrollment/session/revocation controls;
 - Performance Today `Start My Day` / `Finish Day` integration;
-- current native-store sync restricted to operational `EVENT` and `LOCATION` writes;
+- offline queued replay restricted to operational `EVENT` and `LOCATION` writes, while authoritative shift/workday state uses the separate controlled shift transport for start/finish state and configured workday fields;
 - dormant customer `SET` transport excluded from the current native store bundle;
+- reusable marketplace-review sign-in source architecture that can mint a fresh short-lived synthetic-device enrollment before ordinary trusted-device redemption; operational reviewer credentials remain blocked pending supported Auth-user provisioning and deployed end-to-end validation;
 - Android compile/target SDK 36 preparation;
 - unsigned Android Release AAB compilation;
 - iOS 26+ SDK validation;
@@ -40,7 +41,7 @@ The controlled repository now contains:
 - visually approved Apple and Google icon-review evidence;
 - no signing secrets committed to GitHub.
 
-Unsigned CI artifacts remain engineering evidence only and must not be distributed to employees.
+Unsigned CI artifacts remain engineering evidence only and must not be distributed to employees. Physical-device acceptance remains **OWNER-WAIVED / UNTESTED / NOT PASS** unless the release owner reverses that waiver and completes the hardware matrix.
 
 ## Brand package — closed
 
@@ -105,7 +106,7 @@ Required external additions before submission:
 
 - final approved privacy-policy URL;
 - final support/review contact;
-- final App Review account and trusted-device enrollment instructions;
+- final operational App Review credential and trusted-device enrollment instructions after supported Auth-user creation, exact administrator-controlled `app_metadata` readback, and deployed end-to-end validation;
 - final signed-build screenshots;
 - age-rating answers;
 - final app-privacy questionnaire.
@@ -130,16 +131,19 @@ Current controlled intent remains linked to the employee/user, used for app func
 
 ### E. Review access
 
+The reusable marketplace-review source path is implemented and validated in stable source. The review credential uses a separate non-persistent Auth client only to obtain a fresh short-lived one-time synthetic-device enrollment; the review client signs out before the ordinary trusted-device redemption/session flow begins. The reusable review account itself has no ordinary Performance actor identity.
+
+**Operational status remains NOT OPERATIONAL.** Before submission, Paradise must use a supported Supabase Auth admin path to create the reusable reviewer, confirm the exact administrator-controlled `app_metadata`, run the deployed reusable login → fresh one-time enrollment → ordinary trusted-device redemption path end to end, and store the final credential only in the real marketplace review consoles or another approved secret store.
+
 App Review must receive usable synthetic access instructions. Before submission, add:
 
 - review username/account;
 - approved review password/access mechanism;
-- exact trusted-device enrollment steps;
-- any controlled one-time token/QR step needed by the reviewer;
+- exact `APP REVIEW ACCESS` → fresh one-time enrollment → trusted-device redemption steps;
 - steps to reach Start My Day and Finish Day;
 - explanation that location starts from an employee action and is not advertising/tracking.
 
-Never place a live password, recovery code, signing key, or reusable secret in the repository or screenshot package.
+Never place a live password, recovery code, signing key, reusable review secret, or enrollment token in the repository or screenshot package.
 
 ### F. Unlisted request
 
@@ -170,7 +174,7 @@ Google states that **apps exclusively active on the Internal Testing track are e
 
 Use the controlled metadata package for the app name, short description, full description, support URL, approved icon, and screenshot plan.
 
-Google review must be able to access restricted functionality whenever the applicable Play workflow requires review access. Provide a synthetic review account and exact enrollment/trusted-device instructions. Do not claim the app is unrestricted.
+Google review must be able to access restricted functionality whenever the applicable Play workflow requires review access. Use the same controlled synthetic reusable-review architecture described above after supported Auth-user provisioning and deployed end-to-end validation. Do not claim the app is unrestricted or that reviewer access is operational before that validation passes.
 
 ### D. Foreground-service declaration
 
@@ -182,9 +186,9 @@ The Play Console declaration must truthfully describe:
 - why timely execution matters;
 - what happens if the service is interrupted;
 - the employee action that starts the workday/location flow;
-- a final-binary demonstration video URL when required by the applicable Play flow.
+- the final-binary demonstration video URL required by the current controlled Paradise Play release gate.
 
-Do not fabricate a video URL.
+Do not fabricate a video URL or treat the foreground-service evidence package as complete until the final signed binary is available and the real demonstration is recorded.
 
 ## Controlled screenshot plan
 
@@ -240,9 +244,9 @@ Actual employee-installable distribution remains blocked on:
 3. protected production signing configuration;
 4. approved substantive employee-app privacy-policy URL;
 5. approved retention and workforce-location notice language;
-6. final review accounts/enrollment instructions where required;
+6. operational reusable review credential: supported Auth-user provisioning, exact `app_metadata` readback, deployed end-to-end validation, and final review-console storage;
 7. final signed-build screenshot set;
-8. Google foreground-service demonstration video where required by the applicable Play submission flow;
+8. final signed-binary Google location foreground-service demonstration video and declaration evidence;
 9. final App Store privacy-answer review;
 10. successful official-store review/processing and explicit release authorization.
 
