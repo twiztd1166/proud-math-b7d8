@@ -1,0 +1,95 @@
+name: Validate Paradise native dependency evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'performance/client/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/build-performance-native-site.mjs'
+      - 'scripts/capture-paradise-native-dependency-evidence.mjs'
+      - '.github/workflows/validate-paradise-native-dependency-evidence.yml'
+  push:
+    branches:
+      - agent/paradise-native-dependency-evidence-v1
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'performance/client/**'
+      - 'scripts/build-canvass-site.mjs'
+      - 'scripts/build-performance-native-site.mjs'
+      - 'scripts/capture-paradise-native-dependency-evidence.mjs'
+      - '.github/workflows/validate-paradise-native-dependency-evidence.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-native-dependency-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CAPACITOR_VERSION: '8.5.0'
+  SUPABASE_JS_VERSION: '2.112.3'
+  ESBUILD_VERSION: '0.28.2'
+  SHARP_VERSION: '0.35.3'
+
+jobs:
+  dependency-evidence:
+    name: Dependency evidence — ${{ matrix.variant }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: controls
+            os: ubuntu-latest
+            extra_packages: ''
+          - variant: android
+            os: ubuntu-latest
+            extra_packages: '@capacitor/cli@8.5.0 @capacitor/android@8.5.0'
+          - variant: ios
+            os: macos-latest
+            extra_packages: '@capacitor/cli@8.5.0 @capacitor/ios@8.5.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Install exact pinned native dependency set
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false \
+            @capacitor/core@${CAPACITOR_VERSION} \
+            @supabase/supabase-js@${SUPABASE_JS_VERSION} \
+            esbuild@${ESBUILD_VERSION} \
+            sharp@${SHARP_VERSION} \
+            ${{ matrix.extra_packages }}
+
+      - name: Build controlled public Canvass bundle
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Build controlled native Performance bundle
+        run: node scripts/build-performance-native-site.mjs
+
+      - name: Capture byte-matched dependency and npm-audit evidence
+        run: node scripts/capture-paradise-native-dependency-evidence.mjs --variant ${{ matrix.variant }}
+
+      - name: Upload dependency evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: paradise-performance-${{ matrix.variant }}-dependency-evidence-NOT-A-SECURITY-CLEARANCE
+          path: store-build/paradise-performance/dependency-evidence/${{ matrix.variant }}/dependency-evidence.json
+          if-no-files-found: error
+          retention-days: 7
