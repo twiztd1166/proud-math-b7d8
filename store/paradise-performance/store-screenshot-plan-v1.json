@@ -3,8 +3,16 @@
   "status": "CONTROLLED_CAPTURE_PLAN_NOT_YET_CAPTURED",
   "app": "Paradise Performance",
   "bundleId": "com.paradiseexteriors.performance",
-  "validatedApplicationBaseline": "01778750b89817025d88f802608417dd155c7227",
-  "publicMetadataBaseline": "253d50eae5a4df2b83e5f70cf25e67b20412dd85",
+  "provenance": {
+    "runtimeBehaviorBaselineEnteringEvidencePlan": "662e0716fda60003bac3800712c8d2910c3aa10b",
+    "releaseSourceAtPlanAuthoring": "c84bc51d9beb1cda0e27f92f746b5219997e871c",
+    "publicMetadataAtPlanAuthoring": "efc7fa075bb820b7796d7fb99e82864a36023c35",
+    "currentReleaseSourceAuthorityAtCapture": [
+      "paradise-canvass-manager-validated",
+      "latest.json"
+    ],
+    "captureRule": "Record the exact then-current validated release-source SHA and signed-candidate artifact SHA-256 with every final screenshot. Do not repin this plan solely because documentation-only release-source SHAs advance."
+  },
   "captureAuthority": {
     "finalScreenshotsRequireSignedCandidate": true,
     "unsignedCiShellMayBeUsedAsFinalScreenshotSource": false,
@@ -21,7 +29,10 @@
       "width": 1320,
       "height": 2868
     },
-    "format": ["PNG", "JPEG"],
+    "format": [
+      "PNG",
+      "JPEG"
+    ],
     "alphaAllowed": false,
     "minimumScreenshots": 1,
     "maximumScreenshots": 10,
@@ -37,7 +48,10 @@
       "height": 1920
     },
     "aspectRatio": "9:16",
-    "format": ["24-bit PNG", "JPEG"],
+    "format": [
+      "24-bit PNG",
+      "JPEG"
+    ],
     "alphaAllowed": false,
     "minimumScreenshotsAcrossDeviceTypes": 2,
     "maximumPhoneScreenshots": 8,
@@ -101,6 +115,7 @@
   ],
   "preCaptureReadback": [
     "exact signed binary version/build/bundle ID matches controlled release",
+    "exact current validated release-source SHA and signed-candidate artifact SHA-256 are recorded",
     "iOS build metadata reports iPhone device family only",
     "approved Paradise icon is present in the signed binary",
     "synthetic review account is active and contains no production data",
@@ -113,6 +128,6 @@
     "no stretching, distortion or invented UI",
     "visual sequence tells the same six-state story on both platforms where the UI is equivalent",
     "every screenshot is visually compared to the exact signed candidate UI",
-    "SHA-256 and source build identity are recorded for each final screenshot"
+    "SHA-256, exact signed-candidate artifact SHA-256 and exact validated release-source SHA at capture time are recorded for each final screenshot"
   ]
 }
