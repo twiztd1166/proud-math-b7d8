@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "status": "CONTROLLED_FINAL_BINARY_EVIDENCE_PLAN_NOT_YET_CAPTURED",
+  "app": {
+    "name": "Paradise Performance",
+    "bundleId": "com.paradiseexteriors.performance",
+    "version": "1.0.0",
+    "build": "1"
+  },
+  "provenance": {
+    "runtimeBehaviorBaselineEnteringEvidencePlan": "662e0716fda60003bac3800712c8d2910c3aa10b",
+    "releaseSourceAtPlanAuthoring": "c84bc51d9beb1cda0e27f92f746b5219997e871c",
+    "publicMetadataAtPlanAuthoring": "efc7fa075bb820b7796d7fb99e82864a36023c35",
+    "currentReleaseSourceAuthorityAtCapture": [
+      "paradise-canvass-manager-validated",
+      "latest.json"
+    ],
+    "captureRule": "At capture time, record the exact then-current validated release-source SHA and public metadata SHA from the authoritative release controls. Do not repin this plan merely because documentation-only release-source SHAs advance."
+  },
+  "captureAuthority": {
+    "finalProductionSignedCandidateRequired": true,
+    "unsignedCiCandidateMaySatisfyFinalEvidence": false,
+    "simulatorOnlyMaySatisfyFinalEvidence": false,
+    "syntheticReviewDataRequired": true,
+    "productionEmployeeOrCustomerDataAllowed": false,
+    "credentialsOrSigningSecretsMayBeStoredInRepository": false,
+    "physicalAcceptanceWaiverDoesNotConvertEvidenceCaptureToPass": true,
+    "finalEvidenceStatusMustRemainNotCapturedUntilArtifactsAndReadbacksExist": true
+  },
+  "signedCandidateIdentity": {
+    "status": "NOT_CAPTURED",
+    "required": [
+      "platform",
+      "exact validated release-source SHA at capture time",
+      "public metadata SHA at capture time",
+      "version",
+      "build/versionCode",
+      "bundle/package ID",
+      "signed artifact filename",
+      "signed artifact SHA-256",
+      "non-secret signing certificate/team identity or certificate fingerprint",
+      "capture timestamp"
+    ],
+    "forbidden": [
+      "private signing key",
+      "certificate private key",
+      "p12 contents or password",
+      "keystore contents or password",
+      "Apple API private key",
+      "Google Play service-account private key",
+      "Supabase service-role/secret key",
+      "reviewer password or recovery value"
+    ]
+  },
+  "appleFinalBinaryReadback": {
+    "status": "NOT_CAPTURED",
+    "required": [
+      "signed archive/app identity matches com.paradiseexteriors.performance version 1.0.0 build 1 unless separately controlled",
+      "compiled UIDeviceFamily remains [1]",
+      "TARGETED_DEVICE_FAMILY remains 1",
+      "PrivacyInfo.xcprivacy is present in the submitted signed candidate",
+      "final privacy-manifest/data-flow review remains consistent with Precise Location, Coarse Location, User ID, Device ID and Other Data Types unless the binary changes",
+      "location authorization remains When In Use; do not claim Always authorization",
+      "background location behavior remains limited to an already employee-started active workday",
+      "approved Paradise icon is present",
+      "final six-state screenshots are captured from this exact signed candidate under the controlled screenshot plan"
+    ]
+  },
+  "androidFinalBinaryReadback": {
+    "status": "NOT_CAPTURED",
+    "required": [
+      "signed Android App Bundle identity matches com.paradiseexteriors.performance version 1.0.0 build/versionCode 1 unless separately controlled",
+      "target SDK remains API 36 for this release",
+      "manifest contains ACCESS_COARSE_LOCATION and ACCESS_FINE_LOCATION",
+      "manifest contains FOREGROUND_SERVICE and FOREGROUND_SERVICE_LOCATION",
+      "PerformanceLocationService declares foregroundServiceType=location",
+      "manifest does not request ACCESS_BACKGROUND_LOCATION",
+      "approved Paradise launcher icon is present",
+      "final phone screenshots are captured from this exact signed candidate under the controlled screenshot plan",
+      "Google Play location foreground-service declaration demonstration is captured from this exact signed candidate"
+    ]
+  },
+  "googlePlayForegroundServiceDemonstration": {
+    "status": "NOT_CAPTURED",
+    "videoUrl": "BLOCKED_PENDING_FINAL_BINARY_DEMONSTRATION_VIDEO_URL",
+    "purpose": "Demonstrate the user-initiated location foreground-service use case implemented by the exact signed Android candidate without exposing real employee/customer data.",
+    "preconditions": [
+      "final production-signed Android candidate is installed",
+      "synthetic review credential/device access is operational",
+      "no real employee, customer, route, address, phone, pay or precise production-location data is visible",
+      "screen recording excludes passwords, one-time tokens, QR secrets, recovery values and signing credentials",
+      "device/system time and notification surface are visible enough to establish sequence"
+    ],
+    "requiredSequence": [
+      {
+        "order": 1,
+        "id": "pre-shift",
+        "proof": "Show Paradise Performance before Start My Day with no active workday and no Paradise location foreground-service notification."
+      },
+      {
+        "order": 2,
+        "id": "user-start",
+        "proof": "From the visible app foreground, the synthetic employee intentionally invokes Start My Day. If location or notification permission is not already granted, show the system permission flow without exposing unrelated device data."
+      },
+      {
+        "order": 3,
+        "id": "active-notification",
+        "proof": "Show the active-workday state and the visible Paradise Performance foreground-service notification indicating shift location is active."
+      },
+      {
+        "order": 4,
+        "id": "background",
+        "proof": "Background the app while the active workday remains in progress and show that the visible foreground-service notification remains present."
+      },
+      {
+        "order": 5,
+        "id": "lock-unlock",
+        "proof": "Where the review device permits clean recording, lock and unlock the device during the active workday and show the foreground-service notification remains associated with the active shift. This step proves the intended user-visible service state, not a blanket physical-device acceptance PASS."
+      },
+      {
+        "order": 6,
+        "id": "return-active",
+        "proof": "Return to Paradise Performance and show the same active workday still in progress. Do not expose precise synthetic coordinates unless needed for the declaration."
+      },
+      {
+        "order": 7,
+        "id": "finish-day",
+        "proof": "Invoke Finish Day from the app and show the completed-workday state."
+      },
+      {
+        "order": 8,
+        "id": "service-stopped",
+        "proof": "Show that the Paradise Performance location foreground-service notification is removed after Finish Day/stop. Attach a redacted platform readback if needed to prove the service/location updates stopped."
+      }
+    ],
+    "separateTechnicalReadback": [
+      "signed-candidate manifest proves no ACCESS_BACKGROUND_LOCATION",
+      "signed-candidate manifest proves foregroundServiceType=location",
+      "signed-candidate target SDK is 36",
+      "signed artifact SHA-256 and non-secret signing identity/fingerprint are recorded"
+    ],
+    "failureRule": "If any required step cannot be demonstrated on the exact signed candidate, keep the video URL BLOCKED and do not submit the foreground-service declaration as complete."
+  },
+  "screenshotEvidence": {
+    "status": "NOT_CAPTURED",
+    "plan": "store/paradise-performance/store-screenshot-plan-v1.json",
+    "requiredPerArtifact": [
+      "platform",
+      "story state ID",
+      "pixel dimensions",
+      "file format",
+      "SHA-256",
+      "exact signed-candidate artifact SHA-256",
+      "exact validated release-source SHA at capture time",
+      "synthetic-data confirmation",
+      "visual QC confirmation"
+    ]
+  },
+  "reviewAccessEvidence": {
+    "status": "BLOCKED_PENDING_SUPPORTED_REVIEW_AUTH_USER_AND_E2E",
+    "manifest": "store/paradise-performance/store-review-access-v1.json",
+    "requiredBeforeStoreSubmission": [
+      "supported Supabase Auth reviewer user exists",
+      "administrator-controlled app_metadata exactly matches the controlled synthetic review employee and issuer",
+      "deployed reusable sign-in -> review mint -> fresh one-time enrollment -> ordinary trusted-device redemption succeeds",
+      "review credential is stored only in the real Apple/Google review consoles or another approved secret channel",
+      "no reviewer credential is committed to repository or Drive"
+    ]
+  },
+  "artifactRegister": {
+    "status": "EMPTY_UNTIL_CAPTURE",
+    "rule": "Final evidence artifacts must be registered only after capture/readback with filename, platform, purpose, SHA-256, exact signed-candidate SHA-256, source release SHA and capture timestamp. Do not pre-populate successful evidence."
+  }
+}
