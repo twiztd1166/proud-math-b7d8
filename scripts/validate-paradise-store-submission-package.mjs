@@ -2,15 +2,17 @@ import fs from 'node:fs';
 
 const metadataPath = 'store/paradise-performance/store-metadata-v1.json';
 const screenshotPlanPath = 'store/paradise-performance/store-screenshot-plan-v1.json';
+const finalEvidencePlanPath = 'store/paradise-performance/store-final-binary-evidence-plan-v1.json';
 const privacyDraftPath = 'docs/PARADISE_PERFORMANCE_EMPLOYEE_APP_PRIVACY_NOTICE_DRAFT_2026-08-19.md';
 const runbookPath = 'docs/PARADISE_NATIVE_STORE_SUBMISSION_RUNBOOK_V1.md';
 
-for (const path of [metadataPath, screenshotPlanPath, privacyDraftPath, runbookPath]) {
+for (const path of [metadataPath, screenshotPlanPath, finalEvidencePlanPath, privacyDraftPath, runbookPath]) {
   if (!fs.existsSync(path)) throw new Error(`Missing required store submission file: ${path}`);
 }
 
 const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
 const screenshotPlan = JSON.parse(fs.readFileSync(screenshotPlanPath, 'utf8'));
+const finalEvidencePlan = JSON.parse(fs.readFileSync(finalEvidencePlanPath, 'utf8'));
 const privacyDraft = fs.readFileSync(privacyDraftPath, 'utf8');
 const runbook = fs.readFileSync(runbookPath, 'utf8');
 
@@ -65,6 +67,55 @@ assert(Array.isArray(screenshotPlan.story) && screenshotPlan.story.length === 6,
 assert(screenshotPlan.captureAuthority?.finalScreenshotsRequireSignedCandidate === true, 'Final screenshots must remain blocked on the signed candidate');
 assert(screenshotPlan.captureAuthority?.syntheticReviewDataRequired === true, 'Synthetic review data must remain required');
 assert(screenshotPlan.captureAuthority?.realProductionEmployeeOrCustomerDataAllowed === false, 'Production PII must remain forbidden in screenshots');
+assert(screenshotPlan.provenance?.runtimeBehaviorBaselineEnteringEvidencePlan === '662e0716fda60003bac3800712c8d2910c3aa10b', 'Screenshot runtime-behavior baseline drift');
+assert(screenshotPlan.provenance?.releaseSourceAtPlanAuthoring === 'c84bc51d9beb1cda0e27f92f746b5219997e871c', 'Screenshot plan authoring release-source drift');
+assert(screenshotPlan.provenance?.publicMetadataAtPlanAuthoring === 'efc7fa075bb820b7796d7fb99e82864a36023c35', 'Screenshot plan authoring metadata drift');
+assert(screenshotPlan.provenance?.currentReleaseSourceAuthorityAtCapture?.includes('paradise-canvass-manager-validated'), 'Screenshot capture must resolve the current validated release-source');
+assert(screenshotPlan.provenance?.currentReleaseSourceAuthorityAtCapture?.includes('latest.json'), 'Screenshot capture must resolve latest.json');
+assert(!('validatedApplicationBaseline' in screenshotPlan), 'Screenshot plan must not reintroduce a self-referential current application SHA field');
+assert(!('publicMetadataBaseline' in screenshotPlan), 'Screenshot plan must not reintroduce a self-referential current metadata SHA field');
+assert(screenshotPlan.preCaptureReadback?.some(value => value.includes('signed-candidate artifact SHA-256')), 'Screenshot plan must bind capture to the exact signed artifact');
+
+assert(finalEvidencePlan.status === 'CONTROLLED_FINAL_BINARY_EVIDENCE_PLAN_NOT_YET_CAPTURED', 'Final-binary evidence plan must remain explicitly not captured');
+assert(finalEvidencePlan.app?.bundleId === 'com.paradiseexteriors.performance', 'Final-binary evidence app identity drift');
+assert(finalEvidencePlan.app?.version === '1.0.0' && finalEvidencePlan.app?.build === '1', 'Final-binary evidence version/build drift');
+assert(finalEvidencePlan.provenance?.runtimeBehaviorBaselineEnteringEvidencePlan === '662e0716fda60003bac3800712c8d2910c3aa10b', 'Final-binary evidence runtime baseline drift');
+assert(finalEvidencePlan.provenance?.releaseSourceAtPlanAuthoring === 'c84bc51d9beb1cda0e27f92f746b5219997e871c', 'Final-binary evidence authoring release-source drift');
+assert(finalEvidencePlan.provenance?.publicMetadataAtPlanAuthoring === 'efc7fa075bb820b7796d7fb99e82864a36023c35', 'Final-binary evidence authoring metadata drift');
+assert(finalEvidencePlan.provenance?.currentReleaseSourceAuthorityAtCapture?.includes('paradise-canvass-manager-validated'), 'Final evidence capture must resolve the current validated branch');
+assert(finalEvidencePlan.provenance?.currentReleaseSourceAuthorityAtCapture?.includes('latest.json'), 'Final evidence capture must resolve latest.json');
+assert(finalEvidencePlan.captureAuthority?.finalProductionSignedCandidateRequired === true, 'Final evidence must require a production-signed candidate');
+assert(finalEvidencePlan.captureAuthority?.unsignedCiCandidateMaySatisfyFinalEvidence === false, 'Unsigned CI candidates must not satisfy final evidence');
+assert(finalEvidencePlan.captureAuthority?.simulatorOnlyMaySatisfyFinalEvidence === false, 'Simulator-only evidence must not satisfy final evidence');
+assert(finalEvidencePlan.captureAuthority?.syntheticReviewDataRequired === true, 'Final evidence must require synthetic review data');
+assert(finalEvidencePlan.captureAuthority?.productionEmployeeOrCustomerDataAllowed === false, 'Final evidence must forbid production employee/customer data');
+assert(finalEvidencePlan.captureAuthority?.credentialsOrSigningSecretsMayBeStoredInRepository === false, 'Final evidence must forbid repository credential/signing-secret storage');
+assert(finalEvidencePlan.captureAuthority?.physicalAcceptanceWaiverDoesNotConvertEvidenceCaptureToPass === true, 'Evidence capture must not convert the hardware waiver into PASS');
+assert(finalEvidencePlan.signedCandidateIdentity?.status === 'NOT_CAPTURED', 'Signed-candidate identity must remain not captured until real evidence exists');
+assert(finalEvidencePlan.appleFinalBinaryReadback?.status === 'NOT_CAPTURED', 'Apple final-binary readback must remain not captured');
+assert(finalEvidencePlan.androidFinalBinaryReadback?.status === 'NOT_CAPTURED', 'Android final-binary readback must remain not captured');
+assert(finalEvidencePlan.screenshotEvidence?.status === 'NOT_CAPTURED', 'Screenshot evidence register must remain not captured');
+assert(finalEvidencePlan.reviewAccessEvidence?.status?.startsWith('BLOCKED_'), 'Review-access evidence must remain blocked until operational E2E exists');
+assert(finalEvidencePlan.artifactRegister?.status === 'EMPTY_UNTIL_CAPTURE', 'Final evidence artifact register must remain empty until capture');
+
+const fgs = finalEvidencePlan.googlePlayForegroundServiceDemonstration;
+assert(fgs?.status === 'NOT_CAPTURED', 'Google Play FGS demonstration must remain not captured');
+assert(fgs?.videoUrl?.startsWith('BLOCKED_'), 'Google Play FGS video URL must fail closed until real final-binary evidence exists');
+assert(Array.isArray(fgs?.requiredSequence) && fgs.requiredSequence.length === 8, 'Google Play FGS evidence must preserve the controlled eight-step sequence');
+const fgsStepIds = fgs.requiredSequence.map(step => step.id);
+for (const requiredStep of ['pre-shift', 'user-start', 'active-notification', 'background', 'lock-unlock', 'return-active', 'finish-day', 'service-stopped']) {
+  assert(fgsStepIds.includes(requiredStep), `Missing Google Play FGS demonstration step: ${requiredStep}`);
+}
+assert(fgs.requiredSequence.find(step => step.id === 'user-start')?.proof.includes('Start My Day'), 'FGS evidence must prove employee foreground initiation');
+assert(fgs.requiredSequence.find(step => step.id === 'active-notification')?.proof.includes('foreground-service notification'), 'FGS evidence must prove the visible active-shift notification');
+assert(fgs.requiredSequence.find(step => step.id === 'background')?.proof.includes('Background the app'), 'FGS evidence must prove the active service while the app is backgrounded');
+assert(fgs.requiredSequence.find(step => step.id === 'finish-day')?.proof.includes('Finish Day'), 'FGS evidence must prove employee Finish Day');
+assert(fgs.requiredSequence.find(step => step.id === 'service-stopped')?.proof.includes('notification is removed'), 'FGS evidence must prove the foreground service stops');
+assert(finalEvidencePlan.androidFinalBinaryReadback?.required?.some(value => value.includes('does not request ACCESS_BACKGROUND_LOCATION')), 'Android final-binary evidence must prove no ACCESS_BACKGROUND_LOCATION');
+assert(finalEvidencePlan.androidFinalBinaryReadback?.required?.some(value => value.includes('FOREGROUND_SERVICE_LOCATION')), 'Android final-binary evidence must prove FOREGROUND_SERVICE_LOCATION');
+assert(finalEvidencePlan.androidFinalBinaryReadback?.required?.some(value => value.includes('foregroundServiceType=location')), 'Android final-binary evidence must prove foregroundServiceType=location');
+assert(finalEvidencePlan.androidFinalBinaryReadback?.required?.some(value => value.includes('target SDK remains API 36')), 'Android final-binary evidence must prove target SDK 36');
+assert(finalEvidencePlan.screenshotEvidence?.plan === screenshotPlanPath, 'Final-binary evidence must reference the controlled screenshot plan');
 
 assert(metadata.app.privacyPolicyUrl.startsWith('BLOCKED_'), 'Do not silently promote the current website privacy page to final app privacy policy');
 assert(metadata.apple.reviewAccount.startsWith('BLOCKED_'), 'Apple review account must fail closed until configured');
@@ -111,7 +162,7 @@ assert(runbook.includes('Lookup field/legal instruction view'), 'Screenshot plan
 assert(runbook.includes('Finish Day / completed-workday state'), 'Screenshot plan must use the real Finish Day v1 surface');
 assert(!runbook.includes('Performance/progress view showing only configured/authorized information'), 'Screenshot plan must not imply an unavailable generic KPI/performance screen');
 
-const serialized = JSON.stringify(metadata) + '\n' + JSON.stringify(screenshotPlan) + '\n' + privacyDraft + '\n' + runbook;
+const serialized = JSON.stringify(metadata) + '\n' + JSON.stringify(screenshotPlan) + '\n' + JSON.stringify(finalEvidencePlan) + '\n' + privacyDraft + '\n' + runbook;
 const forbiddenSecretPatterns = [
   /BEGIN PRIVATE KEY/i,
   /BEGIN CERTIFICATE/i,
