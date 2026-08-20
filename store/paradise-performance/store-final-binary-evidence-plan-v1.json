@@ -58,8 +58,11 @@
       "signed archive/app identity matches com.paradiseexteriors.performance version 1.0.0 build 1 unless separately controlled",
       "compiled UIDeviceFamily remains [1]",
       "TARGETED_DEVICE_FAMILY remains 1",
+      "actual minimum supported iOS version / deployment target is read from the final generated and signed candidate and recorded; do not infer it from the iOS 26+ build SDK requirement",
       "PrivacyInfo.xcprivacy is present in the submitted signed candidate",
       "final privacy-manifest/data-flow review remains consistent with Precise Location, Coarse Location, User ID, Device ID and Other Data Types unless the binary changes",
+      "exact final NSLocationWhenInUseUsageDescription is read back from the signed candidate and reconciled to the approved employee-facing location wording",
+      "final UIBackgroundModes readback includes location; any additional background modes require explicit reconciliation",
       "location authorization remains When In Use; do not claim Always authorization",
       "background location behavior remains limited to an already employee-started active workday",
       "approved Paradise icon is present",
@@ -71,7 +74,9 @@
     "required": [
       "signed Android App Bundle identity matches com.paradiseexteriors.performance version 1.0.0 build/versionCode 1 unless separately controlled",
       "target SDK remains API 36 for this release",
+      "actual minSdkVersion / minimum supported Android version is read from the final generated and signed candidate and recorded; do not infer it from the generated Capacitor toolchain default",
       "manifest contains ACCESS_COARSE_LOCATION and ACCESS_FINE_LOCATION",
+      "manifest contains POST_NOTIFICATIONS",
       "manifest contains FOREGROUND_SERVICE and FOREGROUND_SERVICE_LOCATION",
       "PerformanceLocationService declares foregroundServiceType=location",
       "manifest does not request ACCESS_BACKGROUND_LOCATION",
@@ -79,6 +84,17 @@
       "final phone screenshots are captured from this exact signed candidate under the controlled screenshot plan",
       "Google Play location foreground-service declaration demonstration is captured from this exact signed candidate"
     ]
+  },
+  "signedCandidateSecurityAndDependencyEvidence": {
+    "status": "NOT_CAPTURED",
+    "requiredPerPlatform": [
+      "final signed-candidate SDK, native framework/library, and packaged dependency inventory is captured from the exact signed artifact or its exact signed-build outputs",
+      "final signed-candidate secret scan is performed and confirms no privileged Supabase/service-role key, signing private key, reviewer credential, or other release secret is packaged in the candidate",
+      "final provider/network-destination review is reconciled to the production privacy/service-provider inventory; any provider beyond the approved release inventory remains a blocker until reviewed",
+      "dependency/advisory findings are recorded with scope and exploitability boundaries; do not convert repository or build-tool audit counts into a zero-vulnerability or final-binary safety claim",
+      "evidence is bound to the exact signed artifact SHA-256, validated release-source SHA, platform, and capture timestamp"
+    ],
+    "failureRule": "If the exact signed candidate cannot be inspected sufficiently to complete the required dependency, secret, and provider/network review, keep this section NOT_CAPTURED and do not mark the final production-binary gate complete."
   },
   "googlePlayForegroundServiceDemonstration": {
     "status": "NOT_CAPTURED",
@@ -137,6 +153,7 @@
       "signed-candidate manifest proves no ACCESS_BACKGROUND_LOCATION",
       "signed-candidate manifest proves foregroundServiceType=location",
       "signed-candidate target SDK is 36",
+      "signed-candidate minSdkVersion is recorded",
       "signed artifact SHA-256 and non-secret signing identity/fingerprint are recorded"
     ],
     "failureRule": "If any required step cannot be demonstrated on the exact signed candidate, keep the video URL BLOCKED and do not submit the foreground-service declaration as complete."
