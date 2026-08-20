@@ -4,9 +4,9 @@ Status: **SUBMISSION PACKAGE PREP / NOT SUBMITTED / NOT PUBLICLY DISTRIBUTED**
 
 Date: 2026-08-19
 
-Current stable validated application baseline: `662e0716fda60003bac3800712c8d2910c3aa10b`.
+Runtime-behavior baseline entering this documentation synchronization: `662e0716fda60003bac3800712c8d2910c3aa10b`.
 
-Controlled publication is complete: `paradise-canvass-manager-validated` pins that exact application SHA, and public `latest.json` independently pins it at **78 / 76 / 2** with zero dataset, jurisdiction, or classification drift. The public publisher metadata commit is `be6d5e388490af3cffb39c6e57bcad49fb39ff59`.
+The corresponding controlled publication before this docs-only synchronization was complete: `paradise-canvass-manager-validated` pinned that runtime-behavior baseline, public `latest.json` independently pinned **78 / 76 / 2** with zero dataset, jurisdiction, or classification drift, and the publisher metadata commit was `be6d5e388490af3cffb39c6e57bcad49fb39ff59`. Documentation-only revisions may advance the release-source SHA without changing that runtime behavior. For the current release-source identity, use `paradise-canvass-manager-validated` and public `latest.json` rather than treating this historical runtime-baseline line as a self-referential source pin.
 
 ## Decision locked
 
