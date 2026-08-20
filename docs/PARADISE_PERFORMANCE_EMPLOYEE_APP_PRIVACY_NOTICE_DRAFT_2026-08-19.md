@@ -20,13 +20,17 @@ Depending on the functions an authorized employee uses, the app may process or t
 
 - employee or user account identifiers;
 - trusted-device identifiers and device/platform metadata;
-- active shift or workday identifiers;
-- timestamps associated with work activity;
+- authoritative active-shift/workday records, which can include employee/device linkage, start and finish timestamps, active/finished status, optional territory identifier when supplied, door and conversation counts, break duration, and start/end location fields when available;
+- operational event records and timestamps associated with work activity;
 - precise or approximate device location while an employee has intentionally started an active workday/location-tracking session;
 - location accuracy;
 - where supplied by the device, altitude, speed, heading, and indicators that location may be simulated or mocked;
 - operational route or workday evidence derived from employee activity;
-- app interaction or synchronization information necessary to operate, secure, troubleshoot, or reconcile the employee session.
+- synchronization, authentication, security, or reconciliation information necessary to operate and protect the employee session.
+
+The current submitted-v1 architecture uses two distinct operational paths: authoritative shift/workday state is written through the controlled shift transport, while the offline replay queue accepts operational `EVENT` and `LOCATION` records only. The queue limitation should not be read as meaning shift/workday records are not stored.
+
+The current native store v1 does **not** enable customer `SET` writes, Quick Set, generic KPI/pay values, compensation formulas, or future sale/outcome records as active employee-app collection paths. If a later release enables those capabilities, Paradise must re-review the privacy notice, store declarations, access controls, and retention rules before that release.
 
 The current controlled native design does **not** request Android `ACCESS_BACKGROUND_LOCATION`. Android workday location is designed to run through a user-started foreground location service with a visible notification. On iPhone, the app requests When In Use location permission from the visible employee flow and may continue location updates during the employee-started active workday while the app is backgrounded, with the platform's background-location indication enabled.
 
@@ -36,7 +40,7 @@ Location tracking is designed to begin only when an authorized employee intentio
 
 Ordinary app launch alone is not intended to start an active workday location session.
 
-The native layer is designed to stop active tracking when the controlled workday/session is stopped or otherwise ended according to the application controls.
+The native layer is designed to stop active tracking when the controlled workday/session is stopped or otherwise ended according to the application controls. The current release control does not treat physical-device stop/off-shift behavior as proven: hardware acceptance remains **OWNER-WAIVED / UNTESTED / NOT PASS** unless Paradise later authorizes and completes the physical-device matrix.
 
 ## 4. Why Paradise uses this information
 
@@ -59,13 +63,20 @@ The controlled Paradise Performance design is not intended to use employee data 
 
 The current iOS privacy manifest is designed to declare no advertising/cross-company tracking use.
 
-If the final production app later adds an analytics, advertising, attribution, crash-reporting, or other third-party SDK that changes the data flow, this notice and the App Store/Google Play privacy disclosures must be re-reviewed before release.
+Operational Start/Finish workday records and other workday evidence should not be described as general user-interface analytics merely because an employee used a button to create the operational record. If the final production app later adds separately retained interaction analytics, advertising, attribution, crash-reporting, or another third-party SDK that changes the data flow, this notice and the App Store/Google Play privacy disclosures must be re-reviewed before release.
 
 ## 6. Service providers and disclosures
 
 Paradise may use service providers that operate infrastructure necessary to provide the application, such as hosting, authentication, database, synchronization, security, or distribution services. Service providers should receive information only as necessary to provide their contracted service and subject to applicable company agreements and controls.
 
-Current controlled backend infrastructure includes a Paradise-managed Supabase project for the Performance application foundation.
+Known current Performance data-platform services include:
+
+- **Supabase Auth** for authentication and session functions;
+- **Supabase Edge Functions** for controlled server-side enrollment, review-access, and security operations;
+- **Supabase Postgres** for central Performance data storage;
+- Supabase authorization and row-level-security controls for access enforcement.
+
+Before publication, Paradise must reconcile this list against the final signed binary, integrated SDK/dependency inventory, network destinations, and any additional production provider that receives or processes employee-app data. Do not name a map or other provider that is not actually present in the submitted binary.
 
 This draft does not authorize sale of employee data or disclosure to data brokers.
 
@@ -75,18 +86,20 @@ Paradise may also disclose information when required by law, legal process, or a
 
 **FINAL RETENTION POLICY NOT YET APPROVED.**
 
-Before publication, Paradise must replace this section with an approved retention rule addressing at minimum:
+Before publication, Paradise must replace this section with approved retention rules addressing at minimum:
 
-- active-workday/location records;
-- device-enrollment and revocation records;
-- authentication/session records;
+- detailed active-workday/location points;
+- authoritative shift/workday and operational event records;
+- device-enrollment, last-seen, revocation, and trusted-device records;
+- authentication/session/security/audit records;
 - operational performance records;
-- training/progress records;
-- backups and logs;
+- training/progress records where centrally retained;
+- backups, disaster-recovery copies, and logs;
+- deletion propagation after primary-record deletion;
 - legal-hold or investigation exceptions;
 - deletion/anonymization after the approved retention period.
 
-No retention duration should be represented in a store submission until it is approved and matches actual production behavior.
+No retention duration should be represented in a store submission until it is approved and matches actual production behavior. Do not infer a retention period for dormant/future features that are not part of the current native store-v1 collection path.
 
 ## 8. Employee choices and device controls
 
@@ -96,11 +109,15 @@ An employee should not be represented as consenting to unrelated advertising or 
 
 The trusted-device system may allow Paradise to revoke an authorized device or employee session as part of security and access control.
 
+Employees should receive approved workforce-location/monitoring language explaining that location may continue while the phone is locked or the app is backgrounded during an employee-started active workday, and that Paradise Performance is not intended to collect live off-shift location. The final delivery, acknowledgment, consent, and policy-cross-reference process remains subject to HR/counsel/management approval.
+
 ## 9. Security
 
-Paradise uses technical and administrative controls intended to restrict the employee application to authorized users and trusted devices. The controlled foundation includes enrollment, session, revocation, and row-level access controls.
+Paradise uses technical and administrative controls intended to restrict the employee application to authorized users and trusted devices. The controlled foundation includes one-time trusted-device enrollment, session validation, revocation, protected native credential storage, and row-level access controls.
 
-No system can be guaranteed to be completely secure. Employees should promptly report a lost device, suspected account compromise, or unauthorized access through the company-approved support route.
+The reusable marketplace-review source path is separate from ordinary employee credentials: it is designed to use a non-persistent review client to obtain a fresh short-lived one-time synthetic-device enrollment before the ordinary trusted-device redemption flow. That review path remains **NOT OPERATIONAL** until supported Auth-user creation, exact administrator-controlled `app_metadata` readback, deployed end-to-end validation, and approved secret storage are complete.
+
+No system can be guaranteed to be completely secure. Employees should promptly report a lost device, suspected account compromise, unauthorized access, or concern about off-shift collection through the company-approved support route.
 
 ## 10. Employee rights / employment-law notice — APPROVAL REQUIRED
 
@@ -139,13 +156,16 @@ Do not publish the final app notice until management/counsel confirms the correc
 
 The final reviewer should explicitly approve or replace each of these unresolved items:
 
-1. retention durations and deletion rules;
-2. employee monitoring/location notice requirements;
-3. employee access/correction/deletion procedure;
-4. final privacy/support email or route;
-5. exact service-provider disclosure language;
-6. whether operational location data can be used for performance management, discipline, compensation, litigation, or only narrower operational purposes;
-7. any state-specific employee notice or acknowledgment requirements;
-8. whether this notice should be incorporated into or linked from Paradise's main public privacy policy.
+1. detailed GPS/location retention and deletion rules;
+2. shift/workday/event retention and deletion rules;
+3. device/session/security/audit retention and deletion rules;
+4. backup/disaster-recovery retention and deletion-propagation rules;
+5. employee monitoring/location notice requirements and delivery/acknowledgment process;
+6. employee access/correction/deletion procedure;
+7. final privacy/support email or route;
+8. exact final service-provider disclosure language after signed-binary reconciliation;
+9. whether operational location data can be used for performance management, discipline, compensation, litigation, or only narrower operational purposes;
+10. any state-specific employee notice or acknowledgment requirements;
+11. whether this notice should be incorporated into or linked from Paradise's main public privacy policy.
 
 Until those items are approved, status remains **DRAFT / DO NOT PUBLISH AS FINAL**.
