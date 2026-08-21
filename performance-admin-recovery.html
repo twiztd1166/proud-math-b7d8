@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta name="theme-color" content="#12344d">
+  <title>Paradise Performance — Admin Recovery</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="performance-web.css">
+  <script type="importmap">{"imports":{"@supabase/supabase-js":"https://esm.sh/@supabase/supabase-js@2.112.3"}}</script>
+</head>
+<body>
+  <header class="top">
+    <div class="logo">P</div>
+    <div class="brand"><small>PARADISE EXTERIORS</small><b>Performance Admin Recovery</b></div>
+  </header>
+  <main class="main">
+    <section class="performance-web-shell">
+      <div class="performance-web-banner" role="note">
+        <b>CONTROLLED ADMIN RECOVERY</b>
+        <span>Already-enrolled designated admin testing only · not first enrollment · not employee rollout</span>
+      </div>
+      <div class="performance-web-card">
+        <p class="performance-eyebrow">LOST TRUSTED BROWSER SESSION</p>
+        <h2>Recover this admin test browser</h2>
+        <p>This path is only for a designated Paradise admin who was already enrolled and lost the browser credential. It cannot create a first admin identity and it cannot approve itself.</p>
+        <p id="recoveryStatus" role="status">Checking this browser…</p>
+        <button id="recoveryCreate" class="btn primary" type="button" hidden>CREATE RECOVERY REQUEST</button>
+      </div>
+      <div id="recoveryRequestCard" class="performance-web-card" hidden>
+        <p class="performance-eyebrow">RECOVERY REFERENCE</p>
+        <h3 id="recoveryReference" style="overflow-wrap:anywhere"></h3>
+        <p><b>This reference is not an enrollment code.</b> Send only this reference to the authorized operator so the exact browser request can be approved. The browser-held recovery secret is never displayed.</p>
+        <p id="recoveryExpiry"></p>
+        <p id="recoveryApprovalStatus" role="status"></p>
+        <button id="recoveryComplete" class="btn primary" type="button" hidden>COMPLETE RECOVERY</button>
+      </div>
+      <div id="recoverySuccess" class="performance-web-card" hidden>
+        <p class="performance-eyebrow">RECOVERY COMPLETE ✓</p>
+        <h3>Replacement trusted browser is ready</h3>
+        <p>The replacement credential is active and the older credential lineage has been revoked.</p>
+        <a class="btn primary" href="./index.html">OPEN PARADISE PERFORMANCE</a>
+      </div>
+      <div class="performance-web-card performance-web-security">
+        <h3>Security boundary</h3>
+        <p>Creating a request does not grant access. Completion requires the exact browser-held secret, explicit operator approval of the displayed reference, ordinary one-time trusted-device redemption, and authenticated finalization.</p>
+        <a href="./index.html">Back to Paradise Performance</a>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="performance/client/performance-admin-recovery.mjs"></script>
+</body>
+</html>
