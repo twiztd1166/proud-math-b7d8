@@ -6,14 +6,16 @@ import {
   formatKpiPace,
   formatKpiRate,
 } from './performance-web-kpis.mjs';
+import { mergeKnockClockEvents, KNOCK_EVENT_TYPES } from './performance-web-knock-clock.mjs';
 
-export const PERFORMANCE_WEB_NEUTRAL_KPI_UI_VERSION = '2026.08.21-web-neutral-kpi-ui-v1';
+export const PERFORMANCE_WEB_NEUTRAL_KPI_UI_VERSION = '2026.08.21-web-neutral-kpi-ui-v2';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
 const DEVICE_ID_KEY = 'paradise-performance-web-device-id-v1';
 const COUNT_DRAFT_PREFIX = 'paradise-performance-web-counts-v1:';
 const APPOINTMENT_QUEUE_KEY = 'paradise-performance-web-appointments-offline-v1';
+const KNOCK_QUEUE_KEY = 'paradise-performance-web-knock-clock-offline-v1';
 const CARD_ID = 'performanceWebNeutralKpis';
 const ACTIVE_STATUSES = ['active', 'paused', 'finishing'];
 
@@ -85,6 +87,18 @@ async function fetchServerSets(shiftId) {
   return data ?? [];
 }
 
+async function fetchKnockEvents(shiftId) {
+  const { data, error } = await runtime.supabase
+    .from('performance_events')
+    .select('client_event_id,shift_id,event_type,captured_at')
+    .eq('employee_id', runtime.employeeId)
+    .eq('shift_id', shiftId)
+    .in('event_type', KNOCK_EVENT_TYPES)
+    .order('captured_at', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
 function countDraft(shiftId) {
   if (!isUuid(shiftId)) return null;
   return readJson(`${COUNT_DRAFT_PREFIX}${shiftId}`, null);
@@ -95,14 +109,22 @@ function pendingAppointmentWrites() {
   return Array.isArray(rows) ? rows : [];
 }
 
+function pendingKnockWrites() {
+  const rows = readJson(KNOCK_QUEUE_KEY, []);
+  return Array.isArray(rows) ? rows : [];
+}
+
 function metric(label, value, detail = '') {
   return `<div class="performance-kpi-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong>${detail ? `<small>${esc(detail)}</small>` : ''}</div>`;
 }
 
-function cardMarkup(mode, kpis, appointmentMeta) {
+function cardMarkup(mode, kpis, appointmentMeta, knockMeta) {
   const heading = mode === 'ACTIVE' ? 'LIVE KPI SNAPSHOT' : mode === 'COMPLETE' ? 'DAY COMPLETE KPI SNAPSHOT' : 'LAST COMPLETED DAY KPI SNAPSHOT';
-  const pending = appointmentMeta.pendingSyncCount > 0
+  const pendingAppointments = appointmentMeta.pendingSyncCount > 0
     ? `<p class="performance-kpi-sync-note">Includes ${appointmentMeta.pendingSyncCount} appointment${appointmentMeta.pendingSyncCount === 1 ? '' : 's'} pending browser sync.</p>`
+    : '';
+  const pendingKnock = knockMeta.pendingSyncCount > 0
+    ? `<p class="performance-kpi-sync-note">Includes ${knockMeta.pendingSyncCount} Knock Clock event${knockMeta.pendingSyncCount === 1 ? '' : 's'} pending browser sync.</p>`
     : '';
   return `<section id="${CARD_ID}" class="performance-kpi-card" data-mode="${mode.toLowerCase()}">
     <div class="performance-kpi-head">
@@ -110,15 +132,16 @@ function cardMarkup(mode, kpis, appointmentMeta) {
       <b>${kpis.appointments} appt${kpis.appointments === 1 ? '' : 's'}</b>
     </div>
     <div class="performance-kpi-grid" aria-label="Measured KPI snapshot">
-      ${metric('DOORS / HR', formatKpiPace(kpis.doorsPerHour), `${kpis.doors} doors`)}
-      ${metric('CONVERSATIONS / HR', formatKpiPace(kpis.conversationsPerHour), `${kpis.conversations} conversations`)}
-      ${metric('APPOINTMENTS / HR', formatKpiPace(kpis.appointmentsPerHour), `${kpis.appointments} appointments`)}
+      ${metric('DOORS / KNOCK HR', formatKpiPace(kpis.doorsPerHour), `${kpis.doors} doors`)}
+      ${metric('CONVERSATIONS / KNOCK HR', formatKpiPace(kpis.conversationsPerHour), `${kpis.conversations} conversations`)}
+      ${metric('APPOINTMENTS / KNOCK HR', formatKpiPace(kpis.appointmentsPerHour), `${kpis.appointments} appointments`)}
       ${metric('CONVERSATION RATE', formatKpiRate(kpis.conversationRate), 'conversations ÷ doors')}
       ${metric('APPOINTMENT RATE', formatKpiRate(kpis.appointmentRate), 'appointments ÷ conversations')}
       ${metric('APPOINTMENTS', String(kpis.appointments), 'captured this shift')}
     </div>
-    ${pending}
-    <p class="performance-kpi-boundary">Measured only. No Paradise standard, grade, rank, bonus, commission, or pay rule is applied.</p>
+    ${pendingAppointments}
+    ${pendingKnock}
+    <p class="performance-kpi-boundary">Measured only. Per-hour activity uses explicit Knock Clock time. No Paradise standard, grade, rank, bonus, commission, or pay rule is applied.</p>
   </section>`;
 }
 
@@ -155,21 +178,30 @@ async function refresh() {
       document.getElementById(CARD_ID)?.remove();
       return;
     }
-    const serverSets = await fetchServerSets(shift.id);
+    const [serverSets, serverKnockEvents] = await Promise.all([
+      fetchServerSets(shift.id),
+      fetchKnockEvents(shift.id),
+    ]);
     const appointmentMeta = appointmentCountForShift({
       serverRows: serverSets,
       pendingWrites: pendingAppointmentWrites(),
+      shiftId: shift.id,
+    });
+    const knockMeta = mergeKnockClockEvents({
+      serverRows: serverKnockEvents,
+      pendingWrites: pendingKnockWrites(),
       shiftId: shift.id,
     });
     const kpis = calculateNeutralWebKpis({
       shift,
       appointmentCount: appointmentMeta.count,
       countDraft: countDraft(shift.id),
+      knockEvents: knockMeta.events,
       now: Date.now(),
     });
-    mount(surface, cardMarkup(surface.mode, kpis, appointmentMeta));
+    mount(surface, cardMarkup(surface.mode, kpis, appointmentMeta, knockMeta));
   } catch {
-    // This card is additive, read-only context. Core shift/GPS/appointment controls remain usable on KPI read failure.
+    // This card is additive, read-only context. Core shift/GPS/appointment/Knock Clock controls remain usable on KPI read failure.
   } finally {
     runtime.refreshing = false;
   }
@@ -192,7 +224,7 @@ async function boot() {
 
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest('#nPerf,[data-performance-web-action],[data-performance-count],[data-performance-appointment-action]')) scheduleRefresh(750);
+    if (target?.closest('#nPerf,[data-performance-web-action],[data-performance-count],[data-performance-appointment-action],[data-performance-knock-action]')) scheduleRefresh(750);
     if (target?.closest('#nLook,#nTrain,#nRel,#nHist')) scheduleRefresh(100);
   }, true);
   window.addEventListener('online', () => scheduleRefresh(500));
@@ -208,7 +240,8 @@ void boot();
 export const ParadisePerformanceWebNeutralKpiUiInvariants = Object.freeze([
   'the neutral KPI card is read-only and cannot change a shift, appointment, KPI standard, leaderboard, or compensation record',
   'active, Day Complete, and Last Completed Day reuse the same neutral KPI formulas',
-  'pending offline appointment writes may be included in live descriptive counts and are explicitly disclosed as pending sync',
+  'per-hour activity uses explicit productive Knock Clock events and never silently substitutes total Day Clock duration',
+  'pending offline appointment and Knock Clock writes may be included in live descriptive measurements and are explicitly disclosed as pending sync',
   'the helper disables a second refresh-token loop and reuses the same-origin trusted browser session only for RLS-protected reads',
-  'KPI rendering failure never disables the core shift, GPS, count, or appointment controls',
+  'KPI rendering failure never disables the core shift, GPS, count, appointment, or Knock Clock controls',
 ]);

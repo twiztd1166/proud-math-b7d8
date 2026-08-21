@@ -1,6 +1,7 @@
 import { calculatePerformance, finiteNonNegative } from '../shared/performance-math.mjs';
+import { deriveKnockClock } from './performance-web-knock-clock.mjs';
 
-export const PERFORMANCE_WEB_NEUTRAL_KPI_VERSION = '2026.08.21-web-neutral-kpis-v1';
+export const PERFORMANCE_WEB_NEUTRAL_KPI_VERSION = '2026.08.21-web-neutral-kpis-v2';
 
 function field(record, ...keys) {
   for (const key of keys) {
@@ -71,19 +72,30 @@ export function appointmentCountForShift({ serverRows = [], pendingWrites = [], 
   return Object.freeze({ count: rows.size, pendingSyncCount });
 }
 
-export function calculateNeutralWebKpis({ shift = {}, appointmentCount = 0, countDraft = null, now = Date.now() } = {}) {
+export function calculateNeutralWebKpis({
+  shift = {},
+  appointmentCount = 0,
+  countDraft = null,
+  knockEvents = [],
+  now = Date.now(),
+} = {}) {
   const counts = visibleShiftCounts(shift, countDraft);
-  const hours = workedHoursForShift(shift, now);
+  const workedHours = workedHoursForShift(shift, now);
+  const knockClock = deriveKnockClock({ shift, events: knockEvents, now });
   const sets = nonNegativeInteger(appointmentCount);
   const performance = calculatePerformance({
-    hours: hours ?? 0,
+    hours: knockClock.hours ?? 0,
     doors: counts.doors,
     conversations: counts.conversations,
     sets,
   });
 
   return Object.freeze({
-    hours,
+    hours: knockClock.hours,
+    knockHours: knockClock.hours,
+    knockSeconds: knockClock.totalSeconds,
+    knockActive: knockClock.active,
+    workedHours,
     doors: counts.doors,
     conversations: counts.conversations,
     appointments: sets,
@@ -105,8 +117,10 @@ export function formatKpiPace(value) {
 
 export const ParadisePerformanceWebNeutralKpiInvariants = Object.freeze([
   'web KPI values are descriptive measurements only and do not classify performance against a standard',
+  'Doors/hour, Conversations/hour, and Appointments/hour use explicit productive Knock Clock time rather than total Day Clock duration',
+  'historical shifts with no Knock Clock evidence render per-hour activity as unavailable rather than silently substituting Day Clock time',
+  'worked Day Clock hours remain separately available for future downstream metrics whose approved denominator is worked hours',
   'zero or unavailable denominators render as unavailable rather than a misleading zero-percent or zero-per-hour result',
-  'active worked hours use elapsed shift time less recorded break seconds; finished shifts use their authoritative finish time',
   'doors and conversations may use the local unsynced count draft so live feedback does not regress during a transient network failure',
   'appointment counts deduplicate server rows and idempotent pending SET writes by client set id',
   'no leaderboard rank, compensation, commission, bonus, minimum target, above-standard target, or pay decision is produced here',
