@@ -1,0 +1,91 @@
+name: Publish Paradise Performance web interim preview
+
+on:
+  push:
+    branches:
+      - paradise-canvass-manager-public
+    paths:
+      - '.github/workflows/publish-paradise-performance-web-preview.yml'
+
+permissions:
+  contents: write
+
+env:
+  SUPABASE_JS_VERSION: '2.112.3'
+  ESBUILD_VERSION: '0.28.2'
+  PREVIEW_BRANCH: 'paradise-performance-web-interim-preview'
+
+jobs:
+  publish-preview:
+    name: Build, validate and publish isolated preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact public source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Install pinned web build dependencies
+        run: >-
+          npm install --no-save --package-lock=false
+          @supabase/supabase-js@${SUPABASE_JS_VERSION}
+          esbuild@${ESBUILD_VERSION}
+
+      - name: Validate web source controls
+        run: node scripts/validate-paradise-performance-web-interim.mjs
+
+      - name: Run web interim contract tests
+        run: node --test performance/tests/performance-web-interim.test.mjs
+
+      - name: Build controlled Canvass and University base
+        run: node scripts/build-canvass-site.mjs
+
+      - name: Build isolated Performance web interim
+        run: node scripts/build-performance-web-site.mjs
+
+      - name: Validate exact built preview
+        run: node scripts/validate-paradise-performance-web-interim.mjs --built
+
+      - name: Stamp preview provenance
+        shell: bash
+        run: |
+          cat > performance-web-dist/PREVIEW_CONTROL.txt <<EOF
+          PARADISE PERFORMANCE WEB INTERIM PREVIEW
+          NOT EMPLOYEE-ROLLOUT AUTHORIZED
+          NOT A NATIVE GPS SUBSTITUTE
+          SOURCE_COMMIT=${GITHUB_SHA}
+          VALIDATED_APP_BASE=16664d276a529006be68a846e12ede5ff7344e1b
+          FIELD_BASELINE=78/76/2
+          LOCATION_MODE=FOREGROUND_SAMPLE_ONLY
+          EOF
+
+      - name: Publish only validated static output to dedicated preview branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/paradise-performance-web-preview
+          mkdir -p /tmp/paradise-performance-web-preview
+          cp -R performance-web-dist/. /tmp/paradise-performance-web-preview/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan "$PREVIEW_BRANCH"
+          git rm -rf .
+          cp -R /tmp/paradise-performance-web-preview/. .
+          git add --all
+          git commit -m "Publish Paradise Performance web interim preview from ${GITHUB_SHA}"
+          git push --force origin HEAD:"$PREVIEW_BRANCH"
+
+      - name: Confirm release refs are not moved by publisher
+        shell: bash
+        run: |
+          test "${GITHUB_REF_NAME}" = 'paradise-canvass-manager-public'
+          echo 'Dedicated preview published. Validated branch and release pointer are outside this workflow.'
