@@ -6,6 +6,7 @@ import {
   formatShiftDuration,
   qualifiedRoutePoints,
   renderWebRouteTrace,
+  splitTrackedSegments,
   summarizeWebRoute,
 } from '../client/performance-web-summary.mjs';
 
@@ -57,6 +58,20 @@ test('long hidden or locked interval is not bridged into tracked miles or steps'
   assert.equal(summary.acceptedSegmentCount, 1);
   assert.equal(summary.skippedGapCount, 1);
   assert.ok(summary.distanceMeters > 20 && summary.distanceMeters < 25);
+});
+
+test('route segments split across hidden or locked gaps', () => {
+  const qualified = qualifiedRoutePoints([
+    point({ id: 'a', capturedAt: '2026-08-21T17:01:00.000Z', latitude: 26.1000, longitude: -80.1000 }),
+    point({ id: 'b', capturedAt: '2026-08-21T17:01:10.000Z', latitude: 26.1002, longitude: -80.1000 }),
+    point({ id: 'c', capturedAt: '2026-08-21T17:02:20.000Z', latitude: 26.1012, longitude: -80.1000 }),
+    point({ id: 'd', capturedAt: '2026-08-21T17:02:30.000Z', latitude: 26.1014, longitude: -80.1000 }),
+  ]);
+  const segments = splitTrackedSegments(qualified);
+  assert.equal(segments.length, 2);
+  assert.deepEqual(segments.map(segment => segment.map(item => item.clientPointId)), [['a', 'b'], ['c', 'd']]);
+  const html = renderWebRouteTrace(qualified);
+  assert.equal((html.match(/data-route-segment=/g) || []).length, 2);
 });
 
 test('duplicate client points are counted once', () => {
