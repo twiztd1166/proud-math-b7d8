@@ -17,7 +17,7 @@ import {
   mergeKnockClockEvents,
 } from './performance-web-knock-clock.mjs';
 
-export const PERFORMANCE_WEB_KNOCK_CLOCK_UI_VERSION = '2026.08.21-web-knock-clock-ui-v1';
+export const PERFORMANCE_WEB_KNOCK_CLOCK_UI_VERSION = '2026.08.21-web-knock-clock-ui-v2';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -130,7 +130,7 @@ function cardMarkup(surfaceMode, shift, clock, merged) {
     ? `<p class="performance-knock-sync-note">${merged.pendingSyncCount} Knock Clock event${merged.pendingSyncCount === 1 ? '' : 's'} pending browser sync.</p>`
     : '';
   const rejected = merged.rejectedCount > 0
-    ? `<p class="performance-warning" role="status">A Knock Clock event could not sync. Do not rely on its timing until a manager reviews the record.</p>`
+    ? `<p class="performance-warning" role="status">A Knock Clock event could not sync. Do not rely on its timing until the record is reviewed.</p>`
     : '';
   return `<section id="${CARD_ID}" class="performance-knock-clock-card" data-knock-state="${clock.active ? 'active' : 'inactive'}">
     <div class="performance-knock-clock-head">
@@ -152,7 +152,7 @@ function mount(surface, markup) {
   else surface.host.insertAdjacentHTML('afterbegin', markup);
 }
 
-async function buildWrite(type, shift, capturedAt = new Date().toISOString()) {
+function buildWrite(type, shift, capturedAt = new Date().toISOString()) {
   if (!runtime.employeeId || !runtime.deviceId) throw new Error('Trusted employee/device context is unavailable');
   const envelope = buildEventEnvelope({
     clientEventId: createClientEventId(),
@@ -179,7 +179,7 @@ async function buildWrite(type, shift, capturedAt = new Date().toISOString()) {
 }
 
 async function recordKnockEvent(type, shift, { flush = true } = {}) {
-  const write = await buildWrite(type, shift);
+  const write = buildWrite(type, shift);
   await runtime.queue.enqueue(write);
   if (flush) await runtime.queue.flush().catch(() => undefined);
   if (runtime.current?.shift?.id === shift.id) {
@@ -189,6 +189,33 @@ async function recordKnockEvent(type, shift, { flush = true } = {}) {
     };
   }
   return write;
+}
+
+function queueStopForFinishSynchronously() {
+  const current = runtime.current;
+  if (!current?.clock?.active || !isUuid(current?.shift?.id) || !runtime.employeeId || !runtime.deviceId) return false;
+  try {
+    const capturedAt = new Date().toISOString();
+    const write = buildWrite('KNOCK_STOPPED', current.shift, capturedAt);
+    const rows = pendingWrites();
+    if (!rows.some(row => row?.id === write.id)) {
+      rows.push({
+        ...write,
+        payload: { ...write.payload },
+        state: 'PENDING',
+        attempts: 0,
+        nextAttemptAt: null,
+        lastError: null,
+        enqueuedAt: capturedAt,
+      });
+      window.localStorage.setItem(QUEUE_KEY, JSON.stringify(rows));
+    }
+    runtime.current = { ...current, clock: { ...current.clock, active: false } };
+    void runtime.queue.flush().catch(() => undefined);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function refresh() {
@@ -236,23 +263,6 @@ function scheduleRefresh(delay = 150) {
   runtime.scheduled = window.setTimeout(() => { void refresh(); }, delay);
 }
 
-async function stopForFinish(shiftFromCore) {
-  if (!shiftFromCore || !isUuid(shiftFromCore.id)) return;
-  try {
-    if (!runtime.employeeId && !await trustedContext()) return;
-    let active = runtime.current?.shift?.id === shiftFromCore.id ? runtime.current.clock?.active === true : false;
-    if (!active) {
-      const latest = await clockForShift(shiftFromCore, Date.now()).catch(() => null);
-      active = latest?.clock?.active === true;
-    }
-    if (!active) return;
-    await recordKnockEvent('KNOCK_STOPPED', shiftFromCore, { flush: false });
-    void runtime.queue.flush().catch(() => undefined);
-  } catch {
-    // The finished shift timestamp still closes an open interval during readback; Finish Day must never be blocked by this helper.
-  }
-}
-
 async function boot() {
   runtime.supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
@@ -267,10 +277,9 @@ async function boot() {
     transport: createSupabaseOperationalSyncTransport(runtime.supabase),
   });
 
-  globalThis.ParadisePerformanceKnockClockBridge = Object.freeze({ stopForFinish });
-
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('[data-performance-web-action="finish"]')) queueStopForFinishSynchronously();
     if (target?.closest('#nPerf,[data-performance-web-action],[data-performance-knock-action]')) scheduleRefresh(500);
     if (target?.closest('#nLook,#nTrain,#nRel,#nHist')) scheduleRefresh(100);
   }, true);
@@ -289,10 +298,10 @@ void boot();
 
 export const ParadisePerformanceWebKnockClockUiInvariants = Object.freeze([
   'Start My Day never automatically starts productive Knock Clock time',
-  'the employee explicitly starts and stops productive canvassing time',
+  'the user explicitly starts and stops productive canvassing time',
   'Knock Clock events reuse authenticated RLS-protected performance_events and stable retry IDs',
   'offline Knock Clock events keep their original captured timestamp and replay idempotently',
-  'Finish Day best-effort records a stop without making shift completion depend on network success',
+  'Finish Day synchronously queues a best-effort stop before the core finish click runs and never depends on network success',
   'a finished shift closes any still-open productive interval at the authoritative finish timestamp',
   'GPS never silently determines productive Knock Clock state',
   'no KPI threshold, pace classification, leaderboard, compensation, or pay rule is introduced by this helper',
