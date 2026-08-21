@@ -1,0 +1,120 @@
+name: Validate Paradise Performance web CDN delivery
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - '.github/workflows/validate-paradise-performance-web-cdn.yml'
+      - 'CDN_SMOKE_TRIGGER.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-performance-web-cdn-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  delivery:
+    name: RawGitHack WebKit delivery smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          PWROOT="$RUNNER_TEMP/performance-cdn-playwright"
+          mkdir -p "$PWROOT"
+          printf '{"private":true,"type":"module"}\n' > "$PWROOT/package.json"
+          timeout --signal=TERM --kill-after=30s 5m npm install --prefix "$PWROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PWROOT/node_modules" node_modules
+          PW='./node_modules/.bin/playwright'
+          if "$PW" install-deps --dry-run webkit >/tmp/pw-deps.log 2>&1; then
+            timeout --signal=TERM --kill-after=30s 12m "$PW" install webkit
+          else
+            cat /tmp/pw-deps.log
+            timeout --signal=TERM --kill-after=30s 12m "$PW" install --with-deps webkit
+          fi
+      - name: Smoke actual HTTPS delivery surfaces
+        shell: bash
+        env:
+          DEV_URL: https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-performance-web-interim-preview/index.html
+          IMMUTABLE_URL: https://rawcdn.githack.com/twiztd1166/proud-math-b7d8/d5f5ef34830ce6ddc96b0359a59b41523e39c662/index.html
+        run: |
+          cat > .performance-cdn-smoke.mjs <<'EOF'
+          import { webkit } from '@playwright/test';
+
+          const browser = await webkit.launch();
+          const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+          await context.addCookies([
+            { name: '__Http-phish', value: '1', domain: 'raw.githack.com', path: '/', secure: true },
+            { name: '__Http-phish', value: '1', domain: 'rawcdn.githack.com', path: '/', secure: true },
+          ]);
+
+          async function verify(label, url) {
+            const page = await context.newPage();
+            const pageErrors = [];
+            const consoleErrors = [];
+            const badResponses = [];
+            page.on('pageerror', error => pageErrors.push(String(error)));
+            page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+            page.on('response', response => {
+              const u = new URL(response.url());
+              if ((u.hostname.endsWith('githack.com') || u.hostname === 'esm.sh') && response.status() >= 400) {
+                badResponses.push(`${response.status()} ${response.url()}`);
+              }
+            });
+
+            const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            if (!response || response.status() !== 200) throw new Error(`${label}: entry HTTP ${response?.status() ?? 'none'}`);
+            await page.waitForSelector('#nPerf', { timeout: 45000 });
+            if (await page.title() !== 'Paradise Performance — Web Interim') throw new Error(`${label}: unexpected title ${await page.title()}`);
+
+            const meta = await page.evaluate(() => window.PCM_DATA?.meta || null);
+            if (!meta || meta.recordCount !== 78 || meta.goCount !== 76 || meta.noGoCount !== 2) {
+              throw new Error(`${label}: field baseline mismatch ${JSON.stringify(meta)}`);
+            }
+
+            await page.click('#nTrain');
+            await page.waitForTimeout(500);
+            const trainingText = await page.locator('#main').innerText();
+            if (!/(Continue Training|Practice|Career Path|Videos & Audio|My Progress)/i.test(trainingText)) {
+              throw new Error(`${label}: University navigation missing`);
+            }
+
+            await page.click('#nPerf');
+            await page.waitForSelector('#performanceWebEnrollForm', { timeout: 30000 });
+            const performanceText = await page.locator('#main').innerText();
+            if (!/WEB INTERIM/.test(performanceText) || !/foreground\/sample-only/i.test(performanceText) || !/one-time manager code/i.test(performanceText)) {
+              throw new Error(`${label}: Performance enrollment boundary missing`);
+            }
+
+            if (badResponses.length) throw new Error(`${label}: delivery asset failures ${badResponses.join(' | ')}`);
+            if (pageErrors.length) throw new Error(`${label}: page errors ${pageErrors.join(' | ')}`);
+            if (consoleErrors.length) throw new Error(`${label}: console errors ${consoleErrors.join(' | ')}`);
+
+            console.log(JSON.stringify({
+              status: 'PASS',
+              surface: label,
+              finalUrl: page.url(),
+              title: await page.title(),
+              records: meta.recordCount,
+              go: meta.goCount,
+              noGo: meta.noGoCount,
+              performanceEnrollmentBoundary: true,
+              locationMode: 'FOREGROUND_SAMPLE_ONLY'
+            }));
+            await page.close();
+          }
+
+          await verify('raw.githack branch', process.env.DEV_URL);
+          await verify('rawcdn.githack immutable', process.env.IMMUTABLE_URL);
+          await browser.close();
+          EOF
+          node ./.performance-cdn-smoke.mjs
+          rm -f .performance-cdn-smoke.mjs
