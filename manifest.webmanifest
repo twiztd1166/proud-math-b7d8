@@ -1,16 +1,26 @@
 {
-  "name": "Paradise Canvass Manager",
-  "short_name": "Canvass",
-  "description": "Paradise Exteriors mobile canvass jurisdiction lookup and route release.",
+  "name": "Paradise Performance",
+  "short_name": "Performance",
+  "description": "Paradise Performance web interim for authorized Paradise team members.",
   "id": "./",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f4f6f8",
   "theme_color": "#12344d",
   "icons": [
-    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
