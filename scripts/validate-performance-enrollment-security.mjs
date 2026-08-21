@@ -63,6 +63,8 @@ for (const required of [
   /SYNTHETIC_REVIEW_EMPLOYEE_IDS/i,
   /SYNTHETIC_REVIEW_EMPLOYEE_FORBIDDEN/i,
   /\['manager', 'admin'\]\.includes\(manager\.role\)/i,
+  /historicalPrivilegedIdentityCount/i,
+  /\.in\('role', \['manager', 'admin'\]\)/i,
   /PRIVILEGED_PERFORMANCE_ACTOR_ALREADY_EXISTS/i,
   /FIRST_MANAGER_BOOTSTRAP_ALREADY_USED/i,
   /randomSecret\(32\)/i,
