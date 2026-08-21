@@ -176,11 +176,18 @@ async function installAdminTools() {
   }
 }
 
-const main = document.getElementById('main');
-if (main && typeof MutationObserver !== 'undefined') {
+function observePerformanceRoot() {
+  const main = document.getElementById('main');
+  if (!main || typeof MutationObserver === 'undefined') return;
   const observer = new MutationObserver(() => { void installAdminTools(); });
   observer.observe(main, { childList: true, subtree: true });
   void installAdminTools();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', observePerformanceRoot, { once: true });
+} else {
+  observePerformanceRoot();
 }
 
 export const PerformanceWebAdminEnrollmentInvariants = Object.freeze([
