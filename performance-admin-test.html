@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta name="theme-color" content="#12344d">
+  <title>Paradise Performance — Admin Test Enrollment</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="performance-web.css">
+  <script type="importmap">{"imports":{"@supabase/supabase-js":"https://esm.sh/@supabase/supabase-js@2.112.3"}}</script>
+</head>
+<body>
+  <header class="top">
+    <div class="logo">P</div>
+    <div class="brand"><small>PARADISE EXTERIORS</small><b>Performance Admin Test Access</b></div>
+  </header>
+  <main class="main">
+    <section class="performance-web-shell">
+      <div class="performance-web-banner" role="note">
+        <b>ADMIN TEST ACCESS</b>
+        <span>CONTROLLED ADMIN TESTING ONLY · NOT EMPLOYEE ROLLOUT</span>
+      </div>
+      <div class="performance-web-card">
+        <p class="performance-eyebrow">TRUSTED-DEVICE ENROLLMENT</p>
+        <h2>Issue one-time admin test enrollment</h2>
+        <p id="adminTestStatus" role="status">Verifying this designated trusted admin browser…</p>
+        <form id="adminTestEnrollmentForm" hidden autocomplete="off">
+          <label for="adminTestEmployee">Admin tester</label>
+          <select id="adminTestEmployee" class="input" required></select>
+          <label for="adminTestExpires">Code lifetime</label>
+          <select id="adminTestExpires" class="input">
+            <option value="10" selected>10 minutes</option>
+            <option value="20">20 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+          <button id="adminTestIssue" class="btn primary" type="submit">ISSUE ONE-TIME CODE</button>
+        </form>
+      </div>
+      <div id="adminTestResult" class="performance-web-card" hidden>
+        <p class="performance-eyebrow">ONE-TIME ADMIN TEST CODE</p>
+        <h3 id="adminTestEmployeeName"></h3>
+        <p id="adminTestCode" style="overflow-wrap:anywhere;font-weight:700"></p>
+        <p id="adminTestExpiry"></p>
+        <button id="adminTestCopy" class="btn secondary" type="button">COPY CODE</button>
+        <p class="performance-web-boundary">Share only with the intended designated admin tester. The newest unused code replaces any older unexpired code for that tester. The displayed code is cleared when it expires or when this page is left.</p>
+      </div>
+      <div class="performance-web-card performance-web-security">
+        <h3>Testing boundary</h3>
+        <p>This page requires a designated Paradise admin trusted-device session and offers designated active admin test profiles only. It uses the existing JWT-protected enrollment function, does not use a service-role key, and cannot be used for employee-wide enrollment.</p>
+        <a href="./index.html">Back to Paradise Performance</a>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="performance/client/performance-admin-test-enrollment.mjs"></script>
+</body>
+</html>
