@@ -21,14 +21,27 @@ test('coarse fixes are excluded from route distance and step estimate', () => {
   const points = [
     point({ id: 'coarse', capturedAt: '2026-08-21T17:00:00.000Z', latitude: 26.0, longitude: -80.0, accuracyMeters: 1414 }),
     point({ id: 'a', capturedAt: '2026-08-21T17:01:00.000Z', latitude: 26.1000, longitude: -80.1000, accuracyMeters: 8 }),
-    point({ id: 'b', capturedAt: '2026-08-21T17:01:10.000Z', latitude: 26.1005, longitude: -80.1000, accuracyMeters: 6 }),
+    point({ id: 'b', capturedAt: '2026-08-21T17:01:30.000Z', latitude: 26.1005, longitude: -80.1000, accuracyMeters: 6 }),
   ];
   const summary = summarizeWebRoute(points);
   assert.equal(summary.qualifiedPointCount, 2);
   assert.equal(summary.maxAccuracyMeters, WEB_ROUTE_MAX_ACCURACY_METERS);
   assert.ok(summary.distanceMeters > 50 && summary.distanceMeters < 60);
+  assert.ok(summary.pedestrianDistanceMeters > 50 && summary.pedestrianDistanceMeters < 60);
   assert.ok(summary.miles > 0.03 && summary.miles < 0.04);
   assert.ok(summary.estimatedSteps > 60 && summary.estimatedSteps < 90);
+});
+
+test('vehicle-speed travel contributes to GPS miles but not estimated steps', () => {
+  const points = [
+    point({ id: 'a', capturedAt: '2026-08-21T17:01:00.000Z', latitude: 26.1000, longitude: -80.1000 }),
+    point({ id: 'b', capturedAt: '2026-08-21T17:01:10.000Z', latitude: 26.1010, longitude: -80.1000 }),
+  ];
+  const summary = summarizeWebRoute(points);
+  assert.ok(summary.distanceMeters > 100);
+  assert.equal(summary.pedestrianDistanceMeters, 0);
+  assert.equal(summary.estimatedSteps, 0);
+  assert.ok(summary.miles > 0);
 });
 
 test('duplicate client points are counted once', () => {
