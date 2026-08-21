@@ -69,6 +69,27 @@ jobs:
       - name: Validate built web interim
         run: node scripts/validate-paradise-performance-web-interim.mjs --built
 
+      - name: Stamp controlled preview artifact provenance
+        shell: bash
+        run: |
+          cat > performance-web-dist/PREVIEW_CONTROL.txt <<EOF
+          PARADISE PERFORMANCE WEB INTERIM PREVIEW
+          NOT EMPLOYEE-ROLLOUT AUTHORIZED
+          NOT A NATIVE GPS SUBSTITUTE
+          SOURCE_COMMIT=${GITHUB_SHA}
+          VALIDATED_APP_BASE=16664d276a529006be68a846e12ede5ff7344e1b
+          FIELD_BASELINE=78/76/2
+          LOCATION_MODE=FOREGROUND_SAMPLE_ONLY
+          EOF
+
+      - name: Upload validated web preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paradise-performance-web-interim-preview-dist
+          path: performance-web-dist/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Re-run controlled Canvass build after web build
         run: node scripts/build-canvass-site.mjs
 
