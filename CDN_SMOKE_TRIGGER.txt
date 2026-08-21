@@ -1,0 +1,2 @@
+Paradise Performance Web Interim CDN delivery closeout trigger.
+Control-only change. No runtime, field data, enrollment, native release, privacy/HR, or employee-rollout authorization change.
