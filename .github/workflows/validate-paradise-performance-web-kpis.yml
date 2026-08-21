@@ -1,0 +1,56 @@
+name: Validate Paradise Performance web neutral KPIs
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance-kpis.css'
+      - 'performance/client/performance-web-kpis.mjs'
+      - 'performance/client/performance-web-kpi-ui.mjs'
+      - 'performance/shared/performance-math.mjs'
+      - 'performance/tests/performance-web-kpis.test.mjs'
+      - '.github/workflows/validate-paradise-performance-web-kpis.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Web neutral-KPI contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check KPI modules
+        run: |
+          node --check performance/client/performance-web-kpis.mjs
+          node --check performance/client/performance-web-kpi-ui.mjs
+      - name: Run KPI unit contracts
+        run: node --test performance/tests/performance-web-kpis.test.mjs performance/tests/performance-math.test.mjs
+      - name: Verify neutral KPI surfaces and governance boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'DOORS / HR' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'CONVERSATIONS / HR' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'APPOINTMENTS / HR' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'CONVERSATION RATE' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'APPOINTMENT RATE' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'Measured only' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'performance-web-kpi-ui.mjs' index.html
+          grep -q 'performance-kpis.css' index.html
+          grep -q 'performance/shared/performance-math.mjs' sw.js
+          if grep -Eq "from\('performance_kpi_standard_versions'\)|from\('performance_period_snapshots'\)|from\('performance_commissions'\)" performance/client/performance-web-kpi-ui.mjs; then
+            echo 'Neutral KPI UI queried standards, snapshots, or commissions' >&2
+            exit 1
+          fi
+          if grep -Eqi 'below standard|above standard|meets standard|leaderboard rank|bonus earned|commission earned|pay earned' performance/client/performance-web-kpi-ui.mjs; then
+            echo 'Neutral KPI UI introduced an unapproved judgment or compensation claim' >&2
+            exit 1
+          fi
+          echo 'PASS: neutral KPI math + UI present with standards/rank/pay boundaries preserved'
