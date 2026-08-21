@@ -27,14 +27,20 @@ function shift(overrides = {}) {
   };
 }
 
-function harness({ active = null, startLocationState = 'ACTIVE', finishFails = false } = {}) {
+function harness({ active = null, startLocationState = 'ACTIVE', finishFails = false, countFails = false } = {}) {
   let current = active;
-  const calls = { start: [], finish: [], attach: [], locationStart: [], locationStop: [], cleanup: 0, capture: 0 };
+  const calls = { start: [], counts: [], finish: [], attach: [], locationStart: [], locationStop: [], cleanup: 0, capture: 0 };
   const writes = [];
   const ids = [clientShiftId, startEventId, finishEventId];
   const shiftTransport = {
     async findActiveShift() { return current; },
     async startShift(args) { calls.start.push(args); current = shift({ client_shift_id: args.clientShiftId, started_at: args.startedAt }); return current; },
+    async updateShiftCounts(args) {
+      calls.counts.push(args);
+      if (countFails) throw new Error('network count failed');
+      current = shift({ ...current, doors: args.doors, conversations: args.conversations });
+      return current;
+    },
     async finishShift(args) {
       calls.finish.push(args);
       if (finishFails) throw new Error('network finish failed');
@@ -68,8 +74,8 @@ function harness({ active = null, startLocationState = 'ACTIVE', finishFails = f
     locationBridge,
     syncQueue,
     now: (() => {
-      const times = [new Date('2026-08-18T12:00:00.000Z'), new Date('2026-08-18T18:30:00.000Z')];
-      return () => times.shift() ?? new Date('2026-08-18T18:30:00.000Z');
+      const times = [new Date('2026-08-18T12:00:00.000Z'), new Date('2026-08-18T18:30:00.000Z'), new Date('2026-08-18T18:30:01.000Z')];
+      return () => times.shift() ?? new Date('2026-08-18T18:30:01.000Z');
     })(),
     uuid: () => ids.shift(),
   });
@@ -118,6 +124,26 @@ test('native GPS failure does not create a second shift or roll back the authori
   assert.equal(state.mode, 'ACTIVE');
   assert.equal(state.location.state, 'ERROR');
   assert.match(state.warning, /Shift started/);
+});
+
+test('live counts update the authoritative active shift', async () => {
+  const h = harness({ active: shift() });
+  await h.controller.load();
+  await h.controller.updateCounts({ doors: 12, conversations: 4 });
+  assert.equal(h.calls.counts.length, 1);
+  assert.equal(h.calls.counts[0].doors, 12);
+  assert.equal(h.calls.counts[0].conversations, 4);
+  assert.equal(h.controller.getState().shift.doors, 12);
+  assert.equal(h.controller.getState().shift.conversations, 4);
+});
+
+test('count sync failure preserves optimistic counts for browser retry', async () => {
+  const h = harness({ active: shift(), countFails: true });
+  await h.controller.load();
+  await assert.rejects(() => h.controller.updateCounts({ doors: 3, conversations: 1 }), /network count failed/);
+  assert.equal(h.controller.getState().shift.doors, 3);
+  assert.equal(h.controller.getState().shift.conversations, 1);
+  assert.match(h.controller.getState().warning, /not synced yet/);
 });
 
 test('Finish Day records best-effort end GPS, queues finish event, then stops native tracking', async () => {
