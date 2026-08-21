@@ -14,8 +14,8 @@ All of the following must be true before use:
 
 1. An approved real Paradise manager/admin exists in `performance_employees`, is active, and has the correct role.
 2. The selected employee must not be either synthetic store-review identity.
-3. No live privileged Performance actor identity may already exist.
-4. The selected real manager/admin must never previously have had a Performance actor identity. If a manager was already enrolled and later revoked, use the ordinary manager/admin recovery path rather than initial bootstrap.
+3. No historical real manager/admin Performance actor identity may ever have existed. A previously enrolled and later revoked privileged actor permanently closes the initial-bootstrap path.
+4. The selected real manager/admin must never previously have had any Performance actor identity. Initial bootstrap is not a recovery mechanism.
 5. A temporary Supabase Auth user must be created through a supported Supabase Dashboard/Auth Admin route. Do not create or modify `auth.users` with SQL.
 6. The temporary Auth user must receive administrator-controlled `app_metadata` exactly identifying the bootstrap purpose and the approved real manager employee UUID:
 
@@ -29,7 +29,7 @@ All of the following must be true before use:
 1. Human operator creates the temporary bootstrap Auth user with the exact `app_metadata` above using Supabase Dashboard/Auth Admin.
 2. From a trusted operator environment, sign in as that temporary Auth user and obtain its normal user JWT.
 3. Invoke `performance-first-manager-bootstrap-mint` with that JWT. The request body does not choose an employee; the target comes only from administrator-controlled `app_metadata`.
-4. The Edge function independently reads the current Auth user, verifies the bootstrap flag, resolves the target manager/admin from `performance_employees`, rejects synthetic review identities, and refuses to run if a privileged actor already exists or if the target manager has any historical actor identity.
+4. The Edge function independently reads the current Auth user, verifies the bootstrap flag, resolves the target manager/admin from `performance_employees`, rejects synthetic review identities, and refuses to run if any historical manager/admin actor lineage exists, if a currently privileged employee already has a live actor identity, or if the selected manager has any historical actor identity.
 5. If permitted, the function revokes any older unused bootstrap enrollment token for that target, mints a fresh high-entropy 10-minute one-time enrollment secret, stores only its SHA-256 hash, then disables the temporary bootstrap Auth identity by clearing the bootstrap metadata and applying a long ban.
 6. If temporary-identity disabling fails, the newly minted enrollment token is revoked and the function returns no usable bootstrap result.
 7. Immediately enter the returned one-time token into the ordinary Paradise Performance trusted-device enrollment screen on the manager's intended browser/device.
@@ -57,7 +57,7 @@ Therefore this source architecture can be prepared and validated now, but it can
 - Never ship a service-role/secret key to the browser or app.
 - Never reuse the synthetic marketplace-review employee or issuer for real employee rollout.
 - Never turn this function into a general employee enrollment endpoint.
-- Never use it after a real privileged Performance actor has been established.
+- Never use it after any real privileged Performance actor lineage has been established, even if that actor was later revoked.
 - Never treat successful bootstrap as employee-rollout authorization, Privacy/HR approval, or native background-GPS validation.
 
 ## Completion evidence
