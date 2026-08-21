@@ -1,4 +1,4 @@
-name: Validate Paradise Performance web neutral KPIs
+name: Validate Paradise Performance web KPIs and pace
 
 on:
   pull_request:
@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   contract:
-    name: Web Knock Clock + neutral-KPI contracts
+    name: Web Knock Clock + KPI + fail-closed pace contracts
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,7 +40,7 @@ jobs:
           node --check performance/client/performance-web-kpi-ui.mjs
       - name: Run KPI and Knock Clock unit contracts
         run: node --test performance/tests/performance-web-knock-clock.test.mjs performance/tests/performance-web-kpis.test.mjs performance/tests/performance-math.test.mjs
-      - name: Verify measured-only surfaces and governance boundaries
+      - name: Verify measured surfaces, pace boundaries, and governance controls
         shell: bash
         run: |
           set -euo pipefail
@@ -53,21 +53,38 @@ jobs:
           grep -q 'APPOINTMENTS / KNOCK HR' performance/client/performance-web-kpi-ui.mjs
           grep -q 'CONVERSATION RATE' performance/client/performance-web-kpi-ui.mjs
           grep -q 'APPOINTMENT RATE' performance/client/performance-web-kpi-ui.mjs
-          grep -q 'Measured only' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'DOORS PACE' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'APPOINTMENT PACE' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'GOAL_NOT_CONFIGURED' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'HISTORICAL GOAL NOT PINNED' performance/client/performance-web-kpis.mjs
+          grep -q 'PINNED GOAL VERSION MISSING' performance/client/performance-web-kpis.mjs
+          grep -q 'kpi_standard_version_label' performance/client/performance-web-kpi-ui.mjs
+          grep -q "from('performance_kpi_standard_versions')" performance/client/performance-web-kpi-ui.mjs
+          grep -q "select('version_label,applies_to_role,applies_to_office,applies_to_team,effective_from,effective_to,metric_key,minimum')" performance/client/performance-web-kpi-ui.mjs
+          grep -q 'completed shifts without a pinned version fail closed' performance/client/performance-web-kpis.mjs
+          grep -q 'volume pace requires both an explicit daily goal and explicit planned work hours' performance/client/performance-web-kpis.mjs
           grep -q 'performance-web-knock-clock-ui.mjs' index.html
           grep -q 'performance-web-kpi-ui.mjs' index.html
           grep -q 'performance/client/performance-web-knock-clock.mjs' sw.js
           grep -q 'performance/client/performance-web-knock-clock-ui.mjs' sw.js
-          if grep -Eq "from\('performance_kpi_standard_versions'\)|from\('performance_period_snapshots'\)|from\('performance_commissions'\)" performance/client/performance-web-knock-clock-ui.mjs performance/client/performance-web-kpi-ui.mjs; then
-            echo 'Measured-only web slice queried standards, snapshots, or commissions' >&2
+          if grep -Eq '\.(insert|update|upsert|delete)\(' performance/client/performance-web-kpi-ui.mjs; then
+            echo 'Pace UI introduced a write path' >&2
             exit 1
           fi
-          if grep -Eqi 'ahead of pace|behind pace|below standard|above standard|meets standard|leaderboard rank|bonus earned|commission earned|pay earned' performance/client/performance-web-knock-clock-ui.mjs performance/client/performance-web-kpi-ui.mjs; then
-            echo 'Measured-only web slice introduced an unapproved judgment or compensation claim' >&2
+          if grep -Eq "from\('performance_period_snapshots'\)|from\('performance_commissions'\)|from\('performance_pay_plan_versions'\)" performance/client/performance-web-kpi-ui.mjs; then
+            echo 'Pace UI queried snapshots, commissions, or pay plans' >&2
             exit 1
           fi
-          if grep -Eq '(^|[^0-9])10[[:space:]]*(doors|door)|0\.50[[:space:]]*(appointments|appointment)|90%/110%' performance/client/performance-web-knock-clock-ui.mjs performance/client/performance-web-kpi-ui.mjs; then
-            echo 'Measured-only runtime embedded proposed KPI target values' >&2
+          if grep -Eqi 'ahead of pace|behind pace|slightly behind|slightly ahead|bonus earned|commission earned|pay earned' performance/client/performance-web-kpi-ui.mjs performance/client/performance-web-kpis.mjs; then
+            echo 'Pace slice introduced an unapproved band or compensation claim' >&2
             exit 1
           fi
-          echo 'PASS: explicit Knock Clock + neutral KPI math present with standards/rank/pay boundaries preserved'
+          if grep -Eq 'above_standard|aboveStandard' performance/client/performance-web-kpi-ui.mjs; then
+            echo 'Pace UI consumed above-standard semantics before approval' >&2
+            exit 1
+          fi
+          if grep -Eq 'plannedWorkHours[[:space:]]*(\?\?|\|\|)[[:space:]]*[0-9]' performance/client/performance-web-kpis.mjs; then
+            echo 'Pace runtime silently defaulted planned work hours' >&2
+            exit 1
+          fi
+          echo 'PASS: explicit Knock Clock + measured KPI math + read-only fail-closed pace with pinned historical standards and no embedded targets, bands, rank, or pay logic'
