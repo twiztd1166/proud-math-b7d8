@@ -88,4 +88,4 @@ jobs:
         shell: bash
         run: |
           test "${GITHUB_REF_NAME}" = 'paradise-canvass-manager-public'
-          echo 'Dedicated preview published. Validated branch/latest.json are outside this workflow.'
+          echo 'Dedicated preview published. Validated branch and release pointer are outside this workflow.'
