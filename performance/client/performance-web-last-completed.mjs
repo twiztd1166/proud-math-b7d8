@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { createPerformanceSupabaseOptions } from './performance-session.mjs';
 import {
   WEB_ROUTE_MAX_ACCURACY_METERS,
   formatShiftClock,
@@ -9,7 +8,7 @@ import {
 } from './performance-web-summary.mjs';
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const PERFORMANCE_WEB_LAST_COMPLETED_VERSION = '2026.08.21-web-last-completed-v1';
+export const PERFORMANCE_WEB_LAST_COMPLETED_VERSION = '2026.08.21-web-last-completed-v2';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -124,11 +123,14 @@ async function refreshLastCompleted() {
 }
 
 async function boot() {
-  supabase = createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY,
-    createPerformanceSupabaseOptions(window.localStorage),
-  );
+  supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: window.localStorage,
+    },
+  });
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target.closest('#nPerf,[data-performance-web-action]') : null;
     if (!target) return;
@@ -147,5 +149,6 @@ export const ParadisePerformanceLastCompletedInvariants = Object.freeze([
   'the idle Performance screen may show the most recent authoritative finished shift without reopening or mutating it',
   'last completed start, end, duration, doors, and conversations come from the finished performance_shifts row',
   'last completed miles, estimated steps, and route trace reuse the same controlled web-summary filters as live Day Complete',
+  'the read-only helper does not run a second refresh-token loop for the shared browser session',
   'this read-only enhancement adds no new schema, privilege, third-party map provider, or background location capability',
 ]);
