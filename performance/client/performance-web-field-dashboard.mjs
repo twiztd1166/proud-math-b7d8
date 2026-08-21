@@ -12,7 +12,7 @@ import {
   normalizeRouteForSvg,
 } from './performance-web-field-metrics.mjs';
 
-export const PERFORMANCE_WEB_FIELD_DASHBOARD_VERSION = '2026.08.21-web-field-dashboard-v1';
+export const PERFORMANCE_WEB_FIELD_DASHBOARD_VERSION = '2026.08.21-web-field-dashboard-v2';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -31,7 +31,6 @@ const runtime = {
   snapshot: null,
   refreshTimer: null,
   clockTimer: null,
-  observer: null,
   refreshing: false,
   actionChain: Promise.resolve(),
   lastWarning: null,
@@ -248,6 +247,16 @@ function controlsMarkup(counts) {
   </div>`;
 }
 
+function syncCoreCountText(anchor, counts) {
+  if (!anchor) return;
+  for (const node of anchor.querySelectorAll('p,h3')) {
+    if (/\bDoors\b.*\bConversations\b/i.test(node.textContent || '')) {
+      node.textContent = `${counts.doors} Doors · ${counts.conversations} Conversations`;
+      break;
+    }
+  }
+}
+
 function renderDashboard(snapshot, domMode) {
   const main = document.getElementById('main');
   const anchor = main?.querySelector('[data-performance-web-state]');
@@ -272,8 +281,8 @@ function renderDashboard(snapshot, domMode) {
     ${warning}
   </section>`;
 
-  const existing = document.getElementById('performanceWebFieldDashboard');
-  if (existing) existing.remove();
+  syncCoreCountText(anchor, snapshot.counts);
+  document.getElementById('performanceWebFieldDashboard')?.remove();
   anchor.insertAdjacentHTML('afterend', html);
   document.querySelectorAll('[data-performance-count]').forEach(button => {
     button.addEventListener('click', () => {
@@ -332,8 +341,7 @@ async function changeCount(field, delta) {
   const result = await runtime.queue.flush().catch(() => null);
   if (result?.blockedAuth) runtime.lastWarning = 'Count saved locally; trusted-device authorization must recover before sync.';
   try {
-    const updatedCounts = { ...optimistic.counts };
-    const updatedShift = await persistShiftCounts(optimistic.shift, updatedCounts);
+    const updatedShift = await persistShiftCounts(optimistic.shift, optimistic.counts);
     runtime.snapshot = { ...optimistic, shift: updatedShift };
     runtime.lastWarning = null;
   } catch {
@@ -404,8 +412,8 @@ async function refreshDashboard() {
   }
 }
 
-function scheduleRefresh() {
-  window.setTimeout(() => { void refreshDashboard(); }, 50);
+function scheduleRefresh(delay = 50) {
+  window.setTimeout(() => { void refreshDashboard(); }, delay);
 }
 
 async function bootFieldDashboard() {
@@ -419,12 +427,17 @@ async function bootFieldDashboard() {
       store: createJsonStorageQueueStore(window.localStorage, QUEUE_KEY),
       transport: createSupabaseOperationalSyncTransport(runtime.supabase),
     });
-    runtime.observer = new MutationObserver(scheduleRefresh);
-    const main = document.getElementById('main');
-    if (main) runtime.observer.observe(main, { childList: true, subtree: true });
     runtime.refreshTimer = window.setInterval(() => { void refreshDashboard(); }, REFRESH_MS);
     runtime.clockTimer = window.setInterval(updateClockOnly, 1000);
-    document.getElementById('nPerf')?.addEventListener('click', scheduleRefresh);
+    document.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target.closest('#nPerf,[data-performance-web-action]') : null;
+      if (!target) return;
+      scheduleRefresh(target.id === 'nPerf' ? 100 : 800);
+      if (target.matches('[data-performance-web-action]')) scheduleRefresh(2500);
+    }, true);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') scheduleRefresh(250);
+    });
     await refreshDashboard();
   } catch {
     // Enhancement is additive only. The core Performance web app remains usable if this dashboard cannot initialize.
