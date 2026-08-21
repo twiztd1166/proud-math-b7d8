@@ -1,4 +1,4 @@
-export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v3';
+export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v4';
 export const WEB_ROUTE_MAX_ACCURACY_METERS = 50;
 export const WEB_ESTIMATED_STRIDE_METERS = 0.762;
 export const WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5;
@@ -57,6 +57,19 @@ export function qualifiedRoutePoints(points = [], maxAccuracyMeters = WEB_ROUTE_
       return true;
     })
     .sort((a, b) => Date.parse(a.capturedAt) - Date.parse(b.capturedAt));
+}
+
+export function splitTrackedSegments(points = [], maxTrackedGapSeconds = WEB_MAX_TRACKED_GAP_SECONDS) {
+  if (!points.length) return [];
+  const segments = [[points[0]]];
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const elapsedSeconds = (Date.parse(current.capturedAt) - Date.parse(previous.capturedAt)) / 1000;
+    if (!(elapsedSeconds > 0) || elapsedSeconds > maxTrackedGapSeconds) segments.push([current]);
+    else segments.at(-1).push(current);
+  }
+  return segments;
 }
 
 export function summarizeWebRoute(points = [], {
@@ -134,6 +147,7 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
   const averageLatitude = qualified.reduce((sum, point) => sum + point.latitude, 0) / qualified.length;
   const cosLat = Math.max(0.2, Math.cos(radians(averageLatitude)));
   const projected = qualified.map(point => ({
+    ...point,
     x: point.longitude * cosLat,
     y: point.latitude,
   }));
@@ -153,15 +167,20 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
   const offsetX = pad + (plotWidth - usedWidth) / 2;
   const offsetY = pad + (plotHeight - usedHeight) / 2;
   const screen = projected.map(point => ({
+    ...point,
     x: offsetX + (point.x - minX) * scale,
     y: height - (offsetY + (point.y - minY) * scale),
   }));
-  const polyline = screen.map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+  const segments = splitTrackedSegments(screen);
+  const polylines = segments
+    .filter(segment => segment.length > 1)
+    .map((segment, index) => `<polyline data-route-segment="${index + 1}" points="${segment.map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ')}" class="performance-route-line"></polyline>`)
+    .join('');
   const first = screen[0];
   const last = screen.at(-1);
   return `<svg class="performance-route-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="GPS route trace with ${qualified.length} qualified points">
     <rect x="1" y="1" width="${width - 2}" height="${height - 2}" rx="14" class="performance-route-bg"></rect>
-    ${qualified.length > 1 ? `<polyline points="${polyline}" class="performance-route-line"></polyline>` : ''}
+    ${polylines}
     <circle cx="${first.x.toFixed(1)}" cy="${first.y.toFixed(1)}" r="5" class="performance-route-start"></circle>
     <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="6" class="performance-route-current"></circle>
   </svg>`;
@@ -170,7 +189,7 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
 export const PerformanceWebSummaryInvariants = Object.freeze([
   'web miles are derived only from non-mocked GPS points at or better than the controlled accuracy ceiling',
   'coarse and mocked GPS fixes are excluded from distance, estimated steps, and route trace calculations',
-  'tracked-distance segments do not bridge visibility/lock gaps longer than the controlled maximum gap',
+  'tracked-distance calculations and route-line rendering never bridge visibility or lock gaps longer than the controlled maximum gap',
   'web estimated steps use only pedestrian-speed qualified GPS segments and exclude faster travel segments',
   'web estimated steps are a transparent GPS-distance estimate and are never represented as Apple Health or pedometer steps',
   'the route trace is self-contained and does not add a third-party map-tile or geocoding provider',
