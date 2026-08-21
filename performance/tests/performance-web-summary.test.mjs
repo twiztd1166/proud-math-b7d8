@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  WEB_MAX_TRACKED_GAP_SECONDS,
   WEB_ROUTE_MAX_ACCURACY_METERS,
   formatShiftDuration,
   qualifiedRoutePoints,
@@ -8,8 +9,8 @@ import {
   summarizeWebRoute,
 } from '../client/performance-web-summary.mjs';
 
-function point({ id, capturedAt, latitude, longitude, accuracyMeters = 5 }) {
-  return { clientPointId: id, capturedAt, latitude, longitude, accuracyMeters, precise: accuracyMeters <= 100, source: 'web-foreground-watch' };
+function point({ id, capturedAt, latitude, longitude, accuracyMeters = 5, mocked = false }) {
+  return { clientPointId: id, capturedAt, latitude, longitude, accuracyMeters, precise: accuracyMeters <= 100, mocked, source: 'web-foreground-watch' };
 }
 
 test('duration renders exact HH:MM:SS', () => {
@@ -17,11 +18,12 @@ test('duration renders exact HH:MM:SS', () => {
   assert.equal(formatShiftDuration('2026-08-21T00:00:00.000Z', '2026-08-22T01:02:03.000Z'), '25:02:03');
 });
 
-test('coarse fixes are excluded from route distance and step estimate', () => {
+test('coarse and mocked fixes are excluded from route distance and step estimate', () => {
   const points = [
     point({ id: 'coarse', capturedAt: '2026-08-21T17:00:00.000Z', latitude: 26.0, longitude: -80.0, accuracyMeters: 1414 }),
+    point({ id: 'mocked', capturedAt: '2026-08-21T17:00:30.000Z', latitude: 26.05, longitude: -80.05, mocked: true }),
     point({ id: 'a', capturedAt: '2026-08-21T17:01:00.000Z', latitude: 26.1000, longitude: -80.1000, accuracyMeters: 8 }),
-    point({ id: 'b', capturedAt: '2026-08-21T17:01:30.000Z', latitude: 26.1005, longitude: -80.1000, accuracyMeters: 6 }),
+    point({ id: 'b', capturedAt: '2026-08-21T17:01:20.000Z', latitude: 26.1005, longitude: -80.1000, accuracyMeters: 6 }),
   ];
   const summary = summarizeWebRoute(points);
   assert.equal(summary.qualifiedPointCount, 2);
@@ -42,6 +44,19 @@ test('vehicle-speed travel contributes to GPS miles but not estimated steps', ()
   assert.equal(summary.pedestrianDistanceMeters, 0);
   assert.equal(summary.estimatedSteps, 0);
   assert.ok(summary.miles > 0);
+});
+
+test('long hidden or locked interval is not bridged into tracked miles or steps', () => {
+  const points = [
+    point({ id: 'a', capturedAt: '2026-08-21T17:01:00.000Z', latitude: 26.1000, longitude: -80.1000 }),
+    point({ id: 'b', capturedAt: '2026-08-21T17:01:10.000Z', latitude: 26.1002, longitude: -80.1000 }),
+    point({ id: 'after-lock', capturedAt: '2026-08-21T17:02:20.000Z', latitude: 26.1012, longitude: -80.1000 }),
+  ];
+  const summary = summarizeWebRoute(points);
+  assert.equal(summary.maxTrackedGapSeconds, WEB_MAX_TRACKED_GAP_SECONDS);
+  assert.equal(summary.acceptedSegmentCount, 1);
+  assert.equal(summary.skippedGapCount, 1);
+  assert.ok(summary.distanceMeters > 20 && summary.distanceMeters < 25);
 });
 
 test('duplicate client points are counted once', () => {
