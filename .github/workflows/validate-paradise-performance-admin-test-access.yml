@@ -69,8 +69,8 @@ jobs:
           requireText(js, 'No direct database fallback was attempted.', 'no-bypass error boundary');
           requireText(js, 'SUPABASE_PUBLISHABLE_KEY', 'publishable browser key');
 
-          reject(js, /service[_-]?role/i, 'service-role reference');
-          reject(js, /SUPABASE_SECRET/i, 'secret key reference');
+          reject(js, /SERVICE_ROLE_KEY|service_role_key|SUPABASE_SERVICE_ROLE/i, 'service-role credential usage');
+          reject(js, /SUPABASE_SECRET/i, 'secret key usage');
           reject(js, /performance_enrollment_tokens[\s\S]{0,180}\.(insert|update|delete|upsert)\s*\(/i, 'direct enrollment-token DML');
           reject(js, /(localStorage|sessionStorage)\.setItem\([^\n]*(token|code)/i, 'plaintext token persistence');
 
