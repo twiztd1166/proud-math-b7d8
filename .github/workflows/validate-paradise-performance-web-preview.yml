@@ -12,12 +12,23 @@ on:
       - 'performance/client/**'
       - 'performance/shared/**'
       - '.github/workflows/validate-paradise-performance-web-preview.yml'
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'PREVIEW_SMOKE_TRIGGER.txt'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'performance-web.css'
+      - 'performance/client/**'
+      - 'performance/shared/**'
+      - '.github/workflows/validate-paradise-performance-web-preview.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: paradise-performance-web-preview
+  group: paradise-performance-web-preview-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
