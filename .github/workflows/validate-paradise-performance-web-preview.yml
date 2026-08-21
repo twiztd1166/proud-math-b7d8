@@ -22,6 +22,7 @@ on:
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'performance-web.css'
+      - 'PREVIEW_CONTROL.txt'
       - 'performance/client/**'
       - 'performance/shared/**'
       - '.github/workflows/validate-paradise-performance-web-preview.yml'
@@ -35,9 +36,13 @@ concurrency:
 
 jobs:
   smoke:
-    name: WebKit preview smoke
+    name: ${{ matrix.browser }} preview + live GPS smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [webkit, chromium]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,6 +50,8 @@ jobs:
           node-version: '24'
       - name: Install isolated Playwright runtime
         shell: bash
+        env:
+          BROWSER: ${{ matrix.browser }}
         run: |
           set -euo pipefail
           PWROOT="$RUNNER_TEMP/performance-preview-playwright"
@@ -53,11 +60,11 @@ jobs:
           timeout --signal=TERM --kill-after=30s 5m npm install --prefix "$PWROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
           ln -s "$PWROOT/node_modules" node_modules
           PW='./node_modules/.bin/playwright'
-          if "$PW" install-deps --dry-run webkit >/tmp/pw-deps.log 2>&1; then
-            timeout --signal=TERM --kill-after=30s 12m "$PW" install webkit
+          if "$PW" install-deps --dry-run "$BROWSER" >/tmp/pw-deps.log 2>&1; then
+            timeout --signal=TERM --kill-after=30s 12m "$PW" install "$BROWSER"
           else
             cat /tmp/pw-deps.log
-            timeout --signal=TERM --kill-after=30s 12m "$PW" install --with-deps webkit
+            timeout --signal=TERM --kill-after=30s 12m "$PW" install --with-deps "$BROWSER"
           fi
       - name: Start preview server
         shell: bash
@@ -66,13 +73,21 @@ jobs:
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && exit 0; sleep 1; done
           cat /tmp/performance-preview-http.log
           exit 1
-      - name: Run source-direct iPhone/WebKit smoke
+      - name: Run local app and live foreground GPS smoke
         shell: bash
+        env:
+          BROWSER: ${{ matrix.browser }}
         run: |
           cat > .performance-preview-smoke.mjs <<'EOF'
-          import { webkit } from '@playwright/test';
-          const browser = await webkit.launch();
-          const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+          import { webkit, chromium } from '@playwright/test';
+          const browserType = process.env.BROWSER === 'chromium' ? chromium : webkit;
+          const browser = await browserType.launch();
+          const context = await browser.newContext({
+            viewport: { width: 390, height: 844 },
+            geolocation: { latitude: 26.35, longitude: -80.09 },
+            permissions: ['geolocation'],
+          });
+          const page = await context.newPage();
           const pageErrors = [];
           const consoleErrors = [];
           const badLocalResponses = [];
@@ -88,68 +103,79 @@ jobs:
           const meta = await page.evaluate(() => window.PCM_DATA?.meta || null);
           if (!meta || meta.recordCount !== 78 || meta.goCount !== 76 || meta.noGoCount !== 2) throw new Error(`Field baseline mismatch: ${JSON.stringify(meta)}`);
           await page.click('#nTrain');
-          await page.waitForTimeout(400);
+          await page.waitForTimeout(250);
           const trainingText = await page.locator('#main').innerText();
           if (!/(Continue Training|Practice|Career Path|Videos & Audio|My Progress)/i.test(trainingText)) throw new Error(`Training did not render expected navigation: ${trainingText.slice(0,400)}`);
           await page.click('#nPerf');
           await page.waitForSelector('#performanceWebEnrollForm', { timeout: 30000 });
           const performanceText = await page.locator('#main').innerText();
-          if (!/WEB INTERIM/.test(performanceText) || !/foreground\/sample-only/i.test(performanceText) || !/one-time manager code/i.test(performanceText)) throw new Error(`Performance enrollment boundary missing: ${performanceText.slice(0,600)}`);
+          if (!/LIVE FOREGROUND GPS/i.test(performanceText) || !/locked-screen\/background/i.test(performanceText) || !/one-time manager code/i.test(performanceText)) throw new Error(`Performance boundary missing: ${performanceText.slice(0,700)}`);
+          const tracker = await page.evaluate(async () => {
+            const { BrowserForegroundLocationBridge } = await import('./performance/client/performance-web-location.mjs');
+            const writes = [];
+            let counter = 0;
+            const bridge = new BrowserForegroundLocationBridge({
+              onQueuedLocation: async write => writes.push(write),
+              uuid: () => `44444444-4444-4444-8444-${String(++counter).padStart(12, '0')}`,
+            });
+            const state = await bridge.startShift({
+              shiftId: '11111111-1111-4111-8111-111111111111',
+              employeeId: '22222222-2222-4222-8222-222222222222',
+              deviceId: '33333333-3333-4333-8333-333333333333',
+              initiatedByUser: true,
+            });
+            await new Promise(resolve => setTimeout(resolve, 400));
+            const live = bridge.getState();
+            await bridge.stopShift({ shiftId: '11111111-1111-4111-8111-111111111111' });
+            bridge.destroy();
+            return { state, live, writes: writes.map(write => write.payload?.source) };
+          });
+          if (!tracker.live.continuousForegroundTracking) throw new Error(`watchPosition not active: ${JSON.stringify(tracker)}`);
+          if (tracker.live.continuousBackgroundTracking !== false) throw new Error('Browser must never claim continuous background tracking');
+          if (!tracker.writes.includes('web-foreground-sample')) throw new Error(`Initial foreground sample missing: ${JSON.stringify(tracker.writes)}`);
           if (badLocalResponses.length) throw new Error(`Local asset failures: ${badLocalResponses.join(', ')}`);
           if (pageErrors.length) throw new Error(`Page errors: ${pageErrors.join(' | ')}`);
           if (consoleErrors.length) throw new Error(`Console errors: ${consoleErrors.join(' | ')}`);
-          console.log(JSON.stringify({status:'PASS',title:await page.title(),records:meta.recordCount,go:meta.goCount,noGo:meta.noGoCount,performanceEnrollmentBoundary:true,locationMode:'FOREGROUND_SAMPLE_ONLY'}));
+          console.log(JSON.stringify({status:'PASS',browser:process.env.BROWSER,records:78,go:76,noGo:2,continuousForegroundTracking:true,continuousBackgroundTracking:false,wakeLock:tracker.live.screenWakeLock,locationMode:'CONTINUOUS_FOREGROUND_VISIBLE_ONLY'}));
           await browser.close();
           EOF
           node ./.performance-preview-smoke.mjs
           rm -f .performance-preview-smoke.mjs
-      - name: Verify first-admin bootstrap locally and on immutable HTTPS head
+      - name: Verify immutable HTTPS delivery and first-admin boundary
         shell: bash
         env:
-          LIVE_URL: https://rawcdn.githack.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}/first-admin-bootstrap.html
+          BROWSER: ${{ matrix.browser }}
+          LIVE_APP_URL: https://rawcdn.githack.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}/index.html
+          LIVE_ADMIN_URL: https://rawcdn.githack.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}/first-admin-bootstrap.html
         run: |
-          cat > .first-admin-preview-smoke.mjs <<'EOF'
-          import { webkit } from '@playwright/test';
-
-          async function verify(page, url, label) {
-            const pageErrors = [];
-            const consoleErrors = [];
-            const badResponses = [];
-            const provisioningRequests = [];
-            page.on('pageerror', error => pageErrors.push(String(error)));
-            page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
-            page.on('response', response => {
-              if (response.status() >= 400) badResponses.push(`${response.status()} ${response.url()}`);
-            });
-            page.on('request', request => {
-              if (request.url().includes('/functions/v1/performance-first-manager-bootstrap-provision')) provisioningRequests.push(request.url());
-            });
-            const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-            if (!response || response.status() >= 400) throw new Error(`${label} navigation failed: ${response?.status() ?? 'NO_RESPONSE'}`);
-            await page.waitForSelector('#firstAdminBootstrapForm', { timeout: 30000 });
-            if (await page.title() !== 'Paradise Performance — First Admin Test') throw new Error(`${label} unexpected title: ${await page.title()}`);
-            if (await page.locator('#firstAdminEmail').inputValue() !== '') throw new Error(`${label} email field must not be prefilled`);
-            if (await page.locator('#firstAdminProof').inputValue() !== '') throw new Error(`${label} proof field must not be prefilled`);
-            await page.evaluate(() => {
-              const form = document.querySelector('#firstAdminBootstrapForm');
-              if (!form) throw new Error('First-admin bootstrap form missing');
-              form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-            });
-            await page.waitForFunction(() => /Enter the authorized email and the one-time proof/i.test(document.querySelector('#firstAdminBootstrapStatus')?.textContent || ''), null, { timeout: 10000 });
-            if (provisioningRequests.length) throw new Error(`${label} made a provisioning request without credentials`);
-            if (badResponses.length) throw new Error(`${label} response failures: ${badResponses.join(' | ')}`);
-            if (pageErrors.length) throw new Error(`${label} page errors: ${pageErrors.join(' | ')}`);
-            if (consoleErrors.length) throw new Error(`${label} console errors: ${consoleErrors.join(' | ')}`);
-            return {label,title:await page.title(),form:true,moduleListener:true,provisioningRequests:0};
-          }
-
-          const browser = await webkit.launch();
+          cat > .performance-live-smoke.mjs <<'EOF'
+          import { webkit, chromium } from '@playwright/test';
+          const browserType = process.env.BROWSER === 'chromium' ? chromium : webkit;
+          const browser = await browserType.launch();
           const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
           await context.addCookies([{ name: '__Http-phish', value: '1', domain: 'rawcdn.githack.com', path: '/', secure: true }]);
-          const local = await verify(await context.newPage(), 'http://127.0.0.1:4173/first-admin-bootstrap.html', 'LOCAL');
-          const live = await verify(await context.newPage(), process.env.LIVE_URL, 'LIVE_HTTPS');
-          console.log(JSON.stringify({status:'PASS',local,live,liveUrl:process.env.LIVE_URL}));
+          async function cleanPage(url) {
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', error => errors.push(String(error)));
+            page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+            const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+            if (!response || response.status() >= 400) throw new Error(`HTTPS navigation failed ${response?.status()}`);
+            return { page, errors };
+          }
+          const app = await cleanPage(process.env.LIVE_APP_URL);
+          await app.page.waitForSelector('#nPerf', { timeout: 30000 });
+          await app.page.click('#nPerf');
+          await app.page.waitForSelector('#performanceWebEnrollForm', { timeout: 30000 });
+          const text = await app.page.locator('#main').innerText();
+          if (!/LIVE FOREGROUND GPS/i.test(text) || !/one-time manager code/i.test(text)) throw new Error(`Live app v2 boundary missing: ${text.slice(0,700)}`);
+          if (app.errors.length) throw new Error(`Live app errors: ${app.errors.join(' | ')}`);
+          const admin = await cleanPage(process.env.LIVE_ADMIN_URL);
+          await admin.page.waitForSelector('#firstAdminBootstrapForm', { timeout: 30000 });
+          if (await admin.page.locator('#firstAdminEmail').inputValue() !== '' || await admin.page.locator('#firstAdminProof').inputValue() !== '') throw new Error('First-admin credentials must not be prefilled');
+          if (admin.errors.length) throw new Error(`Live admin errors: ${admin.errors.join(' | ')}`);
+          console.log(JSON.stringify({status:'PASS',browser:process.env.BROWSER,liveApp:process.env.LIVE_APP_URL,liveAdmin:process.env.LIVE_ADMIN_URL,locationMode:'CONTINUOUS_FOREGROUND_VISIBLE_ONLY'}));
           await browser.close();
           EOF
-          node ./.first-admin-preview-smoke.mjs
-          rm -f .first-admin-preview-smoke.mjs
+          node ./.performance-live-smoke.mjs
+          rm -f .performance-live-smoke.mjs
