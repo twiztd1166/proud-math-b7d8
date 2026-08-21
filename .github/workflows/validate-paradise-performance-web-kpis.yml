@@ -55,7 +55,7 @@ jobs:
           grep -q 'APPOINTMENT RATE' performance/client/performance-web-kpi-ui.mjs
           grep -q 'DOORS PACE' performance/client/performance-web-kpi-ui.mjs
           grep -q 'APPOINTMENT PACE' performance/client/performance-web-kpi-ui.mjs
-          grep -q 'GOAL NOT CONFIGURED' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'GOAL_NOT_CONFIGURED' performance/client/performance-web-kpi-ui.mjs
           grep -q 'HISTORICAL GOAL NOT PINNED' performance/client/performance-web-kpis.mjs
           grep -q 'PINNED GOAL VERSION MISSING' performance/client/performance-web-kpis.mjs
           grep -q 'kpi_standard_version_label' performance/client/performance-web-kpi-ui.mjs
