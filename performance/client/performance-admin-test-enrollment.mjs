@@ -10,6 +10,11 @@ export const PERFORMANCE_ADMIN_TEST_ENROLLMENT_VERSION = '2026.08.21-admin-test-
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
 const AUTHORIZED_TEST_ROLE = 'admin';
+const AUTHORIZED_TEST_EMPLOYEE_IDS = Object.freeze([
+  'a6eb5ecc-ca82-4b83-94f3-5a0a534e3f64',
+  'c10e9f21-e71e-4385-ab8b-855da0a506a3',
+]);
+const AUTHORIZED_TEST_EMPLOYEE_ID_SET = new Set(AUTHORIZED_TEST_EMPLOYEE_IDS);
 
 const statusEl = document.getElementById('adminTestStatus');
 const form = document.getElementById('adminTestEnrollmentForm');
@@ -23,6 +28,7 @@ const expiryEl = document.getElementById('adminTestExpiry');
 const copyButton = document.getElementById('adminTestCopy');
 
 let currentPlaintextCode = '';
+let expiryTimer = null;
 
 function setStatus(message, kind = 'info') {
   if (!statusEl) return;
@@ -30,24 +36,41 @@ function setStatus(message, kind = 'info') {
   statusEl.dataset.kind = kind;
 }
 
-function clearPlaintextCode() {
+function clearPlaintextCode({ hideResult = false } = {}) {
   currentPlaintextCode = '';
+  if (expiryTimer) window.clearTimeout(expiryTimer);
+  expiryTimer = null;
   if (codeEl) codeEl.textContent = '';
+  if (hideResult && resultCard) resultCard.hidden = true;
+}
+
+function scheduleExpiryClear(expiresAt) {
+  const delay = Math.max(0, Date.parse(expiresAt) - Date.now());
+  expiryTimer = window.setTimeout(() => {
+    clearPlaintextCode({ hideResult: true });
+    setStatus('The displayed one-time code expired and was cleared. Issue a new code if testing still requires it.', 'info');
+  }, Math.min(delay, 2147483647));
 }
 
 function displayName(employee) {
   return `${employee.display_name} — ${employee.role}`;
 }
 
-async function loadActiveAdminTesters(supabase) {
+async function loadAuthorizedAdminTesters(supabase) {
   const { data, error } = await supabase
     .from('performance_employees')
     .select('id,display_name,role,active')
+    .in('id', AUTHORIZED_TEST_EMPLOYEE_IDS)
     .eq('active', true)
     .eq('role', AUTHORIZED_TEST_ROLE)
     .order('display_name', { ascending: true });
   if (error) throw error;
-  return (data ?? []).filter(employee => employee?.id && employee?.display_name && employee?.active === true && employee?.role === AUTHORIZED_TEST_ROLE);
+  return (data ?? []).filter(employee =>
+    employee?.id
+    && employee?.display_name
+    && employee?.active === true
+    && employee?.role === AUTHORIZED_TEST_ROLE
+    && AUTHORIZED_TEST_EMPLOYEE_ID_SET.has(employee.id));
 }
 
 function populateEmployees(employees, currentEmployeeId) {
@@ -81,39 +104,45 @@ async function bootAdminTestEnrollment() {
     return;
   }
 
-  if (session.status !== 'READY' || session.role !== AUTHORIZED_TEST_ROLE) {
-    setStatus('This page requires an enrolled Paradise admin test browser. No enrollment code was issued.', 'error');
+  if (
+    session.status !== 'READY'
+    || session.role !== AUTHORIZED_TEST_ROLE
+    || !AUTHORIZED_TEST_EMPLOYEE_ID_SET.has(session.employeeId)
+  ) {
+    setStatus('This page requires one of the designated enrolled Paradise admin test browsers. No enrollment code was issued.', 'error');
     return;
   }
 
   let employees;
   try {
-    employees = await loadActiveAdminTesters(supabase);
+    employees = await loadAuthorizedAdminTesters(supabase);
   } catch {
-    setStatus('Could not load the active admin test list. No enrollment code was issued.', 'error');
+    setStatus('Could not load the designated admin test list. No enrollment code was issued.', 'error');
     return;
   }
 
   if (!employees.length) {
-    setStatus('No active Paradise admin testers are available for test enrollment.', 'error');
+    setStatus('No designated Paradise admin testers are currently active for test enrollment.', 'error');
     return;
   }
 
   populateEmployees(employees, session.employeeId);
   form.hidden = false;
-  setStatus('Authorized admin test browser. Issue a short-lived one-time code only for the intended admin tester.', 'success');
+  setStatus('Authorized designated admin test browser. Issue a short-lived one-time code only for the intended admin tester.', 'success');
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    clearPlaintextCode();
-    resultCard.hidden = true;
+    clearPlaintextCode({ hideResult: true });
     if (issueButton) issueButton.disabled = true;
 
     const employeeId = employeeSelect.value;
-    const selectedEmployee = employees.find(employee => employee.id === employeeId && employee.role === AUTHORIZED_TEST_ROLE);
+    const selectedEmployee = employees.find(employee =>
+      employee.id === employeeId
+      && employee.role === AUTHORIZED_TEST_ROLE
+      && AUTHORIZED_TEST_EMPLOYEE_ID_SET.has(employee.id));
     const expiresMinutes = Number(expiresSelect.value || 10);
     if (!selectedEmployee) {
-      setStatus('Select a valid active admin tester.', 'error');
+      setStatus('Select a valid designated active admin tester.', 'error');
       if (issueButton) issueButton.disabled = false;
       return;
     }
@@ -127,9 +156,10 @@ async function bootAdminTestEnrollment() {
       if (codeEl) codeEl.textContent = currentPlaintextCode;
       if (expiryEl) expiryEl.textContent = `Expires ${new Date(enrollment.expiresAt).toLocaleString()}`;
       resultCard.hidden = false;
+      scheduleExpiryClear(enrollment.expiresAt);
       setStatus('One-time admin test enrollment issued. It is short-lived and the plaintext is not persisted by this page.', 'success');
     } catch {
-      clearPlaintextCode();
+      clearPlaintextCode({ hideResult: true });
       setStatus('Enrollment code could not be issued. No direct database fallback was attempted.', 'error');
     } finally {
       if (issueButton) issueButton.disabled = false;
@@ -146,16 +176,16 @@ async function bootAdminTestEnrollment() {
     }
   });
 
-  window.addEventListener('pagehide', clearPlaintextCode, { once: true });
+  window.addEventListener('pagehide', () => clearPlaintextCode({ hideResult: true }), { once: true });
 }
 
 void bootAdminTestEnrollment();
 
 export const PerformanceAdminTestEnrollmentInvariants = Object.freeze([
-  'the page requires an existing READY trusted-device session with admin role before showing enrollment controls',
-  'the test page offers active admin employee records only and cannot be used for employee-wide enrollment',
+  'the page requires an existing READY trusted-device session with admin role and a designated admin-test employee identity before showing controls',
+  'the test cohort is explicitly limited to the two designated active admin employee identities',
   'the server-side performance-enrollment-mint function independently enforces manager/admin authorization',
-  'the one-time token is generated server-side, remains short-lived, and is not persisted by this page',
+  'the one-time token is generated server-side, remains short-lived, is cleared on expiry or page hide, and is not persisted by this page',
   'no Supabase secret or service-role credential is present in the browser',
   'no direct client write to performance_enrollment_tokens is used',
   'this surface is controlled admin testing only and does not authorize employee rollout',
