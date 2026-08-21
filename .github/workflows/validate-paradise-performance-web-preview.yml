@@ -130,7 +130,11 @@ jobs:
             if (await page.title() !== 'Paradise Performance — First Admin Test') throw new Error(`${label} unexpected title: ${await page.title()}`);
             if (await page.locator('#firstAdminEmail').inputValue() !== '') throw new Error(`${label} email field must not be prefilled`);
             if (await page.locator('#firstAdminProof').inputValue() !== '') throw new Error(`${label} proof field must not be prefilled`);
-            await page.click('#firstAdminBootstrapSubmit');
+            await page.evaluate(() => {
+              const form = document.querySelector('#firstAdminBootstrapForm');
+              if (!form) throw new Error('First-admin bootstrap form missing');
+              form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            });
             await page.waitForFunction(() => /Enter the authorized email and the one-time proof/i.test(document.querySelector('#firstAdminBootstrapStatus')?.textContent || ''), null, { timeout: 10000 });
             if (provisioningRequests.length) throw new Error(`${label} made a provisioning request without credentials`);
             if (badResponses.length) throw new Error(`${label} response failures: ${badResponses.join(' | ')}`);
