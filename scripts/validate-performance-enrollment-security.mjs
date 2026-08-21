@@ -13,6 +13,7 @@ const readSession = read('supabase/migrations/20260818091500_paradise_performanc
 const config = read('supabase/config.toml');
 const edgeAuth = read('supabase/functions/_shared/performance-auth.ts');
 const reviewMint = read('supabase/functions/performance-review-enrollment-mint/index.ts');
+const bootstrapMint = read('supabase/functions/performance-first-manager-bootstrap-mint/index.ts');
 const reviewClient = read('performance/client/performance-store-review-access.mjs');
 const nativeApp = read('performance/client/performance-native-app.mjs');
 
@@ -56,6 +57,28 @@ forbidText(reviewMint, /body\?\.employeeId|body\.employeeId/i, 'Store-review cal
 forbidText(reviewMint, /Deno\.env\.get\([^)]*(PASSWORD|REVIEW_PASSWORD)/i, 'Reusable review password must not be an Edge Function environment secret');
 
 for (const required of [
+  /auth\.auth\.getUser\(jwt\)/i,
+  /paradise_performance_first_manager_bootstrap/i,
+  /performance_bootstrap_manager_employee_id/i,
+  /SYNTHETIC_REVIEW_EMPLOYEE_IDS/i,
+  /SYNTHETIC_REVIEW_EMPLOYEE_FORBIDDEN/i,
+  /\['manager', 'admin'\]\.includes\(manager\.role\)/i,
+  /PRIVILEGED_PERFORMANCE_ACTOR_ALREADY_EXISTS/i,
+  /FIRST_MANAGER_BOOTSTRAP_ALREADY_USED/i,
+  /randomSecret\(32\)/i,
+  /sha256Hex\(token\)/i,
+  /BOOTSTRAP_TOKEN_MINUTES = 10/i,
+  /admin\.auth\.admin\.updateUserById\(bootstrapUser\.id/i,
+  /ban_duration:\s*LONG_BAN_DURATION/i,
+  /BOOTSTRAP_IDENTITY_DISABLE_FAILED/i,
+  /REDEEM_IMMEDIATELY_THROUGH_ORDINARY_TRUSTED_DEVICE_FLOW/i,
+]) requireText(bootstrapMint, required, `First-manager bootstrap security control missing: ${required}`);
+forbidText(bootstrapMint, /authenticatePerformanceActor\(/i, 'Initial manager bootstrap cannot require an already-enrolled Performance actor');
+forbidText(bootstrapMint, /body\?\.employeeId|body\.employeeId/i, 'Bootstrap caller must not choose the manager target in request body');
+forbidText(bootstrapMint, /Deno\.env\.get\([^)]*(PASSWORD|BOOTSTRAP_SECRET|BOOTSTRAP_PASSWORD)/i, 'Bootstrap password/secret must not be an Edge Function environment secret');
+forbidText(bootstrapMint, /createUser\(/i, 'Bootstrap Edge Function must not create its own human-facing bootstrap Auth user');
+
+for (const required of [
   /persistSession:\s*false/i,
   /autoRefreshToken:\s*false/i,
   /signInWithPassword/i,
@@ -75,9 +98,10 @@ const expectedJwtModes = {
   'performance-enrollment-redeem': false,
   'performance-device-revoke': true,
   'performance-review-enrollment-mint': true,
+  'performance-first-manager-bootstrap-mint': true,
 };
 for (const [fn, expected] of Object.entries(expectedJwtModes)) {
   requireText(config, new RegExp(`\\[functions\\.${fn}\\][\\s\\S]{0,100}verify_jwt\\s*=\\s*${expected}`, 'i'), `verify_jwt=${expected} missing for ${fn}`);
 }
 
-console.log('Paradise Performance enrollment/read-session/store-review security validation: PASS');
+console.log('Paradise Performance enrollment/read-session/store-review/first-manager-bootstrap security validation: PASS');
