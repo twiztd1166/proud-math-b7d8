@@ -1,3 +1,4 @@
+# Controlled non-production preview publisher. No employee rollout or validated-release movement.
 name: Publish Paradise Performance web interim preview
 
 on:
