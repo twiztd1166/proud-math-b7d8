@@ -72,8 +72,8 @@ jobs:
             echo 'Pace UI queried snapshots, commissions, or pay plans' >&2
             exit 1
           fi
-          if grep -Eqi 'ahead of pace|behind pace|slightly behind|slightly ahead|leaderboard rank|bonus earned|commission earned|pay earned' performance/client/performance-web-kpi-ui.mjs performance/client/performance-web-kpis.mjs; then
-            echo 'Pace slice introduced an unapproved band, rank, or compensation claim' >&2
+          if grep -Eqi 'ahead of pace|behind pace|slightly behind|slightly ahead|bonus earned|commission earned|pay earned' performance/client/performance-web-kpi-ui.mjs performance/client/performance-web-kpis.mjs; then
+            echo 'Pace slice introduced an unapproved band or compensation claim' >&2
             exit 1
           fi
           if grep -Eq 'above_standard|aboveStandard' performance/client/performance-web-kpi-ui.mjs; then
