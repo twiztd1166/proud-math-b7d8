@@ -1,4 +1,4 @@
-export const PERFORMANCE_WEB_KNOCK_CLOCK_VERSION = '2026.08.21-web-knock-clock-v1';
+export const PERFORMANCE_WEB_KNOCK_CLOCK_VERSION = '2026.08.21-web-knock-clock-v2';
 export const KNOCK_EVENT_TYPES = Object.freeze(['KNOCK_STARTED', 'KNOCK_STOPPED']);
 
 const ACTIVE_SHIFT_STATUSES = new Set(['active', 'paused', 'finishing']);
@@ -11,6 +11,7 @@ function field(record, ...keys) {
 }
 
 function instantMs(value) {
+  if (value === null || value === undefined || value === '') return null;
   const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
   return Number.isFinite(date.getTime()) ? date.getTime() : null;
 }
@@ -141,6 +142,7 @@ export function formatKnockDuration(seconds) {
 }
 
 export const ParadisePerformanceWebKnockClockInvariants = Object.freeze([
+  'absent, null, and blank timestamps are treated as unavailable and never coerced to the Unix epoch',
   'productive Knock Clock time is explicit event evidence and is never inferred solely from GPS',
   'Start My Day does not automatically start productive Knock Clock time',
   'repeated starts and stops cannot double-count productive time',
