@@ -19,14 +19,22 @@ for (const required of [
   'validateTrustedDeviceSession',
   'performance_devices',
   'Paradise Performance Web Interim',
-  'CAPTURE LOCATION NOW',
+  'RESUME LIVE GPS',
   'CLEAR WEB ACCESS',
 ]) if (!sourceApp.includes(required)) throw new Error(`Web interim source missing control: ${required}`);
 
-for (const required of ['getCurrentPosition', 'web-foreground-sample', 'continuousBackgroundTracking: false']) {
-  if (!sourceLocation.includes(required)) throw new Error(`Web location source missing control: ${required}`);
-}
-if (/\.watchPosition\s*\(/.test(sourceLocation)) throw new Error('Web location source must not call watchPosition');
+for (const required of [
+  'getCurrentPosition',
+  'watchPosition',
+  'clearWatch',
+  'web-foreground-sample',
+  'web-foreground-watch',
+  "wakeLock.request('screen')",
+  'visibilitychange',
+  'continuousForegroundTracking',
+  'continuousBackgroundTracking: false',
+]) if (!sourceLocation.includes(required)) throw new Error(`Web location source missing control: ${required}`);
+
 for (const prohibited of ['service_role', 'sb_secret_', 'ACCESS_BACKGROUND_LOCATION']) {
   if (sourceApp.includes(prohibited) || sourceLocation.includes(prohibited)) throw new Error(`Web interim client contains prohibited privileged/background marker: ${prohibited}`);
 }
@@ -49,10 +57,17 @@ if (built) {
   for (const asset of ["'./performance-web-app.js'", "'./performance-web.css'"]) {
     if (!sw.includes(asset)) throw new Error(`Service worker CORE missing ${asset}`);
   }
-  for (const required of ['web-test', 'web-foreground-sample', 'START MY DAY', 'FINISH DAY', 'CAPTURE LOCATION NOW']) {
-    if (!bundle.includes(required)) throw new Error(`Built web bundle missing ${required}`);
-  }
-  if (/\.watchPosition\s*\(/.test(bundle)) throw new Error('Built web bundle unexpectedly enables continuous browser location tracking');
+  for (const required of [
+    'web-test',
+    'web-foreground-sample',
+    'web-foreground-watch',
+    'watchPosition',
+    'clearWatch',
+    'wakeLock',
+    'START MY DAY',
+    'FINISH DAY',
+    'RESUME LIVE GPS',
+  ]) if (!bundle.includes(required)) throw new Error(`Built web bundle missing ${required}`);
   if (/sb_secret_[A-Za-z0-9_-]{20,}/.test(bundle)) throw new Error('Built web bundle contains Supabase secret-key material');
   if (bundle.includes('performance_sets')) throw new Error('Built web bundle contains dormant customer SET material');
   for (const required of ['"goCount":76', '"noGoCount":2', '"recordCount":78']) {
