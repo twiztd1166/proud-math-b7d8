@@ -56,15 +56,17 @@ jobs:
           };
 
           requireText(html, 'noindex,nofollow,noarchive', 'noindex control');
-          requireText(html, 'CONTROLLED TESTING ONLY · NOT EMPLOYEE ROLLOUT', 'testing-only boundary');
+          requireText(html, 'CONTROLLED ADMIN TESTING ONLY · NOT EMPLOYEE ROLLOUT', 'testing-only boundary');
+          requireText(html, 'only offers active admin test profiles', 'admin-target boundary');
           requireText(html, 'performance-admin-test-enrollment.mjs', 'admin controller module');
 
           requireText(js, 'validateTrustedDeviceSession', 'trusted-session validation');
-          requireText(js, "new Set(['manager', 'admin'])", 'manager/admin client gate');
-          requireText(js, "session.status !== 'READY'", 'READY fail-closed gate');
+          requireText(js, "const AUTHORIZED_TEST_ROLE = 'admin';", 'admin-only client gate');
+          requireText(js, "session.status !== 'READY' || session.role !== AUTHORIZED_TEST_ROLE", 'READY admin fail-closed gate');
           requireText(js, 'mintEnrollment', 'existing protected mint helper');
           requireText(js, ".from('performance_employees')", 'employee directory read');
           requireText(js, ".eq('active', true)", 'active employee filter');
+          requireText(js, ".eq('role', AUTHORIZED_TEST_ROLE)", 'admin target filter');
           requireText(js, 'clearPlaintextCode', 'plaintext cleanup');
           requireText(js, 'No direct database fallback was attempted.', 'no-bypass error boundary');
           requireText(js, 'SUPABASE_PUBLISHABLE_KEY', 'publishable browser key');
@@ -74,5 +76,5 @@ jobs:
           reject(js, /performance_enrollment_tokens[\s\S]{0,180}\.(insert|update|delete|upsert)\s*\(/i, 'direct enrollment-token DML');
           reject(js, /(localStorage|sessionStorage)\.setItem\([^\n]*(token|code)/i, 'plaintext token persistence');
 
-          console.log('Paradise Performance admin test enrollment controls: PASS');
+          console.log('Paradise Performance admin-only test enrollment controls: PASS');
           EOF
