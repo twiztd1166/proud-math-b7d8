@@ -4,9 +4,16 @@ import { createJsonStorageQueueStore, PerformanceSyncQueue } from './performance
 import { createSupabaseOperationalSyncTransport } from './performance-operational-sync.mjs';
 import { createSupabaseShiftTransport, PerformanceTodayController } from './performance-today.mjs';
 import { BrowserForegroundLocationBridge } from './performance-web-location.mjs';
+import {
+  WEB_ROUTE_MAX_ACCURACY_METERS,
+  formatShiftClock,
+  formatShiftDuration,
+  renderWebRouteTrace,
+  summarizeWebRoute,
+} from './performance-web-summary.mjs';
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const PARADISE_PERFORMANCE_WEB_INTERIM_VERSION = '2026.08.21-web-interim-v2';
+export const PARADISE_PERFORMANCE_WEB_INTERIM_VERSION = '2026.08.21-web-interim-v3';
 const STORE_VERSION = 'web-interim-v1';
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -14,6 +21,7 @@ const DEVICE_PUBLIC_ID_KEY = 'paradise-performance-web-device-public-id-v1';
 const DEVICE_ID_KEY = 'paradise-performance-web-device-id-v1';
 const EMPLOYEE_ID_KEY = 'paradise-performance-web-employee-id-v1';
 const QUEUE_KEY = 'paradise-performance-web-offline-v1';
+const COUNT_DRAFT_PREFIX = 'paradise-performance-web-counts-v1:';
 const BINDING_KEYS = [DEVICE_PUBLIC_ID_KEY, DEVICE_ID_KEY, EMPLOYEE_ID_KEY];
 
 const runtime = {
@@ -24,6 +32,9 @@ const runtime = {
   locationBridge: null,
   controller: null,
   session: null,
+  routeShiftId: null,
+  routePoints: new Map(),
+  telemetryTimer: null,
 };
 
 const main = document.getElementById('main');
@@ -95,13 +106,164 @@ function wakeLockLabel(location = {}) {
   return 'Screen keep-awake starts best-effort with live GPS';
 }
 
-function elapsed(startedAt) {
-  const start = new Date(startedAt);
-  if (Number.isNaN(start.valueOf())) return '';
-  const minutes = Math.max(0, Math.floor((Date.now() - start.valueOf()) / 60000));
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return hours ? `${hours} hr ${mins} min` : `${mins} min`;
+function routeArray() {
+  return Array.from(runtime.routePoints.values());
+}
+
+function resetRoute(shiftId = null) {
+  runtime.routeShiftId = shiftId;
+  runtime.routePoints = new Map();
+}
+
+function ingestRoutePoint(point) {
+  const shiftId = String(point?.shiftId ?? point?.shift_id ?? '');
+  const clientPointId = String(point?.clientPointId ?? point?.client_point_id ?? point?.id ?? '');
+  if (!isUuid(shiftId) || !clientPointId) return;
+  if (runtime.routeShiftId !== shiftId) resetRoute(shiftId);
+  if (runtime.routePoints.has(clientPointId)) return;
+  runtime.routePoints.set(clientPointId, {
+    clientPointId,
+    capturedAt: point?.capturedAt ?? point?.captured_at,
+    latitude: Number(point?.latitude),
+    longitude: Number(point?.longitude),
+    accuracyMeters: Number(point?.accuracyMeters ?? point?.accuracy_meters),
+    precise: point?.precise !== false,
+    source: point?.source ?? '',
+  });
+}
+
+function ingestQueuedLocation(write) {
+  if (write?.kind !== 'LOCATION') return;
+  ingestRoutePoint({
+    clientPointId: write.id,
+    shiftId: write.payload?.shiftId,
+    capturedAt: write.capturedAt,
+    latitude: write.payload?.latitude,
+    longitude: write.payload?.longitude,
+    accuracyMeters: write.payload?.accuracyMeters,
+    precise: write.payload?.precise,
+    source: write.payload?.source,
+  });
+}
+
+async function hydrateRoute(shiftId) {
+  if (!isUuid(shiftId)) {
+    resetRoute();
+    return;
+  }
+  resetRoute(shiftId);
+  const { data, error } = await runtime.supabase
+    .from('performance_location_points')
+    .select('client_point_id,shift_id,captured_at,latitude,longitude,accuracy_meters,precise,source')
+    .eq('shift_id', shiftId)
+    .order('captured_at', { ascending: true });
+  if (error) throw error;
+  for (const point of data || []) ingestRoutePoint(point);
+}
+
+function routeSummary() {
+  return summarizeWebRoute(routeArray());
+}
+
+function countDraftKey(shiftId) {
+  return `${COUNT_DRAFT_PREFIX}${shiftId}`;
+}
+
+function normalizeCount(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isInteger(number) && number >= 0 ? number : fallback;
+}
+
+function readVisibleCounts(shift = {}) {
+  if (!isUuid(shift.id)) {
+    return { doors: normalizeCount(shift.doors), conversations: normalizeCount(shift.conversations) };
+  }
+  try {
+    const raw = window.localStorage.getItem(countDraftKey(shift.id));
+    if (raw) {
+      const draft = JSON.parse(raw);
+      return {
+        doors: normalizeCount(draft.doors, normalizeCount(shift.doors)),
+        conversations: normalizeCount(draft.conversations, normalizeCount(shift.conversations)),
+      };
+    }
+  } catch { /* use authoritative shift values */ }
+  return { doors: normalizeCount(shift.doors), conversations: normalizeCount(shift.conversations) };
+}
+
+function writeCountDraft(shiftId, counts) {
+  if (!isUuid(shiftId)) return;
+  window.localStorage.setItem(countDraftKey(shiftId), JSON.stringify({
+    doors: normalizeCount(counts.doors),
+    conversations: normalizeCount(counts.conversations),
+  }));
+}
+
+function clearCountDraft(shiftId) {
+  if (isUuid(shiftId)) window.localStorage.removeItem(countDraftKey(shiftId));
+}
+
+async function syncVisibleCounts() {
+  const state = runtime.controller?.getState?.();
+  if (!state?.shift || !['ACTIVE', 'FINISHING'].includes(state.mode)) return false;
+  const counts = readVisibleCounts(state.shift);
+  try {
+    await runtime.controller.updateCounts(counts);
+    clearCountDraft(state.shift.id);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function metricMarkup(shift, active) {
+  const summary = routeSummary();
+  const end = active ? Date.now() : shift.finished_at;
+  const startText = formatShiftClock(shift.started_at);
+  const endText = active ? '—' : formatShiftClock(shift.finished_at);
+  const duration = formatShiftDuration(shift.started_at, end);
+  return `<div class="performance-web-metrics" aria-label="Shift summary">
+    <div class="performance-web-metric"><span>START</span><strong data-performance-start>${esc(startText)}</strong></div>
+    <div class="performance-web-metric"><span>END</span><strong data-performance-end>${esc(endText)}</strong></div>
+    <div class="performance-web-metric"><span>DURATION</span><strong data-performance-duration>${esc(duration)}</strong></div>
+    <div class="performance-web-metric"><span>GPS MILES</span><strong data-performance-miles>${summary.miles.toFixed(2)}</strong></div>
+    <div class="performance-web-metric"><span>EST. STEPS</span><strong data-performance-steps>${summary.estimatedSteps.toLocaleString()}</strong></div>
+  </div>`;
+}
+
+function routeMarkup() {
+  const summary = routeSummary();
+  return `<div class="performance-web-route-card">
+    <div class="performance-web-route-heading">
+      <div><span>LIVE ROUTE TRACE</span><strong>${summary.qualifiedPointCount} qualified GPS points</strong></div>
+      <small>Uses fixes ≤ ${WEB_ROUTE_MAX_ACCURACY_METERS} m. Coarse fixes are excluded.</small>
+    </div>
+    <div data-performance-route>${renderWebRouteTrace(routeArray())}</div>
+    <p class="performance-web-route-note">Route trace only — no third-party street-map provider is loaded in this controlled web interim.</p>
+  </div>`;
+}
+
+function counterMarkup(shift, disabled = false) {
+  const counts = readVisibleCounts(shift);
+  const disabledAttr = disabled ? ' disabled aria-disabled="true"' : '';
+  const doorsMinusDisabled = disabled || counts.doors <= 0 ? ' disabled aria-disabled="true"' : '';
+  const conversationsMinusDisabled = disabled || counts.conversations <= 0 ? ' disabled aria-disabled="true"' : '';
+  return `<div class="performance-web-counters" aria-label="Daily field counts">
+    <div class="performance-web-counter">
+      <div><span>DOORS KNOCKED</span><strong data-performance-count-value="doors">${counts.doors}</strong></div>
+      <div class="performance-web-counter-actions">
+        <button type="button" class="performance-count-btn" data-performance-count="doors" data-delta="-1" aria-label="Subtract one door"${doorsMinusDisabled}>−</button>
+        <button type="button" class="performance-count-btn performance-count-add" data-performance-count="doors" data-delta="1" aria-label="Add one door"${disabledAttr}>+ DOOR</button>
+      </div>
+    </div>
+    <div class="performance-web-counter">
+      <div><span>CONVERSATIONS</span><strong data-performance-count-value="conversations">${counts.conversations}</strong></div>
+      <div class="performance-web-counter-actions">
+        <button type="button" class="performance-count-btn" data-performance-count="conversations" data-delta="-1" aria-label="Subtract one conversation"${conversationsMinusDisabled}>−</button>
+        <button type="button" class="performance-count-btn performance-count-add" data-performance-count="conversations" data-delta="1" aria-label="Add one conversation"${disabledAttr}>+ CONVERSATION</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function todayMarkup(state) {
@@ -120,10 +282,13 @@ function todayMarkup(state) {
     const shift = state.shift || {};
     const gpsAction = state.location?.continuousForegroundTracking ? 'CAPTURE GPS NOW' : 'RESUME LIVE GPS';
     return `<div class="performance-web-card" data-performance-web-state="active">
-      <p class="performance-eyebrow">SHIFT ACTIVE · ${esc(elapsed(shift.started_at))}</p>
+      <p class="performance-eyebrow">SHIFT ACTIVE</p>
       <h3>${esc(locationLabel(state.location))}</h3>
       <p>${esc(wakeLockLabel(state.location))}</p>
-      <p>${esc(shift.doors ?? 0)} Doors · ${esc(shift.conversations ?? 0)} Conversations</p>
+      ${metricMarkup(shift, true)}
+      ${counterMarkup(shift, Boolean(state.busy))}
+      ${routeMarkup()}
+      <p class="performance-web-step-note">Estimated steps are derived from qualified GPS distance in the web interim; they are not Apple Health or iPhone pedometer steps.</p>
       <p class="performance-web-boundary">Keep Paradise visible for continuous web GPS. Switching apps or locking the phone pauses browser tracking; returning to Paradise automatically resumes when location permission is already granted. Native apps are still required for true background/locked-screen GPS.</p>
       ${warning}
       <button class="btn primary" data-performance-web-action="sample" type="button"${disabled}>${gpsAction}</button>
@@ -132,13 +297,48 @@ function todayMarkup(state) {
   }
   if (state.mode === 'COMPLETE') {
     const shift = state.shift || {};
-    return `<div class="performance-web-card" data-performance-web-state="complete">
+    const counts = readVisibleCounts(shift);
+    return `<div class="performance-web-card performance-web-complete" data-performance-web-state="complete">
       <p class="performance-eyebrow">DAY COMPLETE ✓</p>
-      <h3>${esc(shift.doors ?? 0)} Doors · ${esc(shift.conversations ?? 0)} Conversations</h3>
+      <h3>${counts.doors} Doors · ${counts.conversations} Conversations</h3>
+      ${metricMarkup(shift, false)}
+      ${routeMarkup()}
+      <p class="performance-web-step-note">Estimated steps are GPS-distance based in this web interim. The native app can use platform pedometer data after that capability is separately implemented and validated.</p>
       ${warning}
     </div>`;
   }
   return `<div class="performance-web-card"><h3>Performance needs attention</h3>${warning}</div>`;
+}
+
+function refreshLiveTelemetry() {
+  const state = runtime.controller?.getState?.();
+  if (!state?.shift) return;
+  const active = state.mode === 'ACTIVE' || state.mode === 'FINISHING';
+  const summary = routeSummary();
+  const startNode = main?.querySelector('[data-performance-start]');
+  const endNode = main?.querySelector('[data-performance-end]');
+  const durationNode = main?.querySelector('[data-performance-duration]');
+  const milesNode = main?.querySelector('[data-performance-miles]');
+  const stepsNode = main?.querySelector('[data-performance-steps]');
+  const routeNode = main?.querySelector('[data-performance-route]');
+  if (startNode) startNode.textContent = formatShiftClock(state.shift.started_at);
+  if (endNode) endNode.textContent = active ? '—' : formatShiftClock(state.shift.finished_at);
+  if (durationNode) durationNode.textContent = formatShiftDuration(state.shift.started_at, active ? Date.now() : state.shift.finished_at);
+  if (milesNode) milesNode.textContent = summary.miles.toFixed(2);
+  if (stepsNode) stepsNode.textContent = summary.estimatedSteps.toLocaleString();
+  if (routeNode) routeNode.innerHTML = renderWebRouteTrace(routeArray());
+}
+
+async function adjustCount(kind, delta) {
+  const state = runtime.controller?.getState?.();
+  if (!state?.shift || !['ACTIVE', 'FINISHING'].includes(state.mode)) return;
+  const counts = readVisibleCounts(state.shift);
+  if (kind !== 'doors' && kind !== 'conversations') return;
+  counts[kind] = Math.max(0, normalizeCount(counts[kind]) + Number(delta || 0));
+  writeCountDraft(state.shift.id, counts);
+  try { await runtime.controller.updateCounts(counts); clearCountDraft(state.shift.id); }
+  catch { /* warning is exposed by the controller; draft remains local for retry */ }
+  await renderPerformance();
 }
 
 async function clearBindings() {
@@ -149,6 +349,7 @@ async function clearWebAccess() {
   await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
   await runtime.supabase?.auth?.signOut({ scope: 'local' }).catch(() => undefined);
   await clearBindings();
+  resetRoute();
   runtime.controller = null;
   runtime.session = null;
   runtime.phase = 'ENROLL';
@@ -176,6 +377,9 @@ async function createController(employeeId, deviceId) {
     syncQueue: runtime.queue,
   });
   await controller.load();
+  const state = controller.getState();
+  if (state.shift?.id) await hydrateRoute(state.shift.id);
+  else resetRoute();
   return controller;
 }
 
@@ -187,6 +391,7 @@ async function resolveSession() {
   if (state.status === 'NO_SESSION' || state.status === 'REVOKED_OR_UNENROLLED') {
     await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
     await clearBindings();
+    resetRoute();
     runtime.phase = 'ENROLL';
     if (state.status === 'REVOKED_OR_UNENROLLED') runtime.error = 'This web trusted-device session is no longer active. Ask a manager for a new code.';
     return;
@@ -203,6 +408,7 @@ async function resolveSession() {
     await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
     await runtime.supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
     await clearBindings();
+    resetRoute();
     runtime.phase = 'ENROLL';
     runtime.error = 'This browser binding is incomplete or no longer valid. Ask a manager for a new code.';
     return;
@@ -211,6 +417,7 @@ async function resolveSession() {
   await runtime.queue.releaseAuthBlocked();
   await runtime.queue.flush().catch(() => undefined);
   runtime.controller = await createController(state.employeeId, deviceId);
+  await syncVisibleCounts();
   runtime.phase = 'READY';
 }
 
@@ -237,6 +444,7 @@ async function enrollBrowser(token) {
   } catch (error) {
     await runtime.supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
     await clearBindings();
+    resetRoute();
     throw error;
   }
 }
@@ -284,28 +492,45 @@ async function renderPerformance() {
   }
   if (runtime.phase === 'READY' && runtime.controller) {
     main.innerHTML = shell(`${todayMarkup(runtime.controller.getState())}<div class="performance-web-card performance-web-security"><h3>Web interim security</h3><p>This browser holds a revocable trusted-device session in same-origin browser storage. Use only a private company-controlled device.</p><button id="performanceWebClear" class="btn secondary" type="button">CLEAR WEB ACCESS</button></div>`);
+
+    main.querySelectorAll('[data-performance-count]').forEach(button => button.addEventListener('click', async () => {
+      button.disabled = true;
+      await adjustCount(button.dataset.performanceCount, Number(button.dataset.delta || 0));
+    }, { once: true }));
+
     main.querySelectorAll('[data-performance-web-action]').forEach(button => button.addEventListener('click', async () => {
       const action = button.dataset.performanceWebAction;
       button.disabled = true;
       try {
-        if (action === 'start') await runtime.controller.startMyDay();
+        if (action === 'start') {
+          await runtime.controller.startMyDay();
+          const active = runtime.controller.getState().shift;
+          if (active?.id && runtime.routeShiftId !== active.id) await hydrateRoute(active.id);
+        }
         if (action === 'sample') {
           const liveState = runtime.locationBridge.getState();
           if (liveState.continuousForegroundTracking) await runtime.locationBridge.captureNow();
           else await runtime.locationBridge.resumeForegroundTracking({ initiatedByUser: true });
           await runtime.controller.load();
         }
-        if (action === 'finish') await runtime.controller.finishDay();
+        if (action === 'finish') {
+          const before = runtime.controller.getState();
+          const counts = readVisibleCounts(before.shift || {});
+          await runtime.controller.finishDay(counts);
+          clearCountDraft(before.shift?.id);
+        }
         await runtime.queue.flush().catch(() => undefined);
       } catch (error) {
         runtime.error = safeMessage(error);
       }
       await renderPerformance();
     }, { once: true }));
+
     document.getElementById('performanceWebClear')?.addEventListener('click', async () => {
       await clearWebAccess();
       await renderPerformance();
     }, { once: true });
+    refreshLiveTelemetry();
   }
 }
 
@@ -314,6 +539,7 @@ async function bootWebPerformance() {
   performanceNav.hidden = false;
   performanceNav.addEventListener('click', () => { void renderPerformance(); });
   otherNav.forEach(button => button.addEventListener('click', () => setPerformanceNavActive(false)));
+  window.addEventListener('online', () => { void syncVisibleCounts().then(() => renderPerformance()); });
 
   try {
     runtime.supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, createPerformanceSupabaseOptions(window.localStorage));
@@ -323,8 +549,10 @@ async function bootWebPerformance() {
     });
     runtime.locationBridge = new BrowserForegroundLocationBridge({
       onQueuedLocation: async write => {
+        ingestQueuedLocation(write);
         await runtime.queue.enqueue(write);
         await runtime.queue.flush().catch(() => undefined);
+        refreshLiveTelemetry();
       },
     });
     await resolveSession();
@@ -332,6 +560,7 @@ async function bootWebPerformance() {
     runtime.phase = 'ERROR';
     runtime.error = safeMessage(error);
   }
+  runtime.telemetryTimer = window.setInterval(refreshLiveTelemetry, 1000);
   await renderPerformance();
 }
 
@@ -347,6 +576,12 @@ export const ParadisePerformanceWebInterimInvariants = Object.freeze([
   'visibility loss pauses browser GPS; returning visible auto-resumes only when location permission is already granted',
   'true locked-screen and background GPS remain native-app capabilities',
   'Start My Day creates or recovers the authoritative Performance shift before browser GPS begins',
+  'live door and conversation controls persist against the same authoritative shift and preserve local retry state if connectivity fails',
+  'shift start, end, and exact duration come from authoritative shift timestamps',
+  'GPS miles, estimated steps, and route trace exclude fixes worse than the controlled accuracy ceiling',
+  'web estimated steps are never represented as Apple Health or pedometer steps',
+  'the live route trace is self-contained and adds no third-party map-tile or geocoding provider',
+  'Day Complete shows doors, conversations, start, end, duration, GPS miles, estimated steps, and route trace',
   'Finish Day remains available when browser location permission, signal, or wake lock is unavailable',
   'Performance evidence never authorizes or changes field Lookup',
   'customer SET writes, KPI/pay values, territory rules, and retention values are not invented by the web interim shell',
