@@ -4,10 +4,11 @@ import {
   splitTrackedSegments,
 } from './performance-web-summary.mjs';
 
-export const PERFORMANCE_WEB_APPOINTMENTS_VERSION = '2026.08.21-web-appointments-v1';
+export const PERFORMANCE_WEB_APPOINTMENTS_VERSION = '2026.08.21-web-appointments-v2';
 export const WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS = 100;
 
 function finite(value) {
+  if (value === null || value === undefined || value === '') return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
@@ -229,6 +230,7 @@ export function renderPinnedRouteTrace(routePoints = [], appointments = [], { wi
 export const PerformanceWebAppointmentInvariants = Object.freeze([
   'customer address and set-capture GPS remain separate evidence fields',
   'appointment pins require captured GPS coordinates with 100 meters or better accuracy',
+  'missing or blank GPS values fail closed and never become zero-coordinate pins',
   'map pin labels never expose the customer phone number',
   'the pinned route renderer uses only same-origin Paradise data and no third-party map provider',
   'route segments preserve the same accuracy, mocked-point, and hidden-gap exclusions as the web shift summary',
