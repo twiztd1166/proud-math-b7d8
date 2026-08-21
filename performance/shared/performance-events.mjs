@@ -1,10 +1,12 @@
-export const PERFORMANCE_EVENT_VERSION = '2026.08.18-performance-events-v1';
+export const PERFORMANCE_EVENT_VERSION = '2026.08.21-performance-events-v2';
 
 export const PERFORMANCE_EVENT_TYPES = Object.freeze([
   'SHIFT_STARTED',
   'SHIFT_PAUSED',
   'SHIFT_RESUMED',
   'SHIFT_FINISHED',
+  'KNOCK_STARTED',
+  'KNOCK_STOPPED',
   'DOOR_COUNT_SET',
   'CONVERSATION_COUNT_SET',
   'DOOR_INCREMENTED',
