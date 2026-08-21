@@ -25,7 +25,7 @@
       <div class="performance-web-card">
         <p class="performance-eyebrow">TRUSTED-DEVICE ENROLLMENT</p>
         <h2>Issue one-time admin test enrollment</h2>
-        <p id="adminTestStatus" role="status">Verifying this trusted admin browser…</p>
+        <p id="adminTestStatus" role="status">Verifying this designated trusted admin browser…</p>
         <form id="adminTestEnrollmentForm" hidden autocomplete="off">
           <label for="adminTestEmployee">Admin tester</label>
           <select id="adminTestEmployee" class="input" required></select>
@@ -44,11 +44,11 @@
         <p id="adminTestCode" style="overflow-wrap:anywhere;font-weight:700"></p>
         <p id="adminTestExpiry"></p>
         <button id="adminTestCopy" class="btn secondary" type="button">COPY CODE</button>
-        <p class="performance-web-boundary">Share only with the intended admin tester. The newest unused code replaces any older unexpired code for that admin tester. This page does not store the plaintext code.</p>
+        <p class="performance-web-boundary">Share only with the intended designated admin tester. The newest unused code replaces any older unexpired code for that tester. The displayed code is cleared when it expires or when this page is left.</p>
       </div>
       <div class="performance-web-card performance-web-security">
         <h3>Testing boundary</h3>
-        <p>This page requires an existing Paradise admin trusted-device session and only offers active admin test profiles. It uses the existing JWT-protected enrollment function, does not use a service-role key, and cannot be used for employee-wide enrollment.</p>
+        <p>This page requires a designated Paradise admin trusted-device session and offers designated active admin test profiles only. It uses the existing JWT-protected enrollment function, does not use a service-role key, and cannot be used for employee-wide enrollment.</p>
         <a href="./index.html">Back to Paradise Performance</a>
       </div>
     </section>
