@@ -1,0 +1,78 @@
+name: Validate Paradise Performance admin test access
+
+on:
+  push:
+    branches:
+      - paradise-performance-web-interim-preview
+    paths:
+      - 'performance-admin-test.html'
+      - 'performance/client/performance-admin-test-enrollment.mjs'
+      - '.github/workflows/validate-paradise-performance-admin-test-access.yml'
+  pull_request:
+    branches:
+      - paradise-performance-web-interim-preview
+    paths:
+      - 'performance-admin-test.html'
+      - 'performance/client/performance-admin-test-enrollment.mjs'
+      - '.github/workflows/validate-paradise-performance-admin-test-access.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-performance-admin-test-access-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-admin-test-access:
+    name: Admin test enrollment controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: JavaScript syntax check
+        run: node --check performance/client/performance-admin-test-enrollment.mjs
+
+      - name: Validate controlled admin test enrollment boundaries
+        shell: bash
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const html = fs.readFileSync('performance-admin-test.html', 'utf8');
+          const js = fs.readFileSync('performance/client/performance-admin-test-enrollment.mjs', 'utf8');
+
+          const requireText = (source, text, label) => {
+            if (!source.includes(text)) throw new Error(`Missing ${label}: ${text}`);
+          };
+          const reject = (source, pattern, label) => {
+            if (pattern.test(source)) throw new Error(`Forbidden ${label}: ${pattern}`);
+          };
+
+          requireText(html, 'noindex,nofollow,noarchive', 'noindex control');
+          requireText(html, 'CONTROLLED TESTING ONLY · NOT EMPLOYEE ROLLOUT', 'testing-only boundary');
+          requireText(html, 'performance-admin-test-enrollment.mjs', 'admin controller module');
+
+          requireText(js, 'validateTrustedDeviceSession', 'trusted-session validation');
+          requireText(js, "new Set(['manager', 'admin'])", 'manager/admin client gate');
+          requireText(js, "session.status !== 'READY'", 'READY fail-closed gate');
+          requireText(js, 'mintEnrollment', 'existing protected mint helper');
+          requireText(js, ".from('performance_employees')", 'employee directory read');
+          requireText(js, ".eq('active', true)", 'active employee filter');
+          requireText(js, 'clearPlaintextCode', 'plaintext cleanup');
+          requireText(js, 'No direct database fallback was attempted.', 'no-bypass error boundary');
+          requireText(js, 'SUPABASE_PUBLISHABLE_KEY', 'publishable browser key');
+
+          reject(js, /service[_-]?role/i, 'service-role reference');
+          reject(js, /SUPABASE_SECRET/i, 'secret key reference');
+          reject(js, /performance_enrollment_tokens[\s\S]{0,180}\.(insert|update|delete|upsert)\s*\(/i, 'direct enrollment-token DML');
+          reject(js, /(localStorage|sessionStorage)\.setItem\([^\n]*(token|code)/i, 'plaintext token persistence');
+
+          console.log('Paradise Performance admin test enrollment controls: PASS');
+          EOF
