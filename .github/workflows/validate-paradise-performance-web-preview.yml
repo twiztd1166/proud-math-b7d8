@@ -153,7 +153,7 @@ jobs:
           const browserType = process.env.BROWSER === 'chromium' ? chromium : webkit;
           const browser = await browserType.launch();
           const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-          await context.addCookies([{ name: '__Http-phish', value: '1', domain: 'rawcdn.githack.com', path: '/', secure: true }]);
+          await context.addCookies([{ name: '__Http-phish', value: '1', domain: 'rawcdn.githack.com', path: '/', secure: true, httpOnly: true }]);
           async function cleanPage(url) {
             const page = await context.newPage();
             const errors = [];
