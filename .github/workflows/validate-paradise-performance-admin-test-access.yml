@@ -27,7 +27,7 @@ jobs:
   validate-admin-test-access:
     name: Admin test enrollment controls
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,3 +84,49 @@ jobs:
 
           console.log('Paradise Performance designated-admin test enrollment controls: PASS');
           EOF
+
+      - name: Install isolated Chromium smoke runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          PWROOT="$RUNNER_TEMP/performance-admin-test-playwright"
+          mkdir -p "$PWROOT"
+          npm install --prefix "$PWROOT" --no-save --ignore-scripts --package-lock=false @playwright/test
+          ln -s "$PWROOT/node_modules" node_modules
+          ./node_modules/.bin/playwright install chromium
+
+      - name: Start local preview server
+        shell: bash
+        run: |
+          python3 -m http.server 4174 --bind 127.0.0.1 >/tmp/performance-admin-test-http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4174/performance-admin-test.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/performance-admin-test-http.log
+          exit 1
+
+      - name: Verify unauthenticated browser fails closed
+        shell: bash
+        run: |
+          cat > .performance-admin-test-smoke.mjs <<'EOF'
+          import { chromium } from '@playwright/test';
+          const browser = await chromium.launch();
+          const context = await browser.newContext();
+          const page = await context.newPage();
+          const pageErrors = [];
+          const consoleErrors = [];
+          page.on('pageerror', error => pageErrors.push(String(error)));
+          page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+          await page.goto('http://127.0.0.1:4174/performance-admin-test.html', { waitUntil: 'networkidle', timeout: 30000 });
+          await page.waitForFunction(() => document.querySelector('#adminTestStatus')?.textContent?.includes('requires one of the designated enrolled Paradise admin test browsers'), null, { timeout: 30000 });
+          const result = await page.evaluate(() => ({
+            status: document.querySelector('#adminTestStatus')?.textContent || '',
+            formHidden: document.querySelector('#adminTestEnrollmentForm')?.hidden === true,
+            robots: document.querySelector('meta[name="robots"]')?.content || '',
+          }));
+          if (!result.formHidden) throw new Error('Unauthorized enrollment form became visible');
+          if (result.robots !== 'noindex,nofollow,noarchive') throw new Error(`Unexpected robots boundary: ${result.robots}`);
+          if (pageErrors.length) throw new Error(`Page errors: ${pageErrors.join(' | ')}`);
+          if (consoleErrors.length) throw new Error(`Console errors: ${consoleErrors.join(' | ')}`);
+          console.log(JSON.stringify({ status: 'PASS', failClosed: true, noindex: true }));
+          await browser.close();
+          EOF
+          node .performance-admin-test-smoke.mjs
