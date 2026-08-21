@@ -9,13 +9,14 @@ import {
 import { isUuid } from '../shared/performance-events.mjs';
 import {
   WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS,
+  appointmentHasPin,
   buildAppointmentSetPayload,
   formatAppointmentAt,
   mergeAppointments,
   renderPinnedRouteTrace,
 } from './performance-web-appointments.mjs';
 
-export const PERFORMANCE_WEB_APPOINTMENT_UI_VERSION = '2026.08.21-web-appointment-ui-v1';
+export const PERFORMANCE_WEB_APPOINTMENT_UI_VERSION = '2026.08.21-web-appointment-ui-v2';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -54,7 +55,7 @@ function safeMessage(error) {
   return String(error?.message || error || 'Unknown error').slice(0, 220);
 }
 
-function readJsonStorage(key) {
+function readJsonArray(key) {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(key) || '[]');
     return Array.isArray(parsed) ? parsed : [];
@@ -129,7 +130,7 @@ async function fetchServerRoute(shiftId) {
 }
 
 function pendingCoreRoute(shiftId) {
-  return readJsonStorage(CORE_QUEUE_KEY)
+  return readJsonArray(CORE_QUEUE_KEY)
     .filter(row => row?.kind === 'LOCATION' && row?.payload?.shiftId === shiftId)
     .map(row => ({
       clientPointId: row.id,
@@ -187,7 +188,7 @@ function formMarkup() {
 function appointmentListMarkup(appointments) {
   if (!appointments.length) return '<p class="performance-appointment-empty">No appointments entered on this shift yet.</p>';
   return `<div class="performance-appointment-list">${appointments.map((appointment, index) => {
-    const pin = appointment.latitude != null && appointment.longitude != null && Number(appointment.accuracyMeters) <= WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS;
+    const pin = appointmentHasPin(appointment);
     const sync = appointment.syncState === 'PENDING' ? ' · Pending sync' : appointment.syncState === 'NEEDS_ATTENTION' ? ' · Needs attention' : '';
     return `<details data-performance-appointment-details="${esc(appointment.clientSetId)}">
       <summary><b>${index + 1}. ${esc(appointment.customerName)}</b><span>${esc(formatAppointmentAt(appointment.appointmentAt))}${sync}</span></summary>
@@ -213,19 +214,22 @@ function panelMarkup(mode) {
 }
 
 function mountPanel(surface) {
+  if (!surface?.host) return;
   document.getElementById(PANEL_ID)?.remove();
   const insertion = surface.host.querySelector('.performance-web-counters') || surface.host.querySelector('.performance-web-metrics') || surface.host.querySelector('h3');
   if (insertion) insertion.insertAdjacentHTML('afterend', panelMarkup(surface.mode));
 }
 
 function mountCombinedMap(surface) {
+  if (!surface?.host) return;
   const routeCard = surface.host.querySelector('.performance-web-route-card');
   if (!routeCard) return;
   routeCard.classList.add('performance-appointment-map-active');
   routeCard.querySelector(`[${MAP_ATTR}]`)?.remove();
   const routeSource = routeCard.querySelector('[data-performance-route]') || routeCard.querySelector('.performance-route-svg');
+  const pinnedCount = runtime.appointments.filter(appointmentHasPin).length;
   const html = `<div ${MAP_ATTR} class="performance-appointment-combined-map">
-    <div class="performance-appointment-map-caption"><b>ROUTE + APPOINTMENT PINS</b><span>${runtime.appointments.filter(row => row.latitude != null && row.longitude != null && Number(row.accuracyMeters) <= WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS).length} pinned</span></div>
+    <div class="performance-appointment-map-caption"><b>ROUTE + APPOINTMENT PINS</b><span>${pinnedCount} pinned</span></div>
     ${renderPinnedRouteTrace(runtime.routePoints, runtime.appointments)}
   </div>`;
   if (routeSource) routeSource.insertAdjacentHTML('afterend', html);
@@ -233,12 +237,15 @@ function mountCombinedMap(surface) {
 }
 
 async function refresh({ force = false } = {}) {
-  if (runtime.refreshing || (runtime.formOpen && !force)) return;
+  if (runtime.refreshing) return;
   const surface = currentSurface();
   if (!surface) {
+    runtime.formOpen = false;
+    runtime.shift = null;
     document.getElementById(PANEL_ID)?.remove();
     return;
   }
+  if (runtime.formOpen && !force) return;
   runtime.refreshing = true;
   try {
     if ((!runtime.employeeId || !runtime.deviceId) && !await trustedContext()) return;
@@ -253,6 +260,7 @@ async function refresh({ force = false } = {}) {
     const pendingAppointments = appointmentQueueRows.filter(row => row?.kind === 'SET' && row?.payload?.originShiftId === shift.id);
     runtime.appointments = mergeAppointments(serverAppointments, pendingAppointments);
     runtime.routePoints = mergeRoutePoints(serverRoute, pendingCoreRoute(shift.id));
+    runtime.warning = null;
     mountPanel(surface);
     mountCombinedMap(surface);
   } catch (error) {
@@ -266,17 +274,14 @@ async function refresh({ force = false } = {}) {
   }
 }
 
-function scheduleRefresh(delay = 250) {
+function scheduleRefresh(delay = 250, force = false) {
   window.clearTimeout(runtime.scheduled);
-  runtime.scheduled = window.setTimeout(() => { void refresh(); }, delay);
+  runtime.scheduled = window.setTimeout(() => { void refresh({ force }); }, delay);
 }
 
 async function saveAppointment(form) {
   if (runtime.saving || !runtime.shift || !ACTIVE_STATUSES.includes(runtime.shift.status)) throw new Error('No active shift is available for this appointment');
   if (!isUuid(runtime.employeeId) || !isUuid(runtime.deviceId) || !isUuid(runtime.shift.id)) throw new Error('Trusted shift binding is incomplete');
-  runtime.saving = true;
-  runtime.warning = null;
-  mountPanel(currentSurface());
   const formData = new FormData(form);
   const draft = {
     customerName: formData.get('customerName'),
@@ -286,6 +291,9 @@ async function saveAppointment(form) {
     appointmentDate: formData.get('appointmentDate'),
     appointmentTime: formData.get('appointmentTime'),
   };
+  runtime.saving = true;
+  runtime.warning = null;
+  mountPanel(currentSurface());
   const capturedAt = new Date().toISOString();
   const location = await locationFix();
   const payload = buildAppointmentSetPayload({
@@ -297,16 +305,11 @@ async function saveAppointment(form) {
     location,
   });
   const clientSetId = crypto.randomUUID();
-  const write = createQueuedWrite({ id: clientSetId, kind: 'SET', capturedAt, payload });
-  await runtime.queue.enqueue(write);
+  await runtime.queue.enqueue(createQueuedWrite({ id: clientSetId, kind: 'SET', capturedAt, payload }));
   const result = await runtime.queue.flush();
-  if (result.rejected > 0 || result.blockedAuth) {
-    runtime.warning = 'Appointment is retained on this browser but needs sync attention.';
-  } else if (!location) {
-    runtime.warning = 'Appointment saved. GPS was unavailable, so this appointment has no map pin.';
-  } else if (Number(location.accuracyMeters) > WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS) {
-    runtime.warning = `Appointment saved. GPS accuracy was ${Math.round(Number(location.accuracyMeters))} m, so the map does not show a misleading precise pin.`;
-  }
+  if (result.rejected > 0 || result.blockedAuth) runtime.warning = 'Appointment is retained on this browser but needs sync attention.';
+  else if (!location) runtime.warning = 'Appointment saved. GPS was unavailable, so this appointment has no map pin.';
+  else if (Number(location.accuracyMeters) > WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS) runtime.warning = `Appointment saved. GPS accuracy was ${Math.round(Number(location.accuracyMeters))} m, so the map does not show a misleading precise pin.`;
   runtime.formOpen = false;
   runtime.saving = false;
   await refresh({ force: true });
@@ -328,7 +331,8 @@ async function boot() {
   });
 
   document.addEventListener('click', event => {
-    const action = event.target instanceof Element ? event.target.closest('[data-performance-appointment-action]') : null;
+    const target = event.target instanceof Element ? event.target : null;
+    const action = target?.closest('[data-performance-appointment-action]');
     if (action) {
       const type = action.getAttribute('data-performance-appointment-action');
       if (type === 'new') {
@@ -342,8 +346,16 @@ async function boot() {
       }
       return;
     }
-    const pin = event.target instanceof Element ? event.target.closest('[data-performance-appointment-pin]') : null;
-    if (pin) openAppointmentDetails(pin.getAttribute('data-performance-appointment-pin'));
+    const pin = target?.closest('[data-performance-appointment-pin]');
+    if (pin) {
+      openAppointmentDetails(pin.getAttribute('data-performance-appointment-pin'));
+      return;
+    }
+    if (target?.closest('#nPerf,[data-performance-web-action]')) scheduleRefresh(900, true);
+    if (target?.closest('#nLook,#nTrain,#nRel,#nHist')) {
+      runtime.formOpen = false;
+      scheduleRefresh(100, true);
+    }
   }, true);
 
   document.addEventListener('keydown', event => {
@@ -365,19 +377,17 @@ async function boot() {
     });
   }, true);
 
-  const main = document.getElementById('main');
-  if (main) new MutationObserver(() => scheduleRefresh(300)).observe(main, { childList: true, subtree: true });
   window.addEventListener('online', () => {
-    void runtime.queue.flush().finally(() => scheduleRefresh(100));
-    window.setTimeout(() => { void runtime.queue.flush().finally(() => scheduleRefresh(100)); }, 2500);
+    void runtime.queue.flush().finally(() => scheduleRefresh(100, true));
+    window.setTimeout(() => { void runtime.queue.flush().finally(() => scheduleRefresh(100, true)); }, 2500);
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') scheduleRefresh(200);
+    if (document.visibilityState === 'visible') scheduleRefresh(200, true);
   });
   window.setInterval(() => {
     if (!runtime.formOpen) void runtime.queue.flush().finally(() => refresh());
   }, 5000);
-  scheduleRefresh(500);
+  scheduleRefresh(500, true);
 }
 
 void boot();
