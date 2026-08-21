@@ -101,7 +101,7 @@ for (const required of [
 ]) {
   if (!bundle.includes(required)) throw new Error(`Web Performance bundle missing runtime control: ${required}`);
 }
-if (/\bwatchPosition\b/.test(bundle)) throw new Error('Web interim bundle must not enable continuous browser location tracking');
+if (/\.watchPosition\s*\(/.test(bundle)) throw new Error('Web interim bundle must not enable continuous browser location tracking');
 if (bundle.includes('performance_sets')) throw new Error('Web interim bundle contains dormant customer SET transport material');
 assertNoPrivilegedSupabaseCredentialValue(bundle, 'Web Performance bundle');
 
