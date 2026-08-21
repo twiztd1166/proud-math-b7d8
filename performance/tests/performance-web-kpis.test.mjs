@@ -225,6 +225,84 @@ test('multiple applicable standards fail closed rather than inventing scope prec
   assert.equal(classifyRatePace(99, resolution, 'ACTIVE').status, 'GOAL_CONFIGURATION_AMBIGUOUS');
 });
 
+test('completed shift without a pinned version never borrows an effective or newer standard', () => {
+  const finished = {
+    ...paceShift,
+    status: 'finished',
+    finished_at: '2026-08-21T20:00:00.000Z',
+    kpi_standard_version_label: null,
+  };
+  const resolution = resolveRatePaceStandard({
+    standards: [
+      standard({ version_label: 'EFFECTIVE-AT-SHIFT', minimum: 10 }),
+      standard({ version_label: 'NEWER', minimum: 99, effective_from: '2026-08-21T18:00:00.000Z' }),
+    ],
+    metricKey: 'knocks_per_hour',
+    employee: paceEmployee,
+    shift: finished,
+  });
+  assert.equal(resolution.status, 'PINNED_STANDARD_REQUIRED');
+  assert.equal(formatPaceStatus(resolution.status), 'HISTORICAL GOAL NOT PINNED');
+});
+
+test('completed shift uses its pinned KPI version and never silently substitutes a newer standard', () => {
+  const finished = {
+    ...paceShift,
+    status: 'finished',
+    finished_at: '2026-08-21T20:00:00.000Z',
+    kpi_standard_version_label: 'PINNED-AUG',
+  };
+  const resolution = resolveRatePaceStandard({
+    standards: [
+      standard({ version_label: 'PINNED-AUG', minimum: 10, effective_from: '2026-08-01T00:00:00.000Z' }),
+      standard({ version_label: 'NEWER', minimum: 99, effective_from: '2026-08-21T18:00:00.000Z' }),
+    ],
+    metricKey: 'knocks_per_hour',
+    employee: paceEmployee,
+    shift: finished,
+  });
+  assert.equal(resolution.status, 'CONFIGURED');
+  assert.equal(resolution.versionLabel, 'PINNED-AUG');
+  assert.equal(resolution.minimum, 10);
+  assert.equal(classifyRatePace(10, resolution, 'COMPLETE').status, 'AT_OR_ABOVE_GOAL');
+});
+
+test('pinned live shift also uses the pinned version rather than re-resolving current scope', () => {
+  const pinnedLive = { ...paceShift, kpi_standard_version_label: 'PINNED-AUG' };
+  const resolution = resolveRatePaceStandard({
+    standards: [
+      standard({ version_label: 'PINNED-AUG', minimum: 10, applies_to_role: 'manager' }),
+      standard({ version_label: 'OTHER', minimum: 99 }),
+    ],
+    metricKey: 'knocks_per_hour',
+    employee: paceEmployee,
+    shift: pinnedLive,
+  });
+  assert.equal(resolution.status, 'CONFIGURED');
+  assert.equal(resolution.versionLabel, 'PINNED-AUG');
+  assert.equal(resolution.minimum, 10);
+});
+
+test('missing pinned version and missing metric both fail closed with distinct evidence', () => {
+  const missingVersion = resolveRatePaceStandard({
+    standards: [standard({ version_label: 'OTHER' })],
+    metricKey: 'knocks_per_hour',
+    employee: paceEmployee,
+    shift: { ...paceShift, status: 'finished', kpi_standard_version_label: 'MISSING' },
+  });
+  assert.equal(missingVersion.status, 'PINNED_STANDARD_NOT_FOUND');
+  assert.equal(formatPaceStatus(missingVersion.status), 'PINNED GOAL VERSION MISSING');
+
+  const missingMetric = resolveRatePaceStandard({
+    standards: [standard({ version_label: 'PINNED-AUG', metric_key: 'sets_per_hour' })],
+    metricKey: 'knocks_per_hour',
+    employee: paceEmployee,
+    shift: { ...paceShift, status: 'finished', kpi_standard_version_label: 'PINNED-AUG' },
+  });
+  assert.equal(missingMetric.status, 'GOAL_NOT_CONFIGURED');
+  assert.equal(missingMetric.versionLabel, 'PINNED-AUG');
+});
+
 test('no measured Knock Clock rate never gets a false on-pace classification', () => {
   const resolution = resolveRatePaceStandard({
     standards: [standard()],
@@ -246,6 +324,24 @@ test('rate pace summary maps only supported live standard keys', () => {
     shift: paceShift,
     mode: 'ACTIVE',
   });
+  assert.equal(summary.doors.status, 'ON_PACE');
+  assert.equal(summary.appointments.status, 'ON_PACE');
+});
+
+test('pinned version may carry one row per supported KPI metric', () => {
+  const shift = { ...paceShift, kpi_standard_version_label: 'PINNED-AUG' };
+  const summary = buildRatePaceSummary({
+    kpis: { doorsPerHour: 11, appointmentsPerHour: 0.5 },
+    standards: [
+      standard({ version_label: 'PINNED-AUG', metric_key: 'knocks_per_hour', minimum: 10 }),
+      standard({ version_label: 'PINNED-AUG', metric_key: 'sets_per_hour', minimum: 0.5 }),
+    ],
+    employee: paceEmployee,
+    shift,
+    mode: 'ACTIVE',
+  });
+  assert.equal(summary.doors.versionLabel, 'PINNED-AUG');
+  assert.equal(summary.appointments.versionLabel, 'PINNED-AUG');
   assert.equal(summary.doors.status, 'ON_PACE');
   assert.equal(summary.appointments.status, 'ON_PACE');
 });
