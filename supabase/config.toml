@@ -6,6 +6,10 @@
 # Store-review mint is called only by a signed-in reusable marketplace-review gate account.
 # That account has no Performance actor identity; the handler validates auth.getUser() plus
 # admin-controlled review app_metadata and can mint only the configured synthetic canvasser.
+# Admin recovery request/status/redeem are pre-session recovery endpoints. Request creation
+# has no employee selector or approval capability; status/redeem require the exact browser-held
+# high-entropy recovery secret, and redeem also requires prior service-role operator approval.
+# Finalization is post-enrollment and requires the newly authenticated designated admin session.
 
 [functions.performance-enrollment-mint]
 verify_jwt = true
@@ -17,4 +21,16 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.performance-review-enrollment-mint]
+verify_jwt = true
+
+[functions.performance-admin-recovery-request]
+verify_jwt = false
+
+[functions.performance-admin-recovery-status]
+verify_jwt = false
+
+[functions.performance-admin-recovery-redeem]
+verify_jwt = false
+
+[functions.performance-admin-recovery-finalize]
 verify_jwt = true
