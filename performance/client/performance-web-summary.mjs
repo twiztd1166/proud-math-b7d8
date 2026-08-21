@@ -1,6 +1,7 @@
-export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v1';
+export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v2';
 export const WEB_ROUTE_MAX_ACCURACY_METERS = 50;
 export const WEB_ESTIMATED_STRIDE_METERS = 0.762;
+export const WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5;
 const METERS_PER_MILE = 1609.344;
 const EARTH_RADIUS_METERS = 6371000;
 
@@ -55,22 +56,35 @@ export function qualifiedRoutePoints(points = [], maxAccuracyMeters = WEB_ROUTE_
     .sort((a, b) => Date.parse(a.capturedAt) - Date.parse(b.capturedAt));
 }
 
-export function summarizeWebRoute(points = [], { maxAccuracyMeters = WEB_ROUTE_MAX_ACCURACY_METERS, strideMeters = WEB_ESTIMATED_STRIDE_METERS } = {}) {
+export function summarizeWebRoute(points = [], {
+  maxAccuracyMeters = WEB_ROUTE_MAX_ACCURACY_METERS,
+  strideMeters = WEB_ESTIMATED_STRIDE_METERS,
+  maxPedestrianSpeedMps = WEB_MAX_PEDESTRIAN_SPEED_MPS,
+} = {}) {
   const qualified = qualifiedRoutePoints(points, maxAccuracyMeters);
   let meters = 0;
+  let pedestrianMeters = 0;
   for (let index = 1; index < qualified.length; index += 1) {
-    meters += distanceMeters(qualified[index - 1], qualified[index]);
+    const previous = qualified[index - 1];
+    const current = qualified[index];
+    const segmentMeters = distanceMeters(previous, current);
+    meters += segmentMeters;
+    const elapsedSeconds = (Date.parse(current.capturedAt) - Date.parse(previous.capturedAt)) / 1000;
+    const inferredSpeed = elapsedSeconds > 0 ? segmentMeters / elapsedSeconds : Number.POSITIVE_INFINITY;
+    if (inferredSpeed <= maxPedestrianSpeedMps) pedestrianMeters += segmentMeters;
   }
   const miles = meters / METERS_PER_MILE;
-  const estimatedSteps = strideMeters > 0 ? Math.round(meters / strideMeters) : 0;
+  const estimatedSteps = strideMeters > 0 ? Math.round(pedestrianMeters / strideMeters) : 0;
   return Object.freeze({
     qualifiedPoints: Object.freeze(qualified),
     qualifiedPointCount: qualified.length,
     distanceMeters: meters,
+    pedestrianDistanceMeters: pedestrianMeters,
     miles,
     estimatedSteps,
     maxAccuracyMeters,
     strideMeters,
+    maxPedestrianSpeedMps,
   });
 }
 
@@ -141,6 +155,7 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
 export const PerformanceWebSummaryInvariants = Object.freeze([
   'web miles are derived only from GPS points at or better than the controlled accuracy ceiling',
   'coarse GPS fixes are excluded from distance, estimated steps, and route trace calculations',
+  'web estimated steps use only pedestrian-speed qualified GPS segments and exclude faster travel segments',
   'web estimated steps are a transparent GPS-distance estimate and are never represented as Apple Health or pedometer steps',
   'the route trace is self-contained and does not add a third-party map-tile or geocoding provider',
   'start, end, and duration are derived from the authoritative shift timestamps',
