@@ -8,6 +8,8 @@ const outDir = 'performance-web-dist';
 const sourceIndex = path.join(baseDir, 'index.html');
 const WEB_JS = 'performance-web-app.js';
 const WEB_CSS = 'performance-web.css';
+const FIRST_ADMIN_HTML = 'first-admin-bootstrap.html';
+const FIRST_ADMIN_JS = 'first-admin-bootstrap.js';
 
 function sha256(text) {
   return crypto.createHash('sha256').update(text).digest('hex');
@@ -47,6 +49,7 @@ for (const required of ['Paradise Performance', 'Web Interim', WEB_CSS, 'id="nPe
 }
 fs.writeFileSync(path.join(outDir, 'index.html'), index);
 fs.copyFileSync('performance/client/performance-web-app.css', path.join(outDir, WEB_CSS));
+fs.copyFileSync('performance/client/performance-first-admin-bootstrap.html', path.join(outDir, FIRST_ADMIN_HTML));
 
 const manifestPath = path.join(outDir, 'manifest.webmanifest');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -70,6 +73,19 @@ await build({
   legalComments: 'none',
 });
 
+await build({
+  entryPoints: ['performance/client/performance-first-admin-bootstrap.mjs'],
+  outfile: path.join(outDir, FIRST_ADMIN_JS),
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  target: ['safari16.4', 'chrome120'],
+  minify: false,
+  sourcemap: false,
+  treeShaking: true,
+  legalComments: 'none',
+});
+
 const swPath = path.join(outDir, 'sw.js');
 let sw = fs.readFileSync(swPath, 'utf8');
 if (!sw.includes(`'./${WEB_JS}'`) || !sw.includes(`'./${WEB_CSS}'`)) {
@@ -83,27 +99,39 @@ if (!sw.includes(`'./${WEB_JS}'`) || !sw.includes(`'./${WEB_CSS}'`)) {
 if (!sw.includes(`'./${WEB_JS}'`) || !sw.includes(`'./${WEB_CSS}'`)) throw new Error('Unable to add web interim assets to service-worker CORE');
 fs.writeFileSync(swPath, sw);
 
-for (const file of ['index.html', 'manifest.webmanifest', 'sw.js', WEB_CSS, WEB_JS, 'plain-data.js']) {
+for (const file of ['index.html', 'manifest.webmanifest', 'sw.js', WEB_CSS, WEB_JS, FIRST_ADMIN_HTML, FIRST_ADMIN_JS, 'plain-data.js']) {
   const target = path.join(outDir, file);
   if (!fs.existsSync(target) || fs.statSync(target).size === 0) throw new Error(`Web Performance bundle missing ${file}`);
 }
 
 const bundle = fs.readFileSync(path.join(outDir, WEB_JS), 'utf8');
 for (const required of [
-  'START MY DAY',
-  'FINISH DAY',
-  'CAPTURE LOCATION NOW',
-  'performance-enrollment-redeem',
-  'web-test',
-  'web-foreground-sample',
-  'performance_location_points',
-  'performance_events',
+  'START MY DAY', 'FINISH DAY', 'CAPTURE LOCATION NOW', 'performance-enrollment-redeem',
+  'web-test', 'web-foreground-sample', 'performance_location_points', 'performance_events',
 ]) {
   if (!bundle.includes(required)) throw new Error(`Web Performance bundle missing runtime control: ${required}`);
 }
 if (/\.watchPosition\s*\(/.test(bundle)) throw new Error('Web interim bundle must not enable continuous browser location tracking');
 if (bundle.includes('performance_sets')) throw new Error('Web interim bundle contains dormant customer SET transport material');
 assertNoPrivilegedSupabaseCredentialValue(bundle, 'Web Performance bundle');
+
+const bootstrapBundle = fs.readFileSync(path.join(outDir, FIRST_ADMIN_JS), 'utf8');
+for (const required of [
+  'performance-first-manager-bootstrap-provision',
+  'performance-first-manager-bootstrap-mint',
+  'performance-enrollment-redeem',
+  'web-test',
+  'persistSession: false',
+]) {
+  if (!bootstrapBundle.includes(required)) throw new Error(`First-admin bootstrap bundle missing control: ${required}`);
+}
+if (/@paradiseexteriors\.com|husseygrowthcollc@gmail\.com/i.test(bootstrapBundle)) {
+  throw new Error('First-admin bootstrap bundle hardcodes an authorized human email');
+}
+assertNoPrivilegedSupabaseCredentialValue(bootstrapBundle, 'First-admin bootstrap bundle');
+
+const bootstrapHtml = fs.readFileSync(path.join(outDir, FIRST_ADMIN_HTML), 'utf8');
+if (!/noindex,nofollow,noarchive/i.test(bootstrapHtml)) throw new Error('First-admin bootstrap page must be noindex/nofollow/noarchive');
 
 const builtData = fs.readFileSync(path.join(outDir, 'plain-data.js'), 'utf8');
 for (const required of ['"goCount":76', '"noGoCount":2']) {
