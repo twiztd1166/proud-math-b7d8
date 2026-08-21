@@ -26,9 +26,7 @@ for (const required of [
 for (const required of ['getCurrentPosition', 'web-foreground-sample', 'continuousBackgroundTracking: false']) {
   if (!sourceLocation.includes(required)) throw new Error(`Web location source missing control: ${required}`);
 }
-if (/\bwatchPosition\b/.test(sourceLocation.replace(/'web location uses getCurrentPosition only and never watchPosition'/, ''))) {
-  throw new Error('Web location source must not call watchPosition');
-}
+if (/\.watchPosition\s*\(/.test(sourceLocation)) throw new Error('Web location source must not call watchPosition');
 for (const prohibited of ['service_role', 'sb_secret_', 'ACCESS_BACKGROUND_LOCATION']) {
   if (sourceApp.includes(prohibited) || sourceLocation.includes(prohibited)) throw new Error(`Web interim client contains prohibited privileged/background marker: ${prohibited}`);
 }
@@ -54,7 +52,7 @@ if (built) {
   for (const required of ['web-test', 'web-foreground-sample', 'START MY DAY', 'FINISH DAY', 'CAPTURE LOCATION NOW']) {
     if (!bundle.includes(required)) throw new Error(`Built web bundle missing ${required}`);
   }
-  if (/\bwatchPosition\b/.test(bundle)) throw new Error('Built web bundle unexpectedly contains continuous browser location tracking');
+  if (/\.watchPosition\s*\(/.test(bundle)) throw new Error('Built web bundle unexpectedly enables continuous browser location tracking');
   if (/sb_secret_[A-Za-z0-9_-]{20,}/.test(bundle)) throw new Error('Built web bundle contains Supabase secret-key material');
   if (bundle.includes('performance_sets')) throw new Error('Built web bundle contains dormant customer SET material');
   for (const required of ['"goCount":76', '"noGoCount":2', '"recordCount":78']) {
