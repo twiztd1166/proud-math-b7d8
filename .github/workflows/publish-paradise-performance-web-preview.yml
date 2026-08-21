@@ -1,3 +1,4 @@
+# Controlled retrigger marker: publisher already established on public base before this push.
 name: Publish Paradise Performance web interim preview
 
 on:
