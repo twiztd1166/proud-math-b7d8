@@ -1,0 +1,53 @@
+name: Validate Paradise Performance web day summary
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'performance/client/performance-web-app.mjs'
+      - 'performance/client/performance-web-summary.mjs'
+      - 'performance/client/performance-today.mjs'
+      - 'performance/tests/performance-web-summary.test.mjs'
+      - 'performance/tests/performance-today.test.mjs'
+      - 'performance-web.css'
+      - '.github/workflows/validate-paradise-performance-web-day-summary.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Web day-summary contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check changed runtime modules
+        run: |
+          node --check performance/client/performance-web-app.mjs
+          node --check performance/client/performance-web-summary.mjs
+          node --check performance/client/performance-today.mjs
+      - name: Run focused unit contracts
+        run: node --test performance/tests/performance-web-summary.test.mjs performance/tests/performance-today.test.mjs
+      - name: Verify requested web UX surfaces and safety boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'GPS MILES' performance/client/performance-web-app.mjs
+          grep -q 'EST. STEPS' performance/client/performance-web-app.mjs
+          grep -q 'DOORS KNOCKED' performance/client/performance-web-app.mjs
+          grep -q '+ CONVERSATION' performance/client/performance-web-app.mjs
+          grep -q 'DAY COMPLETE' performance/client/performance-web-app.mjs
+          grep -q 'formatShiftDuration' performance/client/performance-web-app.mjs
+          grep -q 'renderWebRouteTrace' performance/client/performance-web-app.mjs
+          grep -q 'WEB_ROUTE_MAX_ACCURACY_METERS = 50' performance/client/performance-web-summary.mjs
+          grep -q 'WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5' performance/client/performance-web-summary.mjs
+          grep -q 'Apple Health or iPhone pedometer steps' performance/client/performance-web-app.mjs
+          if grep -Eqi 'leaflet|mapbox|google.maps|openstreetmap|tile\.openstreetmap|maps\.google' performance/client/performance-web-app.mjs performance/client/performance-web-summary.mjs; then
+            echo 'Third-party map provider introduced into controlled web interim' >&2
+            exit 1
+          fi
+          echo 'PASS: web day-summary requested surfaces + no third-party map provider'
