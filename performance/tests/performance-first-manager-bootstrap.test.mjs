@@ -23,7 +23,9 @@ test('first-manager bootstrap cannot target store-review synthetic identities', 
   has(/ACTIVE_REAL_MANAGER_OR_ADMIN_NOT_FOUND/i);
 });
 
-test('first-manager bootstrap fails closed once privileged enrollment already exists', () => {
+test('first-manager bootstrap closes permanently after any real privileged lineage exists', () => {
+  has(/historicalPrivilegedIdentityCount/i);
+  has(/\.in\('role', \['manager', 'admin'\]\)/i);
   has(/performance_actor_identities/i);
   has(/PRIVILEGED_PERFORMANCE_ACTOR_ALREADY_EXISTS/i);
   has(/FIRST_MANAGER_BOOTSTRAP_ALREADY_USED/i);
