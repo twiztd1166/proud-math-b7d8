@@ -6,7 +6,7 @@ import { createSupabaseShiftTransport, PerformanceTodayController } from './perf
 import { BrowserForegroundLocationBridge } from './performance-web-location.mjs';
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const PARADISE_PERFORMANCE_WEB_INTERIM_VERSION = '2026.08.21-web-interim-v1';
+export const PARADISE_PERFORMANCE_WEB_INTERIM_VERSION = '2026.08.21-web-interim-v2';
 const STORE_VERSION = 'web-interim-v1';
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -51,8 +51,8 @@ function setPerformanceNavActive(active) {
 function shell(inner) {
   return `<section class="performance-web-shell">
     <div class="performance-web-banner" role="note">
-      <b>WEB INTERIM</b>
-      <span>Use on a private company-controlled browser. Location is foreground/sample-only and does not continue reliably when the browser is backgrounded or the phone is locked.</span>
+      <b>WEB INTERIM · LIVE FOREGROUND GPS</b>
+      <span>During an active shift Paradise uses continuous high-accuracy GPS while this page is visible and requests Screen Wake Lock where supported. Switching apps, hiding the page, or locking the phone pauses browser GPS. True locked-screen/background tracking remains native-app only.</span>
     </div>
     <div class="performance-web-heading">
       <p class="performance-eyebrow">PARADISE PERFORMANCE</p>
@@ -80,9 +80,19 @@ function enrollmentMarkup(message = '') {
 
 function locationLabel(location = {}) {
   if (location.state === 'PERMISSION_REQUIRED') return 'Location permission needed';
-  if (location.state === 'WEB_FOREGROUND') return 'Foreground location samples available';
+  if (location.state === 'WEB_FOREGROUND_CONTINUOUS') return 'Live foreground GPS active';
+  if (location.state === 'WEB_FOREGROUND_PAUSED') return 'Live GPS paused — keep Paradise visible';
+  if (location.state === 'WEB_FOREGROUND_SAMPLE_ONLY') return 'Foreground GPS available — continuous watch unsupported';
+  if (location.state === 'WEB_FOREGROUND') return 'Foreground GPS available';
   if (location.state === 'ERROR' || location.state === 'STOP_ERROR') return 'Location needs attention';
-  return 'Background GPS not active in web interim';
+  return 'GPS starts with your workday';
+}
+
+function wakeLockLabel(location = {}) {
+  if (location.screenWakeLock === 'ACTIVE') return 'Screen keep-awake: active';
+  if (location.screenWakeLock === 'PAUSED_HIDDEN') return 'Screen keep-awake: paused while hidden';
+  if (location.screenWakeLock === 'UNAVAILABLE' || location.screenWakeLock === 'UNAVAILABLE_OR_DENIED') return 'Screen keep-awake unavailable — keep the phone awake manually';
+  return 'Screen keep-awake starts best-effort with live GPS';
 }
 
 function elapsed(startedAt) {
@@ -101,20 +111,22 @@ function todayMarkup(state) {
     return `<div class="performance-web-card" data-performance-web-state="idle">
       <p class="performance-eyebrow">READY FOR THE FIELD?</p>
       <h3>${esc(locationLabel(state?.location))}</h3>
-      <p>Start My Day creates the authoritative workday. The web interim may capture a foreground start sample if location permission is available.</p>
+      <p>Start My Day creates the authoritative workday, requests location permission, starts continuous foreground GPS, and asks the browser to keep the screen awake where supported.</p>
       ${warning}
       <button class="btn primary" data-performance-web-action="start" type="button"${disabled}>START MY DAY</button>
     </div>`;
   }
   if (state.mode === 'ACTIVE' || state.mode === 'FINISHING') {
     const shift = state.shift || {};
+    const gpsAction = state.location?.continuousForegroundTracking ? 'CAPTURE GPS NOW' : 'RESUME LIVE GPS';
     return `<div class="performance-web-card" data-performance-web-state="active">
       <p class="performance-eyebrow">SHIFT ACTIVE · ${esc(elapsed(shift.started_at))}</p>
       <h3>${esc(locationLabel(state.location))}</h3>
+      <p>${esc(wakeLockLabel(state.location))}</p>
       <p>${esc(shift.doors ?? 0)} Doors · ${esc(shift.conversations ?? 0)} Conversations</p>
-      <p class="performance-web-boundary">Keep this page open when you want a browser location sample. This is not continuous background route tracking.</p>
+      <p class="performance-web-boundary">Keep Paradise visible for continuous web GPS. Switching apps or locking the phone pauses browser tracking; returning to Paradise automatically resumes when location permission is already granted. Native apps are still required for true background/locked-screen GPS.</p>
       ${warning}
-      <button class="btn primary" data-performance-web-action="sample" type="button"${disabled}>CAPTURE LOCATION NOW</button>
+      <button class="btn primary" data-performance-web-action="sample" type="button"${disabled}>${gpsAction}</button>
       <button class="btn secondary" data-performance-web-action="finish" type="button"${disabled}>FINISH DAY</button>
     </div>`;
   }
@@ -134,6 +146,7 @@ async function clearBindings() {
 }
 
 async function clearWebAccess() {
+  await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
   await runtime.supabase?.auth?.signOut({ scope: 'local' }).catch(() => undefined);
   await clearBindings();
   runtime.controller = null;
@@ -172,6 +185,7 @@ async function resolveSession() {
   const state = await validateTrustedDeviceSession({ supabase: runtime.supabase, signOutWhenInvalid: true });
   runtime.session = state;
   if (state.status === 'NO_SESSION' || state.status === 'REVOKED_OR_UNENROLLED') {
+    await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
     await clearBindings();
     runtime.phase = 'ENROLL';
     if (state.status === 'REVOKED_OR_UNENROLLED') runtime.error = 'This web trusted-device session is no longer active. Ask a manager for a new code.';
@@ -186,6 +200,7 @@ async function resolveSession() {
   const storedEmployeeId = window.localStorage.getItem(EMPLOYEE_ID_KEY);
   const deviceId = window.localStorage.getItem(DEVICE_ID_KEY);
   if (storedEmployeeId !== state.employeeId || !await verifyStoredDevice(state.employeeId, deviceId)) {
+    await runtime.locationBridge?.ensureStoppedWhenNoActiveShift?.().catch(() => undefined);
     await runtime.supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
     await clearBindings();
     runtime.phase = 'ENROLL';
@@ -274,7 +289,12 @@ async function renderPerformance() {
       button.disabled = true;
       try {
         if (action === 'start') await runtime.controller.startMyDay();
-        if (action === 'sample') await runtime.locationBridge.captureNow();
+        if (action === 'sample') {
+          const liveState = runtime.locationBridge.getState();
+          if (liveState.continuousForegroundTracking) await runtime.locationBridge.captureNow();
+          else await runtime.locationBridge.resumeForegroundTracking({ initiatedByUser: true });
+          await runtime.controller.load();
+        }
         if (action === 'finish') await runtime.controller.finishDay();
         await runtime.queue.flush().catch(() => undefined);
       } catch (error) {
@@ -322,9 +342,12 @@ export const ParadisePerformanceWebInterimInvariants = Object.freeze([
   'web trusted-device enrollment uses the existing one-time manager enrollment flow with platform web-test',
   'the browser never receives a service-role or secret Supabase key',
   'web refresh-token persistence is explicitly interim browser storage and is not represented as native secure storage',
-  'web location uses explicit foreground samples only and never promises background or locked-screen continuity',
-  'Start My Day creates or recovers the authoritative Performance shift before any browser location sample',
-  'Finish Day remains available when browser location permission or signal is unavailable',
+  'web location uses continuous high-accuracy watchPosition only while the page is visible and the authoritative shift is active',
+  'Screen Wake Lock is best-effort foreground assistance and is never represented as native background execution',
+  'visibility loss pauses browser GPS; returning visible auto-resumes only when location permission is already granted',
+  'true locked-screen and background GPS remain native-app capabilities',
+  'Start My Day creates or recovers the authoritative Performance shift before browser GPS begins',
+  'Finish Day remains available when browser location permission, signal, or wake lock is unavailable',
   'Performance evidence never authorizes or changes field Lookup',
   'customer SET writes, KPI/pay values, territory rules, and retention values are not invented by the web interim shell',
 ]);

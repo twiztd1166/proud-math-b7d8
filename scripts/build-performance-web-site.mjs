@@ -106,12 +106,12 @@ for (const file of ['index.html', 'manifest.webmanifest', 'sw.js', WEB_CSS, WEB_
 
 const bundle = fs.readFileSync(path.join(outDir, WEB_JS), 'utf8');
 for (const required of [
-  'START MY DAY', 'FINISH DAY', 'CAPTURE LOCATION NOW', 'performance-enrollment-redeem',
-  'web-test', 'web-foreground-sample', 'performance_location_points', 'performance_events',
+  'START MY DAY', 'FINISH DAY', 'RESUME LIVE GPS', 'performance-enrollment-redeem',
+  'web-test', 'web-foreground-sample', 'web-foreground-watch', 'watchPosition', 'clearWatch',
+  'wakeLock', 'continuousBackgroundTracking', 'performance_location_points', 'performance_events',
 ]) {
   if (!bundle.includes(required)) throw new Error(`Web Performance bundle missing runtime control: ${required}`);
 }
-if (/\.watchPosition\s*\(/.test(bundle)) throw new Error('Web interim bundle must not enable continuous browser location tracking');
 if (bundle.includes('performance_sets')) throw new Error('Web interim bundle contains dormant customer SET transport material');
 assertNoPrivilegedSupabaseCredentialValue(bundle, 'Web Performance bundle');
 
