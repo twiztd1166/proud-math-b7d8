@@ -10,7 +10,7 @@ import {
 } from './performance-web-kpis.mjs';
 import { mergeKnockClockEvents, KNOCK_EVENT_TYPES } from './performance-web-knock-clock.mjs';
 
-export const PERFORMANCE_WEB_NEUTRAL_KPI_UI_VERSION = '2026.08.21-web-neutral-kpi-ui-v3';
+export const PERFORMANCE_WEB_NEUTRAL_KPI_UI_VERSION = '2026.08.21-web-neutral-kpi-ui-v4';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -142,9 +142,16 @@ function metric(label, value, detail = '') {
 }
 
 function paceDetail(result) {
-  if (Number.isFinite(result?.minimum)) return `approved minimum ${formatKpiPace(result.minimum)} / knock hr`;
-  if (result?.status === 'GOAL_NOT_CONFIGURED') return 'no approved effective minimum';
+  if (Number.isFinite(result?.minimum)) {
+    const version = result?.versionLabel ? ` · ${result.versionLabel}` : '';
+    return `approved minimum ${formatKpiPace(result.minimum)} / knock hr${version}`;
+  }
+  if (result?.status === 'GOAL_NOT_CONFIGURED') {
+    return result?.versionLabel ? `no approved minimum in ${result.versionLabel}` : 'no approved effective minimum';
+  }
   if (result?.status === 'GOAL_CONFIGURATION_AMBIGUOUS') return 'multiple applicable standards; no classification';
+  if (result?.status === 'PINNED_STANDARD_REQUIRED') return 'completed shift has no pinned KPI version; no historical reclassification';
+  if (result?.status === 'PINNED_STANDARD_NOT_FOUND') return `pinned KPI version ${result?.versionLabel ?? 'unknown'} is unavailable`;
   if (result?.status === 'NO_MEASURED_RATE_YET') return 'start Knock Clock to establish a rate';
   return 'approved goal context unavailable';
 }
@@ -175,7 +182,7 @@ function cardMarkup(mode, kpis, appointmentMeta, knockMeta, paceSummary) {
     </div>
     ${pendingAppointments}
     ${pendingKnock}
-    <p class="performance-kpi-boundary">Measured KPIs use explicit Knock Clock time. Pace compares only to one unambiguous approved effective minimum; if none exists, it says GOAL NOT CONFIGURED. No tolerance band, overall pace score, grade, rank, bonus, commission, or pay rule is inferred.</p>
+    <p class="performance-kpi-boundary">Measured KPIs use explicit Knock Clock time. Live pace compares only to one unambiguous approved minimum. A shift-pinned KPI version is authoritative when present, and completed shifts without one are not reclassified from later standards. No tolerance band, overall pace score, grade, rank, bonus, commission, or pay rule is inferred.</p>
   </section>`;
 }
 
@@ -288,6 +295,7 @@ export const ParadisePerformanceWebNeutralKpiUiInvariants = Object.freeze([
   'per-hour activity uses explicit productive Knock Clock events and never silently substitutes total Day Clock duration',
   'pace reads standards only and never creates, updates, deletes, or invents a target value',
   'pace uses the exact configured minimum as the binary boundary with no hidden tolerance; multiple applicable standards fail closed',
+  'a shift-pinned KPI version controls that shift historical goal classification; completed unpinned shifts fail closed',
   'active shifts use ON PACE or OFF PACE while completed surfaces use final goal language rather than a live projection claim',
   'pending offline appointment and Knock Clock writes may be included in live descriptive measurements and are explicitly disclosed as pending sync',
   'the helper disables a second refresh-token loop and reuses the same-origin trusted browser session only for RLS-protected reads',
