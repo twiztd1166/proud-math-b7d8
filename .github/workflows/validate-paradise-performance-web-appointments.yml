@@ -1,0 +1,60 @@
+name: Validate Paradise Performance web appointments
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance-appointments.css'
+      - 'performance/client/performance-web-appointments.mjs'
+      - 'performance/client/performance-web-appointment-ui.mjs'
+      - 'performance/client/performance-web-summary.mjs'
+      - 'performance/client/performance-sync.mjs'
+      - 'performance/tests/performance-web-appointments.test.mjs'
+      - '.github/workflows/validate-paradise-performance-web-appointments.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Web appointment contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check appointment modules
+        run: |
+          node --check performance/client/performance-web-appointments.mjs
+          node --check performance/client/performance-web-appointment-ui.mjs
+      - name: Run appointment and route contracts
+        run: node --test performance/tests/performance-web-appointments.test.mjs performance/tests/performance-web-summary.test.mjs
+      - name: Verify controlled web appointment boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'performance-appointments.css' index.html
+          grep -q 'performance-web-appointment-ui.mjs' index.html
+          grep -q '+ APPOINTMENT' performance/client/performance-web-appointment-ui.mjs
+          grep -q 'SAVE APPOINTMENT' performance/client/performance-web-appointment-ui.mjs
+          grep -q 'createSupabaseSyncTransport' performance/client/performance-web-appointment-ui.mjs
+          grep -q 'paradise-performance-web-appointments-offline-v1' performance/client/performance-web-appointment-ui.mjs
+          grep -q 'customer address.*separate' performance/client/performance-web-appointment-ui.mjs
+          grep -q 'WEB_APPOINTMENT_PIN_MAX_ACCURACY_METERS = 100' performance/client/performance-web-appointments.mjs
+          grep -q 'data-performance-appointment-pin' performance/client/performance-web-appointments.mjs
+          grep -q 'performance-web-appointments.mjs' sw.js
+          grep -q 'performance-web-appointment-ui.mjs' sw.js
+          grep -q "PERFORMANCE_OPERATIONAL_WRITE_KINDS = Object.freeze(\['EVENT', 'LOCATION'\])" performance/client/performance-operational-sync.mjs
+          if grep -Eqi 'leaflet|mapbox|google\.maps|openstreetmap|tile\.openstreetmap|maps\.google' performance/client/performance-web-appointments.mjs performance/client/performance-web-appointment-ui.mjs; then
+            echo 'Third-party map provider introduced into controlled web appointment slice' >&2
+            exit 1
+          fi
+          if grep -Eqi 'service[_-]?role|secret[_-]?key' performance/client/performance-web-appointments.mjs performance/client/performance-web-appointment-ui.mjs; then
+            echo 'Privileged credential language found in browser appointment modules' >&2
+            exit 1
+          fi
+          echo 'PASS: appointment entry + offline SET queue + pinned route + native SET boundary'
