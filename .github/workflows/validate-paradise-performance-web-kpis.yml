@@ -56,9 +56,12 @@ jobs:
           grep -q 'DOORS PACE' performance/client/performance-web-kpi-ui.mjs
           grep -q 'APPOINTMENT PACE' performance/client/performance-web-kpi-ui.mjs
           grep -q 'GOAL NOT CONFIGURED' performance/client/performance-web-kpi-ui.mjs
+          grep -q 'HISTORICAL GOAL NOT PINNED' performance/client/performance-web-kpis.mjs
+          grep -q 'PINNED GOAL VERSION MISSING' performance/client/performance-web-kpis.mjs
+          grep -q 'kpi_standard_version_label' performance/client/performance-web-kpi-ui.mjs
           grep -q "from('performance_kpi_standard_versions')" performance/client/performance-web-kpi-ui.mjs
           grep -q "select('version_label,applies_to_role,applies_to_office,applies_to_team,effective_from,effective_to,metric_key,minimum')" performance/client/performance-web-kpi-ui.mjs
-          grep -q 'multiple applicable standards fail closed' performance/client/performance-web-kpis.mjs
+          grep -q 'completed shifts without a pinned version fail closed' performance/client/performance-web-kpis.mjs
           grep -q 'volume pace requires both an explicit daily goal and explicit planned work hours' performance/client/performance-web-kpis.mjs
           grep -q 'performance-web-knock-clock-ui.mjs' index.html
           grep -q 'performance-web-kpi-ui.mjs' index.html
@@ -84,4 +87,4 @@ jobs:
             echo 'Pace runtime silently defaulted planned work hours' >&2
             exit 1
           fi
-          echo 'PASS: explicit Knock Clock + measured KPI math + read-only fail-closed pace present without embedded targets, bands, rank, or pay logic'
+          echo 'PASS: explicit Knock Clock + measured KPI math + read-only fail-closed pace with pinned historical standards and no embedded targets, bands, rank, or pay logic'
