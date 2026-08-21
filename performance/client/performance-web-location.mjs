@@ -35,7 +35,12 @@ function distanceMeters(a, b) {
 }
 
 export class BrowserForegroundLocationBridge {
-  constructor({ onQueuedLocation, navigatorRef = globalThis.navigator, documentRef = globalThis.document, uuid = () => crypto.randomUUID() } = {}) {
+  constructor({
+    onQueuedLocation,
+    navigatorRef = globalThis.navigator,
+    documentRef = globalThis.document,
+    uuid = () => crypto.randomUUID(),
+  } = {}) {
     if (typeof onQueuedLocation !== 'function') throw new Error('onQueuedLocation callback is required');
     this.onQueuedLocation = onQueuedLocation;
     this.navigatorRef = navigatorRef;
@@ -55,7 +60,9 @@ export class BrowserForegroundLocationBridge {
     this.documentRef?.addEventListener?.('visibilitychange', this.visibilityHandler);
   }
 
-  #isVisible() { return !this.documentRef || this.documentRef.visibilityState !== 'hidden'; }
+  #isVisible() {
+    return !this.documentRef || this.documentRef.visibilityState !== 'hidden';
+  }
 
   getState() {
     return Object.freeze({
@@ -78,14 +85,22 @@ export class BrowserForegroundLocationBridge {
       if (!permissions?.query) return null;
       const status = await permissions.query({ name: 'geolocation' });
       return String(status?.state || '').toUpperCase() || null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   async #requestWakeLock() {
     if (!this.context || !this.#isVisible()) return;
     const wakeLock = this.navigatorRef?.wakeLock;
-    if (!wakeLock?.request) { this.wakeLockState = 'UNAVAILABLE'; return; }
-    if (this.wakeLockSentinel && !this.wakeLockSentinel.released) { this.wakeLockState = 'ACTIVE'; return; }
+    if (!wakeLock?.request) {
+      this.wakeLockState = 'UNAVAILABLE';
+      return;
+    }
+    if (this.wakeLockSentinel && !this.wakeLockSentinel.released) {
+      this.wakeLockState = 'ACTIVE';
+      return;
+    }
     try {
       const sentinel = await wakeLock.request('screen');
       this.wakeLockSentinel = sentinel;
@@ -105,7 +120,9 @@ export class BrowserForegroundLocationBridge {
   async #releaseWakeLock(nextState = null) {
     const sentinel = this.wakeLockSentinel;
     this.wakeLockSentinel = null;
-    if (sentinel && !sentinel.released) { try { await sentinel.release(); } catch {} }
+    if (sentinel && !sentinel.released) {
+      try { await sentinel.release(); } catch { /* best effort */ }
+    }
     if (nextState) this.wakeLockState = nextState;
     else this.wakeLockState = this.navigatorRef?.wakeLock?.request ? 'AVAILABLE' : 'UNAVAILABLE';
   }
@@ -113,7 +130,13 @@ export class BrowserForegroundLocationBridge {
   async #currentPosition() {
     const geolocation = this.navigatorRef?.geolocation;
     if (!geolocation?.getCurrentPosition) throw new Error('Browser geolocation is unavailable');
-    return new Promise((resolve, reject) => geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }));
+    return new Promise((resolve, reject) => {
+      geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 15000,
+      });
+    });
   }
 
   #sampleFromPosition(position, source) {
@@ -121,24 +144,45 @@ export class BrowserForegroundLocationBridge {
     const capturedAt = new Date(Number(position?.timestamp) || Date.now()).toISOString();
     const sample = Object.freeze({
       capturedAt,
-      latitude: Number(coords.latitude), longitude: Number(coords.longitude), accuracyMeters: Number(coords.accuracy),
+      latitude: Number(coords.latitude),
+      longitude: Number(coords.longitude),
+      accuracyMeters: Number(coords.accuracy),
       altitudeMeters: Number.isFinite(Number(coords.altitude)) ? Number(coords.altitude) : null,
       speedMetersPerSecond: Number.isFinite(Number(coords.speed)) ? Number(coords.speed) : null,
       headingDegrees: Number.isFinite(Number(coords.heading)) ? Number(coords.heading) : null,
-      precise: Number(coords.accuracy) <= 100, mocked: null, source, bridgeVersion: PERFORMANCE_WEB_LOCATION_VERSION,
+      precise: Number(coords.accuracy) <= 100,
+      mocked: null,
+      source,
+      bridgeVersion: PERFORMANCE_WEB_LOCATION_VERSION,
     });
-    if (!Number.isFinite(sample.latitude) || !Number.isFinite(sample.longitude) || !Number.isFinite(sample.accuracyMeters)) throw new Error('Browser location sample is incomplete');
+    if (!Number.isFinite(sample.latitude) || !Number.isFinite(sample.longitude) || !Number.isFinite(sample.accuracyMeters)) {
+      throw new Error('Browser location sample is incomplete');
+    }
     return sample;
   }
 
   async #queueSample(sample) {
     if (!this.context) throw new Error('No active web shift location context');
-    const write = createQueuedWrite({ id: this.uuid(), kind: 'LOCATION', capturedAt: sample.capturedAt, payload: {
-      employeeId: this.context.employeeId, deviceId: this.context.deviceId, shiftId: this.context.shiftId,
-      latitude: sample.latitude, longitude: sample.longitude, accuracyMeters: sample.accuracyMeters,
-      altitudeMeters: sample.altitudeMeters, speedMetersPerSecond: sample.speedMetersPerSecond, headingDegrees: sample.headingDegrees,
-      precise: sample.precise, mocked: sample.mocked, source: sample.source, bridgeVersion: sample.bridgeVersion,
-    }});
+    const write = createQueuedWrite({
+      id: this.uuid(),
+      kind: 'LOCATION',
+      capturedAt: sample.capturedAt,
+      payload: {
+        employeeId: this.context.employeeId,
+        deviceId: this.context.deviceId,
+        shiftId: this.context.shiftId,
+        latitude: sample.latitude,
+        longitude: sample.longitude,
+        accuracyMeters: sample.accuracyMeters,
+        altitudeMeters: sample.altitudeMeters,
+        speedMetersPerSecond: sample.speedMetersPerSecond,
+        headingDegrees: sample.headingDegrees,
+        precise: sample.precise,
+        mocked: sample.mocked,
+        source: sample.source,
+        bridgeVersion: sample.bridgeVersion,
+      },
+    });
     await this.onQueuedLocation(write);
     this.lastSample = sample;
     this.permission = 'GRANTED';
@@ -149,8 +193,13 @@ export class BrowserForegroundLocationBridge {
   async #captureSample() {
     if (!this.context) throw new Error('No active web shift location context');
     let position;
-    try { position = await this.#currentPosition(); this.permission = 'GRANTED'; }
-    catch (error) { this.permission = permissionFromError(error); throw error; }
+    try {
+      position = await this.#currentPosition();
+      this.permission = 'GRANTED';
+    } catch (error) {
+      this.permission = permissionFromError(error);
+      throw error;
+    }
     return this.#queueSample(this.#sampleFromPosition(position, 'web-foreground-sample'));
   }
 
@@ -165,56 +214,97 @@ export class BrowserForegroundLocationBridge {
   #handleWatchPosition(position) {
     if (!this.context || !this.#isVisible()) return;
     let sample;
-    try { sample = this.#sampleFromPosition(position, 'web-foreground-watch'); }
-    catch (error) { this.lastError = String(error?.message || error).slice(0, 180); return; }
-    this.permission = 'GRANTED'; this.state = 'WEB_FOREGROUND_CONTINUOUS';
+    try {
+      sample = this.#sampleFromPosition(position, 'web-foreground-watch');
+    } catch (error) {
+      this.lastError = String(error?.message || error).slice(0, 180);
+      return;
+    }
+    this.permission = 'GRANTED';
+    this.state = 'WEB_FOREGROUND_CONTINUOUS';
     if (!this.#shouldAcceptWatchSample(sample)) return;
     this.lastAcceptedWatchSample = sample;
-    this.writeChain = this.writeChain.catch(() => undefined).then(() => this.#queueSample(sample)).catch(error => {
-      this.lastError = String(error?.message || error || 'Location queue failed').slice(0, 180);
-      if (this.context && this.watchId !== null) this.state = 'WEB_FOREGROUND_CONTINUOUS';
-    });
+    this.writeChain = this.writeChain
+      .catch(() => undefined)
+      .then(() => this.#queueSample(sample))
+      .catch(error => {
+        this.lastError = String(error?.message || error || 'Location queue failed').slice(0, 180);
+        if (this.context && this.watchId !== null) this.state = 'WEB_FOREGROUND_CONTINUOUS';
+      });
   }
 
   #handleWatchError(error) {
     this.permission = permissionFromError(error);
     this.lastError = String(error?.message || error || 'Browser location watch error').slice(0, 180);
-    if (this.permission === 'DENIED') { this.#stopWatch(); this.state = 'PERMISSION_REQUIRED'; }
-    else if (this.context) this.state = 'WEB_FOREGROUND_PAUSED';
+    if (this.permission === 'DENIED') {
+      this.#stopWatch();
+      this.state = 'PERMISSION_REQUIRED';
+    } else if (this.context) {
+      this.state = 'WEB_FOREGROUND_PAUSED';
+    }
   }
 
   #startWatch() {
     if (!this.context || !this.#isVisible() || this.watchId !== null) return;
     const geolocation = this.navigatorRef?.geolocation;
-    if (!geolocation?.watchPosition || !geolocation?.clearWatch) { this.state = 'WEB_FOREGROUND_SAMPLE_ONLY'; return; }
+    if (!geolocation?.watchPosition || !geolocation?.clearWatch) {
+      this.state = 'WEB_FOREGROUND_SAMPLE_ONLY';
+      return;
+    }
     try {
-      this.watchId = geolocation.watchPosition(position => this.#handleWatchPosition(position), error => this.#handleWatchError(error), { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+      const id = geolocation.watchPosition(
+        position => this.#handleWatchPosition(position),
+        error => this.#handleWatchError(error),
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
+      );
+      this.watchId = id;
       this.state = 'WEB_FOREGROUND_CONTINUOUS';
     } catch (error) {
-      this.watchId = null; this.lastError = String(error?.message || error || 'Browser location watch unavailable').slice(0, 180); this.state = 'WEB_FOREGROUND_SAMPLE_ONLY';
+      this.watchId = null;
+      this.lastError = String(error?.message || error || 'Browser location watch unavailable').slice(0, 180);
+      this.state = 'WEB_FOREGROUND_SAMPLE_ONLY';
     }
   }
 
   #stopWatch() {
     if (this.watchId === null) return;
-    try { this.navigatorRef?.geolocation?.clearWatch?.(this.watchId); } catch {}
+    try { this.navigatorRef?.geolocation?.clearWatch?.(this.watchId); } catch { /* best effort */ }
     this.watchId = null;
   }
 
-  async #beginVisibleTracking() { if (!this.context || !this.#isVisible()) return this.getState(); this.#startWatch(); await this.#requestWakeLock(); return this.getState(); }
+  async #beginVisibleTracking() {
+    if (!this.context || !this.#isVisible()) return this.getState();
+    this.#startWatch();
+    await this.#requestWakeLock();
+    return this.getState();
+  }
 
   async #handleVisibilityChange() {
     if (!this.context) return;
-    if (!this.#isVisible()) { this.#stopWatch(); this.state = 'WEB_FOREGROUND_PAUSED'; await this.#releaseWakeLock('PAUSED_HIDDEN'); return; }
-    if (this.permission === 'GRANTED') await this.#beginVisibleTracking();
-    else this.state = this.permission === 'DENIED' ? 'PERMISSION_REQUIRED' : 'WEB_FOREGROUND_PAUSED';
+    if (!this.#isVisible()) {
+      this.#stopWatch();
+      this.state = 'WEB_FOREGROUND_PAUSED';
+      await this.#releaseWakeLock('PAUSED_HIDDEN');
+      return;
+    }
+    if (this.permission === 'GRANTED') {
+      await this.#beginVisibleTracking();
+    } else {
+      this.state = this.permission === 'DENIED' ? 'PERMISSION_REQUIRED' : 'WEB_FOREGROUND_PAUSED';
+    }
   }
 
   async startShift({ shiftId, employeeId, deviceId, initiatedByUser = false }) {
     assertContext({ shiftId, employeeId, deviceId });
     if (initiatedByUser !== true) throw new Error('Web location may only start from visible Start My Day action');
-    this.context = { shiftId, employeeId, deviceId }; this.permission = await this.#readPermissionWithoutPrompt(); this.state = 'WEB_FOREGROUND';
-    try { await this.#captureSample(); } catch (error) { if (this.permission === 'DENIED') return Object.freeze({ ...this.getState(), state: 'PERMISSION_REQUIRED' }); }
+    this.context = { shiftId, employeeId, deviceId };
+    this.permission = await this.#readPermissionWithoutPrompt();
+    this.state = 'WEB_FOREGROUND';
+    try {
+      await this.#captureSample();
+    } catch (error) {
+      if (this.permission === 'DENIED') return Object.freeze({ ...this.getState(), state: 'PERMISSION_REQUIRED' });
+    }
     if (this.permission !== 'DENIED') await this.#beginVisibleTracking();
     return this.getState();
   }
@@ -222,10 +312,15 @@ export class BrowserForegroundLocationBridge {
   async attachToAlreadyActiveShift({ shiftId, employeeId, deviceId }) {
     assertContext({ shiftId, employeeId, deviceId });
     this.context = { shiftId, employeeId, deviceId };
-    const observed = await this.#readPermissionWithoutPrompt(); if (observed) this.permission = observed;
-    if (this.permission === 'GRANTED' && this.#isVisible()) await this.#beginVisibleTracking();
-    else if (this.permission === 'DENIED') this.state = 'PERMISSION_REQUIRED';
-    else this.state = 'WEB_FOREGROUND_PAUSED';
+    const observed = await this.#readPermissionWithoutPrompt();
+    if (observed) this.permission = observed;
+    if (this.permission === 'GRANTED' && this.#isVisible()) {
+      await this.#beginVisibleTracking();
+    } else if (this.permission === 'DENIED') {
+      this.state = 'PERMISSION_REQUIRED';
+    } else {
+      this.state = 'WEB_FOREGROUND_PAUSED';
+    }
     return this.getState();
   }
 
@@ -233,23 +328,49 @@ export class BrowserForegroundLocationBridge {
     if (!this.context) throw new Error('No active web shift location context');
     if (initiatedByUser !== true) throw new Error('Foreground GPS resume requires a visible user action');
     if (!this.#isVisible()) return this.getState();
-    try { await this.#captureSample(); } catch (error) { if (this.permission === 'DENIED') return Object.freeze({ ...this.getState(), state: 'PERMISSION_REQUIRED' }); }
+    try {
+      await this.#captureSample();
+    } catch (error) {
+      if (this.permission === 'DENIED') return Object.freeze({ ...this.getState(), state: 'PERMISSION_REQUIRED' });
+    }
     if (this.permission !== 'DENIED') await this.#beginVisibleTracking();
     return this.getState();
   }
 
-  async captureNow() { if (!this.context) throw new Error('No active web shift location context'); return this.#captureSample(); }
+  async captureNow() {
+    if (!this.context) throw new Error('No active web shift location context');
+    return this.#captureSample();
+  }
 
   async stopShift({ shiftId } = {}) {
     if (shiftId && this.context?.shiftId && shiftId !== this.context.shiftId) throw new Error('Cannot stop a different shift');
-    this.#stopWatch(); await this.#releaseWakeLock(); this.context = null; this.lastSample = null; this.lastAcceptedWatchSample = null; this.state = 'STOPPED'; this.lastError = null; return this.getState();
+    this.#stopWatch();
+    await this.#releaseWakeLock();
+    this.context = null;
+    this.lastSample = null;
+    this.lastAcceptedWatchSample = null;
+    this.state = 'STOPPED';
+    this.lastError = null;
+    return this.getState();
   }
 
   async ensureStoppedWhenNoActiveShift() {
-    this.#stopWatch(); await this.#releaseWakeLock(); this.context = null; this.lastSample = null; this.lastAcceptedWatchSample = null; this.state = 'STOPPED'; this.lastError = null; this.permission = await this.#readPermissionWithoutPrompt(); return this.getState();
+    this.#stopWatch();
+    await this.#releaseWakeLock();
+    this.context = null;
+    this.lastSample = null;
+    this.lastAcceptedWatchSample = null;
+    this.state = 'STOPPED';
+    this.lastError = null;
+    this.permission = await this.#readPermissionWithoutPrompt();
+    return this.getState();
   }
 
-  destroy() { this.#stopWatch(); void this.#releaseWakeLock(); this.documentRef?.removeEventListener?.('visibilitychange', this.visibilityHandler); }
+  destroy() {
+    this.#stopWatch();
+    void this.#releaseWakeLock();
+    this.documentRef?.removeEventListener?.('visibilitychange', this.visibilityHandler);
+  }
 }
 
 export const PerformanceWebLocationInvariants = Object.freeze([
