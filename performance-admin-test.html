@@ -20,14 +20,14 @@
     <section class="performance-web-shell">
       <div class="performance-web-banner" role="note">
         <b>ADMIN TEST ACCESS</b>
-        <span>CONTROLLED TESTING ONLY · NOT EMPLOYEE ROLLOUT</span>
+        <span>CONTROLLED ADMIN TESTING ONLY · NOT EMPLOYEE ROLLOUT</span>
       </div>
       <div class="performance-web-card">
         <p class="performance-eyebrow">TRUSTED-DEVICE ENROLLMENT</p>
-        <h2>Issue one-time test enrollment</h2>
-        <p id="adminTestStatus" role="status">Verifying this trusted manager/admin browser…</p>
+        <h2>Issue one-time admin test enrollment</h2>
+        <p id="adminTestStatus" role="status">Verifying this trusted admin browser…</p>
         <form id="adminTestEnrollmentForm" hidden autocomplete="off">
-          <label for="adminTestEmployee">Employee</label>
+          <label for="adminTestEmployee">Admin tester</label>
           <select id="adminTestEmployee" class="input" required></select>
           <label for="adminTestExpires">Code lifetime</label>
           <select id="adminTestExpires" class="input">
@@ -39,16 +39,16 @@
         </form>
       </div>
       <div id="adminTestResult" class="performance-web-card" hidden>
-        <p class="performance-eyebrow">ONE-TIME TEST CODE</p>
+        <p class="performance-eyebrow">ONE-TIME ADMIN TEST CODE</p>
         <h3 id="adminTestEmployeeName"></h3>
         <p id="adminTestCode" style="overflow-wrap:anywhere;font-weight:700"></p>
         <p id="adminTestExpiry"></p>
         <button id="adminTestCopy" class="btn secondary" type="button">COPY CODE</button>
-        <p class="performance-web-boundary">Share only with the intended tester. The newest unused code replaces any older unexpired code for that employee. This page does not store the plaintext code.</p>
+        <p class="performance-web-boundary">Share only with the intended admin tester. The newest unused code replaces any older unexpired code for that admin tester. This page does not store the plaintext code.</p>
       </div>
       <div class="performance-web-card performance-web-security">
         <h3>Testing boundary</h3>
-        <p>This page uses the existing Paradise trusted-device session and the existing JWT-protected manager/admin enrollment function. It does not use a service-role key and does not authorize employee rollout.</p>
+        <p>This page requires an existing Paradise admin trusted-device session and only offers active admin test profiles. It uses the existing JWT-protected enrollment function, does not use a service-role key, and cannot be used for employee-wide enrollment.</p>
         <a href="./index.html">Back to Paradise Performance</a>
       </div>
     </section>
