@@ -1,7 +1,7 @@
 import { buildEventEnvelope, createClientEventId, isUuid } from '../shared/performance-events.mjs';
 import { createQueuedWrite } from './performance-sync.mjs';
 
-export const PERFORMANCE_TODAY_VERSION = '2026.08.18-performance-today-v1';
+export const PERFORMANCE_TODAY_VERSION = '2026.08.21-performance-today-v2';
 export const PERFORMANCE_ACTIVE_SHIFT_STATUSES = Object.freeze(['active', 'paused', 'finishing']);
 
 const SHIFT_SELECT = [
@@ -31,7 +31,7 @@ function normalizeOptionalCount(value, fallback = null) {
 }
 
 function assertDependencies({ shiftTransport, employeeId, deviceId, locationBridge, syncQueue, uuid }) {
-  for (const method of ['findActiveShift', 'startShift', 'finishShift']) {
+  for (const method of ['findActiveShift', 'startShift', 'updateShiftCounts', 'finishShift']) {
     if (typeof shiftTransport?.[method] !== 'function') throw new Error(`shiftTransport.${method} is required`);
   }
   if (!isUuid(employeeId)) throw new Error('employeeId must be a UUID');
@@ -97,6 +97,24 @@ export function createSupabaseShiftTransport(supabase) {
         if (existing) return existing;
       }
       throw error;
+    },
+
+    async updateShiftCounts({ shiftId, employeeId, doors, conversations, updatedAt }) {
+      const patch = {
+        doors: normalizeOptionalCount(doors, 0),
+        conversations: normalizeOptionalCount(conversations, 0),
+        updated_at: updatedAt,
+      };
+      const { data, error } = await supabase
+        .from('performance_shifts')
+        .update(patch)
+        .eq('id', shiftId)
+        .eq('employee_id', employeeId)
+        .in('status', PERFORMANCE_ACTIVE_SHIFT_STATUSES)
+        .select(SHIFT_SELECT)
+        .single();
+      if (error) throw error;
+      return data;
     },
 
     async finishShift({ shiftId, employeeId, finishedAt, doors, conversations, endLocation = null }) {
@@ -255,11 +273,39 @@ export class PerformanceTodayController {
           this.warning = 'Shift started. Location permission is required for live shift GPS.';
         }
       } catch (error) {
-        // The authoritative shift already exists. Never create a second shift just because native GPS failed.
         this.location = Object.freeze({ state: 'ERROR', permission: null });
         this.warning = `Shift started. GPS needs attention: ${safeMessage(error)}`;
       }
       return this.getState();
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  async updateCounts({ doors, conversations } = {}) {
+    if (this.busy) throw new Error('Performance Today is busy');
+    if (!this.shift || !PERFORMANCE_ACTIVE_SHIFT_STATUSES.includes(this.shift.status)) {
+      throw new Error('No active shift for daily counts');
+    }
+    const nextDoors = normalizeOptionalCount(doors, this.shift.doors ?? 0) ?? 0;
+    const nextConversations = normalizeOptionalCount(conversations, this.shift.conversations ?? 0) ?? 0;
+    const optimistic = { ...this.shift, doors: nextDoors, conversations: nextConversations };
+    this.shift = optimistic;
+    this.busy = true;
+    this.warning = null;
+    try {
+      const updated = await this.shiftTransport.updateShiftCounts({
+        shiftId: optimistic.id,
+        employeeId: this.employeeId,
+        doors: nextDoors,
+        conversations: nextConversations,
+        updatedAt: this.now().toISOString(),
+      });
+      this.shift = updated;
+      return this.getState();
+    } catch (error) {
+      this.warning = `Counts are saved on this browser but have not synced yet: ${safeMessage(error)}`;
+      throw error;
     } finally {
       this.busy = false;
     }
@@ -327,7 +373,6 @@ export class PerformanceTodayController {
       }
       return this.getState();
     } catch (error) {
-      // If the authoritative finish failed, remain active and keep tracking rather than creating off-server gaps.
       this.mode = 'ACTIVE';
       this.warning = `Finish Day did not complete: ${safeMessage(error)}`;
       throw error;
@@ -367,6 +412,8 @@ export const PerformanceTodayInvariants = Object.freeze([
   'Start My Day creates or recovers one authoritative shift before native GPS begins',
   'native GPS failure never causes a duplicate shift',
   'relaunch reattaches only to the authoritative active shift already known to native runtime',
+  'live door and conversation counts update only the authoritative employee shift',
+  'count sync failure may remain visible on the browser but never silently invents a server write',
   'Finish Day stops native GPS only after the authoritative shift finish succeeds',
   'an authoritative finish remains finished even if the append-only finish event needs local recovery',
   'missing end GPS never blocks Finish Day',
