@@ -5,6 +5,7 @@ on:
     branches: [paradise-performance-web-interim-preview]
     paths:
       - 'index.html'
+      - 'first-admin-bootstrap.html'
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'performance-web.css'
@@ -17,6 +18,7 @@ on:
     paths:
       - 'PREVIEW_SMOKE_TRIGGER.txt'
       - 'index.html'
+      - 'first-admin-bootstrap.html'
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'performance-web.css'
@@ -101,3 +103,49 @@ jobs:
           EOF
           node ./.performance-preview-smoke.mjs
           rm -f .performance-preview-smoke.mjs
+      - name: Verify first-admin bootstrap locally and on immutable HTTPS head
+        shell: bash
+        env:
+          LIVE_URL: https://rawcdn.githack.com/${{ github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}/first-admin-bootstrap.html
+        run: |
+          cat > .first-admin-preview-smoke.mjs <<'EOF'
+          import { webkit } from '@playwright/test';
+
+          async function verify(page, url, label) {
+            const pageErrors = [];
+            const consoleErrors = [];
+            const badResponses = [];
+            const provisioningRequests = [];
+            page.on('pageerror', error => pageErrors.push(String(error)));
+            page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+            page.on('response', response => {
+              if (response.status() >= 400) badResponses.push(`${response.status()} ${response.url()}`);
+            });
+            page.on('request', request => {
+              if (request.url().includes('/functions/v1/performance-first-manager-bootstrap-provision')) provisioningRequests.push(request.url());
+            });
+            const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+            if (!response || response.status() >= 400) throw new Error(`${label} navigation failed: ${response?.status() ?? 'NO_RESPONSE'}`);
+            await page.waitForSelector('#firstAdminBootstrapForm', { timeout: 30000 });
+            if (await page.title() !== 'Paradise Performance — First Admin Test') throw new Error(`${label} unexpected title: ${await page.title()}`);
+            if (await page.locator('#firstAdminEmail').inputValue() !== '') throw new Error(`${label} email field must not be prefilled`);
+            if (await page.locator('#firstAdminProof').inputValue() !== '') throw new Error(`${label} proof field must not be prefilled`);
+            await page.click('#firstAdminBootstrapSubmit');
+            await page.waitForFunction(() => /Enter the authorized email and the one-time proof/i.test(document.querySelector('#firstAdminBootstrapStatus')?.textContent || ''), null, { timeout: 10000 });
+            if (provisioningRequests.length) throw new Error(`${label} made a provisioning request without credentials`);
+            if (badResponses.length) throw new Error(`${label} response failures: ${badResponses.join(' | ')}`);
+            if (pageErrors.length) throw new Error(`${label} page errors: ${pageErrors.join(' | ')}`);
+            if (consoleErrors.length) throw new Error(`${label} console errors: ${consoleErrors.join(' | ')}`);
+            return {label,title:await page.title(),form:true,moduleListener:true,provisioningRequests:0};
+          }
+
+          const browser = await webkit.launch();
+          const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+          await context.addCookies([{ name: '__Http-phish', value: '1', domain: 'rawcdn.githack.com', path: '/', secure: true }]);
+          const local = await verify(await context.newPage(), 'http://127.0.0.1:4173/first-admin-bootstrap.html', 'LOCAL');
+          const live = await verify(await context.newPage(), process.env.LIVE_URL, 'LIVE_HTTPS');
+          console.log(JSON.stringify({status:'PASS',local,live,liveUrl:process.env.LIVE_URL}));
+          await browser.close();
+          EOF
+          node ./.first-admin-preview-smoke.mjs
+          rm -f .first-admin-preview-smoke.mjs
