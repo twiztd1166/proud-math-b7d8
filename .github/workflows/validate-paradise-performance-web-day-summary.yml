@@ -4,7 +4,9 @@ on:
   pull_request:
     branches: [paradise-performance-web-interim-preview]
     paths:
+      - 'index.html'
       - 'performance/client/performance-web-app.mjs'
+      - 'performance/client/performance-web-last-completed.mjs'
       - 'performance/client/performance-web-summary.mjs'
       - 'performance/client/performance-today.mjs'
       - 'performance/tests/performance-web-summary.test.mjs'
@@ -28,6 +30,7 @@ jobs:
       - name: Syntax check changed runtime modules
         run: |
           node --check performance/client/performance-web-app.mjs
+          node --check performance/client/performance-web-last-completed.mjs
           node --check performance/client/performance-web-summary.mjs
           node --check performance/client/performance-today.mjs
       - name: Run focused unit contracts
@@ -43,11 +46,15 @@ jobs:
           grep -q 'DAY COMPLETE' performance/client/performance-web-app.mjs
           grep -q 'formatShiftDuration' performance/client/performance-web-app.mjs
           grep -q 'renderWebRouteTrace' performance/client/performance-web-app.mjs
+          grep -q 'LAST COMPLETED DAY' performance/client/performance-web-last-completed.mjs
+          grep -q 'performance-web-last-completed.mjs' index.html
           grep -q 'WEB_ROUTE_MAX_ACCURACY_METERS = 50' performance/client/performance-web-summary.mjs
           grep -q 'WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5' performance/client/performance-web-summary.mjs
+          grep -q 'WEB_MAX_TRACKED_GAP_SECONDS = 30' performance/client/performance-web-summary.mjs
+          grep -q 'point.mocked' performance/client/performance-web-summary.mjs
           grep -q 'Apple Health or iPhone pedometer steps' performance/client/performance-web-app.mjs
-          if grep -Eqi 'leaflet|mapbox|google.maps|openstreetmap|tile\.openstreetmap|maps\.google' performance/client/performance-web-app.mjs performance/client/performance-web-summary.mjs; then
+          if grep -Eqi 'leaflet|mapbox|google.maps|openstreetmap|tile\.openstreetmap|maps\.google' performance/client/performance-web-app.mjs performance/client/performance-web-summary.mjs performance/client/performance-web-last-completed.mjs; then
             echo 'Third-party map provider introduced into controlled web interim' >&2
             exit 1
           fi
-          echo 'PASS: web day-summary requested surfaces + no third-party map provider'
+          echo 'PASS: live + completed-day surfaces, hardened route metrics, no third-party map provider'
