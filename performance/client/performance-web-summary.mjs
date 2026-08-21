@@ -1,7 +1,8 @@
-export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v2';
+export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v3';
 export const WEB_ROUTE_MAX_ACCURACY_METERS = 50;
 export const WEB_ESTIMATED_STRIDE_METERS = 0.762;
 export const WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5;
+export const WEB_MAX_TRACKED_GAP_SECONDS = 30;
 const METERS_PER_MILE = 1609.344;
 const EARTH_RADIUS_METERS = 6371000;
 
@@ -26,7 +27,7 @@ export function distanceMeters(a, b) {
   const p1 = radians(lat1);
   const p2 = radians(lat2);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dLon / 2) ** 2;
-  return EARTH_RADIUS_METERS * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  return EARTH_RADIUS_METERS * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(Math.max(0, 1 - h)));
 }
 
 function pointKey(point, index) {
@@ -43,10 +44,12 @@ export function qualifiedRoutePoints(points = [], maxAccuracyMeters = WEB_ROUTE_
       longitude: finite(point?.longitude),
       accuracyMeters: finite(point?.accuracyMeters ?? point?.accuracy_meters),
       precise: point?.precise !== false,
+      mocked: point?.mocked === true,
       source: String(point?.source ?? ''),
     }))
     .filter(point => {
       if (seen.has(point.clientPointId)) return false;
+      if (point.mocked) return false;
       if (point.latitude === null || point.longitude === null || point.accuracyMeters === null) return false;
       if (point.accuracyMeters > maxAccuracyMeters) return false;
       if (!Number.isFinite(Date.parse(point.capturedAt))) return false;
@@ -60,17 +63,26 @@ export function summarizeWebRoute(points = [], {
   maxAccuracyMeters = WEB_ROUTE_MAX_ACCURACY_METERS,
   strideMeters = WEB_ESTIMATED_STRIDE_METERS,
   maxPedestrianSpeedMps = WEB_MAX_PEDESTRIAN_SPEED_MPS,
+  maxTrackedGapSeconds = WEB_MAX_TRACKED_GAP_SECONDS,
 } = {}) {
   const qualified = qualifiedRoutePoints(points, maxAccuracyMeters);
   let meters = 0;
   let pedestrianMeters = 0;
+  let acceptedSegmentCount = 0;
+  let skippedGapCount = 0;
   for (let index = 1; index < qualified.length; index += 1) {
     const previous = qualified[index - 1];
     const current = qualified[index];
-    const segmentMeters = distanceMeters(previous, current);
-    meters += segmentMeters;
     const elapsedSeconds = (Date.parse(current.capturedAt) - Date.parse(previous.capturedAt)) / 1000;
-    const inferredSpeed = elapsedSeconds > 0 ? segmentMeters / elapsedSeconds : Number.POSITIVE_INFINITY;
+    if (!(elapsedSeconds > 0) || elapsedSeconds > maxTrackedGapSeconds) {
+      skippedGapCount += 1;
+      continue;
+    }
+    const segmentMeters = distanceMeters(previous, current);
+    if (!Number.isFinite(segmentMeters) || segmentMeters < 0) continue;
+    meters += segmentMeters;
+    acceptedSegmentCount += 1;
+    const inferredSpeed = segmentMeters / elapsedSeconds;
     if (inferredSpeed <= maxPedestrianSpeedMps) pedestrianMeters += segmentMeters;
   }
   const miles = meters / METERS_PER_MILE;
@@ -82,9 +94,12 @@ export function summarizeWebRoute(points = [], {
     pedestrianDistanceMeters: pedestrianMeters,
     miles,
     estimatedSteps,
+    acceptedSegmentCount,
+    skippedGapCount,
     maxAccuracyMeters,
     strideMeters,
     maxPedestrianSpeedMps,
+    maxTrackedGapSeconds,
   });
 }
 
@@ -153,8 +168,9 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
 }
 
 export const PerformanceWebSummaryInvariants = Object.freeze([
-  'web miles are derived only from GPS points at or better than the controlled accuracy ceiling',
-  'coarse GPS fixes are excluded from distance, estimated steps, and route trace calculations',
+  'web miles are derived only from non-mocked GPS points at or better than the controlled accuracy ceiling',
+  'coarse and mocked GPS fixes are excluded from distance, estimated steps, and route trace calculations',
+  'tracked-distance segments do not bridge visibility/lock gaps longer than the controlled maximum gap',
   'web estimated steps use only pedestrian-speed qualified GPS segments and exclude faster travel segments',
   'web estimated steps are a transparent GPS-distance estimate and are never represented as Apple Health or pedometer steps',
   'the route trace is self-contained and does not add a third-party map-tile or geocoding provider',
