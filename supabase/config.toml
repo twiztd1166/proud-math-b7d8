@@ -6,6 +6,11 @@
 # Store-review mint is called only by a signed-in reusable marketplace-review gate account.
 # That account has no Performance actor identity; the handler validates auth.getUser() plus
 # admin-controlled review app_metadata and can mint only the configured synthetic canvasser.
+# First-manager bootstrap mint is a one-time initialization path only. It requires a temporary
+# Auth user created through a supported Supabase Dashboard/Auth Admin route with exact
+# administrator-controlled bootstrap app_metadata. The handler rejects synthetic review IDs,
+# refuses to run once a privileged Performance actor exists, and disables the temporary Auth
+# identity before returning the ordinary short-lived trusted-device enrollment token.
 
 [functions.performance-enrollment-mint]
 verify_jwt = true
@@ -17,4 +22,7 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.performance-review-enrollment-mint]
+verify_jwt = true
+
+[functions.performance-first-manager-bootstrap-mint]
 verify_jwt = true
