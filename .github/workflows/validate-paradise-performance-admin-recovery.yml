@@ -1,0 +1,62 @@
+name: Validate Paradise Performance admin recovery
+
+on:
+  pull_request:
+    paths:
+      - 'performance-admin-recovery.html'
+      - 'performance/client/performance-admin-recovery-core.mjs'
+      - 'performance/client/performance-admin-recovery.mjs'
+      - 'performance/tests/performance-admin-recovery.test.mjs'
+      - 'supabase/config.toml'
+      - 'supabase/functions/performance-admin-recovery-*/**'
+      - 'supabase/migrations/*admin_recovery*.sql'
+      - '.github/workflows/validate-paradise-performance-admin-recovery.yml'
+  push:
+    paths:
+      - 'performance-admin-recovery.html'
+      - 'performance/client/performance-admin-recovery-core.mjs'
+      - 'performance/client/performance-admin-recovery.mjs'
+      - 'performance/tests/performance-admin-recovery.test.mjs'
+      - 'supabase/config.toml'
+      - 'supabase/functions/performance-admin-recovery-*/**'
+      - 'supabase/migrations/*admin_recovery*.sql'
+      - '.github/workflows/validate-paradise-performance-admin-recovery.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Controlled admin recovery contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check browser recovery modules
+        run: |
+          node --check performance/client/performance-admin-recovery-core.mjs
+          node --check performance/client/performance-admin-recovery.mjs
+      - name: Run recovery security contracts
+        run: node --test performance/tests/performance-admin-recovery.test.mjs
+      - name: Re-run enrollment and stale-session static controls
+        run: node scripts/validate-performance-enrollment-security.mjs
+      - name: Verify recovery page stays isolated from ordinary field UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CONTROLLED ADMIN RECOVERY' performance-admin-recovery.html
+          grep -q 'PENDING_OPERATOR_APPROVAL' supabase/functions/performance-admin-recovery-request/index.ts
+          grep -q 'performance_exchange_admin_recovery' supabase/functions/performance-admin-recovery-redeem/index.ts
+          grep -q 'performance_finalize_admin_recovery' supabase/functions/performance-admin-recovery-finalize/index.ts
+          if grep -Eqi 'service[_-]?role|SUPABASE_SECRET|SERVICE_ROLE_KEY' performance-admin-recovery.html performance/client/performance-admin-recovery*.mjs; then
+            echo 'Browser recovery surface contains a forbidden server credential reference' >&2
+            exit 1
+          fi
+          if grep -Eq 'a6eb5ecc-ca82-4b83-94f3-5a0a534e3f64|c10e9f21-e71e-4385-ab8b-855da0a506a3' performance-admin-recovery.html performance/client/performance-admin-recovery*.mjs; then
+            echo 'Public recovery browser bundle embeds designated employee IDs' >&2
+            exit 1
+          fi
+          echo 'PASS: recovery remains operator-approved, browser-proof-bound, and field-isolated'
