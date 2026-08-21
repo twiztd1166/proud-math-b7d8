@@ -60,7 +60,19 @@ Deno.serve(async (req: Request) => {
     }
 
     // This path exists only to create the first real privileged trusted-device identity.
-    // It must never become a general alternate enrollment path.
+    // Any historical identity that was enrolled as manager/admin closes the bootstrap path
+    // permanently, including an identity that was later revoked or whose employee changed role.
+    const { count: historicalPrivilegedIdentityCount, error: historicalPrivilegedIdentityError } = await admin
+      .from('performance_actor_identities')
+      .select('auth_user_id', { count: 'exact', head: true })
+      .in('role', ['manager', 'admin']);
+    if (historicalPrivilegedIdentityError) throw historicalPrivilegedIdentityError;
+    if ((historicalPrivilegedIdentityCount ?? 0) > 0) {
+      return responseJson({ error: 'PRIVILEGED_PERFORMANCE_ACTOR_ALREADY_EXISTS' }, 409);
+    }
+
+    // Also catch a currently privileged employee whose identity was originally enrolled under
+    // a lower role, because current authorization derives role from performance_employees.
     const { data: privilegedEmployees, error: privilegedEmployeeError } = await admin
       .from('performance_employees')
       .select('id')
@@ -82,8 +94,9 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Even a revoked historical identity for the selected manager proves that initial
-    // bootstrap already occurred. Normal manager/admin enrollment must be used after that.
+    // Even a revoked historical identity for the selected manager proves that this person has
+    // already participated in ordinary trusted-device enrollment. Initial bootstrap is not a
+    // recovery mechanism; another enrolled manager/admin must handle recovery.
     const { count: historicalManagerIdentityCount, error: historicalIdentityError } = await admin
       .from('performance_actor_identities')
       .select('auth_user_id', { count: 'exact', head: true })
