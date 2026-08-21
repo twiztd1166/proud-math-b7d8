@@ -67,7 +67,7 @@ jobs:
       - name: Run source-direct iPhone/WebKit smoke
         shell: bash
         run: |
-          cat > /tmp/performance-preview-smoke.mjs <<'EOF'
+          cat > .performance-preview-smoke.mjs <<'EOF'
           import { webkit } from '@playwright/test';
           const browser = await webkit.launch();
           const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -99,4 +99,5 @@ jobs:
           console.log(JSON.stringify({status:'PASS',title:await page.title(),records:meta.recordCount,go:meta.goCount,noGo:meta.noGoCount,performanceEnrollmentBoundary:true,locationMode:'FOREGROUND_SAMPLE_ONLY'}));
           await browser.close();
           EOF
-          NODE_PATH="$PWD/node_modules" node /tmp/performance-preview-smoke.mjs
+          node ./.performance-preview-smoke.mjs
+          rm -f .performance-preview-smoke.mjs
