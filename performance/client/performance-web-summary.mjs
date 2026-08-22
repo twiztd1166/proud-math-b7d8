@@ -1,9 +1,13 @@
-export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.21-web-day-summary-v4';
+export const PERFORMANCE_WEB_SUMMARY_VERSION = '2026.08.22-web-day-summary-v5';
 export const WEB_ROUTE_MAX_ACCURACY_METERS = 50;
+export const WEB_ROUTE_STATIONARY_DEADBAND_METERS = 6;
+export const WEB_ROUTE_MAX_UNCERTAINTY_DEADBAND_METERS = 12;
+export const WEB_ROUTE_MIN_VIEWPORT_METERS = 100;
 export const WEB_ESTIMATED_STRIDE_METERS = 0.762;
 export const WEB_MAX_PEDESTRIAN_SPEED_MPS = 3.5;
 export const WEB_MAX_TRACKED_GAP_SECONDS = 30;
 const METERS_PER_MILE = 1609.344;
+const METERS_PER_LATITUDE_DEGREE = 111320;
 const EARTH_RADIUS_METERS = 6371000;
 
 function finite(value) {
@@ -59,6 +63,65 @@ export function qualifiedRoutePoints(points = [], maxAccuracyMeters = WEB_ROUTE_
     .sort((a, b) => Date.parse(a.capturedAt) - Date.parse(b.capturedAt));
 }
 
+function movementDeadbandMeters(a, b, {
+  deadbandMeters = WEB_ROUTE_STATIONARY_DEADBAND_METERS,
+  maxUncertaintyDeadbandMeters = WEB_ROUTE_MAX_UNCERTAINTY_DEADBAND_METERS,
+} = {}) {
+  const combinedAccuracy = Math.max(0, (Number(a?.accuracyMeters || 0) + Number(b?.accuracyMeters || 0)) / 2);
+  return Math.max(deadbandMeters, Math.min(maxUncertaintyDeadbandMeters, combinedAccuracy));
+}
+
+export function stabilizeRoutePoints(points = [], {
+  deadbandMeters = WEB_ROUTE_STATIONARY_DEADBAND_METERS,
+  maxUncertaintyDeadbandMeters = WEB_ROUTE_MAX_UNCERTAINTY_DEADBAND_METERS,
+  maxTrackedGapSeconds = WEB_MAX_TRACKED_GAP_SECONDS,
+} = {}) {
+  if (!points.length) return [];
+  const stable = [];
+  let anchor = null;
+  let previousRaw = null;
+  let pendingVisibilityGap = false;
+
+  for (const current of points) {
+    if (previousRaw) {
+      const rawGapSeconds = (Date.parse(current.capturedAt) - Date.parse(previousRaw.capturedAt)) / 1000;
+      if (rawGapSeconds > maxTrackedGapSeconds) pendingVisibilityGap = true;
+    }
+
+    if (!anchor) {
+      stable.push(current);
+      anchor = current;
+      previousRaw = current;
+      continue;
+    }
+
+    const thresholdMeters = movementDeadbandMeters(anchor, current, {
+      deadbandMeters,
+      maxUncertaintyDeadbandMeters,
+    });
+    const displacementMeters = distanceMeters(anchor, current);
+
+    if (displacementMeters >= thresholdMeters) {
+      stable.push(current);
+      anchor = current;
+      pendingVisibilityGap = false;
+      previousRaw = current;
+      continue;
+    }
+
+    // While a stationary cluster remains inside the confidence deadband, keep one
+    // representative point instead of drawing every normal browser-GPS wobble.
+    // Prefer a more accurate fix only when doing so cannot erase a visibility gap.
+    if (!pendingVisibilityGap && Number(current.accuracyMeters) < Number(anchor.accuracyMeters)) {
+      stable[stable.length - 1] = current;
+      anchor = current;
+    }
+    previousRaw = current;
+  }
+
+  return stable;
+}
+
 export function splitTrackedSegments(points = [], maxTrackedGapSeconds = WEB_MAX_TRACKED_GAP_SECONDS) {
   if (!points.length) return [];
   const segments = [[points[0]]];
@@ -74,11 +137,18 @@ export function splitTrackedSegments(points = [], maxTrackedGapSeconds = WEB_MAX
 
 export function summarizeWebRoute(points = [], {
   maxAccuracyMeters = WEB_ROUTE_MAX_ACCURACY_METERS,
+  stationaryDeadbandMeters = WEB_ROUTE_STATIONARY_DEADBAND_METERS,
+  maxUncertaintyDeadbandMeters = WEB_ROUTE_MAX_UNCERTAINTY_DEADBAND_METERS,
   strideMeters = WEB_ESTIMATED_STRIDE_METERS,
   maxPedestrianSpeedMps = WEB_MAX_PEDESTRIAN_SPEED_MPS,
   maxTrackedGapSeconds = WEB_MAX_TRACKED_GAP_SECONDS,
 } = {}) {
-  const qualified = qualifiedRoutePoints(points, maxAccuracyMeters);
+  const rawQualified = qualifiedRoutePoints(points, maxAccuracyMeters);
+  const qualified = stabilizeRoutePoints(rawQualified, {
+    deadbandMeters: stationaryDeadbandMeters,
+    maxUncertaintyDeadbandMeters,
+    maxTrackedGapSeconds,
+  });
   let meters = 0;
   let pedestrianMeters = 0;
   let acceptedSegmentCount = 0;
@@ -103,6 +173,8 @@ export function summarizeWebRoute(points = [], {
   return Object.freeze({
     qualifiedPoints: Object.freeze(qualified),
     qualifiedPointCount: qualified.length,
+    rawQualifiedPointCount: rawQualified.length,
+    suppressedJitterCount: Math.max(0, rawQualified.length - qualified.length),
     distanceMeters: meters,
     pedestrianDistanceMeters: pedestrianMeters,
     miles,
@@ -110,6 +182,8 @@ export function summarizeWebRoute(points = [], {
     acceptedSegmentCount,
     skippedGapCount,
     maxAccuracyMeters,
+    stationaryDeadbandMeters,
+    maxUncertaintyDeadbandMeters,
     strideMeters,
     maxPedestrianSpeedMps,
     maxTrackedGapSeconds,
@@ -137,8 +211,13 @@ export function formatShiftDuration(startedAt, endedAt = Date.now()) {
   return [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
 }
 
-export function renderWebRouteTrace(points = [], { width = 320, height = 180 } = {}) {
-  const qualified = qualifiedRoutePoints(points);
+export function renderWebRouteTrace(points = [], {
+  width = 320,
+  height = 180,
+  minViewportMeters = WEB_ROUTE_MIN_VIEWPORT_METERS,
+} = {}) {
+  const rawQualified = qualifiedRoutePoints(points);
+  const qualified = stabilizeRoutePoints(rawQualified);
   if (!qualified.length) {
     return `<div class="performance-route-empty">Route appears after a qualified GPS fix.</div>`;
   }
@@ -153,12 +232,18 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
   }));
   const xs = projected.map(point => point.x);
   const ys = projected.map(point => point.y);
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
-  const spanX = Math.max(maxX - minX, 0.000001);
-  const spanY = Math.max(maxY - minY, 0.000001);
+  const rawMinX = Math.min(...xs);
+  const rawMaxX = Math.max(...xs);
+  const rawMinY = Math.min(...ys);
+  const rawMaxY = Math.max(...ys);
+  const minLatitudeSpan = Math.max(1, minViewportMeters) / METERS_PER_LATITUDE_DEGREE;
+  const minProjectedLongitudeSpan = minLatitudeSpan * cosLat;
+  const spanX = Math.max(rawMaxX - rawMinX, minProjectedLongitudeSpan);
+  const spanY = Math.max(rawMaxY - rawMinY, minLatitudeSpan);
+  const centerX = (rawMinX + rawMaxX) / 2;
+  const centerY = (rawMinY + rawMaxY) / 2;
+  const minX = centerX - spanX / 2;
+  const minY = centerY - spanY / 2;
   const plotWidth = width - pad * 2;
   const plotHeight = height - pad * 2;
   const scale = Math.min(plotWidth / spanX, plotHeight / spanY);
@@ -178,20 +263,29 @@ export function renderWebRouteTrace(points = [], { width = 320, height = 180 } =
     .join('');
   const first = screen[0];
   const last = screen.at(-1);
-  return `<svg class="performance-route-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="GPS route trace with ${qualified.length} qualified points">
+  const pixelsPerMeter = scale / METERS_PER_LATITUDE_DEGREE;
+  const accuracyRadius = Math.max(10, Math.min(32, Number(last.accuracyMeters || 0) * pixelsPerMeter));
+  const startMarker = screen.length > 1
+    ? `<circle cx="${first.x.toFixed(1)}" cy="${first.y.toFixed(1)}" r="5" class="performance-route-start"></circle>`
+    : '';
+  return `<svg class="performance-route-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="GPS route trace with ${qualified.length} stable points" data-route-stable-points="${qualified.length}" data-route-raw-qualified-points="${rawQualified.length}" data-route-min-viewport-meters="${minViewportMeters}">
     <rect x="1" y="1" width="${width - 2}" height="${height - 2}" rx="14" class="performance-route-bg"></rect>
     ${polylines}
-    <circle cx="${first.x.toFixed(1)}" cy="${first.y.toFixed(1)}" r="5" class="performance-route-start"></circle>
+    ${startMarker}
+    <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="${accuracyRadius.toFixed(1)}" class="performance-route-current-halo"></circle>
     <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="6" class="performance-route-current"></circle>
   </svg>`;
 }
 
 export const PerformanceWebSummaryInvariants = Object.freeze([
+  'raw browser GPS evidence remains stored unchanged while route display and derived miles/steps suppress stationary confidence-radius wobble',
   'web miles are derived only from non-mocked GPS points at or better than the controlled accuracy ceiling',
   'coarse and mocked GPS fixes are excluded from distance, estimated steps, and route trace calculations',
+  'stationary GPS drift inside the controlled movement deadband does not create route distance or estimated steps',
   'tracked-distance calculations and route-line rendering never bridge visibility or lock gaps longer than the controlled maximum gap',
   'web estimated steps use only pedestrian-speed qualified GPS segments and exclude faster travel segments',
   'web estimated steps are a transparent GPS-distance estimate and are never represented as Apple Health or pedometer steps',
-  'the route trace is self-contained and does not add a third-party map-tile or geocoding provider',
+  'the route trace uses a minimum local viewport so sub-meter and few-meter GPS wobble is not magnified to fill the entire card',
+  'the route trace remains self-contained and does not add a third-party map-tile or geocoding provider',
   'start, end, and duration are derived from the authoritative shift timestamps',
 ]);
