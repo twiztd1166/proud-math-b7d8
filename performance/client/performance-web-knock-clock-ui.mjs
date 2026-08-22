@@ -17,7 +17,7 @@ import {
   mergeKnockClockEvents,
 } from './performance-web-knock-clock.mjs';
 
-export const PERFORMANCE_WEB_KNOCK_CLOCK_UI_VERSION = '2026.08.21-web-knock-clock-ui-v2';
+export const PERFORMANCE_WEB_KNOCK_CLOCK_UI_VERSION = '2026.08.22-web-knock-clock-ui-v3';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -105,6 +105,34 @@ function pendingWrites() {
   return Array.isArray(rows) ? rows : [];
 }
 
+function showActionFeedback(target) {
+  const knockButton = target?.closest?.('[data-performance-knock-action]');
+  const finishButton = target?.closest?.('[data-performance-web-action="finish"]');
+  const button = knockButton || finishButton;
+  if (!button || button.dataset.performanceActionFeedbackActive === 'true') return;
+
+  const label = knockButton
+    ? (knockButton.dataset.performanceKnockAction === 'start' ? 'STARTING…' : 'STOPPING…')
+    : 'FINISHING DAY…';
+
+  button.dataset.performanceActionFeedbackActive = 'true';
+  button.setAttribute('aria-busy', 'true');
+  button.textContent = label;
+  button.parentElement?.querySelector('[data-performance-action-feedback]')?.remove();
+
+  const note = document.createElement('p');
+  note.className = 'performance-knock-sync-note';
+  note.dataset.performanceActionFeedback = 'true';
+  note.setAttribute('role', 'status');
+  note.textContent = 'Working… please wait.';
+  button.insertAdjacentElement('afterend', note);
+
+  window.setTimeout(() => {
+    if (!button.isConnected || button.dataset.performanceActionFeedbackActive !== 'true') return;
+    note.textContent = 'Still working — do not tap again.';
+  }, 1200);
+}
+
 async function clockForShift(shift, now = Date.now()) {
   const serverRows = await fetchServerEvents(shift.id);
   const merged = mergeKnockClockEvents({
@@ -181,12 +209,17 @@ function buildWrite(type, shift, capturedAt = new Date().toISOString()) {
 async function recordKnockEvent(type, shift, { flush = true } = {}) {
   const write = buildWrite(type, shift);
   await runtime.queue.enqueue(write);
-  if (flush) await runtime.queue.flush().catch(() => undefined);
   if (runtime.current?.shift?.id === shift.id) {
     runtime.current = {
       ...runtime.current,
       clock: { ...runtime.current.clock, active: type === 'KNOCK_STARTED' },
     };
+  }
+  scheduleRefresh(0);
+  if (flush) {
+    void runtime.queue.flush()
+      .catch(() => undefined)
+      .finally(() => scheduleRefresh(25));
   }
   return write;
 }
@@ -244,9 +277,9 @@ async function refresh() {
       button.disabled = true;
       const action = button.dataset.performanceKnockAction;
       try {
-        const latest = await clockForShift(shift, Date.now());
-        if (action === 'start' && !latest.clock.active) await recordKnockEvent('KNOCK_STARTED', shift);
-        if (action === 'stop' && latest.clock.active) await recordKnockEvent('KNOCK_STOPPED', shift);
+        const current = runtime.current?.shift?.id === shift.id ? runtime.current : null;
+        if (action === 'start' && current && !current.clock.active) await recordKnockEvent('KNOCK_STARTED', shift);
+        if (action === 'stop' && current?.clock?.active) await recordKnockEvent('KNOCK_STOPPED', shift);
       } finally {
         scheduleRefresh(50);
       }
@@ -279,6 +312,7 @@ async function boot() {
 
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
+    showActionFeedback(target);
     if (target?.closest('[data-performance-web-action="finish"]')) queueStopForFinishSynchronously();
     if (target?.closest('#nPerf,[data-performance-web-action],[data-performance-knock-action]')) scheduleRefresh(500);
     if (target?.closest('#nLook,#nTrain,#nRel,#nHist')) scheduleRefresh(100);
@@ -301,6 +335,8 @@ export const ParadisePerformanceWebKnockClockUiInvariants = Object.freeze([
   'the user explicitly starts and stops productive canvassing time',
   'Knock Clock events reuse authenticated RLS-protected performance_events and stable retry IDs',
   'offline Knock Clock events keep their original captured timestamp and replay idempotently',
+  'Knock Clock state becomes locally visible after durable browser enqueue and network flush never blocks immediate control feedback',
+  'Knock Clock and Finish Day actions expose immediate busy labels and repeated-tap guidance while work is pending',
   'Finish Day synchronously queues a best-effort stop before the core finish click runs and never depends on network success',
   'a finished shift closes any still-open productive interval at the authoritative finish timestamp',
   'GPS never silently determines productive Knock Clock state',
