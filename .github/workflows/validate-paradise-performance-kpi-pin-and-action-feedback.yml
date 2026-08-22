@@ -1,0 +1,58 @@
+name: Validate Paradise Performance KPI pinning and action feedback
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance/client/performance-web-action-feedback.mjs'
+      - 'supabase/migrations/*kpi_live_v1_and_shift_pinning.sql'
+      - '.github/workflows/validate-paradise-performance-kpi-pin-and-action-feedback.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: KPI version pin + single-tap action feedback contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check action feedback helper
+        run: node --check performance/client/performance-web-action-feedback.mjs
+      - name: Verify approved KPI values, pinning, and button feedback boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          MIG='supabase/migrations/20260822091500_paradise_performance_kpi_live_v1_and_shift_pinning.sql'
+          test -f "$MIG"
+          grep -q '2026.08.22-canvass-live-v1' "$MIG"
+          grep -q "'knocks_per_hour'" "$MIG"
+          grep -q '10.0' "$MIG"
+          grep -q "'sets_per_hour'" "$MIG"
+          grep -q '0.50' "$MIG"
+          grep -q 'performance_pin_kpi_standard_version' "$MIG"
+          grep -q 'count(distinct s.version_label)' "$MIG"
+          grep -q 'if v_version_count = 1' "$MIG"
+          grep -q 'before insert on public.performance_shifts' "$MIG"
+          grep -q 'STARTING…' performance/client/performance-web-action-feedback.mjs
+          grep -q 'STOPPING…' performance/client/performance-web-action-feedback.mjs
+          grep -q 'FINISHING DAY…' performance/client/performance-web-action-feedback.mjs
+          grep -q 'button.disabled = true' performance/client/performance-web-action-feedback.mjs
+          grep -q 'aria-busy' performance/client/performance-web-action-feedback.mjs
+          grep -q 'performance-web-action-feedback.mjs' index.html
+          grep -q 'performance/client/performance-web-action-feedback.mjs' sw.js
+          if grep -Eq "'sets_per_hour'[[:space:]]*,[[:space:]]*1(\.0+)?" "$MIG"; then
+            echo 'Stretch appointment rate was incorrectly activated as the minimum' >&2
+            exit 1
+          fi
+          if grep -Eq 'minimum_hours[[:space:]]*=[[:space:]]*[1-9]|minimum_opportunities[[:space:]]*=[[:space:]]*[1-9]' "$MIG"; then
+            echo 'Unapproved suppression/sample gate was activated' >&2
+            exit 1
+          fi
+          echo 'PASS: approved 10 doors/hr + 0.50 appointments/hr version pinning and immediate single-tap action feedback only'
