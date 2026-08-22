@@ -17,6 +17,7 @@ on:
       - 'performance/shared/performance-math.mjs'
       - 'performance/tests/performance-web-knock-clock.test.mjs'
       - 'performance/tests/performance-web-kpis.test.mjs'
+      - 'supabase/migrations/*knock_clock_event_types.sql'
       - '.github/workflows/validate-paradise-performance-web-kpis.yml'
 
 permissions:
@@ -40,14 +41,19 @@ jobs:
           node --check performance/client/performance-web-kpi-ui.mjs
       - name: Run KPI and Knock Clock unit contracts
         run: node --test performance/tests/performance-web-knock-clock.test.mjs performance/tests/performance-web-kpis.test.mjs performance/tests/performance-math.test.mjs
-      - name: Verify measured surfaces, pace boundaries, and governance controls
+      - name: Verify measured surfaces, backend event contract, pace boundaries, and governance controls
         shell: bash
         run: |
           set -euo pipefail
+          KNOCK_MIGRATION='supabase/migrations/20260822003000_paradise_performance_knock_clock_event_types.sql'
+          test -f "$KNOCK_MIGRATION"
           grep -q 'START KNOCKING' performance/client/performance-web-knock-clock-ui.mjs
           grep -q 'STOP KNOCKING' performance/client/performance-web-knock-clock-ui.mjs
           grep -q 'KNOCK_STARTED' performance/shared/performance-events.mjs
           grep -q 'KNOCK_STOPPED' performance/shared/performance-events.mjs
+          grep -q "'KNOCK_STARTED'::text" "$KNOCK_MIGRATION"
+          grep -q "'KNOCK_STOPPED'::text" "$KNOCK_MIGRATION"
+          grep -q 'performance_events_type_check' "$KNOCK_MIGRATION"
           grep -q 'DOORS / KNOCK HR' performance/client/performance-web-kpi-ui.mjs
           grep -q 'CONVERSATIONS / KNOCK HR' performance/client/performance-web-kpi-ui.mjs
           grep -q 'APPOINTMENTS / KNOCK HR' performance/client/performance-web-kpi-ui.mjs
@@ -87,4 +93,4 @@ jobs:
             echo 'Pace runtime silently defaulted planned work hours' >&2
             exit 1
           fi
-          echo 'PASS: explicit Knock Clock + measured KPI math + read-only fail-closed pace with pinned historical standards and no embedded targets, bands, rank, or pay logic'
+          echo 'PASS: explicit Knock Clock + database event acceptance + measured KPI math + read-only fail-closed pace with pinned historical standards and no embedded targets, bands, rank, or pay logic'
