@@ -9,6 +9,7 @@ on:
       - 'performance-web.css'
       - 'performance/client/performance-google-maps.mjs'
       - 'performance/client/performance-web-summary.mjs'
+      - 'performance/client/performance-web-last-completed.mjs'
       - 'performance/tests/performance-google-maps.test.mjs'
       - '.github/workflows/validate-paradise-performance-google-maps.yml'
 
@@ -25,8 +26,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Syntax check provider module
-        run: node --check performance/client/performance-google-maps.mjs
+      - name: Syntax check provider and completed-route modules
+        run: |
+          node --check performance/client/performance-google-maps.mjs
+          node --check performance/client/performance-web-last-completed.mjs
       - name: Run provider contracts
         run: node --test performance/tests/performance-google-maps.test.mjs
       - name: Verify controlled provider boundary
@@ -41,6 +44,7 @@ jobs:
           grep -q 'performance_current_employee_id' performance/client/performance-google-maps.mjs
           grep -q 'performance_location_points' performance/client/performance-google-maps.mjs
           grep -q 'raw GPS remains in Paradise' performance/client/performance-google-maps.mjs
+          grep -q 'lastRenderedSignature' performance/client/performance-web-last-completed.mjs
           grep -q 'performance/client/performance-google-maps.mjs' sw.js
           grep -q 'performance-google-map-canvas' performance-web.css
           if grep -ERq 'AIza[0-9A-Za-z_-]{20,}' index.html performance/client/performance-google-maps.mjs; then
@@ -51,4 +55,4 @@ jobs:
             echo 'Unapproved second map provider introduced' >&2
             exit 1
           fi
-          echo 'PASS: Google Maps hybrid integration is provider-scoped, keyless in source, RLS-bound, and drift-filtered'
+          echo 'PASS: Google Maps hybrid integration is provider-scoped, keyless in source, RLS-bound, drift-filtered, and stable on completed routes'
