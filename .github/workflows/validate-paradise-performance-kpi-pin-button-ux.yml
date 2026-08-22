@@ -1,0 +1,57 @@
+name: Validate Paradise Performance KPI pin and button UX
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'performance/client/performance-web-knock-clock-ui.mjs'
+      - 'performance/tests/performance-web-action-feedback-kpi-pin.test.mjs'
+      - 'supabase/migrations/20260822091600_paradise_performance_controlled_admin_kpi_pin.sql'
+      - '.github/workflows/validate-paradise-performance-kpi-pin-button-ux.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Controlled KPI pin + field button responsiveness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check changed web module
+        run: node --check performance/client/performance-web-knock-clock-ui.mjs
+      - name: Run targeted regression contracts
+        run: |
+          node --test \
+            performance/tests/performance-web-action-feedback-kpi-pin.test.mjs \
+            performance/tests/performance-web-knock-clock.test.mjs \
+            performance/tests/performance-web-kpis.test.mjs \
+            performance/tests/performance-math.test.mjs
+      - name: Verify controlled scope and no compensation semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20260822091600_paradise_performance_controlled_admin_kpi_pin.sql'
+          ui='performance/client/performance-web-knock-clock-ui.mjs'
+          grep -q "2026.08.22-canvass-kpi-admin-test-v1" "$migration"
+          grep -q "'knocks_per_hour', 10" "$migration"
+          grep -q "'sets_per_hour', 0.50" "$migration"
+          grep -q "'admin', null, null" "$migration"
+          grep -q 'performance_shifts_pin_kpi_standard_version' "$migration"
+          grep -q 'Multiple KPI standard versions apply' "$migration"
+          grep -q 'STARTING…' "$ui"
+          grep -q 'STOPPING…' "$ui"
+          grep -q 'FINISHING DAY…' "$ui"
+          grep -q 'Still working — do not tap again.' "$ui"
+          if grep -Eqi 'bonus|commission|pay rule|leaderboard' "$migration"; then
+            # Boundary comments may name excluded concepts; only reject executable assignments/columns.
+            if grep -Eq "(bonus|commission|leaderboard)[[:space:]]*=" "$migration"; then
+              echo 'Controlled KPI migration introduced compensation or leaderboard execution logic' >&2
+              exit 1
+            fi
+          fi
+          echo 'PASS: admin-test-only KPI version is pinned at shift insert and field actions show immediate progress feedback'
