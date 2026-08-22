@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { qualifiedRoutePoints, stabilizeRoutePoints } from '../client/performance-web-summary.mjs';
 
 const provider = await readFile(new URL('../client/performance-google-maps.mjs', import.meta.url), 'utf8');
+const lastCompleted = await readFile(new URL('../client/performance-web-last-completed.mjs', import.meta.url), 'utf8');
 const index = await readFile(new URL('../../index.html', import.meta.url), 'utf8');
 const sw = await readFile(new URL('../../sw.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../../performance-web.css', import.meta.url), 'utf8');
@@ -30,6 +31,12 @@ test('provider uses Google hybrid map and Paradise RLS route reads', () => {
   assert.match(provider, /stabilizedProviderPoints/);
   assert.match(provider, /raw GPS remains in Paradise/);
   assert.doesNotMatch(provider, /mapbox|openstreetmap|leaflet/i);
+});
+
+test('last completed surface is not destroyed every five seconds while map is interactive', () => {
+  assert.match(lastCompleted, /lastRenderedSignature/);
+  assert.match(lastCompleted, /signature === lastRenderedSignature && document\.getElementById\(CARD_ID\)/);
+  assert.match(lastCompleted, /interactive map can preserve pan, zoom, and provider state/);
 });
 
 test('stationary wobble is collapsed before coordinates can be sent to map provider', () => {
