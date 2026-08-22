@@ -1,0 +1,54 @@
+name: Validate Paradise Performance Google Maps
+
+on:
+  pull_request:
+    branches: [paradise-performance-web-interim-preview]
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance-web.css'
+      - 'performance/client/performance-google-maps.mjs'
+      - 'performance/client/performance-web-summary.mjs'
+      - 'performance/tests/performance-google-maps.test.mjs'
+      - '.github/workflows/validate-paradise-performance-google-maps.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Google Maps provider contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check provider module
+        run: node --check performance/client/performance-google-maps.mjs
+      - name: Run provider contracts
+        run: node --test performance/tests/performance-google-maps.test.mjs
+      - name: Verify controlled provider boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<meta name="paradise-google-maps-api-key" content="">' index.html
+          grep -q 'performance/client/performance-google-maps.mjs' index.html
+          grep -q 'maps.googleapis.com' performance/client/performance-google-maps.mjs
+          grep -q 'MapTypeId.HYBRID' performance/client/performance-google-maps.mjs
+          grep -q 'stabilizedProviderPoints' performance/client/performance-google-maps.mjs
+          grep -q 'performance_current_employee_id' performance/client/performance-google-maps.mjs
+          grep -q 'performance_location_points' performance/client/performance-google-maps.mjs
+          grep -q 'raw GPS remains in Paradise' performance/client/performance-google-maps.mjs
+          grep -q 'performance/client/performance-google-maps.mjs' sw.js
+          grep -q 'performance-google-map-canvas' performance-web.css
+          if grep -ERq 'AIza[0-9A-Za-z_-]{20,}' index.html performance/client/performance-google-maps.mjs; then
+            echo 'A Google Maps browser API key was committed to source instead of controlled configuration' >&2
+            exit 1
+          fi
+          if grep -Eqi 'mapbox|openstreetmap|leaflet' performance/client/performance-google-maps.mjs; then
+            echo 'Unapproved second map provider introduced' >&2
+            exit 1
+          fi
+          echo 'PASS: Google Maps hybrid integration is provider-scoped, keyless in source, RLS-bound, and drift-filtered'
