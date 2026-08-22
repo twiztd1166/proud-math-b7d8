@@ -8,7 +8,7 @@ import {
 } from './performance-web-summary.mjs';
 import { isUuid } from '../shared/performance-events.mjs';
 
-export const PERFORMANCE_WEB_LAST_COMPLETED_VERSION = '2026.08.21-web-last-completed-v2';
+export const PERFORMANCE_WEB_LAST_COMPLETED_VERSION = '2026.08.22-web-last-completed-v3';
 
 const SUPABASE_URL = 'https://taxlrlfsobtnbasjcnuf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3e755MdDisPBQzzGrBVBIA_gy4uqNqr';
@@ -17,6 +17,7 @@ const CARD_ID = 'performanceWebLastCompleted';
 
 let supabase = null;
 let loading = false;
+let lastRenderedSignature = '';
 
 function esc(value) {
   return String(value ?? '')
@@ -49,7 +50,7 @@ async function trustedEmployeeId() {
 async function latestFinishedShift(employeeId) {
   const { data, error } = await supabase
     .from('performance_shifts')
-    .select('id,status,started_at,finished_at,doors,conversations')
+    .select('id,status,started_at,finished_at,doors,conversations,updated_at')
     .eq('employee_id', employeeId)
     .eq('status', 'finished')
     .not('finished_at', 'is', null)
@@ -96,6 +97,11 @@ function cardMarkup(shift, points) {
   </div>`;
 }
 
+function renderSignature(shift, points) {
+  const lastPoint = points.at(-1);
+  return [shift.id, shift.updated_at || shift.finished_at || '', points.length, lastPoint?.captured_at || ''].join(':');
+}
+
 async function refreshLastCompleted() {
   const idle = document.querySelector('[data-performance-web-state="idle"]');
   if (!idle) {
@@ -110,11 +116,15 @@ async function refreshLastCompleted() {
     const shift = await latestFinishedShift(employeeId);
     if (!shift || !isUuid(shift.id)) {
       document.getElementById(CARD_ID)?.remove();
+      lastRenderedSignature = '';
       return;
     }
     const points = await routePoints(employeeId, shift.id);
+    const signature = renderSignature(shift, points);
+    if (signature === lastRenderedSignature && document.getElementById(CARD_ID)) return;
     document.getElementById(CARD_ID)?.remove();
     idle.insertAdjacentHTML('afterend', cardMarkup(shift, points));
+    lastRenderedSignature = signature;
   } catch {
     // Last-completed summary is read-only additive context; core Performance stays usable on failure.
   } finally {
@@ -149,6 +159,7 @@ export const ParadisePerformanceLastCompletedInvariants = Object.freeze([
   'the idle Performance screen may show the most recent authoritative finished shift without reopening or mutating it',
   'last completed start, end, duration, doors, and conversations come from the finished performance_shifts row',
   'last completed miles, estimated steps, and route trace reuse the same controlled web-summary filters as live Day Complete',
+  'an unchanged completed shift keeps its existing DOM surface so an interactive map can preserve pan, zoom, and provider state',
   'the read-only helper does not run a second refresh-token loop for the shared browser session',
-  'this read-only enhancement adds no new schema, privilege, third-party map provider, or background location capability',
+  'this read-only helper adds no schema, privilege, background location capability, or provider credential',
 ]);
