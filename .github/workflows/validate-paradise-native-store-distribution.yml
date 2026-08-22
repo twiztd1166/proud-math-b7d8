@@ -31,6 +31,8 @@ on:
       - 'docs/PARADISE_STORE_ASSETS_V1.md'
       - '.github/workflows/validate-paradise-native-store-distribution.yml'
   pull_request:
+    branches:
+      - paradise-canvass-manager-public
     paths:
       - 'capacitor.config.json'
       - 'performance/client/**'
