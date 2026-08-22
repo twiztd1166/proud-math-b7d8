@@ -1,3 +1,4 @@
 Paradise Performance Web Interim preview browser smoke trigger.
-Control-closeout rerun on the same final preview-control head.
-No runtime, field-data, enrollment, privacy/HR, native release, or employee-rollout authorization change.
+Exact-head release-gate alignment rerun after continuous-foreground validation repair.
+Requires WebKit and Chromium local GPS smoke plus immutable HTTPS preview smoke.
+No runtime, field-data, enrollment, privacy/HR, native release, store submission, Layer-3, or employee-rollout authorization change.

@@ -63,14 +63,13 @@ test('native operational transport sends EVENT and LOCATION only', async () => {
 test('native Performance bundle is separate from public Canvass bundle by construction', async () => {
   const config = JSON.parse(await read('capacitor.config.json'));
   const builder = await read('scripts/build-performance-native-site.mjs');
-  const sourceIndex = await read('index.html');
   const entry = await read('performance/client/performance-native-app.mjs');
   assert.equal(config.webDir, 'performance-dist');
-  assert.match(builder, /canvass-dist/);
-  assert.match(builder, /performance-dist/);
+  assert.match(builder, /const baseDir = 'canvass-dist'/);
+  assert.match(builder, /const outDir = 'performance-dist'/);
+  assert.match(builder, /Base Canvass bundle unexpectedly already contains native Performance integration/);
   assert.match(builder, /id="nPerf"/);
   assert.match(builder, /performance-native-app\.js/);
-  assert.doesNotMatch(sourceIndex, /performance-native-app\.js|id="nPerf"/);
   assert.match(entry, /validateNativePerformanceSession/);
   assert.match(entry, /redeemTrustedDevice/);
   assert.match(entry, /PerformanceTodayController/);

@@ -16,6 +16,8 @@ on:
       - 'docs/PARADISE_PERFORMANCE_V1_TRANSPORT_VALIDATION_*'
       - '.github/workflows/validate-paradise-performance-native.yml'
   pull_request:
+    branches:
+      - paradise-canvass-manager-public
     paths:
       - 'capacitor.config.json'
       - 'performance/**'
