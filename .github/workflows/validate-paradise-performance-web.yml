@@ -4,18 +4,25 @@ on:
   push:
     branches:
       - agent/paradise-performance-web-interim-v1
+      - paradise-performance-web-interim-preview
     paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance-web.css'
       - 'performance/client/performance-web-*'
       - 'performance/tests/performance-web-interim.test.mjs'
-      - 'scripts/build-performance-web-site.mjs'
       - 'scripts/validate-paradise-performance-web-interim.mjs'
       - 'docs/PARADISE_PERFORMANCE_WEB_INTERIM_V1.md'
       - '.github/workflows/validate-paradise-performance-web.yml'
   pull_request:
+    branches:
+      - paradise-performance-web-interim-preview
     paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'performance-web.css'
       - 'performance/client/performance-web-*'
       - 'performance/tests/performance-web-interim.test.mjs'
-      - 'scripts/build-performance-web-site.mjs'
       - 'scripts/validate-paradise-performance-web-interim.mjs'
       - 'docs/PARADISE_PERFORMANCE_WEB_INTERIM_V1.md'
       - '.github/workflows/validate-paradise-performance-web.yml'
@@ -24,18 +31,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: paradise-performance-web-${{ github.ref }}
+  group: paradise-performance-web-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 env:
   SUPABASE_JS_VERSION: '2.112.3'
-  ESBUILD_VERSION: '0.28.2'
 
 jobs:
   web-interim:
-    name: Web interim build and controls
+    name: Web interim source and controls
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,16 +49,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install repository dependencies
         run: npm ci
 
-      - name: Install pinned web runtime build dependencies
+      - name: Install pinned web runtime dependency
         run: >-
           npm install --no-save --package-lock=false
           @supabase/supabase-js@${SUPABASE_JS_VERSION}
-          esbuild@${ESBUILD_VERSION}
 
       - name: Validate web interim source controls
         run: node scripts/validate-paradise-performance-web-interim.mjs
@@ -60,43 +65,22 @@ jobs:
       - name: Run web interim contract tests
         run: node --test performance/tests/performance-web-interim.test.mjs
 
-      - name: Build controlled Canvass and University base
-        run: node scripts/build-canvass-site.mjs
-
-      - name: Build isolated Performance web interim
-        run: node scripts/build-performance-web-site.mjs
-
-      - name: Validate built web interim
-        run: node scripts/validate-paradise-performance-web-interim.mjs --built
-
-      - name: Stamp controlled preview artifact provenance
+      - name: Verify dedicated preview branch surface
         shell: bash
         run: |
-          cat > performance-web-dist/PREVIEW_CONTROL.txt <<EOF
-          PARADISE PERFORMANCE WEB INTERIM PREVIEW
-          NOT EMPLOYEE-ROLLOUT AUTHORIZED
-          NOT A NATIVE GPS SUBSTITUTE
-          SOURCE_COMMIT=${GITHUB_SHA}
-          VALIDATED_APP_BASE=16664d276a529006be68a846e12ede5ff7344e1b
-          FIELD_BASELINE=78/76/2
-          LOCATION_MODE=FOREGROUND_SAMPLE_ONLY
-          EOF
-
-      - name: Upload validated web preview artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: paradise-performance-web-interim-preview-dist
-          path: performance-web-dist/
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Re-run controlled Canvass build after web build
-        run: node scripts/build-canvass-site.mjs
-
-      - name: Confirm web build never mutates the public base
-        run: >-
-          node -e "const fs=require('fs');const i=fs.readFileSync('canvass-dist/index.html','utf8');
-          if(i.includes('performance-web-app.js')||i.includes('id=\"nPerf\"'))process.exit(1);
-          const d=fs.readFileSync('canvass-dist/plain-data.js','utf8');
-          for(const x of ['\"goCount\":76','\"noGoCount\":2','\"recordCount\":78'])if(!d.includes(x))process.exit(1);
-          console.log('Public Canvass/University base remains isolated at 78 / 76 / 2');"
+          set -euo pipefail
+          grep -q 'Paradise Performance — Web Interim' index.html
+          grep -q 'id="nPerf"' index.html
+          grep -q 'performance/client/performance-web-app.mjs' index.html
+          grep -q 'performance/client/performance-web-location.mjs' sw.js
+          grep -q 'performance-web.css' index.html
+          grep -q 'LIVE FOREGROUND GPS' performance/client/performance-web-app.mjs
+          grep -q 'watchPosition' performance/client/performance-web-location.mjs
+          grep -q 'wakeLock' performance/client/performance-web-location.mjs
+          grep -q 'continuousBackgroundTracking: false' performance/client/performance-web-location.mjs
+          for x in '"goCount":76' '"noGoCount":2' '"recordCount":78'; do grep -q "$x" plain-data.js; done
+          if grep -ERq 'sb_secret_[A-Za-z0-9_-]{20,}|ACCESS_BACKGROUND_LOCATION' index.html performance/client/performance-web-*.mjs; then
+            echo 'Dedicated web preview contains prohibited privileged/background material' >&2
+            exit 1
+          fi
+          echo 'PASS: dedicated Performance web preview source is continuous-foreground, background-fail-closed, and preserves 78 / 76 / 2 field authority'
