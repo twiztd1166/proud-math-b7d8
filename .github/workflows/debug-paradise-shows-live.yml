@@ -1,0 +1,100 @@
+name: Debug Paradise Shows live
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+    paths:
+      - ".github/workflows/debug-paradise-shows-live.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - name: Probe live HTML and assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "== page headers =="
+          curl -fsS -D /tmp/page.headers "$SITE/" -o /tmp/page.html
+          cat /tmp/page.headers
+          echo "== script tags =="
+          grep -oE '<script[^>]+src="[^"]+"' /tmp/page.html || true
+          for asset in app.css app-core.js app-shows.js app-control.js app-bind.js app-modals.js manifest.webmanifest sw.js; do
+            code="$(curl -sS -o "/tmp/$asset" -w '%{http_code}' "$SITE/$asset")"
+            type="$(curl -sSI "$SITE/$asset" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print $2;exit}')"
+            bytes="$(wc -c < "/tmp/$asset")"
+            echo "$asset code=$code type=$type bytes=$bytes"
+            test "$code" = "200"
+          done
+
+      - name: Probe browser CORS path
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "== OPTIONS =="
+          curl -sS -D /tmp/options.headers -o /tmp/options.body \
+            -X OPTIONS "$API" \
+            -H "Origin: $SITE" \
+            -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: content-type"
+          cat /tmp/options.headers
+          cat /tmp/options.body
+          grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
+
+          echo "== bootstrap POST =="
+          curl -sS -D /tmp/post.headers -o /tmp/post.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"bootstrap"}'
+          cat /tmp/post.headers
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/post.json'))
+          print({
+            'ok': x.get('ok'),
+            'shows': len(x.get('shows') or []),
+            'payments': len(x.get('payments') or []),
+            'activity': len(x.get('activity') or []),
+          })
+          assert x.get('ok') is True
+          assert len(x.get('shows') or []) == 36
+          assert len(x.get('payments') or []) == 3
+          PY
+
+      - name: Execute live page in headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome" || { echo "Chrome not found"; exit 1; }
+          set +e
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --virtual-time-budget=20000 \
+            --enable-logging=stderr \
+            --log-level=0 \
+            --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log
+          rc=$?
+          set -e
+          echo "chrome_rc=$rc"
+          echo "== rendered state =="
+          grep -Eo 'Loading shows…|Unable to load current operating data\.|Work today / this week|Paradise Shows' /tmp/dom.html | head -20 || true
+          echo "== browser errors =="
+          grep -Ei 'error|blocked|refused|cors|content security|failed' /tmp/chrome.log | tail -80 || true
+          if grep -q 'Loading shows…' /tmp/dom.html; then
+            echo "Rendered DOM remained stuck on loading."
+            exit 2
+          fi
+          grep -q 'Work today / this week' /tmp/dom.html
