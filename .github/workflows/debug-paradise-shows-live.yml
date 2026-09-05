@@ -90,10 +90,10 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 612, s
-          assert s.get('occurrence_count') == 810, s
-          assert len(x.get('profiles') or []) == 612
-          print({'profiles':612,'evidence_records':810})
+          assert s.get('profile_count') == 606, s
+          assert s.get('occurrence_count') == 808, s
+          assert len(x.get('profiles') or []) == 606
+          print({'profiles':606,'evidence_records':808})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -116,7 +116,16 @@ jobs:
           assert sff19, sff
           years={h.get('source_year') for h in acs.get('history') or [] if h.get('source_kind') in ('ARCHIVED_SCHEDULE','SHOW_COST_REGISTER')}
           assert {2018,2019}.issubset(years), years
-          print({'south_florida_fair_2019_records':len(sff19),'acs_archive_years':sorted(years)})
+
+          catalog=json.load(open('/tmp/catalog.json'))
+          profiles=catalog.get('profiles') or []
+          ids={p.get('profile_id') for p in profiles}
+          for removed in ('HIST-243','HIST-244','HIST-246','HIST-353','HIST-377','HIST-389'):
+              assert removed not in ids, removed
+          names={str(p.get('canonical_event','')).strip().lower() for p in profiles}
+          assert 'add 14 hrs' not in names
+          assert 'training in office' not in names
+          print({'south_florida_fair_2019_records':len(sff19),'acs_archive_years':sorted(years),'cleanup':'PASS'})
           PY
 
       - name: Execute live page in fresh headless Chrome
