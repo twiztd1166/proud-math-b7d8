@@ -1,0 +1,146 @@
+name: Paradise Shows 2014-2015 live proof
+
+on:
+  pull_request:
+    branches:
+      - paradise-shows-public
+    paths:
+      - ".github/workflows/paradise-shows-2014-2015-live-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - name: Verify live API, CORS, controls, and 2014-2015 anchors
+        shell: python
+        run: |
+          import json, os, urllib.request
+
+          SITE=os.environ["SITE"]
+          API=os.environ["API"]
+
+          def post(payload):
+              req=urllib.request.Request(
+                  API,
+                  data=json.dumps(payload).encode(),
+                  headers={"Content-Type":"application/json","Origin":SITE},
+                  method="POST",
+              )
+              with urllib.request.urlopen(req,timeout=30) as res:
+                  assert res.headers.get("Access-Control-Allow-Origin")==SITE, dict(res.headers)
+                  return json.load(res)
+
+          bootstrap=post({"action":"bootstrap"})
+          assert bootstrap.get("ok") is True, bootstrap
+          assert len(bootstrap.get("shows") or [])==36, bootstrap
+          assert len(bootstrap.get("payments") or [])==3, bootstrap
+
+          catalog=post({"action":"catalog"})
+          assert catalog.get("ok") is True, catalog
+          summary=catalog.get("summary") or {}
+          profiles=catalog.get("profiles") or []
+          assert summary.get("id")=="f82b5539-44ec-4c89-b3b0-84366be7c605", summary
+          assert summary.get("status")=="READY", summary
+          assert summary.get("profile_count")==679, summary
+          assert summary.get("occurrence_count")==1079, summary
+          assert len(profiles)==679, len(profiles)
+
+          ss=summary.get("source_summary") or {}
+          y14=ss.get("2014") or {}
+          y15=ss.get("2015") or {}
+          assert y14.get("records")==6 and y14.get("profiles")==4, y14
+          assert y14.get("performance_backed")==5 and y14.get("schedule_only")==1, y14
+          assert (y14.get("annual_control") or {}).get("number_of_shows")==23, y14
+          assert y15.get("records")==75 and y15.get("profiles")==63, y15
+          assert y15.get("performance_backed")==55 and y15.get("schedule_only")==20, y15
+          assert y15.get("undated_source_rows")==4, y15
+          assert (y15.get("annual_control") or {}).get("number_of_shows")==48, y15
+
+          sff=post({"action":"catalogHistory","profileId":"LIFE-002"})
+          acs=post({"action":"catalogHistory","profileId":"LIFE-004"})
+          wpb14=post({"action":"catalogHistory","profileId":"HIST-152"})
+          delray14=post({"action":"catalogHistory","profileId":"HIST-122"})
+
+          def find(d,hid):
+              return next((h for h in d.get("history") or [] if h.get("history_id")==hid),None)
+
+          h=find(sff,"2015-ARCH-PERF-0001")
+          assert h and h.get("dates_text")=="2015-01-16 – 2015-02-02", h
+          assert float(h.get("gross_sales_value"))==389899, h
+          assert (h.get("source_fields") or {}).get("sets")==205, h
+          assert (h.get("source_fields") or {}).get("sales")==39, h
+          assert h.get("payment_status_text")=="Paid In Full", h
+          assert "WORKED/TRACKED" in str(h.get("participation_status","")), h
+
+          h=find(acs,"2015-ARCH-PERF-0010")
+          assert h and h.get("dates_text")=="2015-02-20 – 2015-02-22", h
+          assert float(h.get("gross_sales_value"))==68629, h
+          assert (h.get("source_fields") or {}).get("sets")==103, h
+          assert (h.get("source_fields") or {}).get("sales")==9, h
+
+          rows14=[h for h in wpb14.get("history") or [] if h.get("source_year")==2014]
+          assert len(rows14)==2, rows14
+          h=find(wpb14,"2014-ARCH-SCHED-0001")
+          assert h and h.get("dates_text")=="2014-03-20 – 2014-03-23", h
+          assert h.get("source_kind")=="ARCHIVED_SCHEDULE", h
+          assert "NOT PROOF OF COMPLETED PARTICIPATION" in str(h.get("participation_status","")), h
+
+          h=find(wpb14,"2014-ARCH-PERF-0005")
+          assert h and h.get("dates_text")=="2014-09-26 – 2014-09-27", h
+          assert float(h.get("gross_sales_value"))==9385, h
+
+          h=find(delray14,"2014-ARCH-PERF-0002")
+          assert h and h.get("dates_text")=="2014-04-04 – 2014-04-05", h
+          assert float(h.get("gross_sales_value"))==49950, h
+          assert (h.get("source_fields") or {}).get("sets")==23, h
+          assert (h.get("source_fields") or {}).get("sales")==4, h
+
+          print(json.dumps({
+              "catalog_run":summary.get("id"),
+              "profiles":679,
+              "evidence_records":1079,
+              "year_2014":{"records":6,"profiles":4,"performance":5,"schedule_only":1},
+              "year_2015":{"records":75,"profiles":63,"performance":55,"schedule_only":20,"undated":4},
+              "current_shows":36,
+              "payments":3,
+              "cors":"PASS",
+              "anchors":"PASS",
+          },indent=2))
+
+      - name: Execute stable public page in fresh headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome" || { echo "Chrome not found"; exit 1; }
+          profile="$(mktemp -d)"
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --user-data-dir="$profile" \
+            --virtual-time-budget=20000 \
+            --enable-logging=stderr \
+            --log-level=0 \
+            --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log
+
+          if grep -q 'Loading shows…' /tmp/dom.html; then
+            echo "::error::Rendered DOM remained stuck on Loading shows."
+            grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' /tmp/chrome.log | tail -80 || true
+            exit 1
+          fi
+          grep -q 'Work today / this week' /tmp/dom.html
+          if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError)' /tmp/chrome.log; then
+            echo "::error::Browser console contains an uncaught JavaScript error."
+            exit 1
+          fi
+          echo "Live browser rendered the operating view without uncaught JavaScript errors."
