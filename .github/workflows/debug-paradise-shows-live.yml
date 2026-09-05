@@ -117,6 +117,7 @@ jobs:
           years={h.get('source_year') for h in acs.get('history') or [] if h.get('source_kind') in ('ARCHIVED_SCHEDULE','SHOW_COST_REGISTER')}
           assert {2018,2019,2020}.issubset(years), years
 
+          catalog=json.load(open('/tmp/catalog.json'))
           summary=(catalog.get('summary') or {})
           source_summary=summary.get('source_summary') or {}
           y20=source_summary.get('year_2020') or {}
