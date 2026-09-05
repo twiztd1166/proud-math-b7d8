@@ -1,0 +1,134 @@
+name: Paradise Shows 2016-2017 live proof
+
+on:
+  pull_request:
+    branches:
+      - paradise-shows-public
+    paths:
+      - ".github/workflows/paradise-shows-2016-2017-live-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - name: Verify live API catalog, CORS, controls, and 2016-2017 anchors
+        shell: python
+        run: |
+          import json, os, urllib.request
+
+          SITE=os.environ["SITE"]
+          API=os.environ["API"]
+
+          def post(payload):
+              req=urllib.request.Request(
+                  API,
+                  data=json.dumps(payload).encode(),
+                  headers={"Content-Type":"application/json","Origin":SITE},
+                  method="POST",
+              )
+              with urllib.request.urlopen(req,timeout=30) as res:
+                  assert res.headers.get("Access-Control-Allow-Origin")==SITE, dict(res.headers)
+                  return json.load(res)
+
+          bootstrap=post({"action":"bootstrap"})
+          assert bootstrap.get("ok") is True, bootstrap
+          assert len(bootstrap.get("shows") or [])==36
+          assert len(bootstrap.get("payments") or [])==3
+
+          catalog=post({"action":"catalog"})
+          assert catalog.get("ok") is True, catalog
+          summary=catalog.get("summary") or {}
+          profiles=catalog.get("profiles") or []
+          assert summary.get("id")=="100f8d21-6484-4aa7-ab56-704ff6e73a34", summary
+          assert summary.get("status")=="READY", summary
+          assert summary.get("profile_count")==651, summary
+          assert summary.get("occurrence_count")==998, summary
+          assert len(profiles)==651, len(profiles)
+
+          ss=summary.get("source_summary") or {}
+          y16=ss.get("2016") or {}
+          y17=ss.get("2017") or {}
+          assert y16.get("records")==53 and y16.get("profiles")==45, y16
+          assert (y16.get("main_source_totals") or {}).get("gross_sales")==1621842, y16
+          assert y17.get("records")==82 and y17.get("profiles")==74, y17
+          assert y17.get("worked_or_tracked")==80 and y17.get("booking_only")==2, y17
+
+          sff=post({"action":"catalogHistory","profileId":"LIFE-002"})
+          acs=post({"action":"catalogHistory","profileId":"LIFE-004"})
+          palm=post({"action":"catalogHistory","profileId":"LIFE-016"})
+          jupiter=post({"action":"catalogHistory","profileId":"LIFE-052"})
+
+          def find(d,hid):
+              return next((h for h in d.get("history") or [] if h.get("history_id")==hid),None)
+
+          h=find(sff,"2016-ARCH-PERF-0001")
+          assert h and h.get("issued_appts")==131 and float(h.get("gross_sales_value"))==526809, h
+          assert (h.get("source_fields") or {}).get("appts")==107, h
+          assert (h.get("source_fields") or {}).get("contacts")==164, h
+
+          h=find(sff,"2017-ARCH-PERF-0044")
+          assert h and h.get("issued_appts")==81 and h.get("payment_status_text")=="PAID IN FULL", h
+
+          h=find(acs,"2016-ARCH-PERF-0008")
+          assert h and h.get("issued_appts")==52 and float(h.get("gross_sales_value"))==154426, h
+
+          h=find(acs,"2017-ARCH-PERF-0036")
+          assert h and h.get("issued_appts")==31 and h.get("payment_status_text")=="OWE $3290; DUE 1/10", h
+
+          h=find(palm,"2017-ARCH-SCHED-0081")
+          assert h and h.get("source_kind")=="ARCHIVED_SCHEDULE", h
+          assert "NOT PROOF OF COMPLETED PARTICIPATION" in str(h.get("participation_status","")), h
+          assert h.get("payment_status_text")=="PAID IN FULL", h
+
+          h=find(jupiter,"2016-ARCH-PERF-0009")
+          assert h and h.get("issued_appts")==14 and float(h.get("gross_sales_value"))==37809, h
+
+          print(json.dumps({
+              "catalog_run":summary.get("id"),
+              "profiles":651,
+              "evidence_records":998,
+              "year_2016":{"records":53,"profiles":45},
+              "year_2017":{"records":82,"profiles":74,"worked":80,"booking_only":2},
+              "current_shows":36,
+              "payments":3,
+              "cors":"PASS",
+              "anchors":"PASS",
+          },indent=2))
+
+      - name: Execute stable public page in fresh headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome" || { echo "Chrome not found"; exit 1; }
+          profile="$(mktemp -d)"
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --user-data-dir="$profile" \
+            --virtual-time-budget=20000 \
+            --enable-logging=stderr \
+            --log-level=0 \
+            --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log
+
+          if grep -q 'Loading shows…' /tmp/dom.html; then
+            echo "::error::Rendered DOM remained stuck on Loading shows."
+            grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' /tmp/chrome.log | tail -80 || true
+            exit 1
+          fi
+          grep -q 'Work today / this week' /tmp/dom.html
+          if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError)' /tmp/chrome.log; then
+            echo "::error::Browser console contains an uncaught JavaScript error."
+            exit 1
+          fi
+          echo "Live browser rendered the operating view without uncaught JavaScript errors."
