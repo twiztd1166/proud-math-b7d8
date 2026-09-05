@@ -1,100 +1,127 @@
-name: Debug Paradise Shows live
+name: Paradise Shows public live smoke
 
 on:
   push:
     branches:
       - paradise-shows-public
-    paths:
-      - ".github/workflows/debug-paradise-shows-live.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: paradise-shows-public-live-smoke
+  cancel-in-progress: true
+
 jobs:
   probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
       API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
     steps:
-      - name: Probe live HTML and assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "== page headers =="
-          curl -fsS -D /tmp/page.headers "$SITE/" -o /tmp/page.html
-          cat /tmp/page.headers
-          echo "== script tags =="
-          grep -oE '<script[^>]+src="[^"]+"' /tmp/page.html || true
-          for asset in app.css app-core.js app-shows.js app-control.js app-bind.js app-modals.js manifest.webmanifest sw.js; do
-            code="$(curl -sS -o "/tmp/$asset" -w '%{http_code}' "$SITE/$asset")"
-            type="$(curl -sSI "$SITE/$asset" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print $2;exit}')"
-            bytes="$(wc -c < "/tmp/$asset")"
-            echo "$asset code=$code type=$type bytes=$bytes"
-            test "$code" = "200"
-          done
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
-      - name: Probe browser CORS path
+      - name: Wait for exact public asset convergence
         shell: bash
         run: |
           set -euo pipefail
-          echo "== OPTIONS =="
+          assets=(app.css app-core.js app-shows.js app-control.js app-bind.js app-modals.js manifest.webmanifest sw.js)
+          for attempt in $(seq 1 24); do
+            ok=1
+            for asset in "${assets[@]}"; do
+              if ! curl -fsS "$SITE/$asset" -o "/tmp/$asset"; then
+                ok=0
+                break
+              fi
+              expected="$(sha256sum "public/$asset" | awk '{print $1}')"
+              actual="$(sha256sum "/tmp/$asset" | awk '{print $1}')"
+              if [[ "$expected" != "$actual" ]]; then
+                echo "Attempt $attempt: $asset not converged"
+                ok=0
+                break
+              fi
+            done
+            if [[ "$ok" -eq 1 ]]; then
+              echo "Public assets match this exact GitHub commit."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Stable branch URL did not converge to this commit."
+          exit 1
+
+      - name: Verify live CORS and operating population
+        shell: bash
+        run: |
+          set -euo pipefail
           curl -sS -D /tmp/options.headers -o /tmp/options.body \
             -X OPTIONS "$API" \
             -H "Origin: $SITE" \
             -H "Access-Control-Request-Method: POST" \
             -H "Access-Control-Request-Headers: content-type"
-          cat /tmp/options.headers
-          cat /tmp/options.body
           grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
 
-          echo "== bootstrap POST =="
-          curl -sS -D /tmp/post.headers -o /tmp/post.json \
+          curl -sS -D /tmp/bootstrap.headers -o /tmp/bootstrap.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"bootstrap"}'
-          cat /tmp/post.headers
+          grep -Fi "access-control-allow-origin: $SITE" /tmp/bootstrap.headers
           python - <<'PY'
           import json
-          x=json.load(open('/tmp/post.json'))
-          print({
-            'ok': x.get('ok'),
-            'shows': len(x.get('shows') or []),
-            'payments': len(x.get('payments') or []),
-            'activity': len(x.get('activity') or []),
-          })
-          assert x.get('ok') is True
-          assert len(x.get('shows') or []) == 36
-          assert len(x.get('payments') or []) == 3
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
+          assert len(x.get('payments') or []) == 3, len(x.get('payments') or [])
+          print({'shows':36,'payments':3})
           PY
 
-      - name: Execute live page in headless Chrome
+          curl -sS -o /tmp/catalog.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalog"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/catalog.json'))
+          s=x.get('summary') or {}
+          assert x.get('ok') is True, x
+          assert s.get('profile_count') == 446, s
+          assert s.get('occurrence_count') == 480, s
+          assert len(x.get('profiles') or []) == 446
+          print({'profiles':446,'evidence_records':480})
+          PY
+
+      - name: Execute live page in fresh headless Chrome
         shell: bash
         run: |
           set -euo pipefail
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
-          set +e
+          profile="$(mktemp -d)"
           "$chrome" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
             --disable-dev-shm-usage \
+            --user-data-dir="$profile" \
             --virtual-time-budget=20000 \
             --enable-logging=stderr \
             --log-level=0 \
             --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log
-          rc=$?
-          set -e
-          echo "chrome_rc=$rc"
-          echo "== rendered state =="
-          grep -Eo 'Loading shows…|Unable to load current operating data\.|Work today / this week|Paradise Shows' /tmp/dom.html | head -20 || true
-          echo "== browser errors =="
-          grep -Ei 'error|blocked|refused|cors|content security|failed' /tmp/chrome.log | tail -80 || true
+
           if grep -q 'Loading shows…' /tmp/dom.html; then
-            echo "Rendered DOM remained stuck on loading."
-            exit 2
+            echo "::error::Rendered DOM remained stuck on Loading shows."
+            grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' /tmp/chrome.log | tail -80 || true
+            exit 1
           fi
           grep -q 'Work today / this week' /tmp/dom.html
+          if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError)' /tmp/chrome.log; then
+            echo "::error::Browser console contains an uncaught JavaScript error."
+            exit 1
+          fi
+          echo "Live browser rendered the operating view without uncaught JavaScript errors."
