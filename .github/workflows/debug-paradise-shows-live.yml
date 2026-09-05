@@ -106,6 +106,12 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-004"}'
+
+          curl -sS -o /tmp/palm17.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-016"}'
           python - <<'PY'
           import json
           sff=json.load(open('/tmp/sff.json'))
@@ -155,12 +161,6 @@ jobs:
           acs17=next((h for h in acs.get('history') or [] if h.get('history_id') == '2017-ARCH-PERF-0036'), None)
           assert acs17 and acs17.get('issued_appts') == 31, acs17
           assert acs17.get('payment_status_text') == 'OWE $3290; DUE 1/10', acs17
-
-          curl -sS -o /tmp/palm17.json \
-            -X POST "$API" \
-            -H "Origin: $SITE" \
-            -H "Content-Type: application/json" \
-            --data '{"action":"catalogHistory","profileId":"LIFE-016"}'
 
           sff20=[h for h in sff.get('history') or [] if h.get('source_year') == 2020 and h.get('dates_text') == '2020-01-16 – 2020-02-02']
           assert sff20, sff
