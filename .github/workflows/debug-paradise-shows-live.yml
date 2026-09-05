@@ -90,10 +90,33 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 446, s
-          assert s.get('occurrence_count') == 480, s
-          assert len(x.get('profiles') or []) == 446
-          print({'profiles':446,'evidence_records':480})
+          assert s.get('profile_count') == 612, s
+          assert s.get('occurrence_count') == 810, s
+          assert len(x.get('profiles') or []) == 612
+          print({'profiles':612,'evidence_records':810})
+          PY
+
+          curl -sS -o /tmp/sff.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-002"}'
+          curl -sS -o /tmp/acs.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-004"}'
+          python - <<'PY'
+          import json
+          sff=json.load(open('/tmp/sff.json'))
+          acs=json.load(open('/tmp/acs.json'))
+          assert sff.get('ok') is True, sff
+          assert acs.get('ok') is True, acs
+          sff19=[h for h in sff.get('history') or [] if h.get('source_year') == 2019 and h.get('source_kind') == 'ARCHIVED_SCHEDULE']
+          assert sff19, sff
+          years={h.get('source_year') for h in acs.get('history') or [] if h.get('source_kind') in ('ARCHIVED_SCHEDULE','SHOW_COST_REGISTER')}
+          assert {2018,2019}.issubset(years), years
+          print({'south_florida_fair_2019_records':len(sff19),'acs_archive_years':sorted(years)})
           PY
 
       - name: Execute live page in fresh headless Chrome
