@@ -1,13 +1,13 @@
 function render(){
   persistShowViewState();
-  $('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
   $('#content').innerHTML=state.tab==='today'?renderToday():state.tab==='shows'?renderShows():state.tab==='payments'?renderPayments():renderControl();bindDynamic();
 }
 function bindDynamic(){
-  $('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
-  $('.catalogCard[data-profile]').forEach(c=>c.onclick=()=>openCatalog(c.dataset.profile));
-  $('[data-show-mode]').forEach(b=>b.onclick=()=>{state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();render()});
-  $('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
+  $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
+  $$('.catalogCard[data-profile]').forEach(c=>c.onclick=()=>openCatalog(c.dataset.profile));
+  $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();render()});
+  $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));
   const sf=$('#showFilterBtn');if(sf)sf.onclick=openShowFilters;
   const ss=$('#showSortSelect');if(ss)ss.onchange=()=>{state.showQuickView='NONE';if(state.showMode==='ALL')state.catalogSort=ss.value;else state.currentSort=ss.value;state.catalogLimit=60;render()};
