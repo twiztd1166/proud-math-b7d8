@@ -90,10 +90,10 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 615, s
-          assert s.get('occurrence_count') == 863, s
-          assert len(x.get('profiles') or []) == 615
-          print({'profiles':615,'evidence_records':863})
+          assert s.get('profile_count') == 651, s
+          assert s.get('occurrence_count') == 998, s
+          assert len(x.get('profiles') or []) == 651
+          print({'profiles':651,'evidence_records':998})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -106,6 +106,12 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-004"}'
+
+          curl -sS -o /tmp/palm17.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-016"}'
           python - <<'PY'
           import json
           sff=json.load(open('/tmp/sff.json'))
@@ -126,9 +132,46 @@ jobs:
           assert y20.get('staffed_groups') == 35, y20
           assert y20.get('setup_only_groups') == 20, y20
 
+          y16=source_summary.get('2016') or {}
+          y17=source_summary.get('2017') or {}
+          assert y16.get('records') == 53, y16
+          assert y16.get('profiles') == 45, y16
+          assert (y16.get('main_source_totals') or {}).get('gross_sales') == 1621842, y16
+          assert y17.get('records') == 82, y17
+          assert y17.get('profiles') == 74, y17
+          assert y17.get('worked_or_tracked') == 80, y17
+          assert y17.get('booking_only') == 2, y17
+
+          sff16=next((h for h in sff.get('history') or [] if h.get('history_id') == '2016-ARCH-PERF-0001'), None)
+          assert sff16 and sff16.get('dates_text') == '2016-01-15 – 2016-01-31', sff16
+          assert sff16.get('issued_appts') == 131, sff16
+          assert float(sff16.get('gross_sales_value')) == 526809, sff16
+          assert (sff16.get('source_fields') or {}).get('appts') == 107, sff16
+          assert (sff16.get('source_fields') or {}).get('contacts') == 164, sff16
+
+          sff17=next((h for h in sff.get('history') or [] if h.get('history_id') == '2017-ARCH-PERF-0044'), None)
+          assert sff17 and sff17.get('dates_text') == '2017-01-13 – 2017-01-29', sff17
+          assert sff17.get('issued_appts') == 81, sff17
+          assert sff17.get('payment_status_text') == 'PAID IN FULL', sff17
+
+          acs16=next((h for h in acs.get('history') or [] if h.get('history_id') == '2016-ARCH-PERF-0008'), None)
+          assert acs16 and acs16.get('issued_appts') == 52, acs16
+          assert float(acs16.get('gross_sales_value')) == 154426, acs16
+
+          acs17=next((h for h in acs.get('history') or [] if h.get('history_id') == '2017-ARCH-PERF-0036'), None)
+          assert acs17 and acs17.get('issued_appts') == 31, acs17
+          assert acs17.get('payment_status_text') == 'OWE $3290; DUE 1/10', acs17
+
           sff20=[h for h in sff.get('history') or [] if h.get('source_year') == 2020 and h.get('dates_text') == '2020-01-16 – 2020-02-02']
           assert sff20, sff
           assert all('NOT PROOF OF SHOW COMPLETION' in str(h.get('participation_status','')) for h in sff20), sff20
+
+          palm17=json.load(open('/tmp/palm17.json'))
+          assert palm17.get('ok') is True, palm17
+          palm17_booking=next((h for h in palm17.get('history') or [] if h.get('history_id') == '2017-ARCH-SCHED-0081'), None)
+          assert palm17_booking and palm17_booking.get('source_kind') == 'ARCHIVED_SCHEDULE', palm17_booking
+          assert 'NOT PROOF OF COMPLETED PARTICIPATION' in str(palm17_booking.get('participation_status','')), palm17_booking
+          assert palm17_booking.get('payment_status_text') == 'PAID IN FULL', palm17_booking
 
           catalog=json.load(open('/tmp/catalog.json'))
           profiles=catalog.get('profiles') or []
