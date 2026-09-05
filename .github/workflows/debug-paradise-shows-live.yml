@@ -90,10 +90,10 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 651, s
-          assert s.get('occurrence_count') == 998, s
-          assert len(x.get('profiles') or []) == 651
-          print({'profiles':651,'evidence_records':998})
+          assert s.get('profile_count') == 679, s
+          assert s.get('occurrence_count') == 1079, s
+          assert len(x.get('profiles') or []) == 679
+          print({'profiles':679,'evidence_records':1079})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -112,6 +112,18 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-016"}'
+
+          curl -sS -o /tmp/wpb14.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-152"}'
+
+          curl -sS -o /tmp/delray14.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-122"}'
           python - <<'PY'
           import json
           sff=json.load(open('/tmp/sff.json'))
@@ -132,8 +144,21 @@ jobs:
           assert y20.get('staffed_groups') == 35, y20
           assert y20.get('setup_only_groups') == 20, y20
 
+          y14=source_summary.get('2014') or {}
+          y15=source_summary.get('2015') or {}
           y16=source_summary.get('2016') or {}
           y17=source_summary.get('2017') or {}
+          assert y14.get('records') == 6, y14
+          assert y14.get('profiles') == 4, y14
+          assert y14.get('performance_backed') == 5, y14
+          assert y14.get('schedule_only') == 1, y14
+          assert (y14.get('annual_control') or {}).get('number_of_shows') == 23, y14
+          assert y15.get('records') == 75, y15
+          assert y15.get('profiles') == 63, y15
+          assert y15.get('performance_backed') == 55, y15
+          assert y15.get('schedule_only') == 20, y15
+          assert y15.get('undated_source_rows') == 4, y15
+          assert (y15.get('annual_control') or {}).get('number_of_shows') == 48, y15
           assert y16.get('records') == 53, y16
           assert y16.get('profiles') == 45, y16
           assert (y16.get('main_source_totals') or {}).get('gross_sales') == 1621842, y16
@@ -141,6 +166,14 @@ jobs:
           assert y17.get('profiles') == 74, y17
           assert y17.get('worked_or_tracked') == 80, y17
           assert y17.get('booking_only') == 2, y17
+
+          sff15=next((h for h in sff.get('history') or [] if h.get('history_id') == '2015-ARCH-PERF-0001'), None)
+          assert sff15 and sff15.get('dates_text') == '2015-01-16 – 2015-02-02', sff15
+          assert float(sff15.get('gross_sales_value')) == 389899, sff15
+          assert (sff15.get('source_fields') or {}).get('sets') == 205, sff15
+          assert (sff15.get('source_fields') or {}).get('sales') == 39, sff15
+          assert sff15.get('payment_status_text') == 'Paid In Full', sff15
+          assert 'WORKED/TRACKED' in str(sff15.get('participation_status','')), sff15
 
           sff16=next((h for h in sff.get('history') or [] if h.get('history_id') == '2016-ARCH-PERF-0001'), None)
           assert sff16 and sff16.get('dates_text') == '2016-01-15 – 2016-01-31', sff16
@@ -153,6 +186,12 @@ jobs:
           assert sff17 and sff17.get('dates_text') == '2017-01-13 – 2017-01-29', sff17
           assert sff17.get('issued_appts') == 81, sff17
           assert sff17.get('payment_status_text') == 'PAID IN FULL', sff17
+
+          acs15=next((h for h in acs.get('history') or [] if h.get('history_id') == '2015-ARCH-PERF-0010'), None)
+          assert acs15 and acs15.get('dates_text') == '2015-02-20 – 2015-02-22', acs15
+          assert float(acs15.get('gross_sales_value')) == 68629, acs15
+          assert (acs15.get('source_fields') or {}).get('sets') == 103, acs15
+          assert (acs15.get('source_fields') or {}).get('sales') == 9, acs15
 
           acs16=next((h for h in acs.get('history') or [] if h.get('history_id') == '2016-ARCH-PERF-0008'), None)
           assert acs16 and acs16.get('issued_appts') == 52, acs16
@@ -172,6 +211,20 @@ jobs:
           assert palm17_booking and palm17_booking.get('source_kind') == 'ARCHIVED_SCHEDULE', palm17_booking
           assert 'NOT PROOF OF COMPLETED PARTICIPATION' in str(palm17_booking.get('participation_status','')), palm17_booking
           assert palm17_booking.get('payment_status_text') == 'PAID IN FULL', palm17_booking
+
+
+          wpb14=json.load(open('/tmp/wpb14.json'))
+          assert wpb14.get('ok') is True, wpb14
+          wpb14_rows=[h for h in wpb14.get('history') or [] if h.get('source_year') == 2014]
+          assert len(wpb14_rows) == 2, wpb14_rows
+          assert any(h.get('history_id') == '2014-ARCH-SCHED-0001' and 'NOT PROOF OF COMPLETED PARTICIPATION' in str(h.get('participation_status','')) for h in wpb14_rows), wpb14_rows
+          assert any(h.get('history_id') == '2014-ARCH-PERF-0005' and float(h.get('gross_sales_value')) == 9385 for h in wpb14_rows), wpb14_rows
+
+          delray14=json.load(open('/tmp/delray14.json'))
+          assert delray14.get('ok') is True, delray14
+          affair14=next((h for h in delray14.get('history') or [] if h.get('history_id') == '2014-ARCH-PERF-0002'), None)
+          assert affair14 and affair14.get('dates_text') == '2014-04-04 – 2014-04-05', affair14
+          assert float(affair14.get('gross_sales_value')) == 49950, affair14
 
           catalog=json.load(open('/tmp/catalog.json'))
           profiles=catalog.get('profiles') or []
