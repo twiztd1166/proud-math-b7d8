@@ -90,10 +90,10 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 606, s
-          assert s.get('occurrence_count') == 808, s
-          assert len(x.get('profiles') or []) == 606
-          print({'profiles':606,'evidence_records':808})
+          assert s.get('profile_count') == 615, s
+          assert s.get('occurrence_count') == 863, s
+          assert len(x.get('profiles') or []) == 615
+          print({'profiles':615,'evidence_records':863})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -115,7 +115,19 @@ jobs:
           sff19=[h for h in sff.get('history') or [] if h.get('source_year') == 2019 and h.get('source_kind') == 'ARCHIVED_SCHEDULE']
           assert sff19, sff
           years={h.get('source_year') for h in acs.get('history') or [] if h.get('source_kind') in ('ARCHIVED_SCHEDULE','SHOW_COST_REGISTER')}
-          assert {2018,2019}.issubset(years), years
+          assert {2018,2019,2020}.issubset(years), years
+
+          summary=(catalog.get('summary') or {})
+          source_summary=summary.get('source_summary') or {}
+          y20=source_summary.get('year_2020') or {}
+          assert y20.get('source_files') == 19, y20
+          assert y20.get('preserved_occurrence_groups') == 55, y20
+          assert y20.get('staffed_groups') == 35, y20
+          assert y20.get('setup_only_groups') == 20, y20
+
+          sff20=[h for h in sff.get('history') or [] if h.get('source_year') == 2020 and h.get('dates_text') == '2020-01-16 – 2020-02-02']
+          assert sff20, sff
+          assert all('NOT PROOF OF SHOW COMPLETION' in str(h.get('participation_status','')) for h in sff20), sff20
 
           catalog=json.load(open('/tmp/catalog.json'))
           profiles=catalog.get('profiles') or []
