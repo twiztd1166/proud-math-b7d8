@@ -40,6 +40,25 @@ function bookingEventRange(show){
   const end=show.event_end&&show.event_end!==show.event_start?date(show.event_end):'';
   return end?start+' – '+end:start;
 }
+function bookingTiming(show){
+  const signal=bookingSignal(show);
+  const due=daysFromToday(show?.action_due);
+  if(signal.key==='COMMITTED'){
+    if(show?.next_payment_due)return 'Payment due '+date(show.next_payment_due);
+    if(due!==null&&due<0)return 'Booking active · follow-up overdue';
+    if(show?.action_due)return 'Booking active · follow up '+date(show.action_due);
+    return 'Booking active · manage confirmation / payment';
+  }
+  if(signal.key==='GATED')return 'Now · clear booking / account gate';
+  if(signal.key==='IN_PROGRESS')return 'Current event · plan next cycle now';
+  if(signal.key==='NEXT_CYCLE')return 'Now · request next cycle / next date';
+  if(signal.key==='WATCH_DATE')return 'Monitor · request date when organizer opens';
+  if(signal.key==='LATE_VERIFY')return 'Immediate · verify availability now';
+  if(signal.key==='BOOK_NOW')return 'Now · opportunity is open';
+  if(due!==null&&due<0)return 'Now · follow-up is overdue';
+  if(show?.action_due)return 'Follow up by '+date(show.action_due);
+  return 'Review current availability now';
+}
 function bookingBoardSummary(){
   const rows=state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR');
   const signals=rows.map(bookingSignal);
@@ -51,7 +70,7 @@ function showCard(s){
   const history=profile?`${Number(profile.history_count||0)} history records${profile.lifetime_net_volume!=null?' · '+money(profile.lifetime_net_volume)+' lifetime net':''}`:'';
   const boothHint=profile?.has_booth?' · booth history available':'';
   const follow=s.follow_up&&s.follow_up!=='—'?`<div class="action">${esc(s.follow_up)}</div>`:'';
-  return `<div class="card bookingCard" data-id="${esc(s.mfc_id)}"><div class="row"><div><div class="event">${esc(s.event)}</div><div class="mfc">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div></div><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="bookingDecision">${esc(s.decision||'Decision not stated')}</div><div class="bookingGrid"><div><span>Event</span><b>${esc(bookingEventRange(s))}</b></div><div><span>Max booking cost</span><b>${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</b></div><div><span>History</span><b>${history?esc(history+boothHint):'Loading linked history…'}</b></div><div><span>Current action</span><b class="due ${dueClass(s.action_due)}">${esc(dueLabel(s.action_due))}</b></div></div>${s.performance?`<div class="bookingPerformance"><span>Historical signal</span><b>${esc(s.performance)}</b></div>`:''}${s.booking_status?`<div class="bookingStatusLine"><span>Booking status</span><b>${esc(s.booking_status)}</b></div>`:''}${follow}<div class="meta"><span>${esc(s.owner||'Unassigned')}</span>${s.source_detail?.needs_evidence&&s.source_detail.needs_evidence!=='NONE'?`<span class="pill review">Needs ${esc(s.source_detail.needs_evidence)}</span>`:''}${s.this_year==='SKIP THIS YEAR'?'<span class="pill review">SKIPPED THIS YEAR</span>':''}</div></div>`;
+  return `<div class="card bookingCard" data-id="${esc(s.mfc_id)}"><div class="row"><div><div class="event">${esc(s.event)}</div><div class="mfc">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div></div><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="bookingDecision">${esc(s.decision||'Decision not stated')}</div><div class="bookingGrid"><div><span>Event</span><b>${esc(bookingEventRange(s))}</b></div><div><span>Max booking cost</span><b>${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</b></div><div><span>History</span><b>${history?esc(history+boothHint):'Loading linked history…'}</b></div><div><span>When to act</span><b>${esc(bookingTiming(s))}</b></div></div>${s.performance?`<div class="bookingPerformance"><span>Historical signal</span><b>${esc(s.performance)}</b></div>`:''}${s.booking_status?`<div class="bookingStatusLine"><span>Booking status</span><b>${esc(s.booking_status)}</b></div>`:''}${s.payment_terms&&s.payment_terms!=='—'?`<div class="bookingStatusLine"><span>Booking / payment terms</span><b>${esc(s.payment_terms)}</b></div>`:''}${follow}<div class="meta"><span>${esc(s.owner||'Unassigned')}</span>${s.source_detail?.needs_evidence&&s.source_detail.needs_evidence!=='NONE'?`<span class="pill review">Needs ${esc(s.source_detail.needs_evidence)}</span>`:''}${s.this_year==='SKIP THIS YEAR'?'<span class="pill review">SKIPPED THIS YEAR</span>':''}</div></div>`;
 }
 
 function renderToday(){
