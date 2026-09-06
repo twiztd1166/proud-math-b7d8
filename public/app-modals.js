@@ -228,16 +228,23 @@ function boothOutcomeMetrics(row){
   if(row?.demos!==null&&row?.demos!==undefined)parts.push(String(row.demos)+' demos');
   return parts.join(' · ');
 }
+function specificBoothPlacement(value){
+  const text=String(value||'').trim();
+  if(!text)return false;
+  return !/(EXACT (BOOTH|SPACE|SPOT|TABLE).*(NOT STATED|UNKNOWN)|NUMBER NOT STATED|ASSIGNED (AT|ON)SITE|ASSIGNED AT SETUP|WOULD FOLLOW|NOT RECOVERED|UNVERIFIED|^N\/A$|^UNKNOWN)/i.test(text);
+}
 function boothGuidanceHtml(rows){
   const placed=(rows||[]).filter(row=>sourceSemanticState(historyBoothValue(row))==='VALUE');
   if(!placed.length)return '';
   const latest=[...placed].sort((a,b)=>Number(b.source_year||0)-Number(a.source_year||0)||Number(b.source_row||0)-Number(a.source_row||0))[0];
   const outcomes=boothOutcomeRows(rows);
   const best=outcomes[0]||null;
+  const bestSpecific=outcomes.find(row=>specificBoothPlacement(historyBoothValue(row)))||null;
   const outcomeCards=outcomes.slice(0,3).map((row,index)=>`<div class="boothOutcome"><span>${index===0?'Best observed outcome':'Observed outcome'} · ${esc(row.source_year||'—')} · ${esc(row.dates_text||'Date not stated')}</span><b>${esc(historyBoothValue(row))}</b><small>${esc(boothOutcomeMetrics(row)||'Performance fields not separately attributable')}</small></div>`).join('');
-  const bestHtml=best?`<div class="boothBest"><span>Best observed booth / placement</span><b>${esc(historyBoothValue(best))}</b><small>${esc(best.source_year||'—')} · ${esc(boothOutcomeMetrics(best))}</small></div>`:'<div class="boothBest"><span>Best observed booth / placement</span><b>Not enough booth + event-performance overlap to rank</b></div>';
+  const bestHtml=best?`<div class="boothBest"><span>Best observed performance placement</span><b>${esc(historyBoothValue(best))}</b><small>${esc(best.source_year||'—')} · ${esc(boothOutcomeMetrics(best))}</small></div>`:'<div class="boothBest"><span>Best observed performance placement</span><b>Not enough booth + event-performance overlap to rank</b></div>';
+  const specificHtml=bestSpecific?`<div class="boothBest"><span>Best observed specific booth</span><b>${esc(historyBoothValue(bestSpecific))}</b><small>${esc(bestSpecific.source_year||'—')} · ${esc(boothOutcomeMetrics(bestSpecific))}</small></div>`:'<div class="boothBest"><span>Best observed specific booth</span><b>No performance-backed specific booth number/location is preserved</b></div>';
   const latestHtml=latest?`<div class="boothLatest"><span>Latest preserved placement</span><b>${esc(historyBoothValue(latest))}</b><small>${esc(latest.source_year||'—')} · ${esc(latest.dates_text||'Date not stated')}</small></div>`:'';
-  return `<div class="boothGuidance"><div class="yearSubhead">Booth / placement guidance</div><div class="boothGuidanceGrid">${bestHtml}${latestHtml}</div>${outcomeCards?`<div class="boothOutcomeGrid">${outcomeCards}</div>`:''}<div class="yearVerification">“Best observed” means the highest event-level net outcome among preserved records that also contain booth/placement evidence, with net sales, COM, issued, and recency used as tie-breakers. It is correlation only; it does not prove the booth caused performance.</div></div>`;
+  return `<div class="boothGuidance"><div class="yearSubhead">Booth / placement guidance</div><div class="boothGuidanceGrid">${bestHtml}${specificHtml}${latestHtml}</div>${outcomeCards?`<div class="boothOutcomeGrid">${outcomeCards}</div>`:''}<div class="yearVerification">“Best observed” means the strongest event-level outcome among preserved records that also contain booth/placement evidence. Specific-booth guidance excludes generic “assigned onsite / exact number not stated” placements when possible. Net revenue ranks first, then net sales, COM, issued, and recency. This is correlation only; it does not prove the booth caused performance.</div></div>`;
 }
 function lpYearHtml(items){
   if(!items.length)return '<div class="yearLpEmpty">No LeadPerfection performance source is linked to this year.</div>';
