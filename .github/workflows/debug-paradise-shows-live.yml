@@ -469,7 +469,7 @@ jobs:
           assert 'Dave LaBell' in profiles['LIFE-044']['current_rebook_opportunity']['contact_text']
           assert 'same-market/same-venue evidence' in profiles['LIFE-044']['current_rebook_opportunity']['notes']
           assert 'not proof of same-organizer series continuity' in profiles['LIFE-044']['current_rebook_opportunity']['notes']
-                    assert profiles['LIFE-046']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-046']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-046']['current_rebook_opportunity']['event_start']=='2026-10-10'
           assert profiles['LIFE-046']['current_rebook_opportunity']['event_end']=='2026-10-11'
           assert '8-foot table $100' in profiles['LIFE-046']['current_rebook_opportunity']['price_text']
