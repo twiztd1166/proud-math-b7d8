@@ -217,12 +217,12 @@ jobs:
           annual=u.get('annual') or []
           cumulative=u.get('cumulative') or []
           assert u.get('ok') is True, u
-          assert s.get('annual_rows') == 19, s
-          assert s.get('cumulative_rows') == 20, s
+          assert s.get('annual_rows') == 16, s
+          assert s.get('cumulative_rows') == 17, s
           assert s.get('no_profile_identity_asserted') is True, s
           assert s.get('attendance_inference') is False, s
-          assert len(annual) == 19, len(annual)
-          assert len(cumulative) == 20, len(cumulative)
+          assert len(annual) == 16, len(annual)
+          assert len(cumulative) == 17, len(cumulative)
           annual_ids={x.get('evidence_id') for x in annual}
           linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
           assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
@@ -234,7 +234,7 @@ jobs:
           assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
           assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
           assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
-          print({'unlinked_annual':19,'unlinked_cumulative':20,'source_groups':20,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
+          print({'unlinked_annual':16,'unlinked_cumulative':17,'source_groups':17,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/lponly.json \
@@ -284,6 +284,47 @@ jobs:
           assert {r.get('evidence_id') for r in x.get('performance') or []} == {'LP2024-109'}, x
           assert {r.get('annual_evidence_id') for r in x.get('cumulativePerformance') or []} == {'LP2024-109'}, x
           print({'lp_source_only_profile':'LPONLY-2024-109','history_rows':0,'annual_lp':1,'cumulative_lp':1,'attendance_inference':False})
+          PY
+
+          curl -sS -o /tmp/residual_antique.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-146"}'
+          curl -sS -o /tmp/residual_seafood.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-200"}'
+          python - <<'PY'
+          import json
+          antique=json.load(open('/tmp/residual_antique.json'))
+          seafood=json.load(open('/tmp/residual_seafood.json'))
+          assert antique.get('ok') is True, antique
+          assert seafood.get('ok') is True, seafood
+
+          a=next((r for r in antique.get('performance') or [] if r.get('evidence_id')=='LP2019-009'),None)
+          ac=next((r for r in antique.get('cumulativePerformance') or [] if r.get('annual_evidence_id')=='LP2019-009'),None)
+          assert a and a.get('profile_id')=='LIFE-146' and a.get('match_status')=='PROFILE_MATCH', a
+          assert a.get('matched_history_ids') == [], a
+          assert (a.get('source_fields') or {}).get('residual_profile_match',{}).get('occurrence_inference') is False, a
+          assert ac and ac.get('profile_id')=='LIFE-146' and ac.get('match_status')=='PROFILE_MATCH', ac
+          assert ac.get('matched_history_ids') == [], ac
+
+          expected={'LP2022-086','LP2022-087'}
+          sr={r.get('evidence_id'):r for r in seafood.get('performance') or [] if r.get('evidence_id') in expected}
+          sc={r.get('annual_evidence_id'):r for r in seafood.get('cumulativePerformance') or [] if r.get('annual_evidence_id') in expected}
+          assert set(sr)==expected, sr
+          assert set(sc)==expected, sc
+          for eid,row in sr.items():
+              assert row.get('profile_id')=='HIST-200' and row.get('match_status')=='PROFILE_MATCH', row
+              assert row.get('matched_history_ids') == [], row
+              assert (row.get('source_fields') or {}).get('residual_profile_match',{}).get('occurrence_inference') is False, row
+          for eid,row in sc.items():
+              assert row.get('profile_id')=='HIST-200' and row.get('match_status')=='PROFILE_MATCH', row
+              assert row.get('matched_history_ids') == [], row
+          assert ((sr['LP2022-086'].get('source_fields') or {}).get('event_dates')) == '3/120/2022', sr['LP2022-086']
+          print({'residual_profile_matches':3,'antique_profile':'LIFE-146','seafood_profile':'HIST-200','matched_history_ids_added':0,'malformed_date_preserved':True})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -359,6 +400,7 @@ jobs:
           currentcanon=source_summary.get('current_profile_canonicalization') or {}
           lp_source_only=source_summary.get('lp_source_only_identity_profiles') or {}
           lp_source_only_residual=source_summary.get('lp_source_only_residual_named') or {}
+          lp_residual=source_summary.get('lp_residual_profile_match_exhaustion') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -611,6 +653,39 @@ jobs:
           assert lp_source_only_residual.get('occurrences_created') == 0, lp_source_only_residual
           assert lp_source_only_residual.get('attendance_inference') is False, lp_source_only_residual
           assert lp_source_only_residual.get('psl_care_bag_held_ambiguous') is True, lp_source_only_residual
+          assert lp_residual.get('validation') == 'PASS', lp_residual
+          assert lp_residual.get('previous_ready_run') == '7d9b4cd9-9775-4b94-80e2-ce85c3a9961b', lp_residual
+          assert lp_residual.get('profiles_before') == 665, lp_residual
+          assert lp_residual.get('profiles_after') == 665, lp_residual
+          assert lp_residual.get('history_records_before') == 1086, lp_residual
+          assert lp_residual.get('history_records_after') == 1086, lp_residual
+          assert lp_residual.get('annual_rows_before') == 1235, lp_residual
+          assert lp_residual.get('annual_rows_after') == 1235, lp_residual
+          assert lp_residual.get('cumulative_rows_before') == 1251, lp_residual
+          assert lp_residual.get('cumulative_rows_after') == 1251, lp_residual
+          assert lp_residual.get('profile_links_added_annual') == 3, lp_residual
+          assert lp_residual.get('profile_links_added_cumulative') == 3, lp_residual
+          assert lp_residual.get('unlinked_annual_before') == 19, lp_residual
+          assert lp_residual.get('unlinked_annual_after') == 16, lp_residual
+          assert lp_residual.get('unlinked_cumulative_before') == 20, lp_residual
+          assert lp_residual.get('unlinked_cumulative_after') == 17, lp_residual
+          assert lp_residual.get('remaining_unlinked_annual') == 16, lp_residual
+          assert lp_residual.get('remaining_unlinked_cumulative') == 17, lp_residual
+          assert len(lp_residual.get('administrative_or_aggregate_ids') or []) == 5, lp_residual
+          assert len(lp_residual.get('generic_or_locationless_ids') or []) == 8, lp_residual
+          assert set(lp_residual.get('competing_profile_ambiguity_ids') or []) == {'LP2016-049','LP2025-050'}, lp_residual
+          assert lp_residual.get('distinctive_but_insufficient_identity_ids') == ['LP2017-112'], lp_residual
+          assert lp_residual.get('popup_shop_boca_cumulative_only_preserved_unmatched') is True, lp_residual
+          assert lp_residual.get('catalog_exact') is True, lp_residual
+          assert lp_residual.get('history_exact') is True, lp_residual
+          assert lp_residual.get('annual_nonidentity_exact') is True, lp_residual
+          assert lp_residual.get('cumulative_nonidentity_exact') is True, lp_residual
+          assert lp_residual.get('matched_history_ids_added') == 0, lp_residual
+          assert lp_residual.get('occurrences_created') == 0, lp_residual
+          assert lp_residual.get('attendance_inference') is False, lp_residual
+          assert lp_residual.get('malformed_source_dates_repaired') is False, lp_residual
+          assert lp_residual.get('current_shows') == 36, lp_residual
+          assert lp_residual.get('payments') == 3, lp_residual
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
