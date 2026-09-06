@@ -1,4 +1,77 @@
-function showCard(s){return `<div class="card" data-id="${esc(s.mfc_id)}"><div class="row"><div><div class="event">${esc(s.event)}</div><div class="mfc">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div></div><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div>${s.follow_up&&s.follow_up!=='—'?`<div class="action">${esc(s.follow_up)}</div>`:''}<div class="meta"><span class="due ${dueClass(s.action_due)}">${esc(dueLabel(s.action_due))}</span><span>${esc(s.owner||'Unassigned')}</span>${s.max_booking_cost!=null?`<span>Max ${money(s.max_booking_cost)}</span>`:''}${s.this_year==='SKIP THIS YEAR'?'<span class="pill review">SKIPPED THIS YEAR</span>':''}</div></div>`}
+function currentProfileForShow(show){
+  if(!show||!state.catalogLoaded)return null;
+  return state.catalog.find(p=>Array.isArray(p?.matched_mfc_ids)&&p.matched_mfc_ids.includes(show.mfc_id))||null;
+}
+function bookingOpportunityOpen(show){
+  const text=[show?.booking_status,show?.source_detail?.follow_up_detail,show?.payment_terms].filter(Boolean).join(' ').toUpperCase();
+  return /(APPLICATIONS? OPEN|VENDOR (APPLICATION|INTEREST|CALL)|EXHIBITOR (SALES|SPACE|APPLICATION)|CONTRACT OFFER|REGISTRATION OFFER|SOLICITING|BOOTH AWAITS|APPLY|RESERVATION)/.test(text)
+    && !/(EVENT (WAS )?FULL|ALREADY FULL)/.test(text);
+}
+function bookingCommitted(show){
+  const status=String(show?.booking_status||'').toUpperCase();
+  const payment=String(show?.source_detail?.payment_status||'').toUpperCase();
+  if(/NOT BOOKED|BOOKING NOT|NOT CONFIRMED|NOT VERIFIED|PARTICIPATION NOT/.test(status))return false;
+  return /(CONTRACTED|BOOKED|RESERVED|CONFIRMED)/.test(status)||/(COMMITMENT APPROVED|PAID \/ VERIFIED)/.test(payment);
+}
+function bookingSignal(show){
+  const decision=String(show?.decision||'').toUpperCase();
+  const end=show?.event_end||show?.event_start||null;
+  const endDays=end?daysFromToday(end):null;
+  const startDays=show?.event_start?daysFromToday(show.event_start):null;
+  const open=bookingOpportunityOpen(show);
+  const status=String(show?.booking_status||'').toUpperCase();
+  if(endDays!==null&&endDays<0)return {key:'NEXT_CYCLE',label:'NEXT CYCLE',detail:'Current occurrence has passed · get the next date early',weight:7,cls:'next'};
+  if(startDays!==null&&startDays<=0&&endDays!==null&&endDays>=0)return {key:'IN_PROGRESS',label:'CURRENT EVENT',detail:'Occurrence has started · use this cycle for execution and next-cycle planning',weight:6,cls:'watch'};
+  if(!show?.event_start)return {key:'WATCH_DATE',label:'WATCH FOR DATE',detail:'No current event date · monitor organizer before committing',weight:6,cls:'watch'};
+  if(/ACCOUNT GATE|HARD GATE|BOOKING GATE/.test(status))return {key:'GATED',label:'GATED / VERIFY',detail:'Do not book until the current account / eligibility gate is cleared',weight:5,cls:'watch'};
+  if(bookingCommitted(show))return {key:'COMMITTED',label:'COMMITTED',detail:'Booking is supported · manage confirmation / payment controls',weight:0,cls:'committed'};
+  if(decision.includes('TIER 3'))return {key:'NEGOTIATE_ONLY',label:'NEGOTIATE ONLY',detail:open?'Opportunity is open · proceed only if price / placement improves':'Do not book at current economics without improved terms',weight:4,cls:'negotiate'};
+  if(decision.includes('TIER 2'))return {key:'TEST_NEGOTIATE',label:'TEST / NEGOTIATE',detail:open?'Opportunity is open · use only as a controlled test':'Consider only as a controlled test with defined spend',weight:3,cls:'test'};
+  if(decision.includes('TIER 1')||decision.includes('RESTART')){
+    if(startDays!==null&&startDays<=7)return {key:'LATE_VERIFY',label:'LATE / VERIFY NOW',detail:'Event is within 7 days and booking is not confirmed · verify availability immediately',weight:1,cls:'book'};
+    if(open)return {key:'BOOK_NOW',label:'BOOK / APPLY NOW',detail:'High-priority history + current opportunity is open',weight:1,cls:'book'};
+    return {key:'PRIORITY_REVIEW',label:'PRIORITY REVIEW',detail:startDays!==null&&startDays>=0?'Future Tier 1 / restart candidate · confirm availability now':'High-priority history · verify next booking opportunity',weight:2,cls:'book'};
+  }
+  return {key:'REVIEW',label:'REVIEW',detail:open?'Current opportunity is open · review history and terms':'Review history, cost, and current organizer status',weight:3,cls:'review'};
+}
+function bookingEventRange(show){
+  if(!show?.event_start&&!show?.event_end)return 'Date not verified';
+  const start=show.event_start?date(show.event_start):'—';
+  const end=show.event_end&&show.event_end!==show.event_start?date(show.event_end):'';
+  return end?start+' – '+end:start;
+}
+function bookingTiming(show){
+  const signal=bookingSignal(show);
+  const due=daysFromToday(show?.action_due);
+  if(signal.key==='COMMITTED'){
+    if(show?.next_payment_due)return 'Payment due '+date(show.next_payment_due);
+    if(due!==null&&due<0)return 'Booking active · follow-up overdue';
+    if(show?.action_due)return 'Booking active · follow up '+date(show.action_due);
+    return 'Booking active · manage confirmation / payment';
+  }
+  if(signal.key==='GATED')return 'Now · clear booking / account gate';
+  if(signal.key==='IN_PROGRESS')return 'Current event · plan next cycle now';
+  if(signal.key==='NEXT_CYCLE')return 'Now · request next cycle / next date';
+  if(signal.key==='WATCH_DATE')return 'Monitor · request date when organizer opens';
+  if(signal.key==='LATE_VERIFY')return 'Immediate · verify availability now';
+  if(signal.key==='BOOK_NOW')return 'Now · opportunity is open';
+  if(due!==null&&due<0)return 'Now · follow-up is overdue';
+  if(show?.action_due)return 'Follow up by '+date(show.action_due);
+  return 'Review current availability now';
+}
+function bookingBoardSummary(){
+  const rows=state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR');
+  const signals=rows.map(bookingSignal);
+  const count=key=>signals.filter(x=>x.key===key).length;
+  return {book:count('BOOK_NOW')+count('PRIORITY_REVIEW')+count('LATE_VERIFY'),committed:count('COMMITTED'),test:count('TEST_NEGOTIATE')+count('NEGOTIATE_ONLY'),watch:count('WATCH_DATE')+count('NEXT_CYCLE')+count('IN_PROGRESS')+count('GATED')};
+}
+function showCard(s){
+  const signal=bookingSignal(s),profile=currentProfileForShow(s);
+  const history=profile?`${Number(profile.history_count||0)} history records${profile.lifetime_net_volume!=null?' · '+money(profile.lifetime_net_volume)+' lifetime net':''}`:'';
+  const boothHint=profile?.has_booth?' · booth history available':'';
+  const follow=s.follow_up&&s.follow_up!=='—'?`<div class="action">${esc(s.follow_up)}</div>`:'';
+  return `<div class="card bookingCard" data-id="${esc(s.mfc_id)}"><div class="row"><div><div class="event">${esc(s.event)}</div><div class="mfc">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div></div><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="bookingDecision">${esc(s.decision||'Decision not stated')}</div><div class="bookingGrid"><div><span>Event</span><b>${esc(bookingEventRange(s))}</b></div><div><span>Max booking cost</span><b>${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</b></div><div><span>History</span><b>${history?esc(history+boothHint):'Loading linked history…'}</b></div><div><span>When to act</span><b>${esc(bookingTiming(s))}</b></div></div>${s.performance?`<div class="bookingPerformance"><span>Historical signal</span><b>${esc(s.performance)}</b></div>`:''}${s.booking_status?`<div class="bookingStatusLine"><span>Booking status</span><b>${esc(s.booking_status)}</b></div>`:''}${s.payment_terms&&s.payment_terms!=='—'?`<div class="bookingStatusLine"><span>Booking / payment terms</span><b>${esc(s.payment_terms)}</b></div>`:''}${follow}<div class="meta"><span>${esc(s.owner||'Unassigned')}</span>${s.source_detail?.needs_evidence&&s.source_detail.needs_evidence!=='NONE'?`<span class="pill review">Needs ${esc(s.source_detail.needs_evidence)}</span>`:''}${s.this_year==='SKIP THIS YEAR'?'<span class="pill review">SKIPPED THIS YEAR</span>':''}</div></div>`;
+}
 
 function renderToday(){
   const actions=activeActions();const counts=countStatuses();const pay=paymentAttention();const rs=state.reconciliation.summary||{};
@@ -261,7 +334,7 @@ function showSortOptions(mode){
       ['NET_2025','Highest 2025 net'],['NET_2024','Highest 2024 net'],['DATA_COMPLETE',state.catalogFilters.historyYear==='ALL'?'Most complete data':'Most complete fields · '+state.catalogFilters.historyYear],['MISSING_DATA',state.catalogFilters.historyYear==='ALL'?'Most missing data':'Most missing fields · '+state.catalogFilters.historyYear]
     ]
     :[
-      ['PRIORITY','Priority'],['EVENT_ASC','Event date soonest'],['EVENT_DESC','Event date latest'],['ACTION_DUE','Action due soonest'],
+      ['PRIORITY','Priority'],['BOOKING','Booking recommendation'],['EVENT_ASC','Event date soonest'],['EVENT_DESC','Event date latest'],['ACTION_DUE','Action due soonest'],
       ['STATUS','Status priority'],['COST_LOW','Max booking cost low'],['COST_HIGH','Max booking cost high'],
       ['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],['OWNER','Owner'],['CONFIRMATION','Confirmation'],
       ['EVIDENCE','Evidence needs attention'],['PAYMENT','Payment state']
@@ -387,6 +460,9 @@ function currentMatchesWith(s,f,quickView='NONE',search=state.search){
   if(f.owner!=='ALL'&&String(s.owner||'Unassigned')!==f.owner)return false;
   if(f.evidence!=='ALL'&&String(s.source_detail?.needs_evidence||'NONE')!==f.evidence)return false;
   if(f.payment!=='ALL'&&String(s.source_detail?.payment_status||'NO PAYMENT SCHEDULE')!==f.payment)return false;
+  if(quickView==='CURRENT_BOOK_NOW'&&!['BOOK_NOW','PRIORITY_REVIEW','LATE_VERIFY'].includes(bookingSignal(s).key))return false;
+  if(quickView==='CURRENT_COMMITTED'&&bookingSignal(s).key!=='COMMITTED')return false;
+  if(quickView==='CURRENT_WATCH'&&!['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS','GATED'].includes(bookingSignal(s).key))return false;
   if(quickView==='CURRENT_EVIDENCE'&&String(s.source_detail?.needs_evidence||'NONE')==='NONE')return false;
   if(quickView==='CURRENT_COST_HIGH'&&(s.max_booking_cost===null||s.max_booking_cost===undefined||s.max_booking_cost===''))return false;
   if(!rangeMatch(s.max_booking_cost,f.costBand))return false;
@@ -403,6 +479,7 @@ function currentComparator(a,b){
   const dateKey=x=>String(x||'9999-12-31');
   const statusWeight={RECONCILE:0,OPEN:1,'DATE ONLY':2,HOLD:3,READY:4};
   const confirmationWeight={UNVERIFIED:0,PARTIAL:1,VERIFIED:2};
+  if(sort==='BOOKING')return bookingSignal(a).weight-bookingSignal(b).weight||dateKey(a.event_start).localeCompare(dateKey(b.event_start))||name(a,b);
   if(sort==='EVENT_ASC')return dateKey(a.event_start).localeCompare(dateKey(b.event_start))||name(a,b);
   if(sort==='EVENT_DESC')return dateKey(b.event_start||'0000').localeCompare(dateKey(a.event_start||'0000'))||name(a,b);
   if(sort==='ACTION_DUE')return dateKey(a.action_due).localeCompare(dateKey(b.action_due))||name(a,b);
@@ -647,6 +724,9 @@ function quickViewOptions(mode){
       ['ALL_CURRENT_LINKED','Current linked'],
     ]
     :[
+      ['CURRENT_BOOK_NOW','Book / priority'],
+      ['CURRENT_COMMITTED','Committed'],
+      ['CURRENT_WATCH','Watch / gated / next'],
       ['CURRENT_IN_PLAY','In Play'],
       ['CURRENT_DUE7','Due ≤7 days'],
       ['CURRENT_EVIDENCE','Evidence attention'],
@@ -665,6 +745,9 @@ function quickViewCount(key){
   if(key==='ALL_HIST_ONLY')return state.catalog.filter(p=>p.source_type==='HISTORY_ONLY').length;
   if(key==='ALL_LP_SOURCE_ONLY')return state.catalog.filter(isLpSourceOnly).length;
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
+  if(key==='CURRENT_BOOK_NOW')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['BOOK_NOW','PRIORITY_REVIEW','LATE_VERIFY'].includes(bookingSignal(s).key)).length;
+  if(key==='CURRENT_COMMITTED')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&bookingSignal(s).key==='COMMITTED').length;
+  if(key==='CURRENT_WATCH')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS','GATED'].includes(bookingSignal(s).key)).length;
   if(key==='CURRENT_IN_PLAY')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR').length;
   if(key==='CURRENT_DUE7')return state.shows.filter(s=>{const d=daysFromToday(s.action_due);return s.this_year!=='SKIP THIS YEAR'&&d!==null&&d>=0&&d<=7}).length;
   if(key==='CURRENT_EVIDENCE')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&String(s.source_detail?.needs_evidence||'NONE')!=='NONE').length;
@@ -696,6 +779,9 @@ function applyQuickView(key){
     if(key==='ALL_CURRENT_LINKED'){state.catalogFilters.profileState='CURRENT';state.catalogSort='CURRENT_FIRST'}
   }else{
     state.showMode='CURRENT';state.currentFilters=defaultCurrentFilters();state.currentSort='PRIORITY';
+    if(key==='CURRENT_BOOK_NOW'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
+    if(key==='CURRENT_COMMITTED'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
+    if(key==='CURRENT_WATCH'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
     if(key==='CURRENT_IN_PLAY')state.currentFilters.treatment='IN PLAY';
     if(key==='CURRENT_DUE7'){state.currentFilters.treatment='IN PLAY';state.currentFilters.timing='NEXT7';state.currentSort='ACTION_DUE'}
     if(key==='CURRENT_EVIDENCE'){state.currentFilters.treatment='IN PLAY';state.currentSort='EVIDENCE'}
@@ -880,7 +966,9 @@ function renderUnlinkedLp(){
 
 function renderCurrentShows(){
   const list=state.shows.filter(currentMatches).slice().sort(currentComparator);
-  return `${quickViewsBar('CURRENT')}${showTools('CURRENT',list.length)}${list.map(showCard).join('')||'<div class="empty">No current shows match these filters.</div>'}`;
+  const board=bookingBoardSummary();
+  const intro=`<div class="bookingBoard"><div><span>Priority to book / review</span><b>${board.book}</b></div><div><span>Committed</span><b>${board.committed}</b></div><div><span>Test / negotiate</span><b>${board.test}</b></div><div><span>Watch / gated / next</span><b>${board.watch}</b></div></div><div class="sourceWarn bookingBoardNote"><b>Booking recommendation uses the governed Decision/Tier plus current booking status and dates.</b> Historical sales, COM, costs, and booth evidence remain visible separately; this layer does not overwrite source evidence.</div>`;
+  return intro+`${quickViewsBar('CURRENT')}${showTools('CURRENT',list.length)}${list.map(showCard).join('')||'<div class="empty">No current shows match these filters.</div>'}`;
 }
 function renderShows(){
   const profileCount=Number(state.catalogSummary?.profile_count||state.catalog.length||0),occCount=Number(state.catalogSummary?.occurrence_count||0);
