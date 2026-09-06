@@ -67,6 +67,9 @@ jobs:
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
+              grep -q 'History performance' /tmp/app-shows.js
+              grep -q 'Has history performance' /tmp/app-shows.js
+              grep -q 'Has annual LP source' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -166,6 +169,14 @@ jobs:
           assert profiles['LIFE-009'].get('worked_year_count') == 0, profiles['LIFE-009']
           assert profiles['LIFE-054'].get('worked_year_count') == 0, profiles['LIFE-054']
           assert profiles['LIFE-204'].get('worked_year_count') == 0, profiles['LIFE-204']
+          # Performance layers remain independent: preserved history vs annual LeadPerfection.
+          assert profiles['HIST-052'].get('has_performance') is True, profiles['HIST-052']
+          assert profiles['HIST-052'].get('has_lp_performance') is False, profiles['HIST-052']
+          assert profiles['LPONLY-2021-123'].get('has_performance') is False, profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('has_lp_performance') is True, profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('data_completeness_score') == 1, profiles['LPONLY-2021-123']
+          assert profiles['LIFE-002'].get('has_performance') is True, profiles['LIFE-002']
+          assert profiles['LIFE-002'].get('has_lp_performance') is True, profiles['LIFE-002']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
