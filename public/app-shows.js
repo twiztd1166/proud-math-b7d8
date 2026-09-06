@@ -360,7 +360,7 @@ function showTools(mode,resultCount){
   const active=summary.length;
   const sort=mode==='ALL'?state.catalogSort:state.currentSort;
   const options=showSortOptions(mode);
-  const sortChanged=mode==='ALL'?state.catalogSort!=='RECOMMENDED':state.currentSort!=='PRIORITY';
+  const sortChanged=mode==='ALL'?state.catalogSort!=='RECOMMENDED':state.currentSort!=='BOOKING';
   const placeholder=mode==='ALL'?'Search name, alias, contact, booth, city, MFC…':'Search current shows, owner, booking, decision…';
   const chips=summary.map(item=>`<button type="button" class="activeFilterChip" data-active-filter-key="${esc(item.key)}" aria-label="Remove ${esc(item.label)}"><span>${esc(item.label)}</span><b aria-hidden="true">×</b></button>`).join('');
   return `<div class="showTools"><div class="search"><input id="searchInput" placeholder="${placeholder}" value="${esc(state.search)}"></div><div class="toolRow"><button class="toolBtn ${active?'active':''}" id="showFilterBtn">Filter${active?` <span class="toolCount">${active}</span>`:''}</button><label class="sortBox"><span>Sort</span><select id="showSortSelect">${options.map(([value,label])=>`<option value="${value}" ${sort===value?'selected':''}>${label}</option>`).join('')}</select></label><button class="toolBtn resetBtn ${active||state.search||sortChanged?'':'hidden'}" id="showResetBtn">Reset</button></div>${chips?`<div class="activeFilters" aria-label="Active filters">${chips}</div>`:''}<div class="resultLine">${resultCount.toLocaleString()} matching show${resultCount===1?'':'s'}</div></div>`;
@@ -797,7 +797,7 @@ function applyQuickView(key){
     if(key==='ALL_LP_SOURCE_ONLY'){state.catalogFilters.profileState='LP_SOURCE_ONLY';state.catalogSort='NAME_ASC'}
     if(key==='ALL_CURRENT_LINKED'){state.catalogFilters.profileState='CURRENT';state.catalogSort='CURRENT_FIRST'}
   }else{
-    state.showMode='CURRENT';state.currentFilters=defaultCurrentFilters();state.currentSort='PRIORITY';
+    state.showMode='CURRENT';state.currentFilters=defaultCurrentFilters();state.currentSort='BOOKING';
     if(key==='CURRENT_BOOK_NOW'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
     if(key==='CURRENT_COMMITTED'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
     if(key==='CURRENT_WATCH'){state.currentFilters.treatment='IN PLAY';state.currentSort='BOOKING'}
@@ -912,7 +912,7 @@ function resetShowView(){
     state.catalogSort='RECOMMENDED';
   }else{
     state.currentFilters=defaultCurrentFilters();
-    state.currentSort='PRIORITY';
+    state.currentSort='BOOKING';
   }
   state.catalogLimit=60;render();
 }
