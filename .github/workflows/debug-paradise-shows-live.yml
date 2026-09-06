@@ -117,6 +117,12 @@ jobs:
               grep -q 'latest_preserved_cost' /tmp/app-shows.js
               grep -q 'latest_preserved_dates' /tmp/app-shows.js
               grep -q 'Rebook candidates 2013+' /tmp/app-shows.js
+              grep -q 'Hold / do not book' /tmp/app-shows.js
+              grep -q 'rebookReviewCard' /tmp/app-shows.js
+              grep -q 'current_rebook_review' /tmp/app-shows.js
+              grep -q 'Current booking review' /tmp/app-shows.js
+              grep -q 'rebookReviewHtml' /tmp/app-modals.js
+              grep -q 'rebookReview' /tmp/app.css
               grep -q 'Positive-net history 2013+' /tmp/app-shows.js
               grep -q 'historicalReviewCandidate2013' /tmp/app-shows.js
               grep -q 'latest>=2013' /tmp/app-shows.js
@@ -244,6 +250,24 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-177"}'
 
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/barrett_review.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-041"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/ourkids_review.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-029"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/sarasota_review.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-032"}'
+
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/2023_brevard.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
@@ -299,9 +323,18 @@ jobs:
                   and latest>=2013
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
-          strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
+          strong_history_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
+          hold_dispositions={'HOLD','RETIRED'}
+          strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
           assert len(historical_2013)==76, len(historical_2013)
-          assert len(strong_2013)==14, len(strong_2013)
+          assert len(strong_history_2013)==14, len(strong_history_2013)
+          assert len(strong_2013)==11, len(strong_2013)
+          reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
+          expected_reviews={'LIFE-029':'HOLD','LIFE-032':'HOLD','LIFE-041':'HOLD'}
+          assert {pid:(review or {}).get('disposition') for pid,review in reviews.items()}==expected_reviews, reviews
+          for held in expected_reviews:
+              assert any(p.get('profile_id')==held for p in strong_history_2013), held
+              assert not any(p.get('profile_id')==held for p in strong_2013), held
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -657,8 +690,19 @@ jobs:
           assert cleanup_queue(2022) == []
           assert cleanup_queue(2023) == []
           assert cleanup_queue(2026) == []
+          barrett_review=json.load(open('/tmp/barrett_review.json'))
+          ourkids_review=json.load(open('/tmp/ourkids_review.json'))
+          sarasota_review=json.load(open('/tmp/sarasota_review.json'))
+          for detail in (barrett_review,ourkids_review,sarasota_review):
+              assert detail.get('ok') is True, detail
+              assert detail.get('version') == 23, detail.get('version')
+              assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
+          assert 'did not generate much business' in (barrett_review.get('rebookReview') or {}).get('rationale',''), barrett_review
+          assert '2020 event was cancelled' in (ourkids_review.get('rebookReview') or {}).get('rationale',''), ourkids_review
+          assert '$3,095 balance' in (sarasota_review.get('rebookReview') or {}).get('rationale',''), sarasota_review
+          assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 41, x.get('version')
+          assert x.get('version') == 42, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -1716,6 +1760,8 @@ jobs:
           grep -q 'Show database' /tmp/shows.html
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
+          grep -q 'Hold / do not book' /tmp/shows.html
+          grep -q '>HOLD<' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'REBOOK CANDIDATE' /tmp/shows.html
           grep -q 'Historical booking context' /tmp/shows.html
@@ -1736,6 +1782,27 @@ jobs:
           grep -q 'BOOTH 815 ASSIGNED' /tmp/current.html
           grep -q '\$2,110.50' /tmp/current.html
           grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
+
+          render_view barrett_hold "$SITE/#show/LIFE-041"
+          grep -q 'Barrett Jackson' /tmp/barrett_hold.html
+          grep -q 'Current booking review' /tmp/barrett_hold.html
+          grep -q '>HOLD<' /tmp/barrett_hold.html
+          grep -q 'did not generate much business' /tmp/barrett_hold.html
+          grep -q 'Do not treat Barrett-Jackson as a current rebook target' /tmp/barrett_hold.html
+
+          render_view ourkids_hold "$SITE/#show/LIFE-029"
+          grep -q 'Our Kids World' /tmp/ourkids_hold.html
+          grep -q 'Current booking review' /tmp/ourkids_hold.html
+          grep -q '>HOLD<' /tmp/ourkids_hold.html
+          grep -q '2020 event was cancelled' /tmp/ourkids_hold.html
+          grep -q 'Open review source' /tmp/ourkids_hold.html
+
+          render_view sarasota_hold "$SITE/#show/LIFE-032"
+          grep -q 'Sarasota Spring Home Show' /tmp/sarasota_hold.html
+          grep -q 'Current booking review' /tmp/sarasota_hold.html
+          grep -q '>HOLD<' /tmp/sarasota_hold.html
+          grep -q '\$3,095' /tmp/sarasota_hold.html
+          grep -q 'contract/invoice dispute' /tmp/sarasota_hold.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
