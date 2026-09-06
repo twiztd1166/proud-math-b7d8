@@ -78,6 +78,8 @@ jobs:
               grep -q 'Cumulative LeadPerfection' /tmp/app-shows.js
               grep -q 'Year-by-year evidence' /tmp/app-modals.js
               grep -q 'Active year filter' /tmp/app-modals.js
+              grep -q 'selectedEvidenceYears' /tmp/app-modals.js
+              grep -q 'Selected evidence years shown first' /tmp/app-modals.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
