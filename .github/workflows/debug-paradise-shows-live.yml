@@ -359,6 +359,35 @@ jobs:
           print({'residual_profile_matches':3,'antique_profile':'LIFE-146','seafood_profile':'HIST-200','matched_history_ids_added':0,'malformed_date_preserved':True})
           PY
 
+          curl -sS -o /tmp/vero_detail.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-009"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/vero_detail.json'))
+          assert x.get('ok') is True, x
+          p=x.get('profile') or {}
+          assert p.get('profile_id') == 'LIFE-009', p
+          assert p.get('canonical_event') == 'Vero Home Show', p
+          row=next((r for r in x.get('history') or [] if r.get('history_id')=='2022-SCH22-0005'),None)
+          assert row, x.get('history')
+          assert row.get('source_year') == 2022, row
+          assert row.get('address') == 'Indian River Fairgrounds - 7955 58th Ave.', row
+          assert row.get('city') == 'Vero 32967', row
+          assert row.get('booth') == '66  (10x10)', row
+          assert row.get('coi') == 'n', row
+          assert row.get('setup_info') == 'Fri-Jan 14 from 10am - 7pm & Sat-Jan 15 from 7am - 9:30am', row
+          assert row.get('breakdown_info') == 'Sun-Jan 16 from 4pm - 8pm', row
+          assert row.get('event_cost_text') == '$420.00', row
+          assert row.get('final_cost_text') == '$420.00', row
+          assert row.get('savings_text') == '$0.00', row
+          assert '866)611-0442' in str(row.get('contact') or ''), row
+          assert 'Mail Cks. To:' in str(row.get('notes') or ''), row
+          print({'profile':'LIFE-009','year':2022,'history_id':'2022-SCH22-0005','year_detail_source':'PASS'})
+          PY
+
           curl -sS -o /tmp/sff.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
@@ -908,6 +937,26 @@ jobs:
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
 
+          render_view detail "$SITE/#show/LIFE-009"
+          grep -q 'Vero Home Show' /tmp/detail.html
+          grep -q 'LIFE-009' /tmp/detail.html
+          grep -q 'Year snapshot' /tmp/detail.html
+          grep -q '>2022<' /tmp/detail.html
+          grep -q '>Location<' /tmp/detail.html
+          grep -q 'Indian River Fairgrounds - 7955 58th Ave.' /tmp/detail.html
+          grep -q '>Booth / space<' /tmp/detail.html
+          grep -q '66  (10x10)' /tmp/detail.html
+          grep -q '>Setup<' /tmp/detail.html
+          grep -q 'Fri-Jan 14 from 10am - 7pm' /tmp/detail.html
+          grep -q '>Breakdown<' /tmp/detail.html
+          grep -q 'Sun-Jan 16 from 4pm - 8pm' /tmp/detail.html
+          grep -q '>Savings / discount<' /tmp/detail.html
+          grep -q '\$0.00' /tmp/detail.html
+          grep -q '>Show contact<' /tmp/detail.html
+          grep -q 'vendors@patriotshows.com' /tmp/detail.html
+          grep -q '>Notes<' /tmp/detail.html
+          grep -q 'Mail Cks. To:' /tmp/detail.html
+
           render_view unlinked "$SITE/#unlinked"
           grep -q 'Unlinked LP 17' /tmp/unlinked.html
           grep -q 'Administrative / aggregate 5' /tmp/unlinked.html
@@ -917,4 +966,4 @@ jobs:
           grep -q 'Cumulative only 1' /tmp/unlinked.html
           grep -q 'Why unresolved:' /tmp/unlinked.html
 
-          echo "Live browser rendered #shows, #current, and #unlinked with governed counts and no uncaught JavaScript errors."
+          echo "Live browser rendered #shows, #current, #unlinked, and #show/LIFE-009 with governed counts/year details and no uncaught JavaScript errors."
