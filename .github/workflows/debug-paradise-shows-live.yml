@@ -90,6 +90,9 @@ jobs:
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
               grep -q 'bookingSignal' /tmp/app-shows.js
+              grep -q 'rebookCandidate' /tmp/app-shows.js
+              grep -q 'Rebook candidates' /tmp/app-shows.js
+              grep -q "currentSort:'BOOKING'" /tmp/app-core.js
               grep -q 'Priority to book / review' /tmp/app-shows.js
               grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/app-shows.js
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
@@ -1547,6 +1550,8 @@ jobs:
           render_view shows "$SITE/#shows"
           grep -q 'Show database' /tmp/shows.html
           grep -q '665 show profiles' /tmp/shows.html
+          grep -q 'Rebook candidates' /tmp/shows.html
+          grep -q 'REBOOK CANDIDATE' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html

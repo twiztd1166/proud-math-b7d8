@@ -14,7 +14,7 @@ let state={
     comBand:'ALL',lifetimeNetBand:'ALL',
     currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL',
   },
-  currentSort:'PRIORITY',
+  currentSort:'BOOKING',
   currentFilters:{
     status:'ALL',treatment:'IN PLAY',eventYear:'ALL',timing:'ALL',
     confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY',
@@ -31,7 +31,7 @@ const SHOW_CATALOG_FILTER_KEYS=['profileState','historyYear','lpYear','cumulativ
 const SHOW_CURRENT_FILTER_KEYS=['status','treatment','eventYear','timing','confirmation','owner','evidence','payment','costBand','followUp'];
 const SHOW_CATALOG_SORTS=['RECOMMENDED','CURRENT_FIRST','NAME_ASC','NAME_DESC','LATEST_HISTORY','HISTORY_DEPTH','HISTORY_RECORDS','OCCURRENCES','WORKED_YEARS','LOWEST_COM','HIGHEST_COM','LIFETIME_NET','LIFETIME_SALES','CLOSE_VOLUME','ISSUED','NET_2025','NET_2024','DATA_COMPLETE','MISSING_DATA'];
 const SHOW_CURRENT_SORTS=['PRIORITY','BOOKING','EVENT_ASC','EVENT_DESC','ACTION_DUE','STATUS','COST_LOW','COST_HIGH','NAME_ASC','NAME_DESC','OWNER','CONFIRMATION','EVIDENCE','PAYMENT'];
-const SHOW_QUICK_VIEWS=['NONE','ALL_TOP_NET','ALL_LOW_COM','ALL_MISSING','ALL_HIST_ONLY','ALL_LP_SOURCE_ONLY','ALL_CURRENT_LINKED','CURRENT_BOOK_NOW','CURRENT_COMMITTED','CURRENT_WATCH','CURRENT_IN_PLAY','CURRENT_DUE7','CURRENT_EVIDENCE','CURRENT_NO_DATE','CURRENT_COST_HIGH'];
+const SHOW_QUICK_VIEWS=['NONE','ALL_REBOOK','ALL_TOP_NET','ALL_LOW_COM','ALL_MISSING','ALL_HIST_ONLY','ALL_LP_SOURCE_ONLY','ALL_CURRENT_LINKED','CURRENT_BOOK_NOW','CURRENT_COMMITTED','CURRENT_WATCH','CURRENT_IN_PLAY','CURRENT_DUE7','CURRENT_EVIDENCE','CURRENT_NO_DATE','CURRENT_COST_HIGH'];
 
 function persistedString(v,max=120){return typeof v==='string'?v.slice(0,max):null}
 function restoreShowViewState(){
