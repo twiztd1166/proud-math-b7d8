@@ -82,6 +82,11 @@ jobs:
               grep -q 'cleanup year opened first' /tmp/app-modals.js
               grep -q 'The checklist is at the top' /tmp/app-modals.js
               grep -q 'Explicit unknown and N/A are preserved as coded states and do not count as missing' /tmp/app-modals.js
+              grep -q 'cleanupQueueProfilesForYear' /tmp/app-shows.js
+              grep -q 'cleanupQueueProgress' /tmp/app-modals.js
+              grep -q 'Back to queue' /tmp/app-modals.js
+              grep -q 'cleanupQueueMove' /tmp/app-modals.js
+              grep -q 'state.showQuickView=.ALL_MISSING.' /tmp/app-modals.js
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
@@ -205,6 +210,24 @@ jobs:
           assert missing_fields(profiles['HIST-015'],2022,supported_fields(2022)) == ['coi']
           assert 'booth' not in missing_fields(profiles['HIST-015'],2022,supported_fields(2022))
           assert missing_fields(profiles['LIFE-043'],2024,supported_fields(2024)) == []
+          def cleanup_queue(year):
+              supported=supported_fields(year)
+              rows=[
+                  p for p in profiles.values()
+                  if missing_count(p,year,supported)>0
+              ]
+              return sorted(rows,key=lambda p:(-missing_count(p,year,supported),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
+          queue_2025=cleanup_queue(2025)
+          assert len(queue_2025) == 19, len(queue_2025)
+          assert len({p.get('profile_id') for p in queue_2025}) == len(queue_2025)
+          assert all(
+              missing_count(queue_2025[i],2025,supported_fields(2025)) >= missing_count(queue_2025[i+1],2025,supported_fields(2025))
+              for i in range(len(queue_2025)-1)
+          )
+          hist055_index=next(i for i,p in enumerate(queue_2025) if p.get('profile_id')=='HIST-055')
+          assert 0 <= hist055_index < len(queue_2025)
+          assert cleanup_queue(2024) == []
+          assert len(cleanup_queue(2026)) == 5
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 31, x.get('version')
           for p in profiles.values():
