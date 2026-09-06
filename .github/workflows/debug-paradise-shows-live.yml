@@ -64,6 +64,9 @@ jobs:
               grep -q 'COI on file' /tmp/app-shows.js
               grep -q 'Explicit no COI' /tmp/app-shows.js
               grep -q 'Status unknown / N/A' /tmp/app-shows.js
+              grep -q 'Most verified worked years' /tmp/app-shows.js
+              grep -q 'Verified worked evidence' /tmp/app-shows.js
+              grep -q 'Has verified worked evidence' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -156,6 +159,13 @@ jobs:
           assert profiles['HIST-148'].get('has_cost') is False, profiles['HIST-148']
           assert profiles['LIFE-043'].get('has_cost') is False, profiles['LIFE-043']
           assert profiles['HIST-015'].get('has_cost') is True, profiles['HIST-015']
+          # Verified-worked semantics: only explicit WORKED/ATTENDED evidence counts.
+          assert profiles['LIFE-002'].get('worked_year_count') == 4, profiles['LIFE-002']
+          assert profiles['HIST-182'].get('worked_year_count') == 1, profiles['HIST-182']
+          assert profiles['LIFE-005'].get('worked_year_count') == 0, profiles['LIFE-005']
+          assert profiles['LIFE-009'].get('worked_year_count') == 0, profiles['LIFE-009']
+          assert profiles['LIFE-054'].get('worked_year_count') == 0, profiles['LIFE-054']
+          assert profiles['LIFE-204'].get('worked_year_count') == 0, profiles['LIFE-204']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']

@@ -69,7 +69,7 @@ function catalogFilterSummary(){
     profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
     contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
     com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has performance',MISSING:'Missing performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
-    coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Has participation evidence',MISSING:'No participation evidence'},
+    coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Verified worked evidence',MISSING:'No verified worked evidence'},
     currentTreatment:{'IN PLAY':'In Play',SKIPPED:'Skipped'}
   };
   if(f.profileState!=='ALL')add('profileState',labels.profileState[f.profileState]||f.profileState);
@@ -117,7 +117,7 @@ function showSortOptions(mode){
   return mode==='ALL'
     ?[
       ['RECOMMENDED','Recommended'],['CURRENT_FIRST','Current controls first'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
-      ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most worked years'],
+      ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
       ['NET_2025','Highest 2025 net'],['NET_2024','Highest 2024 net'],['DATA_COMPLETE','Most complete data'],['MISSING_DATA','Most missing data']
@@ -548,7 +548,7 @@ function openShowFilters(){
         ${filterField('Performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has performance'],['MISSING','Missing performance']],{ANY:fc.total,...fc.flags.has_performance}))}
         ${filterField('LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has LP source'],['MISSING','Missing LP source']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
         ${filterField('COI','fCoi',f.coi,opts([['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Status unknown / N/A']],{ANY:fc.total,...fc.coi}))}
-        ${filterField('Participation evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has worked/participation evidence'],['MISSING','No worked/participation evidence']],{ANY:fc.total,...fc.worked}))}
+        ${filterField('Verified worked evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has verified worked evidence'],['MISSING','No verified worked evidence']],{ANY:fc.total,...fc.worked}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Performance bands</div><div class="filterGrid">
         ${filterField('Lowest preserved COM','fComBand',f.comBand,opts([['ALL','Any COM'],['UNDER5','Under 5%'],['5_10','5% to <10%'],['10_15','10% to <15%'],['15_25','15% to <25%'],['25PLUS','25%+']],{ALL:fc.total,...fc.comBand}))}
