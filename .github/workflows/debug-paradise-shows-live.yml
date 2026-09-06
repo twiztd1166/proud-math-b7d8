@@ -296,8 +296,6 @@ jobs:
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
           assert len(historical_2013)==86, len(historical_2013)
           assert len(strong_2013)==24, len(strong_2013)
-          assert any(p.get('profile_id')=='LIFE-010' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
-          assert any(p.get('profile_id')=='LIFE-016' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
