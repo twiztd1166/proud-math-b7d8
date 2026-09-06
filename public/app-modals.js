@@ -222,13 +222,18 @@ const CLEANUP_FIELD_GUIDANCE={
   application:'Check application, approval, or event correspondence.',
   coi:'Check preserved event/organizer insurance evidence; do not infer a COI from attendance.',
 };
+function cleanupInvestigationSourceUrl(row){
+  if(row?.source_system==='GMAIL_CALENDAR'&&String(row?.source_locator||'').trim())return String(row.source_locator).trim();
+  if(String(row?.source_spreadsheet_id||'').trim()&&Number.isFinite(Number(row?.source_row)))return historySourceUrl(row);
+  return '';
+}
 function cleanupInvestigationRows(rows,field){
   const priority=CLEANUP_SOURCE_PRIORITIES[field]||[];
   const rank=row=>{const i=priority.indexOf(String(row?.source_kind||''));return i<0?priority.length+1:i};
   const sorted=[...(rows||[])].sort((a,b)=>rank(a)-rank(b)||Number(b.source_row||0)-Number(a.source_row||0));
   const seen=new Set(),out=[];
   for(const row of sorted){
-    const url=historySourceUrl(row);
+    const url=cleanupInvestigationSourceUrl(row);
     if(!url||seen.has(url))continue;
     seen.add(url);out.push(row);
     if(out.length>=2)break;
@@ -250,7 +255,7 @@ function cleanupInvestigationHtml(field,rows,lpItems){
   const sources=cleanupInvestigationRows(rows,field);
   const rowLinks=sources.map(row=>{
     const place=[row.source_workbook,row.source_tab,row.source_row?('row '+row.source_row):''].filter(Boolean).join(' · ');
-    return `<a class="cleanupSourceLink" target="_blank" href="${esc(historySourceUrl(row))}">Check preserved source${place?' · '+esc(place):''}</a>`;
+    return `<a class="cleanupSourceLink" target="_blank" href="${esc(cleanupInvestigationSourceUrl(row))}">Check preserved source${place?' · '+esc(place):''}</a>`;
   }).join('');
   const lpLinks=cleanupLpInvestigationLinks(lpItems,field);
   return `<div class="cleanupInvestigation"><div><b>${esc(label)}</b><span>${esc(CLEANUP_FIELD_GUIDANCE[field]||'Check the preserved source before making any inference.')}</span></div><div class="cleanupSourceLinks">${rowLinks}${lpLinks}</div><small>Investigation link only — the source may confirm the field, preserve it as unknown/N/A, or contain no additional answer.</small></div>`;
