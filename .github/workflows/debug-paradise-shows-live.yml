@@ -223,7 +223,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:0,2015:37,2016:0,2017:5,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:37,2016:0,2017:3,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -300,11 +300,17 @@ jobs:
           expected_2017={
               'HIST-418':['performance'],
               'HIST-433':['performance'],
-              'HIST-439':['contact'],
-              'LIFE-004':['contact'],
               'LIFE-177':['performance'],
           }
           assert actual_2017 == expected_2017, actual_2017
+          assert missing_fields(profiles['HIST-439'],2017) == []
+          assert missing_fields(profiles['LIFE-004'],2017) == []
+          hist439_contact=profiles['HIST-439']['history_field_states']['2017']['contact']
+          life004_contact=profiles['LIFE-004']['history_field_states']['2017']['contact']
+          assert hist439_contact.get('VALUE') == 1 and hist439_contact.get('MISSING') == 0, hist439_contact
+          assert life004_contact.get('VALUE') == 1 and life004_contact.get('MISSING') == 0, life004_contact
+          assert profiles['HIST-439'].get('has_contact') is True, profiles['HIST-439']
+          assert profiles['LIFE-004'].get('has_contact') is True, profiles['LIFE-004']
           assert cleanup_queue(2014) == []
           assert len(cleanup_queue(2015)) == 37
           assert cleanup_queue(2016) == []
@@ -319,7 +325,7 @@ jobs:
           assert len(cleanup_queue(2023)) == 43
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 38, x.get('version')
+          assert x.get('version') == 39, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -331,6 +337,7 @@ jobs:
               assert rule.get('field_scoped') is True, (p.get('profile_id'),rule)
               assert rule.get('source_labeled_performance') is True, (p.get('profile_id'),rule)
               assert rule.get('source_phone_contact') is True, (p.get('profile_id'),rule)
+              assert rule.get('source_booking_contact') is True, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
