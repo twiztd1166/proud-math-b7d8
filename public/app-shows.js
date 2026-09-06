@@ -40,6 +40,7 @@ function coiMatch(p,mode){
 }
 const HISTORY_FIELD_KEYS=['contact','booth','cost','com','performance','payment','application','coi'];
 const CLEANUP_FIELD_LABELS={contact:'Contact',booth:'Booth / space',cost:'Show cost',com:'Event COM',performance:'Performance',payment:'Payment status',application:'Application status',coi:'COI'};
+const cleanupFieldSupportCache=new Map();
 function emptyHistoryState(){return {VALUE:0,UNKNOWN:0,NA:0,MISSING:0}}
 function historyFieldState(p,key,year='ALL'){
   const state=year!=='ALL'?p?.history_field_states?.[String(year)]?.[key]:p?.history_field_totals?.[key];
@@ -99,14 +100,33 @@ function scopedCompletenessScore(p){
   if(year==='ALL')return Number(p.data_completeness_score||0);
   return HISTORY_FIELD_KEYS.reduce((n,key)=>n+(Number(historyFieldState(p,key,year).VALUE||0)>0?1:0),0);
 }
+function cleanupSupportedFieldsForYear(year){
+  if(year==='ALL')return [];
+  const cacheKey=String(state.catalogSummary?.id||state.catalog.length)+'|'+String(year);
+  if(cleanupFieldSupportCache.has(cacheKey))return cleanupFieldSupportCache.get(cacheKey);
+  const supported=HISTORY_FIELD_KEYS.filter(key=>state.catalog.some(p=>{
+    if(!Array.isArray(p?.history_years)||!p.history_years.map(String).includes(String(year)))return false;
+    const s=historyFieldState(p,key,year);
+    return Number(s.VALUE||0)>0||Number(s.UNKNOWN||0)>0||Number(s.NA||0)>0;
+  }));
+  cleanupFieldSupportCache.set(cacheKey,supported);
+  return supported;
+}
 function missingFieldsForYear(p,year){
   if(year==='ALL'||!Array.isArray(p?.history_years)||!p.history_years.map(String).includes(String(year)))return [];
-  return HISTORY_FIELD_KEYS.filter(key=>{
+  return cleanupSupportedFieldsForYear(year).filter(key=>{
     const s=historyFieldState(p,key,year);
     return Number(s.VALUE||0)===0&&Number(s.UNKNOWN||0)===0&&Number(s.NA||0)===0;
   });
 }
 function missingFieldCountForYear(p,year){return missingFieldsForYear(p,year).length}
+function cleanupQueueIntro(){
+  if(state.showQuickView!=='ALL_MISSING'||state.catalogFilters.historyYear==='ALL')return '';
+  const year=state.catalogFilters.historyYear,supported=cleanupSupportedFieldsForYear(year);
+  if(!supported.length)return '';
+  const labels=supported.map(key=>CLEANUP_FIELD_LABELS[key]||key);
+  return `<div class="sourceWarn cleanupQueueIntro"><b>${esc(year)} cleanup queue.</b> Ranked by missing fields that are actually supported by ${esc(year)} preserved source evidence: ${esc(labels.join(' · '))}. Explicit unknown and N/A are preserved separately and do not count as missing.</div>`;
+}
 function rangeMatch(value,band){
   if(band==='ALL')return true;
   if(value===null||value===undefined||value==='')return band==='MISSING';
@@ -827,5 +847,5 @@ function renderShows(){
   if(!state.catalogLoaded)return top+'<div class="loading">Opening full show database…</div>';
   const list=state.catalog.filter(catalogMatches).slice().sort(catalogComparator);
   const shown=list.slice(0,state.catalogLimit);
-  return top+quickViewsBar('ALL')+showTools('ALL',list.length)+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
+  return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
