@@ -96,9 +96,9 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 654, s
+          assert s.get('profile_count') == 665, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 654
+          assert len(x.get('profiles') or []) == 665
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
           for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059','CURRENT-001','CURRENT-002','CURRENT-005','CURRENT-006','HIST-093','HIST-260','HIST-261','HIST-262','HIST-324'):
               assert removed not in profiles, removed
@@ -187,7 +187,7 @@ jobs:
           assert current_only == ['CURRENT-003'], current_only
           assert profiles['CURRENT-003'].get('canonical_event') == 'St Lucie Earth Day Fest', profiles['CURRENT-003']
           lp_only=[p for p in profiles.values() if str(p.get('profile_id') or '').startswith('LPONLY-')]
-          assert len(lp_only) == 61, len(lp_only)
+          assert len(lp_only) == 72, len(lp_only)
           for p in lp_only:
               assert p.get('history_count') == 0, p
               assert p.get('occurrences') is None, p
@@ -206,7 +206,8 @@ jobs:
           assert set((profiles['LPONLY-2021-131'].get('source_rows') or [{}])[0].get('annual_evidence_ids') or []) == {'LP2021-131','LP2025-087'}, profiles['LPONLY-2021-131']
           assert set((profiles['LPONLY-2021-134'].get('source_rows') or [{}])[0].get('annual_evidence_ids') or []) == {'LP2021-134','LP2022-104'}, profiles['LPONLY-2021-134']
           assert set((profiles['LPONLY-2024-095'].get('source_rows') or [{}])[0].get('annual_evidence_ids') or []) == {'LP2024-095','LP2024-098','LP2025-093'}, profiles['LPONLY-2024-095']
-          print({'profiles':654,'evidence_records':1086,'identity_profile_shells_consolidated':61,'non_show_profiles_removed':1,'lp_source_only_profiles':61,'catalog_profiles_removed_total':62})
+          assert set((profiles['LPONLY-2024-109'].get('source_rows') or [{}])[0].get('annual_evidence_ids') or []) == {'LP2024-109'}, profiles['LPONLY-2024-109']
+          print({'profiles':665,'evidence_records':1086,'identity_profile_shells_consolidated':61,'non_show_profiles_removed':1,'lp_source_only_profiles':72,'catalog_profiles_removed_total':62})
           PY
 
           python - <<'PY'
@@ -216,12 +217,12 @@ jobs:
           annual=u.get('annual') or []
           cumulative=u.get('cumulative') or []
           assert u.get('ok') is True, u
-          assert s.get('annual_rows') == 30, s
-          assert s.get('cumulative_rows') == 31, s
+          assert s.get('annual_rows') == 19, s
+          assert s.get('cumulative_rows') == 20, s
           assert s.get('no_profile_identity_asserted') is True, s
           assert s.get('attendance_inference') is False, s
-          assert len(annual) == 30, len(annual)
-          assert len(cumulative) == 31, len(cumulative)
+          assert len(annual) == 19, len(annual)
+          assert len(cumulative) == 20, len(cumulative)
           annual_ids={x.get('evidence_id') for x in annual}
           linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
           assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
@@ -233,7 +234,7 @@ jobs:
           assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
           assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
           assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
-          print({'unlinked_annual':30,'unlinked_cumulative':31,'source_groups':31,'lp_source_only_profiles':61,'popup_identity':'PRESERVED_UNMATCHED'})
+          print({'unlinked_annual':19,'unlinked_cumulative':20,'source_groups':20,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/lponly.json \
@@ -260,6 +261,29 @@ jobs:
           assert annual == expected, annual
           assert cumulative == expected, cumulative
           print({'lp_source_only_profile':'LPONLY-2021-123','history_rows':0,'annual_lp':3,'cumulative_lp':3,'attendance_inference':False})
+          PY
+
+          curl -sS -o /tmp/lponly_residual.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LPONLY-2024-109"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/lponly_residual.json'))
+          assert x.get('ok') is True, x
+          p=x.get('profile') or {}
+          assert p.get('profile_id') == 'LPONLY-2024-109', p
+          assert p.get('canonical_event') == 'YouFit PopUp', p
+          assert p.get('history_count') == 0, p
+          assert p.get('occurrences') is None, p
+          rows=p.get('source_rows') or []
+          assert len(rows) == 1 and rows[0].get('source_kind') == 'LP_SOURCE_ONLY', p
+          assert rows[0].get('attendance_inference') is False, p
+          assert x.get('history') == [], x.get('history')
+          assert {r.get('evidence_id') for r in x.get('performance') or []} == {'LP2024-109'}, x
+          assert {r.get('annual_evidence_id') for r in x.get('cumulativePerformance') or []} == {'LP2024-109'}, x
+          print({'lp_source_only_profile':'LPONLY-2024-109','history_rows':0,'annual_lp':1,'cumulative_lp':1,'attendance_inference':False})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -334,6 +358,7 @@ jobs:
           non_show_cleanup=source_summary.get('non_show_profile_cleanup') or {}
           currentcanon=source_summary.get('current_profile_canonicalization') or {}
           lp_source_only=source_summary.get('lp_source_only_identity_profiles') or {}
+          lp_source_only_residual=source_summary.get('lp_source_only_residual_named') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -547,6 +572,45 @@ jobs:
           assert lp_source_only.get('occurrences_created') == 0, lp_source_only
           assert lp_source_only.get('attendance_inference') is False, lp_source_only
           assert lp_source_only.get('popup_shop_boca_preserved_unmatched') is True, lp_source_only
+          assert lp_source_only_residual.get('validation') == 'PASS', lp_source_only_residual
+          assert lp_source_only_residual.get('previous_ready_run') == 'd948dc0d-abda-4f6a-8c23-699926446373', lp_source_only_residual
+          assert lp_source_only_residual.get('profiles_before') == 654, lp_source_only_residual
+          assert lp_source_only_residual.get('profiles_after') == 665, lp_source_only_residual
+          assert lp_source_only_residual.get('profiles_added') == 11, lp_source_only_residual
+          assert lp_source_only_residual.get('preexisting_catalog_profiles_exact') == 654, lp_source_only_residual
+          assert lp_source_only_residual.get('lp_source_only_profiles_before') == 61, lp_source_only_residual
+          assert lp_source_only_residual.get('lp_source_only_profiles_after') == 72, lp_source_only_residual
+          assert lp_source_only_residual.get('annual_rows_before') == 1235, lp_source_only_residual
+          assert lp_source_only_residual.get('annual_rows_after') == 1235, lp_source_only_residual
+          assert lp_source_only_residual.get('annual_rows_linked') == 11, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_annual_before') == 69, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_annual_after') == 80, lp_source_only_residual
+          assert lp_source_only_residual.get('unlinked_annual_before') == 30, lp_source_only_residual
+          assert lp_source_only_residual.get('unlinked_annual_after') == 19, lp_source_only_residual
+          assert lp_source_only_residual.get('cumulative_rows_before') == 1251, lp_source_only_residual
+          assert lp_source_only_residual.get('cumulative_rows_after') == 1251, lp_source_only_residual
+          assert lp_source_only_residual.get('cumulative_rows_linked') == 11, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_cumulative_before') == 69, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_cumulative_after') == 80, lp_source_only_residual
+          assert lp_source_only_residual.get('unlinked_cumulative_before') == 31, lp_source_only_residual
+          assert lp_source_only_residual.get('unlinked_cumulative_after') == 20, lp_source_only_residual
+          assert lp_source_only_residual.get('history_records_before') == 1086, lp_source_only_residual
+          assert lp_source_only_residual.get('history_records_after') == 1086, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_history_refs') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('source_only_current_refs') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('matched_history_links_checked') == 534, lp_source_only_residual
+          assert lp_source_only_residual.get('matched_history_profile_mismatches') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('annual_nonidentity_exact') is True, lp_source_only_residual
+          assert lp_source_only_residual.get('cumulative_nonidentity_exact') is True, lp_source_only_residual
+          assert lp_source_only_residual.get('history_exact') is True, lp_source_only_residual
+          assert lp_source_only_residual.get('exact_duplicate_pairs_after') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('expanded_abbreviation_duplicate_pairs_after') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('word_order_duplicate_pairs_after') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('current_shows') == 36, lp_source_only_residual
+          assert lp_source_only_residual.get('payments') == 3, lp_source_only_residual
+          assert lp_source_only_residual.get('occurrences_created') == 0, lp_source_only_residual
+          assert lp_source_only_residual.get('attendance_inference') is False, lp_source_only_residual
+          assert lp_source_only_residual.get('psl_care_bag_held_ambiguous') is True, lp_source_only_residual
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
