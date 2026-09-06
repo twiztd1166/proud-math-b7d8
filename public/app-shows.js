@@ -33,6 +33,67 @@ function coiMatch(p,mode){
   if(mode==='MISSING')return !p.has_coi;
   return true;
 }
+const HISTORY_FIELD_KEYS=['contact','booth','cost','com','performance','payment','application','coi'];
+function emptyHistoryState(){return {VALUE:0,UNKNOWN:0,NA:0,MISSING:0}}
+function historyFieldState(p,key,year='ALL'){
+  const state=year!=='ALL'?p?.history_field_states?.[String(year)]?.[key]:p?.history_field_totals?.[key];
+  return state&&typeof state==='object'?state:emptyHistoryState();
+}
+function historyFieldMatch(p,key,mode,year='ALL',legacyFlag=''){
+  if(mode==='ANY')return true;
+  const s=historyFieldState(p,key,year),hasSummary=Object.values(s).some(v=>Number(v)>0);
+  if(!hasSummary&&year==='ALL'&&legacyFlag){
+    if(mode==='HAS')return Boolean(p?.[legacyFlag]);
+    if(mode==='MISSING')return !p?.[legacyFlag];
+    return false;
+  }
+  const value=Number(s.VALUE||0),unknown=Number(s.UNKNOWN||0),na=Number(s.NA||0);
+  if(mode==='HAS')return value>0;
+  if(mode==='UNKNOWN')return unknown>0;
+  if(mode==='NA')return na>0;
+  if(mode==='MISSING')return value===0&&unknown===0&&na===0;
+  return true;
+}
+function historyCoiMatch(p,mode,year='ALL'){
+  if(mode==='ANY')return true;
+  const state=historyFieldState(p,'coi',year);
+  const summary=year!=='ALL'
+    ?p?.history_field_states?.[String(year)]||{}
+    :p?.history_coi_summary||{};
+  const affirmative=Number(year!=='ALL'?summary.coi_affirmative:summary.affirmative||0);
+  const nonaffirmative=Number(year!=='ALL'?summary.coi_known_nonaffirmative:summary.known_nonaffirmative||0);
+  const value=Number(state.VALUE||0),unknown=Number(state.UNKNOWN||0),na=Number(state.NA||0);
+  if(!value&&!unknown&&!na&&year==='ALL'&&!p?.history_field_totals)return coiMatch(p,mode);
+  if(mode==='HAS')return affirmative>0;
+  if(mode==='NO')return affirmative===0&&nonaffirmative>0;
+  if(mode==='UNKNOWN')return affirmative===0&&nonaffirmative===0&&unknown>0;
+  if(mode==='NA')return affirmative===0&&nonaffirmative===0&&na>0;
+  if(mode==='MISSING')return affirmative===0&&nonaffirmative===0&&unknown===0&&na===0&&value===0;
+  return true;
+}
+function historyWorkedMatch(p,mode,year='ALL'){
+  if(mode==='ANY')return true;
+  if(year==='ALL')return triMatch(Number(p.worked_year_count||0)>0,mode);
+  const w=p?.history_field_states?.[String(year)]?.worked||{HAS:0,MISSING:0};
+  const has=Number(w.HAS||0)>0;
+  return mode==='HAS'?has:mode==='MISSING'?!has:true;
+}
+function scopedComValue(p,which='min'){
+  const year=state.catalogFilters.historyYear;
+  if(year!=='ALL'){
+    const y=p?.history_field_states?.[String(year)];
+    const v=which==='max'?y?.com_max:y?.com_min;
+    return v===null||v===undefined||v===''?null:Number(v);
+  }
+  const v=which==='max'?p.highest_preserved_com:p.lowest_preserved_com;
+  return v===null||v===undefined||v===''?null:Number(v);
+}
+function scopedCompletenessScore(p){
+  const year=state.catalogFilters.historyYear;
+  if(year==='ALL')return Number(p.data_completeness_score||0);
+  return ['contact','booth','cost','com','performance','payment','application','coi']
+    .reduce((n,key)=>n+(Number(historyFieldState(p,key,year).VALUE||0)>0?1:0),0);
+}
 function rangeMatch(value,band){
   if(band==='ALL')return true;
   if(value===null||value===undefined||value==='')return band==='MISSING';
@@ -55,7 +116,7 @@ function rangeMatch(value,band){
 }
 function catalogActiveFilterCount(){
   const f=state.catalogFilters;
-  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
   return Object.keys(defaults).filter(k=>String(f[k])!==String(defaults[k])).length;
 }
 function currentActiveFilterCount(){
@@ -67,9 +128,11 @@ function catalogFilterSummary(){
   const f=state.catalogFilters,out=[],add=(key,label)=>out.push({key,label});
   const labels={
     profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
-    contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
-    com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has show-history performance',MISSING:'Missing show-history performance'},lp:{HAS:'Has annual LP',MISSING:'Missing annual LP'},cumulativeLp:{HAS:'Has cumulative LP',MISSING:'Missing cumulative LP'},
-    coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Verified worked evidence',MISSING:'No verified worked evidence'},
+    contact:{HAS:'Has contact',UNKNOWN:'Contact explicitly unknown',NA:'Contact N/A',MISSING:'Contact missing'},booth:{HAS:'Has booth',UNKNOWN:'Booth explicitly unknown',NA:'Booth N/A',MISSING:'Booth missing'},cost:{HAS:'Has cost',UNKNOWN:'Cost explicitly unknown',NA:'Cost N/A',MISSING:'Cost missing'},
+    com:{HAS:'Has COM',UNKNOWN:'COM explicitly unknown',NA:'COM N/A',MISSING:'COM missing'},performance:{HAS:'Has show-history performance',MISSING:'Show-history performance missing'},
+    historyPayment:{HAS:'Has payment status',UNKNOWN:'Payment explicitly unknown',NA:'Payment N/A',MISSING:'Payment status missing'},application:{HAS:'Has application status',UNKNOWN:'Application explicitly unknown',NA:'Application N/A',MISSING:'Application status missing'},
+    lp:{HAS:'Has annual LP',MISSING:'Missing annual LP'},cumulativeLp:{HAS:'Has cumulative LP',MISSING:'Missing cumulative LP'},
+    coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI explicitly unknown',NA:'COI N/A',MISSING:'COI missing'},worked:{HAS:'Verified worked evidence',MISSING:'No verified worked evidence'},
     currentTreatment:{'IN PLAY':'In Play',SKIPPED:'Skipped'}
   };
   if(f.profileState!=='ALL')add('profileState',labels.profileState[f.profileState]||f.profileState);
@@ -78,7 +141,9 @@ function catalogFilterSummary(){
   if(f.cumulativeLpYear!=='ALL')add('cumulativeLpYear','Cumulative LP '+f.cumulativeLpYear);
   if(f.tier!=='ALL')add('tier',f.tier==='OTHER'?'Untiered':f.tier[0]+f.tier.slice(1).toLowerCase());
   if(f.historyDepth!=='ALL')add('historyDepth',f.historyDepth+'+ history years');
-  for(const key of ['contact','booth','cost','com','performance','lp','cumulativeLp','coi','worked'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
+  const scope=f.historyYear!=='ALL'?f.historyYear+' · ':'';
+  for(const key of ['contact','booth','cost','com','performance','historyPayment','application','coi','worked'])if(f[key]!=='ANY')add(key,scope+(labels[key][f[key]]||f[key]));
+  for(const key of ['lp','cumulativeLp'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
@@ -160,8 +225,17 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.cumulativeLpYear!=='ALL'&&!cumulativeLpYears.map(String).includes(String(f.cumulativeLpYear)))return false;
   if(f.tier!=='ALL'&&(f.tier==='OTHER'?Boolean(p.tier):String(p.tier||'').toUpperCase()!==f.tier))return false;
   if(f.historyDepth!=='ALL'&&Number(p.history_year_count||0)<Number(f.historyDepth))return false;
-  if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!triMatch(p.has_cumulative_lp_performance,f.cumulativeLp)||!coiMatch(p,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
-  if(!rangeMatch(p.lowest_preserved_com,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
+  if(!historyFieldMatch(p,'contact',f.contact,f.historyYear,'has_contact')||
+     !historyFieldMatch(p,'booth',f.booth,f.historyYear,'has_booth')||
+     !historyFieldMatch(p,'cost',f.cost,f.historyYear,'has_cost')||
+     !historyFieldMatch(p,'com',f.com,f.historyYear,'has_com')||
+     !historyFieldMatch(p,'performance',f.performance,f.historyYear,'has_performance')||
+     !historyFieldMatch(p,'payment',f.historyPayment,f.historyYear,'has_payment')||
+     !historyFieldMatch(p,'application',f.application,f.historyYear,'has_application')||
+     !triMatch(p.has_lp_performance,f.lp)||!triMatch(p.has_cumulative_lp_performance,f.cumulativeLp)||
+     !historyCoiMatch(p,f.coi,f.historyYear)||!historyWorkedMatch(p,f.worked,f.historyYear))return false;
+  const scopedCom=scopedComValueForFilters(p,f.historyYear);
+  if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(isLpSourceOnly(p)||Number(p.data_completeness_score||0)>=7))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
@@ -171,6 +245,15 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.currentEventYear!=='ALL'&&!current.some(s=>String(showEventYear(s))===String(f.currentEventYear)))return false;
   const q=String(search||'').trim().toLowerCase();
   return !q||catalogSearchText(p,current).includes(q);
+}
+function scopedComValueForFilters(p,year,which='min'){
+  if(year!=='ALL'){
+    const y=p?.history_field_states?.[String(year)];
+    const v=which==='max'?y?.com_max:y?.com_min;
+    return v===null||v===undefined||v===''?null:Number(v);
+  }
+  const v=which==='max'?p.highest_preserved_com:p.lowest_preserved_com;
+  return v===null||v===undefined||v===''?null:Number(v);
 }
 function catalogMatches(p){
   return catalogMatchesWith(p,state.catalogFilters,state.showQuickView,state.search);
@@ -190,12 +273,12 @@ function catalogComparator(a,b){
   if(sort==='OCCURRENCES')return Number(b.occurrences||0)-Number(a.occurrences||0)||name(a,b);
   if(sort==='WORKED_YEARS')return Number(b.worked_year_count||0)-Number(a.worked_year_count||0)||name(a,b);
   if(sort==='LOWEST_COM'){
-    const ar=a.lowest_preserved_com,br=b.lowest_preserved_com,av=ar===null||ar===undefined||ar===''?NaN:Number(ar),bv=br===null||br===undefined||br===''?NaN:Number(br),aa=Number.isFinite(av),bb=Number.isFinite(bv);
+    const av=scopedComValue(a,'min'),bv=scopedComValue(b,'min'),aa=Number.isFinite(av),bb=Number.isFinite(bv);
     if(aa!==bb)return aa?-1:1;
     return aa?av-bv||name(a,b):name(a,b);
   }
   if(sort==='HIGHEST_COM'){
-    const ar=a.highest_preserved_com,br=b.highest_preserved_com,av=ar===null||ar===undefined||ar===''?NaN:Number(ar),bv=br===null||br===undefined||br===''?NaN:Number(br),aa=Number.isFinite(av),bb=Number.isFinite(bv);
+    const av=scopedComValue(a,'max'),bv=scopedComValue(b,'max'),aa=Number.isFinite(av),bb=Number.isFinite(bv);
     if(aa!==bb)return aa?-1:1;
     return aa?bv-av||name(a,b):name(a,b);
   }
@@ -205,8 +288,8 @@ function catalogComparator(a,b){
   if(sort==='ISSUED')return numberDesc('issued')(a,b);
   if(sort==='NET_2025')return numberDesc('net_volume_2025')(a,b);
   if(sort==='NET_2024')return numberDesc('net_volume_2024')(a,b);
-  if(sort==='DATA_COMPLETE')return Number(b.data_completeness_score||0)-Number(a.data_completeness_score||0)||name(a,b);
-  if(sort==='MISSING_DATA')return Number(a.data_completeness_score||0)-Number(b.data_completeness_score||0)||name(a,b);
+  if(sort==='DATA_COMPLETE')return scopedCompletenessScore(b)-scopedCompletenessScore(a)||name(a,b);
+  if(sort==='MISSING_DATA')return scopedCompletenessScore(a)-scopedCompletenessScore(b)||name(a,b);
   return profileCurrentShows(b).length-profileCurrentShows(a).length||Number(a.tier_rank??999)-Number(b.tier_rank??999)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
 }
 function currentSearchText(s){
@@ -277,6 +360,8 @@ function draftCatalogFilters(){
     cost:$('#fCost')?.value??state.catalogFilters.cost,
     com:$('#fCom')?.value??state.catalogFilters.com,
     performance:$('#fPerformance')?.value??state.catalogFilters.performance,
+    historyPayment:$('#fHistoryPayment')?.value??state.catalogFilters.historyPayment,
+    application:$('#fApplication')?.value??state.catalogFilters.application,
     lp:$('#fLp')?.value??state.catalogFilters.lp,
     cumulativeLp:$('#fCumulativeLp')?.value??state.catalogFilters.cumulativeLp,
     coi:$('#fCoi')?.value??state.catalogFilters.coi,
@@ -345,7 +430,7 @@ function refreshContextFacetCounts(){
   const mapping=mode==='ALL'
     ?{
       fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fCumulativeLpYear:'cumulativeLpYear',fTier:'tier',fHistoryDepth:'historyDepth',
-      fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
+      fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fHistoryPayment:'historyPayment',fApplication:'application',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
       fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
       fCurrentTreatment:'currentTreatment',fConfirmation:'confirmation',
     }
@@ -383,7 +468,7 @@ function catalogFacetCounts(){
   const tier={PLATINUM:0,GOLD:0,SILVER:0,OTHER:0};
   const record={CURRENT:0,HISTORICAL:0,CURRENT_ONLY:0,HISTORY_ONLY:0,LP_SOURCE_ONLY:0};
   const depth={'1':0,'2':0,'3':0,'5':0};
-  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance','has_cumulative_lp_performance'];
+  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_payment','has_application','has_lp_performance','has_cumulative_lp_performance'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
   const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0};
   for(const p of profiles){
@@ -470,7 +555,7 @@ function countedOptions(options,counts){
   return options.map(([value,label])=>[value,label,Number(counts?.[value]||0)]);
 }
 function defaultCatalogFilters(){
-  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
 }
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
