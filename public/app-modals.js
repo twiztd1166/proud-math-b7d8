@@ -60,9 +60,40 @@ function sourceSemanticState(value){
 function historyContactValue(row){return String(row?.contact||sourceFieldValue(row,['CONTACT INFO','CONTACT_NAME','CONTACT'])||'').trim()}
 function historyBoothValue(row){return String(row?.booth||sourceFieldValue(row,['BOOTH / SPACE LOCATION','BOOTH #'])||'').trim()}
 function historyCostValue(row){return String(row?.final_cost_text||row?.event_cost_text||sourceFieldValue(row,['FINAL / NEGOTIATED COST','FINAL NEGOTIATED COST','EVENT COST','COST'])||'').trim()}
+function governedStatusStateValue(value){
+  const text=String(value??'').trim();
+  if(!text)return '';
+  const upper=text.toUpperCase();
+  const naMarkers=['AGGREGATED','BUNDLE AGGREGATE','DO NOT DOUBLE COUNT','NO EVENT-SPECIFIC','DO NOT ALLOCATE','MONTH-RESOLVED ELSEWHERE','MAPS TO '];
+  return naMarkers.some(marker=>upper.includes(marker))?'N/A — '+text:'UNKNOWN — '+text;
+}
+function historyCostStateValue(row){
+  const value=historyCostValue(row);
+  if(value)return value;
+  const verification=sourceFieldValue(row,['VERIFICATION STATUS']);
+  const upper=verification.toUpperCase();
+  if(upper.includes('COST UNVERIFIED')||upper.includes('COST UNKNOWN')||upper.includes('COST NOT RECOVERED'))return 'UNKNOWN — '+verification;
+  return '';
+}
+function historyPerformancePresent(row){
+  return ['issued_appts','demos','gross_sales_count','gross_sales_value','net_sales_count','net_revenue','nsli']
+    .some(field=>row?.[field]!==null&&row?.[field]!==undefined&&String(row[field]).trim()!=='');
+}
+function historyPerformanceStateValue(row){
+  if(historyPerformancePresent(row))return 'PRESENT';
+  return governedStatusStateValue(sourceFieldValue(row,['PERFORMANCE MATCH STATUS']));
+}
 function historyEventComValue(row){
   if(row?.com_percent!==null&&row?.com_percent!==undefined&&String(row.com_percent).trim()!=='')return String(row.com_percent).trim()+'%';
   return sourceFieldValue(row,['COM % (EVENT COST ÷ NET REV)']);
+}
+function historyComStateValue(row){
+  const value=historyEventComValue(row);
+  if(value)return value;
+  const performanceState=historyPerformanceStateValue(row);
+  if(sourceSemanticState(performanceState)==='NA')return 'N/A — performance not separately attributable';
+  if(sourceSemanticState(performanceState)==='UNKNOWN')return 'UNKNOWN — performance attribution unresolved';
+  return governedStatusStateValue(sourceFieldValue(row,['FULL COM STATUS']));
 }
 function historyDirectSetupCostValue(row){return sourceFieldValue(row,['DIRECT + SETUP COST'])}
 function historyDirectSetupComValue(row){return sourceFieldValue(row,['DIRECT + SETUP COM %'])}
@@ -77,10 +108,7 @@ function completenessText(rows,getter){
   return parts.join(' · ');
 }
 function metricCompletenessText(rows){
-  if(!rows.length)return 'No preserved history records';
-  const fields=['issued_appts','demos','gross_sales_count','gross_sales_value','net_sales_count','net_revenue','nsli'];
-  const present=rows.filter(row=>fields.some(field=>row[field]!==null&&row[field]!==undefined&&String(row[field]).trim()!=='')).length;
-  return present+' of '+rows.length+' record'+(rows.length===1?'':'s')+' with history metrics';
+  return completenessText(rows,historyPerformanceStateValue);
 }
 function missingValue(){return '<span class="yearMissing">'+HISTORY_MISSING+'</span>'}
 function uniqueText(values){
@@ -114,7 +142,7 @@ function numericYearTotal(rows,field,formatter=v=>esc(v)){
   return `<strong>${formatter(total)}</strong>${coverage}`;
 }
 function comYearValues(rows){
-  return datedValues(rows,row=>historyEventComValue(row),v=>esc(v));
+  return datedValues(rows,row=>historyComStateValue(row),v=>esc(v));
 }
 function sourceFieldYearValues(rows,keys){
   return datedValues(rows,row=>sourceFieldValue(row,keys),v=>esc(v));
@@ -164,7 +192,9 @@ function cumulativeLpYearHtml(items){
   }).join('');
 }
 function historyItem(x){
-  return `<details class="historyItem"><summary><span><b>${esc(x.source_year)}</b> · ${esc(x.dates_text||'Date not stated')}</span><span>${esc(historyCostValue(x))}</span></summary><div class="historyBody">${historyEvidenceFlag(x)}${x.participation_status?`<div class="detailLine"><b>Participation</b><span>${esc(x.participation_status)}</span></div>`:''}${(x.address||x.city)?`<div class="detailLine"><b>Location</b><span>${x.address?esc(x.address):''}${x.address&&x.city?' · ':''}${x.city?esc(x.city):''}</span></div>`:''}${x.booth?`<div class="detailLine"><b>Booth / space</b><span>${esc(x.booth)}</span></div>`:''}${x.coi?`<div class="detailLine"><b>COI</b><span>${esc(x.coi)}</span></div>`:''}${x.setup_info?`<div class="detailLine"><b>Setup</b><span>${esc(x.setup_info)}</span></div>`:''}${x.breakdown_info?`<div class="detailLine"><b>Breakdown</b><span>${esc(x.breakdown_info)}</span></div>`:''}${x.event_cost_text?`<div class="detailLine"><b>Event cost</b><span>${esc(x.event_cost_text)}</span></div>`:''}${x.final_cost_text?`<div class="detailLine"><b>Final cost</b><span>${esc(x.final_cost_text)}</span></div>`:''}${x.savings_text?`<div class="detailLine"><b>Savings</b><span>${esc(x.savings_text)}</span></div>`:''}${x.payment_status_text?`<div class="detailLine"><b>Payment</b><span>${esc(x.payment_status_text)}</span></div>`:''}${x.application_status_text?`<div class="detailLine"><b>Application</b><span>${esc(x.application_status_text)}</span></div>`:''}${x.calendar_status_text?`<div class="detailLine"><b>Calendar</b><span>${esc(x.calendar_status_text)}</span></div>`:''}${x.issued_appts!=null?`<div class="detailLine"><b>Issued / demos</b><span>${esc(x.issued_appts)} / ${esc(x.demos??'—')}</span></div>`:''}${x.gross_sales_count!=null?`<div class="detailLine"><b>Gross sales</b><span>${esc(x.gross_sales_count)} · ${money(x.gross_sales_value)}</span></div>`:''}${x.net_sales_count!=null?`<div class="detailLine"><b>Net sales</b><span>${esc(x.net_sales_count)} · ${money(x.net_revenue)}</span></div>`:''}${x.nsli!=null?`<div class="detailLine"><b>NSLI</b><span>${money(x.nsli)}</span></div>`:''}${historyEventComValue(x)?`<div class="detailLine"><b>Event COM</b><span>${esc(historyEventComValue(x))}</span></div>`:''}${sourceFieldValue(x,['DIRECT + SETUP COM %'])?`<div class="detailLine"><b>Direct + setup COM</b><span>${esc(sourceFieldValue(x,['DIRECT + SETUP COM %']))}</span></div>`:''}${x.verification_status?`<div class="detailLine"><b>Verification</b><span>${esc(x.verification_status)}</span></div>`:''}${historyContactValue(x)?`<div class="detailLine"><b>Contact</b><span>${esc(historyContactValue(x))}${contactActions(historyContactValue(x))}</span></div>`:''}${x.notes?`<div class="detailLine"><b>Notes</b><span>${esc(x.notes)}</span></div>`:''}<div class="actions"><a class="btn secondary sourceBtn" target="_blank" href="${historySourceUrl(x)}">${x.source_system==='GMAIL_CALENDAR'?'Open source email':'Open source row'}</a>${supplementalEvidenceLinks(x)}</div></div></details>`;
+  const performanceStatus=sourceFieldValue(x,['PERFORMANCE MATCH STATUS']);
+  const fullComStatus=sourceFieldValue(x,['FULL COM STATUS']);
+  return `<details class="historyItem"><summary><span><b>${esc(x.source_year)}</b> · ${esc(x.dates_text||'Date not stated')}</span><span>${esc(historyCostStateValue(x))}</span></summary><div class="historyBody">${historyEvidenceFlag(x)}${x.participation_status?`<div class="detailLine"><b>Participation</b><span>${esc(x.participation_status)}</span></div>`:''}${(x.address||x.city)?`<div class="detailLine"><b>Location</b><span>${x.address?esc(x.address):''}${x.address&&x.city?' · ':''}${x.city?esc(x.city):''}</span></div>`:''}${x.booth?`<div class="detailLine"><b>Booth / space</b><span>${esc(x.booth)}</span></div>`:''}${x.coi?`<div class="detailLine"><b>COI</b><span>${esc(x.coi)}</span></div>`:''}${x.setup_info?`<div class="detailLine"><b>Setup</b><span>${esc(x.setup_info)}</span></div>`:''}${x.breakdown_info?`<div class="detailLine"><b>Breakdown</b><span>${esc(x.breakdown_info)}</span></div>`:''}${x.event_cost_text?`<div class="detailLine"><b>Event cost</b><span>${esc(x.event_cost_text)}</span></div>`:''}${x.final_cost_text?`<div class="detailLine"><b>Final cost</b><span>${esc(x.final_cost_text)}</span></div>`:''}${x.savings_text?`<div class="detailLine"><b>Savings</b><span>${esc(x.savings_text)}</span></div>`:''}${x.payment_status_text?`<div class="detailLine"><b>Payment</b><span>${esc(x.payment_status_text)}</span></div>`:''}${x.application_status_text?`<div class="detailLine"><b>Application</b><span>${esc(x.application_status_text)}</span></div>`:''}${x.calendar_status_text?`<div class="detailLine"><b>Calendar</b><span>${esc(x.calendar_status_text)}</span></div>`:''}${x.issued_appts!=null?`<div class="detailLine"><b>Issued / demos</b><span>${esc(x.issued_appts)} / ${esc(x.demos??'—')}</span></div>`:''}${x.gross_sales_count!=null?`<div class="detailLine"><b>Gross sales</b><span>${esc(x.gross_sales_count)} · ${money(x.gross_sales_value)}</span></div>`:''}${x.net_sales_count!=null?`<div class="detailLine"><b>Net sales</b><span>${esc(x.net_sales_count)} · ${money(x.net_revenue)}</span></div>`:''}${x.nsli!=null?`<div class="detailLine"><b>NSLI</b><span>${money(x.nsli)}</span></div>`:''}${historyEventComValue(x)?`<div class="detailLine"><b>Event COM</b><span>${esc(historyEventComValue(x))}</span></div>`:''}${performanceStatus?`<div class="detailLine"><b>Performance attribution</b><span>${esc(performanceStatus)}</span></div>`:''}${fullComStatus?`<div class="detailLine"><b>COM status</b><span>${esc(fullComStatus)}</span></div>`:''}${sourceFieldValue(x,['DIRECT + SETUP COM %'])?`<div class="detailLine"><b>Direct + setup COM</b><span>${esc(sourceFieldValue(x,['DIRECT + SETUP COM %']))}</span></div>`:''}${x.verification_status?`<div class="detailLine"><b>Verification</b><span>${esc(x.verification_status)}</span></div>`:''}${historyContactValue(x)?`<div class="detailLine"><b>Contact</b><span>${esc(historyContactValue(x))}${contactActions(historyContactValue(x))}</span></div>`:''}${x.notes?`<div class="detailLine"><b>Notes</b><span>${esc(x.notes)}</span></div>`:''}<div class="actions"><a class="btn secondary sourceBtn" target="_blank" href="${historySourceUrl(x)}">${x.source_system==='GMAIL_CALENDAR'?'Open source email':'Open source row'}</a>${supplementalEvidenceLinks(x)}</div></div></details>`;
 }
 function cleanupChecklistHtml(profile,year){
   if(!profile||typeof cleanupSupportedFieldsForYear!=='function'||typeof missingFieldsForYear!=='function')return '';
@@ -172,13 +202,13 @@ function cleanupChecklistHtml(profile,year){
   if(!supported.length)return '';
   const missingLabels=missing.map(key=>CLEANUP_FIELD_LABELS[key]||key);
   const supportedLabels=supported.map(key=>CLEANUP_FIELD_LABELS[key]||key);
-  return `<div class="yearCleanupChecklist"><div class="yearCleanupHead"><div><span>Cleanup checklist</span><b>${esc(year)}</b></div><strong class="${missing.length?'needsWork':'complete'}">${missing.length?missing.length+' missing':'Source-supported fields complete'}</strong></div>${missing.length?`<div class="yearCleanupMissing">${missingLabels.map(label=>`<span>${esc(label)}</span>`).join('')}</div>`:'<div class="yearCleanupComplete">No source-supported fields are missing for this year.</div>'}<div class="yearCleanupNote">Source-supported fields for ${esc(year)}: ${esc(supportedLabels.join(' · '))}. Explicit unknown and N/A are preserved as coded states and do not count as missing.</div></div>`;
+  return `<div class="yearCleanupChecklist"><div class="yearCleanupHead"><div><span>Cleanup checklist</span><b>${esc(year)}</b></div><strong class="${missing.length?'needsWork':'complete'}">${missing.length?missing.length+' missing':'No actionable missing fields'}</strong></div>${missing.length?`<div class="yearCleanupMissing">${missingLabels.map(label=>`<span>${esc(label)}</span>`).join('')}</div>`:'<div class="yearCleanupComplete">No commonly coded, applicable fields are truly missing for this year.</div>'}<div class="yearCleanupNote">Commonly coded fields for ${esc(year)} (25%+ preserved-row coverage): ${esc(supportedLabels.join(' · '))}. Explicit unknown, N/A, and execution-only fields for explicit non-participation do not count as missing.</div></div>`;
 }
 function yearScorecard(year,rows,lpItems,cumulativeItems,cleanupChecklist=''){
   const recordCount=rows.length;
   const lpCount=lpItems.length;
   const cumulativeCount=cumulativeItems.length;
-  const eventCosts=datedValues(rows,row=>historyCostValue(row),v=>esc(v));
+  const eventCosts=datedValues(rows,row=>historyCostStateValue(row),v=>esc(v));
   const setupCosts=datedValues(rows,row=>historyDirectSetupCostValue(row),v=>esc(v));
   const directSetupCom=datedValues(rows,row=>historyDirectSetupComValue(row),v=>esc(v));
   const location=datedValues(rows,row=>[row.address,row.city].filter(Boolean).join(row.address&&row.city?' · ':''),v=>esc(v));
@@ -191,7 +221,7 @@ function yearScorecard(year,rows,lpItems,cumulativeItems,cleanupChecklist=''){
   const coi=datedValues(rows,row=>row.coi,v=>esc(v));
   const application=datedValues(rows,row=>row.application_status_text,v=>esc(v));
   const calendar=datedValues(rows,row=>row.calendar_status_text,v=>esc(v));
-  const completeness=`<div class="yearSubhead">Source-field completeness</div><div class="yearStatusGrid"><div><span>Contact</span><div>${esc(completenessText(rows,historyContactValue))}</div></div><div><span>Booth / space</span><div>${esc(completenessText(rows,historyBoothValue))}</div></div><div><span>Show cost</span><div>${esc(completenessText(rows,historyCostValue))}</div></div><div><span>Direct + setup cost</span><div>${esc(completenessText(rows,historyDirectSetupCostValue))}</div></div><div><span>Event COM</span><div>${esc(completenessText(rows,historyEventComValue))}</div></div><div><span>Direct + setup COM</span><div>${esc(completenessText(rows,historyDirectSetupComValue))}</div></div><div><span>COI</span><div>${esc(completenessText(rows,row=>row.coi))}</div></div><div><span>Payment</span><div>${esc(completenessText(rows,row=>row.payment_status_text))}</div></div><div><span>Application</span><div>${esc(completenessText(rows,row=>row.application_status_text))}</div></div><div><span>History performance</span><div>${esc(metricCompletenessText(rows))}</div></div></div><div class="yearVerification">Completeness is counted per preserved history record. Missing means no field/value was found in the preserved source. Explicit unknown and N/A remain separate source states. LeadPerfection attribution is audited separately below.</div>`;
+  const completeness=`<div class="yearSubhead">Source-field completeness</div><div class="yearStatusGrid"><div><span>Contact</span><div>${esc(completenessText(rows,historyContactValue))}</div></div><div><span>Booth / space</span><div>${esc(completenessText(rows,historyBoothValue))}</div></div><div><span>Show cost</span><div>${esc(completenessText(rows,historyCostStateValue))}</div></div><div><span>Direct + setup cost</span><div>${esc(completenessText(rows,historyDirectSetupCostValue))}</div></div><div><span>Event COM</span><div>${esc(completenessText(rows,historyComStateValue))}</div></div><div><span>Direct + setup COM</span><div>${esc(completenessText(rows,historyDirectSetupComValue))}</div></div><div><span>COI</span><div>${esc(completenessText(rows,row=>row.coi))}</div></div><div><span>Payment</span><div>${esc(completenessText(rows,row=>row.payment_status_text))}</div></div><div><span>Application</span><div>${esc(completenessText(rows,row=>row.application_status_text))}</div></div><div><span>History performance</span><div>${esc(metricCompletenessText(rows))}</div></div></div><div class="yearVerification">Completeness is counted per preserved history record. Missing means no field/value was found in the preserved source. Explicit unknown and N/A remain separate source states. LeadPerfection attribution is audited separately below.</div>`;
   const details=recordCount?`<details class="yearRecords"><summary>Preserved records & sources · ${recordCount}</summary><div class="historyList">${rows.map(historyItem).join('')}</div></details>`:'<div class="yearNoOccurrence">No preserved occurrence record for this year.</div>';
   return `<div class="yearScorecard"><div class="yearScoreHeader"><div><span>Year snapshot</span><b>${esc(year)}</b></div><div>${recordCount} record${recordCount===1?'':'s'} · ${lpCount} annual LP · ${cumulativeCount} cumulative LP</div></div>${cleanupChecklist}<div class="yearFieldGrid"><div class="yearField wide"><span>Dates</span><div>${plainValues(rows,row=>row.dates_text,v=>esc(v))}</div></div><div class="yearField wide"><span>Location</span><div>${location}</div></div><div class="yearField wide"><span>Booth / space</span><div>${datedValues(rows,row=>historyBoothValue(row),v=>esc(v))}</div></div><div class="yearField"><span>Show cost</span><div>${eventCosts}</div></div><div class="yearField"><span>Direct + setup cost</span><div>${setupCosts}</div></div><div class="yearField"><span>Event COM</span><div>${comYearValues(rows)}</div></div><div class="yearField"><span>Direct + setup COM</span><div>${directSetupCom}</div></div><div class="yearField wide"><span>Setup</span><div>${setup}</div></div><div class="yearField wide"><span>Breakdown</span><div>${breakdown}</div></div><div class="yearField wide"><span>Savings / discount</span><div>${savings}</div></div></div><div class="yearMetricGrid"><div><span>Issued</span><b>${numericYearTotal(rows,'issued_appts',v=>Number(v).toLocaleString())}</b></div><div><span>Demos</span><b>${numericYearTotal(rows,'demos',v=>Number(v).toLocaleString())}</b></div><div><span>Net sales</span><b>${numericYearTotal(rows,'net_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Net revenue</span><b>${numericYearTotal(rows,'net_revenue',money)}</b></div><div><span>Gross sales</span><b>${numericYearTotal(rows,'gross_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Gross volume</span><b>${numericYearTotal(rows,'gross_sales_value',money)}</b></div><div class="wide"><span>NSLI</span><b>${numericYearTotal(rows,'nsli',money)}</b></div></div><div class="yearField full"><span>Show contact</span><div>${contactYearValues(rows)}</div></div><div class="yearStatusGrid"><div><span>Payment</span><div>${payment}</div></div><div><span>Participation</span><div>${participation}</div></div><div><span>COI</span><div>${coi}</div></div><div><span>Application</span><div>${application}</div></div><div><span>Calendar</span><div>${calendar}</div></div></div>${completeness}<div class="yearField full"><span>Notes</span><div>${notes}</div></div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${lpYearHtml(lpItems)}</div><div class="yearLpSection cumulativeLpSection"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${cumulativeLpYearHtml(cumulativeItems)}</div>${details}</div>`;
 }
