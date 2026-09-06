@@ -9,7 +9,7 @@ let state={
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
   catalogFilters:{
-    profileState:'ALL',historyYear:'ALL',tier:'ALL',historyDepth:'ALL',
+    profileState:'ALL',historyYear:'ALL',lpYear:'ALL',tier:'ALL',historyDepth:'ALL',
     contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',coi:'ANY',worked:'ANY',
     comBand:'ALL',lifetimeNetBand:'ALL',
     currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL',
@@ -27,7 +27,7 @@ function isLpSourceOnly(p){
 
 const SHOW_VIEW_STORAGE='paradise-shows-view-v1';
 const SHOW_SEARCH_SESSION='paradise-shows-search-v1';
-const SHOW_CATALOG_FILTER_KEYS=['profileState','historyYear','tier','historyDepth','contact','booth','cost','com','performance','lp','coi','worked','comBand','lifetimeNetBand','currentStatus','currentTreatment','confirmation','currentEventYear'];
+const SHOW_CATALOG_FILTER_KEYS=['profileState','historyYear','lpYear','tier','historyDepth','contact','booth','cost','com','performance','lp','coi','worked','comBand','lifetimeNetBand','currentStatus','currentTreatment','confirmation','currentEventYear'];
 const SHOW_CURRENT_FILTER_KEYS=['status','treatment','eventYear','timing','confirmation','owner','evidence','payment','costBand','followUp'];
 const SHOW_CATALOG_SORTS=['RECOMMENDED','CURRENT_FIRST','NAME_ASC','NAME_DESC','LATEST_HISTORY','HISTORY_DEPTH','HISTORY_RECORDS','OCCURRENCES','WORKED_YEARS','LOWEST_COM','HIGHEST_COM','LIFETIME_NET','LIFETIME_SALES','CLOSE_VOLUME','ISSUED','NET_2025','NET_2024','DATA_COMPLETE','MISSING_DATA'];
 const SHOW_CURRENT_SORTS=['PRIORITY','EVENT_ASC','EVENT_DESC','ACTION_DUE','STATUS','COST_LOW','COST_HIGH','NAME_ASC','NAME_DESC','OWNER','CONFIRMATION','EVIDENCE','PAYMENT'];
