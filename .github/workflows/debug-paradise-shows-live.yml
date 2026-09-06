@@ -169,6 +169,24 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-177"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/2023_brevard.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-084"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/2023_jumpjam.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-217"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/2023_boca_holiday.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-206"}'
           python - <<'PY'
           import json
           x=json.load(open('/tmp/catalog.json'))
@@ -229,7 +247,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:0,2022:0,2023:43,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:0,2022:0,2023:0,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -359,6 +377,58 @@ jobs:
           assert supported_fields(profiles['HIST-182'],2023) == ['payment']
           assert missing_fields(profiles['HIST-182'],2023) == []
           assert 'cost' not in supported_fields(profiles['HIST-182'],2023)
+          # Final governed 2023 cleanup: direct values + explicit N/A + source-exhausted UNKNOWN.
+          for pid in (
+              'HIST-206','LIFE-084','HIST-184','HIST-209','HIST-210','LIFE-011','HIST-212','HIST-215',
+              'HIST-217','LIFE-003','LIFE-066','LIFE-028','HIST-226','HIST-229','HIST-230','HIST-231',
+              'HIST-232','LIFE-162','HIST-238','HIST-204','LIFE-004','LIFE-108','LIFE-030','LIFE-041',
+              'LIFE-163','HIST-216','HIST-228','HIST-240','LIFE-071','HIST-211','LIFE-190','HIST-330',
+              'LIFE-052','HIST-219','HIST-220','HIST-224','LIFE-049','LIFE-112','HIST-227','LIFE-124',
+              'LIFE-211','HIST-082','HIST-234'
+          ):
+              assert missing_fields(profiles[pid],2023) == [], (pid,missing_fields(profiles[pid],2023))
+          life084_cost=profiles['LIFE-084']['history_field_states']['2023']['cost']
+          life084_payment=profiles['LIFE-084']['history_field_states']['2023']['payment']
+          life028_cost=profiles['LIFE-028']['history_field_states']['2023']['cost']
+          life028_payment=profiles['LIFE-028']['history_field_states']['2023']['payment']
+          life162_cost=profiles['LIFE-162']['history_field_states']['2023']['cost']
+          life162_payment=profiles['LIFE-162']['history_field_states']['2023']['payment']
+          life163_cost=profiles['LIFE-163']['history_field_states']['2023']['cost']
+          hist184_cost=profiles['HIST-184']['history_field_states']['2023']['cost']
+          hist184_payment=profiles['HIST-184']['history_field_states']['2023']['payment']
+          hist220_payment=profiles['HIST-220']['history_field_states']['2023']['payment']
+          hist330_payment=profiles['HIST-330']['history_field_states']['2023']['payment']
+          life190_payment=profiles['LIFE-190']['history_field_states']['2023']['payment']
+          life211_payment=profiles['LIFE-211']['history_field_states']['2023']['payment']
+          hist206_cost=profiles['HIST-206']['history_field_states']['2023']['cost']
+          hist206_payment=profiles['HIST-206']['history_field_states']['2023']['payment']
+          assert life084_cost.get('VALUE') == 1 and life084_cost.get('MISSING') == 0, life084_cost
+          assert life084_payment.get('VALUE') == 1 and life084_payment.get('MISSING') == 0, life084_payment
+          assert life028_cost.get('VALUE') == 2 and life028_cost.get('MISSING') == 0, life028_cost
+          assert life028_payment.get('VALUE') == 2 and life028_payment.get('MISSING') == 0, life028_payment
+          assert life162_cost.get('VALUE') == 1 and life162_payment.get('VALUE') == 1, (life162_cost,life162_payment)
+          assert life163_cost.get('VALUE') == 1 and life163_cost.get('MISSING') == 0, life163_cost
+          assert hist184_cost.get('UNKNOWN') == 1 and hist184_cost.get('VALUE') == 0 and hist184_cost.get('MISSING') == 0, hist184_cost
+          assert hist184_payment.get('UNKNOWN') == 1 and hist184_payment.get('VALUE') == 0 and hist184_payment.get('MISSING') == 0, hist184_payment
+          for state in (hist220_payment,hist330_payment,life190_payment,life211_payment):
+              assert state.get('NA') == 1 and state.get('VALUE') == 0 and state.get('MISSING') == 0, state
+          assert hist206_cost.get('UNKNOWN') == 1 and hist206_cost.get('MISSING') == 0, hist206_cost
+          assert hist206_payment.get('NA') == 1 and hist206_payment.get('MISSING') == 0, hist206_payment
+          assert all_nonparticipation(profiles['HIST-206'],2023) is True, profiles['HIST-206']
+
+          brevard=json.load(open('/tmp/2023_brevard.json'))
+          jumpjam=json.load(open('/tmp/2023_jumpjam.json'))
+          boca_holiday=json.load(open('/tmp/2023_boca_holiday.json'))
+          assert brevard.get('ok') is True and jumpjam.get('ok') is True and boca_holiday.get('ok') is True
+          br=next(h for h in brevard.get('history') or [] if h.get('history_id') == '2023-CAL-1884e3aaf2664916')
+          jj=next(h for h in jumpjam.get('history') or [] if h.get('history_id') == '2023-CAL-188ee32f1665f86b')
+          bh=next(h for h in boca_holiday.get('history') or [] if h.get('history_id') == '2023-CAL-18a671379f36de17')
+          assert br.get('event_cost_text') == '$950.00' and str(br.get('payment_status_text') or '').startswith('PAID —'), br
+          assert jj.get('dates_text') == 'Sat Sep 23, 2023', jj
+          assert jj.get('event_cost_text') == '$205.00' and '1895ab3ad0232fc5' in str(jj.get('payment_status_text') or ''), jj
+          assert str(bh.get('event_cost_text') or '').startswith('UNKNOWN — 2023 event cost'), bh
+          assert str(bh.get('payment_status_text') or '').startswith('N/A — organizer declined'), bh
+          assert str(bh.get('participation_status') or '').startswith('DID NOT PARTICIPATE'), bh
           assert missing_fields(profiles['LIFE-043'],2024) == []
           assert missing_fields(profiles['HIST-055'],2025) == []
           assert missing_fields(profiles['LIFE-080'],2025) == []
@@ -403,7 +473,7 @@ jobs:
           assert cleanup_queue(2024) == []
           assert cleanup_queue(2025) == []
           assert cleanup_queue(2022) == []
-          assert len(cleanup_queue(2023)) == 43
+          assert cleanup_queue(2023) == []
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 40, x.get('version')
