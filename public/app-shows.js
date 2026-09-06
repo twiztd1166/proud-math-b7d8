@@ -163,7 +163,7 @@ function cleanupQueueIntro(){
   const year=state.catalogFilters.historyYear,supported=cleanupSupportedFieldsForYear(year);
   if(!supported.length)return '';
   const labels=supported.map(key=>CLEANUP_FIELD_LABELS[key]||key);
-  return `<div class="sourceWarn cleanupQueueIntro"><b>${esc(year)} cleanup queue.</b> Ranked against fields regularly coded in each profile's exact year + preserved source family (25%+ family coverage). Year-wide supported fields: ${esc(labels.join(' · '))}. Explicit unknown, N/A, and execution-only fields for explicit non-participation do not count as missing.</div>`;
+  return `<div class="sourceWarn cleanupQueueIntro"><b>${esc(year)} cleanup queue.</b> Ranked against fields regularly coded in each profile's exact year + preserved source family (25%+ family coverage). Supplemental merged evidence is scoped only to rows that actually carry that supplemental source. Year-wide supported fields: ${esc(labels.join(' · '))}. Explicit unknown, N/A, and execution-only fields for explicit non-participation do not count as missing.</div>`;
 }
 function rangeMatch(value,band){
   if(band==='ALL')return true;
