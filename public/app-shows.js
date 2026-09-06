@@ -83,13 +83,23 @@ function renderToday(){
   return `<div class="hero"><h1>Work today / this week</h1><p>Only actionable show work and payment exceptions are surfaced here.</p></div>${recoveryReview?`<div class="alert"><div class="event">Recovery checkpoint needs review</div><div class="action">The latest operating recovery checkpoint did not pass every integrity/coverage control. Review Recovery health in Control before relying on rollback.</div></div>`:''}${sourceReview?`<div class="alert"><div class="event">Google Sheet refresh needs review</div><div class="action">${sourceReview} conflicting field${sourceReview===1?'':'s'} were preserved. Review in Control; nothing conflicting was overwritten.</div></div>`:''}${drift?`<div class="alert"><div class="event">Source reconciliation needs review</div><div class="action">${drift} show${drift===1?'':'s'} changed in the app since the last verified Sheet snapshot. Review in Control before treating the Sheet and app as identical.</div></div>`:''}<div class="stats"><div class="stat"><div class="v">${actions.length}</div><div class="l">Show actions</div></div><div class="stat"><div class="v">${pay.length}</div><div class="l">Payment alerts</div></div><div class="stat"><div class="v">${counts.RECONCILE||0}</div><div class="l">Reconcile</div></div></div>${pay.length?`<div class="sectionTitle"><span>Payment attention</span><span>${pay.length} open</span></div>${pay.map(p=>`<div class="alert paymentCard" data-payment="${esc(p.payment_id)}"><div class="row"><div><div class="event">${esc(p.event)} · ${esc(p.contract_year)}</div><div class="mfc">${esc(p.installment)} · due ${date(p.due)}</div></div>${paymentPill(p)}</div><div class="action">${money(p.balance??p.amount)} remaining · ${esc(p.clearing||'UNVERIFIED')}</div></div>`).join('')}`:''}<div class="sectionTitle"><span>Show priority queue</span><span>${state.shows.length} shows controlled</span></div>${actions.length?actions.map(showCard).join(''):'<div class="empty">No dated show actions are open.</div>'}`
 }
 function countStatuses(){return state.shows.reduce((a,s)=>(a[s.show_status]=(a[s.show_status]||0)+1,a),{})}
+function rebookOpportunityCard(op){
+  if(!op)return '';
+  const status=String(op.opportunity_status||'').replaceAll('_',' ');
+  const range=op.event_start
+    ?date(op.event_start)+(op.event_end&&op.event_end!==op.event_start?' – '+date(op.event_end):'')
+    :'Current date not verified';
+  const checked=String(op.checked_at||'').slice(0,10);
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>Verified current opportunity</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   const lpOnly=isLpSourceOnly(p);
   const tier=lpOnly?'LP source only':(p.tier||((p.source_type==='HISTORY_ONLY')?'Historical':(p.source_type==='CURRENT_ONLY'?'Current':'Profile')));
   const hist=Number(p.history_count||0),life=Number(p.occurrences||0),years=Array.isArray(p.history_years)?p.history_years:[];
   const candidate=rebookCandidate(p);
-  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(candidate?'REBOOK CANDIDATE':'READ ONLY'));
+  const liveOpportunity=p?.current_rebook_opportunity||null;
+  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?'LIVE OPPORTUNITY':(candidate?'REBOOK CANDIDATE':'READ ONLY')));
   const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
   const missing=cleanupYear!=='ALL'?missingFieldsForYear(p,cleanupYear):[];
   const cleanup=missing.length
@@ -107,7 +117,7 @@ function catalogCard(p){
   ].filter(Boolean);
   const preservedContext=candidate&&preservedBits.length?`<div class="rebookContext"><span>Historical booking context</span><b>${preservedBits.join(' · ')}</b></div>`:'';
   const nextBooking=candidate?`<div class="rebookNext"><span>Next booking step</span><b>Verify the next occurrence, current availability, current quote / fees, and booking or payment deadline before committing.</b></div>`:'';
-  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${preservedContext}${nextBooking}`:'';
+  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${rebookOpportunityCard(liveOpportunity)}${preservedContext}${liveOpportunity?'':nextBooking}`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
