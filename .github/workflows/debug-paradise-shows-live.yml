@@ -74,7 +74,7 @@ jobs:
               grep -q 'cleanupSupportedFieldsForYear' /tmp/app-shows.js
               grep -q 'cleanupQueueLine' /tmp/app-shows.js
               grep -q 'cleanup queue' /tmp/app-shows.js
-              grep -q '25%+ coverage' /tmp/app-shows.js
+              grep -q '25%+ family coverage' /tmp/app-shows.js
               grep -q 'execution-only fields for explicit non-participation do not count as missing' /tmp/app-shows.js
               grep -q 'data-focus-year' /tmp/app-shows.js
               grep -q 'deepLinkedYear' /tmp/app-core.js
@@ -83,7 +83,7 @@ jobs:
               grep -q 'cleanup year opened first' /tmp/app-modals.js
               grep -q 'The checklist is at the top' /tmp/app-modals.js
               grep -q 'No actionable missing fields' /tmp/app-modals.js
-              grep -q '25%+ preserved-row coverage' /tmp/app-modals.js
+              grep -q '25%+ family coverage' /tmp/app-modals.js
               grep -q 'historyPerformanceStateValue' /tmp/app-modals.js
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
