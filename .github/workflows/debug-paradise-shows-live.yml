@@ -930,6 +930,7 @@ jobs:
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
           annual_cum_recon=source_summary.get('annual_vs_cumulative_reconciliation_2013_2026') or {}
           row_recon=source_summary.get('annual_vs_cumulative_row_level_reconciliation_2013_2026') or {}
+          unpaired_recon=source_summary.get('annual_vs_cumulative_unpaired_reconciliation_2013_2026') or {}
           identity=source_summary.get('identity_reconciliation') or {}
           consolidation=source_summary.get('duplicate_profile_consolidation') or {}
           exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
@@ -1326,6 +1327,47 @@ jobs:
           assert row_recon.get('annual_only_labels') == recon20.get('annual_only_labels'), (row_recon,recon20)
           assert 'five preserved annual-only rows' in str(row_recon.get('2020_explanation') or ''), row_recon
           assert 'exact preserved annual_row_id' in str(row_recon.get('2023_explanation') or ''), row_recon
+          assert unpaired_recon.get('stage') == 'READY', unpaired_recon
+          assert unpaired_recon.get('validation') == 'PASS', unpaired_recon
+          assert unpaired_recon.get('annual_values_overwritten') is False, unpaired_recon
+          assert unpaired_recon.get('attendance_inference') is False, unpaired_recon
+          annual_only=unpaired_recon.get('annual_only') or {}
+          assert annual_only.get('rows') == 5 and annual_only.get('year') == 2020, annual_only
+          assert annual_only.get('set_total') == 8, annual_only
+          assert annual_only.get('issue_total') == 6, annual_only
+          assert annual_only.get('demo_total') == 5, annual_only
+          assert annual_only.get('gross_close_total') == 1 and annual_only.get('gross_volume_total') == 18000, annual_only
+          assert annual_only.get('net_close_total') == 1 and annual_only.get('net_volume_total') == 18000, annual_only
+          assert set(annual_only.get('ids') or []) == {'LP2020-085','LP2020-086','LP2020-087','LP2020-088','LP2020-089'}, annual_only
+          assert annual_only.get('labels') == recon20.get('annual_only_labels'), (annual_only,recon20)
+          cum_only=unpaired_recon.get('cumulative_only') or {}
+          assert cum_only.get('rows') == 13, cum_only
+          assert cum_only.get('positive_activity') == 10 and cum_only.get('zero_activity') == 3, cum_only
+          assert cum_only.get('match_status_counts') == {'OCCURRENCE_MATCH':6,'MISSING_OCCURRENCE':6,'UNMATCHED_SOURCE':1}, cum_only
+          assert cum_only.get('category_counts') == {
+              'EXTRA_CUMULATIVE_DUPLICATE_LABEL':1,
+              'CROSS_CALENDAR_SOURCE_LABEL':1,
+              'UNMATCHED_CUMULATIVE_ONLY':1,
+              'NEW_CUMULATIVE_LABEL_OCCURRENCE_MATCH':5,
+              'NEW_CUMULATIVE_LABEL_IDENTITY_ONLY':5,
+          }, cum_only
+          extra_dup=cum_only.get('extra_duplicate') or {}
+          assert extra_dup.get('cumulative_id') == 'LPCUM-2017-0001', extra_dup
+          assert extra_dup.get('annual_id') == 'LP2017-062', extra_dup
+          assert extra_dup.get('linked_counterpart_cumulative_id') == 'LPCUM-2017-0065', extra_dup
+          cross_calendar=cum_only.get('cross_calendar') or {}
+          assert cross_calendar.get('cumulative_id') == 'LPCUM-2024-0101', cross_calendar
+          assert cross_calendar.get('source_year') == 2024 and cross_calendar.get('printed_dates') == '1/4/25 through 1/5/25', cross_calendar
+          unmatched=cum_only.get('unmatched') or {}
+          assert unmatched.get('cumulative_id') == 'LPCUM-2024-0052' and unmatched.get('raw_count') == 1, unmatched
+          assert set(cum_only.get('zero_activity_ids') or []) == {'LPCUM-2017-0034','LPCUM-2017-0043','LPCUM-2020-0080'}, cum_only
+          assert len(cum_only.get('positive_activity_ids') or []) == 10, cum_only
+          delta20=unpaired_recon.get('2020_full_delta_explanation') or {}
+          assert delta20.get('validation') == 'PASS', delta20
+          assert delta20.get('linked_matured_delta') == {'set':5,'issue':3,'demo':3,'gross_close':2,'gross_volume':39243,'net_close':2,'net_volume':39243}, delta20
+          assert delta20.get('annual_only_subtraction') == {'set':8,'issue':6,'demo':5,'gross_close':1,'gross_volume':18000,'net_close':1,'net_volume':18000}, delta20
+          assert delta20.get('cumulative_only_addition') == {'set':0,'issue':0,'demo':0,'gross_close':0,'gross_volume':0,'net_close':0,'net_volume':0}, delta20
+          assert delta20.get('reconciled_year_delta') == {'set':-3,'issue':-3,'demo':-2,'gross_close':1,'gross_volume':21243,'net_close':1,'net_volume':21243}, delta20
           y20=source_summary.get('year_2020') or {}
           assert y20.get('source_files') == 19, y20
           assert y20.get('preserved_occurrence_groups') == 55, y20
