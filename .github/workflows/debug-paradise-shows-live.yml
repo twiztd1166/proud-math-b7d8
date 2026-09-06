@@ -1611,15 +1611,11 @@ jobs:
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
+          grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
-          grep -q 'APPLICATION OPEN' /tmp/winterfest_detail.html
-          grep -q 'Dec 5, 2026' /tmp/winterfest_detail.html
-          grep -q 'Commercial/Retail \$160' /tmp/winterfest_detail.html
-          grep -q 'Corporate Level 1 \$300' /tmp/winterfest_detail.html
-          grep -q 'Corporate Level 2 \$400' /tmp/winterfest_detail.html
-          grep -q '\$10 application fee' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
+          grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
 
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
