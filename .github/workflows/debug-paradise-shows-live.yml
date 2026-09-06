@@ -294,8 +294,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==86, len(historical_2013)
-          assert len(strong_2013)==24, len(strong_2013)
+          assert len(historical_2013)==85, len(historical_2013)
+          assert len(strong_2013)==23, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -312,7 +312,7 @@ jobs:
           assert any(p.get('profile_id')=='LIFE-020' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
           assert any(p.get('profile_id')=='LIFE-047' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-054','LIFE-077'}
+          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-046','LIFE-054','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
@@ -334,6 +334,11 @@ jobs:
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert profiles['LIFE-046']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-046']['current_rebook_opportunity']['event_start']=='2026-10-10'
+          assert profiles['LIFE-046']['current_rebook_opportunity']['event_end']=='2026-10-11'
+          assert '8-foot table $100' in profiles['LIFE-046']['current_rebook_opportunity']['price_text']
+          assert 'Tuesday at 10:30 AM' in profiles['LIFE-046']['current_rebook_opportunity']['booking_window_text']
           assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
           assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
@@ -1702,6 +1707,15 @@ jobs:
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
+
+          render_view gunshow_detail "$SITE/#show/LIFE-046"
+          grep -q 'West Palm Beach Gun Show' /tmp/gunshow_detail.html
+          grep -q 'Verified current opportunity' /tmp/gunshow_detail.html
+          grep -q 'CONTRACT REQUEST OPEN' /tmp/gunshow_detail.html
+          grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
+          grep -q '8-foot table \$100' /tmp/gunshow_detail.html
+          grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
+          grep -q 'Open current source' /tmp/gunshow_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
