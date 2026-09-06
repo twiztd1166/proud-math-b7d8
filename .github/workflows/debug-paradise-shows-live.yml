@@ -223,7 +223,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:1,2015:40,2016:0,2017:6,2018:0,2019:0,2020:0,2021:43,2022:17,2023:51,2024:0,2025:0,2026:0}
+          expected_queue={2014:1,2015:40,2016:0,2017:6,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -249,6 +249,30 @@ jobs:
           assert missing_fields(profiles['HIST-160'],2022) == []
           assert missing_fields(profiles['HIST-163'],2022) == ['booth']
           assert missing_fields(profiles['LIFE-066'],2022) == ['booth','coi']
+          for profile_id in ('HIST-109','HIST-218','HIST-236','HIST-237','LIFE-039','LIFE-156','LIFE-027','LIFE-186'):
+              assert missing_fields(profiles[profile_id],2023) == [], (profile_id,missing_fields(profiles[profile_id],2023))
+          hist109_payment=profiles['HIST-109']['history_field_states']['2023']['payment']
+          hist218_payment=profiles['HIST-218']['history_field_states']['2023']['payment']
+          hist236_cost=profiles['HIST-236']['history_field_states']['2023']['cost']
+          hist237_payment=profiles['HIST-237']['history_field_states']['2023']['payment']
+          life039_cost=profiles['LIFE-039']['history_field_states']['2023']['cost']
+          life039_payment=profiles['LIFE-039']['history_field_states']['2023']['payment']
+          life156_cost=profiles['LIFE-156']['history_field_states']['2023']['cost']
+          life027_cost=profiles['LIFE-027']['history_field_states']['2023']['cost']
+          life027_payment=profiles['LIFE-027']['history_field_states']['2023']['payment']
+          life186_cost=profiles['LIFE-186']['history_field_states']['2023']['cost']
+          life186_payment=profiles['LIFE-186']['history_field_states']['2023']['payment']
+          assert hist109_payment.get('VALUE') == 1 and hist109_payment.get('MISSING') == 0, hist109_payment
+          assert hist218_payment.get('UNKNOWN') == 1 and hist218_payment.get('MISSING') == 0, hist218_payment
+          assert hist236_cost.get('VALUE') == 1 and hist236_cost.get('MISSING') == 0, hist236_cost
+          assert hist237_payment.get('VALUE') == 4 and hist237_payment.get('MISSING') == 0, hist237_payment
+          assert life039_cost.get('VALUE') == 1 and life039_cost.get('MISSING') == 0, life039_cost
+          assert life039_payment.get('VALUE') == 1 and life039_payment.get('MISSING') == 0, life039_payment
+          assert life156_cost.get('VALUE') == 1 and life156_cost.get('MISSING') == 0, life156_cost
+          assert life027_cost.get('VALUE') == 1 and life027_cost.get('MISSING') == 1, life027_cost
+          assert life027_payment.get('VALUE') == 2 and life027_payment.get('MISSING') == 0, life027_payment
+          assert life186_cost.get('VALUE') == 1 and life186_cost.get('MISSING') == 0, life186_cost
+          assert life186_payment.get('UNKNOWN') == 1 and life186_payment.get('MISSING') == 0, life186_payment
           assert supported_fields(profiles['HIST-182'],2023) == ['payment']
           assert missing_fields(profiles['HIST-182'],2023) == []
           assert 'cost' not in supported_fields(profiles['HIST-182'],2023)
@@ -285,7 +309,7 @@ jobs:
           assert cleanup_queue(2025) == []
           queue_2022=cleanup_queue(2022)
           assert len(queue_2022) == 17 and len({p.get('profile_id') for p in queue_2022}) == 17
-          assert len(cleanup_queue(2023)) == 51
+          assert len(cleanup_queue(2023)) == 43
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 37, x.get('version')
