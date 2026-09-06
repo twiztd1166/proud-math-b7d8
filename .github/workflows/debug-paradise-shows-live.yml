@@ -345,16 +345,16 @@ jobs:
           strong_history_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
           hold_dispositions={'HOLD','RETIRED'}
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
-          assert len(historical_2013)==75, len(historical_2013)
-          assert len(strong_history_2013)==13, len(strong_history_2013)
-          assert len(strong_2013)==9, len(strong_2013)
+          assert len(historical_2013)==74, len(historical_2013)
+          assert len(strong_history_2013)==12, len(strong_history_2013)
+          assert len(strong_2013)==8, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={
               'LIFE-028':'PURSUE',
               'LIFE-038':'PURSUE',
               'LIFE-039':'WATCH',
               'LIFE-041':'HOLD',
-              'LIFE-044':'WATCH',
+              'LIFE-044':'PURSUE',
               'LIFE-056':'WATCH',
               'LIFE-057':'PURSUE',
               'LIFE-071':'WATCH',
@@ -366,18 +366,21 @@ jobs:
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==4, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==5, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==5, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==4, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==4, actual_reviews
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
               assert not any(p.get('profile_id')==held for p in strong_2013), held
           for actionable_review in {pid for pid,disposition in expected_reviews.items() if disposition in {'PURSUE','WATCH'}}:
-              assert any(p.get('profile_id')==actionable_review for p in strong_2013), actionable_review
+              assert any(p.get('profile_id')==actionable_review for p in strong_2013) or profiles[actionable_review].get('current_rebook_opportunity'), actionable_review
           assert '561-330-4777' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
           assert '$75/day' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
-          assert 'does not list a Bradenton/Palmetto occurrence' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
+          assert 'exact same venue' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
+          assert 'Tampa Bay Times Events' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
+          assert '$995' in reviews['LIFE-044'].get('next_step',''), reviews['LIFE-044']
+          assert reviews['LIFE-044'].get('action_timing','').startswith('NOW'), reviews['LIFE-044']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
@@ -409,7 +412,7 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
+          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
@@ -456,7 +459,17 @@ jobs:
           assert 'exact booth assignment' in profiles['LIFE-033']['current_rebook_opportunity']['booking_window_text']
           assert 'payment clearing' in profiles['LIFE-033']['current_rebook_opportunity']['booking_window_text']
           assert 'American Consumer Shows' in profiles['LIFE-033']['current_rebook_opportunity']['contact_text']
-          assert profiles['LIFE-046']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-044']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-044']['current_rebook_opportunity']['event_start']=='2026-10-17'
+          assert profiles['LIFE-044']['current_rebook_opportunity']['event_end']=='2026-10-18'
+          assert '10x10 booth starts at $995' in profiles['LIFE-044']['current_rebook_opportunity']['price_text']
+          assert 'corner booth +$100' in profiles['LIFE-044']['current_rebook_opportunity']['price_text']
+          assert 'full payment is due by showtime' in profiles['LIFE-044']['current_rebook_opportunity']['booking_window_text']
+          assert '30 days before show opening' in profiles['LIFE-044']['current_rebook_opportunity']['booking_window_text']
+          assert 'Dave LaBell' in profiles['LIFE-044']['current_rebook_opportunity']['contact_text']
+          assert 'same-market/same-venue evidence' in profiles['LIFE-044']['current_rebook_opportunity']['notes']
+          assert 'not proof of same-organizer series continuity' in profiles['LIFE-044']['current_rebook_opportunity']['notes']
+                    assert profiles['LIFE-046']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-046']['current_rebook_opportunity']['event_start']=='2026-10-10'
           assert profiles['LIFE-046']['current_rebook_opportunity']['event_end']=='2026-10-11'
           assert '8-foot table $100' in profiles['LIFE-046']['current_rebook_opportunity']['price_text']
@@ -1864,7 +1877,23 @@ jobs:
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
 
-          render_view hurricane_watch "$SITE/#show/LIFE-039"
+          render_view bradenton_pursue "$SITE/#show/LIFE-044"
+          grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html
+          grep -q 'Current booking review' /tmp/bradenton_pursue.html
+          grep -q 'When to act' /tmp/bradenton_pursue.html
+          grep -q '>PURSUE<' /tmp/bradenton_pursue.html
+          grep -q 'Verified current opportunity' /tmp/bradenton_pursue.html
+          grep -q 'CONTRACT REQUEST OPEN' /tmp/bradenton_pursue.html
+          grep -q 'Oct 17, 2026' /tmp/bradenton_pursue.html
+          grep -q 'Oct 18, 2026' /tmp/bradenton_pursue.html
+          grep -q '10x10 booth starts at \$995' /tmp/bradenton_pursue.html
+          grep -q 'corner booth +\$100' /tmp/bradenton_pursue.html
+          grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
+          grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
+          grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
+          grep -q 'Open current source' /tmp/bradenton_pursue.html
+
+                    render_view hurricane_watch "$SITE/#show/LIFE-039"
           grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
           grep -q 'Current booking review' /tmp/hurricane_watch.html
           grep -q 'When to act' /tmp/hurricane_watch.html
