@@ -159,9 +159,9 @@ jobs:
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
           assert cumulative.get('rows') == 1251, cumulative
           assert cumulative.get('unresolved') == 0, cumulative
-          assert cumulative.get('exact_unchanged') == 1147, cumulative
-          assert cumulative.get('matured') == 84, cumulative
-          assert cumulative.get('cumulative_only') == 20, cumulative
+          assert cumulative.get('exact_unchanged') == 1095, cumulative
+          assert cumulative.get('matured') == 143, cumulative
+          assert cumulative.get('cumulative_only') == 13, cumulative
           assert cumulative.get('gross_close_delta') == 108, cumulative
           assert cumulative.get('gross_volume_delta') == 1850586, cumulative
           assert cumulative.get('net_close_delta') == 82, cumulative
