@@ -629,7 +629,11 @@ function openShowFilters(){
     const cumulativeLpYears=Object.keys(fc.cumulativeLpYears).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
     const currentYears=Object.keys(fc.currentYears).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
     const opts=(options,counts)=>countedOptions(options,counts);
-    body.innerHTML=`<h2>Filter All Shows</h2><div class="subtitle">Counts update against your other selections. Apply combines filters and replaces any Quick View.</div>
+    const histOpts=(hasLabel,missingLabel)=>[
+      ['ANY','Any'],['HAS',hasLabel],['UNKNOWN','Explicit unknown'],['NA','N/A'],['MISSING',missingLabel]
+    ];
+    const coiOpts=[['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Explicit unknown'],['NA','N/A'],['MISSING','Missing in preserved source']];
+    body.innerHTML=`<h2>Filter All Shows</h2><div class="subtitle">Counts update against your other selections. Historical field filters use the selected Historical Year when one is chosen; otherwise they evaluate the full preserved history. Missing, explicit unknown, and N/A remain separate.</div>
       <div class="filterSection"><div class="filterSectionTitle">Show record</div><div class="filterGrid">
         ${filterField('Record type','fProfileState',f.profileState,opts([['ALL','All profiles'],['CURRENT','Has current control'],['HISTORICAL','Has historical evidence'],['CURRENT_ONLY','Current only'],['HISTORY_ONLY','Historical only'],['LP_SOURCE_ONLY','LP source only']],{ALL:fc.total,...fc.record}))}
         ${filterField('Historical year','fHistoryYear',f.historyYear,opts([['ALL','All history years'],...years.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.years}))}
@@ -638,16 +642,20 @@ function openShowFilters(){
         ${filterField('Performance tier','fTier',f.tier,opts([['ALL','All tiers'],['PLATINUM','Platinum'],['GOLD','Gold'],['SILVER','Silver'],['OTHER','Untiered']],{ALL:fc.total,...fc.tier}))}
         ${filterField('Historical depth','fHistoryDepth',f.historyDepth,opts([['ALL','Any depth'],['1','1+ years'],['2','2+ years'],['3','3+ years'],['5','5+ years']],{ALL:fc.total,...fc.depth}))}
       </div></div>
-      <div class="filterSection"><div class="filterSectionTitle">Data availability</div><div class="filterGrid">
-        ${filterField('Contact','fContact',f.contact,opts([['ANY','Any'],['HAS','Has contact'],['MISSING','Missing contact']],{ANY:fc.total,...fc.flags.has_contact}))}
-        ${filterField('Booth','fBooth',f.booth,opts([['ANY','Any'],['HAS','Has booth'],['MISSING','Missing booth']],{ANY:fc.total,...fc.flags.has_booth}))}
-        ${filterField('Cost','fCost',f.cost,opts([['ANY','Any'],['HAS','Has cost'],['MISSING','Missing cost']],{ANY:fc.total,...fc.flags.has_cost}))}
-        ${filterField('COM','fCom',f.com,opts([['ANY','Any'],['HAS','Has COM'],['MISSING','Missing COM']],{ANY:fc.total,...fc.flags.has_com}))}
-        ${filterField('Show-history performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has show-history performance'],['MISSING','Missing show-history performance']],{ANY:fc.total,...fc.flags.has_performance}))}
+      <div class="filterSection"><div class="filterSectionTitle">Historical field availability</div><div class="filterGrid">
+        ${filterField('Contact','fContact',f.contact,histOpts('Has contact','Missing in preserved source'))}
+        ${filterField('Booth / space','fBooth',f.booth,histOpts('Has booth / space','Missing in preserved source'))}
+        ${filterField('Show cost','fCost',f.cost,histOpts('Has show cost','Missing in preserved source'))}
+        ${filterField('Event COM','fCom',f.com,histOpts('Has event COM','Missing in preserved source'))}
+        ${filterField('Show-history performance','fPerformance',f.performance,[['ANY','Any'],['HAS','Has show-history performance'],['MISSING','Missing show-history performance']])}
+        ${filterField('Payment status','fHistoryPayment',f.historyPayment,histOpts('Has payment status','Missing in preserved source'))}
+        ${filterField('Application status','fApplication',f.application,histOpts('Has application status','Missing in preserved source'))}
+        ${filterField('COI','fCoi',f.coi,coiOpts)}
+        ${filterField('Verified worked evidence','fWorked',f.worked,[['ANY','Any'],['HAS','Has verified worked evidence'],['MISSING','No verified worked evidence']])}
+      </div><div class="filterScopeNote">Historical field availability follows the Historical Year filter above. Annual LP and cumulative LP remain independently scoped.</div></div>
+      <div class="filterSection"><div class="filterSectionTitle">LeadPerfection availability</div><div class="filterGrid">
         ${filterField('Annual LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has annual LP'],['MISSING','Missing annual LP']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
         ${filterField('Cumulative LeadPerfection','fCumulativeLp',f.cumulativeLp,opts([['ANY','Any'],['HAS','Has cumulative LP'],['MISSING','Missing cumulative LP']],{ANY:fc.total,...fc.flags.has_cumulative_lp_performance}))}
-        ${filterField('COI','fCoi',f.coi,opts([['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Status unknown / N/A']],{ANY:fc.total,...fc.coi}))}
-        ${filterField('Verified worked evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has verified worked evidence'],['MISSING','No verified worked evidence']],{ANY:fc.total,...fc.worked}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Performance bands</div><div class="filterGrid">
         ${filterField('Lowest preserved COM','fComBand',f.comBand,opts([['ALL','Any COM'],['UNDER5','Under 5%'],['5_10','5% to <10%'],['10_15','10% to <15%'],['15_25','15% to <25%'],['25PLUS','25%+']],{ALL:fc.total,...fc.comBand}))}
