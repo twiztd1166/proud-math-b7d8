@@ -80,6 +80,20 @@ function persistShowViewState(){
   try{sessionStorage.setItem(SHOW_SEARCH_SESSION,String(state.search||'').slice(0,240))}catch{}
 }
 restoreShowViewState();
+function applyLocationView(){
+  const hash=String(location.hash||'').replace(/^#/,'').toLowerCase();
+  if(hash==='shows'){state.tab='shows';state.showMode='ALL'}
+  else if(hash==='current'){state.tab='shows';state.showMode='CURRENT'}
+  else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED'}
+  else if(['today','payments','control'].includes(hash))state.tab=hash;
+}
+function syncLocationView(){
+  const hash=state.tab==='shows'
+    ?(state.showMode==='CURRENT'?'current':state.showMode==='UNLINKED'?'unlinked':'shows')
+    :state.tab;
+  try{history.replaceState(null,'','#'+hash)}catch{}
+}
+applyLocationView();
 
 async function call(action,payload={}){
   const controller=new AbortController();
@@ -146,6 +160,8 @@ async function bootstrap(){
   try{
     const d=await call('bootstrap');state.shows=d.shows;state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
+    if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
+    if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
   }catch(e){toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'}
 }
 
