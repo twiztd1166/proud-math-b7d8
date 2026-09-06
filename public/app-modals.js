@@ -51,8 +51,10 @@ function sourceSemanticState(value){
   const text=String(value??'').trim();
   if(!text)return 'MISSING';
   const normalized=text.toLowerCase();
-  if(/^(n\\/a|na|not applicable|none)\\b/.test(normalized))return 'NA';
-  if(/^(unknown|unk|not known|not found|not available|missing|tbd|unavailable|not calculated|not calculable|cannot calculate)\\b/.test(normalized)||['?','—','-'].includes(normalized))return 'UNKNOWN';
+  const naTokens=['n/a','na','not applicable','none'];
+  if(naTokens.some(token=>normalized===token||normalized.startsWith(token+' ')))return 'NA';
+  const unknownTokens=['unknown','unk','not known','not found','not available','missing','tbd','unavailable','not calculated','not calculable','cannot calculate'];
+  if(unknownTokens.some(token=>normalized===token||normalized.startsWith(token+' '))||['?','—','-'].includes(normalized))return 'UNKNOWN';
   return 'VALUE';
 }
 function historyContactValue(row){return String(row?.contact||sourceFieldValue(row,['CONTACT INFO','CONTACT_NAME','CONTACT'])||'').trim()}
