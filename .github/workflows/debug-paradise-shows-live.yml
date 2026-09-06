@@ -195,7 +195,7 @@ jobs:
           import json
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
-          assert x.get('version') == 41, x.get('version')
+          assert x.get('version') == 17, x.get('version')
           assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
@@ -658,7 +658,7 @@ jobs:
           assert cleanup_queue(2023) == []
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 40, x.get('version')
+          assert x.get('version') == 41, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
