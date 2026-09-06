@@ -26,6 +26,13 @@ function profileCurrentShows(p){
 function triMatch(flag,mode){
   return mode==='ANY'||(mode==='HAS'&&Boolean(flag))||(mode==='MISSING'&&!flag);
 }
+function coiMatch(p,mode){
+  if(mode==='HAS')return Boolean(p.has_coi);
+  if(mode==='NO')return !p.has_coi&&Boolean(p.has_coi_status);
+  if(mode==='UNKNOWN')return !p.has_coi_status;
+  if(mode==='MISSING')return !p.has_coi;
+  return true;
+}
 function rangeMatch(value,band){
   if(band==='ALL')return true;
   if(value===null||value===undefined||value==='')return band==='MISSING';
@@ -62,7 +69,7 @@ function catalogFilterSummary(){
     profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
     contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
     com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has performance',MISSING:'Missing performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
-    coi:{HAS:'Has COI',MISSING:'Missing COI'},worked:{HAS:'Has participation evidence',MISSING:'No participation evidence'},
+    coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Has participation evidence',MISSING:'No participation evidence'},
     currentTreatment:{'IN PLAY':'In Play',SKIPPED:'Skipped'}
   };
   if(f.profileState!=='ALL')add('profileState',labels.profileState[f.profileState]||f.profileState);
@@ -149,7 +156,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.historyYear!=='ALL'&&!years.map(String).includes(String(f.historyYear)))return false;
   if(f.tier!=='ALL'&&(f.tier==='OTHER'?Boolean(p.tier):String(p.tier||'').toUpperCase()!==f.tier))return false;
   if(f.historyDepth!=='ALL'&&Number(p.history_year_count||0)<Number(f.historyDepth))return false;
-  if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!triMatch(p.has_coi,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
+  if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!coiMatch(p,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
   if(!rangeMatch(p.lowest_preserved_com,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(isLpSourceOnly(p)||Number(p.data_completeness_score||0)>=7))return false;
@@ -369,9 +376,9 @@ function catalogFacetCounts(){
   const tier={PLATINUM:0,GOLD:0,SILVER:0,OTHER:0};
   const record={CURRENT:0,HISTORICAL:0,CURRENT_ONLY:0,HISTORY_ONLY:0,LP_SOURCE_ONLY:0};
   const depth={'1':0,'2':0,'3':0,'5':0};
-  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance','has_coi'];
+  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
-  const worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0};
+  const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0};
   for(const p of profiles){
     const current=currentByProfile.get(p.profile_id)||[];
     const hist=Number(p.history_count||0);
@@ -385,6 +392,7 @@ function catalogFacetCounts(){
     for(const y of (Array.isArray(p.history_years)?p.history_years:[]))years[String(y)]=(years[String(y)]||0)+1;
     for(const d of [1,2,3,5])if(Number(p.history_year_count||0)>=d)depth[String(d)]++;
     for(const k of flagKeys)flags[k][p[k]?'HAS':'MISSING']++;
+    coi[p.has_coi?'HAS':p.has_coi_status?'NO':'UNKNOWN']++;
     worked[Number(p.worked_year_count||0)>0?'HAS':'MISSING']++;
     const com=p.lowest_preserved_com;
     if(com!==null&&com!==undefined&&com!==''){
@@ -416,7 +424,7 @@ function catalogFacetCounts(){
       if(!seenConfirm.has(cf)){seenConfirm.add(cf);confirmation[cf]=(confirmation[cf]||0)+1}
     }
   }
-  return {total:profiles.length,record,years,tier,depth,flags,worked,comBand,lifeBand,currentYears,status,treatment,confirmation};
+  return {total:profiles.length,record,years,tier,depth,flags,coi,worked,comBand,lifeBand,currentYears,status,treatment,confirmation};
 }
 function currentFacetCounts(){
   const shows=state.shows;
@@ -539,7 +547,7 @@ function openShowFilters(){
         ${filterField('COM','fCom',f.com,opts([['ANY','Any'],['HAS','Has COM'],['MISSING','Missing COM']],{ANY:fc.total,...fc.flags.has_com}))}
         ${filterField('Performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has performance'],['MISSING','Missing performance']],{ANY:fc.total,...fc.flags.has_performance}))}
         ${filterField('LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has LP source'],['MISSING','Missing LP source']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
-        ${filterField('COI','fCoi',f.coi,opts([['ANY','Any'],['HAS','Has COI'],['MISSING','Missing COI']],{ANY:fc.total,...fc.flags.has_coi}))}
+        ${filterField('COI','fCoi',f.coi,opts([['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Status unknown / N/A']],{ANY:fc.total,...fc.coi}))}
         ${filterField('Participation evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has worked/participation evidence'],['MISSING','No worked/participation evidence']],{ANY:fc.total,...fc.worked}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Performance bands</div><div class="filterGrid">
