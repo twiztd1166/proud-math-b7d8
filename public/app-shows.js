@@ -103,20 +103,13 @@ function cleanupAllNonparticipation(p,year){
   const n=p?.history_field_states?.[String(year)]?.nonparticipation||{HAS:0,MISSING:0};
   return Number(n.HAS||0)>0&&Number(n.MISSING||0)===0;
 }
-function scopedCompletenessScore(p){
-  const year=state.catalogFilters.historyYear;
-  if(year==='ALL')return Number(p.data_completeness_score||0);
-  return cleanupSupportedFieldsForYear(year).reduce((n,key)=>{
-    if(cleanupAllNonparticipation(p,year)&&CLEANUP_EXECUTION_ONLY_FIELDS.has(key))return n;
-    const s=historyFieldState(p,key,year);
-    return n+(Number(s.VALUE||0)>0||Number(s.UNKNOWN||0)>0||Number(s.NA||0)>0?1:0);
-  },0);
+function historyFieldIsCoded(p,key,year){
+  const s=historyFieldState(p,key,year);
+  return Number(s.VALUE||0)>0||Number(s.UNKNOWN||0)>0||Number(s.NA||0)>0;
 }
-function cleanupSupportedFieldsForYear(year){
+function legacyCleanupSupportedFieldsForYear(year){
   if(year==='ALL')return [];
-  const cacheKey=String(state.catalogSummary?.id||state.catalog.length)+'|'+String(year);
-  if(cleanupFieldSupportCache.has(cacheKey))return cleanupFieldSupportCache.get(cacheKey);
-  const supported=HISTORY_FIELD_KEYS.filter(key=>{
+  return HISTORY_FIELD_KEYS.filter(key=>{
     let coded=0,total=0;
     for(const p of state.catalog){
       if(!Array.isArray(p?.history_years)||!p.history_years.map(String).includes(String(year)))continue;
@@ -126,15 +119,35 @@ function cleanupSupportedFieldsForYear(year){
     }
     return total>0&&coded/total>=CLEANUP_COMMON_FIELD_MIN_COVERAGE;
   });
+}
+function cleanupSupportedFieldsForProfileYear(p,year){
+  if(year==='ALL')return [];
+  const raw=p?.history_field_support?.[String(year)];
+  if(Array.isArray(raw))return HISTORY_FIELD_KEYS.filter(key=>raw.includes(key));
+  return legacyCleanupSupportedFieldsForYear(year);
+}
+function scopedCompletenessScore(p){
+  const year=state.catalogFilters.historyYear;
+  if(year==='ALL')return Number(p.data_completeness_score||0);
+  const supported=cleanupSupportedFieldsForProfileYear(p,year)
+    .filter(key=>!(cleanupAllNonparticipation(p,year)&&CLEANUP_EXECUTION_ONLY_FIELDS.has(key)));
+  if(!supported.length)return 0;
+  return supported.filter(key=>historyFieldIsCoded(p,key,year)).length/supported.length;
+}
+function cleanupSupportedFieldsForYear(year){
+  if(year==='ALL')return [];
+  const sample=state.catalog.find(p=>p?.history_field_support_rule)?.history_field_support_rule||{};
+  const cacheKey=[String(state.catalogSummary?.id||state.catalog.length),String(year),String(sample.scope||'legacy'),String(sample.min_coded_ratio??'legacy')].join('|');
+  if(cleanupFieldSupportCache.has(cacheKey))return cleanupFieldSupportCache.get(cacheKey);
+  const supported=HISTORY_FIELD_KEYS.filter(key=>state.catalog.some(p=>cleanupSupportedFieldsForProfileYear(p,year).includes(key)));
   cleanupFieldSupportCache.set(cacheKey,supported);
   return supported;
 }
 function missingFieldsForYear(p,year){
   if(year==='ALL'||!Array.isArray(p?.history_years)||!p.history_years.map(String).includes(String(year)))return [];
-  return cleanupSupportedFieldsForYear(year).filter(key=>{
+  return cleanupSupportedFieldsForProfileYear(p,year).filter(key=>{
     if(cleanupAllNonparticipation(p,year)&&CLEANUP_EXECUTION_ONLY_FIELDS.has(key))return false;
-    const s=historyFieldState(p,key,year);
-    return Number(s.VALUE||0)===0&&Number(s.UNKNOWN||0)===0&&Number(s.NA||0)===0;
+    return !historyFieldIsCoded(p,key,year);
   });
 }
 function missingFieldCountForYear(p,year){return missingFieldsForYear(p,year).length}
@@ -150,7 +163,7 @@ function cleanupQueueIntro(){
   const year=state.catalogFilters.historyYear,supported=cleanupSupportedFieldsForYear(year);
   if(!supported.length)return '';
   const labels=supported.map(key=>CLEANUP_FIELD_LABELS[key]||key);
-  return `<div class="sourceWarn cleanupQueueIntro"><b>${esc(year)} cleanup queue.</b> Ranked only against fields commonly coded in that year's preserved evidence (25%+ coverage): ${esc(labels.join(' · '))}. Explicit unknown, N/A, and execution-only fields for explicit non-participation do not count as missing.</div>`;
+  return `<div class="sourceWarn cleanupQueueIntro"><b>${esc(year)} cleanup queue.</b> Ranked against fields regularly coded in each profile's exact year + preserved source family (25%+ family coverage). Year-wide supported fields: ${esc(labels.join(' · '))}. Explicit unknown, N/A, and execution-only fields for explicit non-participation do not count as missing.</div>`;
 }
 function rangeMatch(value,band){
   if(band==='ALL')return true;
