@@ -108,7 +108,7 @@ jobs:
               grep -q 'rebookSeries' /tmp/app.css
               grep -q 'profileRelations' /tmp/app-modals.js
               grep -q 'Same organizer series' /tmp/app-modals.js
-              grep -q 'Current series decision target is tracked under' /tmp/app-shows.js
+              grep -q 'Series decision target is tracked under' /tmp/app-shows.js
               grep -q 'Open current series profile' /tmp/app-modals.js
               grep -q 'rebookOpportunityHtml' /tmp/app-modals.js
               grep -q 'Historical booking context' /tmp/app-shows.js
@@ -195,6 +195,7 @@ jobs:
           import json
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
+          assert x.get('version') == 41, x.get('version')
           assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
@@ -299,8 +300,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==77, len(historical_2013)
-          assert len(strong_2013)==15, len(strong_2013)
+          assert len(historical_2013)==76, len(historical_2013)
+          assert len(strong_2013)==14, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -312,6 +313,7 @@ jobs:
               'LIFE-047':'LIFE-066',
               'LIFE-049':'LIFE-033',
               'LIFE-043':'LIFE-004',
+              'LIFE-069':'LIFE-028',
               'LIFE-045':'LIFE-112',
           }
           for legacy,canonical in expected_series_links.items():
@@ -1809,40 +1811,47 @@ jobs:
           render_view vero_legacy "$SITE/#show/LIFE-005"
           grep -q 'LIFE-005' /tmp/vero_legacy.html
           grep -q 'Same organizer series' /tmp/vero_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-009' /tmp/vero_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-009' /tmp/vero_legacy.html
           grep -q 'not a second booking target' /tmp/vero_legacy.html
           grep -q 'Open current series profile' /tmp/vero_legacy.html
 
           render_view southfl_legacy "$SITE/#show/LIFE-049"
           grep -q 'LIFE-049' /tmp/southfl_legacy.html
           grep -q 'Same organizer series' /tmp/southfl_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-033' /tmp/southfl_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-033' /tmp/southfl_legacy.html
           grep -q 'not a second booking target' /tmp/southfl_legacy.html
           grep -q 'Open current series profile' /tmp/southfl_legacy.html
 
           render_view wpbfall_legacy "$SITE/#show/LIFE-043"
           grep -q 'LIFE-043' /tmp/wpbfall_legacy.html
           grep -q 'Same organizer series' /tmp/wpbfall_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-004' /tmp/wpbfall_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-004' /tmp/wpbfall_legacy.html
           grep -q 'not a second booking target' /tmp/wpbfall_legacy.html
           grep -q 'Open current series profile' /tmp/wpbfall_legacy.html
+
+          render_view pbliquors_legacy "$SITE/#show/LIFE-069"
+          grep -q 'LIFE-069' /tmp/pbliquors_legacy.html
+          grep -q 'Same organizer series' /tmp/pbliquors_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-028' /tmp/pbliquors_legacy.html
+          grep -q 'not a second booking target' /tmp/pbliquors_legacy.html
+          grep -q 'Open current series profile' /tmp/pbliquors_legacy.html
 
           render_view palm18_legacy "$SITE/#show/LIFE-020"
           grep -q 'LIFE-020' /tmp/palm18_legacy.html
           grep -q 'Same organizer series' /tmp/palm18_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-066' /tmp/palm18_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-066' /tmp/palm18_legacy.html
           grep -q 'not a second booking target' /tmp/palm18_legacy.html
 
           render_view palm19_legacy "$SITE/#show/LIFE-047"
           grep -q 'LIFE-047' /tmp/palm19_legacy.html
           grep -q 'Same organizer series' /tmp/palm19_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-066' /tmp/palm19_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-066' /tmp/palm19_legacy.html
           grep -q 'not a second booking target' /tmp/palm19_legacy.html
 
           render_view broward_legacy "$SITE/#show/LIFE-010"
           grep -q 'LIFE-010' /tmp/broward_legacy.html
           grep -q 'Same organizer series' /tmp/broward_legacy.html
-          grep -q 'Current series decision target is tracked under LIFE-011' /tmp/broward_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-011' /tmp/broward_legacy.html
           grep -q 'not a second booking target' /tmp/broward_legacy.html
           grep -q 'Open current series profile' /tmp/broward_legacy.html
 
