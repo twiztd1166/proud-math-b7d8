@@ -127,6 +127,7 @@ jobs:
               grep -q 'rebookReviewCard' /tmp/app-shows.js
               grep -q 'current_rebook_review' /tmp/app-shows.js
               grep -q 'Current booking review' /tmp/app-shows.js
+              grep -q 'review.action_timing' /tmp/app-shows.js
               grep -q 'rebookReviewHtml' /tmp/app-modals.js
               grep -q 'rebookReview' /tmp/app.css
               grep -q 'Positive-net history 2013+' /tmp/app-shows.js
@@ -382,6 +383,12 @@ jobs:
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
           assert 'November 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert '772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
+          assert all(str(reviews[pid].get('action_timing') or '').strip() for pid in expected_reviews), reviews
+          assert reviews['LIFE-028'].get('action_timing','').startswith('NOW'), reviews['LIFE-028']
+          assert 'NOVEMBER 2026' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
+          assert 'JANUARY 2027' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
+          assert '2027 REGISTRATION CYCLE' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
+          assert reviews['LIFE-032'].get('action_timing','').startswith('HOLD'), reviews['LIFE-032']
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -752,10 +759,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 23, detail.get('version')
+              assert detail.get('version') == 24, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 23, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 24, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -767,7 +774,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 42, x.get('version')
+          assert x.get('version') == 43, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -1850,6 +1857,8 @@ jobs:
           render_view palm_liquors_pursue "$SITE/#show/LIFE-028"
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
           grep -q 'Current booking review' /tmp/palm_liquors_pursue.html
+          grep -q 'When to act' /tmp/palm_liquors_pursue.html
+          grep -q 'NOW' /tmp/palm_liquors_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
@@ -1858,6 +1867,8 @@ jobs:
           render_view hurricane_watch "$SITE/#show/LIFE-039"
           grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
           grep -q 'Current booking review' /tmp/hurricane_watch.html
+          grep -q 'When to act' /tmp/hurricane_watch.html
+          grep -q '2027 REGISTRATION CYCLE' /tmp/hurricane_watch.html
           grep -q '>WATCH<' /tmp/hurricane_watch.html
           grep -q '2027 cycle' /tmp/hurricane_watch.html
           grep -q '\$200/\$225' /tmp/hurricane_watch.html
@@ -1866,6 +1877,7 @@ jobs:
           render_view safety_pursue "$SITE/#show/LIFE-073"
           grep -q 'St Lucie Health, Wellness &amp; Safety Fest' /tmp/safety_pursue.html
           grep -q 'Current booking review' /tmp/safety_pursue.html
+          grep -q 'When to act' /tmp/safety_pursue.html
           grep -q '>PURSUE<' /tmp/safety_pursue.html
           grep -q 'November 2026' /tmp/safety_pursue.html
           grep -q '772-337-0049' /tmp/safety_pursue.html
@@ -1888,6 +1900,8 @@ jobs:
           render_view sarasota_hold "$SITE/#show/LIFE-032"
           grep -q 'Sarasota Spring Home Show' /tmp/sarasota_hold.html
           grep -q 'Current booking review' /tmp/sarasota_hold.html
+          grep -q 'When to act' /tmp/sarasota_hold.html
+          grep -q 'HOLD' /tmp/sarasota_hold.html
           grep -q '>HOLD<' /tmp/sarasota_hold.html
           grep -q '\$3,095' /tmp/sarasota_hold.html
           grep -q 'contract/invoice dispute' /tmp/sarasota_hold.html
