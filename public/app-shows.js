@@ -88,14 +88,16 @@ function catalogCard(p){
   const lpOnly=isLpSourceOnly(p);
   const tier=lpOnly?'LP source only':(p.tier||((p.source_type==='HISTORY_ONLY')?'Historical':(p.source_type==='CURRENT_ONLY'?'Current':'Profile')));
   const hist=Number(p.history_count||0),life=Number(p.occurrences||0),years=Array.isArray(p.history_years)?p.history_years:[];
-  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':'READ ONLY');
+  const candidate=rebookCandidate(p);
+  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(candidate?'REBOOK CANDIDATE':'READ ONLY'));
   const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
   const missing=cleanupYear!=='ALL'?missingFieldsForYear(p,cleanupYear):[];
   const cleanup=missing.length
     ?`<div class="cleanupQueueLine"><b>${esc(cleanupYear)} · ${missing.length} missing field${missing.length===1?'':'s'}</b><span>${esc(missing.map(key=>CLEANUP_FIELD_LABELS[key]||key).join(' · '))}</span></div>`
     :'';
   const focusAttr=cleanupYear!=='ALL'&&missing.length?` data-focus-year="${esc(cleanupYear)}"`:'';
-  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net · no current control</div>`:'';
+  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
@@ -105,6 +107,15 @@ function showEventYear(s){
 function profileCurrentShows(p){
   const ids=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   return ids.map(id=>state.shows.find(show=>show.mfc_id===id)).filter(Boolean);
+}
+function rebookCandidate(p){
+  const tier=String(p?.tier||'');
+  const latest=Number(p?.latest_history_year||0);
+  const net=Number(p?.lifetime_net_volume||0);
+  return profileCurrentShows(p).length===0
+    && (tier==='Platinum'||tier==='Gold')
+    && Number.isFinite(net)&&net>0
+    && Number.isFinite(latest)&&latest>=2023;
 }
 function triMatch(flag,mode){
   return mode==='ANY'||(mode==='HAS'&&Boolean(flag))||(mode==='MISSING'&&!flag);
@@ -384,6 +395,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
      !historyCoiMatch(p,f.coi,f.historyYear)||!historyWorkedMatch(p,f.worked,f.historyYear))return false;
   const scopedCom=scopedComValueForFilters(p,f.historyYear);
   if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
+  if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(f.historyYear==='ALL'||isLpSourceOnly(p)||missingFieldCountForYear(p,f.historyYear)===0))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
@@ -720,6 +732,7 @@ function quickViewOptions(mode){
   const cleanupYear=state.catalogFilters.historyYear;
   return mode==='ALL'
     ?[
+      ['ALL_REBOOK','Rebook candidates'],
       ['ALL_TOP_NET','Top lifetime net'],
       ['ALL_LOW_COM','Low COM'],
       ['ALL_MISSING',cleanupYear==='ALL'?'Missing fields · choose year':'Missing fields · '+cleanupYear],
@@ -739,6 +752,7 @@ function quickViewOptions(mode){
     ];
 }
 function quickViewCount(key){
+  if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
   if(key==='ALL_MISSING'){
@@ -775,6 +789,7 @@ function applyQuickView(key){
   if(key.startsWith('ALL_')){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
+    if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
     if(key==='ALL_MISSING'){state.catalogFilters.historyYear=selectedHistoryYear;state.catalogSort='MISSING_DATA'}
