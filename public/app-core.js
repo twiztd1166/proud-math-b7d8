@@ -114,7 +114,7 @@ async function loadUnlinkedLp(force=false){
   if(state.tab==='shows'&&state.showMode==='UNLINKED')render();
   try{
     const d=await call('catalogUnlinked');
-    u.annual=d.annual||[];u.cumulative=d.cumulative||[];u.summary=d.summary||null;u.loaded=true;
+    u.annual=d.annual||[];u.cumulative=d.cumulative||[];u.summary=d.summary||null;if(!state.catalogSummary&&d.run)state.catalogSummary=d.run;u.loaded=true;
   }catch(e){
     u.error=e.message||'Unable to load unlinked LeadPerfection evidence.';
     toast('Unlinked LeadPerfection evidence unavailable');
