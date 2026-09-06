@@ -100,7 +100,14 @@ function catalogCard(p){
     ?` · best specific booth ${esc(p.best_observed_specific_booth)}${p.best_observed_specific_booth_year?' ('+esc(p.best_observed_specific_booth_year)+')':''}`
     :(p?.best_observed_booth?` · best observed placement ${esc(p.best_observed_booth)}${p.best_observed_booth_year?' ('+esc(p.best_observed_booth_year)+')':''}`:'');
   const candidateSales=p?.lifetime_net_sales!==null&&p?.lifetime_net_sales!==undefined?` · ${esc(p.lifetime_net_sales)} lifetime net sales`:'';
-  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>`:'';
+  const preservedBits=[
+    p?.latest_preserved_dates?`Last preserved date ${esc(p.latest_preserved_dates)}${p.latest_preserved_dates_year?' ('+esc(p.latest_preserved_dates_year)+')':''}`:'',
+    p?.latest_preserved_cost?`Last preserved cost ${esc(p.latest_preserved_cost)}${p.latest_preserved_cost_year?' ('+esc(p.latest_preserved_cost_year)+')':''}`:'',
+    p?.latest_preserved_contact?`Preserved contact ${esc(p.latest_preserved_contact)}${p.latest_preserved_contact_year?' ('+esc(p.latest_preserved_contact_year)+')':''}`:'',
+  ].filter(Boolean);
+  const preservedContext=candidate&&preservedBits.length?`<div class="rebookContext"><span>Historical booking context</span><b>${preservedBits.join(' · ')}</b></div>`:'';
+  const nextBooking=candidate?`<div class="rebookNext"><span>Next booking step</span><b>Verify the next occurrence, current availability, current quote / fees, and booking or payment deadline before committing.</b></div>`:'';
+  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${preservedContext}${nextBooking}`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){

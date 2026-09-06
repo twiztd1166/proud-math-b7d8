@@ -91,6 +91,11 @@ jobs:
               grep -q 'historyCostStateValue' /tmp/app-modals.js
               grep -q 'bookingSignal' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
+              grep -q 'Historical booking context' /tmp/app-shows.js
+              grep -q 'Next booking step' /tmp/app-shows.js
+              grep -q 'latest_preserved_contact' /tmp/app-shows.js
+              grep -q 'latest_preserved_cost' /tmp/app-shows.js
+              grep -q 'latest_preserved_dates' /tmp/app-shows.js
               grep -q 'Rebook candidates' /tmp/app-shows.js
               grep -q 'best specific booth' /tmp/app-shows.js
               grep -q "currentSort:'BOOKING'" /tmp/app-core.js
@@ -1553,6 +1558,8 @@ jobs:
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates' /tmp/shows.html
           grep -q 'REBOOK CANDIDATE' /tmp/shows.html
+          grep -q 'Historical booking context' /tmp/shows.html
+          grep -q 'Next booking step' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
