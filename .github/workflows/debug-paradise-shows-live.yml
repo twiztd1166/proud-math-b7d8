@@ -92,6 +92,9 @@ jobs:
               grep -q 'bookingSignal' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
+              grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
+              grep -q 'Live opportunities' /tmp/app-shows.js
+              grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
               grep -q 'current_rebook_opportunity' /tmp/app-shows.js
               grep -q 'rebookOpportunityHtml' /tmp/app-modals.js
@@ -243,7 +246,10 @@ jobs:
           assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
-          assert 'Corporate vendor: $275' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert 'Corporate Level 1 $300' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert 'Corporate Level 2 $400' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert '$10 application fee' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
           assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
@@ -1584,6 +1590,7 @@ jobs:
           grep -q 'Next booking step' /tmp/shows.html
           grep -q 'LIVE OPPORTUNITY' /tmp/shows.html
           grep -q 'Verified current opportunity' /tmp/shows.html
+          grep -q 'Live opportunities' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
@@ -1608,7 +1615,10 @@ jobs:
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
           grep -q 'APPLICATION OPEN' /tmp/winterfest_detail.html
           grep -q 'Dec 5, 2026' /tmp/winterfest_detail.html
-          grep -q 'Corporate vendor: \$275' /tmp/winterfest_detail.html
+          grep -q 'Commercial/Retail \$160' /tmp/winterfest_detail.html
+          grep -q 'Corporate Level 1 \$300' /tmp/winterfest_detail.html
+          grep -q 'Corporate Level 2 \$400' /tmp/winterfest_detail.html
+          grep -q '\$10 application fee' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
 
           render_view detail "$SITE/#show/LIFE-009"
