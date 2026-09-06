@@ -89,6 +89,10 @@ jobs:
               grep -q 'sourceLabeledPerformanceValue' /tmp/app-modals.js
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
+              grep -Fq "row?.[field]" /tmp/app-modals.js
+              grep -Fq "value!==null&&value!==undefined&&String(value).trim()!==''" /tmp/app-modals.js
+              grep -Fq "fields.booking_evidence" /tmp/app-modals.js
+              grep -Fq "historyBoothValue(x)" /tmp/app-modals.js
               grep -q 'cleanupQueueProfilesForYear' /tmp/app-shows.js
               grep -q 'cleanupQueueProgress' /tmp/app-modals.js
               grep -q 'Back to queue' /tmp/app-modals.js
