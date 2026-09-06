@@ -30,8 +30,8 @@ const SHOW_SEARCH_SESSION='paradise-shows-search-v1';
 const SHOW_CATALOG_FILTER_KEYS=['profileState','historyYear','lpYear','cumulativeLpYear','tier','historyDepth','contact','booth','cost','com','performance','historyPayment','application','lp','cumulativeLp','coi','worked','comBand','lifetimeNetBand','currentStatus','currentTreatment','confirmation','currentEventYear'];
 const SHOW_CURRENT_FILTER_KEYS=['status','treatment','eventYear','timing','confirmation','owner','evidence','payment','costBand','followUp'];
 const SHOW_CATALOG_SORTS=['RECOMMENDED','CURRENT_FIRST','NAME_ASC','NAME_DESC','LATEST_HISTORY','HISTORY_DEPTH','HISTORY_RECORDS','OCCURRENCES','WORKED_YEARS','LOWEST_COM','HIGHEST_COM','LIFETIME_NET','LIFETIME_SALES','CLOSE_VOLUME','ISSUED','NET_2025','NET_2024','DATA_COMPLETE','MISSING_DATA'];
-const SHOW_CURRENT_SORTS=['PRIORITY','EVENT_ASC','EVENT_DESC','ACTION_DUE','STATUS','COST_LOW','COST_HIGH','NAME_ASC','NAME_DESC','OWNER','CONFIRMATION','EVIDENCE','PAYMENT'];
-const SHOW_QUICK_VIEWS=['NONE','ALL_TOP_NET','ALL_LOW_COM','ALL_MISSING','ALL_HIST_ONLY','ALL_LP_SOURCE_ONLY','ALL_CURRENT_LINKED','CURRENT_IN_PLAY','CURRENT_DUE7','CURRENT_EVIDENCE','CURRENT_NO_DATE','CURRENT_COST_HIGH'];
+const SHOW_CURRENT_SORTS=['PRIORITY','BOOKING','EVENT_ASC','EVENT_DESC','ACTION_DUE','STATUS','COST_LOW','COST_HIGH','NAME_ASC','NAME_DESC','OWNER','CONFIRMATION','EVIDENCE','PAYMENT'];
+const SHOW_QUICK_VIEWS=['NONE','ALL_TOP_NET','ALL_LOW_COM','ALL_MISSING','ALL_HIST_ONLY','ALL_LP_SOURCE_ONLY','ALL_CURRENT_LINKED','CURRENT_BOOK_NOW','CURRENT_COMMITTED','CURRENT_WATCH','CURRENT_IN_PLAY','CURRENT_DUE7','CURRENT_EVIDENCE','CURRENT_NO_DATE','CURRENT_COST_HIGH'];
 
 function persistedString(v,max=120){return typeof v==='string'?v.slice(0,max):null}
 function restoreShowViewState(){
@@ -166,7 +166,7 @@ async function bootstrap(){
   try{
     const d=await call('bootstrap');state.shows=d.shows;state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
-    if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
+    if(state.tab==='shows'&&state.showMode!=='UNLINKED'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
   }catch(e){toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'}
 }
