@@ -61,7 +61,18 @@ function historyContactValue(row){
   const named=String(row?.contact||sourceFieldValue(row,['CONTACT INFO','CONTACT_NAME','CONTACT'])||'').trim();
   if(named)return named;
   const phone=sourceFieldValue(row,['PHONE']);
-  return phone?'Phone: '+phone:'';
+  if(phone)return 'Phone: '+phone;
+  const fields=row&&row.source_fields&&typeof row.source_fields==='object'?row.source_fields:{};
+  const booking=fields.booking_evidence&&typeof fields.booking_evidence==='object'?fields.booking_evidence:null;
+  if(booking){
+    const bookingContact=String(booking.contact||'').trim();
+    if(bookingContact)return bookingContact;
+    const bookingPhone=String(booking.phone||'').trim();
+    if(bookingPhone)return 'Phone: '+bookingPhone;
+    const bookingEmail=String(booking.email||'').trim();
+    if(bookingEmail)return 'Email: '+bookingEmail;
+  }
+  return '';
 }
 function historyBoothValue(row){return String(row?.booth||sourceFieldValue(row,['BOOTH / SPACE LOCATION','BOOTH #'])||'').trim()}
 function historyCostValue(row){return String(row?.final_cost_text||row?.event_cost_text||sourceFieldValue(row,['FINAL / NEGOTIATED COST','FINAL NEGOTIATED COST','EVENT COST','COST'])||'').trim()}
