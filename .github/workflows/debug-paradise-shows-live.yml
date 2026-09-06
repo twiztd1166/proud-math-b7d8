@@ -109,12 +109,12 @@ jobs:
           annual=u.get('annual') or []
           cumulative=u.get('cumulative') or []
           assert u.get('ok') is True, u
-          assert s.get('annual_rows') == 168, s
-          assert s.get('cumulative_rows') == 169, s
+          assert s.get('annual_rows') == 100, s
+          assert s.get('cumulative_rows') == 101, s
           assert s.get('no_profile_identity_asserted') is True, s
           assert s.get('attendance_inference') is False, s
-          assert len(annual) == 168, len(annual)
-          assert len(cumulative) == 169, len(cumulative)
+          assert len(annual) == 100, len(annual)
+          assert len(cumulative) == 101, len(cumulative)
           annual_ids={x.get('evidence_id') for x in annual}
           linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
           assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
@@ -126,7 +126,7 @@ jobs:
           assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
           assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
           assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
-          print({'unlinked_annual':168,'unlinked_cumulative':169,'source_groups':169,'popup_identity':'PRESERVED_UNMATCHED'})
+          print({'unlinked_annual':100,'unlinked_cumulative':101,'source_groups':101,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -190,6 +190,16 @@ jobs:
           summary=(catalog.get('summary') or {})
           source_summary=summary.get('source_summary') or {}
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
+          identity=source_summary.get('identity_reconciliation') or {}
+          assert identity.get('validation') == 'PASS', identity
+          assert identity.get('profile_links_added_annual') == 68, identity
+          assert identity.get('profile_links_added_cumulative') == 68, identity
+          assert identity.get('unlinked_annual_after') == 100, identity
+          assert identity.get('unlinked_cumulative_after') == 101, identity
+          assert identity.get('existing_profile_links_rewritten') == 0, identity
+          assert identity.get('occurrences_created') == 0, identity
+          assert identity.get('attendance_inference') is False, identity
+          assert identity.get('residual_2019_missing_evidence_id') == 'LP2019-014', identity
           assert cumulative.get('rows') == 1251, cumulative
           assert cumulative.get('unresolved') == 0, cumulative
           assert cumulative.get('exact_unchanged') == 1095, cumulative
