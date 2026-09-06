@@ -229,7 +229,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:43,2022:14,2023:43,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:43,2022:0,2023:43,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -298,8 +298,23 @@ jobs:
           assert life041_coi.get('VALUE') == 1 and life041_coi.get('MISSING') == 0, life041_coi
           assert profiles['LIFE-041'].get('has_coi') is True, profiles['LIFE-041']
           assert missing_fields(profiles['HIST-160'],2022) == []
-          assert missing_fields(profiles['HIST-163'],2022) == ['booth']
-          assert missing_fields(profiles['LIFE-066'],2022) == ['booth','coi']
+          for pid in ('HIST-145','HIST-163','HIST-155','HIST-162','HIST-168','HIST-161','HIST-151','HIST-169','LIFE-212','LIFE-066','HIST-166','HIST-150','HIST-144','HIST-164'):
+              assert missing_fields(profiles[pid],2022) == [], (pid,missing_fields(profiles[pid],2022))
+          hist145_cost=profiles['HIST-145']['history_field_states']['2022']['cost']
+          hist163_booth=profiles['HIST-163']['history_field_states']['2022']['booth']
+          hist155_booth=profiles['HIST-155']['history_field_states']['2022']['booth']
+          hist155_cost=profiles['HIST-155']['history_field_states']['2022']['cost']
+          hist151_booth=profiles['HIST-151']['history_field_states']['2022']['booth']
+          life066_booth=profiles['LIFE-066']['history_field_states']['2022']['booth']
+          life066_coi=profiles['LIFE-066']['history_field_states']['2022']['coi']
+          assert hist145_cost.get('UNKNOWN') == 1 and hist145_cost.get('VALUE') == 0 and hist145_cost.get('MISSING') == 0, hist145_cost
+          assert hist163_booth.get('UNKNOWN') == 1 and hist163_booth.get('VALUE') == 0 and hist163_booth.get('MISSING') == 0, hist163_booth
+          assert hist155_booth.get('UNKNOWN') == 1 and hist155_booth.get('VALUE') == 0 and hist155_booth.get('MISSING') == 0, hist155_booth
+          assert hist155_cost.get('UNKNOWN') == 1 and hist155_cost.get('VALUE') == 0 and hist155_cost.get('MISSING') == 0, hist155_cost
+          assert hist151_booth.get('NA') == 1 and hist151_booth.get('VALUE') == 0 and hist151_booth.get('MISSING') == 0, hist151_booth
+          assert life066_booth.get('UNKNOWN') == 1 and life066_booth.get('VALUE') == 0 and life066_booth.get('MISSING') == 0, life066_booth
+          assert life066_coi.get('UNKNOWN') == 1 and life066_coi.get('VALUE') == 0 and life066_coi.get('MISSING') == 0, life066_coi
+          assert profiles['HIST-145'].get('has_cost') is False, profiles['HIST-145']
           assert missing_fields(profiles['LIFE-156'],2023) == []
           assert missing_fields(profiles['LIFE-039'],2023) == []
           assert missing_fields(profiles['LIFE-186'],2023) == []
@@ -364,8 +379,7 @@ jobs:
           assert len(cleanup_queue(2021)) == 43
           assert cleanup_queue(2024) == []
           assert cleanup_queue(2025) == []
-          queue_2022=cleanup_queue(2022)
-          assert len(queue_2022) == 14 and len({p.get('profile_id') for p in queue_2022}) == 14
+          assert cleanup_queue(2022) == []
           assert len(cleanup_queue(2023)) == 43
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
