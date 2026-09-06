@@ -4,7 +4,7 @@ let state={
   shows:[],payments:[],activity:[],settings:{},
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
-  catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,
+  catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,deepLinkedYear:null,
   unlinkedLp:{annual:[],cumulative:[],summary:null,category:'ALL',loaded:false,loading:false,error:null},
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
@@ -83,16 +83,16 @@ restoreShowViewState();
 function applyLocationView(){
   const raw=String(location.hash||'').replace(/^#/,'');
   const hash=raw.toLowerCase();
-  const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})$/i);
-  if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase()}
-  else if(hash==='shows'){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=null}
-  else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null}
-  else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null}
-  else if(['today','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null}
+  const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})(?:\/year\/(20\d{2}))?$/i);
+  if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase();state.deepLinkedYear=profileMatch[2]?Number(profileMatch[2]):null}
+  else if(hash==='shows'){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else if(['today','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null;state.deepLinkedYear=null}
 }
 function syncLocationView(){
   const hash=state.deepLinkedProfile
-    ?'show/'+state.deepLinkedProfile
+    ?'show/'+state.deepLinkedProfile+(Number.isFinite(Number(state.deepLinkedYear))?'/year/'+Number(state.deepLinkedYear):'')
     :(state.tab==='shows'
       ?(state.showMode==='CURRENT'?'current':state.showMode==='UNLINKED'?'unlinked':'shows')
       :state.tab);
