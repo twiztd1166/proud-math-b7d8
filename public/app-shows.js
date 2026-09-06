@@ -87,8 +87,9 @@ function rebookOpportunityCard(op){
   if(!op)return '';
   const rawStatus=String(op.opportunity_status||'').toUpperCase();
   const status=rawStatus.replaceAll('_',' ');
+  const exhibitorListed=rawStatus==='EXHIBITOR_LISTED';
   const watchState=rawStatus==='WATCH'||rawStatus==='APPLICATION_CLOSED';
-  const heading=watchState?'Verified current watch':'Verified current opportunity';
+  const heading=exhibitorListed?'Verified current exhibitor listing':(watchState?'Verified current watch':'Verified current opportunity');
   const range=op.event_start
     ?date(op.event_start)+(op.event_end&&op.event_end!==op.event_start?' – '+date(op.event_end):'')
     :'Current date not verified';
@@ -104,8 +105,9 @@ function catalogCard(p){
   const liveOpportunity=p?.current_rebook_opportunity||null;
   const relatedCurrentProfile=String(p?.related_current_profile_id||'').trim();
   const opportunityPill=liveOpportunity
-    ?(String(liveOpportunity.opportunity_status||'').toUpperCase()==='WATCH'?'CURRENT WATCH'
-      :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='APPLICATION_CLOSED'?'NEXT-CYCLE WATCH':'LIVE OPPORTUNITY'))
+    ?(String(liveOpportunity.opportunity_status||'').toUpperCase()==='EXHIBITOR_LISTED'?'EXHIBITOR LISTED'
+      :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='WATCH'?'CURRENT WATCH'
+        :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='APPLICATION_CLOSED'?'NEXT-CYCLE WATCH':'LIVE OPPORTUNITY')))
     :'';
   const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?opportunityPill:(relatedCurrentProfile?'SAME SERIES':(candidate?'REBOOK CANDIDATE':'READ ONLY'))));
   const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
