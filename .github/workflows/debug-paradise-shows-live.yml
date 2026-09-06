@@ -291,7 +291,9 @@ jobs:
               assert missing_fields(profiles[pid],2021) == [], (pid,missing_fields(profiles[pid],2021))
               coi_state=profiles[pid]['history_field_states']['2021']['coi']
               assert int(coi_state.get('UNKNOWN') or 0) >= 1 and int(coi_state.get('VALUE') or 0) == 0 and int(coi_state.get('MISSING') or 0) == 0, (pid,coi_state)
-              assert profiles[pid].get('has_coi') is False, (pid,profiles[pid])
+              ystate=profiles[pid]['history_field_states']['2021']
+              assert int(ystate.get('coi_affirmative') or 0) == 0, (pid,ystate)
+              assert int(ystate.get('coi_known_nonaffirmative') or 0) >= 1, (pid,ystate)
           hist029_booth=profiles['HIST-029']['history_field_states']['2021']['booth']
           hist029_coi=profiles['HIST-029']['history_field_states']['2021']['coi']
           assert hist029_booth.get('UNKNOWN') == 1 and hist029_booth.get('VALUE') == 0 and hist029_booth.get('MISSING') == 0, hist029_booth
