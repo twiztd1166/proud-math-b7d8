@@ -376,7 +376,7 @@ jobs:
               assert any(p.get('profile_id')==actionable_review for p in strong_2013), actionable_review
           assert '561-330-4777' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
           assert '$75/day' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
-          assert 'current 2026-2027 calendar does not list' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
+          assert 'does not list a Bradenton/Palmetto occurrence' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
