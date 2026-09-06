@@ -299,8 +299,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==79, len(historical_2013)
-          assert len(strong_2013)==17, len(strong_2013)
+          assert len(historical_2013)==77, len(historical_2013)
+          assert len(strong_2013)==15, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -310,6 +310,8 @@ jobs:
               'LIFE-016':'LIFE-066',
               'LIFE-020':'LIFE-066',
               'LIFE-047':'LIFE-066',
+              'LIFE-049':'LIFE-033',
+              'LIFE-043':'LIFE-004',
               'LIFE-045':'LIFE-112',
           }
           for legacy,canonical in expected_series_links.items():
@@ -1810,6 +1812,20 @@ jobs:
           grep -q 'Current series decision target is tracked under LIFE-009' /tmp/vero_legacy.html
           grep -q 'not a second booking target' /tmp/vero_legacy.html
           grep -q 'Open current series profile' /tmp/vero_legacy.html
+
+          render_view southfl_legacy "$SITE/#show/LIFE-049"
+          grep -q 'LIFE-049' /tmp/southfl_legacy.html
+          grep -q 'Same organizer series' /tmp/southfl_legacy.html
+          grep -q 'Current series decision target is tracked under LIFE-033' /tmp/southfl_legacy.html
+          grep -q 'not a second booking target' /tmp/southfl_legacy.html
+          grep -q 'Open current series profile' /tmp/southfl_legacy.html
+
+          render_view wpbfall_legacy "$SITE/#show/LIFE-043"
+          grep -q 'LIFE-043' /tmp/wpbfall_legacy.html
+          grep -q 'Same organizer series' /tmp/wpbfall_legacy.html
+          grep -q 'Current series decision target is tracked under LIFE-004' /tmp/wpbfall_legacy.html
+          grep -q 'not a second booking target' /tmp/wpbfall_legacy.html
+          grep -q 'Open current series profile' /tmp/wpbfall_legacy.html
 
           render_view palm18_legacy "$SITE/#show/LIFE-020"
           grep -q 'LIFE-020' /tmp/palm18_legacy.html
