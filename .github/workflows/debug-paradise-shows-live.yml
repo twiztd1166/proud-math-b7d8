@@ -96,11 +96,11 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 618, s
+          assert s.get('profile_count') == 609, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 618
+          assert len(x.get('profiles') or []) == 609
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150'):
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
           assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
@@ -150,7 +150,26 @@ jobs:
           assert float(profiles['LIFE-112'].get('lifetime_net_volume')) == 72822, profiles['LIFE-112']
           assert float(profiles['LIFE-112'].get('lifetime_close_volume')) == 115825, profiles['LIFE-112']
           assert len(profiles['LIFE-112'].get('source_rows') or []) == 2, profiles['LIFE-112']
-          print({'profiles':618,'evidence_records':1086,'duplicate_profiles_removed_total':37})
+          assert profiles['LIFE-041'].get('history_count') == 8, profiles['LIFE-041']
+          assert profiles['LIFE-041'].get('occurrences') == 7, profiles['LIFE-041']
+          assert profiles['LIFE-041'].get('issued') == 71, profiles['LIFE-041']
+          assert float(profiles['LIFE-041'].get('lifetime_close_volume')) == 284061, profiles['LIFE-041']
+          assert len(profiles['LIFE-041'].get('source_rows') or []) == 2, profiles['LIFE-041']
+          assert profiles['LIFE-046'].get('history_count') == 16, profiles['LIFE-046']
+          assert profiles['LIFE-046'].get('occurrences') == 13, profiles['LIFE-046']
+          assert profiles['LIFE-046'].get('issued') == 41, profiles['LIFE-046']
+          assert len(profiles['LIFE-046'].get('source_rows') or []) == 2, profiles['LIFE-046']
+          assert profiles['LIFE-156'].get('history_count') == 2, profiles['LIFE-156']
+          assert profiles['LIFE-156'].get('occurrences') == 3, profiles['LIFE-156']
+          assert profiles['LIFE-156'].get('issued') == 74, profiles['LIFE-156']
+          assert len(profiles['LIFE-156'].get('source_rows') or []) == 2, profiles['LIFE-156']
+          assert profiles['LIFE-104'].get('history_count') == 2, profiles['LIFE-104']
+          assert profiles['HIST-330'].get('history_count') == 3, profiles['HIST-330']
+          assert profiles['LIFE-212'].get('history_count') == 1, profiles['LIFE-212']
+          assert profiles['LIFE-212'].get('dnd_count') == 1, profiles['LIFE-212']
+          assert profiles['LIFE-126'].get('history_count') == 3, profiles['LIFE-126']
+          assert profiles['LIFE-126'].get('dnd_count') == 2, profiles['LIFE-126']
+          print({'profiles':609,'evidence_records':1086,'duplicate_profiles_removed_total':46})
           PY
 
           python - <<'PY'
@@ -246,6 +265,7 @@ jobs:
           exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
           controlled_dupes=source_summary.get('controlled_abbreviation_duplicate_consolidation') or {}
           word_order=source_summary.get('word_order_recurring_profile_consolidation') or {}
+          fuzzy=source_summary.get('conservative_fuzzy_profile_consolidation') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -309,6 +329,27 @@ jobs:
           assert len(word_order.get('families') or []) == 11, word_order
           assert word_order.get('occurrences_created') == 0, word_order
           assert word_order.get('attendance_inference') is False, word_order
+          assert fuzzy.get('validation') == 'PASS', fuzzy
+          assert fuzzy.get('profiles_before') == 618, fuzzy
+          assert fuzzy.get('profiles_after') == 609, fuzzy
+          assert fuzzy.get('profiles_removed') == 9, fuzzy
+          assert fuzzy.get('changed_survivors') == 7, fuzzy
+          assert fuzzy.get('untouched_catalog_profiles_exact') == 602, fuzzy
+          assert fuzzy.get('history_records_after') == 1086, fuzzy
+          assert fuzzy.get('annual_rows_after') == 1235, fuzzy
+          assert fuzzy.get('cumulative_rows_after') == 1251, fuzzy
+          assert fuzzy.get('unlinked_annual') == 99, fuzzy
+          assert fuzzy.get('unlinked_cumulative') == 100, fuzzy
+          assert fuzzy.get('matched_history_links_checked') == 533, fuzzy
+          assert fuzzy.get('matched_history_profile_mismatches') == 0, fuzzy
+          assert fuzzy.get('source_row_metric_reconciliation') == 'PASS', fuzzy
+          assert fuzzy.get('exact_duplicate_pairs_after') == 0, fuzzy
+          assert fuzzy.get('expanded_abbreviation_duplicate_pairs_after') == 0, fuzzy
+          assert fuzzy.get('word_order_duplicate_pairs_after') == 0, fuzzy
+          assert len(fuzzy.get('families') or []) == 7, fuzzy
+          assert len(fuzzy.get('held_out_as_ambiguous') or []) >= 5, fuzzy
+          assert fuzzy.get('occurrences_created') == 0, fuzzy
+          assert fuzzy.get('attendance_inference') is False, fuzzy
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
