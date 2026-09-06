@@ -89,6 +89,12 @@ jobs:
               grep -q 'sourceLabeledPerformanceValue' /tmp/app-modals.js
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
+              grep -q 'bookingSignal' /tmp/app-shows.js
+              grep -q 'Priority to book / review' /tmp/app-shows.js
+              grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/app-shows.js
+              grep -q 'boothGuidanceHtml' /tmp/app-modals.js
+              grep -q 'Best observed booth / placement' /tmp/app-modals.js
+              grep -q 'correlation only' /tmp/app-modals.js
               grep -Fq "row?.[field]" /tmp/app-modals.js
               grep -Fq "value!==null&&value!==undefined&&String(value).trim()!==''" /tmp/app-modals.js
               grep -Fq "fields.booking_evidence" /tmp/app-modals.js
@@ -1540,6 +1546,9 @@ jobs:
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
+          grep -q 'Priority to book / review' /tmp/current.html
+          grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/current.html
+          grep -q 'Booking status' /tmp/current.html
 
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
@@ -1561,6 +1570,8 @@ jobs:
           grep -q '>Notes<' /tmp/detail.html
           grep -q 'Mail Cks. To:' /tmp/detail.html
           grep -q 'Year-by-year evidence' /tmp/detail.html
+          grep -q 'Booth / placement guidance' /tmp/detail.html
+          grep -q 'Best observed booth / placement' /tmp/detail.html
 
           render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
           grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
