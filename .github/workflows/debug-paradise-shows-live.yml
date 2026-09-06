@@ -1868,7 +1868,7 @@ jobs:
           grep -q 'Open review source' /tmp/hurricane_watch.html
 
           render_view safety_pursue "$SITE/#show/LIFE-073"
-          grep -q 'St Lucie Health, Wellness & Safety Fest' /tmp/safety_pursue.html
+          grep -q 'St Lucie Health, Wellness &amp; Safety Fest' /tmp/safety_pursue.html
           grep -q 'Current booking review' /tmp/safety_pursue.html
           grep -q '>PURSUE<' /tmp/safety_pursue.html
           grep -q 'November 2026' /tmp/safety_pursue.html
