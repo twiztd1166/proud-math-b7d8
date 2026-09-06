@@ -268,6 +268,18 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-032"}'
 
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/oktoberfest_review.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-061"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/vero_oktoberfest.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"HIST-234"}'
+
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/2023_brevard.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
@@ -328,9 +340,9 @@ jobs:
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
           assert len(historical_2013)==76, len(historical_2013)
           assert len(strong_history_2013)==14, len(strong_history_2013)
-          assert len(strong_2013)==11, len(strong_2013)
+          assert len(strong_2013)==10, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
-          expected_reviews={'LIFE-029':'HOLD','LIFE-032':'HOLD','LIFE-041':'HOLD'}
+          expected_reviews={'LIFE-029':'HOLD','LIFE-032':'HOLD','LIFE-041':'HOLD','LIFE-061':'HOLD'}
           assert {pid:(review or {}).get('disposition') for pid,review in reviews.items()}==expected_reviews, reviews
           for held in expected_reviews:
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
@@ -354,8 +366,15 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
+          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
+          assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
+          assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
+          assert '10x10 inline $200' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
+          assert 'sold out/waitlist' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
+          assert 'commercial & retail businesses should use the Sponsor path' in profiles['HIST-234']['current_rebook_opportunity']['booking_window_text']
+          assert 'Latitude-88' in profiles['HIST-234']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
           assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
@@ -693,13 +712,23 @@ jobs:
           barrett_review=json.load(open('/tmp/barrett_review.json'))
           ourkids_review=json.load(open('/tmp/ourkids_review.json'))
           sarasota_review=json.load(open('/tmp/sarasota_review.json'))
-          for detail in (barrett_review,ourkids_review,sarasota_review):
+          oktoberfest_review=json.load(open('/tmp/oktoberfest_review.json'))
+          vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
+          for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
               assert detail.get('version') == 23, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
+          assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
+          assert vero_oktoberfest.get('version') == 23, vero_oktoberfest.get('version')
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
           assert 'did not generate much business' in (barrett_review.get('rebookReview') or {}).get('rationale',''), barrett_review
           assert '2020 event was cancelled' in (ourkids_review.get('rebookReview') or {}).get('rationale',''), ourkids_review
           assert '$3,095 balance' in (sarasota_review.get('rebookReview') or {}).get('rationale',''), sarasota_review
+          assert 'multiple unrelated organizer series' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
+          assert 'HIST-234' in (oktoberfest_review.get('rebookReview') or {}).get('next_step',''), oktoberfest_review
+          assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 42, x.get('version')
@@ -1803,6 +1832,23 @@ jobs:
           grep -q '>HOLD<' /tmp/sarasota_hold.html
           grep -q '\$3,095' /tmp/sarasota_hold.html
           grep -q 'contract/invoice dispute' /tmp/sarasota_hold.html
+
+          render_view oktoberfest_hold "$SITE/#show/LIFE-061"
+          grep -q 'Oktoberfest' /tmp/oktoberfest_hold.html
+          grep -q 'Current booking review' /tmp/oktoberfest_hold.html
+          grep -q '>HOLD<' /tmp/oktoberfest_hold.html
+          grep -q 'multiple unrelated organizer series' /tmp/oktoberfest_hold.html
+          grep -q 'HIST-234' /tmp/oktoberfest_hold.html
+
+          render_view vero_oktoberfest "$SITE/#show/HIST-234"
+          grep -q 'Vero Beach Oktoberfest' /tmp/vero_oktoberfest.html
+          grep -q 'Verified current opportunity' /tmp/vero_oktoberfest.html
+          grep -q 'SPONSORSHIP OPEN' /tmp/vero_oktoberfest.html
+          grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
+          grep -q 'Oct 18, 2026' /tmp/vero_oktoberfest.html
+          grep -q '10x10 inline \$200' /tmp/vero_oktoberfest.html
+          grep -q 'Latitude-88' /tmp/vero_oktoberfest.html
+          grep -q 'Open current source' /tmp/vero_oktoberfest.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
