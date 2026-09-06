@@ -8,9 +8,11 @@ function renderToday(){
 function countStatuses(){return state.shows.reduce((a,s)=>(a[s.show_status]=(a[s.show_status]||0)+1,a),{})}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
-  const tier=p.tier||((p.source_type==='HISTORY_ONLY')?'Historical':(p.source_type==='CURRENT_ONLY'?'Current':'Profile'));
+  const lpOnly=isLpSourceOnly(p);
+  const tier=lpOnly?'LP source only':(p.tier||((p.source_type==='HISTORY_ONLY')?'Historical':(p.source_type==='CURRENT_ONLY'?'Current':'Profile')));
   const hist=Number(p.history_count||0),life=Number(p.occurrences||0),years=Array.isArray(p.history_years)?p.history_years:[];
-  return `<div class="card catalogCard" data-profile="${esc(p.profile_id)}"><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${current.length?current.length+' CURRENT':'READ ONLY'}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':'READ ONLY');
+  return `<div class="card catalogCard" data-profile="${esc(p.profile_id)}"><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
@@ -57,7 +59,7 @@ function currentActiveFilterCount(){
 function catalogFilterSummary(){
   const f=state.catalogFilters,out=[],add=(key,label)=>out.push({key,label});
   const labels={
-    profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only'},
+    profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
     contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
     com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has performance',MISSING:'Missing performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
     coi:{HAS:'Has COI',MISSING:'Missing COI'},worked:{HAS:'Has participation evidence',MISSING:'No participation evidence'},
@@ -143,6 +145,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.profileState==='HISTORICAL'&&!Number(p.history_count||0))return false;
   if(f.profileState==='CURRENT_ONLY'&&p.source_type!=='CURRENT_ONLY')return false;
   if(f.profileState==='HISTORY_ONLY'&&p.source_type!=='HISTORY_ONLY')return false;
+  if(f.profileState==='LP_SOURCE_ONLY'&&!isLpSourceOnly(p))return false;
   if(f.historyYear!=='ALL'&&!years.map(String).includes(String(f.historyYear)))return false;
   if(f.tier!=='ALL'&&(f.tier==='OTHER'?Boolean(p.tier):String(p.tier||'').toUpperCase()!==f.tier))return false;
   if(f.historyDepth!=='ALL'&&Number(p.history_year_count||0)<Number(f.historyDepth))return false;
@@ -364,7 +367,7 @@ function catalogFacetCounts(){
   for(const p of profiles)currentByProfile.set(p.profile_id,profileCurrentShows(p));
   const years={},currentYears={},status={},treatment={IN_PLAY:0,SKIPPED:0},confirmation={};
   const tier={PLATINUM:0,GOLD:0,SILVER:0,OTHER:0};
-  const record={CURRENT:0,HISTORICAL:0,CURRENT_ONLY:0,HISTORY_ONLY:0};
+  const record={CURRENT:0,HISTORICAL:0,CURRENT_ONLY:0,HISTORY_ONLY:0,LP_SOURCE_ONLY:0};
   const depth={'1':0,'2':0,'3':0,'5':0};
   const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance','has_coi'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
@@ -376,6 +379,7 @@ function catalogFacetCounts(){
     if(hist)record.HISTORICAL++;
     if(p.source_type==='CURRENT_ONLY')record.CURRENT_ONLY++;
     if(p.source_type==='HISTORY_ONLY')record.HISTORY_ONLY++;
+    if(isLpSourceOnly(p))record.LP_SOURCE_ONLY++;
     const t=String(p.tier||'').toUpperCase();
     tier[['PLATINUM','GOLD','SILVER'].includes(t)?t:'OTHER']++;
     for(const y of (Array.isArray(p.history_years)?p.history_years:[]))years[String(y)]=(years[String(y)]||0)+1;
@@ -461,6 +465,7 @@ function quickViewOptions(mode){
       ['ALL_LOW_COM','Low COM'],
       ['ALL_MISSING','Missing data'],
       ['ALL_HIST_ONLY','Historical only'],
+      ['ALL_LP_SOURCE_ONLY','LP source only'],
       ['ALL_CURRENT_LINKED','Current linked'],
     ]
     :[
@@ -476,6 +481,7 @@ function quickViewCount(key){
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
   if(key==='ALL_MISSING')return state.catalog.filter(p=>Number(p.data_completeness_score||0)<7).length;
   if(key==='ALL_HIST_ONLY')return state.catalog.filter(p=>p.source_type==='HISTORY_ONLY').length;
+  if(key==='ALL_LP_SOURCE_ONLY')return state.catalog.filter(isLpSourceOnly).length;
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
   if(key==='CURRENT_IN_PLAY')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR').length;
   if(key==='CURRENT_DUE7')return state.shows.filter(s=>{const d=daysFromToday(s.action_due);return s.this_year!=='SKIP THIS YEAR'&&d!==null&&d>=0&&d<=7}).length;
@@ -497,6 +503,7 @@ function applyQuickView(key){
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
     if(key==='ALL_MISSING')state.catalogSort='MISSING_DATA';
     if(key==='ALL_HIST_ONLY'){state.catalogFilters.profileState='HISTORY_ONLY';state.catalogSort='LATEST_HISTORY'}
+    if(key==='ALL_LP_SOURCE_ONLY'){state.catalogFilters.profileState='LP_SOURCE_ONLY';state.catalogSort='NAME_ASC'}
     if(key==='ALL_CURRENT_LINKED'){state.catalogFilters.profileState='CURRENT';state.catalogSort='CURRENT_FIRST'}
   }else{
     state.showMode='CURRENT';state.currentFilters=defaultCurrentFilters();state.currentSort='PRIORITY';
@@ -520,7 +527,7 @@ function openShowFilters(){
     const opts=(options,counts)=>countedOptions(options,counts);
     body.innerHTML=`<h2>Filter All Shows</h2><div class="subtitle">Counts update against your other selections. Apply combines filters and replaces any Quick View.</div>
       <div class="filterSection"><div class="filterSectionTitle">Show record</div><div class="filterGrid">
-        ${filterField('Record type','fProfileState',f.profileState,opts([['ALL','All profiles'],['CURRENT','Has current control'],['HISTORICAL','Has historical evidence'],['CURRENT_ONLY','Current only'],['HISTORY_ONLY','Historical only']],{ALL:fc.total,...fc.record}))}
+        ${filterField('Record type','fProfileState',f.profileState,opts([['ALL','All profiles'],['CURRENT','Has current control'],['HISTORICAL','Has historical evidence'],['CURRENT_ONLY','Current only'],['HISTORY_ONLY','Historical only'],['LP_SOURCE_ONLY','LP source only']],{ALL:fc.total,...fc.record}))}
         ${filterField('Historical year','fHistoryYear',f.historyYear,opts([['ALL','All years'],...years.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.years}))}
         ${filterField('Performance tier','fTier',f.tier,opts([['ALL','All tiers'],['PLATINUM','Platinum'],['GOLD','Gold'],['SILVER','Silver'],['OTHER','Untiered']],{ALL:fc.total,...fc.tier}))}
         ${filterField('Historical depth','fHistoryDepth',f.historyDepth,opts([['ALL','Any depth'],['1','1+ years'],['2','2+ years'],['3','3+ years'],['5','5+ years']],{ALL:fc.total,...fc.depth}))}
