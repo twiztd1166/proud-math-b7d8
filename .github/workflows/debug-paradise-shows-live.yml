@@ -98,6 +98,12 @@ jobs:
               grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
               grep -q 'current_rebook_opportunity' /tmp/app-shows.js
+              grep -q 'related_current_profile_id' /tmp/app-shows.js
+              grep -q 'SAME SERIES' /tmp/app-shows.js
+              grep -q 'rebookSeries' /tmp/app.css
+              grep -q 'profileRelations' /tmp/app-modals.js
+              grep -q 'Same organizer series' /tmp/app-modals.js
+              grep -q 'Open current series profile' /tmp/app-modals.js
               grep -q 'rebookOpportunityHtml' /tmp/app-modals.js
               grep -q 'Historical booking context' /tmp/app-shows.js
               grep -q 'Next booking step' /tmp/app-shows.js
@@ -262,10 +268,24 @@ jobs:
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-054','LIFE-077'}
+          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-054','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
+          assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-009']['current_rebook_opportunity']['event_start']=='2027-01-02'
+          assert profiles['LIFE-009']['current_rebook_opportunity']['event_end']=='2027-01-03'
+          assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
+          assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
+          assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
+          assert '25% deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert profiles['LIFE-009'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-009']
+          assert not profiles['LIFE-009'].get('related_current_profile_id'), profiles['LIFE-009']
+          assert profiles['LIFE-005'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-005']
+          assert profiles['LIFE-005'].get('related_current_profile_id')=='LIFE-009', profiles['LIFE-005']
+          assert not profiles['LIFE-005'].get('current_rebook_opportunity'), profiles['LIFE-005']
+          rels=profiles['LIFE-005'].get('profile_relations') or []
+          assert any(r.get('relation_type')=='SAME_SERIES_LEGACY_SOURCE_SPLIT' and r.get('canonical_series_profile_id')=='LIFE-009' for r in rels), rels
           assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
@@ -279,8 +299,6 @@ jobs:
           assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
           assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
-          assert not profiles['LIFE-005'].get('current_rebook_opportunity'), profiles['LIFE-005']
-          assert not profiles['LIFE-009'].get('current_rebook_opportunity'), profiles['LIFE-009']
           assert not profiles['LIFE-018'].get('current_rebook_opportunity'), profiles['LIFE-018']
           # Cleanup expectations are scoped to each profile's exact year + source family
           # (25%+ family coverage), plus explicit non-participation applicability.
@@ -1647,6 +1665,14 @@ jobs:
           grep -q 'Open current source' /tmp/winterfest_detail.html
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
 
+
+          render_view vero_legacy "$SITE/#show/LIFE-005"
+          grep -q 'LIFE-005' /tmp/vero_legacy.html
+          grep -q 'Same organizer series' /tmp/vero_legacy.html
+          grep -q 'Current booking opportunity is tracked under LIFE-009' /tmp/vero_legacy.html
+          grep -q 'not a second booking target' /tmp/vero_legacy.html
+          grep -q 'Open current series profile' /tmp/vero_legacy.html
+
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
           grep -q 'LIFE-009' /tmp/detail.html
@@ -1670,6 +1696,13 @@ jobs:
           grep -q 'Booth / placement guidance' /tmp/detail.html
           grep -q 'Best observed performance placement' /tmp/detail.html
           grep -q 'Best observed specific booth' /tmp/detail.html
+          grep -q 'Verified current opportunity' /tmp/detail.html
+          grep -q 'Vero Beach Home &amp; Remodel Show' /tmp/detail.html
+          grep -q 'Jan 2, 2027' /tmp/detail.html
+          grep -q 'Standard 10x10 \$475' /tmp/detail.html
+          grep -q 'Premium 10x10 \$535' /tmp/detail.html
+          grep -q 'Premium Corner 10x10 \$635' /tmp/detail.html
+          grep -q '25% deposit' /tmp/detail.html
 
           render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
           grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
