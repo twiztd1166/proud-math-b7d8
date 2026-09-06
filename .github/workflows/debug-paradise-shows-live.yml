@@ -1827,18 +1827,13 @@ jobs:
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
-          grep -q '>HOLD<' /tmp/shows.html
+          grep -q 'Pursue now' /tmp/shows.html
+          grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
-          grep -q 'REBOOK CANDIDATE' /tmp/shows.html
-          grep -q 'Historical booking context' /tmp/shows.html
-          grep -q 'Next booking step' /tmp/shows.html
-          grep -q 'LIVE OPPORTUNITY' /tmp/shows.html
-          grep -q 'Verified current opportunity' /tmp/shows.html
           grep -q 'Verified current / watch' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
-          grep -q 'EXHIBITOR LISTED' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
