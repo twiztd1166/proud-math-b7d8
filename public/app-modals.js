@@ -221,6 +221,7 @@ function currentOperatingScorecard(show){
   </div>`;
 }
 async function openCatalog(id){
+  state.deepLinkedProfile=id;syncLocationView();
   $('#detailBody').innerHTML='<h2>Loading show history…</h2><div class="subtitle">Reading the preserved show database.</div>';
   $('#detailModal').classList.add('show');
   try{
@@ -284,10 +285,10 @@ async function savePayment(id){
   try{const d=await call('updatePayment',{paymentId:id,patch});state.payments=state.payments.map(p=>p.payment_id===id?d.payment:p);closeModal('paymentModal');toast('Payment updated');await bootstrap();}
   catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save payment'}
 }
-function closeModal(id){$('#'+id).classList.remove('show')}
-$$('.nav button').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;syncLocationView();render();if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
+function closeModal(id){$('#'+id).classList.remove('show');if(id==='detailModal'){state.deepLinkedProfile=null;syncLocationView()}}
+$$('.nav button').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.tab=b.dataset.tab;syncLocationView();render();if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
 $('#refreshBtn').onclick=async()=>{toast('Reloading operating data…');await bootstrap();if(state.catalogLoaded)await loadCatalog(true);if(state.unlinkedLp.loaded)await loadUnlinkedLp(true);toast('Current')};
-$$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){m.classList.remove('show');if(m.id==='detailModal'){state.deepLinkedProfile=null;syncLocationView()}}}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 bootstrap();
 
