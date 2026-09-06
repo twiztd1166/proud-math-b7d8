@@ -25,6 +25,21 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Guard selector collection calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,re
+          bad=[]
+          for path in sorted(pathlib.Path('public').glob('app-*.js')):
+              for number,line in enumerate(path.read_text().splitlines(),1):
+                  if re.search(r'(?<!\$)\$\([^)]*\)\.forEach',line):
+                      bad.append(f'{path}:{number}: {line.strip()}')
+          assert not bad, 'Single-element $() used as a collection:\n'+'\n'.join(bad)
+          print('Selector collection guard: PASS')
+          PY
+
       - name: Wait for exact public asset convergence
         shell: bash
         run: |
