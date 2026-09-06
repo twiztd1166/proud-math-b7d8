@@ -96,7 +96,11 @@ function catalogCard(p){
     ?`<div class="cleanupQueueLine"><b>${esc(cleanupYear)} · ${missing.length} missing field${missing.length===1?'':'s'}</b><span>${esc(missing.map(key=>CLEANUP_FIELD_LABELS[key]||key).join(' · '))}</span></div>`
     :'';
   const focusAttr=cleanupYear!=='ALL'&&missing.length?` data-focus-year="${esc(cleanupYear)}"`:'';
-  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net · no current control</div>`:'';
+  const candidateBooth=p?.best_observed_specific_booth
+    ?` · best specific booth ${esc(p.best_observed_specific_booth)}${p.best_observed_specific_booth_year?' ('+esc(p.best_observed_specific_booth_year)+')':''}`
+    :(p?.best_observed_booth?` · best observed placement ${esc(p.best_observed_booth)}${p.best_observed_booth_year?' ('+esc(p.best_observed_booth_year)+')':''}`:'');
+  const candidateSales=p?.lifetime_net_sales!==null&&p?.lifetime_net_sales!==undefined?` · ${esc(p.lifetime_net_sales)} lifetime net sales`:'';
+  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){

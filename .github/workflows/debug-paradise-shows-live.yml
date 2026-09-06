@@ -92,6 +92,7 @@ jobs:
               grep -q 'bookingSignal' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
               grep -q 'Rebook candidates' /tmp/app-shows.js
+              grep -q 'best specific booth' /tmp/app-shows.js
               grep -q "currentSort:'BOOKING'" /tmp/app-core.js
               grep -q 'Priority to book / review' /tmp/app-shows.js
               grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/app-shows.js
