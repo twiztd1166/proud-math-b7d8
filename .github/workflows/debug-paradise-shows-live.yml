@@ -96,10 +96,18 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 655, s
+          assert s.get('profile_count') == 649, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 655
-          print({'profiles':655,'evidence_records':1086})
+          assert len(x.get('profiles') or []) == 649
+          profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348'):
+              assert removed not in profiles, removed
+          assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
+          assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
+          assert profiles['HIST-299'].get('history_count') == 5, profiles['HIST-299']
+          assert profiles['HIST-349'].get('history_count') == 2, profiles['HIST-349']
+          assert profiles['LIFE-056'].get('history_count') == 6, profiles['LIFE-056']
+          print({'profiles':649,'evidence_records':1086,'duplicate_profiles_removed':6})
           PY
 
           python - <<'PY'
@@ -109,12 +117,12 @@ jobs:
           annual=u.get('annual') or []
           cumulative=u.get('cumulative') or []
           assert u.get('ok') is True, u
-          assert s.get('annual_rows') == 100, s
-          assert s.get('cumulative_rows') == 101, s
+          assert s.get('annual_rows') == 99, s
+          assert s.get('cumulative_rows') == 100, s
           assert s.get('no_profile_identity_asserted') is True, s
           assert s.get('attendance_inference') is False, s
-          assert len(annual) == 100, len(annual)
-          assert len(cumulative) == 101, len(cumulative)
+          assert len(annual) == 99, len(annual)
+          assert len(cumulative) == 100, len(cumulative)
           annual_ids={x.get('evidence_id') for x in annual}
           linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
           assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
@@ -126,7 +134,7 @@ jobs:
           assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
           assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
           assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
-          print({'unlinked_annual':100,'unlinked_cumulative':101,'source_groups':101,'popup_identity':'PRESERVED_UNMATCHED'})
+          print({'unlinked_annual':99,'unlinked_cumulative':100,'source_groups':100,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -191,15 +199,31 @@ jobs:
           source_summary=summary.get('source_summary') or {}
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
           identity=source_summary.get('identity_reconciliation') or {}
+          consolidation=source_summary.get('duplicate_profile_consolidation') or {}
           assert identity.get('validation') == 'PASS', identity
-          assert identity.get('profile_links_added_annual') == 68, identity
-          assert identity.get('profile_links_added_cumulative') == 68, identity
-          assert identity.get('unlinked_annual_after') == 100, identity
-          assert identity.get('unlinked_cumulative_after') == 101, identity
+          assert consolidation.get('validation') == 'PASS', consolidation
+          assert consolidation.get('profiles_before') == 655, consolidation
+          assert consolidation.get('profiles_after') == 649, consolidation
+          assert consolidation.get('profiles_removed') == 6, consolidation
+          assert consolidation.get('history_records_after') == 1086, consolidation
+          assert consolidation.get('annual_rows_after') == 1235, consolidation
+          assert consolidation.get('cumulative_rows_after') == 1251, consolidation
+          assert consolidation.get('unlinked_annual_after') == 99, consolidation
+          assert consolidation.get('unlinked_cumulative_after') == 100, consolidation
+          assert consolidation.get('untouched_catalog_profiles_exact') == 644, consolidation
+          assert consolidation.get('matched_history_profile_mismatches') == 0, consolidation
+          assert consolidation.get('occurrences_created') == 0, consolidation
+          assert consolidation.get('attendance_inference') is False, consolidation
+          assert identity.get('profile_links_added_annual') == 69, identity
+          assert identity.get('profile_links_added_cumulative') == 69, identity
+          assert identity.get('unlinked_annual_after') == 99, identity
+          assert identity.get('unlinked_cumulative_after') == 100, identity
           assert identity.get('existing_profile_links_rewritten') == 0, identity
           assert identity.get('occurrences_created') == 0, identity
           assert identity.get('attendance_inference') is False, identity
-          assert identity.get('residual_2019_missing_evidence_id') == 'LP2019-014', identity
+          assert identity.get('residual_2019_missing_occurrence') == 0, identity
+          assert identity.get('residual_2019_missing_evidence_id') is None, identity
+          assert 'LIFE-056' in str(identity.get('beer_fest_resolution') or ''), identity
           assert cumulative.get('rows') == 1251, cumulative
           assert cumulative.get('unresolved') == 0, cumulative
           assert cumulative.get('exact_unchanged') == 1095, cumulative
