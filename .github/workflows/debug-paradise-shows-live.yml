@@ -1591,7 +1591,7 @@ jobs:
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
           grep -q 'Verified current opportunity' /tmp/rebook_detail.html
           grep -q 'APPLICATION OPEN' /tmp/rebook_detail.html
-          grep -q '10/17/2026' /tmp/rebook_detail.html
+          grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
