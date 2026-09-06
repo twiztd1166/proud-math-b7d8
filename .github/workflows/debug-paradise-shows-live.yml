@@ -67,6 +67,8 @@ jobs:
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
+              grep -q 'Show-history performance' /tmp/app-shows.js
+              grep -q 'Has show-history performance' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -120,6 +122,10 @@ jobs:
           assert s.get('profile_count') == 665, s
           assert s.get('occurrence_count') == 1086, s
           assert len(x.get('profiles') or []) == 665
+          coverage=x.get('coverage') or {}
+          assert coverage.get('history_rows') == 1086, coverage
+          assert coverage.get('annual_lp_rows') == 1235, coverage
+          assert coverage.get('cumulative_lp_rows') == 1151, coverage
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
           for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059','CURRENT-001','CURRENT-002','CURRENT-005','CURRENT-006','HIST-093','HIST-260','HIST-261','HIST-262','HIST-324'):
               assert removed not in profiles, removed
@@ -166,6 +172,13 @@ jobs:
           assert profiles['LIFE-009'].get('worked_year_count') == 0, profiles['LIFE-009']
           assert profiles['LIFE-054'].get('worked_year_count') == 0, profiles['LIFE-054']
           assert profiles['LIFE-204'].get('worked_year_count') == 0, profiles['LIFE-204']
+          # Show-history performance and LeadPerfection performance are distinct evidence layers.
+          assert profiles['LPONLY-2014-002'].get('has_performance') is False, profiles['LPONLY-2014-002']
+          assert profiles['LPONLY-2014-002'].get('has_lp_performance') is True, profiles['LPONLY-2014-002']
+          assert profiles['HIST-052'].get('has_performance') is True, profiles['HIST-052']
+          assert profiles['HIST-052'].get('has_lp_performance') is False, profiles['HIST-052']
+          assert profiles['LIFE-002'].get('has_performance') is True, profiles['LIFE-002']
+          assert profiles['LIFE-002'].get('has_lp_performance') is True, profiles['LIFE-002']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
