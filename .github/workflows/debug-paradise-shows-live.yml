@@ -1792,7 +1792,8 @@ jobs:
       - name: Execute show database deep links in fresh headless Chrome
         shell: bash
         run: |
-          set -euo pipefail
+          set -Eeuo pipefail
+          trap 'rc=$?; echo "DEEP_LINK_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; exit $rc' ERR
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
 
