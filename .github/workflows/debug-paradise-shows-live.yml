@@ -87,6 +87,12 @@ jobs:
               grep -q 'Back to queue' /tmp/app-modals.js
               grep -q 'cleanupQueueMove' /tmp/app-modals.js
               grep -q 'state.showQuickView=.ALL_MISSING.' /tmp/app-modals.js
+              grep -q 'cleanupSupportedFieldsForProfileYear' /tmp/app-shows.js
+              grep -q "exact year + preserved source family" /tmp/app-shows.js
+              grep -q 'Investigation link only' /tmp/app-modals.js
+              grep -q 'Check preserved source' /tmp/app-modals.js
+              grep -q 'Performance attribution' /tmp/app-modals.js
+              grep -q 'governed Unknown/N/A statuses count as coded evidence' /tmp/app-modals.js
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
@@ -166,73 +172,66 @@ jobs:
           assert coverage.get('annual_lp_profiled_rows') + us.get('annual_rows',0) == 1235, (coverage,us)
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          # Year cleanup queue semantics: only source-supported fields count as required.
+          # Cleanup requirements are scoped to each profile's exact year + source family.
           cleanup_fields=('contact','booth','cost','com','performance','payment','application','coi')
           def state_for(p,year,field):
               return (((p.get('history_field_states') or {}).get(str(year)) or {}).get(field) or {})
-          def supported_fields(year):
-              out=[]
-              for field in cleanup_fields:
-                  supported=any(
-                      int(state_for(p,year,field).get('VALUE') or 0)
-                      + int(state_for(p,year,field).get('UNKNOWN') or 0)
-                      + int(state_for(p,year,field).get('NA') or 0) > 0
-                      for p in profiles.values()
-                  )
-                  if supported:
-                      out.append(field)
-              return out
-          def missing_fields(p,year,supported):
+          def supported_fields(p,year):
+              raw=((p.get('history_field_support') or {}).get(str(year)) or [])
+              return [field for field in cleanup_fields if field in raw]
+          def union_supported_fields(year):
+              return [field for field in cleanup_fields if any(field in supported_fields(p,year) for p in profiles.values())]
+          def missing_fields(p,year):
               if str(year) not in {str(v) for v in (p.get('history_years') or [])}:
                   return []
               out=[]
-              for field in supported:
+              for field in supported_fields(p,year):
                   s=state_for(p,year,field)
                   if int(s.get('VALUE') or 0)==0 and int(s.get('UNKNOWN') or 0)==0 and int(s.get('NA') or 0)==0:
                       out.append(field)
               return out
-          def missing_count(p,year,supported):
-              return len(missing_fields(p,year,supported))
-          expected_support={
+          def missing_count(p,year):
+              return len(missing_fields(p,year))
+          expected_union_support={
               2019:[],
               2022:['contact','booth','cost','coi'],
               2024:['cost','payment','application'],
               2025:['contact','booth','cost','com','performance'],
-              2026:['contact','booth','payment'],
+              2026:['contact','payment'],
           }
-          expected_queue={2019:0,2022:48,2024:0,2025:19,2026:5}
-          for year,expected in expected_support.items():
-              actual=supported_fields(year)
+          expected_queue={2019:0,2022:18,2024:0,2025:0,2026:3}
+          for year,expected in expected_union_support.items():
+              actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
-              queue=sum(1 for p in profiles.values() if missing_count(p,year,actual)>0)
+              queue=sum(1 for p in profiles.values() if missing_count(p,year)>0)
               assert queue == expected_queue[year], (year,queue,expected_queue[year])
-          assert missing_fields(profiles['HIST-055'],2025,supported_fields(2025)) == ['com','performance']
-          assert missing_fields(profiles['HIST-015'],2022,supported_fields(2022)) == ['coi']
-          assert 'booth' not in missing_fields(profiles['HIST-015'],2022,supported_fields(2022))
-          assert missing_fields(profiles['LIFE-043'],2024,supported_fields(2024)) == []
+          assert supported_fields(profiles['HIST-015'],2022) == ['contact','booth','cost']
+          assert missing_fields(profiles['HIST-015'],2022) == []
+          assert supported_fields(profiles['HIST-055'],2025) == ['contact','booth','cost','com','performance']
+          assert missing_fields(profiles['HIST-055'],2025) == []
+          assert supported_fields(profiles['LIFE-043'],2024) == ['cost','payment','application']
+          assert missing_fields(profiles['LIFE-043'],2024) == []
+          assert missing_fields(profiles['HIST-153'],2022) == ['booth','cost']
+          assert missing_fields(profiles['LIFE-002'],2026) == ['payment']
           def cleanup_queue(year):
-              supported=supported_fields(year)
-              rows=[
-                  p for p in profiles.values()
-                  if missing_count(p,year,supported)>0
-              ]
-              return sorted(rows,key=lambda p:(-missing_count(p,year,supported),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
-          queue_2025=cleanup_queue(2025)
-          assert len(queue_2025) == 19, len(queue_2025)
-          assert len({p.get('profile_id') for p in queue_2025}) == len(queue_2025)
-          assert all(
-              missing_count(queue_2025[i],2025,supported_fields(2025)) >= missing_count(queue_2025[i+1],2025,supported_fields(2025))
-              for i in range(len(queue_2025)-1)
-          )
-          hist055_index=next(i for i,p in enumerate(queue_2025) if p.get('profile_id')=='HIST-055')
-          assert 0 <= hist055_index < len(queue_2025)
+              rows=[p for p in profiles.values() if missing_count(p,year)>0]
+              return sorted(rows,key=lambda p:(-missing_count(p,year),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
+          queue_2022=cleanup_queue(2022)
+          assert len(queue_2022) == 18, len(queue_2022)
+          assert len({p.get('profile_id') for p in queue_2022}) == len(queue_2022)
+          assert all(missing_count(queue_2022[i],2022) >= missing_count(queue_2022[i+1],2022) for i in range(len(queue_2022)-1))
           assert cleanup_queue(2024) == []
-          assert len(cleanup_queue(2026)) == 5
+          assert cleanup_queue(2025) == []
+          assert len(cleanup_queue(2026)) == 3
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 31, x.get('version')
+          assert x.get('version') == 34, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
+              assert isinstance(p.get('history_field_support'), dict), p.get('profile_id')
+              rule=p.get('history_field_support_rule') or {}
+              assert rule.get('scope') == 'YEAR_SOURCE_FAMILY', (p.get('profile_id'),rule)
+              assert float(rule.get('min_coded_ratio')) == 0.25, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
           booth_2022=profiles['HIST-015']['history_field_states']['2022']['booth']
           assert booth_2022.get('NA') == 1 and booth_2022.get('VALUE') == 0, booth_2022
@@ -241,9 +240,15 @@ jobs:
           app_2024=profiles['LIFE-081']['history_field_states']['2024']['application']
           assert app_2024.get('NA') == 1 and app_2024.get('VALUE') == 0, app_2024
           com_2025_value=profiles['HIST-052']['history_field_states']['2025']['com']
-          com_2025_missing=profiles['HIST-055']['history_field_states']['2025']['com']
+          com_2025_governed=profiles['HIST-055']['history_field_states']['2025']['com']
+          perf_2025_governed=profiles['HIST-055']['history_field_states']['2025']['performance']
+          agg_2025_com=profiles['HIST-107']['history_field_states']['2025']['com']
+          agg_2025_perf=profiles['HIST-107']['history_field_states']['2025']['performance']
           assert com_2025_value.get('VALUE') == 1, com_2025_value
-          assert com_2025_missing.get('VALUE') == 0 and com_2025_missing.get('MISSING') == 1, com_2025_missing
+          assert com_2025_governed.get('UNKNOWN') == 1 and com_2025_governed.get('MISSING') == 0, com_2025_governed
+          assert perf_2025_governed.get('UNKNOWN') == 1 and perf_2025_governed.get('MISSING') == 0, perf_2025_governed
+          assert agg_2025_com.get('NA') == 1 and agg_2025_com.get('MISSING') == 0, agg_2025_com
+          assert agg_2025_perf.get('NA') == 1 and agg_2025_perf.get('MISSING') == 0, agg_2025_perf
           for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059','CURRENT-001','CURRENT-002','CURRENT-005','CURRENT-006','HIST-093','HIST-260','HIST-261','HIST-262','HIST-324'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
