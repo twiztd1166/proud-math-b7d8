@@ -85,12 +85,15 @@ function renderToday(){
 function countStatuses(){return state.shows.reduce((a,s)=>(a[s.show_status]=(a[s.show_status]||0)+1,a),{})}
 function rebookOpportunityCard(op){
   if(!op)return '';
-  const status=String(op.opportunity_status||'').replaceAll('_',' ');
+  const rawStatus=String(op.opportunity_status||'').toUpperCase();
+  const status=rawStatus.replaceAll('_',' ');
+  const watchState=rawStatus==='WATCH'||rawStatus==='APPLICATION_CLOSED';
+  const heading=watchState?'Verified current watch':'Verified current opportunity';
   const range=op.event_start
     ?date(op.event_start)+(op.event_end&&op.event_end!==op.event_start?' – '+date(op.event_end):'')
     :'Current date not verified';
   const checked=String(op.checked_at||'').slice(0,10);
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>Verified current opportunity</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
@@ -100,7 +103,11 @@ function catalogCard(p){
   const candidate=rebookCandidate(p);
   const liveOpportunity=p?.current_rebook_opportunity||null;
   const relatedCurrentProfile=String(p?.related_current_profile_id||'').trim();
-  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?'LIVE OPPORTUNITY':(relatedCurrentProfile?'SAME SERIES':(candidate?'REBOOK CANDIDATE':'READ ONLY'))));
+  const opportunityPill=liveOpportunity
+    ?(String(liveOpportunity.opportunity_status||'').toUpperCase()==='WATCH'?'CURRENT WATCH'
+      :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='APPLICATION_CLOSED'?'NEXT-CYCLE WATCH':'LIVE OPPORTUNITY'))
+    :'';
+  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?opportunityPill:(relatedCurrentProfile?'SAME SERIES':(candidate?'REBOOK CANDIDATE':'READ ONLY'))));
   const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
   const missing=cleanupYear!=='ALL'?missingFieldsForYear(p,cleanupYear):[];
   const cleanup=missing.length
@@ -773,7 +780,7 @@ function quickViewOptions(mode){
   const cleanupYear=state.catalogFilters.historyYear;
   return mode==='ALL'
     ?[
-      ['ALL_LIVE_REBOOK','Live opportunities'],
+      ['ALL_LIVE_REBOOK','Verified current / watch'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
       ['ALL_HISTORICAL_2013','Positive-net history 2013+'],
       ['ALL_TOP_NET','Top lifetime net'],
