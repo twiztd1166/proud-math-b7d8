@@ -93,7 +93,8 @@ jobs:
               grep -q 'Priority to book / review' /tmp/app-shows.js
               grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/app-shows.js
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
-              grep -q 'Best observed booth / placement' /tmp/app-modals.js
+              grep -q 'Best observed performance placement' /tmp/app-modals.js
+              grep -q 'Best observed specific booth' /tmp/app-modals.js
               grep -q 'correlation only' /tmp/app-modals.js
               grep -Fq "row?.[field]" /tmp/app-modals.js
               grep -Fq "value!==null&&value!==undefined&&String(value).trim()!==''" /tmp/app-modals.js
@@ -1571,7 +1572,8 @@ jobs:
           grep -q 'Mail Cks. To:' /tmp/detail.html
           grep -q 'Year-by-year evidence' /tmp/detail.html
           grep -q 'Booth / placement guidance' /tmp/detail.html
-          grep -q 'Best observed booth / placement' /tmp/detail.html
+          grep -q 'Best observed performance placement' /tmp/detail.html
+          grep -q 'Best observed specific booth' /tmp/detail.html
 
           render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
           grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
