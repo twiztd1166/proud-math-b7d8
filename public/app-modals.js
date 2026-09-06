@@ -57,7 +57,12 @@ function sourceSemanticState(value){
   if(unknownTokens.some(token=>normalized===token||normalized.startsWith(token+' '))||['?','—','-'].includes(normalized))return 'UNKNOWN';
   return 'VALUE';
 }
-function historyContactValue(row){return String(row?.contact||sourceFieldValue(row,['CONTACT INFO','CONTACT_NAME','CONTACT'])||'').trim()}
+function historyContactValue(row){
+  const named=String(row?.contact||sourceFieldValue(row,['CONTACT INFO','CONTACT_NAME','CONTACT'])||'').trim();
+  if(named)return named;
+  const phone=sourceFieldValue(row,['PHONE']);
+  return phone?'Phone: '+phone:'';
+}
 function historyBoothValue(row){return String(row?.booth||sourceFieldValue(row,['BOOTH / SPACE LOCATION','BOOTH #'])||'').trim()}
 function historyCostValue(row){return String(row?.final_cost_text||row?.event_cost_text||sourceFieldValue(row,['FINAL / NEGOTIATED COST','FINAL NEGOTIATED COST','EVENT COST','COST'])||'').trim()}
 function governedStatusStateValue(value){

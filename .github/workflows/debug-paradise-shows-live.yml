@@ -223,12 +223,24 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:1,2015:40,2016:0,2017:6,2018:0,2019:0,2020:0,2021:43,2022:17,2023:51,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:37,2016:0,2017:5,2018:0,2019:0,2020:0,2021:43,2022:17,2023:51,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
               queue=sum(1 for p in profiles.values() if missing_count(p,year)>0)
               assert queue == expected_queue[year], (year,queue,expected_queue[year])
+          assert missing_fields(profiles['HIST-152'],2014) == []
+          hist152_contact=profiles['HIST-152']['history_field_states']['2014']['contact']
+          assert hist152_contact.get('VALUE') == 2 and hist152_contact.get('MISSING') == 0, hist152_contact
+          assert profiles['HIST-152'].get('has_contact') is True, profiles['HIST-152']
+          assert missing_fields(profiles['HIST-128'],2015) == ['cost']
+          hist128_contact=profiles['HIST-128']['history_field_states']['2015']['contact']
+          assert hist128_contact.get('VALUE') == 1 and hist128_contact.get('MISSING') == 0, hist128_contact
+          assert profiles['HIST-128'].get('has_contact') is True, profiles['HIST-128']
+          assert missing_fields(profiles['HIST-428'],2017) == []
+          hist428_contact=profiles['HIST-428']['history_field_states']['2017']['contact']
+          assert hist428_contact.get('VALUE') == 1 and hist428_contact.get('MISSING') == 0, hist428_contact
+          assert profiles['HIST-428'].get('has_contact') is True, profiles['HIST-428']
           assert missing_fields(profiles['LIFE-159'],2021) == []
           assert missing_fields(profiles['LIFE-112'],2021) == []
           assert missing_fields(profiles['HIST-019'],2021) == []
@@ -269,13 +281,14 @@ jobs:
           actual_2017={p.get('profile_id'):missing_fields(p,2017) for p in queue_2017}
           expected_2017={
               'HIST-418':['performance'],
-              'HIST-428':['contact'],
               'HIST-433':['performance'],
               'HIST-439':['contact'],
               'LIFE-004':['contact'],
               'LIFE-177':['performance'],
           }
           assert actual_2017 == expected_2017, actual_2017
+          assert cleanup_queue(2014) == []
+          assert len(cleanup_queue(2015)) == 37
           assert cleanup_queue(2016) == []
           assert cleanup_queue(2018) == []
           assert cleanup_queue(2019) == []
@@ -288,7 +301,7 @@ jobs:
           assert len(cleanup_queue(2023)) == 51
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 37, x.get('version')
+          assert x.get('version') == 38, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -299,6 +312,7 @@ jobs:
               assert rule.get('supplemental_provenance') is True, (p.get('profile_id'),rule)
               assert rule.get('field_scoped') is True, (p.get('profile_id'),rule)
               assert rule.get('source_labeled_performance') is True, (p.get('profile_id'),rule)
+              assert rule.get('source_phone_contact') is True, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
