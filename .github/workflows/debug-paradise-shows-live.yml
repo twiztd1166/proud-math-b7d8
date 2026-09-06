@@ -74,7 +74,7 @@ jobs:
               grep -q 'cleanupSupportedFieldsForYear' /tmp/app-shows.js
               grep -q 'cleanupQueueLine' /tmp/app-shows.js
               grep -q 'cleanup queue' /tmp/app-shows.js
-              grep -q '25%+ coverage' /tmp/app-shows.js
+              grep -q '25%+ family coverage' /tmp/app-shows.js
               grep -q 'execution-only fields for explicit non-participation do not count as missing' /tmp/app-shows.js
               grep -q 'data-focus-year' /tmp/app-shows.js
               grep -q 'deepLinkedYear' /tmp/app-core.js
@@ -83,7 +83,7 @@ jobs:
               grep -q 'cleanup year opened first' /tmp/app-modals.js
               grep -q 'The checklist is at the top' /tmp/app-modals.js
               grep -q 'No actionable missing fields' /tmp/app-modals.js
-              grep -q '25%+ preserved-row coverage' /tmp/app-modals.js
+              grep -q '25%+ family coverage' /tmp/app-modals.js
               grep -q 'historyPerformanceStateValue' /tmp/app-modals.js
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
@@ -92,6 +92,12 @@ jobs:
               grep -q 'Back to queue' /tmp/app-modals.js
               grep -q 'cleanupQueueMove' /tmp/app-modals.js
               grep -q 'state.showQuickView=.ALL_MISSING.' /tmp/app-modals.js
+              grep -q 'cleanupSupportedFieldsForProfileYear' /tmp/app-shows.js
+              grep -q 'exact year + preserved source family' /tmp/app-shows.js
+              grep -q 'Investigation link only' /tmp/app-modals.js
+              grep -q 'Check preserved source' /tmp/app-modals.js
+              grep -q 'Check annual LP source' /tmp/app-modals.js
+              grep -q 'No direct preserved source URL is captured' /tmp/app-modals.js
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
@@ -171,81 +177,79 @@ jobs:
           assert coverage.get('annual_lp_profiled_rows') + us.get('annual_rows',0) == 1235, (coverage,us)
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          # Year cleanup semantics: commonly coded fields (25%+ of preserved rows)
-          # plus explicit non-participation applicability.
+          # Cleanup expectations are scoped to each profile's exact year + source family
+          # (25%+ family coverage), plus explicit non-participation applicability.
           cleanup_fields=('contact','booth','cost','com','performance','payment','application','coi')
           execution_only={'com','performance','payment','application','coi'}
           def state_for(p,year,field):
               return (((p.get('history_field_states') or {}).get(str(year)) or {}).get(field) or {})
-          def supported_fields(year):
-              out=[]
-              for field in cleanup_fields:
-                  coded=0
-                  total=0
-                  for p in profiles.values():
-                      if str(year) not in {str(v) for v in (p.get('history_years') or [])}:
-                          continue
-                      s=state_for(p,year,field)
-                      coded += int(s.get('VALUE') or 0)+int(s.get('UNKNOWN') or 0)+int(s.get('NA') or 0)
-                      total += coded*0 + int(s.get('VALUE') or 0)+int(s.get('UNKNOWN') or 0)+int(s.get('NA') or 0)+int(s.get('MISSING') or 0)
-                  if total and coded/total >= 0.25:
-                      out.append(field)
-              return out
+          def supported_fields(p,year):
+              raw=((p.get('history_field_support') or {}).get(str(year)) or [])
+              return [field for field in cleanup_fields if field in raw]
+          def union_supported_fields(year):
+              return [field for field in cleanup_fields if any(field in supported_fields(p,year) for p in profiles.values())]
           def all_nonparticipation(p,year):
               n=(((p.get('history_field_states') or {}).get(str(year)) or {}).get('nonparticipation') or {})
               return int(n.get('HAS') or 0)>0 and int(n.get('MISSING') or 0)==0
-          def missing_fields(p,year,supported):
+          def missing_fields(p,year):
               if str(year) not in {str(v) for v in (p.get('history_years') or [])}:
                   return []
               out=[]
-              for field in supported:
+              for field in supported_fields(p,year):
                   if all_nonparticipation(p,year) and field in execution_only:
                       continue
                   s=state_for(p,year,field)
                   if int(s.get('VALUE') or 0)==0 and int(s.get('UNKNOWN') or 0)==0 and int(s.get('NA') or 0)==0:
                       out.append(field)
               return out
-          def missing_count(p,year,supported):
-              return len(missing_fields(p,year,supported))
-          expected_support={
+          def missing_count(p,year):
+              return len(missing_fields(p,year))
+          expected_union_support={
               2019:[],
               2021:['contact','booth','cost','coi'],
               2022:['contact','booth','cost','coi'],
-              2023:['cost','payment'],
+              2023:['contact','cost','payment'],
               2024:['cost','payment','application'],
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2019:0,2021:48,2022:18,2023:62,2024:0,2025:0,2026:2}
-          for year,expected in expected_support.items():
-              actual=supported_fields(year)
+          expected_queue={2019:0,2021:48,2022:18,2023:51,2024:0,2025:0,2026:2}
+          for year,expected in expected_union_support.items():
+              actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
-              queue=sum(1 for p in profiles.values() if missing_count(p,year,actual)>0)
+              queue=sum(1 for p in profiles.values() if missing_count(p,year)>0)
               assert queue == expected_queue[year], (year,queue,expected_queue[year])
-          assert missing_fields(profiles['HIST-015'],2022,supported_fields(2022)) == []
-          assert missing_fields(profiles['HIST-148'],2022,supported_fields(2022)) == ['booth']
-          assert missing_fields(profiles['LIFE-066'],2022,supported_fields(2022)) == ['booth','coi']
-          assert missing_fields(profiles['LIFE-043'],2024,supported_fields(2024)) == []
-          assert missing_fields(profiles['HIST-055'],2025,supported_fields(2025)) == []
-          assert missing_fields(profiles['LIFE-080'],2025,supported_fields(2025)) == []
-          assert missing_fields(profiles['LIFE-002'],2026,supported_fields(2026)) == ['payment']
-          assert missing_fields(profiles['LIFE-007'],2026,supported_fields(2026)) == ['payment']
-          assert missing_fields(profiles['LIFE-027'],2026,supported_fields(2026)) == []
+          assert supported_fields(profiles['HIST-015'],2022) == ['contact','booth','cost']
+          assert missing_fields(profiles['HIST-015'],2022) == []
+          assert missing_fields(profiles['HIST-148'],2022) == ['booth']
+          assert missing_fields(profiles['LIFE-066'],2022) == ['booth','coi']
+          assert supported_fields(profiles['HIST-182'],2023) == ['payment']
+          assert missing_fields(profiles['HIST-182'],2023) == []
+          assert 'cost' not in supported_fields(profiles['HIST-182'],2023)
+          assert missing_fields(profiles['LIFE-043'],2024) == []
+          assert missing_fields(profiles['HIST-055'],2025) == []
+          assert missing_fields(profiles['LIFE-080'],2025) == []
+          assert missing_fields(profiles['LIFE-002'],2026) == ['payment']
+          assert missing_fields(profiles['LIFE-007'],2026) == ['payment']
+          assert missing_fields(profiles['LIFE-027'],2026) == []
           def cleanup_queue(year):
-              supported=supported_fields(year)
-              rows=[p for p in profiles.values() if missing_count(p,year,supported)>0]
-              return sorted(rows,key=lambda p:(-missing_count(p,year,supported),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
+              rows=[p for p in profiles.values() if missing_count(p,year)>0]
+              return sorted(rows,key=lambda p:(-missing_count(p,year),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
           assert cleanup_queue(2024) == []
           assert cleanup_queue(2025) == []
           queue_2022=cleanup_queue(2022)
           assert len(queue_2022) == 18 and len({p.get('profile_id') for p in queue_2022}) == 18
-          assert len(cleanup_queue(2023)) == 62
+          assert len(cleanup_queue(2023)) == 51
           assert len(cleanup_queue(2026)) == 2
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 33, x.get('version')
+          assert x.get('version') == 34, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
+              assert isinstance(p.get('history_field_support'), dict), p.get('profile_id')
+              rule=p.get('history_field_support_rule') or {}
+              assert rule.get('scope') == 'YEAR_SOURCE_FAMILY', (p.get('profile_id'),rule)
+              assert float(rule.get('min_coded_ratio')) == 0.25, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
