@@ -142,6 +142,15 @@ function rebookCandidate(p){
     && Number.isFinite(net)&&net>0
     && Number.isFinite(latest)&&latest>=2013;
 }
+function historicalReviewCandidate2013(p){
+  const latest=Number(p?.latest_history_year||0);
+  const net=Number(p?.lifetime_net_volume||0);
+  return profileCurrentShows(p).length===0
+    && !String(p?.related_current_profile_id||'').trim()
+    && !p?.current_rebook_opportunity
+    && Number.isFinite(net)&&net>0
+    && Number.isFinite(latest)&&latest>=2013;
+}
 function triMatch(flag,mode){
   return mode==='ANY'||(mode==='HAS'&&Boolean(flag))||(mode==='MISSING'&&!flag);
 }
@@ -422,6 +431,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
+  if(quickView==='ALL_HISTORICAL_2013'&&!historicalReviewCandidate2013(p))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(f.historyYear==='ALL'||isLpSourceOnly(p)||missingFieldCountForYear(p,f.historyYear)===0))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
@@ -765,6 +775,7 @@ function quickViewOptions(mode){
     ?[
       ['ALL_LIVE_REBOOK','Live opportunities'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
+      ['ALL_HISTORICAL_2013','Positive-net history 2013+'],
       ['ALL_TOP_NET','Top lifetime net'],
       ['ALL_LOW_COM','Low COM'],
       ['ALL_MISSING',cleanupYear==='ALL'?'Missing fields · choose year':'Missing fields · '+cleanupYear],
@@ -786,6 +797,7 @@ function quickViewOptions(mode){
 function quickViewCount(key){
   if(key==='ALL_LIVE_REBOOK')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
+  if(key==='ALL_HISTORICAL_2013')return state.catalog.filter(historicalReviewCandidate2013).length;
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
   if(key==='ALL_MISSING'){
@@ -824,6 +836,7 @@ function applyQuickView(key){
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='NEXT_OPPORTUNITY';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
+    if(key==='ALL_HISTORICAL_2013')state.catalogSort='RECOMMENDED';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
     if(key==='ALL_MISSING'){state.catalogFilters.historyYear=selectedHistoryYear;state.catalogSort='MISSING_DATA'}
