@@ -150,6 +150,12 @@ jobs:
           assert profiles['LIFE-009'].get('has_coi_status') is True, profiles['LIFE-009']
           assert profiles['LIFE-092'].get('has_coi') is False, profiles['LIFE-092']
           assert profiles['LIFE-092'].get('has_coi_status') is False, profiles['LIFE-092']
+          # Cost semantics: numeric/Free are known cost; DND/admin-only text is not.
+          assert profiles['HIST-064'].get('has_cost') is True, profiles['HIST-064']
+          assert profiles['HIST-125'].get('has_cost') is False, profiles['HIST-125']
+          assert profiles['HIST-148'].get('has_cost') is False, profiles['HIST-148']
+          assert profiles['LIFE-043'].get('has_cost') is False, profiles['LIFE-043']
+          assert profiles['HIST-015'].get('has_cost') is True, profiles['HIST-015']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
