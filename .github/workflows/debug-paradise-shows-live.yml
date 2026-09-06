@@ -299,8 +299,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==81, len(historical_2013)
-          assert len(strong_2013)==19, len(strong_2013)
+          assert len(historical_2013)==80, len(historical_2013)
+          assert len(strong_2013)==18, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -317,7 +317,7 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-077'}
+          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
@@ -358,6 +358,13 @@ jobs:
           assert profiles['LIFE-060']['current_rebook_opportunity']['event_end']=='2027-02-21'
           assert 'not yet published' in profiles['LIFE-060']['current_rebook_opportunity']['price_text']
           assert '2027 commercial vendor application' in profiles['LIFE-060']['current_rebook_opportunity']['booking_window_text']
+          assert profiles['LIFE-076']['current_rebook_opportunity']['opportunity_status']=='WATCH'
+          assert profiles['LIFE-076']['current_rebook_opportunity']['event_start']=='2027-02-24'
+          assert profiles['LIFE-076']['current_rebook_opportunity']['event_end']=='2027-02-28'
+          assert 'partnership / activation pricing is not publicly verified' in profiles['LIFE-076']['current_rebook_opportunity']['price_text']
+          assert 'Do not treat hospitality as a vendor booth' in profiles['LIFE-076']['current_rebook_opportunity']['price_text']
+          assert 'lead-generation rights' in profiles['LIFE-076']['current_rebook_opportunity']['booking_window_text']
+          assert 'Sebastian Ascanio' in profiles['LIFE-076']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
           assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
@@ -1758,6 +1765,17 @@ jobs:
           grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
           grep -q 'fairoffice@martincountyfair.com' /tmp/martin_detail.html
           grep -q 'Open current source' /tmp/martin_detail.html
+
+          render_view cognizant_detail "$SITE/#show/LIFE-076"
+          grep -q 'Honda Classic' /tmp/cognizant_detail.html
+          grep -q 'Verified current watch' /tmp/cognizant_detail.html
+          grep -q '>WATCH<' /tmp/cognizant_detail.html
+          grep -q 'Feb 24, 2027' /tmp/cognizant_detail.html
+          grep -q 'Feb 28, 2027' /tmp/cognizant_detail.html
+          grep -q 'partnership / activation pricing is not publicly verified' /tmp/cognizant_detail.html
+          grep -q 'Do not treat hospitality as a vendor booth' /tmp/cognizant_detail.html
+          grep -q 'Sebastian Ascanio' /tmp/cognizant_detail.html
+          grep -q 'Open current source' /tmp/cognizant_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
