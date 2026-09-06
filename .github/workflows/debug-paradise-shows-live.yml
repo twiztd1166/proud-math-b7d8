@@ -339,7 +339,7 @@ jobs:
           assert len(cleanup_queue(2023)) == 43
           assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 38, x.get('version')
+          assert x.get('version') == 40, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -352,6 +352,7 @@ jobs:
               assert rule.get('source_labeled_performance') is True, (p.get('profile_id'),rule)
               assert rule.get('source_phone_contact') is True, (p.get('profile_id'),rule)
               assert rule.get('source_booking_contact') is True, (p.get('profile_id'),rule)
+              assert rule.get('semantic_known_cost') is True, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
