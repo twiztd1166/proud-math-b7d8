@@ -69,6 +69,9 @@ jobs:
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
               grep -q 'Show-history performance' /tmp/app-shows.js
               grep -q 'Has show-history performance' /tmp/app-shows.js
+              grep -q 'LeadPerfection year' /tmp/app-shows.js
+              grep -q 'All history years' /tmp/app-shows.js
+              grep -q 'All LP years' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -81,14 +84,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sS -D /tmp/options.headers -o /tmp/options.body \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -D /tmp/options.headers -o /tmp/options.body \
             -X OPTIONS "$API" \
             -H "Origin: $SITE" \
             -H "Access-Control-Request-Method: POST" \
             -H "Access-Control-Request-Headers: content-type"
           grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
 
-          curl -sS -D /tmp/bootstrap.headers -o /tmp/bootstrap.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -D /tmp/bootstrap.headers -o /tmp/bootstrap.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -103,13 +106,13 @@ jobs:
           print({'shows':36,'payments':3})
           PY
 
-          curl -sS -o /tmp/catalog.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/catalog.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalog"}'
 
-          curl -sS -o /tmp/unlinked.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unlinked.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -184,6 +187,27 @@ jobs:
           assert profiles['HIST-052'].get('has_lp_performance') is False, profiles['HIST-052']
           assert profiles['LIFE-002'].get('has_performance') is True, profiles['LIFE-002']
           assert profiles['LIFE-002'].get('has_lp_performance') is True, profiles['LIFE-002']
+          # History years are preserved occurrence years only; LP attribution years stay separate.
+          assert profiles['LPONLY-2021-123'].get('history_count') == 0, profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('history_year_count') == 0, profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('history_years') == [], profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('lp_year_count') == 2, profiles['LPONLY-2021-123']
+          assert profiles['LPONLY-2021-123'].get('lp_years') == [2022,2021], profiles['LPONLY-2021-123']
+          assert profiles['CURRENT-003'].get('history_year_count') == 0, profiles['CURRENT-003']
+          assert profiles['CURRENT-003'].get('history_years') == [], profiles['CURRENT-003']
+          assert profiles['CURRENT-003'].get('lp_year_count') == 1, profiles['CURRENT-003']
+          assert profiles['CURRENT-003'].get('lp_years') == [2022], profiles['CURRENT-003']
+          assert profiles['LIFE-025'].get('history_year_count') == 0, profiles['LIFE-025']
+          assert profiles['LIFE-025'].get('lp_year_count') == 4, profiles['LIFE-025']
+          assert profiles['LIFE-025'].get('lp_years') == [2025,2024,2022,2021], profiles['LIFE-025']
+          assert profiles['HIST-052'].get('history_year_count') == 1, profiles['HIST-052']
+          assert profiles['HIST-052'].get('history_years') == [2025], profiles['HIST-052']
+          assert profiles['HIST-052'].get('lp_year_count') == 0, profiles['HIST-052']
+          assert profiles['HIST-052'].get('lp_years') == [], profiles['HIST-052']
+          assert profiles['LIFE-002'].get('history_year_count') == 10, profiles['LIFE-002']
+          assert profiles['LIFE-002'].get('history_years') == [2026,2025,2023,2022,2021,2020,2019,2017,2016,2015], profiles['LIFE-002']
+          assert profiles['LIFE-002'].get('lp_year_count') == 11, profiles['LIFE-002']
+          assert profiles['LIFE-002'].get('lp_years') == [2026,2025,2024,2023,2022,2021,2020,2019,2017,2016,2015], profiles['LIFE-002']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
@@ -322,7 +346,7 @@ jobs:
           print({'unlinked_annual':16,'unlinked_cumulative':17,'source_groups':17,'reason_categories':expected_categories,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
-          curl -sS -o /tmp/lponly.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/lponly.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -348,7 +372,7 @@ jobs:
           print({'lp_source_only_profile':'LPONLY-2021-123','history_rows':0,'annual_lp':3,'cumulative_lp':3,'attendance_inference':False})
           PY
 
-          curl -sS -o /tmp/lponly_residual.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/lponly_residual.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -371,12 +395,12 @@ jobs:
           print({'lp_source_only_profile':'LPONLY-2024-109','history_rows':0,'annual_lp':1,'cumulative_lp':1,'attendance_inference':False})
           PY
 
-          curl -sS -o /tmp/residual_antique.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/residual_antique.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-146"}'
-          curl -sS -o /tmp/residual_seafood.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/residual_seafood.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -412,7 +436,7 @@ jobs:
           print({'residual_profile_matches':3,'antique_profile':'LIFE-146','seafood_profile':'HIST-200','matched_history_ids_added':0,'malformed_date_preserved':True})
           PY
 
-          curl -sS -o /tmp/vero_detail.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/vero_detail.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
@@ -441,36 +465,36 @@ jobs:
           print({'profile':'LIFE-009','year':2022,'history_id':'2022-SCH22-0005','year_detail_source':'PASS'})
           PY
 
-          curl -sS -o /tmp/sff.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/sff.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-002"}'
-          curl -sS -o /tmp/acs.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/acs.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-004"}'
 
-          curl -sS -o /tmp/broward.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/broward.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-010"}'
 
-          curl -sS -o /tmp/palm17.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/palm17.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-016"}'
 
-          curl -sS -o /tmp/wpb14.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/wpb14.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"HIST-152"}'
 
-          curl -sS -o /tmp/delray14.json \
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/delray14.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
