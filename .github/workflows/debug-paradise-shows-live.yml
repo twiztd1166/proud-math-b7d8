@@ -236,6 +236,32 @@ jobs:
           print({'unlinked_annual':30,'unlinked_cumulative':31,'source_groups':31,'lp_source_only_profiles':61,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
+          curl -sS -o /tmp/lponly.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LPONLY-2021-123"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/lponly.json'))
+          assert x.get('ok') is True, x
+          p=x.get('profile') or {}
+          assert p.get('profile_id') == 'LPONLY-2021-123', p
+          assert p.get('canonical_event') == 'Tampa Boat Show', p
+          assert p.get('history_count') == 0, p
+          assert p.get('occurrences') is None, p
+          rows=p.get('source_rows') or []
+          assert len(rows) == 1 and rows[0].get('source_kind') == 'LP_SOURCE_ONLY', p
+          assert rows[0].get('attendance_inference') is False, p
+          assert x.get('history') == [], x.get('history')
+          annual={r.get('evidence_id') for r in x.get('performance') or []}
+          cumulative={r.get('annual_evidence_id') for r in x.get('cumulativePerformance') or []}
+          expected={'LP2021-123','LP2021-124','LP2022-098'}
+          assert annual == expected, annual
+          assert cumulative == expected, cumulative
+          print({'lp_source_only_profile':'LPONLY-2021-123','history_rows':0,'annual_lp':3,'cumulative_lp':3,'attendance_inference':False})
+          PY
+
           curl -sS -o /tmp/sff.json \
             -X POST "$API" \
             -H "Origin: $SITE" \
