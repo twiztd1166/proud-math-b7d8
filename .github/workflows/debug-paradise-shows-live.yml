@@ -867,3 +867,54 @@ jobs:
             exit 1
           fi
           echo "Live browser rendered the operating view without uncaught JavaScript errors."
+
+
+      - name: Execute show database deep links in fresh headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome" || { echo "Chrome not found"; exit 1; }
+
+          render_view() {
+            name="$1"
+            url="$2"
+            profile="$(mktemp -d)"
+            "$chrome" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --disable-dev-shm-usage \
+              --user-data-dir="$profile" \
+              --virtual-time-budget=25000 \
+              --enable-logging=stderr \
+              --log-level=0 \
+              --dump-dom "$url" >"/tmp/${name}.html" 2>"/tmp/${name}.log"
+            if grep -q 'Loading shows…' "/tmp/${name}.html"; then
+              echo "::error::$name remained stuck on Loading shows."
+              grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' "/tmp/${name}.log" | tail -80 || true
+              exit 1
+            fi
+            if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError|SyntaxError)' "/tmp/${name}.log"; then
+              echo "::error::$name browser console contains an uncaught JavaScript error."
+              exit 1
+            fi
+          }
+
+          render_view shows "$SITE/#shows"
+          grep -q 'Show database' /tmp/shows.html
+          grep -q '665 show profiles' /tmp/shows.html
+
+          render_view current "$SITE/#current"
+          grep -q 'Current 36' /tmp/current.html
+
+          render_view unlinked "$SITE/#unlinked"
+          grep -q 'Unlinked LP 17' /tmp/unlinked.html
+          grep -q 'Administrative / aggregate 5' /tmp/unlinked.html
+          grep -q 'Generic / locationless 8' /tmp/unlinked.html
+          grep -q 'Competing identity 2' /tmp/unlinked.html
+          grep -q 'Insufficient identity 1' /tmp/unlinked.html
+          grep -q 'Cumulative only 1' /tmp/unlinked.html
+          grep -q 'Why unresolved:' /tmp/unlinked.html
+
+          echo "Live browser rendered #shows, #current, and #unlinked with governed counts and no uncaught JavaScript errors."
