@@ -6,7 +6,7 @@ function render(){
 function bindDynamic(){
   $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   $('.catalogCard[data-profile]').forEach(c=>c.onclick=()=>{const focusYear=Number(c.dataset.focusYear||0)||null;state.deepLinkedProfile=c.dataset.profile;state.deepLinkedYear=focusYear;syncLocationView();openCatalog(c.dataset.profile,focusYear)});
-  $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();render()});
+  $('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();render()});
   $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));
   const sf=$('#showFilterBtn');if(sf)sf.onclick=openShowFilters;
