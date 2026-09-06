@@ -85,6 +85,12 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalog"}'
+
+          curl -sS -o /tmp/unlinked.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogUnlinked"}'
           python - <<'PY'
           import json
           x=json.load(open('/tmp/catalog.json'))
@@ -94,6 +100,33 @@ jobs:
           assert s.get('occurrence_count') == 1086, s
           assert len(x.get('profiles') or []) == 655
           print({'profiles':655,'evidence_records':1086})
+          PY
+
+          python - <<'PY'
+          import json
+          u=json.load(open('/tmp/unlinked.json'))
+          s=u.get('summary') or {}
+          annual=u.get('annual') or []
+          cumulative=u.get('cumulative') or []
+          assert u.get('ok') is True, u
+          assert s.get('annual_rows') == 168, s
+          assert s.get('cumulative_rows') == 169, s
+          assert s.get('no_profile_identity_asserted') is True, s
+          assert s.get('attendance_inference') is False, s
+          assert len(annual) == 168, len(annual)
+          assert len(cumulative) == 169, len(cumulative)
+          annual_ids={x.get('evidence_id') for x in annual}
+          linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
+          assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
+          cumulative_only=[x for x in cumulative if not x.get('annual_evidence_id')]
+          assert len(cumulative_only) == 1, cumulative_only
+          popup=cumulative_only[0]
+          assert popup.get('evidence_id') == 'LPCUM-2024-0052', popup
+          assert popup.get('source_label') == '2024 PopUp Shop Boca 8/24/24', popup
+          assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
+          assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
+          assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
+          print({'unlinked_annual':168,'unlinked_cumulative':169,'source_groups':169,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/sff.json \
