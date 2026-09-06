@@ -90,10 +90,10 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 679, s
-          assert s.get('occurrence_count') == 1079, s
-          assert len(x.get('profiles') or []) == 679
-          print({'profiles':679,'evidence_records':1079})
+          assert s.get('profile_count') == 655, s
+          assert s.get('occurrence_count') == 1086, s
+          assert len(x.get('profiles') or []) == 655
+          print({'profiles':655,'evidence_records':1086})
           PY
 
           curl -sS -o /tmp/sff.json \
@@ -106,6 +106,12 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogHistory","profileId":"LIFE-004"}'
+
+          curl -sS -o /tmp/broward.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-010"}'
 
           curl -sS -o /tmp/palm17.json \
             -X POST "$API" \
@@ -128,16 +134,40 @@ jobs:
           import json
           sff=json.load(open('/tmp/sff.json'))
           acs=json.load(open('/tmp/acs.json'))
+          broward=json.load(open('/tmp/broward.json'))
           assert sff.get('ok') is True, sff
           assert acs.get('ok') is True, acs
+          assert broward.get('ok') is True, broward
           sff19=[h for h in sff.get('history') or [] if h.get('source_year') == 2019 and h.get('source_kind') == 'ARCHIVED_SCHEDULE']
           assert sff19, sff
+
+          annual_broward=next((x for x in broward.get('performance') or [] if x.get('evidence_id') == 'LP2015-007'), None)
+          cumulative_broward=next((x for x in broward.get('cumulativePerformance') or [] if x.get('evidence_id') == 'LPCUM-2015-0007'), None)
+          assert annual_broward, broward
+          assert cumulative_broward, broward
+          assert annual_broward.get('close_sales_count') == 1 and float(annual_broward.get('close_sales_volume')) == 2420, annual_broward
+          assert cumulative_broward.get('raw_count') == 91, cumulative_broward
+          assert cumulative_broward.get('gross_close_count') == 12 and float(cumulative_broward.get('gross_close_volume')) == 125738, cumulative_broward
+          assert cumulative_broward.get('net_close_count') == 10 and float(cumulative_broward.get('net_close_volume')) == 92473, cumulative_broward
+          assert cumulative_broward.get('comparison_status') == 'MATURED', cumulative_broward
           years={h.get('source_year') for h in acs.get('history') or [] if h.get('source_kind') in ('ARCHIVED_SCHEDULE','SHOW_COST_REGISTER')}
           assert {2018,2019,2020}.issubset(years), years
 
           catalog=json.load(open('/tmp/catalog.json'))
           summary=(catalog.get('summary') or {})
           source_summary=summary.get('source_summary') or {}
+          cumulative=source_summary.get('cumulative_lifetime_layer') or {}
+          assert cumulative.get('rows') == 1251, cumulative
+          assert cumulative.get('unresolved') == 0, cumulative
+          assert cumulative.get('exact_unchanged') == 1147, cumulative
+          assert cumulative.get('matured') == 84, cumulative
+          assert cumulative.get('cumulative_only') == 20, cumulative
+          assert cumulative.get('gross_close_delta') == 108, cumulative
+          assert cumulative.get('gross_volume_delta') == 1850586, cumulative
+          assert cumulative.get('net_close_delta') == 82, cumulative
+          assert cumulative.get('net_volume_delta') == 1362328, cumulative
+          assert cumulative.get('annual_values_overwritten') is False, cumulative
+          assert cumulative.get('validation') == 'PASS', cumulative
           y20=source_summary.get('year_2020') or {}
           assert y20.get('source_files') == 19, y20
           assert y20.get('preserved_occurrence_groups') == 55, y20
@@ -261,7 +291,7 @@ jobs:
             exit 1
           fi
           grep -q 'Work today / this week' /tmp/dom.html
-          if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError)' /tmp/chrome.log; then
+          if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError|SyntaxError)' /tmp/chrome.log; then
             echo "::error::Browser console contains an uncaught JavaScript error."
             exit 1
           fi
