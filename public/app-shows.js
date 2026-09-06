@@ -609,11 +609,29 @@ function unlinkedLpGroups(){
   for(const row of cumulative)if(!row.annual_evidence_id)groups.push({annual:null,cumulative:row});
   return groups.sort((a,b)=>Number(b.annual?.source_year||b.cumulative?.source_year||0)-Number(a.annual?.source_year||a.cumulative?.source_year||0)||String(a.annual?.source_label||a.cumulative?.source_label||'').localeCompare(String(b.annual?.source_label||b.cumulative?.source_label||'')));
 }
+function unlinkedLpCategoryLabel(category){
+  return ({
+    ALL:'All reasons',
+    ADMINISTRATIVE_AGGREGATE:'Administrative / aggregate',
+    GENERIC_LOCATIONLESS:'Generic / locationless',
+    COMPETING_IDENTITY:'Competing identity',
+    INSUFFICIENT_IDENTITY:'Insufficient identity',
+    CUMULATIVE_ONLY_UNMATCHED:'Cumulative only',
+    UNRESOLVED_OTHER:'Other unresolved',
+  })[category]||String(category||'Unresolved').replaceAll('_',' ');
+}
+function unlinkedLpGroupCategory(group){
+  return group.annual?.resolution_category||group.cumulative?.resolution_category||'UNRESOLVED_OTHER';
+}
+function unlinkedLpGroupReason(group){
+  return group.annual?.resolution_reason||group.cumulative?.resolution_reason||'Source identity remains unresolved without manufacturing a show profile.';
+}
 function unlinkedLpSearchText(group){
   const a=group.annual||{},c=group.cumulative||{};
   return [
     a.source_year,c.source_year,a.source_label,c.source_label,a.evidence_id,c.evidence_id,a.match_status,c.match_status,c.comparison_status,
-    a.source_fields?.event_name,a.source_fields?.event_dates,a.source_fields?.mapping_note,c.source_fields?.controlled_reconciliation_note
+    a.source_fields?.event_name,a.source_fields?.event_dates,a.source_fields?.mapping_note,c.source_fields?.controlled_reconciliation_note,
+    a.resolution_category,c.resolution_category,a.resolution_reason,c.resolution_reason,unlinkedLpCategoryLabel(unlinkedLpGroupCategory(group))
   ].join(' ').toLowerCase();
 }
 function unlinkedAnnualHtml(a){
@@ -631,17 +649,23 @@ function unlinkedCumulativeHtml(c){
 function unlinkedLpCard(group){
   const a=group.annual,c=group.cumulative,year=Number(a?.source_year||c?.source_year||0),label=a?.source_label||c?.source_label||'Unlinked LeadPerfection source';
   const status=c?.comparison_status?String(c.comparison_status).replaceAll('_',' '):(a?.match_status?String(a.match_status).replaceAll('_',' '):'UNLINKED');
-  return `<details class="historyItem unlinkedLpCard"><summary><span><b>${esc(year||'—')}</b> · ${esc(label)}</span><span>${esc(status)}</span></summary><div class="historyBody"><div class="historyFlag evidence">UNLINKED SOURCE · evidence preserved without creating a show profile</div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${unlinkedAnnualHtml(a)}</div><div class="yearLpSection cumulativeLpSection" style="margin-top:8px"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${unlinkedCumulativeHtml(c)}</div><div class="yearVerification">Evidence IDs: ${esc(a?.evidence_id||'—')} · ${esc(c?.evidence_id||'—')}</div></div></details>`;
+  const category=unlinkedLpGroupCategory(group),categoryLabel=unlinkedLpCategoryLabel(category),reason=unlinkedLpGroupReason(group);
+  return `<details class="historyItem unlinkedLpCard"><summary><span><b>${esc(year||'—')}</b> · ${esc(label)}</span><span>${esc(categoryLabel)} · ${esc(status)}</span></summary><div class="historyBody"><div class="historyFlag evidence">UNLINKED SOURCE · ${esc(categoryLabel)}</div><div class="yearVerification"><b>Why unresolved:</b> ${esc(reason)}</div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${unlinkedAnnualHtml(a)}</div><div class="yearLpSection cumulativeLpSection" style="margin-top:8px"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${unlinkedCumulativeHtml(c)}</div><div class="yearVerification">Evidence IDs: ${esc(a?.evidence_id||'—')} · ${esc(c?.evidence_id||'—')}</div></div></details>`;
 }
 function renderUnlinkedLp(){
   const u=state.unlinkedLp;
   if(u.loading&&!u.loaded)return '<div class="loading">Loading unlinked LeadPerfection evidence…</div>';
   if(u.error&&!u.loaded)return `<div class="alert"><div class="event">Unlinked evidence unavailable</div><div class="action">${esc(u.error)}</div><div class="actions"><button class="btn primary" id="unlinkedRetry">Try again</button></div></div>`;
   if(!u.loaded)return '<div class="loading">Opening unlinked LeadPerfection evidence…</div>';
-  const q=String(state.search||'').trim().toLowerCase();
-  const groups=unlinkedLpGroups().filter(g=>!q||unlinkedLpSearchText(g).includes(q));
-  const annualCount=Number(u.summary?.annual_rows||u.annual.length||0),cumulativeCount=Number(u.summary?.cumulative_rows||u.cumulative.length||0);
-  return `<div class="sourceWarn historyIntro"><b>Unlinked LeadPerfection sources are not extra show profiles.</b> These rows are preserved because their source identity could not be linked safely to a governed show profile. They remain searchable evidence; no attendance or show identity is inferred.</div><div class="stats"><div class="stat"><div class="v">${annualCount}</div><div class="l">Annual rows</div></div><div class="stat"><div class="v">${cumulativeCount}</div><div class="l">Cumulative rows</div></div><div class="stat"><div class="v">${unlinkedLpGroups().length}</div><div class="l">Source groups</div></div></div><div class="showTools"><div class="search"><input id="searchInput" placeholder="Search unlinked source, year, evidence ID…" value="${esc(state.search)}"></div><div class="resultLine">${groups.length.toLocaleString()} matching source group${groups.length===1?'':'s'}</div></div><div class="historyList">${groups.map(unlinkedLpCard).join('')||'<div class="empty">No unlinked LeadPerfection sources match this search.</div>'}</div>`;
+  const q=String(state.search||'').trim().toLowerCase(),category=String(u.category||'ALL');
+  const allGroups=unlinkedLpGroups();
+  const categoryGroups=allGroups.filter(g=>category==='ALL'||unlinkedLpGroupCategory(g)===category);
+  const groups=categoryGroups.filter(g=>!q||unlinkedLpSearchText(g).includes(q));
+  const annualCount=Number(u.summary?.annual_rows||u.annual.length||0),cumulativeCount=Number(u.summary?.cumulative_rows||u.cumulative.length||0),sourceGroups=Number(u.summary?.source_groups||allGroups.length||0);
+  const counts=u.summary?.category_counts||{};
+  const categories=['ALL','ADMINISTRATIVE_AGGREGATE','GENERIC_LOCATIONLESS','COMPETING_IDENTITY','INSUFFICIENT_IDENTITY','CUMULATIVE_ONLY_UNMATCHED','UNRESOLVED_OTHER'];
+  const reasonFilters=`<div class="filterbar modebar">${categories.filter(key=>key==='ALL'||Number(counts[key]||0)>0).map(key=>{const count=key==='ALL'?sourceGroups:Number(counts[key]||0);return `<button class="chip ${category===key?'active':''}" data-unlinked-category="${esc(key)}">${esc(unlinkedLpCategoryLabel(key))} ${count}</button>`}).join('')}</div>`;
+  return `<div class="sourceWarn historyIntro"><b>Unlinked LeadPerfection sources are not extra show profiles.</b> These rows are preserved because their source identity could not be linked safely to a governed show profile. Each source now shows its governed unresolved reason; no attendance or show identity is inferred.</div><div class="stats"><div class="stat"><div class="v">${annualCount}</div><div class="l">Annual rows</div></div><div class="stat"><div class="v">${cumulativeCount}</div><div class="l">Cumulative rows</div></div><div class="stat"><div class="v">${sourceGroups}</div><div class="l">Source groups</div></div></div>${reasonFilters}<div class="showTools"><div class="search"><input id="searchInput" placeholder="Search source, reason, year, evidence ID…" value="${esc(state.search)}"></div><div class="resultLine">${groups.length.toLocaleString()} matching source group${groups.length===1?'':'s'}</div></div><div class="historyList">${groups.map(unlinkedLpCard).join('')||'<div class="empty">No unlinked LeadPerfection sources match this reason/search.</div>'}</div>`;
 }
 
 function renderCurrentShows(){
