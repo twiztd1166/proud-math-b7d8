@@ -96,6 +96,14 @@ function rebookOpportunityCard(op){
   const checked=String(op.checked_at||'').slice(0,10);
   return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
+function rebookReviewCard(review){
+  if(!review)return '';
+  const disposition=String(review.disposition||'').toUpperCase()||'REVIEW';
+  const checked=String(review.checked_at||'').slice(0,10);
+  const evidence=String(review.evidence_date||'').slice(0,10);
+  const css=disposition.toLowerCase();
+  return `<div class="rebookReview ${esc(css)}"><div class="rebookReviewHead"><span>Current booking review</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid"><div class="wide"><span>Why</span><b>${esc(review.rationale||'Current review requires attention.')}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||'Verified current review source')}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
+}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   const lpOnly=isLpSourceOnly(p);
@@ -103,13 +111,15 @@ function catalogCard(p){
   const hist=Number(p.history_count||0),life=Number(p.occurrences||0),years=Array.isArray(p.history_years)?p.history_years:[];
   const candidate=rebookCandidate(p);
   const liveOpportunity=p?.current_rebook_opportunity||null;
+  const currentReview=p?.current_rebook_review||null;
+  const reviewDisposition=String(currentReview?.disposition||'').toUpperCase();
   const relatedCurrentProfile=String(p?.related_current_profile_id||'').trim();
   const opportunityPill=liveOpportunity
     ?(String(liveOpportunity.opportunity_status||'').toUpperCase()==='EXHIBITOR_LISTED'?'EXHIBITOR LISTED'
       :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='WATCH'?'CURRENT WATCH'
         :(String(liveOpportunity.opportunity_status||'').toUpperCase()==='APPLICATION_CLOSED'?'NEXT-CYCLE WATCH':'LIVE OPPORTUNITY')))
     :'';
-  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?opportunityPill:(relatedCurrentProfile?'SAME SERIES':(candidate?'REBOOK CANDIDATE':'READ ONLY'))));
+  const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':(liveOpportunity?opportunityPill:(relatedCurrentProfile?'SAME SERIES':(reviewDisposition?reviewDisposition:(candidate?'REBOOK CANDIDATE':'READ ONLY')))));
   const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
   const missing=cleanupYear!=='ALL'?missingFieldsForYear(p,cleanupYear):[];
   const cleanup=missing.length
@@ -128,9 +138,11 @@ function catalogCard(p){
   const preservedContext=candidate&&preservedBits.length?`<div class="rebookContext"><span>Historical booking context</span><b>${preservedBits.join(' · ')}</b></div>`:'';
   const nextBooking=candidate?`<div class="rebookNext"><span>Next booking step</span><b>Verify the next occurrence, current availability, current quote / fees, and booking or payment deadline before committing.</b></div>`:'';
   const historicalAgeNote=candidate&&Number(p.latest_history_year||0)<2023?`<div class="rebookAge"><span>Older historical evidence</span><b>Strong history remains eligible because the rebook review starts in 2013. Verify that the organizer / series still exists, the venue or market still fits, and current economics remain attractive before booking.</b></div>`:'';
-  const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${rebookOpportunityCard(liveOpportunity)}${preservedContext}${liveOpportunity?'':nextBooking}`:'';
+  const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${preservedContext}${nextBooking}`:'';
+  const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity):'';
+  const reviewCard=currentReview?rebookReviewCard(currentReview):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
-  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${reviewCard}${opportunityCard}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
@@ -145,8 +157,11 @@ function rebookCandidate(p){
   const tier=String(p?.tier||'');
   const latest=Number(p?.latest_history_year||0);
   const net=Number(p?.lifetime_net_volume||0);
+  const disposition=String(p?.current_rebook_review?.disposition||'').toUpperCase();
   return profileCurrentShows(p).length===0
     && !String(p?.related_current_profile_id||'').trim()
+    && !p?.current_rebook_opportunity
+    && !['HOLD','RETIRED'].includes(disposition)
     && (tier==='Platinum'||tier==='Gold')
     && Number.isFinite(net)&&net>0
     && Number.isFinite(latest)&&latest>=2013;
@@ -413,7 +428,8 @@ function catalogSearchText(p,current){
     s.event,s.mfc_id,s.owner,s.follow_up,s.booking_status,s.decision,s.confirmation,s.performance,
     s.source_detail?.needs_evidence,s.source_detail?.payment_status,s.source_detail?.follow_up_detail
   ]);
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),...currentText].join(' ').toLowerCase();
+  const review=p?.current_rebook_review||{};
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
@@ -440,6 +456,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
+  if(quickView==='ALL_REBOOK_HOLD'&&!['HOLD','RETIRED'].includes(String(p?.current_rebook_review?.disposition||'').toUpperCase()))return false;
   if(quickView==='ALL_HISTORICAL_2013'&&!historicalReviewCandidate2013(p))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(f.historyYear==='ALL'||isLpSourceOnly(p)||missingFieldCountForYear(p,f.historyYear)===0))return false;
@@ -784,6 +801,7 @@ function quickViewOptions(mode){
     ?[
       ['ALL_LIVE_REBOOK','Verified current / watch'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
+      ['ALL_REBOOK_HOLD','Hold / do not book'],
       ['ALL_HISTORICAL_2013','Positive-net history 2013+'],
       ['ALL_TOP_NET','Top lifetime net'],
       ['ALL_LOW_COM','Low COM'],
@@ -806,6 +824,7 @@ function quickViewOptions(mode){
 function quickViewCount(key){
   if(key==='ALL_LIVE_REBOOK')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
+  if(key==='ALL_REBOOK_HOLD')return state.catalog.filter(p=>['HOLD','RETIRED'].includes(String(p?.current_rebook_review?.disposition||'').toUpperCase())).length;
   if(key==='ALL_HISTORICAL_2013')return state.catalog.filter(historicalReviewCandidate2013).length;
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
@@ -845,6 +864,7 @@ function applyQuickView(key){
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='NEXT_OPPORTUNITY';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
+    if(key==='ALL_REBOOK_HOLD')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_HISTORICAL_2013')state.catalogSort='RECOMMENDED';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
