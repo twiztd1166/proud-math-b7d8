@@ -6,7 +6,7 @@ function render(){
 function bindDynamic(){
   $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   $$('.catalogCard[data-profile]').forEach(c=>c.onclick=()=>openCatalog(c.dataset.profile));
-  $('[data-show-mode]').forEach(b=>b.onclick=()=>{state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();render()});
+  $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();render()});
   $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));
   const sf=$('#showFilterBtn');if(sf)sf.onclick=openShowFilters;
@@ -14,7 +14,7 @@ function bindDynamic(){
   const sr=$('#showResetBtn');if(sr)sr.onclick=resetShowView;
   const cr=$('#catalogRetry');if(cr)cr.onclick=()=>loadCatalog(true);
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
-  $('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
+  $$('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
   $$('.paymentCard[data-payment]').forEach(c=>c.onclick=()=>openPayment(c.dataset.payment));
   $$('.chip[data-filter]').forEach(c=>c.onclick=()=>{state.filter=c.dataset.filter;render()});
