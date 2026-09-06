@@ -163,6 +163,12 @@ jobs:
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
             --data '{"action":"catalogUnlinked"}'
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/life177.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"catalogHistory","profileId":"LIFE-177"}'
           python - <<'PY'
           import json
           x=json.load(open('/tmp/catalog.json'))
@@ -223,7 +229,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:0,2015:0,2016:0,2017:3,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -318,13 +324,26 @@ jobs:
               rows=[p for p in profiles.values() if missing_count(p,year)>0]
               return sorted(rows,key=lambda p:(-missing_count(p,year),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
           queue_2017=cleanup_queue(2017)
-          actual_2017={p.get('profile_id'):missing_fields(p,2017) for p in queue_2017}
-          expected_2017={
-              'HIST-418':['performance'],
-              'HIST-433':['performance'],
-              'LIFE-177':['performance'],
-          }
-          assert actual_2017 == expected_2017, actual_2017
+          assert queue_2017 == [], queue_2017
+          for pid in ('HIST-418','HIST-433','LIFE-177'):
+              assert missing_fields(profiles[pid],2017) == []
+              perf=profiles[pid]['history_field_states']['2017']['performance']
+              assert perf.get('UNKNOWN') == 1 and perf.get('VALUE') == 0 and perf.get('MISSING') == 0, (pid,perf)
+          life177_cost=profiles['LIFE-177']['history_field_states']['2017']['cost']
+          life177_payment=profiles['LIFE-177']['history_field_states']['2017']['payment']
+          assert life177_cost.get('VALUE') == 1 and life177_cost.get('MISSING') == 0, life177_cost
+          assert life177_payment.get('UNKNOWN') == 1 and life177_payment.get('VALUE') == 0 and life177_payment.get('MISSING') == 0, life177_payment
+          life177=json.load(open('/tmp/life177.json'))
+          assert life177.get('ok') is True, life177
+          hg=next((h for h in (life177.get('history') or []) if h.get('history_id') == '2017-ARCH-PERF-0032'),None)
+          assert hg, life177
+          assert str(hg.get('event_cost_text')) == '600', hg
+          assert str(hg.get('payment_status_text') or '').startswith('UNKNOWN — 2017 payment completion not recovered'), hg
+          sf=hg.get('source_fields') or {}
+          assert ((sf.get('booking_evidence') or {}).get('payment')) == 'OWE $750', sf
+          rec=sf.get('booking_reconciliation_2017') or {}
+          assert rec.get('event_year_booth_fee') == 600 and rec.get('event_year_payment_completion') == 'UNKNOWN', rec
+          assert str(sf.get('PERFORMANCE MATCH STATUS') or '').startswith('UNKNOWN — 2017 event-level lead/set/issued metrics not recovered'), sf
           assert cleanup_queue(2014) == []
           assert cleanup_queue(2015) == []
           assert cleanup_queue(2016) == []
