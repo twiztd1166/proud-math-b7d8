@@ -929,6 +929,7 @@ jobs:
           source_summary=summary.get('source_summary') or {}
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
           annual_cum_recon=source_summary.get('annual_vs_cumulative_reconciliation_2013_2026') or {}
+          row_recon=source_summary.get('annual_vs_cumulative_row_level_reconciliation_2013_2026') or {}
           identity=source_summary.get('identity_reconciliation') or {}
           consolidation=source_summary.get('duplicate_profile_consolidation') or {}
           exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
@@ -1304,6 +1305,27 @@ jobs:
           recon23net=recon23.get('annual_net_raw_only') or {}
           assert recon23net.get('net_close_count') == 119, recon23net
           assert recon23net.get('net_sale_volume') == 2910250, recon23net
+          assert row_recon.get('stage') == 'READY', row_recon
+          assert row_recon.get('validation') == 'PASS', row_recon
+          assert row_recon.get('matured_rows') == 143, row_recon
+          assert row_recon.get('standard_monotonic_matured') == 125, row_recon
+          assert row_recon.get('administrative_aggregate_matured') == 2, row_recon
+          assert row_recon.get('explicit_2023_monotonic_matured') == 16, row_recon
+          assert row_recon.get('nonmonotonic_linked_matured') == 0, row_recon
+          assert row_recon.get('cumulative_only_rows') == 13, row_recon
+          assert row_recon.get('cumulative_only_positive_activity') == 10, row_recon
+          assert row_recon.get('cumulative_only_zero_activity') == 3, row_recon
+          assert row_recon.get('annual_only_rows') == 5, row_recon
+          assert row_recon.get('annual_only_year') == 2020, row_recon
+          assert row_recon.get('annual_values_overwritten') is False, row_recon
+          assert row_recon.get('attendance_inference') is False, row_recon
+          assert set(row_recon.get('administrative_aggregate_ids') or []) == {'LPCUM-2014-0024','LPCUM-2014-0033'}, row_recon
+          assert set(row_recon.get('cumulative_only_zero_ids') or []) == {'LPCUM-2017-0034','LPCUM-2017-0043','LPCUM-2020-0080'}, row_recon
+          assert len(row_recon.get('cumulative_only_positive_ids') or []) == 10, row_recon
+          assert len(row_recon.get('explicit_2023_matured_ids') or []) == 16, row_recon
+          assert row_recon.get('annual_only_labels') == recon20.get('annual_only_labels'), (row_recon,recon20)
+          assert 'five preserved annual-only rows' in str(row_recon.get('2020_explanation') or ''), row_recon
+          assert 'exact preserved annual_row_id' in str(row_recon.get('2023_explanation') or ''), row_recon
           y20=source_summary.get('year_2020') or {}
           assert y20.get('source_files') == 19, y20
           assert y20.get('preserved_occurrence_groups') == 55, y20
