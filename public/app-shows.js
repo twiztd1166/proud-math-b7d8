@@ -5,7 +5,7 @@ function currentProfileForShow(show){
 function bookingOpportunityOpen(show){
   const text=[show?.booking_status,show?.source_detail?.follow_up_detail,show?.payment_terms].filter(Boolean).join(' ').toUpperCase();
   return /(APPLICATIONS? OPEN|VENDOR (APPLICATION|INTEREST|CALL)|EXHIBITOR (SALES|SPACE|APPLICATION)|CONTRACT OFFER|REGISTRATION OFFER|SOLICITING|BOOTH AWAITS|APPLY|RESERVATION)/.test(text)
-    && !/(EVENT (WAS )?FULL|ALREADY FULL|NOT BOOKED|BOOKING NOT FOUND|PARTICIPATION NOT FOUND)/.test(text);
+    && !/(EVENT (WAS )?FULL|ALREADY FULL)/.test(text);
 }
 function bookingCommitted(show){
   const status=String(show?.booking_status||'').toUpperCase();
