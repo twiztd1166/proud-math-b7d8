@@ -238,18 +238,22 @@ async function openCatalog(id){
       {label:'Annual LP',value:state.catalogFilters.lpYear},
       {label:'Cumulative LP',value:state.catalogFilters.cumulativeLpYear},
     ].filter(x=>x.value!=='ALL').map(x=>({...x,year:Number(x.value)})).filter(x=>Number.isFinite(x.year)&&years.includes(x.year));
-    const focusedEvidenceYear=activeYearFilters[0]?.year??null;
-    const orderedYears=focusedEvidenceYear?[focusedEvidenceYear,...years.filter(y=>y!==focusedEvidenceYear)]:years;
+    const selectedEvidenceYears=[...new Set(activeYearFilters.map(x=>x.year))];
+    const focusedEvidenceYear=selectedEvidenceYears[0]??null;
+    const selectedEvidenceYearSet=new Set(selectedEvidenceYears);
+    const orderedYears=selectedEvidenceYears.length?[...selectedEvidenceYears,...years.filter(y=>!selectedEvidenceYearSet.has(y))]:years;
     const historyHtml=years.length?orderedYears.map((year,i)=>{
       const rows=h.filter(x=>Number(x.source_year||0)===year);
       const lpItems=perf.filter(x=>Number(x.source_year||0)===year);
       const cumulativeItems=cum.filter(x=>Number(x.source_year||0)===year);
-      return `<details class="historyYear ${focusedEvidenceYear===year?'focusedYear':''}" ${i===0?'open':''}><summary><span>${esc(year)}${focusedEvidenceYear===year?'<span class="yearFocusTag">Selected filter</span>':''}</span><span>${rows.length} record${rows.length===1?'':'s'} · ${lpItems.length} annual LP · ${cumulativeItems.length} cumulative LP</span></summary><div class="historyYearBody">${yearScorecard(year,rows,lpItems,cumulativeItems)}</div></details>`;
+      const selectedForYear=activeYearFilters.filter(x=>x.year===year);
+      const filterTag=selectedForYear.length?`<span class="yearFocusTag">${esc(selectedForYear.map(x=>x.label).join(' + '))} filter${selectedForYear.length===1?'':'s'}</span>`:'';
+      return `<details class="historyYear ${selectedForYear.length?'focusedYear':''}" ${i===0?'open':''}><summary><span>${esc(year)}${filterTag}</span><span>${rows.length} record${rows.length===1?'':'s'} · ${lpItems.length} annual LP · ${cumulativeItems.length} cumulative LP</span></summary><div class="historyYearBody">${yearScorecard(year,rows,lpItems,cumulativeItems)}</div></details>`;
     }).join(''):'<div class="empty">No year-by-year history or LeadPerfection evidence is linked to this profile.</div>';
     const latestContact=[...h].filter(x=>String(x.contact||sourceFieldValue(x,['CONTACT INFO'])||'').trim()).sort((a,b)=>Number(b.source_year||0)-Number(a.source_year||0)||Number(b.source_row||0)-Number(a.source_row||0))[0]||null;
     const latestContactText=latestContact?String(latestContact.contact||sourceFieldValue(latestContact,['CONTACT INFO'])||'').trim():'';
     const latestContactHtml=`<div class="latestContact"><div class="k">Latest known show contact</div>${latestContact?`<div class="latestContactValue"><b>${esc(latestContactText)}</b><span>Preserved ${esc(latestContact.source_year)} record</span>${contactActions(latestContactText)}</div>`:`<div class="latestContactValue"><b class="yearMissing">${HISTORY_MISSING}</b></div>`}</div>`;
-    const historyFocusNote=focusedEvidenceYear?`<div class="sourceWarn yearFocusNote"><b>${esc(focusedEvidenceYear)} opened first</b> · Active year filter${activeYearFilters.length===1?'':'s'}: ${activeYearFilters.map(x=>esc(x.label+' '+x.year)).join(' · ')}. All evidence years remain available below.</div>`:'';
+    const historyFocusNote=focusedEvidenceYear?`<div class="sourceWarn yearFocusNote"><b>${selectedEvidenceYears.length===1?esc(focusedEvidenceYear)+' opened first':'Selected evidence years shown first: '+selectedEvidenceYears.map(esc).join(' · ')}</b> · Active year filter${activeYearFilters.length===1?'':'s'}: ${activeYearFilters.map(x=>esc(x.label+' '+x.year)).join(' · ')}. All evidence years remain available below.</div>`:'';
     const profileLabel=lpSourceOnly?'LP source only':(p.tier||p.source_type.replaceAll('_',' '));
     const lpSourceOnlyNotice=lpSourceOnly?`<div class="sourceWarn historyIntro"><b>LP source-only identity.</b> This profile exists only to anchor specific LeadPerfection attribution. It does not assert Paradise attended, worked, staffed, booked, paid for, or completed the event; no history occurrence was created.</div>`:'';
     const yearSectionLabel='Year-by-year evidence';
