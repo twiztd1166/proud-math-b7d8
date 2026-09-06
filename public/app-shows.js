@@ -122,6 +122,13 @@ function missingFieldsForYear(p,year){
   });
 }
 function missingFieldCountForYear(p,year){return missingFieldsForYear(p,year).length}
+function cleanupQueueProfilesForYear(year){
+  if(year==='ALL')return [];
+  return state.catalog
+    .filter(p=>!isLpSourceOnly(p)&&missingFieldCountForYear(p,year)>0)
+    .slice()
+    .sort((a,b)=>missingFieldCountForYear(b,year)-missingFieldCountForYear(a,year)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''),undefined,{sensitivity:'base'}));
+}
 function cleanupQueueIntro(){
   if(state.showQuickView!=='ALL_MISSING'||state.catalogFilters.historyYear==='ALL')return '';
   const year=state.catalogFilters.historyYear,supported=cleanupSupportedFieldsForYear(year);
