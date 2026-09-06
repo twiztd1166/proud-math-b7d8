@@ -594,14 +594,59 @@ function resetShowView(){
   }
   state.catalogLimit=60;render();
 }
+function unlinkedLpGroups(){
+  const annual=state.unlinkedLp.annual||[],cumulative=state.unlinkedLp.cumulative||[];
+  const cumulativeByAnnual=new Map();
+  for(const row of cumulative)if(row.annual_evidence_id)cumulativeByAnnual.set(row.annual_evidence_id,row);
+  const groups=annual.map(row=>({annual:row,cumulative:cumulativeByAnnual.get(row.evidence_id)||null}));
+  for(const row of cumulative)if(!row.annual_evidence_id)groups.push({annual:null,cumulative:row});
+  return groups.sort((a,b)=>Number(b.annual?.source_year||b.cumulative?.source_year||0)-Number(a.annual?.source_year||a.cumulative?.source_year||0)||String(a.annual?.source_label||a.cumulative?.source_label||'').localeCompare(String(b.annual?.source_label||b.cumulative?.source_label||'')));
+}
+function unlinkedLpSearchText(group){
+  const a=group.annual||{},c=group.cumulative||{};
+  return [
+    a.source_year,c.source_year,a.source_label,c.source_label,a.evidence_id,c.evidence_id,a.match_status,c.match_status,c.comparison_status,
+    a.source_fields?.event_name,a.source_fields?.event_dates,a.source_fields?.mapping_note,c.source_fields?.controlled_reconciliation_note
+  ].join(' ').toLowerCase();
+}
+function unlinkedAnnualHtml(a){
+  if(!a)return '<div class="yearLpEmpty">No annual-period row exists for this cumulative-only source.</div>';
+  const f=a.source_fields&&typeof a.source_fields==='object'?a.source_fields:{};
+  const url=String(f.source_report_url||'').trim();
+  return `<div class="yearLpCard"><div class="yearLpHead"><b>${esc(a.source_label||a.evidence_id)}</b><span>${esc(String(a.match_status||'UNLINKED').replaceAll('_',' '))}</span></div><div class="yearMetricGrid compact"><div><span>Raw</span><b>${esc(f.raw??'—')}</b></div><div><span>Set</span><b>${esc(a.issued??'—')}</b></div><div><span>Issue</span><b>${esc(a.opportunities??'—')}</b></div><div><span>Demo</span><b>${esc(a.demos??'—')}</b></div><div><span>Gross closes</span><b>${esc(a.close_sales_count??'—')}</b></div><div><span>Gross volume</span><b>${money(a.close_sales_volume)}</b></div><div><span>Net closes</span><b>${esc(f.net_close_count??'—')}</b></div><div><span>Net volume</span><b>${f.net_sale_volume==null?'—':money(f.net_sale_volume)}</b></div></div>${f.mapping_note?`<div class="yearVerification">${esc(f.mapping_note)}</div>`:''}<div class="yearVerification">Annual-period source attribution · no governed profile identity asserted · not attendance proof</div>${url?`<div class="actions"><a class="btn secondary sourceBtn" target="_blank" href="${esc(url)}">Open annual report</a></div>`:''}</div>`;
+}
+function unlinkedCumulativeHtml(c){
+  if(!c)return '<div class="yearLpEmpty">No 2012–2026 cumulative row is linked to this annual source.</div>';
+  const url=String(c.source_report_url||'').trim(),status=typeof cumulativeLpStatus==='function'?cumulativeLpStatus(c.comparison_status):String(c.comparison_status||'CUMULATIVE ATTRIBUTION').replaceAll('_',' ');
+  const note=String(c.source_fields?.controlled_reconciliation_note||'').trim();
+  return `<div class="yearLpCard cumulativeLpCard"><div class="yearLpHead"><b>${esc(c.source_label||c.evidence_id)}</b><span>${esc(status)}</span></div><div class="yearMetricGrid compact"><div><span>Raw</span><b>${esc(c.raw_count??'—')}</b></div><div><span>Set</span><b>${esc(c.set_count??'—')}</b></div><div><span>Issue</span><b>${esc(c.issue_count??'—')}</b></div><div><span>Demo</span><b>${esc(c.demo_count??'—')}</b></div><div><span>Gross closes</span><b>${esc(c.gross_close_count??'—')}</b></div><div><span>Gross volume</span><b>${money(c.gross_close_volume)}</b></div><div><span>Net closes</span><b>${esc(c.net_close_count??'—')}</b></div><div><span>Net volume</span><b>${money(c.net_close_volume)}</b></div></div>${note?`<div class="yearVerification">${esc(note)}</div>`:''}<div class="yearVerification">2012–2026 report-period attribution · no governed profile identity asserted · not attendance proof</div>${url?`<div class="actions"><a class="btn secondary sourceBtn" target="_blank" href="${esc(url)}">Open cumulative report</a></div>`:''}</div>`;
+}
+function unlinkedLpCard(group){
+  const a=group.annual,c=group.cumulative,year=Number(a?.source_year||c?.source_year||0),label=a?.source_label||c?.source_label||'Unlinked LeadPerfection source';
+  const status=c?.comparison_status?String(c.comparison_status).replaceAll('_',' '):(a?.match_status?String(a.match_status).replaceAll('_',' '):'UNLINKED');
+  return `<details class="historyItem unlinkedLpCard"><summary><span><b>${esc(year||'—')}</b> · ${esc(label)}</span><span>${esc(status)}</span></summary><div class="historyBody"><div class="historyFlag evidence">UNLINKED SOURCE · evidence preserved without creating a show profile</div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${unlinkedAnnualHtml(a)}</div><div class="yearLpSection cumulativeLpSection" style="margin-top:8px"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${unlinkedCumulativeHtml(c)}</div><div class="yearVerification">Evidence IDs: ${esc(a?.evidence_id||'—')} · ${esc(c?.evidence_id||'—')}</div></div></details>`;
+}
+function renderUnlinkedLp(){
+  const u=state.unlinkedLp;
+  if(u.loading&&!u.loaded)return '<div class="loading">Loading unlinked LeadPerfection evidence…</div>';
+  if(u.error&&!u.loaded)return `<div class="alert"><div class="event">Unlinked evidence unavailable</div><div class="action">${esc(u.error)}</div><div class="actions"><button class="btn primary" id="unlinkedRetry">Try again</button></div></div>`;
+  if(!u.loaded)return '<div class="loading">Opening unlinked LeadPerfection evidence…</div>';
+  const q=String(state.search||'').trim().toLowerCase();
+  const groups=unlinkedLpGroups().filter(g=>!q||unlinkedLpSearchText(g).includes(q));
+  const annualCount=Number(u.summary?.annual_rows||u.annual.length||0),cumulativeCount=Number(u.summary?.cumulative_rows||u.cumulative.length||0);
+  return `<div class="sourceWarn historyIntro"><b>Unlinked LeadPerfection sources are not extra show profiles.</b> These rows are preserved because their source identity could not be linked safely to a governed show profile. They remain searchable evidence; no attendance or show identity is inferred.</div><div class="stats"><div class="stat"><div class="v">${annualCount}</div><div class="l">Annual rows</div></div><div class="stat"><div class="v">${cumulativeCount}</div><div class="l">Cumulative rows</div></div><div class="stat"><div class="v">${unlinkedLpGroups().length}</div><div class="l">Source groups</div></div></div><div class="showTools"><div class="search"><input id="searchInput" placeholder="Search unlinked source, year, evidence ID…" value="${esc(state.search)}"></div><div class="resultLine">${groups.length.toLocaleString()} matching source group${groups.length===1?'':'s'}</div></div><div class="historyList">${groups.map(unlinkedLpCard).join('')||'<div class="empty">No unlinked LeadPerfection sources match this search.</div>'}</div>`;
+}
+
 function renderCurrentShows(){
   const list=state.shows.filter(currentMatches).slice().sort(currentComparator);
   return `${quickViewsBar('CURRENT')}${showTools('CURRENT',list.length)}${list.map(showCard).join('')||'<div class="empty">No current shows match these filters.</div>'}`;
 }
 function renderShows(){
   const profileCount=Number(state.catalogSummary?.profile_count||state.catalog.length||0),occCount=Number(state.catalogSummary?.occurrence_count||0);
-  const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button></div>`;
+  const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0);
+  const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Unlinked LP${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
   if(state.showMode==='CURRENT')return top+renderCurrentShows();
+  if(state.showMode==='UNLINKED')return top+renderUnlinkedLp();
   if(state.catalogLoading&&!state.catalogLoaded)return top+'<div class="loading">Loading full show database…</div>';
   if(state.catalogError&&!state.catalogLoaded)return top+`<div class="alert"><div class="event">Full database unavailable</div><div class="action">${esc(state.catalogError)}</div><div class="actions"><button class="btn primary" id="catalogRetry">Try again</button></div></div>`;
   if(!state.catalogLoaded)return top+'<div class="loading">Opening full show database…</div>';
