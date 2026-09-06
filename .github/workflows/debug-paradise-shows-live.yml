@@ -233,7 +233,7 @@ jobs:
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-013','LIFE-014','LIFE-017','LIFE-030'}
+          expected_live={'LIFE-007','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-054','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
@@ -241,6 +241,12 @@ jobs:
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
+          assert 'Corporate vendor: $275' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
+          assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
           assert not profiles['LIFE-005'].get('current_rebook_opportunity'), profiles['LIFE-005']
           assert not profiles['LIFE-009'].get('current_rebook_opportunity'), profiles['LIFE-009']
           assert not profiles['LIFE-018'].get('current_rebook_opportunity'), profiles['LIFE-018']
@@ -1596,6 +1602,14 @@ jobs:
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
+
+          render_view winterfest_detail "$SITE/#show/LIFE-054"
+          grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
+          grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
+          grep -q 'APPLICATION OPEN' /tmp/winterfest_detail.html
+          grep -q 'Dec 5, 2026' /tmp/winterfest_detail.html
+          grep -q 'Corporate vendor: \$275' /tmp/winterfest_detail.html
+          grep -q 'Open current source' /tmp/winterfest_detail.html
 
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
