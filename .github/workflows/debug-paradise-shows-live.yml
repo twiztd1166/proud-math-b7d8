@@ -61,6 +61,9 @@ jobs:
               fi
             done
             if [[ "$ok" -eq 1 ]]; then
+              grep -q 'COI on file' /tmp/app-shows.js
+              grep -q 'Explicit no COI' /tmp/app-shows.js
+              grep -q 'Status unknown / N/A' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -131,6 +134,22 @@ jobs:
           assert profiles['LIFE-206'].get('history_count') == 1, profiles['LIFE-206']
           assert profiles['HIST-015'].get('history_count') == 2, profiles['HIST-015']
           assert profiles['HIST-015'].get('dnd_count') == 1, profiles['HIST-015']
+          # Placeholder-aware derived catalog semantics.
+          # Raw source strings remain unchanged; only filter/completeness flags are normalized.
+          assert profiles['HIST-154'].get('has_booth') is False, profiles['HIST-154']
+          assert profiles['HIST-154'].get('has_cost') is False, profiles['HIST-154']
+          assert profiles['HIST-154'].get('has_coi') is False, profiles['HIST-154']
+          assert profiles['HIST-154'].get('has_coi_status') is False, profiles['HIST-154']
+          assert profiles['HIST-123'].get('has_booth') is False, profiles['HIST-123']
+          assert profiles['HIST-123'].get('has_cost') is True, profiles['HIST-123']
+          assert profiles['HIST-123'].get('has_coi') is True, profiles['HIST-123']
+          assert profiles['HIST-123'].get('has_coi_status') is True, profiles['HIST-123']
+          assert profiles['LIFE-009'].get('has_booth') is True, profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('has_cost') is True, profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('has_coi') is False, profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('has_coi_status') is True, profiles['LIFE-009']
+          assert profiles['LIFE-092'].get('has_coi') is False, profiles['LIFE-092']
+          assert profiles['LIFE-092'].get('has_coi_status') is False, profiles['LIFE-092']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
