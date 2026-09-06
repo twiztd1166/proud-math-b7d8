@@ -11,7 +11,7 @@ function bookingCommitted(show){
   const status=String(show?.booking_status||'').toUpperCase();
   const payment=String(show?.source_detail?.payment_status||'').toUpperCase();
   if(/NOT BOOKED|BOOKING NOT|NOT CONFIRMED|NOT VERIFIED|PARTICIPATION NOT/.test(status))return false;
-  return /(CONTRACTED|BOOKED|RESERVED|CONFIRMED)/.test(status)||/(COMMITMENT APPROVED|PAID \/ VERIFIED)/.test(payment);
+  return /(CONTRACTED|CONTRACT SIGNED|SIGNED CONTRACT|BOOKED|RESERVED|CONFIRMED)/.test(status)||/(COMMITMENT APPROVED|PAID \/ VERIFIED)/.test(payment);
 }
 function bookingSignal(show){
   const decision=String(show?.decision||'').toUpperCase();

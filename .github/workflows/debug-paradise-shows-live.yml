@@ -90,6 +90,7 @@ jobs:
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
               grep -q 'bookingSignal' /tmp/app-shows.js
+              grep -q 'CONTRACT SIGNED' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
@@ -178,19 +179,33 @@ jobs:
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
           assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
-          assert len(x.get('payments') or []) == 3, len(x.get('payments') or [])
+          assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
           acs=current['MFC-063']
-          assert acs.get('show_status') == 'HOLD', acs
-          assert acs.get('max_booking_cost') == 4690, acs
-          assert acs.get('booking_status') == 'ACCOUNT CLEARED — EXHIBITOR SPACE AVAILABLE / PRICE VERIFIED; TERMS GAPS REMAIN; NO BOOKING AUTHORIZED', acs
-          assert 'Pay in full on signing' in (acs.get('payment_terms') or ''), acs
-          assert '10x10 $2,345' in (acs.get('payment_terms') or ''), acs
-          assert '10x20 $4,690' in (acs.get('payment_terms') or ''), acs
-          assert (acs.get('source_detail') or {}).get('account_eligibility') == 'CLEARED 2026-08-31', acs
-          assert (acs.get('source_detail') or {}).get('available_booths') == ['818','813','815','912','914','903-923'], acs
-          assert (acs.get('source_detail') or {}).get('payment_status') == 'PAY IN FULL ON SIGNING', acs
-          print({'shows':36,'payments':3,'acs_current_source':'PASS'})
+          assert acs.get('show_status') == 'RECONCILE', acs
+          assert acs.get('max_booking_cost') == 2110.5, acs
+          assert acs.get('booking_status') == 'CONTRACT SIGNED 2026-09-04 — BOOTH 815 ASSIGNED — $2,110.50 PIF AUTHORIZED; CLEARING UNVERIFIED', acs
+          assert acs.get('confirmation') == 'VERIFIED', acs
+          assert 'Signed 10x10 contract total $2,110.50' in (acs.get('payment_terms') or ''), acs
+          sd=acs.get('source_detail') or {}
+          assert sd.get('needs_evidence') == 'PAYMENT PROOF', sd
+          assert sd.get('payment_status') == 'AUTHORIZED — CLEARING UNVERIFIED', sd
+          assert sd.get('booth_assignment') == '815', sd
+          assert sd.get('booth_size') == '10x10', sd
+          assert sd.get('contract_total') == 2110.5, sd
+          assert sd.get('multi_year_accepted') is True, sd
+          assert sd.get('payment_receipt_found') is False, sd
+          assert sd.get('payment_clearing') == 'UNVERIFIED', sd
+          payments={p.get('payment_id'):p for p in x.get('payments') or []}
+          pid='MFC-063|2026|PIF|2026-09-04|2110.50'
+          assert pid in payments, payments
+          pay=payments[pid]
+          assert pay.get('amount') == 2110.5, pay
+          assert pay.get('balance') == 2110.5, pay
+          assert pay.get('due') == '2026-09-04', pay
+          assert pay.get('clearing') == 'UNVERIFIED', pay
+          assert pay.get('status') == 'HOLD / REVIEW', pay
+          print({'shows':36,'payments':4,'acs_signed_contract':'PASS'})
           PY
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/catalog.json \
@@ -1609,8 +1624,10 @@ jobs:
           grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/current.html
           grep -q 'Booking status' /tmp/current.html
           grep -q 'When to act' /tmp/current.html
-          grep -q 'ACCOUNT CLEARED — EXHIBITOR SPACE AVAILABLE / PRICE VERIFIED' /tmp/current.html
-          grep -q 'Pay in full on signing' /tmp/current.html
+          grep -q 'COMMITTED' /tmp/current.html
+          grep -q 'CONTRACT SIGNED 2026-09-04' /tmp/current.html
+          grep -q 'BOOTH 815 ASSIGNED' /tmp/current.html
+          grep -q '\$2,110.50' /tmp/current.html
           grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
