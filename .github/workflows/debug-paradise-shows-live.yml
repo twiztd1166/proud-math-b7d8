@@ -928,6 +928,7 @@ jobs:
           summary=(catalog.get('summary') or {})
           source_summary=summary.get('source_summary') or {}
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
+          annual_cum_recon=source_summary.get('annual_vs_cumulative_reconciliation_2013_2026') or {}
           identity=source_summary.get('identity_reconciliation') or {}
           consolidation=source_summary.get('duplicate_profile_consolidation') or {}
           exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
@@ -1247,6 +1248,62 @@ jobs:
           assert cumulative.get('net_volume_delta') == 1362328, cumulative
           assert cumulative.get('annual_values_overwritten') is False, cumulative
           assert cumulative.get('validation') == 'PASS', cumulative
+          assert annual_cum_recon.get('stage') == 'READY', annual_cum_recon
+          assert annual_cum_recon.get('validation') == 'PASS', annual_cum_recon
+          assert annual_cum_recon.get('annual_equality') == 'FAIL_EXPECTED', annual_cum_recon
+          assert annual_cum_recon.get('report_period') == '2012-01-01 through 2026-12-31', annual_cum_recon
+          recon_controls=annual_cum_recon.get('controls') or {}
+          assert recon_controls.get('cumulative_rows') == 1251, recon_controls
+          assert recon_controls.get('exact_unchanged') == 1095, recon_controls
+          assert recon_controls.get('matured') == 143, recon_controls
+          assert recon_controls.get('cumulative_only') == 13, recon_controls
+          assert recon_controls.get('gross_close_delta') == 108, recon_controls
+          assert recon_controls.get('gross_volume_delta') == 1850586, recon_controls
+          assert recon_controls.get('net_close_delta') == 82, recon_controls
+          assert recon_controls.get('net_volume_delta') == 1362328, recon_controls
+          assert recon_controls.get('annual_values_overwritten') is False, recon_controls
+          assert recon_controls.get('attendance_inference') is False, recon_controls
+          recon_years={int(v.get('year')):v for v in (annual_cum_recon.get('years') or [])}
+          assert set(recon_years) == set(range(2013,2027)), sorted(recon_years)
+          expected_recon={
+              2013:(2,2,0,2,0,4,4,3,2,7050,2,7050),
+              2014:(38,38,27,11,0,64,56,50,18,156840,15,117159),
+              2015:(47,49,33,14,2,116,96,79,27,339502,20,214887),
+              2016:(53,54,40,13,1,106,77,52,14,192660,11,144560),
+              2017:(127,130,114,13,3,13,8,8,2,67433,1,53633),
+              2018:(141,141,134,7,0,8,8,6,2,58550,2,58550),
+              2019:(137,138,116,21,1,30,20,15,2,52000,2,52000),
+              2020:(89,85,78,6,1,-3,-3,-2,1,21243,1,21243),
+              2021:(171,171,156,15,0,11,9,8,3,57522,3,57522),
+              2022:(133,135,119,14,2,30,22,17,8,281319,5,216347),
+              2023:(80,88,72,16,0,77,55,42,9,212980,6,149180),
+              2024:(109,111,101,8,2,100,88,59,19,383462,13,250172),
+              2025:(100,101,98,2,1,2,2,1,1,20025,1,20025),
+              2026:(8,8,7,1,0,1,1,1,0,0,0,0),
+          }
+          for year,expected in expected_recon.items():
+              row=recon_years[year]
+              actual=(
+                  row.get('annual_rows'),row.get('cumulative_rows'),row.get('exact_unchanged'),
+                  row.get('matured'),row.get('cumulative_only'),row.get('set_delta'),
+                  row.get('issue_delta'),row.get('demo_delta'),row.get('gross_close_delta'),
+                  row.get('gross_volume_delta'),row.get('net_close_delta'),row.get('net_volume_delta')
+              )
+              assert actual == expected, (year,actual,expected)
+          recon_notes=annual_cum_recon.get('representation_notes') or {}
+          recon20=recon_notes.get('2020') or {}
+          assert recon20.get('annual_without_cumulative_link') == 5, recon20
+          assert recon20.get('cumulative_without_annual_link') == 1, recon20
+          assert recon20.get('cumulative_only_label') == '2020 WPB Green Market 3/21/2020', recon20
+          assert len(recon20.get('annual_only_labels') or []) == 5, recon20
+          recon23=recon_notes.get('2023') or {}
+          assert recon23.get('annual_families') == 80, recon23
+          assert recon23.get('explicit_cumulative_rows') == 88, recon23
+          assert recon23.get('distinct_annual_ids_linked') == 80, recon23
+          assert recon23.get('match_method') == '2023_EXPLICIT_ANNUAL_ROW_ORDINAL', recon23
+          recon23net=recon23.get('annual_net_raw_only') or {}
+          assert recon23net.get('net_close_count') == 119, recon23net
+          assert recon23net.get('net_sale_volume') == 2910250, recon23net
           y20=source_summary.get('year_2020') or {}
           assert y20.get('source_files') == 19, y20
           assert y20.get('preserved_occurrence_groups') == 55, y20
