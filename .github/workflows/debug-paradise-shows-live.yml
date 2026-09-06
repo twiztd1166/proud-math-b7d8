@@ -94,6 +94,8 @@ jobs:
               grep -q 'state.showQuickView=.ALL_MISSING.' /tmp/app-modals.js
               grep -q 'cleanupSupportedFieldsForProfileYear' /tmp/app-shows.js
               grep -q 'exact year + preserved source family' /tmp/app-shows.js
+              grep -q 'Supplemental merged evidence is scoped only to rows that actually carry that supplemental source' /tmp/app-shows.js
+              grep -q 'Supplemental merged evidence creates an expectation only on rows that actually carry that supplemental source' /tmp/app-modals.js
               grep -q 'Investigation link only' /tmp/app-modals.js
               grep -q 'Check preserved source' /tmp/app-modals.js
               grep -q 'Check annual LP source' /tmp/app-modals.js
@@ -205,7 +207,13 @@ jobs:
           def missing_count(p,year):
               return len(missing_fields(p,year))
           expected_union_support={
+              2014:['contact','cost','performance'],
+              2015:['contact','cost','payment','performance'],
+              2016:['performance'],
+              2017:['contact','payment','performance'],
+              2018:['cost'],
               2019:[],
+              2020:[],
               2021:['contact','booth','cost','coi'],
               2022:['contact','booth','cost','coi'],
               2023:['contact','cost','payment'],
@@ -213,7 +221,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2019:0,2021:48,2022:18,2023:51,2024:0,2025:0,2026:2}
+          expected_queue={2014:1,2015:40,2016:1,2017:6,2018:0,2019:0,2020:0,2021:48,2022:18,2023:51,2024:0,2025:0,2026:2}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -235,6 +243,20 @@ jobs:
           def cleanup_queue(year):
               rows=[p for p in profiles.values() if missing_count(p,year)>0]
               return sorted(rows,key=lambda p:(-missing_count(p,year),str(p.get('canonical_event') or '').casefold(),str(p.get('profile_id') or '')))
+          queue_2017=cleanup_queue(2017)
+          actual_2017={p.get('profile_id'):missing_fields(p,2017) for p in queue_2017}
+          expected_2017={
+              'HIST-418':['performance'],
+              'HIST-428':['contact'],
+              'HIST-433':['performance'],
+              'HIST-439':['contact'],
+              'LIFE-004':['contact'],
+              'LIFE-177':['performance'],
+          }
+          assert actual_2017 == expected_2017, actual_2017
+          assert cleanup_queue(2018) == []
+          assert cleanup_queue(2019) == []
+          assert cleanup_queue(2020) == []
           assert cleanup_queue(2024) == []
           assert cleanup_queue(2025) == []
           queue_2022=cleanup_queue(2022)
@@ -242,7 +264,7 @@ jobs:
           assert len(cleanup_queue(2023)) == 51
           assert len(cleanup_queue(2026)) == 2
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 34, x.get('version')
+          assert x.get('version') == 35, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -250,6 +272,7 @@ jobs:
               rule=p.get('history_field_support_rule') or {}
               assert rule.get('scope') == 'YEAR_SOURCE_FAMILY', (p.get('profile_id'),rule)
               assert float(rule.get('min_coded_ratio')) == 0.25, (p.get('profile_id'),rule)
+              assert rule.get('supplemental_provenance') is True, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
