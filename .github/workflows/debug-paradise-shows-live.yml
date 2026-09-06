@@ -223,7 +223,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:0,2015:37,2016:0,2017:5,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
+          expected_queue={2014:0,2015:0,2016:0,2017:5,2018:0,2019:0,2020:0,2021:43,2022:17,2023:43,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -233,10 +233,24 @@ jobs:
           hist152_contact=profiles['HIST-152']['history_field_states']['2014']['contact']
           assert hist152_contact.get('VALUE') == 2 and hist152_contact.get('MISSING') == 0, hist152_contact
           assert profiles['HIST-152'].get('has_contact') is True, profiles['HIST-152']
-          assert missing_fields(profiles['HIST-128'],2015) == ['cost']
+          assert missing_fields(profiles['HIST-128'],2015) == []
           hist128_contact=profiles['HIST-128']['history_field_states']['2015']['contact']
+          hist128_cost=profiles['HIST-128']['history_field_states']['2015']['cost']
           assert hist128_contact.get('VALUE') == 1 and hist128_contact.get('MISSING') == 0, hist128_contact
+          assert hist128_cost.get('UNKNOWN') == 1 and hist128_cost.get('MISSING') == 0, hist128_cost
           assert profiles['HIST-128'].get('has_contact') is True, profiles['HIST-128']
+          assert missing_fields(profiles['HIST-455'],2015) == []
+          hist455_cost=profiles['HIST-455']['history_field_states']['2015']['cost']
+          assert hist455_cost.get('UNKNOWN') == 1 and hist455_cost.get('VALUE') == 0 and hist455_cost.get('MISSING') == 0, hist455_cost
+          assert profiles['HIST-455'].get('has_cost') is False, profiles['HIST-455']
+          assert missing_fields(profiles['HIST-456'],2015) == []
+          hist456_payment=profiles['HIST-456']['history_field_states']['2015']['payment']
+          assert hist456_payment.get('UNKNOWN') == 1 and hist456_payment.get('VALUE') == 0 and hist456_payment.get('MISSING') == 0, hist456_payment
+          assert profiles['HIST-456'].get('has_payment') is False, profiles['HIST-456']
+          assert missing_fields(profiles['LIFE-010'],2015) == []
+          life010_payment=profiles['LIFE-010']['history_field_states']['2015']['payment']
+          assert life010_payment.get('UNKNOWN') == 2 and life010_payment.get('VALUE') == 0 and life010_payment.get('MISSING') == 0, life010_payment
+          assert profiles['LIFE-010'].get('has_payment') is False, profiles['LIFE-010']
           assert missing_fields(profiles['HIST-428'],2017) == []
           hist428_contact=profiles['HIST-428']['history_field_states']['2017']['contact']
           assert hist428_contact.get('VALUE') == 1 and hist428_contact.get('MISSING') == 0, hist428_contact
@@ -306,7 +320,7 @@ jobs:
           }
           assert actual_2017 == expected_2017, actual_2017
           assert cleanup_queue(2014) == []
-          assert len(cleanup_queue(2015)) == 37
+          assert cleanup_queue(2015) == []
           assert cleanup_queue(2016) == []
           assert cleanup_queue(2018) == []
           assert cleanup_queue(2019) == []
