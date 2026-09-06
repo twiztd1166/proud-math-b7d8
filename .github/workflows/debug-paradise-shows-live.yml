@@ -264,7 +264,7 @@ jobs:
           assert len(cleanup_queue(2023)) == 51
           assert len(cleanup_queue(2026)) == 2
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 35, x.get('version')
+          assert x.get('version') == 36, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -273,6 +273,7 @@ jobs:
               assert rule.get('scope') == 'YEAR_SOURCE_FAMILY', (p.get('profile_id'),rule)
               assert float(rule.get('min_coded_ratio')) == 0.25, (p.get('profile_id'),rule)
               assert rule.get('supplemental_provenance') is True, (p.get('profile_id'),rule)
+              assert rule.get('field_scoped') is True, (p.get('profile_id'),rule)
               assert isinstance(p.get('history_coi_summary'), dict), p.get('profile_id')
               for y in (p.get('history_field_states') or {}).values():
                   assert isinstance((y or {}).get('nonparticipation'), dict), p.get('profile_id')
