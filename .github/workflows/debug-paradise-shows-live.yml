@@ -94,9 +94,12 @@ jobs:
               grep -q 'rebookCandidate' /tmp/app-shows.js
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
-              grep -q 'Live opportunities' /tmp/app-shows.js
+              grep -q 'Verified current / watch' /tmp/app-shows.js
               grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
+              grep -q 'Verified current watch' /tmp/app-shows.js
+              grep -q 'CURRENT WATCH' /tmp/app-shows.js
+              grep -q 'NEXT-CYCLE WATCH' /tmp/app-shows.js
               grep -q 'current_rebook_opportunity' /tmp/app-shows.js
               grep -q 'related_current_profile_id' /tmp/app-shows.js
               grep -q 'SAME SERIES' /tmp/app-shows.js
@@ -294,8 +297,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==85, len(historical_2013)
-          assert len(strong_2013)==23, len(strong_2013)
+          assert len(historical_2013)==84, len(historical_2013)
+          assert len(strong_2013)==22, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -312,7 +315,7 @@ jobs:
           assert any(p.get('profile_id')=='LIFE-020' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
           assert any(p.get('profile_id')=='LIFE-047' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-046','LIFE-054','LIFE-077'}
+          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-046','LIFE-054','LIFE-060','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
@@ -339,6 +342,11 @@ jobs:
           assert profiles['LIFE-046']['current_rebook_opportunity']['event_end']=='2026-10-11'
           assert '8-foot table $100' in profiles['LIFE-046']['current_rebook_opportunity']['price_text']
           assert 'Tuesday at 10:30 AM' in profiles['LIFE-046']['current_rebook_opportunity']['booking_window_text']
+          assert profiles['LIFE-060']['current_rebook_opportunity']['opportunity_status']=='WATCH'
+          assert profiles['LIFE-060']['current_rebook_opportunity']['event_start']=='2027-02-12'
+          assert profiles['LIFE-060']['current_rebook_opportunity']['event_end']=='2027-02-21'
+          assert 'not yet published' in profiles['LIFE-060']['current_rebook_opportunity']['price_text']
+          assert '2027 commercial vendor application' in profiles['LIFE-060']['current_rebook_opportunity']['booking_window_text']
           assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
           assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
@@ -1684,7 +1692,7 @@ jobs:
           grep -q 'Next booking step' /tmp/shows.html
           grep -q 'LIVE OPPORTUNITY' /tmp/shows.html
           grep -q 'Verified current opportunity' /tmp/shows.html
-          grep -q 'Live opportunities' /tmp/shows.html
+          grep -q 'Verified current / watch' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
@@ -1716,6 +1724,16 @@ jobs:
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
           grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
           grep -q 'Open current source' /tmp/gunshow_detail.html
+
+          render_view martin_detail "$SITE/#show/LIFE-060"
+          grep -q 'Martin County Fair' /tmp/martin_detail.html
+          grep -q 'Verified current watch' /tmp/martin_detail.html
+          grep -q '>WATCH<' /tmp/martin_detail.html
+          grep -q 'Feb 12, 2027' /tmp/martin_detail.html
+          grep -q 'Feb 21, 2027' /tmp/martin_detail.html
+          grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
+          grep -q 'fairoffice@martincountyfair.com' /tmp/martin_detail.html
+          grep -q 'Open current source' /tmp/martin_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
