@@ -5,6 +5,7 @@ let state={
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
   catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,
+  unlinkedLp:{annual:[],cumulative:[],summary:null,loaded:false,loading:false,error:null},
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
   catalogFilters:{
@@ -35,10 +36,11 @@ function restoreShowViewState(){
     const raw=localStorage.getItem(SHOW_VIEW_STORAGE);
     const saved=raw?JSON.parse(raw):null;
     if(saved&&saved.v===1){
-      if(saved.showMode==='ALL'||saved.showMode==='CURRENT')state.showMode=saved.showMode;
+      if(['ALL','CURRENT','UNLINKED'].includes(saved.showMode))state.showMode=saved.showMode;
       if(SHOW_QUICK_VIEWS.includes(saved.showQuickView))state.showQuickView=saved.showQuickView;
       if(state.showQuickView.startsWith('ALL_')&&state.showMode!=='ALL')state.showQuickView='NONE';
       if(state.showQuickView.startsWith('CURRENT_')&&state.showMode!=='CURRENT')state.showQuickView='NONE';
+      if(state.showMode==='UNLINKED')state.showQuickView='NONE';
       if(SHOW_CATALOG_SORTS.includes(saved.catalogSort))state.catalogSort=saved.catalogSort;
       if(SHOW_CURRENT_SORTS.includes(saved.currentSort))state.currentSort=saved.currentSort;
       if(saved.catalogFilters&&typeof saved.catalogFilters==='object'){
@@ -104,6 +106,23 @@ function activityName(a){if(a.kind==='show'){const s=state.shows.find(x=>x.mfc_i
 function fieldLabel(f){return ({show_status:'Status',follow_up:'Next action',owner:'Owner',action_due:'Action due',this_year:'This year',skip_reason:'Skip reason',posted_amount:'Posted amount',posted_date:'Posted date',clearing:'Clearing',payment_owner:'Payment owner',notes:'Operating note',balance:'Balance',status:'Payment status',approval:'Approval',due_status:'Due status',__NEW_SOURCE_ROW__:'New Sheet row',__MISSING_SOURCE_ROW__:'Missing Sheet row',__BASELINE_MISSING__:'Baseline missing'})[f]||f}
 
 
+
+async function loadUnlinkedLp(force=false){
+  const u=state.unlinkedLp;
+  if(u.loading||(!force&&u.loaded))return;
+  u.loading=true;u.error=null;
+  if(state.tab==='shows'&&state.showMode==='UNLINKED')render();
+  try{
+    const d=await call('catalogUnlinked');
+    u.annual=d.annual||[];u.cumulative=d.cumulative||[];u.summary=d.summary||null;u.loaded=true;
+  }catch(e){
+    u.error=e.message||'Unable to load unlinked LeadPerfection evidence.';
+    toast('Unlinked LeadPerfection evidence unavailable');
+  }finally{
+    u.loading=false;
+    if(state.tab==='shows'&&state.showMode==='UNLINKED')render();
+  }
+}
 async function loadCatalog(force=false){
   if(state.catalogLoading||(!force&&state.catalogLoaded))return;
   state.catalogLoading=true;state.catalogError=null;
