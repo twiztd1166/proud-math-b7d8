@@ -726,7 +726,7 @@ function quickViewCount(key){
   if(key==='ALL_HIST_ONLY')return state.catalog.filter(p=>p.source_type==='HISTORY_ONLY').length;
   if(key==='ALL_LP_SOURCE_ONLY')return state.catalog.filter(isLpSourceOnly).length;
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
-  if(key==='CURRENT_BOOK_NOW')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['BOOK_NOW','PRIORITY_REVIEW'].includes(bookingSignal(s).key)).length;
+  if(key==='CURRENT_BOOK_NOW')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['BOOK_NOW','PRIORITY_REVIEW','LATE_VERIFY'].includes(bookingSignal(s).key)).length;
   if(key==='CURRENT_COMMITTED')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&bookingSignal(s).key==='COMMITTED').length;
   if(key==='CURRENT_WATCH')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS','GATED'].includes(bookingSignal(s).key)).length;
   if(key==='CURRENT_IN_PLAY')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR').length;
