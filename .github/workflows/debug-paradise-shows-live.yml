@@ -299,8 +299,8 @@ jobs:
               )
           historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
           strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
-          assert len(historical_2013)==80, len(historical_2013)
-          assert len(strong_2013)==18, len(strong_2013)
+          assert len(historical_2013)==79, len(historical_2013)
+          assert len(strong_2013)==17, len(strong_2013)
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -317,7 +317,7 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
+          expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
@@ -338,6 +338,15 @@ jobs:
           assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-018']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-018']['current_rebook_opportunity']['event_start']=='2027-01-09'
+          assert profiles['LIFE-018']['current_rebook_opportunity']['event_end']=='2027-01-10'
+          assert 'price has not been verified' in profiles['LIFE-018']['current_rebook_opportunity']['price_text']
+          assert '$795' in profiles['LIFE-018']['current_rebook_opportunity']['price_text']
+          assert '$1,500' in profiles['LIFE-018']['current_rebook_opportunity']['price_text']
+          assert 'floor plan plus exhibitor contract' in profiles['LIFE-018']['current_rebook_opportunity']['booking_window_text']
+          assert '772-486-4969' in profiles['LIFE-018']['current_rebook_opportunity']['contact_text']
+          assert 'Professional Show Management' in profiles['LIFE-018']['current_rebook_opportunity']['source_label']
           assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-033']['current_rebook_opportunity']['opportunity_status']=='EXHIBITOR_LISTED'
           assert profiles['LIFE-033']['current_rebook_opportunity']['event_start']=='2026-10-31'
@@ -1755,6 +1764,17 @@ jobs:
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
           grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
           grep -q 'Open current source' /tmp/gunshow_detail.html
+
+          render_view treasure_detail "$SITE/#show/LIFE-018"
+          grep -q 'Treasure Coast Home Show' /tmp/treasure_detail.html
+          grep -q 'Verified current opportunity' /tmp/treasure_detail.html
+          grep -q 'APPLICATION OPEN' /tmp/treasure_detail.html
+          grep -q 'Jan 9, 2027' /tmp/treasure_detail.html
+          grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
+          grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
+          grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
+          grep -q '772-486-4969' /tmp/treasure_detail.html
+          grep -q 'Open current source' /tmp/treasure_detail.html
 
           render_view martin_detail "$SITE/#show/LIFE-060"
           grep -q 'Martin County Fair' /tmp/martin_detail.html
