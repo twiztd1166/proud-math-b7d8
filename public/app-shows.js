@@ -68,7 +68,7 @@ function catalogFilterSummary(){
   const labels={
     profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
     contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
-    com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has performance',MISSING:'Missing performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
+    com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has show-history performance',MISSING:'Missing show-history performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
     coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Verified worked evidence',MISSING:'No verified worked evidence'},
     currentTreatment:{'IN PLAY':'In Play',SKIPPED:'Skipped'}
   };
@@ -545,7 +545,7 @@ function openShowFilters(){
         ${filterField('Booth','fBooth',f.booth,opts([['ANY','Any'],['HAS','Has booth'],['MISSING','Missing booth']],{ANY:fc.total,...fc.flags.has_booth}))}
         ${filterField('Cost','fCost',f.cost,opts([['ANY','Any'],['HAS','Has cost'],['MISSING','Missing cost']],{ANY:fc.total,...fc.flags.has_cost}))}
         ${filterField('COM','fCom',f.com,opts([['ANY','Any'],['HAS','Has COM'],['MISSING','Missing COM']],{ANY:fc.total,...fc.flags.has_com}))}
-        ${filterField('Performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has performance'],['MISSING','Missing performance']],{ANY:fc.total,...fc.flags.has_performance}))}
+        ${filterField('Show-history performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has show-history performance'],['MISSING','Missing show-history performance']],{ANY:fc.total,...fc.flags.has_performance}))}
         ${filterField('LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has LP source'],['MISSING','Missing LP source']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
         ${filterField('COI','fCoi',f.coi,opts([['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Status unknown / N/A']],{ANY:fc.total,...fc.coi}))}
         ${filterField('Verified worked evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has verified worked evidence'],['MISSING','No verified worked evidence']],{ANY:fc.total,...fc.worked}))}
