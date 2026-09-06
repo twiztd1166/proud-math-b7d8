@@ -69,9 +69,13 @@ jobs:
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
               grep -q 'Show-history performance' /tmp/app-shows.js
               grep -q 'Has show-history performance' /tmp/app-shows.js
-              grep -q 'LeadPerfection year' /tmp/app-shows.js
+              grep -q 'Annual LP year' /tmp/app-shows.js
+              grep -q 'Cumulative LP year' /tmp/app-shows.js
               grep -q 'All history years' /tmp/app-shows.js
-              grep -q 'All LP years' /tmp/app-shows.js
+              grep -q 'All annual LP years' /tmp/app-shows.js
+              grep -q 'All cumulative LP years' /tmp/app-shows.js
+              grep -q 'Annual LeadPerfection' /tmp/app-shows.js
+              grep -q 'Cumulative LeadPerfection' /tmp/app-shows.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -208,6 +212,27 @@ jobs:
           assert profiles['LIFE-002'].get('history_years') == [2026,2025,2023,2022,2021,2020,2019,2017,2016,2015], profiles['LIFE-002']
           assert profiles['LIFE-002'].get('lp_year_count') == 11, profiles['LIFE-002']
           assert profiles['LIFE-002'].get('lp_years') == [2026,2025,2024,2023,2022,2021,2020,2019,2017,2016,2015], profiles['LIFE-002']
+          # Global year-layer invariants.
+          assert sum(1 for p in profiles.values() if p.get('has_lp_performance')) == 498
+          assert sum(1 for p in profiles.values() if p.get('has_cumulative_lp_performance')) == 499
+          assert all(int(p.get('history_year_count') or 0) == len(p.get('history_years') or []) for p in profiles.values())
+          assert all(int(p.get('lp_year_count') or 0) == len(p.get('lp_years') or []) for p in profiles.values())
+          assert all(int(p.get('cumulative_year_count') or 0) == len(p.get('cumulative_years') or []) for p in profiles.values())
+          assert all((p.get('latest_history_year') == (p.get('history_years') or [None])[0]) for p in profiles.values())
+          assert all((int(p.get('history_count') or 0) != 0 or not (p.get('history_years') or [])) for p in profiles.values())
+          assert all(bool(p.get('has_lp_performance')) == bool(p.get('lp_years') or []) for p in profiles.values())
+          assert all(bool(p.get('has_cumulative_lp_performance')) == bool(p.get('cumulative_years') or []) for p in profiles.values())
+          # Cumulative-only profile-year controls remain distinct from annual LP.
+          assert profiles['HIST-234'].get('has_lp_performance') is False, profiles['HIST-234']
+          assert profiles['HIST-234'].get('lp_years') == [], profiles['HIST-234']
+          assert profiles['HIST-234'].get('has_cumulative_lp_performance') is True, profiles['HIST-234']
+          assert profiles['HIST-234'].get('cumulative_years') == [2022], profiles['HIST-234']
+          assert profiles['LIFE-009'].get('lp_years') == [2026,2025,2022,2019,2018], profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('cumulative_years') == [2026,2025,2024,2022,2019,2018], profiles['LIFE-009']
+          assert profiles['LIFE-054'].get('lp_years') == [2023,2022,2021], profiles['LIFE-054']
+          assert profiles['LIFE-054'].get('cumulative_years') == [2025,2023,2022,2021], profiles['LIFE-054']
+          assert profiles['LIFE-177'].get('lp_years') == [2016,2015,2014], profiles['LIFE-177']
+          assert profiles['LIFE-177'].get('cumulative_years') == [2017,2016,2015,2014], profiles['LIFE-177']
           assert profiles['LIFE-066'].get('history_count') == 7, profiles['LIFE-066']
           assert profiles['LIFE-066'].get('tier') == 'Platinum', profiles['LIFE-066']
           assert profiles['LIFE-066'].get('occurrences') == 10, profiles['LIFE-066']
