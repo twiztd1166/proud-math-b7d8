@@ -1774,6 +1774,18 @@ jobs:
           grep -q 'not a second booking target' /tmp/vero_legacy.html
           grep -q 'Open current series profile' /tmp/vero_legacy.html
 
+          render_view palm18_legacy "$SITE/#show/LIFE-020"
+          grep -q 'LIFE-020' /tmp/palm18_legacy.html
+          grep -q 'Same organizer series' /tmp/palm18_legacy.html
+          grep -q 'Current series decision target is tracked under LIFE-066' /tmp/palm18_legacy.html
+          grep -q 'not a second booking target' /tmp/palm18_legacy.html
+
+          render_view palm19_legacy "$SITE/#show/LIFE-047"
+          grep -q 'LIFE-047' /tmp/palm19_legacy.html
+          grep -q 'Same organizer series' /tmp/palm19_legacy.html
+          grep -q 'Current series decision target is tracked under LIFE-066' /tmp/palm19_legacy.html
+          grep -q 'not a second booking target' /tmp/palm19_legacy.html
+
           render_view broward_legacy "$SITE/#show/LIFE-010"
           grep -q 'LIFE-010' /tmp/broward_legacy.html
           grep -q 'Same organizer series' /tmp/broward_legacy.html
