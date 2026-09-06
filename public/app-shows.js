@@ -200,7 +200,7 @@ function showSortOptions(mode){
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
-      ['NET_2025','Highest 2025 net'],['NET_2024','Highest 2024 net'],['DATA_COMPLETE','Most complete data'],['MISSING_DATA','Most missing data']
+      ['NET_2025','Highest 2025 net'],['NET_2024','Highest 2024 net'],['DATA_COMPLETE',state.catalogFilters.historyYear==='ALL'?'Most complete data':'Most complete fields · '+state.catalogFilters.historyYear],['MISSING_DATA',state.catalogFilters.historyYear==='ALL'?'Most missing data':'Most missing fields · '+state.catalogFilters.historyYear]
     ]
     :[
       ['PRIORITY','Priority'],['EVENT_ASC','Event date soonest'],['EVENT_DESC','Event date latest'],['ACTION_DUE','Action due soonest'],
@@ -616,9 +616,15 @@ function quickViewCount(key){
 }
 function quickViewsBar(mode){
   const options=quickViewOptions(mode);
-  return `<div class="quickViews"><div class="quickViewsLabel">Quick views</div><div class="quickViewRail">${options.map(([key,label])=>{const count=quickViewCount(key);const needsYear=key==='ALL_MISSING'&&state.catalogFilters.historyYear==='ALL';return `<button class="quickViewChip ${state.showQuickView===key?'active':''}" data-quick-view="${key}" ${count===0?'disabled':''} ${needsYear?'title="Select a Historical Year in Filter to build the cleanup queue"':''}>${esc(label)} <span class="quickViewCount">${count.toLocaleString()}</span></button>`}).join('')}</div></div>`;
+  return `<div class="quickViews"><div class="quickViewsLabel">Quick views</div><div class="quickViewRail">${options.map(([key,label])=>{const count=quickViewCount(key);const needsYear=key==='ALL_MISSING'&&state.catalogFilters.historyYear==='ALL';const disabled=count===0&&!needsYear;return `<button class="quickViewChip ${state.showQuickView===key?'active':''}" data-quick-view="${key}" ${disabled?'disabled':''} ${needsYear?'title="Choose a Historical Year to build the cleanup queue"':''}>${esc(label)} <span class="quickViewCount">${count.toLocaleString()}</span></button>`}).join('')}</div></div>`;
 }
 function applyQuickView(key){
+  if(key==='ALL_MISSING'&&state.catalogFilters.historyYear==='ALL'){
+    openShowFilters();
+    const yearSelect=$('#fHistoryYear');
+    if(yearSelect){yearSelect.focus();try{yearSelect.scrollIntoView({block:'center',behavior:'smooth'})}catch{}}
+    return;
+  }
   if(quickViewCount(key)===0)return;
   state.search='';state.catalogLimit=60;state.showQuickView=key;
   if(key.startsWith('ALL_')){
