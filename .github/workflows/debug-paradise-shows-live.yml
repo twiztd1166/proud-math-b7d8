@@ -96,11 +96,11 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 647, s
+          assert s.get('profile_count') == 641, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 647
+          assert len(x.get('profiles') or []) == 641
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369'):
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
           assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
@@ -114,7 +114,15 @@ jobs:
           assert float(profiles['LIFE-136'].get('lifetime_close_volume')) == 155990.25, profiles['LIFE-136']
           assert len(profiles['LIFE-136'].get('source_rows') or []) == 2, profiles['LIFE-136']
           assert profiles['LIFE-206'].get('history_count') == 1, profiles['LIFE-206']
-          print({'profiles':647,'evidence_records':1086,'duplicate_profiles_removed_total':8})
+          assert profiles['HIST-015'].get('history_count') == 2, profiles['HIST-015']
+          assert profiles['HIST-015'].get('dnd_count') == 1, profiles['HIST-015']
+          assert profiles['LIFE-066'].get('history_count') == 4, profiles['LIFE-066']
+          assert profiles['LIFE-027'].get('history_count') == 11, profiles['LIFE-027']
+          assert len(profiles['LIFE-027'].get('source_rows') or []) == 2, profiles['LIFE-027']
+          assert profiles['LIFE-128'].get('history_count') == 3, profiles['LIFE-128']
+          assert profiles['LIFE-005'].get('history_count') == 5, profiles['LIFE-005']
+          assert profiles['LIFE-146'].get('history_count') == 3, profiles['LIFE-146']
+          print({'profiles':641,'evidence_records':1086,'duplicate_profiles_removed_total':14})
           PY
 
           python - <<'PY'
@@ -208,6 +216,7 @@ jobs:
           identity=source_summary.get('identity_reconciliation') or {}
           consolidation=source_summary.get('duplicate_profile_consolidation') or {}
           exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
+          controlled_dupes=source_summary.get('controlled_abbreviation_duplicate_consolidation') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -234,6 +243,21 @@ jobs:
           assert exact_dupes.get('cumulative_rows_after') == 1251, exact_dupes
           assert exact_dupes.get('occurrences_created') == 0, exact_dupes
           assert exact_dupes.get('attendance_inference') is False, exact_dupes
+          assert controlled_dupes.get('validation') == 'PASS', controlled_dupes
+          assert controlled_dupes.get('profiles_before') == 647, controlled_dupes
+          assert controlled_dupes.get('profiles_after') == 641, controlled_dupes
+          assert controlled_dupes.get('profiles_removed') == 6, controlled_dupes
+          assert controlled_dupes.get('controlled_duplicate_pairs_before') == 6, controlled_dupes
+          assert controlled_dupes.get('controlled_duplicate_pairs_after') == 0, controlled_dupes
+          assert controlled_dupes.get('exact_duplicate_pairs_after') == 0, controlled_dupes
+          assert controlled_dupes.get('untouched_catalog_profiles_exact') == 635, controlled_dupes
+          assert controlled_dupes.get('matched_history_links_checked') == 533, controlled_dupes
+          assert controlled_dupes.get('matched_history_profile_mismatches') == 0, controlled_dupes
+          assert controlled_dupes.get('history_records_after') == 1086, controlled_dupes
+          assert controlled_dupes.get('annual_rows_after') == 1235, controlled_dupes
+          assert controlled_dupes.get('cumulative_rows_after') == 1251, controlled_dupes
+          assert controlled_dupes.get('occurrences_created') == 0, controlled_dupes
+          assert controlled_dupes.get('attendance_inference') is False, controlled_dupes
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
