@@ -96,11 +96,11 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 603, s
+          assert s.get('profile_count') == 602, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 603
+          assert len(x.get('profiles') or []) == 602
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086'):
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
           assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
@@ -179,7 +179,7 @@ jobs:
           assert profiles['LIFE-212'].get('dnd_count') == 1, profiles['LIFE-212']
           assert profiles['LIFE-126'].get('history_count') == 3, profiles['LIFE-126']
           assert profiles['LIFE-126'].get('dnd_count') == 2, profiles['LIFE-126']
-          print({'profiles':603,'evidence_records':1086,'duplicate_profiles_removed_total':52})
+          print({'profiles':602,'evidence_records':1086,'duplicate_profiles_removed':52,'non_show_profiles_removed':1,'catalog_profiles_removed_total':53})
           PY
 
           python - <<'PY'
@@ -277,6 +277,8 @@ jobs:
           word_order=source_summary.get('word_order_recurring_profile_consolidation') or {}
           fuzzy=source_summary.get('conservative_fuzzy_profile_consolidation') or {}
           highconf=source_summary.get('high_confidence_recurring_profile_consolidation') or {}
+          non_show=source_summary.get('non_show_lifetime_source_evidence') or {}
+          non_show_cleanup=source_summary.get('non_show_profile_cleanup') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -382,6 +384,47 @@ jobs:
           assert len(highconf.get('held_out_as_distinct_or_ambiguous') or []) >= 5, highconf
           assert highconf.get('occurrences_created') == 0, highconf
           assert highconf.get('attendance_inference') is False, highconf
+          assert non_show.get('validation') == 'PRESERVED', non_show
+          assert non_show.get('former_profile_id') == 'LIFE-059', non_show
+          assert non_show.get('source_label') == 'Show or Event - Other', non_show
+          assert non_show.get('attendance_inference') is False, non_show
+          snap=non_show.get('profile_snapshot') or {}
+          assert snap.get('profile_id') == 'LIFE-059', snap
+          assert snap.get('canonical_event') == 'Show or Event - Other', snap
+          assert snap.get('issued') == 14, snap
+          assert snap.get('occurrences') == 1, snap
+          assert snap.get('lifetime_net_sales') == 5, snap
+          assert float(snap.get('lifetime_net_volume')) == 89500, snap
+          assert snap.get('lifetime_close_sales') == 6, snap
+          assert float(snap.get('lifetime_close_volume')) == 101260, snap
+          assert len(snap.get('source_rows') or []) == 1, snap
+          srcrow=(snap.get('source_rows') or [])[0]
+          assert srcrow.get('row') == 59, srcrow
+          assert srcrow.get('tab') == 'All_3_Tiers', srcrow
+          assert srcrow.get('spreadsheet_id') == '1kVWGiZamtiztEY1kKjnoD4iDNV2kxwovYVwzR7F_tPM', srcrow
+          assert non_show_cleanup.get('validation') == 'PASS', non_show_cleanup
+          assert non_show_cleanup.get('profiles_before') == 603, non_show_cleanup
+          assert non_show_cleanup.get('profiles_after') == 602, non_show_cleanup
+          assert non_show_cleanup.get('profiles_removed') == 1, non_show_cleanup
+          assert non_show_cleanup.get('removed_profile_id') == 'LIFE-059', non_show_cleanup
+          assert non_show_cleanup.get('evidence_snapshot_preserved') is True, non_show_cleanup
+          assert non_show_cleanup.get('catalog_remaining_byte_exact') is True, non_show_cleanup
+          assert non_show_cleanup.get('history_byte_exact') is True, non_show_cleanup
+          assert non_show_cleanup.get('annual_evidence_byte_exact') is True, non_show_cleanup
+          assert non_show_cleanup.get('cumulative_evidence_byte_exact') is True, non_show_cleanup
+          assert non_show_cleanup.get('history_records_after') == 1086, non_show_cleanup
+          assert non_show_cleanup.get('annual_rows_after') == 1235, non_show_cleanup
+          assert non_show_cleanup.get('cumulative_rows_after') == 1251, non_show_cleanup
+          assert non_show_cleanup.get('unlinked_annual') == 99, non_show_cleanup
+          assert non_show_cleanup.get('unlinked_cumulative') == 100, non_show_cleanup
+          assert non_show_cleanup.get('current_shows') == 36, non_show_cleanup
+          assert non_show_cleanup.get('payments') == 3, non_show_cleanup
+          assert non_show_cleanup.get('matched_history_links_checked') == 533, non_show_cleanup
+          assert non_show_cleanup.get('matched_history_profile_mismatches') == 0, non_show_cleanup
+          assert non_show_cleanup.get('exact_duplicate_pairs_after') == 0, non_show_cleanup
+          assert non_show_cleanup.get('expanded_abbreviation_duplicate_pairs_after') == 0, non_show_cleanup
+          assert non_show_cleanup.get('word_order_duplicate_pairs_after') == 0, non_show_cleanup
+          assert non_show_cleanup.get('attendance_inference') is False, non_show_cleanup
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
