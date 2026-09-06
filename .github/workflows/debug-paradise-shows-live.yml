@@ -96,11 +96,11 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 602, s
+          assert s.get('profile_count') == 593, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 602
+          assert len(x.get('profiles') or []) == 593
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059'):
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369','HIST-132','HIST-014','LIFE-082','HIST-003','HIST-001','HIST-400','LIFE-022','LIFE-042','LIFE-072','LIFE-193','HIST-021','HIST-335','HIST-375','HIST-365','HIST-376','LIFE-113','LIFE-125','HIST-407','HIST-031','HIST-296','HIST-298','HIST-332','HIST-311','HIST-312','HIST-313','HIST-171','HIST-005','HIST-049','LIFE-150','LIFE-078','LIFE-094','HIST-289','HIST-016','HIST-213','LIFE-095','HIST-170','HIST-130','HIST-159','LIFE-026','LIFE-034','LIFE-037','LIFE-051','LIFE-213','HIST-086','LIFE-059','CURRENT-001','CURRENT-002','CURRENT-005','CURRENT-006','HIST-093','HIST-260','HIST-261','HIST-262','HIST-324'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
           assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
@@ -179,7 +179,14 @@ jobs:
           assert profiles['LIFE-212'].get('dnd_count') == 1, profiles['LIFE-212']
           assert profiles['LIFE-126'].get('history_count') == 3, profiles['LIFE-126']
           assert profiles['LIFE-126'].get('dnd_count') == 2, profiles['LIFE-126']
-          print({'profiles':602,'evidence_records':1086,'duplicate_profiles_removed':52,'non_show_profiles_removed':1,'catalog_profiles_removed_total':53})
+          assert profiles['HIST-108'].get('history_count') == 9, profiles['HIST-108']
+          assert set(profiles['HIST-108'].get('matched_mfc_ids') or []) == {'MFC-077'}, profiles['HIST-108']
+          assert set(profiles['LIFE-023'].get('matched_mfc_ids') or []) == {'MFC-005'}, profiles['LIFE-023']
+          assert set(profiles['LIFE-027'].get('matched_mfc_ids') or []) == {'MFC-007','MFC-065'}, profiles['LIFE-027']
+          current_only=[p.get('profile_id') for p in (x.get('profiles') or []) if p.get('source_type') == 'CURRENT_ONLY']
+          assert current_only == ['CURRENT-003'], current_only
+          assert profiles['CURRENT-003'].get('canonical_event') == 'St Lucie Earth Day Fest', profiles['CURRENT-003']
+          print({'profiles':593,'evidence_records':1086,'identity_profile_shells_consolidated':61,'non_show_profiles_removed':1,'catalog_profiles_removed_total':62})
           PY
 
           python - <<'PY'
@@ -279,6 +286,7 @@ jobs:
           highconf=source_summary.get('high_confidence_recurring_profile_consolidation') or {}
           non_show=source_summary.get('non_show_lifetime_source_evidence') or {}
           non_show_cleanup=source_summary.get('non_show_profile_cleanup') or {}
+          currentcanon=source_summary.get('current_profile_canonicalization') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -425,6 +433,40 @@ jobs:
           assert non_show_cleanup.get('expanded_abbreviation_duplicate_pairs_after') == 0, non_show_cleanup
           assert non_show_cleanup.get('word_order_duplicate_pairs_after') == 0, non_show_cleanup
           assert non_show_cleanup.get('attendance_inference') is False, non_show_cleanup
+          assert currentcanon.get('validation') == 'PASS', currentcanon
+          assert currentcanon.get('profiles_before') == 602, currentcanon
+          assert currentcanon.get('profiles_after') == 593, currentcanon
+          assert currentcanon.get('profiles_removed') == 9, currentcanon
+          assert currentcanon.get('changed_survivors') == 3, currentcanon
+          assert currentcanon.get('untouched_catalog_profiles_exact') == 590, currentcanon
+          assert currentcanon.get('current_only_profiles_before') == 5, currentcanon
+          assert currentcanon.get('current_only_profiles_after') == 1, currentcanon
+          assert currentcanon.get('remaining_current_only_profile') == 'CURRENT-003', currentcanon
+          assert currentcanon.get('remaining_current_only_event') == 'St Lucie Earth Day Fest', currentcanon
+          assert currentcanon.get('current_show_rows') == 36, currentcanon
+          assert currentcanon.get('current_mfc_links') == 36, currentcanon
+          assert currentcanon.get('distinct_current_mfc_links') == 36, currentcanon
+          assert currentcanon.get('current_shows_without_profile') == 0, currentcanon
+          assert currentcanon.get('profile_mfc_without_current_show') == 0, currentcanon
+          assert currentcanon.get('duplicate_mfc_assignments') == 0, currentcanon
+          assert currentcanon.get('current_show_rows_modified') is False, currentcanon
+          assert currentcanon.get('history_records_after') == 1086, currentcanon
+          assert currentcanon.get('annual_rows_after') == 1235, currentcanon
+          assert currentcanon.get('cumulative_rows_after') == 1251, currentcanon
+          assert currentcanon.get('unlinked_annual') == 99, currentcanon
+          assert currentcanon.get('unlinked_cumulative') == 100, currentcanon
+          assert currentcanon.get('annual_occurrence_match_before') == 530, currentcanon
+          assert currentcanon.get('annual_occurrence_match_after') == 531, currentcanon
+          assert currentcanon.get('annual_missing_occurrence_before') == 606, currentcanon
+          assert currentcanon.get('annual_missing_occurrence_after') == 605, currentcanon
+          assert currentcanon.get('matched_history_links_before') == 533, currentcanon
+          assert currentcanon.get('matched_history_links_after') == 534, currentcanon
+          assert currentcanon.get('matched_history_profile_mismatches') == 0, currentcanon
+          assert currentcanon.get('exact_duplicate_pairs_after') == 0, currentcanon
+          assert currentcanon.get('expanded_abbreviation_duplicate_pairs_after') == 0, currentcanon
+          assert currentcanon.get('word_order_duplicate_pairs_after') == 0, currentcanon
+          assert len(currentcanon.get('families') or []) == 3, currentcanon
+          assert currentcanon.get('attendance_inference') is False, currentcanon
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
