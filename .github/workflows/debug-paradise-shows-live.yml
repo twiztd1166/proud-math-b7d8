@@ -91,6 +91,10 @@ jobs:
               grep -q 'historyCostStateValue' /tmp/app-modals.js
               grep -q 'bookingSignal' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
+              grep -q 'rebookOpportunityCard' /tmp/app-shows.js
+              grep -q 'Verified current opportunity' /tmp/app-shows.js
+              grep -q 'current_rebook_opportunity' /tmp/app-shows.js
+              grep -q 'rebookOpportunityHtml' /tmp/app-modals.js
               grep -q 'Historical booking context' /tmp/app-shows.js
               grep -q 'Next booking step' /tmp/app-shows.js
               grep -q 'latest_preserved_contact' /tmp/app-shows.js
@@ -228,6 +232,18 @@ jobs:
           assert coverage.get('annual_lp_profiled_rows') + us.get('annual_rows',0) == 1235, (coverage,us)
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
+          live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
+          expected_live={'LIFE-007','LIFE-013','LIFE-014','LIFE-017','LIFE-030'}
+          assert set(live)==expected_live, (set(live),expected_live)
+          assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
+          assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
+          assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
+          assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert not profiles['LIFE-005'].get('current_rebook_opportunity'), profiles['LIFE-005']
+          assert not profiles['LIFE-009'].get('current_rebook_opportunity'), profiles['LIFE-009']
+          assert not profiles['LIFE-018'].get('current_rebook_opportunity'), profiles['LIFE-018']
           # Cleanup expectations are scoped to each profile's exact year + source family
           # (25%+ family coverage), plus explicit non-participation applicability.
           cleanup_fields=('contact','booth','cost','com','performance','payment','application','coi')
@@ -1560,6 +1576,8 @@ jobs:
           grep -q 'REBOOK CANDIDATE' /tmp/shows.html
           grep -q 'Historical booking context' /tmp/shows.html
           grep -q 'Next booking step' /tmp/shows.html
+          grep -q 'LIVE OPPORTUNITY' /tmp/shows.html
+          grep -q 'Verified current opportunity' /tmp/shows.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
@@ -1568,6 +1586,16 @@ jobs:
           grep -q 'Booking status' /tmp/current.html
           grep -q 'When to act' /tmp/current.html
           grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
+
+          render_view rebook_detail "$SITE/#show/LIFE-007"
+          grep -q 'RPB Green Market' /tmp/rebook_detail.html
+          grep -q 'Verified current opportunity' /tmp/rebook_detail.html
+          grep -q 'APPLICATION OPEN' /tmp/rebook_detail.html
+          grep -q '10/17/2026' /tmp/rebook_detail.html
+          grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
+          grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
+          grep -q 'Open current source' /tmp/rebook_detail.html
+          grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
 
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
