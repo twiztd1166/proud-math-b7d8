@@ -179,7 +179,18 @@ jobs:
           assert x.get('ok') is True, x
           assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 3, len(x.get('payments') or [])
-          print({'shows':36,'payments':3})
+          current={row.get('mfc_id'):row for row in x.get('shows') or []}
+          acs=current['MFC-063']
+          assert acs.get('show_status') == 'HOLD', acs
+          assert acs.get('max_booking_cost') == 4690, acs
+          assert acs.get('booking_status') == 'ACCOUNT CLEARED — EXHIBITOR SPACE AVAILABLE / PRICE VERIFIED; TERMS GAPS REMAIN; NO BOOKING AUTHORIZED', acs
+          assert 'Pay in full on signing' in (acs.get('payment_terms') or ''), acs
+          assert '10x10 $2,345' in (acs.get('payment_terms') or ''), acs
+          assert '10x20 $4,690' in (acs.get('payment_terms') or ''), acs
+          assert (acs.get('source_detail') or {}).get('account_eligibility') == 'CLEARED 2026-08-31', acs
+          assert (acs.get('source_detail') or {}).get('available_booths') == ['818','813','815','912','914','903-923'], acs
+          assert (acs.get('source_detail') or {}).get('payment_status') == 'PAY IN FULL ON SIGNING', acs
+          print({'shows':36,'payments':3,'acs_current_source':'PASS'})
           PY
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/catalog.json \
@@ -1598,6 +1609,8 @@ jobs:
           grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/current.html
           grep -q 'Booking status' /tmp/current.html
           grep -q 'When to act' /tmp/current.html
+          grep -q 'ACCOUNT CLEARED — EXHIBITOR SPACE AVAILABLE / PRICE VERIFIED' /tmp/current.html
+          grep -q 'Pay in full on signing' /tmp/current.html
           grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
