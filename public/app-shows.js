@@ -41,6 +41,7 @@ function coiMatch(p,mode){
 const HISTORY_FIELD_KEYS=['contact','booth','cost','com','performance','payment','application','coi'];
 const CLEANUP_FIELD_LABELS={contact:'Contact',booth:'Booth / space',cost:'Show cost',com:'Event COM',performance:'Performance',payment:'Payment status',application:'Application status',coi:'COI'};
 const cleanupFieldSupportCache=new Map();
+let pendingCleanupQueue=false;
 function emptyHistoryState(){return {VALUE:0,UNKNOWN:0,NA:0,MISSING:0}}
 function historyFieldState(p,key,year='ALL'){
   const state=year!=='ALL'?p?.history_field_states?.[String(year)]?.[key]:p?.history_field_totals?.[key];
@@ -640,7 +641,7 @@ function quickViewsBar(mode){
 }
 function applyQuickView(key){
   if(key==='ALL_MISSING'&&state.catalogFilters.historyYear==='ALL'){
-    openShowFilters();
+    openShowFilters(true);
     const yearSelect=$('#fHistoryYear');
     if(yearSelect){yearSelect.focus();try{yearSelect.scrollIntoView({block:'center',behavior:'smooth'})}catch{}}
     return;
@@ -667,7 +668,8 @@ function applyQuickView(key){
   if(state.showMode==='ALL'&&!state.catalogLoaded)loadCatalog();
   render();
 }
-function openShowFilters(){
+function openShowFilters(cleanupRequest=false){
+  pendingCleanupQueue=Boolean(cleanupRequest);
   const all=state.showMode==='ALL';
   const body=$('#filterBody');
   if(!body)return;
@@ -745,11 +747,18 @@ function openShowFilters(){
   bindFilterPreview();
 }
 function applyShowFilters(){
+  const activateCleanup=pendingCleanupQueue&&state.showMode==='ALL';
   if(state.showMode==='ALL')state.catalogFilters=draftCatalogFilters();
   else state.currentFilters=draftCurrentFilters();
-  state.showQuickView='NONE';state.catalogLimit=60;closeModal('filterModal');render();
+  state.showQuickView='NONE';
+  if(activateCleanup&&state.catalogFilters.historyYear!=='ALL'&&quickViewCount('ALL_MISSING')>0){
+    state.showQuickView='ALL_MISSING';
+    state.catalogSort='MISSING_DATA';
+  }
+  pendingCleanupQueue=false;state.catalogLimit=60;closeModal('filterModal');render();
 }
 function resetShowFilters(){
+  pendingCleanupQueue=false;
   if(state.showMode==='ALL')state.catalogFilters=defaultCatalogFilters();
   else state.currentFilters=defaultCurrentFilters();
   state.search='';state.showQuickView='NONE';state.catalogLimit=60;closeModal('filterModal');render();
