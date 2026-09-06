@@ -96,18 +96,25 @@ jobs:
           x=json.load(open('/tmp/catalog.json'))
           s=x.get('summary') or {}
           assert x.get('ok') is True, x
-          assert s.get('profile_count') == 649, s
+          assert s.get('profile_count') == 647, s
           assert s.get('occurrence_count') == 1086, s
-          assert len(x.get('profiles') or []) == 649
+          assert len(x.get('profiles') or []) == 647
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
-          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348'):
+          for removed in ('HIST-247','HIST-259','HIST-277','HIST-300','HIST-333','HIST-348','LIFE-098','HIST-369'):
               assert removed not in profiles, removed
           assert profiles['LIFE-166'].get('history_count') == 2, profiles['LIFE-166']
           assert profiles['LIFE-147'].get('history_count') == 5, profiles['LIFE-147']
           assert profiles['HIST-299'].get('history_count') == 5, profiles['HIST-299']
           assert profiles['HIST-349'].get('history_count') == 2, profiles['HIST-349']
           assert profiles['LIFE-056'].get('history_count') == 6, profiles['LIFE-056']
-          print({'profiles':649,'evidence_records':1086,'duplicate_profiles_removed':6})
+          assert profiles['LIFE-136'].get('history_count') == 9, profiles['LIFE-136']
+          assert profiles['LIFE-136'].get('occurrences') == 7, profiles['LIFE-136']
+          assert profiles['LIFE-136'].get('issued') == 23, profiles['LIFE-136']
+          assert float(profiles['LIFE-136'].get('lifetime_net_volume')) == 100740.25, profiles['LIFE-136']
+          assert float(profiles['LIFE-136'].get('lifetime_close_volume')) == 155990.25, profiles['LIFE-136']
+          assert len(profiles['LIFE-136'].get('source_rows') or []) == 2, profiles['LIFE-136']
+          assert profiles['LIFE-206'].get('history_count') == 1, profiles['LIFE-206']
+          print({'profiles':647,'evidence_records':1086,'duplicate_profiles_removed_total':8})
           PY
 
           python - <<'PY'
@@ -200,6 +207,7 @@ jobs:
           cumulative=source_summary.get('cumulative_lifetime_layer') or {}
           identity=source_summary.get('identity_reconciliation') or {}
           consolidation=source_summary.get('duplicate_profile_consolidation') or {}
+          exact_dupes=source_summary.get('exact_normalized_duplicate_consolidation') or {}
           assert identity.get('validation') == 'PASS', identity
           assert consolidation.get('validation') == 'PASS', consolidation
           assert consolidation.get('profiles_before') == 655, consolidation
@@ -214,6 +222,18 @@ jobs:
           assert consolidation.get('matched_history_profile_mismatches') == 0, consolidation
           assert consolidation.get('occurrences_created') == 0, consolidation
           assert consolidation.get('attendance_inference') is False, consolidation
+          assert exact_dupes.get('validation') == 'PASS', exact_dupes
+          assert exact_dupes.get('profiles_before') == 649, exact_dupes
+          assert exact_dupes.get('profiles_after') == 647, exact_dupes
+          assert exact_dupes.get('profiles_removed') == 2, exact_dupes
+          assert exact_dupes.get('exact_normalized_duplicate_pairs_before') == 2, exact_dupes
+          assert exact_dupes.get('exact_normalized_duplicate_pairs_after') == 0, exact_dupes
+          assert exact_dupes.get('untouched_catalog_profiles_exact') == 645, exact_dupes
+          assert exact_dupes.get('history_records_after') == 1086, exact_dupes
+          assert exact_dupes.get('annual_rows_after') == 1235, exact_dupes
+          assert exact_dupes.get('cumulative_rows_after') == 1251, exact_dupes
+          assert exact_dupes.get('occurrences_created') == 0, exact_dupes
+          assert exact_dupes.get('attendance_inference') is False, exact_dupes
           assert identity.get('profile_links_added_annual') == 69, identity
           assert identity.get('profile_links_added_cumulative') == 69, identity
           assert identity.get('unlinked_annual_after') == 99, identity
