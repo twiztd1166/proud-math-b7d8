@@ -75,6 +75,13 @@ jobs:
               grep -q 'cleanupQueueLine' /tmp/app-shows.js
               grep -q 'cleanup queue' /tmp/app-shows.js
               grep -q 'Explicit unknown and N/A are preserved separately and do not count as missing' /tmp/app-shows.js
+              grep -q 'data-focus-year' /tmp/app-shows.js
+              grep -q 'deepLinkedYear' /tmp/app-core.js
+              grep -q "'/year/'" /tmp/app-core.js
+              grep -q 'Cleanup checklist' /tmp/app-modals.js
+              grep -q 'cleanup year opened first' /tmp/app-modals.js
+              grep -q 'The checklist is at the top' /tmp/app-modals.js
+              grep -q 'Explicit unknown and N/A are preserved as coded states and do not count as missing' /tmp/app-modals.js
               grep -q 'Most verified worked years' /tmp/app-shows.js
               grep -q 'Verified worked evidence' /tmp/app-shows.js
               grep -q 'Has verified worked evidence' /tmp/app-shows.js
@@ -170,15 +177,17 @@ jobs:
                   if supported:
                       out.append(field)
               return out
-          def missing_count(p,year,supported):
+          def missing_fields(p,year,supported):
               if str(year) not in {str(v) for v in (p.get('history_years') or [])}:
-                  return 0
-              missing=0
+                  return []
+              out=[]
               for field in supported:
                   s=state_for(p,year,field)
                   if int(s.get('VALUE') or 0)==0 and int(s.get('UNKNOWN') or 0)==0 and int(s.get('NA') or 0)==0:
-                      missing+=1
-              return missing
+                      out.append(field)
+              return out
+          def missing_count(p,year,supported):
+              return len(missing_fields(p,year,supported))
           expected_support={
               2019:[],
               2022:['contact','booth','cost','coi'],
@@ -192,6 +201,10 @@ jobs:
               assert actual == expected, (year,actual,expected)
               queue=sum(1 for p in profiles.values() if missing_count(p,year,actual)>0)
               assert queue == expected_queue[year], (year,queue,expected_queue[year])
+          assert missing_fields(profiles['HIST-055'],2025,supported_fields(2025)) == ['com','performance']
+          assert missing_fields(profiles['HIST-015'],2022,supported_fields(2022)) == ['coi']
+          assert 'booth' not in missing_fields(profiles['HIST-015'],2022,supported_fields(2022))
+          assert missing_fields(profiles['LIFE-043'],2024,supported_fields(2024)) == []
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 31, x.get('version')
           for p in profiles.values():
