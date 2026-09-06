@@ -223,6 +223,21 @@ jobs:
           assert s.get('attendance_inference') is False, s
           assert len(annual) == 16, len(annual)
           assert len(cumulative) == 17, len(cumulative)
+          assert s.get('source_groups') == 17, s
+          expected_categories={
+              'ADMINISTRATIVE_AGGREGATE':5,
+              'GENERIC_LOCATIONLESS':8,
+              'COMPETING_IDENTITY':2,
+              'INSUFFICIENT_IDENTITY':1,
+              'CUMULATIVE_ONLY_UNMATCHED':1,
+          }
+          assert s.get('category_counts') == expected_categories, s
+          by_annual={x.get('evidence_id'):x for x in annual}
+          assert by_annual['LP2014-024'].get('resolution_category') == 'ADMINISTRATIVE_AGGREGATE', by_annual['LP2014-024']
+          assert by_annual['LP2014-005'].get('resolution_category') == 'GENERIC_LOCATIONLESS', by_annual['LP2014-005']
+          assert by_annual['LP2016-049'].get('resolution_category') == 'COMPETING_IDENTITY', by_annual['LP2016-049']
+          assert by_annual['LP2017-112'].get('resolution_category') == 'INSUFFICIENT_IDENTITY', by_annual['LP2017-112']
+          assert all(str(x.get('resolution_reason') or '').strip() for x in annual+cumulative), 'Every unresolved row must include a governed reason'
           annual_ids={x.get('evidence_id') for x in annual}
           linked_ids={x.get('annual_evidence_id') for x in cumulative if x.get('annual_evidence_id')}
           assert linked_ids == annual_ids, (len(linked_ids),len(annual_ids))
@@ -233,8 +248,10 @@ jobs:
           assert popup.get('source_label') == '2024 PopUp Shop Boca 8/24/24', popup
           assert popup.get('match_status') == 'UNMATCHED_SOURCE', popup
           assert popup.get('comparison_status') == 'CUMULATIVE_ONLY', popup
+          assert popup.get('resolution_category') == 'CUMULATIVE_ONLY_UNMATCHED', popup
+          assert 'Cumulative-only' in str(popup.get('resolution_reason') or ''), popup
           assert all('profile_id' not in x for x in annual+cumulative), 'Unlinked endpoint must not expose or synthesize profile IDs'
-          print({'unlinked_annual':16,'unlinked_cumulative':17,'source_groups':17,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
+          print({'unlinked_annual':16,'unlinked_cumulative':17,'source_groups':17,'reason_categories':expected_categories,'lp_source_only_profiles':72,'popup_identity':'PRESERVED_UNMATCHED'})
           PY
 
           curl -sS -o /tmp/lponly.json \

@@ -5,7 +5,7 @@ let state={
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
   catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,
-  unlinkedLp:{annual:[],cumulative:[],summary:null,loaded:false,loading:false,error:null},
+  unlinkedLp:{annual:[],cumulative:[],summary:null,category:'ALL',loaded:false,loading:false,error:null},
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
   catalogFilters:{

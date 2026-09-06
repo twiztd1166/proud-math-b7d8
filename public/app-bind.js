@@ -14,6 +14,7 @@ function bindDynamic(){
   const sr=$('#showResetBtn');if(sr)sr.onclick=resetShowView;
   const cr=$('#catalogRetry');if(cr)cr.onclick=()=>loadCatalog(true);
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
+  $('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
   $$('.paymentCard[data-payment]').forEach(c=>c.onclick=()=>openPayment(c.dataset.payment));
   $$('.chip[data-filter]').forEach(c=>c.onclick=()=>{state.filter=c.dataset.filter;render()});
