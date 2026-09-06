@@ -14,7 +14,7 @@ let state={
     comBand:'ALL',lifetimeNetBand:'ALL',
     currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL',
   },
-  currentSort:'PRIORITY',
+  currentSort:'BOOKING',
   currentFilters:{
     status:'ALL',treatment:'IN PLAY',eventYear:'ALL',timing:'ALL',
     confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY',
