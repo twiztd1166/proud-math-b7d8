@@ -76,6 +76,8 @@ jobs:
               grep -q 'All cumulative LP years' /tmp/app-shows.js
               grep -q 'Annual LeadPerfection' /tmp/app-shows.js
               grep -q 'Cumulative LeadPerfection' /tmp/app-shows.js
+              grep -q 'Year-by-year evidence' /tmp/app-modals.js
+              grep -q 'Active year filter' /tmp/app-modals.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -1058,6 +1060,16 @@ jobs:
           grep -q 'vendors@patriotshows.com' /tmp/detail.html
           grep -q '>Notes<' /tmp/detail.html
           grep -q 'Mail Cks. To:' /tmp/detail.html
+          grep -q 'Year-by-year evidence' /tmp/detail.html
+
+          render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
+          grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
+          grep -q 'LPONLY-2021-123' /tmp/lponly_detail.html
+          grep -q 'LP source-only identity.' /tmp/lponly_detail.html
+          grep -q 'Preserved history records' /tmp/lponly_detail.html
+          grep -q 'Year-by-year evidence' /tmp/lponly_detail.html
+          grep -q '0 records · 1 annual LP · 1 cumulative LP' /tmp/lponly_detail.html
+          grep -q '0 records · 2 annual LP · 2 cumulative LP' /tmp/lponly_detail.html
 
           render_view unlinked "$SITE/#unlinked"
           grep -q 'Unlinked LP 17' /tmp/unlinked.html
@@ -1068,4 +1080,4 @@ jobs:
           grep -q 'Cumulative only 1' /tmp/unlinked.html
           grep -q 'Why unresolved:' /tmp/unlinked.html
 
-          echo "Live browser rendered #shows, #current, #unlinked, and #show/LIFE-009 with governed counts/year details and no uncaught JavaScript errors."
+          echo "Live browser rendered #shows, #current, #unlinked, #show/LIFE-009, and LP-source-only year evidence with governed semantics and no uncaught JavaScript errors."
