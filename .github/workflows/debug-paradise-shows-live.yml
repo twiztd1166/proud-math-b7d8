@@ -208,9 +208,9 @@ jobs:
               return len(missing_fields(p,year))
           expected_union_support={
               2014:['contact','cost','performance'],
-              2015:['contact','cost','payment','performance'],
+              2015:['contact','cost','performance','payment'],
               2016:['performance'],
-              2017:['contact','payment','performance'],
+              2017:['contact','performance','payment'],
               2018:['cost'],
               2019:[],
               2020:[],
