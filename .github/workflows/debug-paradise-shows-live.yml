@@ -223,7 +223,7 @@ jobs:
               2025:['contact','booth','cost','com','performance'],
               2026:['contact','payment'],
           }
-          expected_queue={2014:1,2015:40,2016:0,2017:6,2018:0,2019:0,2020:0,2021:48,2022:18,2023:51,2024:0,2025:0,2026:2}
+          expected_queue={2014:1,2015:40,2016:0,2017:6,2018:0,2019:0,2020:0,2021:48,2022:18,2023:51,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
               actual=union_supported_fields(year)
               assert actual == expected, (year,actual,expected)
@@ -239,8 +239,12 @@ jobs:
           assert missing_fields(profiles['LIFE-043'],2024) == []
           assert missing_fields(profiles['HIST-055'],2025) == []
           assert missing_fields(profiles['LIFE-080'],2025) == []
-          assert missing_fields(profiles['LIFE-002'],2026) == ['payment']
-          assert missing_fields(profiles['LIFE-007'],2026) == ['payment']
+          assert missing_fields(profiles['LIFE-002'],2026) == []
+          assert missing_fields(profiles['LIFE-007'],2026) == []
+          life002_payment=profiles['LIFE-002']['history_field_states']['2026']['payment']
+          life007_payment=profiles['LIFE-007']['history_field_states']['2026']['payment']
+          assert life002_payment.get('UNKNOWN') == 1 and life002_payment.get('MISSING') == 0, life002_payment
+          assert life007_payment.get('UNKNOWN') == 2 and life007_payment.get('MISSING') == 0, life007_payment
           assert missing_fields(profiles['LIFE-027'],2026) == []
           def cleanup_queue(year):
               rows=[p for p in profiles.values() if missing_count(p,year)>0]
@@ -265,7 +269,7 @@ jobs:
           queue_2022=cleanup_queue(2022)
           assert len(queue_2022) == 18 and len({p.get('profile_id') for p in queue_2022}) == 18
           assert len(cleanup_queue(2023)) == 51
-          assert len(cleanup_queue(2026)) == 2
+          assert cleanup_queue(2026) == []
           # Year-scoped historical completeness semantics.
           assert x.get('version') == 37, x.get('version')
           for p in profiles.values():
