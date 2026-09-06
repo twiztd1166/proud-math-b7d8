@@ -4,7 +4,7 @@ let state={
   shows:[],payments:[],activity:[],settings:{},
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
-  catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,
+  catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,
   unlinkedLp:{annual:[],cumulative:[],summary:null,category:'ALL',loaded:false,loading:false,error:null},
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
@@ -81,16 +81,21 @@ function persistShowViewState(){
 }
 restoreShowViewState();
 function applyLocationView(){
-  const hash=String(location.hash||'').replace(/^#/,'').toLowerCase();
-  if(hash==='shows'){state.tab='shows';state.showMode='ALL'}
-  else if(hash==='current'){state.tab='shows';state.showMode='CURRENT'}
-  else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED'}
-  else if(['today','payments','control'].includes(hash))state.tab=hash;
+  const raw=String(location.hash||'').replace(/^#/,'');
+  const hash=raw.toLowerCase();
+  const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})$/i);
+  if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase()}
+  else if(hash==='shows'){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=null}
+  else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null}
+  else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null}
+  else if(['today','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null}
 }
 function syncLocationView(){
-  const hash=state.tab==='shows'
-    ?(state.showMode==='CURRENT'?'current':state.showMode==='UNLINKED'?'unlinked':'shows')
-    :state.tab;
+  const hash=state.deepLinkedProfile
+    ?'show/'+state.deepLinkedProfile
+    :(state.tab==='shows'
+      ?(state.showMode==='CURRENT'?'current':state.showMode==='UNLINKED'?'unlinked':'shows')
+      :state.tab);
   try{history.replaceState(null,'','#'+hash)}catch{}
 }
 applyLocationView();
@@ -153,6 +158,7 @@ async function loadCatalog(force=false){
   }finally{
     state.catalogLoading=false;
     if(state.tab==='shows')render();
+    if(state.catalogLoaded&&state.deepLinkedProfile&&typeof openCatalog==='function')openCatalog(state.deepLinkedProfile);
   }
 }
 
