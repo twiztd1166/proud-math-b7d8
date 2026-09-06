@@ -67,3 +67,6 @@
 
 
 .rebookSeries{display:grid;gap:3px;padding:8px 9px;border-radius:9px;border:1px solid #d7dce1;background:#f7f8fa;margin-top:7px}.rebookSeries span{font-size:8px;text-transform:uppercase;color:var(--muted);font-weight:850;letter-spacing:.35px}.rebookSeries b{font-size:10px;line-height:1.4;color:var(--navy);overflow-wrap:anywhere}
+
+
+.rebookAge{display:grid;gap:3px;padding:8px 9px;border-radius:9px;border:1px solid #e1d5b6;background:#fffaf0;margin-top:7px}.rebookAge span{font-size:8px;text-transform:uppercase;color:#7a6840;font-weight:850;letter-spacing:.35px}.rebookAge b{font-size:10px;line-height:1.4;color:var(--navy);overflow-wrap:anywhere}

@@ -118,7 +118,8 @@ function catalogCard(p){
   ].filter(Boolean);
   const preservedContext=candidate&&preservedBits.length?`<div class="rebookContext"><span>Historical booking context</span><b>${preservedBits.join(' · ')}</b></div>`:'';
   const nextBooking=candidate?`<div class="rebookNext"><span>Next booking step</span><b>Verify the next occurrence, current availability, current quote / fees, and booking or payment deadline before committing.</b></div>`:'';
-  const candidateNote=candidate?`<div class="action">Rebook candidate · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${rebookOpportunityCard(liveOpportunity)}${preservedContext}${liveOpportunity?'':nextBooking}`:'';
+  const historicalAgeNote=candidate&&Number(p.latest_history_year||0)<2023?`<div class="rebookAge"><span>Older historical evidence</span><b>Strong history remains eligible because the rebook review starts in 2013. Verify that the organizer / series still exists, the venue or market still fits, and current economics remain attractive before booking.</b></div>`:'';
+  const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${rebookOpportunityCard(liveOpportunity)}${preservedContext}${liveOpportunity?'':nextBooking}`:'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Current opportunity is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
@@ -139,7 +140,16 @@ function rebookCandidate(p){
     && !String(p?.related_current_profile_id||'').trim()
     && (tier==='Platinum'||tier==='Gold')
     && Number.isFinite(net)&&net>0
-    && Number.isFinite(latest)&&latest>=2023;
+    && Number.isFinite(latest)&&latest>=2013;
+}
+function historicalReviewCandidate2013(p){
+  const latest=Number(p?.latest_history_year||0);
+  const net=Number(p?.lifetime_net_volume||0);
+  return profileCurrentShows(p).length===0
+    && !String(p?.related_current_profile_id||'').trim()
+    && !p?.current_rebook_opportunity
+    && Number.isFinite(net)&&net>0
+    && Number.isFinite(latest)&&latest>=2013;
 }
 function triMatch(flag,mode){
   return mode==='ANY'||(mode==='HAS'&&Boolean(flag))||(mode==='MISSING'&&!flag);
@@ -421,6 +431,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
+  if(quickView==='ALL_HISTORICAL_2013'&&!historicalReviewCandidate2013(p))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(f.historyYear==='ALL'||isLpSourceOnly(p)||missingFieldCountForYear(p,f.historyYear)===0))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
@@ -763,7 +774,8 @@ function quickViewOptions(mode){
   return mode==='ALL'
     ?[
       ['ALL_LIVE_REBOOK','Live opportunities'],
-      ['ALL_REBOOK','Rebook candidates'],
+      ['ALL_REBOOK','Rebook candidates 2013+'],
+      ['ALL_HISTORICAL_2013','Positive-net history 2013+'],
       ['ALL_TOP_NET','Top lifetime net'],
       ['ALL_LOW_COM','Low COM'],
       ['ALL_MISSING',cleanupYear==='ALL'?'Missing fields · choose year':'Missing fields · '+cleanupYear],
@@ -785,6 +797,7 @@ function quickViewOptions(mode){
 function quickViewCount(key){
   if(key==='ALL_LIVE_REBOOK')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
+  if(key==='ALL_HISTORICAL_2013')return state.catalog.filter(historicalReviewCandidate2013).length;
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
   if(key==='ALL_MISSING'){
@@ -823,6 +836,7 @@ function applyQuickView(key){
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='NEXT_OPPORTUNITY';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
+    if(key==='ALL_HISTORICAL_2013')state.catalogSort='RECOMMENDED';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
     if(key==='ALL_MISSING'){state.catalogFilters.historyYear=selectedHistoryYear;state.catalogSort='MISSING_DATA'}

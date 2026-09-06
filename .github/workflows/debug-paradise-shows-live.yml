@@ -110,7 +110,12 @@ jobs:
               grep -q 'latest_preserved_contact' /tmp/app-shows.js
               grep -q 'latest_preserved_cost' /tmp/app-shows.js
               grep -q 'latest_preserved_dates' /tmp/app-shows.js
-              grep -q 'Rebook candidates' /tmp/app-shows.js
+              grep -q 'Rebook candidates 2013+' /tmp/app-shows.js
+              grep -q 'Positive-net history 2013+' /tmp/app-shows.js
+              grep -q 'historicalReviewCandidate2013' /tmp/app-shows.js
+              grep -q 'latest>=2013' /tmp/app-shows.js
+              grep -q 'Older historical evidence' /tmp/app-shows.js
+              grep -q 'rebookAge' /tmp/app.css
               grep -q 'best specific booth' /tmp/app-shows.js
               grep -q "currentSort:'BOOKING'" /tmp/app-core.js
               grep -q 'Priority to book / review' /tmp/app-shows.js
@@ -267,6 +272,33 @@ jobs:
           assert coverage.get('annual_lp_profiled_rows') + us.get('annual_rows',0) == 1235, (coverage,us)
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
+          boot=json.load(open('/tmp/bootstrap.json'))
+          current_ids={row.get('mfc_id') for row in boot.get('shows') or []}
+          def has_current_control(p):
+              return any(mfc in current_ids for mfc in (p.get('matched_mfc_ids') or []))
+          def related_series_current(p):
+              return bool(str(p.get('related_current_profile_id') or '').strip())
+          def positive_net_2013(p):
+              try:
+                  net=float(p.get('lifetime_net_volume') or 0)
+                  latest=int(p.get('latest_history_year') or 0)
+              except (TypeError,ValueError):
+                  return False
+              return (
+                  not has_current_control(p)
+                  and not related_series_current(p)
+                  and not p.get('current_rebook_opportunity')
+                  and net>0
+                  and latest>=2013
+              )
+          historical_2013=[p for p in profiles.values() if positive_net_2013(p)]
+          strong_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
+          assert len(historical_2013)==90, len(historical_2013)
+          assert len(strong_2013)==28, len(strong_2013)
+          assert any(p.get('profile_id')=='LIFE-010' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
+          assert any(p.get('profile_id')=='LIFE-016' for p in strong_2013), [p.get('profile_id') for p in strong_2013]
+          assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
+          assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-030','LIFE-054','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
@@ -1628,7 +1660,8 @@ jobs:
           render_view shows "$SITE/#shows"
           grep -q 'Show database' /tmp/shows.html
           grep -q '665 show profiles' /tmp/shows.html
-          grep -q 'Rebook candidates' /tmp/shows.html
+          grep -q 'Rebook candidates 2013+' /tmp/shows.html
+          grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'REBOOK CANDIDATE' /tmp/shows.html
           grep -q 'Historical booking context' /tmp/shows.html
           grep -q 'Next booking step' /tmp/shows.html
