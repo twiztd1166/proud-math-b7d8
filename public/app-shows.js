@@ -19,13 +19,16 @@ function bookingSignal(show){
   const endDays=end?daysFromToday(end):null;
   const startDays=show?.event_start?daysFromToday(show.event_start):null;
   const open=bookingOpportunityOpen(show);
-  if(endDays!==null&&endDays<0)return {key:'NEXT_CYCLE',label:'NEXT CYCLE',detail:'Current occurrence has passed · get the next date early',weight:6,cls:'next'};
-  if(startDays!==null&&startDays<0&&endDays!==null&&endDays>=0)return {key:'IN_PROGRESS',label:'CURRENT EVENT',detail:'Occurrence has started · use this cycle for execution and next-cycle planning',weight:5,cls:'watch'};
-  if(!show?.event_start)return {key:'WATCH_DATE',label:'WATCH FOR DATE',detail:'No current event date · monitor organizer before committing',weight:5,cls:'watch'};
+  const status=String(show?.booking_status||'').toUpperCase();
+  if(endDays!==null&&endDays<0)return {key:'NEXT_CYCLE',label:'NEXT CYCLE',detail:'Current occurrence has passed · get the next date early',weight:7,cls:'next'};
+  if(startDays!==null&&startDays<=0&&endDays!==null&&endDays>=0)return {key:'IN_PROGRESS',label:'CURRENT EVENT',detail:'Occurrence has started · use this cycle for execution and next-cycle planning',weight:6,cls:'watch'};
+  if(!show?.event_start)return {key:'WATCH_DATE',label:'WATCH FOR DATE',detail:'No current event date · monitor organizer before committing',weight:6,cls:'watch'};
+  if(/ACCOUNT GATE|HARD GATE|BOOKING GATE/.test(status))return {key:'GATED',label:'GATED / VERIFY',detail:'Do not book until the current account / eligibility gate is cleared',weight:5,cls:'watch'};
   if(bookingCommitted(show))return {key:'COMMITTED',label:'COMMITTED',detail:'Booking is supported · manage confirmation / payment controls',weight:0,cls:'committed'};
   if(decision.includes('TIER 3'))return {key:'NEGOTIATE_ONLY',label:'NEGOTIATE ONLY',detail:open?'Opportunity is open · proceed only if price / placement improves':'Do not book at current economics without improved terms',weight:4,cls:'negotiate'};
   if(decision.includes('TIER 2'))return {key:'TEST_NEGOTIATE',label:'TEST / NEGOTIATE',detail:open?'Opportunity is open · use only as a controlled test':'Consider only as a controlled test with defined spend',weight:3,cls:'test'};
   if(decision.includes('TIER 1')||decision.includes('RESTART')){
+    if(startDays!==null&&startDays<=7)return {key:'LATE_VERIFY',label:'LATE / VERIFY NOW',detail:'Event is within 7 days and booking is not confirmed · verify availability immediately',weight:1,cls:'book'};
     if(open)return {key:'BOOK_NOW',label:'BOOK / APPLY NOW',detail:'High-priority history + current opportunity is open',weight:1,cls:'book'};
     return {key:'PRIORITY_REVIEW',label:'PRIORITY REVIEW',detail:startDays!==null&&startDays>=0?'Future Tier 1 / restart candidate · confirm availability now':'High-priority history · verify next booking opportunity',weight:2,cls:'book'};
   }
@@ -41,7 +44,7 @@ function bookingBoardSummary(){
   const rows=state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR');
   const signals=rows.map(bookingSignal);
   const count=key=>signals.filter(x=>x.key===key).length;
-  return {book:count('BOOK_NOW')+count('PRIORITY_REVIEW'),committed:count('COMMITTED'),test:count('TEST_NEGOTIATE')+count('NEGOTIATE_ONLY'),watch:count('WATCH_DATE')+count('NEXT_CYCLE')+count('IN_PROGRESS')};
+  return {book:count('BOOK_NOW')+count('PRIORITY_REVIEW')+count('LATE_VERIFY'),committed:count('COMMITTED'),test:count('TEST_NEGOTIATE')+count('NEGOTIATE_ONLY'),watch:count('WATCH_DATE')+count('NEXT_CYCLE')+count('IN_PROGRESS')+count('GATED')};
 }
 function showCard(s){
   const signal=bookingSignal(s),profile=currentProfileForShow(s);
@@ -438,9 +441,9 @@ function currentMatchesWith(s,f,quickView='NONE',search=state.search){
   if(f.owner!=='ALL'&&String(s.owner||'Unassigned')!==f.owner)return false;
   if(f.evidence!=='ALL'&&String(s.source_detail?.needs_evidence||'NONE')!==f.evidence)return false;
   if(f.payment!=='ALL'&&String(s.source_detail?.payment_status||'NO PAYMENT SCHEDULE')!==f.payment)return false;
-  if(quickView==='CURRENT_BOOK_NOW'&&!['BOOK_NOW','PRIORITY_REVIEW'].includes(bookingSignal(s).key))return false;
+  if(quickView==='CURRENT_BOOK_NOW'&&!['BOOK_NOW','PRIORITY_REVIEW','LATE_VERIFY'].includes(bookingSignal(s).key))return false;
   if(quickView==='CURRENT_COMMITTED'&&bookingSignal(s).key!=='COMMITTED')return false;
-  if(quickView==='CURRENT_WATCH'&&!['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS'].includes(bookingSignal(s).key))return false;
+  if(quickView==='CURRENT_WATCH'&&!['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS','GATED'].includes(bookingSignal(s).key))return false;
   if(quickView==='CURRENT_EVIDENCE'&&String(s.source_detail?.needs_evidence||'NONE')==='NONE')return false;
   if(quickView==='CURRENT_COST_HIGH'&&(s.max_booking_cost===null||s.max_booking_cost===undefined||s.max_booking_cost===''))return false;
   if(!rangeMatch(s.max_booking_cost,f.costBand))return false;
@@ -704,7 +707,7 @@ function quickViewOptions(mode){
     :[
       ['CURRENT_BOOK_NOW','Book / priority'],
       ['CURRENT_COMMITTED','Committed'],
-      ['CURRENT_WATCH','Watch / next cycle'],
+      ['CURRENT_WATCH','Watch / gated / next'],
       ['CURRENT_IN_PLAY','In Play'],
       ['CURRENT_DUE7','Due ≤7 days'],
       ['CURRENT_EVIDENCE','Evidence attention'],
@@ -725,7 +728,7 @@ function quickViewCount(key){
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
   if(key==='CURRENT_BOOK_NOW')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['BOOK_NOW','PRIORITY_REVIEW'].includes(bookingSignal(s).key)).length;
   if(key==='CURRENT_COMMITTED')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&bookingSignal(s).key==='COMMITTED').length;
-  if(key==='CURRENT_WATCH')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS'].includes(bookingSignal(s).key)).length;
+  if(key==='CURRENT_WATCH')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&['WATCH_DATE','NEXT_CYCLE','IN_PROGRESS','GATED'].includes(bookingSignal(s).key)).length;
   if(key==='CURRENT_IN_PLAY')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR').length;
   if(key==='CURRENT_DUE7')return state.shows.filter(s=>{const d=daysFromToday(s.action_due);return s.this_year!=='SKIP THIS YEAR'&&d!==null&&d>=0&&d<=7}).length;
   if(key==='CURRENT_EVIDENCE')return state.shows.filter(s=>s.this_year!=='SKIP THIS YEAR'&&String(s.source_detail?.needs_evidence||'NONE')!=='NONE').length;
@@ -945,7 +948,7 @@ function renderUnlinkedLp(){
 function renderCurrentShows(){
   const list=state.shows.filter(currentMatches).slice().sort(currentComparator);
   const board=bookingBoardSummary();
-  const intro=`<div class="bookingBoard"><div><span>Priority to book / review</span><b>${board.book}</b></div><div><span>Committed</span><b>${board.committed}</b></div><div><span>Test / negotiate</span><b>${board.test}</b></div><div><span>Watch / next cycle</span><b>${board.watch}</b></div></div><div class="sourceWarn bookingBoardNote"><b>Booking recommendation uses the governed Decision/Tier plus current booking status and dates.</b> Historical sales, COM, costs, and booth evidence remain visible separately; this layer does not overwrite source evidence.</div>`;
+  const intro=`<div class="bookingBoard"><div><span>Priority to book / review</span><b>${board.book}</b></div><div><span>Committed</span><b>${board.committed}</b></div><div><span>Test / negotiate</span><b>${board.test}</b></div><div><span>Watch / gated / next</span><b>${board.watch}</b></div></div><div class="sourceWarn bookingBoardNote"><b>Booking recommendation uses the governed Decision/Tier plus current booking status and dates.</b> Historical sales, COM, costs, and booth evidence remain visible separately; this layer does not overwrite source evidence.</div>`;
   return intro+`${quickViewsBar('CURRENT')}${showTools('CURRENT',list.length)}${list.map(showCard).join('')||'<div class="empty">No current shows match these filters.</div>'}`;
 }
 function renderShows(){
