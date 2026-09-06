@@ -55,7 +55,7 @@ function rangeMatch(value,band){
 }
 function catalogActiveFilterCount(){
   const f=state.catalogFilters;
-  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
   return Object.keys(defaults).filter(k=>String(f[k])!==String(defaults[k])).length;
 }
 function currentActiveFilterCount(){
@@ -68,16 +68,17 @@ function catalogFilterSummary(){
   const labels={
     profileState:{CURRENT:'Has current control',HISTORICAL:'Has historical evidence',CURRENT_ONLY:'Current only',HISTORY_ONLY:'Historical only',LP_SOURCE_ONLY:'LP source only'},
     contact:{HAS:'Has contact',MISSING:'Missing contact'},booth:{HAS:'Has booth',MISSING:'Missing booth'},cost:{HAS:'Has cost',MISSING:'Missing cost'},
-    com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has show-history performance',MISSING:'Missing show-history performance'},lp:{HAS:'Has LP',MISSING:'Missing LP'},
+    com:{HAS:'Has COM',MISSING:'Missing COM'},performance:{HAS:'Has show-history performance',MISSING:'Missing show-history performance'},lp:{HAS:'Has annual LP',MISSING:'Missing annual LP'},cumulativeLp:{HAS:'Has cumulative LP',MISSING:'Missing cumulative LP'},
     coi:{HAS:'COI on file',NO:'Explicit no COI',UNKNOWN:'COI status unknown',MISSING:'No COI on file'},worked:{HAS:'Verified worked evidence',MISSING:'No verified worked evidence'},
     currentTreatment:{'IN PLAY':'In Play',SKIPPED:'Skipped'}
   };
   if(f.profileState!=='ALL')add('profileState',labels.profileState[f.profileState]||f.profileState);
   if(f.historyYear!=='ALL')add('historyYear','History '+f.historyYear);
-  if(f.lpYear!=='ALL')add('lpYear','LP attribution '+f.lpYear);
+  if(f.lpYear!=='ALL')add('lpYear','Annual LP '+f.lpYear);
+  if(f.cumulativeLpYear!=='ALL')add('cumulativeLpYear','Cumulative LP '+f.cumulativeLpYear);
   if(f.tier!=='ALL')add('tier',f.tier==='OTHER'?'Untiered':f.tier[0]+f.tier.slice(1).toLowerCase());
   if(f.historyDepth!=='ALL')add('historyDepth',f.historyDepth+'+ history years');
-  for(const key of ['contact','booth','cost','com','performance','lp','coi','worked'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
+  for(const key of ['contact','booth','cost','com','performance','lp','cumulativeLp','coi','worked'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
@@ -148,7 +149,7 @@ function catalogSearchText(p,current){
   return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
-  const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[];
+  const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
   if(f.profileState==='CURRENT'&&!current.length)return false;
   if(f.profileState==='HISTORICAL'&&!Number(p.history_count||0))return false;
   if(f.profileState==='CURRENT_ONLY'&&p.source_type!=='CURRENT_ONLY')return false;
@@ -156,9 +157,10 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.profileState==='LP_SOURCE_ONLY'&&!isLpSourceOnly(p))return false;
   if(f.historyYear!=='ALL'&&!years.map(String).includes(String(f.historyYear)))return false;
   if(f.lpYear!=='ALL'&&!lpYears.map(String).includes(String(f.lpYear)))return false;
+  if(f.cumulativeLpYear!=='ALL'&&!cumulativeLpYears.map(String).includes(String(f.cumulativeLpYear)))return false;
   if(f.tier!=='ALL'&&(f.tier==='OTHER'?Boolean(p.tier):String(p.tier||'').toUpperCase()!==f.tier))return false;
   if(f.historyDepth!=='ALL'&&Number(p.history_year_count||0)<Number(f.historyDepth))return false;
-  if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!coiMatch(p,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
+  if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!triMatch(p.has_cumulative_lp_performance,f.cumulativeLp)||!coiMatch(p,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
   if(!rangeMatch(p.lowest_preserved_com,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
   if(quickView==='ALL_MISSING'&&(isLpSourceOnly(p)||Number(p.data_completeness_score||0)>=7))return false;
@@ -267,6 +269,7 @@ function draftCatalogFilters(){
     profileState:$('#fProfileState')?.value??state.catalogFilters.profileState,
     historyYear:$('#fHistoryYear')?.value??state.catalogFilters.historyYear,
     lpYear:$('#fLpYear')?.value??state.catalogFilters.lpYear,
+    cumulativeLpYear:$('#fCumulativeLpYear')?.value??state.catalogFilters.cumulativeLpYear,
     tier:$('#fTier')?.value??state.catalogFilters.tier,
     historyDepth:$('#fHistoryDepth')?.value??state.catalogFilters.historyDepth,
     contact:$('#fContact')?.value??state.catalogFilters.contact,
@@ -275,6 +278,7 @@ function draftCatalogFilters(){
     com:$('#fCom')?.value??state.catalogFilters.com,
     performance:$('#fPerformance')?.value??state.catalogFilters.performance,
     lp:$('#fLp')?.value??state.catalogFilters.lp,
+    cumulativeLp:$('#fCumulativeLp')?.value??state.catalogFilters.cumulativeLp,
     coi:$('#fCoi')?.value??state.catalogFilters.coi,
     worked:$('#fWorked')?.value??state.catalogFilters.worked,
     comBand:$('#fComBand')?.value??state.catalogFilters.comBand,
@@ -340,8 +344,8 @@ function refreshContextFacetCounts(){
   const mode=state.showMode;
   const mapping=mode==='ALL'
     ?{
-      fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fTier:'tier',fHistoryDepth:'historyDepth',
-      fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fLp:'lp',fCoi:'coi',fWorked:'worked',
+      fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fCumulativeLpYear:'cumulativeLpYear',fTier:'tier',fHistoryDepth:'historyDepth',
+      fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
       fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
       fCurrentTreatment:'currentTreatment',fConfirmation:'confirmation',
     }
@@ -375,11 +379,11 @@ function countBy(items,keyFn){
 function catalogFacetCounts(){
   const profiles=state.catalog,currentByProfile=new Map();
   for(const p of profiles)currentByProfile.set(p.profile_id,profileCurrentShows(p));
-  const years={},lpYears={},currentYears={},status={},treatment={IN_PLAY:0,SKIPPED:0},confirmation={};
+  const years={},lpYears={},cumulativeLpYears={},currentYears={},status={},treatment={IN_PLAY:0,SKIPPED:0},confirmation={};
   const tier={PLATINUM:0,GOLD:0,SILVER:0,OTHER:0};
   const record={CURRENT:0,HISTORICAL:0,CURRENT_ONLY:0,HISTORY_ONLY:0,LP_SOURCE_ONLY:0};
   const depth={'1':0,'2':0,'3':0,'5':0};
-  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance'];
+  const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_lp_performance','has_cumulative_lp_performance'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
   const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0};
   for(const p of profiles){
@@ -394,6 +398,7 @@ function catalogFacetCounts(){
     tier[['PLATINUM','GOLD','SILVER'].includes(t)?t:'OTHER']++;
     for(const y of (Array.isArray(p.history_years)?p.history_years:[]))years[String(y)]=(years[String(y)]||0)+1;
     for(const y of (Array.isArray(p.lp_years)?p.lp_years:[]))lpYears[String(y)]=(lpYears[String(y)]||0)+1;
+    for(const y of (Array.isArray(p.cumulative_years)?p.cumulative_years:[]))cumulativeLpYears[String(y)]=(cumulativeLpYears[String(y)]||0)+1;
     for(const d of [1,2,3,5])if(Number(p.history_year_count||0)>=d)depth[String(d)]++;
     for(const k of flagKeys)flags[k][p[k]?'HAS':'MISSING']++;
     coi[p.has_coi?'HAS':p.has_coi_status?'NO':'UNKNOWN']++;
@@ -428,7 +433,7 @@ function catalogFacetCounts(){
       if(!seenConfirm.has(cf)){seenConfirm.add(cf);confirmation[cf]=(confirmation[cf]||0)+1}
     }
   }
-  return {total:profiles.length,record,years,lpYears,tier,depth,flags,coi,worked,comBand,lifeBand,currentYears,status,treatment,confirmation};
+  return {total:profiles.length,record,years,lpYears,cumulativeLpYears,tier,depth,flags,coi,worked,comBand,lifeBand,currentYears,status,treatment,confirmation};
 }
 function currentFacetCounts(){
   const shows=state.shows;
@@ -465,7 +470,7 @@ function countedOptions(options,counts){
   return options.map(([value,label])=>[value,label,Number(counts?.[value]||0)]);
 }
 function defaultCatalogFilters(){
-  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
 }
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
@@ -536,13 +541,15 @@ function openShowFilters(){
     const f=state.catalogFilters,fc=catalogFacetCounts();
     const years=Object.keys(fc.years).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
     const lpYears=Object.keys(fc.lpYears).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
+    const cumulativeLpYears=Object.keys(fc.cumulativeLpYears).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
     const currentYears=Object.keys(fc.currentYears).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
     const opts=(options,counts)=>countedOptions(options,counts);
     body.innerHTML=`<h2>Filter All Shows</h2><div class="subtitle">Counts update against your other selections. Apply combines filters and replaces any Quick View.</div>
       <div class="filterSection"><div class="filterSectionTitle">Show record</div><div class="filterGrid">
         ${filterField('Record type','fProfileState',f.profileState,opts([['ALL','All profiles'],['CURRENT','Has current control'],['HISTORICAL','Has historical evidence'],['CURRENT_ONLY','Current only'],['HISTORY_ONLY','Historical only'],['LP_SOURCE_ONLY','LP source only']],{ALL:fc.total,...fc.record}))}
         ${filterField('Historical year','fHistoryYear',f.historyYear,opts([['ALL','All history years'],...years.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.years}))}
-        ${filterField('LeadPerfection year','fLpYear',f.lpYear,opts([['ALL','All LP years'],...lpYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.lpYears}))}
+        ${filterField('Annual LP year','fLpYear',f.lpYear,opts([['ALL','All annual LP years'],...lpYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.lpYears}))}
+        ${filterField('Cumulative LP year','fCumulativeLpYear',f.cumulativeLpYear,opts([['ALL','All cumulative LP years'],...cumulativeLpYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.cumulativeLpYears}))}
         ${filterField('Performance tier','fTier',f.tier,opts([['ALL','All tiers'],['PLATINUM','Platinum'],['GOLD','Gold'],['SILVER','Silver'],['OTHER','Untiered']],{ALL:fc.total,...fc.tier}))}
         ${filterField('Historical depth','fHistoryDepth',f.historyDepth,opts([['ALL','Any depth'],['1','1+ years'],['2','2+ years'],['3','3+ years'],['5','5+ years']],{ALL:fc.total,...fc.depth}))}
       </div></div>
@@ -552,7 +559,8 @@ function openShowFilters(){
         ${filterField('Cost','fCost',f.cost,opts([['ANY','Any'],['HAS','Has cost'],['MISSING','Missing cost']],{ANY:fc.total,...fc.flags.has_cost}))}
         ${filterField('COM','fCom',f.com,opts([['ANY','Any'],['HAS','Has COM'],['MISSING','Missing COM']],{ANY:fc.total,...fc.flags.has_com}))}
         ${filterField('Show-history performance','fPerformance',f.performance,opts([['ANY','Any'],['HAS','Has show-history performance'],['MISSING','Missing show-history performance']],{ANY:fc.total,...fc.flags.has_performance}))}
-        ${filterField('LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has LP source'],['MISSING','Missing LP source']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
+        ${filterField('Annual LeadPerfection','fLp',f.lp,opts([['ANY','Any'],['HAS','Has annual LP'],['MISSING','Missing annual LP']],{ANY:fc.total,...fc.flags.has_lp_performance}))}
+        ${filterField('Cumulative LeadPerfection','fCumulativeLp',f.cumulativeLp,opts([['ANY','Any'],['HAS','Has cumulative LP'],['MISSING','Missing cumulative LP']],{ANY:fc.total,...fc.flags.has_cumulative_lp_performance}))}
         ${filterField('COI','fCoi',f.coi,opts([['ANY','Any status'],['HAS','COI on file'],['NO','Explicit no COI'],['UNKNOWN','Status unknown / N/A']],{ANY:fc.total,...fc.coi}))}
         ${filterField('Verified worked evidence','fWorked',f.worked,opts([['ANY','Any'],['HAS','Has verified worked evidence'],['MISSING','No verified worked evidence']],{ANY:fc.total,...fc.worked}))}
       </div></div>
