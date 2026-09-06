@@ -152,7 +152,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(!triMatch(p.has_contact,f.contact)||!triMatch(p.has_booth,f.booth)||!triMatch(p.has_cost,f.cost)||!triMatch(p.has_com,f.com)||!triMatch(p.has_performance,f.performance)||!triMatch(p.has_lp_performance,f.lp)||!triMatch(p.has_coi,f.coi)||!triMatch(Number(p.worked_year_count||0)>0,f.worked))return false;
   if(!rangeMatch(p.lowest_preserved_com,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
-  if(quickView==='ALL_MISSING'&&Number(p.data_completeness_score||0)>=7)return false;
+  if(quickView==='ALL_MISSING'&&(isLpSourceOnly(p)||Number(p.data_completeness_score||0)>=7))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
   if(f.currentTreatment==='IN PLAY'&&!current.some(s=>s.this_year!=='SKIP THIS YEAR'))return false;
   if(f.currentTreatment==='SKIPPED'&&!current.some(s=>s.this_year==='SKIP THIS YEAR'))return false;
@@ -397,8 +397,8 @@ function catalogFacetCounts(){
         else comBand['25PLUS']++;
       }
     }
-    const net=Number(p.lifetime_net_volume);
-    if(Number.isFinite(net)){
+    const netRaw=p.lifetime_net_volume,net=Number(netRaw);
+    if(netRaw!==null&&netRaw!==undefined&&netRaw!==''&&Number.isFinite(net)){
       if(net<25000)lifeBand.UNDER25K++;
       else if(net<100000)lifeBand['25_100K']++;
       else if(net<250000)lifeBand['100_250K']++;
@@ -479,7 +479,7 @@ function quickViewOptions(mode){
 function quickViewCount(key){
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
-  if(key==='ALL_MISSING')return state.catalog.filter(p=>Number(p.data_completeness_score||0)<7).length;
+  if(key==='ALL_MISSING')return state.catalog.filter(p=>!isLpSourceOnly(p)&&Number(p.data_completeness_score||0)<7).length;
   if(key==='ALL_HIST_ONLY')return state.catalog.filter(p=>p.source_type==='HISTORY_ONLY').length;
   if(key==='ALL_LP_SOURCE_ONLY')return state.catalog.filter(isLpSourceOnly).length;
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
