@@ -338,9 +338,9 @@ jobs:
           strong_history_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
           hold_dispositions={'HOLD','RETIRED'}
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
-          assert len(historical_2013)==76, len(historical_2013)
-          assert len(strong_history_2013)==14, len(strong_history_2013)
-          assert len(strong_2013)==10, len(strong_2013)
+          assert len(historical_2013)==75, len(historical_2013)
+          assert len(strong_history_2013)==13, len(strong_history_2013)
+          assert len(strong_2013)==9, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={'LIFE-029':'HOLD','LIFE-032':'HOLD','LIFE-041':'HOLD','LIFE-061':'HOLD'}
           assert {pid:(review or {}).get('disposition') for pid,review in reviews.items()}==expected_reviews, reviews
@@ -359,6 +359,7 @@ jobs:
               'LIFE-049':'LIFE-033',
               'LIFE-043':'LIFE-004',
               'LIFE-069':'LIFE-028',
+              'LIFE-053':'LIFE-003',
               'LIFE-045':'LIFE-112',
           }
           for legacy,canonical in expected_series_links.items():
@@ -1941,6 +1942,13 @@ jobs:
           grep -q 'Series decision target is tracked under LIFE-004' /tmp/wpbfall_legacy.html
           grep -q 'not a second booking target' /tmp/wpbfall_legacy.html
           grep -q 'Open current series profile' /tmp/wpbfall_legacy.html
+
+          render_view wynwood_legacy "$SITE/#show/LIFE-053"
+          grep -q 'Wynwood Home Show' /tmp/wynwood_legacy.html
+          grep -q 'Same organizer series' /tmp/wynwood_legacy.html
+          grep -q 'Series decision target is tracked under LIFE-003' /tmp/wynwood_legacy.html
+          grep -q 'not a second booking target' /tmp/wynwood_legacy.html
+          grep -q 'Open current series profile' /tmp/wynwood_legacy.html
 
           render_view pbliquors_legacy "$SITE/#show/LIFE-069"
           grep -q 'LIFE-069' /tmp/pbliquors_legacy.html
