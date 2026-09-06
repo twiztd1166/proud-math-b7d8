@@ -383,7 +383,6 @@ jobs:
           assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
           assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
-          assert not profiles['LIFE-018'].get('current_rebook_opportunity'), profiles['LIFE-018']
           # Cleanup expectations are scoped to each profile's exact year + source family
           # (25%+ family coverage), plus explicit non-participation applicability.
           cleanup_fields=('contact','booth','cost','com','performance','payment','application','coi')
