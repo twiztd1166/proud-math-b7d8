@@ -117,6 +117,12 @@ jobs:
               grep -q 'latest_preserved_cost' /tmp/app-shows.js
               grep -q 'latest_preserved_dates' /tmp/app-shows.js
               grep -q 'Rebook candidates 2013+' /tmp/app-shows.js
+              grep -q 'Pursue now' /tmp/app-shows.js
+              grep -q 'Watch / next cycle' /tmp/app-shows.js
+              grep -q 'ALL_REBOOK_PURSUE' /tmp/app-shows.js
+              grep -q 'ALL_REBOOK_WATCH' /tmp/app-shows.js
+              grep -q 'ALL_REBOOK_PURSUE' /tmp/app-core.js
+              grep -q 'ALL_REBOOK_WATCH' /tmp/app-core.js
               grep -q 'Hold / do not book' /tmp/app-shows.js
               grep -q 'rebookReviewCard' /tmp/app-shows.js
               grep -q 'current_rebook_review' /tmp/app-shows.js
@@ -342,11 +348,40 @@ jobs:
           assert len(strong_history_2013)==13, len(strong_history_2013)
           assert len(strong_2013)==9, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
-          expected_reviews={'LIFE-029':'HOLD','LIFE-032':'HOLD','LIFE-041':'HOLD','LIFE-061':'HOLD'}
-          assert {pid:(review or {}).get('disposition') for pid,review in reviews.items()}==expected_reviews, reviews
-          for held in expected_reviews:
+          expected_reviews={
+              'LIFE-028':'PURSUE',
+              'LIFE-038':'PURSUE',
+              'LIFE-039':'WATCH',
+              'LIFE-041':'HOLD',
+              'LIFE-044':'WATCH',
+              'LIFE-056':'WATCH',
+              'LIFE-057':'PURSUE',
+              'LIFE-071':'WATCH',
+              'LIFE-073':'PURSUE',
+              'LIFE-075':'WATCH',
+              'LIFE-029':'HOLD',
+              'LIFE-032':'HOLD',
+              'LIFE-061':'HOLD',
+          }
+          actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
+          assert actual_reviews==expected_reviews, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==4, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==5, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='HOLD')==4, actual_reviews
+          held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
+          for held in held_profiles:
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
               assert not any(p.get('profile_id')==held for p in strong_2013), held
+          for actionable_review in {pid for pid,disposition in expected_reviews.items() if disposition in {'PURSUE','WATCH'}}:
+              assert any(p.get('profile_id')==actionable_review for p in strong_2013), actionable_review
+          assert '561-330-4777' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
+          assert '$75/day' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
+          assert 'current 2026-2027 calendar does not list' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
+          assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'November 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
+          assert '772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
           expected_series_links={
@@ -1799,6 +1834,9 @@ jobs:
           grep -q 'LIVE OPPORTUNITY' /tmp/shows.html
           grep -q 'Verified current opportunity' /tmp/shows.html
           grep -q 'Verified current / watch' /tmp/shows.html
+          grep -q 'Pursue now' /tmp/shows.html
+          grep -q 'Watch / next cycle' /tmp/shows.html
+          grep -q 'Hold / do not book' /tmp/shows.html
           grep -q 'EXHIBITOR LISTED' /tmp/shows.html
 
           render_view current "$SITE/#current"
@@ -1812,6 +1850,30 @@ jobs:
           grep -q 'BOOTH 815 ASSIGNED' /tmp/current.html
           grep -q '\$2,110.50' /tmp/current.html
           grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
+
+          render_view palm_liquors_pursue "$SITE/#show/LIFE-028"
+          grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
+          grep -q 'Current booking review' /tmp/palm_liquors_pursue.html
+          grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
+          grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
+          grep -q '\$75/day' /tmp/palm_liquors_pursue.html
+          grep -q 'Open review source' /tmp/palm_liquors_pursue.html
+
+          render_view hurricane_watch "$SITE/#show/LIFE-039"
+          grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
+          grep -q 'Current booking review' /tmp/hurricane_watch.html
+          grep -q '>WATCH<' /tmp/hurricane_watch.html
+          grep -q '2027 cycle' /tmp/hurricane_watch.html
+          grep -q '\$200/\$225' /tmp/hurricane_watch.html
+          grep -q 'Open review source' /tmp/hurricane_watch.html
+
+          render_view safety_pursue "$SITE/#show/LIFE-073"
+          grep -q 'St Lucie Health, Wellness & Safety Fest' /tmp/safety_pursue.html
+          grep -q 'Current booking review' /tmp/safety_pursue.html
+          grep -q '>PURSUE<' /tmp/safety_pursue.html
+          grep -q 'November 2026' /tmp/safety_pursue.html
+          grep -q '772-337-0049' /tmp/safety_pursue.html
+          grep -q 'Open review source' /tmp/safety_pursue.html
 
           render_view barrett_hold "$SITE/#show/LIFE-041"
           grep -q 'Barrett Jackson' /tmp/barrett_hold.html
