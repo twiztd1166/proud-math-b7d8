@@ -64,6 +64,42 @@ function historyEventComValue(row){
   if(row?.com_percent!==null&&row?.com_percent!==undefined&&String(row.com_percent).trim()!=='')return String(row.com_percent).trim()+'%';
   return sourceFieldValue(row,['COM % (EVENT COST ÷ NET REV)']);
 }
+function governedStatusStateValue(value){
+  const text=String(value??'').trim();
+  if(!text)return '';
+  const upper=text.toUpperCase();
+  const naMarkers=['AGGREGATED','BUNDLE AGGREGATE','DO NOT DOUBLE COUNT','NO EVENT-SPECIFIC','DO NOT ALLOCATE','MONTH-RESOLVED ELSEWHERE','MAPS TO '];
+  return naMarkers.some(marker=>upper.includes(marker))?'N/A — '+text:'UNKNOWN — '+text;
+}
+function historyCostStateValue(row){
+  const value=historyCostValue(row);
+  if(value)return value;
+  const verification=sourceFieldValue(row,['VERIFICATION STATUS']);
+  const upper=verification.toUpperCase();
+  if(upper.includes('COST UNVERIFIED')||upper.includes('COST UNKNOWN')||upper.includes('COST NOT RECOVERED'))return 'UNKNOWN — '+verification;
+  return '';
+}
+function historyPerformancePresent(row){
+  return ['issued_appts','demos','gross_sales_count','gross_sales_value','net_sales_count','net_revenue','nsli']
+    .some(field=>row?.[field]!==null&&row?.[field]!==undefined&&String(row[field]).trim()!=='');
+}
+function historyPerformanceStateValue(row){
+  if(historyPerformancePresent(row))return 'PRESENT';
+  return governedStatusStateValue(sourceFieldValue(row,['PERFORMANCE MATCH STATUS']));
+}
+function historyComStateValue(row){
+  const value=historyEventComValue(row);
+  if(value)return value;
+  const performanceState=historyPerformanceStateValue(row);
+  if(sourceSemanticState(performanceState)==='NA')return 'N/A — performance not separately attributable';
+  if(sourceSemanticState(performanceState)==='UNKNOWN')return 'UNKNOWN — performance attribution unresolved';
+  return governedStatusStateValue(sourceFieldValue(row,['FULL COM STATUS']));
+}
+function historyStateDisplay(value){
+  const state=sourceSemanticState(value);
+  if(state==='VALUE')return esc(value);
+  return `<span class="yearCodedState ${state.toLowerCase()}">${esc(value)}</span>`;
+}
 function historyDirectSetupCostValue(row){return sourceFieldValue(row,['DIRECT + SETUP COST'])}
 function historyDirectSetupComValue(row){return sourceFieldValue(row,['DIRECT + SETUP COM %'])}
 function completenessText(rows,getter){
@@ -114,7 +150,7 @@ function numericYearTotal(rows,field,formatter=v=>esc(v)){
   return `<strong>${formatter(total)}</strong>${coverage}`;
 }
 function comYearValues(rows){
-  return datedValues(rows,row=>historyEventComValue(row),v=>esc(v));
+  return datedValues(rows,row=>historyComStateValue(row),historyStateDisplay);
 }
 function sourceFieldYearValues(rows,keys){
   return datedValues(rows,row=>sourceFieldValue(row,keys),v=>esc(v));
@@ -191,9 +227,10 @@ function yearScorecard(year,rows,lpItems,cumulativeItems,cleanupChecklist=''){
   const coi=datedValues(rows,row=>row.coi,v=>esc(v));
   const application=datedValues(rows,row=>row.application_status_text,v=>esc(v));
   const calendar=datedValues(rows,row=>row.calendar_status_text,v=>esc(v));
-  const completeness=`<div class="yearSubhead">Source-field completeness</div><div class="yearStatusGrid"><div><span>Contact</span><div>${esc(completenessText(rows,historyContactValue))}</div></div><div><span>Booth / space</span><div>${esc(completenessText(rows,historyBoothValue))}</div></div><div><span>Show cost</span><div>${esc(completenessText(rows,historyCostValue))}</div></div><div><span>Direct + setup cost</span><div>${esc(completenessText(rows,historyDirectSetupCostValue))}</div></div><div><span>Event COM</span><div>${esc(completenessText(rows,historyEventComValue))}</div></div><div><span>Direct + setup COM</span><div>${esc(completenessText(rows,historyDirectSetupComValue))}</div></div><div><span>COI</span><div>${esc(completenessText(rows,row=>row.coi))}</div></div><div><span>Payment</span><div>${esc(completenessText(rows,row=>row.payment_status_text))}</div></div><div><span>Application</span><div>${esc(completenessText(rows,row=>row.application_status_text))}</div></div><div><span>History performance</span><div>${esc(metricCompletenessText(rows))}</div></div></div><div class="yearVerification">Completeness is counted per preserved history record. Missing means no field/value was found in the preserved source. Explicit unknown and N/A remain separate source states. LeadPerfection attribution is audited separately below.</div>`;
+  const performanceAttribution=datedValues(rows,row=>sourceFieldValue(row,['PERFORMANCE MATCH STATUS']),v=>esc(v));
+  const completeness=`<div class="yearSubhead">Source-field completeness</div><div class="yearStatusGrid"><div><span>Contact</span><div>${esc(completenessText(rows,historyContactValue))}</div></div><div><span>Booth / space</span><div>${esc(completenessText(rows,historyBoothValue))}</div></div><div><span>Show cost</span><div>${esc(completenessText(rows,historyCostStateValue))}</div></div><div><span>Direct + setup cost</span><div>${esc(completenessText(rows,historyDirectSetupCostValue))}</div></div><div><span>Event COM</span><div>${esc(completenessText(rows,historyComStateValue))}</div></div><div><span>Direct + setup COM</span><div>${esc(completenessText(rows,historyDirectSetupComValue))}</div></div><div><span>COI</span><div>${esc(completenessText(rows,row=>row.coi))}</div></div><div><span>Payment</span><div>${esc(completenessText(rows,row=>row.payment_status_text))}</div></div><div><span>Application</span><div>${esc(completenessText(rows,row=>row.application_status_text))}</div></div><div><span>History performance</span><div>${esc(completenessText(rows,historyPerformanceStateValue))}</div></div></div><div class="yearVerification">Completeness is source-semantic: governed Unknown/N/A statuses count as coded evidence, not missing data. LeadPerfection attribution remains audited separately and never becomes attendance proof.</div>`;
   const details=recordCount?`<details class="yearRecords"><summary>Preserved records & sources · ${recordCount}</summary><div class="historyList">${rows.map(historyItem).join('')}</div></details>`:'<div class="yearNoOccurrence">No preserved occurrence record for this year.</div>';
-  return `<div class="yearScorecard"><div class="yearScoreHeader"><div><span>Year snapshot</span><b>${esc(year)}</b></div><div>${recordCount} record${recordCount===1?'':'s'} · ${lpCount} annual LP · ${cumulativeCount} cumulative LP</div></div>${cleanupChecklist}<div class="yearFieldGrid"><div class="yearField wide"><span>Dates</span><div>${plainValues(rows,row=>row.dates_text,v=>esc(v))}</div></div><div class="yearField wide"><span>Location</span><div>${location}</div></div><div class="yearField wide"><span>Booth / space</span><div>${datedValues(rows,row=>historyBoothValue(row),v=>esc(v))}</div></div><div class="yearField"><span>Show cost</span><div>${eventCosts}</div></div><div class="yearField"><span>Direct + setup cost</span><div>${setupCosts}</div></div><div class="yearField"><span>Event COM</span><div>${comYearValues(rows)}</div></div><div class="yearField"><span>Direct + setup COM</span><div>${directSetupCom}</div></div><div class="yearField wide"><span>Setup</span><div>${setup}</div></div><div class="yearField wide"><span>Breakdown</span><div>${breakdown}</div></div><div class="yearField wide"><span>Savings / discount</span><div>${savings}</div></div></div><div class="yearMetricGrid"><div><span>Issued</span><b>${numericYearTotal(rows,'issued_appts',v=>Number(v).toLocaleString())}</b></div><div><span>Demos</span><b>${numericYearTotal(rows,'demos',v=>Number(v).toLocaleString())}</b></div><div><span>Net sales</span><b>${numericYearTotal(rows,'net_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Net revenue</span><b>${numericYearTotal(rows,'net_revenue',money)}</b></div><div><span>Gross sales</span><b>${numericYearTotal(rows,'gross_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Gross volume</span><b>${numericYearTotal(rows,'gross_sales_value',money)}</b></div><div class="wide"><span>NSLI</span><b>${numericYearTotal(rows,'nsli',money)}</b></div></div><div class="yearField full"><span>Show contact</span><div>${contactYearValues(rows)}</div></div><div class="yearStatusGrid"><div><span>Payment</span><div>${payment}</div></div><div><span>Participation</span><div>${participation}</div></div><div><span>COI</span><div>${coi}</div></div><div><span>Application</span><div>${application}</div></div><div><span>Calendar</span><div>${calendar}</div></div></div>${completeness}<div class="yearField full"><span>Notes</span><div>${notes}</div></div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${lpYearHtml(lpItems)}</div><div class="yearLpSection cumulativeLpSection"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${cumulativeLpYearHtml(cumulativeItems)}</div>${details}</div>`;
+  return `<div class="yearScorecard"><div class="yearScoreHeader"><div><span>Year snapshot</span><b>${esc(year)}</b></div><div>${recordCount} record${recordCount===1?'':'s'} · ${lpCount} annual LP · ${cumulativeCount} cumulative LP</div></div>${cleanupChecklist}<div class="yearFieldGrid"><div class="yearField wide"><span>Dates</span><div>${plainValues(rows,row=>row.dates_text,v=>esc(v))}</div></div><div class="yearField wide"><span>Location</span><div>${location}</div></div><div class="yearField wide"><span>Booth / space</span><div>${datedValues(rows,row=>historyBoothValue(row),v=>esc(v))}</div></div><div class="yearField"><span>Show cost</span><div>${eventCosts}</div></div><div class="yearField"><span>Direct + setup cost</span><div>${setupCosts}</div></div><div class="yearField"><span>Event COM</span><div>${comYearValues(rows)}</div></div><div class="yearField"><span>Direct + setup COM</span><div>${directSetupCom}</div></div><div class="yearField wide"><span>Setup</span><div>${setup}</div></div><div class="yearField wide"><span>Breakdown</span><div>${breakdown}</div></div><div class="yearField wide"><span>Savings / discount</span><div>${savings}</div></div></div><div class="yearMetricGrid"><div><span>Issued</span><b>${numericYearTotal(rows,'issued_appts',v=>Number(v).toLocaleString())}</b></div><div><span>Demos</span><b>${numericYearTotal(rows,'demos',v=>Number(v).toLocaleString())}</b></div><div><span>Net sales</span><b>${numericYearTotal(rows,'net_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Net revenue</span><b>${numericYearTotal(rows,'net_revenue',money)}</b></div><div><span>Gross sales</span><b>${numericYearTotal(rows,'gross_sales_count',v=>Number(v).toLocaleString())}</b></div><div><span>Gross volume</span><b>${numericYearTotal(rows,'gross_sales_value',money)}</b></div><div class="wide"><span>NSLI</span><b>${numericYearTotal(rows,'nsli',money)}</b></div></div><div class="yearField full"><span>Show contact</span><div>${contactYearValues(rows)}</div></div><div class="yearStatusGrid"><div><span>Payment</span><div>${payment}</div></div><div><span>Participation</span><div>${participation}</div></div><div><span>COI</span><div>${coi}</div></div><div><span>Application</span><div>${application}</div></div><div><span>Calendar</span><div>${calendar}</div></div><div class="wide"><span>Performance attribution</span><div>${performanceAttribution}</div></div></div>${completeness}<div class="yearField full"><span>Notes</span><div>${notes}</div></div><div class="yearLpSection"><div class="yearSubhead">LeadPerfection annual-period performance</div>${lpYearHtml(lpItems)}</div><div class="yearLpSection cumulativeLpSection"><div class="yearSubhead">LeadPerfection cumulative / lifetime attribution</div>${cumulativeLpYearHtml(cumulativeItems)}</div>${details}</div>`;
 }
 
 const CURRENT_MISSING='Not found in current operating source';
