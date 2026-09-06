@@ -12,7 +12,12 @@ function catalogCard(p){
   const tier=lpOnly?'LP source only':(p.tier||((p.source_type==='HISTORY_ONLY')?'Historical':(p.source_type==='CURRENT_ONLY'?'Current':'Profile')));
   const hist=Number(p.history_count||0),life=Number(p.occurrences||0),years=Array.isArray(p.history_years)?p.history_years:[];
   const pill=current.length?current.length+' CURRENT':(lpOnly?'LP SOURCE ONLY':'READ ONLY');
-  return `<div class="card catalogCard" data-profile="${esc(p.profile_id)}"><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  const cleanupYear=state.showQuickView==='ALL_MISSING'?state.catalogFilters.historyYear:'ALL';
+  const missing=cleanupYear!=='ALL'?missingFieldsForYear(p,cleanupYear):[];
+  const cleanup=missing.length
+    ?`<div class="cleanupQueueLine"><b>${esc(cleanupYear)} · ${missing.length} missing field${missing.length===1?'':'s'}</b><span>${esc(missing.map(key=>CLEANUP_FIELD_LABELS[key]||key).join(' · '))}</span></div>`
+    :'';
+  return `<div class="card catalogCard" data-profile="${esc(p.profile_id)}"><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
@@ -34,6 +39,7 @@ function coiMatch(p,mode){
   return true;
 }
 const HISTORY_FIELD_KEYS=['contact','booth','cost','com','performance','payment','application','coi'];
+const CLEANUP_FIELD_LABELS={contact:'Contact',booth:'Booth / space',cost:'Show cost',com:'Event COM',performance:'Performance',payment:'Payment status',application:'Application status',coi:'COI'};
 function emptyHistoryState(){return {VALUE:0,UNKNOWN:0,NA:0,MISSING:0}}
 function historyFieldState(p,key,year='ALL'){
   const state=year!=='ALL'?p?.history_field_states?.[String(year)]?.[key]:p?.history_field_totals?.[key];
@@ -91,9 +97,16 @@ function scopedComValue(p,which='min'){
 function scopedCompletenessScore(p){
   const year=state.catalogFilters.historyYear;
   if(year==='ALL')return Number(p.data_completeness_score||0);
-  return ['contact','booth','cost','com','performance','payment','application','coi']
-    .reduce((n,key)=>n+(Number(historyFieldState(p,key,year).VALUE||0)>0?1:0),0);
+  return HISTORY_FIELD_KEYS.reduce((n,key)=>n+(Number(historyFieldState(p,key,year).VALUE||0)>0?1:0),0);
 }
+function missingFieldsForYear(p,year){
+  if(year==='ALL'||!Array.isArray(p?.history_years)||!p.history_years.map(String).includes(String(year)))return [];
+  return HISTORY_FIELD_KEYS.filter(key=>{
+    const s=historyFieldState(p,key,year);
+    return Number(s.VALUE||0)===0&&Number(s.UNKNOWN||0)===0&&Number(s.NA||0)===0;
+  });
+}
+function missingFieldCountForYear(p,year){return missingFieldsForYear(p,year).length}
 function rangeMatch(value,band){
   if(band==='ALL')return true;
   if(value===null||value===undefined||value==='')return band==='MISSING';
@@ -237,7 +250,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const scopedCom=scopedComValueForFilters(p,f.historyYear);
   if(!rangeMatch(scopedCom,f.comBand)||!rangeMatch(p.lifetime_net_volume,f.lifetimeNetBand))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
-  if(quickView==='ALL_MISSING'&&(isLpSourceOnly(p)||Number(p.data_completeness_score||0)>=7))return false;
+  if(quickView==='ALL_MISSING'&&(f.historyYear==='ALL'||isLpSourceOnly(p)||missingFieldCountForYear(p,f.historyYear)===0))return false;
   if(f.currentStatus!=='ALL'&&!current.some(s=>s.show_status===f.currentStatus))return false;
   if(f.currentTreatment==='IN PLAY'&&!current.some(s=>s.this_year!=='SKIP THIS YEAR'))return false;
   if(f.currentTreatment==='SKIPPED'&&!current.some(s=>s.this_year==='SKIP THIS YEAR'))return false;
@@ -289,7 +302,11 @@ function catalogComparator(a,b){
   if(sort==='NET_2025')return numberDesc('net_volume_2025')(a,b);
   if(sort==='NET_2024')return numberDesc('net_volume_2024')(a,b);
   if(sort==='DATA_COMPLETE')return scopedCompletenessScore(b)-scopedCompletenessScore(a)||name(a,b);
-  if(sort==='MISSING_DATA')return scopedCompletenessScore(a)-scopedCompletenessScore(b)||name(a,b);
+  if(sort==='MISSING_DATA'){
+    const year=state.catalogFilters.historyYear;
+    if(year!=='ALL')return missingFieldCountForYear(b,year)-missingFieldCountForYear(a,year)||name(a,b);
+    return scopedCompletenessScore(a)-scopedCompletenessScore(b)||name(a,b);
+  }
   return profileCurrentShows(b).length-profileCurrentShows(a).length||Number(a.tier_rank??999)-Number(b.tier_rank??999)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
 }
 function currentSearchText(s){
@@ -561,11 +578,12 @@ function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
 }
 function quickViewOptions(mode){
+  const cleanupYear=state.catalogFilters.historyYear;
   return mode==='ALL'
     ?[
       ['ALL_TOP_NET','Top lifetime net'],
       ['ALL_LOW_COM','Low COM'],
-      ['ALL_MISSING','Missing data'],
+      ['ALL_MISSING',cleanupYear==='ALL'?'Missing fields · choose year':'Missing fields · '+cleanupYear],
       ['ALL_HIST_ONLY','Historical only'],
       ['ALL_LP_SOURCE_ONLY','LP source only'],
       ['ALL_CURRENT_LINKED','Current linked'],
@@ -581,7 +599,11 @@ function quickViewOptions(mode){
 function quickViewCount(key){
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
   if(key==='ALL_LOW_COM')return state.catalog.filter(p=>p.has_com&&p.lowest_preserved_com!==null&&Number(p.lowest_preserved_com)<5).length;
-  if(key==='ALL_MISSING')return state.catalog.filter(p=>!isLpSourceOnly(p)&&Number(p.data_completeness_score||0)<7).length;
+  if(key==='ALL_MISSING'){
+    const year=state.catalogFilters.historyYear;
+    if(year==='ALL')return 0;
+    return state.catalog.filter(p=>!isLpSourceOnly(p)&&missingFieldCountForYear(p,year)>0).length;
+  }
   if(key==='ALL_HIST_ONLY')return state.catalog.filter(p=>p.source_type==='HISTORY_ONLY').length;
   if(key==='ALL_LP_SOURCE_ONLY')return state.catalog.filter(isLpSourceOnly).length;
   if(key==='ALL_CURRENT_LINKED')return state.catalog.filter(p=>profileCurrentShows(p).length>0).length;
@@ -594,16 +616,17 @@ function quickViewCount(key){
 }
 function quickViewsBar(mode){
   const options=quickViewOptions(mode);
-  return `<div class="quickViews"><div class="quickViewsLabel">Quick views</div><div class="quickViewRail">${options.map(([key,label])=>{const count=quickViewCount(key);return `<button class="quickViewChip ${state.showQuickView===key?'active':''}" data-quick-view="${key}" ${count===0?'disabled':''}>${esc(label)} <span class="quickViewCount">${count.toLocaleString()}</span></button>`}).join('')}</div></div>`;
+  return `<div class="quickViews"><div class="quickViewsLabel">Quick views</div><div class="quickViewRail">${options.map(([key,label])=>{const count=quickViewCount(key);const needsYear=key==='ALL_MISSING'&&state.catalogFilters.historyYear==='ALL';return `<button class="quickViewChip ${state.showQuickView===key?'active':''}" data-quick-view="${key}" ${count===0?'disabled':''} ${needsYear?'title="Select a Historical Year in Filter to build the cleanup queue"':''}>${esc(label)} <span class="quickViewCount">${count.toLocaleString()}</span></button>`}).join('')}</div></div>`;
 }
 function applyQuickView(key){
   if(quickViewCount(key)===0)return;
   state.search='';state.catalogLimit=60;state.showQuickView=key;
   if(key.startsWith('ALL_')){
+    const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_LOW_COM'){state.catalogFilters.com='HAS';state.catalogFilters.comBand='UNDER5';state.catalogSort='LOWEST_COM'}
-    if(key==='ALL_MISSING')state.catalogSort='MISSING_DATA';
+    if(key==='ALL_MISSING'){state.catalogFilters.historyYear=selectedHistoryYear;state.catalogSort='MISSING_DATA'}
     if(key==='ALL_HIST_ONLY'){state.catalogFilters.profileState='HISTORY_ONLY';state.catalogSort='LATEST_HISTORY'}
     if(key==='ALL_LP_SOURCE_ONLY'){state.catalogFilters.profileState='LP_SOURCE_ONLY';state.catalogSort='NAME_ASC'}
     if(key==='ALL_CURRENT_LINKED'){state.catalogFilters.profileState='CURRENT';state.catalogSort='CURRENT_FIRST'}
