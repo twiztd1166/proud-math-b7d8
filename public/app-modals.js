@@ -278,7 +278,7 @@ async function savePayment(id){
   catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save payment'}
 }
 function closeModal(id){$('#'+id).classList.remove('show')}
-$$('.nav button').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render();if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
+$$('.nav button').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;syncLocationView();render();if(state.tab==='shows'&&state.showMode==='ALL'&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
 $('#refreshBtn').onclick=async()=>{toast('Reloading operating data…');await bootstrap();if(state.catalogLoaded)await loadCatalog(true);if(state.unlinkedLp.loaded)await loadUnlinkedLp(true);toast('Current')};
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
