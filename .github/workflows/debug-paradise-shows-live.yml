@@ -318,7 +318,9 @@ jobs:
           assert profiles['HIST-154'].get('has_coi') is False, profiles['HIST-154']
           assert profiles['HIST-154'].get('has_coi_status') is False, profiles['HIST-154']
           assert profiles['HIST-123'].get('has_booth') is False, profiles['HIST-123']
-          assert profiles['HIST-123'].get('has_cost') is True, profiles['HIST-123']
+          assert profiles['HIST-123'].get('has_cost') is False, profiles['HIST-123']
+          hist123_cost=profiles['HIST-123']['history_field_states']['2022']['cost']
+          assert hist123_cost.get('VALUE') == 1 and hist123_cost.get('MISSING') == 0, hist123_cost
           assert profiles['HIST-123'].get('has_coi') is True, profiles['HIST-123']
           assert profiles['HIST-123'].get('has_coi_status') is True, profiles['HIST-123']
           assert profiles['LIFE-009'].get('has_booth') is True, profiles['LIFE-009']
