@@ -95,6 +95,9 @@ jobs:
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
               grep -q 'Best observed performance placement' /tmp/app-modals.js
               grep -q 'Best observed specific booth' /tmp/app-modals.js
+              grep -q 'bookingTiming' /tmp/app-shows.js
+              grep -q 'When to act' /tmp/app-shows.js
+              grep -q 'best_observed_specific_booth' /tmp/app-shows.js
               grep -q 'correlation only' /tmp/app-modals.js
               grep -Fq "row?.[field]" /tmp/app-modals.js
               grep -Fq "value!==null&&value!==undefined&&String(value).trim()!==''" /tmp/app-modals.js
@@ -1550,6 +1553,8 @@ jobs:
           grep -q 'Priority to book / review' /tmp/current.html
           grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/current.html
           grep -q 'Booking status' /tmp/current.html
+          grep -q 'When to act' /tmp/current.html
+          grep -Eq 'Best specific booth:|Best observed placement:|Latest placement:' /tmp/current.html
 
           render_view detail "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/detail.html
