@@ -20,7 +20,7 @@ let state={
     confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY',
   },
 };
-const $=s=>document.querySelector(s), $=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function isLpSourceOnly(p){
   return Array.isArray(p?.source_rows)&&p.source_rows.some(r=>r&&r.source_kind==='LP_SOURCE_ONLY');
 }
