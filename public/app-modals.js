@@ -202,13 +202,67 @@ function cumulativeLpYearHtml(items){
 function historyItem(x){
   return `<details class="historyItem"><summary><span><b>${esc(x.source_year)}</b> · ${esc(x.dates_text||'Date not stated')}</span><span>${esc(historyCostValue(x))}</span></summary><div class="historyBody">${historyEvidenceFlag(x)}${x.participation_status?`<div class="detailLine"><b>Participation</b><span>${esc(x.participation_status)}</span></div>`:''}${(x.address||x.city)?`<div class="detailLine"><b>Location</b><span>${x.address?esc(x.address):''}${x.address&&x.city?' · ':''}${x.city?esc(x.city):''}</span></div>`:''}${x.booth?`<div class="detailLine"><b>Booth / space</b><span>${esc(x.booth)}</span></div>`:''}${x.coi?`<div class="detailLine"><b>COI</b><span>${esc(x.coi)}</span></div>`:''}${x.setup_info?`<div class="detailLine"><b>Setup</b><span>${esc(x.setup_info)}</span></div>`:''}${x.breakdown_info?`<div class="detailLine"><b>Breakdown</b><span>${esc(x.breakdown_info)}</span></div>`:''}${x.event_cost_text?`<div class="detailLine"><b>Event cost</b><span>${esc(x.event_cost_text)}</span></div>`:''}${x.final_cost_text?`<div class="detailLine"><b>Final cost</b><span>${esc(x.final_cost_text)}</span></div>`:''}${x.savings_text?`<div class="detailLine"><b>Savings</b><span>${esc(x.savings_text)}</span></div>`:''}${x.payment_status_text?`<div class="detailLine"><b>Payment</b><span>${esc(x.payment_status_text)}</span></div>`:''}${x.application_status_text?`<div class="detailLine"><b>Application</b><span>${esc(x.application_status_text)}</span></div>`:''}${x.calendar_status_text?`<div class="detailLine"><b>Calendar</b><span>${esc(x.calendar_status_text)}</span></div>`:''}${x.issued_appts!=null?`<div class="detailLine"><b>Issued / demos</b><span>${esc(x.issued_appts)} / ${esc(x.demos??'—')}</span></div>`:''}${x.gross_sales_count!=null?`<div class="detailLine"><b>Gross sales</b><span>${esc(x.gross_sales_count)} · ${money(x.gross_sales_value)}</span></div>`:''}${x.net_sales_count!=null?`<div class="detailLine"><b>Net sales</b><span>${esc(x.net_sales_count)} · ${money(x.net_revenue)}</span></div>`:''}${x.nsli!=null?`<div class="detailLine"><b>NSLI</b><span>${money(x.nsli)}</span></div>`:''}${historyEventComValue(x)?`<div class="detailLine"><b>Event COM</b><span>${esc(historyEventComValue(x))}</span></div>`:''}${sourceFieldValue(x,['DIRECT + SETUP COM %'])?`<div class="detailLine"><b>Direct + setup COM</b><span>${esc(sourceFieldValue(x,['DIRECT + SETUP COM %']))}</span></div>`:''}${x.verification_status?`<div class="detailLine"><b>Verification</b><span>${esc(x.verification_status)}</span></div>`:''}${historyContactValue(x)?`<div class="detailLine"><b>Contact</b><span>${esc(historyContactValue(x))}${contactActions(historyContactValue(x))}</span></div>`:''}${x.notes?`<div class="detailLine"><b>Notes</b><span>${esc(x.notes)}</span></div>`:''}<div class="actions"><a class="btn secondary sourceBtn" target="_blank" href="${historySourceUrl(x)}">${x.source_system==='GMAIL_CALENDAR'?'Open source email':'Open source row'}</a>${supplementalEvidenceLinks(x)}</div></div></details>`;
 }
-function cleanupChecklistHtml(profile,year){
-  if(!profile||typeof cleanupSupportedFieldsForYear!=='function'||typeof missingFieldsForYear!=='function')return '';
-  const supported=cleanupSupportedFieldsForYear(year),missing=missingFieldsForYear(profile,year);
+const CLEANUP_SOURCE_PRIORITIES={
+  contact:['SHOW_HISTORY','DND_OPPORTUNITY','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','ARCHIVED_SCHEDULE','SHOW_PERFORMANCE','SHOW_COST_REGISTER','PAYMENT_TRACKER'],
+  booth:['SHOW_HISTORY','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','ARCHIVED_SCHEDULE','DND_OPPORTUNITY','PAYMENT_TRACKER','SHOW_COST_REGISTER','SHOW_PERFORMANCE'],
+  cost:['SHOW_COST_REGISTER','PAYMENT_TRACKER','SHOW_HISTORY','BOOKING_CALENDAR','GMAIL_EVENT_EVIDENCE','ARCHIVED_SCHEDULE','DND_OPPORTUNITY','SHOW_PERFORMANCE'],
+  com:['SHOW_HISTORY','SHOW_PERFORMANCE','SHOW_COST_REGISTER','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','ARCHIVED_SCHEDULE','PAYMENT_TRACKER','DND_OPPORTUNITY'],
+  performance:['SHOW_PERFORMANCE','SHOW_HISTORY','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','ARCHIVED_SCHEDULE','SHOW_COST_REGISTER','PAYMENT_TRACKER','DND_OPPORTUNITY'],
+  payment:['PAYMENT_TRACKER','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','SHOW_HISTORY','DND_OPPORTUNITY','ARCHIVED_SCHEDULE','SHOW_COST_REGISTER','SHOW_PERFORMANCE'],
+  application:['PAYMENT_TRACKER','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','SHOW_HISTORY','DND_OPPORTUNITY','ARCHIVED_SCHEDULE','SHOW_COST_REGISTER','SHOW_PERFORMANCE'],
+  coi:['SHOW_HISTORY','GMAIL_EVENT_EVIDENCE','BOOKING_CALENDAR','ARCHIVED_SCHEDULE','DND_OPPORTUNITY','PAYMENT_TRACKER','SHOW_COST_REGISTER','SHOW_PERFORMANCE'],
+};
+const CLEANUP_FIELD_GUIDANCE={
+  contact:'Check organizer/contact details in the preserved event source.',
+  booth:'Check assignment, map, acceptance, or space details in the preserved event source.',
+  cost:'Check cost register, payment tracker, contract, or event source evidence.',
+  com:'COM requires source-backed event cost and event-level performance; do not derive it from unmatched or aggregate LP.',
+  performance:'Check preserved performance evidence and annual LP attribution separately; LP is not attendance proof.',
+  payment:'Check payment tracker or preserved payment/event correspondence.',
+  application:'Check application, approval, or event correspondence.',
+  coi:'Check preserved event/organizer insurance evidence; do not infer a COI from attendance.',
+};
+function cleanupInvestigationRows(rows,field){
+  const priority=CLEANUP_SOURCE_PRIORITIES[field]||[];
+  const rank=row=>{const i=priority.indexOf(String(row?.source_kind||''));return i<0?priority.length+1:i};
+  const sorted=[...(rows||[])].sort((a,b)=>rank(a)-rank(b)||Number(b.source_row||0)-Number(a.source_row||0));
+  const seen=new Set(),out=[];
+  for(const row of sorted){
+    const url=historySourceUrl(row);
+    if(!url||seen.has(url))continue;
+    seen.add(url);out.push(row);
+    if(out.length>=2)break;
+  }
+  return out;
+}
+function cleanupLpInvestigationLinks(lpItems,field){
+  if(!['performance','com'].includes(field))return '';
+  const reports=[];
+  for(const item of lpItems||[]){
+    for(const report of Array.isArray(item?.report_months)?item.report_months:[]){
+      if(report?.gmail_url&&!reports.some(x=>x.gmail_url===report.gmail_url))reports.push(report);
+    }
+  }
+  return reports.slice(0,2).map(report=>`<a class="cleanupSourceLink" target="_blank" href="${esc(report.gmail_url)}">Check annual LP source${report.month?' · '+esc(report.month):''}</a>`).join('');
+}
+function cleanupInvestigationHtml(field,rows,lpItems){
+  const label=CLEANUP_FIELD_LABELS[field]||field;
+  const sources=cleanupInvestigationRows(rows,field);
+  const rowLinks=sources.map(row=>{
+    const place=[row.source_workbook,row.source_tab,row.source_row?('row '+row.source_row):''].filter(Boolean).join(' · ');
+    return `<a class="cleanupSourceLink" target="_blank" href="${esc(historySourceUrl(row))}">Check preserved source${place?' · '+esc(place):''}</a>`;
+  }).join('');
+  const lpLinks=cleanupLpInvestigationLinks(lpItems,field);
+  return `<div class="cleanupInvestigation"><div><b>${esc(label)}</b><span>${esc(CLEANUP_FIELD_GUIDANCE[field]||'Check the preserved source before making any inference.')}</span></div><div class="cleanupSourceLinks">${rowLinks}${lpLinks}</div><small>Investigation link only — the source may confirm the field, preserve it as unknown/N/A, or contain no additional answer.</small></div>`;
+}
+function cleanupChecklistHtml(profile,year,rows=[],lpItems=[]){
+  if(!profile||typeof cleanupSupportedFieldsForProfileYear!=='function'||typeof missingFieldsForYear!=='function')return '';
+  const supported=cleanupSupportedFieldsForProfileYear(profile,year),missing=missingFieldsForYear(profile,year);
   if(!supported.length)return '';
   const missingLabels=missing.map(key=>CLEANUP_FIELD_LABELS[key]||key);
   const supportedLabels=supported.map(key=>CLEANUP_FIELD_LABELS[key]||key);
-  return `<div class="yearCleanupChecklist"><div class="yearCleanupHead"><div><span>Cleanup checklist</span><b>${esc(year)}</b></div><strong class="${missing.length?'needsWork':'complete'}">${missing.length?missing.length+' missing':'Source-supported fields complete'}</strong></div>${missing.length?`<div class="yearCleanupMissing">${missingLabels.map(label=>`<span>${esc(label)}</span>`).join('')}</div>`:'<div class="yearCleanupComplete">No source-supported fields are missing for this year.</div>'}<div class="yearCleanupNote">Source-supported fields for ${esc(year)}: ${esc(supportedLabels.join(' · '))}. Explicit unknown and N/A are preserved as coded states and do not count as missing.</div></div>`;
+  const investigations=missing.length?`<div class="cleanupInvestigations">${missing.map(field=>cleanupInvestigationHtml(field,rows,lpItems)).join('')}</div>`:'';
+  return `<div class="yearCleanupChecklist"><div class="yearCleanupHead"><div><span>Cleanup checklist</span><b>${esc(year)}</b></div><strong class="${missing.length?'needsWork':'complete'}">${missing.length?missing.length+' missing':'Source-supported fields complete'}</strong></div>${missing.length?`<div class="yearCleanupMissing">${missingLabels.map(label=>`<span>${esc(label)}</span>`).join('')}</div>`:'<div class="yearCleanupComplete">No source-family-supported fields are missing for this year.</div>'}${investigations}<div class="yearCleanupNote">Expected fields are scoped to this profile's exact year + preserved source family. Explicit unknown and N/A are governed coded states and do not count as missing.</div></div>`;
 }
 function yearScorecard(year,rows,lpItems,cumulativeItems,cleanupChecklist=''){
   const recordCount=rows.length;
@@ -345,7 +399,7 @@ async function openCatalog(id,focusYear=null){
       const cumulativeItems=cum.filter(x=>Number(x.source_year||0)===year);
       const selectedForYear=activeYearFilters.filter(x=>x.year===year);
       const filterTag=selectedForYear.length?`<span class="yearFocusTag">${esc(selectedForYear.map(x=>x.label).join(' + '))} focus</span>`:'';
-      const cleanupChecklist=routeFocusYear===year?cleanupChecklistHtml(catalogProfile,year):'';
+      const cleanupChecklist=routeFocusYear===year?cleanupChecklistHtml(catalogProfile,year,rows,lpItems):'';
       return `<details class="historyYear ${selectedForYear.length?'focusedYear':''}" data-history-year="${esc(year)}" ${i===0?'open':''}><summary><span>${esc(year)}${filterTag}</span><span>${rows.length} record${rows.length===1?'':'s'} · ${lpItems.length} annual LP · ${cumulativeItems.length} cumulative LP</span></summary><div class="historyYearBody">${yearScorecard(year,rows,lpItems,cumulativeItems,cleanupChecklist)}</div></details>`;
     }).join(''):'<div class="empty">No year-by-year history or LeadPerfection evidence is linked to this profile.</div>';
     const latestContact=[...h].filter(x=>historyContactValue(x)).sort((a,b)=>Number(b.source_year||0)-Number(a.source_year||0)||Number(b.source_row||0)-Number(a.source_row||0))[0]||null;
