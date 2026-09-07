@@ -653,7 +653,7 @@ jobs:
               'LIFE-054':'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
-              'LIFE-017':'Current available booth / location · add-on charges before 50% reservation payment',
+              'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Commercial sponsorship price · actual footprint / location · lead-generation / exclusivity / payment / COI terms',
               'LIFE-077':'Normal lower-cost vendor option or justified $2,000 package · exact location · Paradise acceptance',
@@ -1074,7 +1074,7 @@ jobs:
               'LIFE-071':'No Paradise 2026 booth assignment or exact placement is verified. Use the live booth-request path to obtain the current floor plan and available spaces before committing; historical Tampa/Fairgrounds placements are not current St. Petersburg availability evidence.',
               'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
               'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
-              'LIFE-017':'No 2027 Tampa booth assignment is verified. Request the current 2027 booth map from Patience Rall and select the strongest acceptable available location before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
+              'LIFE-017':'No 2027 Tampa booth assignment is verified. The direct Apr. 2027 contract lets Paradise list three preferred booth locations, but ECCS makes the final location decision. Request the current 2027 booth map from Patience Rall and choose three ranked preferred spaces before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
           }
           assert set(expected_current_placements)==expected_live, (set(expected_current_placements),expected_live)
@@ -1191,6 +1191,11 @@ jobs:
           assert 'Friday setup 1 PM-7 PM' in live['LIFE-046'].get('current_logistics_text','')
           assert '24-hour armed security' in live['LIFE-046'].get('current_logistics_text','')
           assert 'power is not available for purchase' in live['LIFE-054'].get('current_logistics_text','')
+          assert 'all materials must be removed at Paradise expense by 9 PM Sunday Apr. 4, 2027' in live['LIFE-017'].get('current_logistics_text','')
+          assert 'no security is provided after 9 PM' in live['LIFE-017'].get('current_logistics_text','')
+          assert 'GEMS (407-438-5002 / GemsEvents.com)' in live['LIFE-017'].get('current_logistics_text','')
+          assert 'Tampa Convention Center (813-274-7761)' in live['LIFE-017'].get('current_logistics_text','')
+          assert 'actual GEMS/TCC add-on prices' in live['LIFE-017'].get('current_logistics_text','')
           assert 'Exhibitor Kit' in live['LIFE-033'].get('current_logistics_text','')
           assert 'Do not use spectator parking or hospitality access rules' in live['LIFE-076'].get('current_logistics_text','')
           assert 'Do not carry forward prior-cycle Wi-Fi' in live['LIFE-060'].get('current_logistics_text','')
@@ -1323,7 +1328,7 @@ jobs:
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
               'LIFE-009':'$100 deposit due by the due date in the emailed invoice after acceptance · signed hold-harmless agreement required · failure to pay the deposit or sign the agreement can delete the booking · final balance due 30 days before the Friday setup day.',
-              'LIFE-017':'50% due with reservation · final balance due March 1, 2027 · signed cancellations are non-refundable.',
+              'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
               'LIFE-054':'$10 non-refundable application fee · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event.',
@@ -2959,6 +2964,10 @@ jobs:
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'data-live-compare-evidence-profile="LIFE-009"' in vero
           assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
+          tampa=row('LIFE-017')
+          assert 'data-live-compare-next-step-profile="LIFE-017"' in tampa
+          assert 'Contact Patience Rall at patience@eccshows.com / 407-273-7469 now and request the current 2027 booth map plus live availability.' in tampa
+          assert 'Still needed: Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment' in tampa
           martin=row('LIFE-018')
           assert '2017 · 23 issued' in martin
           assert 'data-live-compare-next-step-profile="LIFE-018"' in martin
@@ -3335,6 +3344,8 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q 'Current booth / placement' /tmp/tampa_2027.html
           grep -q 'No 2027 Tampa booth assignment is verified' /tmp/tampa_2027.html
+          grep -q 'three preferred booth locations' /tmp/tampa_2027.html
+          grep -q 'ECCS makes the final location decision' /tmp/tampa_2027.html
           grep -q 'do not use the attached 2024 floor plan as current availability evidence' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
@@ -3342,12 +3353,21 @@ jobs:
           grep -q 'Decision-safe current booking cost' /tmp/tampa_2027.html
           grep -q 'data-current-commitment-profile="LIFE-017"' /tmp/tampa_2027.html
           grep -q '50% due with reservation' /tmp/tampa_2027.html
-          grep -q 'final balance due March 1, 2027' /tmp/tampa_2027.html
+          grep -q 'final balance due Mar. 1, 2027' /tmp/tampa_2027.html
+          grep -q '4% surcharge on credit-card payments' /tmp/tampa_2027.html
+          grep -q 'American Express not accepted' /tmp/tampa_2027.html
+          grep -q 'contract controls the amount at 50%' /tmp/tampa_2027.html
           grep -q 'data-current-critical-deadline-profile="LIFE-017"' /tmp/tampa_2027.html
           grep -q 'Critical commitment date' /tmp/tampa_2027.html
           grep -q 'Mar 1, 2027' /tmp/tampa_2027.html
           grep -q 'Final balance due' /tmp/tampa_2027.html
           grep -q '\$1,295–\$1,395 · 10x10 booth' /tmp/tampa_2027.html
+          grep -q 'data-current-logistics-profile="LIFE-017"' /tmp/tampa_2027.html
+          grep -q 'removed at Paradise expense by 9 PM Sunday Apr. 4, 2027' /tmp/tampa_2027.html
+          grep -q 'no security is provided after 9 PM' /tmp/tampa_2027.html
+          grep -q 'GEMS (407-438-5002 / GemsEvents.com)' /tmp/tampa_2027.html
+          grep -q 'Tampa Convention Center (813-274-7761)' /tmp/tampa_2027.html
+          grep -q 'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
