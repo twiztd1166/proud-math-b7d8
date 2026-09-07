@@ -633,7 +633,7 @@ jobs:
               'LIFE-032':'HOLD',
               'LIFE-033':'HOLD',
               'LIFE-038':'HOLD',
-              'LIFE-039':'WATCH',
+              'LIFE-039':'PURSUE',
               'LIFE-041':'HOLD',
               'LIFE-044':'PURSUE',
               'LIFE-046':'PURSUE',
@@ -651,8 +651,8 @@ jobs:
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==10, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==9, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==11, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           expected_live_blockers={
@@ -676,7 +676,7 @@ jobs:
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
-              'LIFE-039':'2027 event date · business-exhibitor registration reopening · 2027 booth rate/power option · footprint · COI terms',
+              'LIFE-039':'2027 event date · registration opening · 2027 booth rate/power · exact booth location · category acceptance/exclusivity · COI · payment/cancellation terms',
               'LIFE-073':'2027 date/application · 10x10 availability · current 2027 fee · placement · payment deadline · COI · setup rules',
           }
           expected_review_blockers={**expected_live_blockers,**expected_historical_blockers}
@@ -689,7 +689,7 @@ jobs:
 
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','WEB palmbeachliquor.com/events route indexed but no current dated event/pop-up content recovered'),
-              'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo 2026 vendor package + City 2024 registration-timing precedent','official Feb.16/Mar.15/Apr.1/May.3 2024 vendor-outreach notices'),
+              'LIFE-039':('https://forms.cityofpsl.com/expo','Direct City/Paradise 2024-2026 Hurricane Expo correspondence + official 2026 City event/vendor pages + Paradise history/LP evidence','GMAIL:18f104adcadb7f0f;GMAIL:18fc51c2d9ab54db;GMAIL:1956bf9a7680f5d1;GMAIL:19de3fa30ccacf8d'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Direct DLF/Paradise 2024-2026 Safety Festival correspondence + official 2026 vendor agreement/site + Paradise history','GMAIL:1935453a8f4b0e19;GMAIL:19c765115e9e2375;GMAIL:19dac1371ec57cf3'),
           }
           assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
@@ -703,7 +703,7 @@ jobs:
 
           expected_historical_outreach={
               'LIFE-028':('Palm Beach Liquors','561-330-4777',None,'https://palmbeachliquor.com/','Current Palm Beach Liquors official storefront'),
-              'LIFE-039':('City of Port St. Lucie / Hurricane Expo','772-871-5225','pslem@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','City of Port St. Lucie Office of Emergency Management'),
+              'LIFE-039':('Ronnie Heen / City of Port St. Lucie Emergency Management','772-344-4073','rheen@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','Direct Ronnie Heen City/Paradise 2024-2026 correspondence + City Emergency Management'),
               'LIFE-073':('Michael Farrell / DLF Media / St. Lucie County Safety Festival','772-337-0049','mike@dlfmedia.com','https://slcsafetyfest.com/vendors/','Direct Michael Farrell DLF Gmail 2024-2026 + official Safety Festival vendor page'),
           }
           assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
@@ -733,6 +733,9 @@ jobs:
           assert '10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'February-April 2027 as a monitoring window' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'not as a verified 2027 deadline' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert '2024 vendor outreach across February-April before late-April registration' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert 'Mar. 6 save-the-date in 2025' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert 'May 1-May 8 registration window in 2026' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'the 2025 package was sent Nov. 22, 2024 and 2026 registration opened Dec. 3, 2025' in reviews['LIFE-073'].get('outreach_cycle_text','')
           assert 'Paradise submitted Dec. 8 and was acknowledged Dec. 15' in reviews['LIFE-073'].get('outreach_cycle_text','')
           assert 'mid-November through early December 2026 as the active monitoring/application window' in reviews['LIFE-073'].get('outreach_cycle_text','')
@@ -935,8 +938,21 @@ jobs:
           assert 'Paradise Gmail/Drive exhaustion' in reviews['LIFE-092'].get('source_label',''), reviews['LIFE-092']
           assert 'current 2026 fee/date/location and the live Business Vendor interest form are verified' in live['LIFE-092'].get('notes','').lower(), live['LIFE-092']
           assert 'no current 2026 VIA/Feast agreement or vendor packet in Paradise Gmail or Drive' in live['LIFE-092'].get('notes',''), live['LIFE-092']
-          assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert 'rheen@cityofpsl.com / 772-344-4073' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200 without power or $225 with power for a 10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert reviews['LIFE-039'].get('disposition')=='PURSUE', reviews['LIFE-039']
+          assert 'Start with the standard business booth unless Ronnie can document materially better sponsor placement/value' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert 'category acceptance/exclusivity' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert '6 lifetime net sales / $94,788 lifetime net' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert '4 closes / $81,956 close volume in 2018' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert '5 / $93,982 in 2019' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert '4 / $71,625 in 2023' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert '1 / $22,520 in 2024' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert 'performance attribution, not attendance proof' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert 'Standard business exhibitor is the decision-safe baseline' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert 'pay a sponsor premium only for documented placement/visibility value' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
+          assert 'Ronnie opened 2024 registration Apr. 24' in reviews['LIFE-039'].get('notes',''), reviews['LIFE-039']
+          assert 'registration was delayed by email/site issues, opened May 1 and closed May 8' in reviews['LIFE-039'].get('notes',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
           assert 'mike@dlfmedia.com / 772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert 'registration opened Dec. 3, 2025, Paradise submitted Dec. 8, DLF acknowledged Dec. 15 and invoiced Feb. 19, 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
@@ -3587,25 +3603,35 @@ jobs:
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
-          render_view hurricane_watch "$SITE/#show/LIFE-039"
-          grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
-          grep -q 'Current booking review' /tmp/hurricane_watch.html
-          grep -q 'When to act' /tmp/hurricane_watch.html
-          grep -q 'FEBRUARY 2027' /tmp/hurricane_watch.html
-          grep -q 'MARCH-APRIL' /tmp/hurricane_watch.html
-          grep -q '>WATCH<' /tmp/hurricane_watch.html
-          grep -q 'business distribution list' /tmp/hurricane_watch.html
-          grep -q '\$200 without power' /tmp/hurricane_watch.html
-          grep -q '\$225 with power' /tmp/hurricane_watch.html
-          grep -q '10x8 booth with one 8 ft table and two chairs' /tmp/hurricane_watch.html
-          grep -q 'Do not convert those 2024 dates into a claimed 2027 deadline' /tmp/hurricane_watch.html
-          grep -q 'href="https://forms.cityofpsl.com/expo"' /tmp/hurricane_watch.html
-          grep -q 'Open review source' /tmp/hurricane_watch.html
-          grep -q 'data-historical-outreach-source-profile="LIFE-039"' /tmp/hurricane_watch.html
-          grep -q 'href="mailto:pslem@cityofpsl.com"' /tmp/hurricane_watch.html
-          grep -q 'Email pslem@cityofpsl.com' /tmp/hurricane_watch.html
-          grep -q '>Open outreach source<' /tmp/hurricane_watch.html
-          grep -q 'City of Port St. Lucie Office of Emergency Management' /tmp/hurricane_watch.html
+          render_view hurricane_pursue "$SITE/#show/LIFE-039"
+          grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_pursue.html
+          grep -q 'Current booking review' /tmp/hurricane_pursue.html
+          grep -q 'When to act' /tmp/hurricane_pursue.html
+          grep -q 'FEBRUARY 2027' /tmp/hurricane_pursue.html
+          grep -q 'MARCH-APRIL' /tmp/hurricane_pursue.html
+          grep -q '>PURSUE<' /tmp/hurricane_pursue.html
+          grep -q 'business distribution list' /tmp/hurricane_pursue.html
+          grep -q '\$200 without power' /tmp/hurricane_pursue.html
+          grep -q '\$225 with power' /tmp/hurricane_pursue.html
+          grep -q '10x8 booth with one 8 ft table and two chairs' /tmp/hurricane_pursue.html
+          grep -q 'standard business booth' /tmp/hurricane_pursue.html
+          grep -q 'sponsor placement/value' /tmp/hurricane_pursue.html
+          grep -q 'category acceptance/exclusivity' /tmp/hurricane_pursue.html
+          grep -q '4 closes / \$81,956 close volume in 2018' /tmp/hurricane_pursue.html
+          grep -q 'performance attribution, not attendance proof' /tmp/hurricane_pursue.html
+          grep -q '2024 vendor outreach across February-April before late-April registration' /tmp/hurricane_pursue.html
+          grep -q 'Mar. 6 save-the-date in 2025' /tmp/hurricane_pursue.html
+          grep -q 'May 1-May 8 registration window in 2026' /tmp/hurricane_pursue.html
+          grep -q 'not as a verified 2027 deadline' /tmp/hurricane_pursue.html
+          grep -q 'href="https://forms.cityofpsl.com/expo"' /tmp/hurricane_pursue.html
+          grep -q 'Open review source' /tmp/hurricane_pursue.html
+          grep -q 'data-historical-outreach-source-profile="LIFE-039"' /tmp/hurricane_pursue.html
+          grep -q 'href="tel:7723444073"' /tmp/hurricane_pursue.html
+          grep -q 'Call 772-344-4073' /tmp/hurricane_pursue.html
+          grep -q 'href="mailto:rheen@cityofpsl.com"' /tmp/hurricane_pursue.html
+          grep -q 'Email rheen@cityofpsl.com' /tmp/hurricane_pursue.html
+          grep -q '>Open outreach source<' /tmp/hurricane_pursue.html
+          grep -q 'Direct Ronnie Heen City/Paradise 2024-2026 correspondence + City Emergency Management' /tmp/hurricane_pursue.html
 
           render_view flhs_watch "$SITE/#show/LIFE-071"
           grep -q 'FL Largest Home Show' /tmp/flhs_watch.html
