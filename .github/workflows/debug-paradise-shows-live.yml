@@ -315,6 +315,9 @@ jobs:
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
+              grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
+              grep -q "return 'Latest: '+latest+' · Best: '+best" /tmp/app-shows.js
+              grep -q 'occurrence rows include issued/demos and show Latest vs Best' /tmp/app-shows.js
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
               grep -q 'liveCompareOpen' /tmp/app-shows.js
               grep -q 'data-live-compare-placement-profile' /tmp/app-shows.js
@@ -2755,6 +2758,11 @@ jobs:
           assert 'Watch / gated' in vero
           assert 'Commitment: Verified current' in vero
           assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
+          assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
+          martin=row('LIFE-018')
+          assert '2017 · 23 issued' in martin
+          gun=row('LIFE-046')
+          assert 'Latest: 2017 · 0 issued · 0 demos · Best: 2017 · 6 issued · 5 demos' in gun
           hold=row('LIFE-033')
           assert 'data-live-compare-readiness-profile="LIFE-033"' in hold
           assert 'Hold / reconcile' in hold
