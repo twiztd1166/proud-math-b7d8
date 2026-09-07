@@ -78,6 +78,9 @@ jobs:
               grep -q 'execution-only fields for explicit non-participation do not count as missing' /tmp/app-shows.js
               grep -q 'data-focus-year' /tmp/app-shows.js
               grep -q 'deepLinkedYear' /tmp/app-core.js
+              grep -q 'paymentControl' /tmp/app-control.js
+              grep -q 'Control:' /tmp/app-control.js
+              grep -q 'Clearing ' /tmp/app-control.js
               grep -q "'/year/'" /tmp/app-core.js
               grep -q 'Cleanup checklist' /tmp/app-modals.js
               grep -q 'cleanup year opened first' /tmp/app-modals.js
@@ -3443,6 +3446,17 @@ jobs:
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
+
+          render_view payments "$SITE/#payments"
+          grep -q 'Contracted payments' /tmp/payments.html
+          grep -q '4 installments' /tmp/payments.html
+          grep -q 'Control: HOLD — VERIFY CLEARING' /tmp/payments.html
+          grep -q 'Control: HOLD — VERIFY PRIOR PAYMENT' /tmp/payments.html
+          test "$(grep -o 'Clearing UNVERIFIED' /tmp/payments.html | wc -l | tr -d ' ')" -ge 2
+          grep -q 'ACS West Palm Beach Home Show · 2026' /tmp/payments.html
+          grep -q '\$2,111 due Sep 4, 2026' /tmp/payments.html
+          grep -q 'S FL Fair · 2027' /tmp/payments.html
+          grep -q '\$13,000 due Sep 1, 2026' /tmp/payments.html
 
           render_view current "$SITE/#current"
           grep -q 'Current 36' /tmp/current.html
