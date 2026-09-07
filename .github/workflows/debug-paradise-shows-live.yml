@@ -1883,7 +1883,7 @@ jobs:
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
           assert '10x10 inline $200' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
-          assert 'sold out/waitlist' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
+          assert 'fully sold out' in profiles['HIST-234']['current_rebook_opportunity']['booking_window_text'] and 'waitlist is free' in profiles['HIST-234']['current_rebook_opportunity']['booking_window_text']
           assert 'commercial & retail businesses should use the Sponsor path' in profiles['HIST-234']['current_rebook_opportunity']['booking_window_text']
           assert 'Latitude-88' in profiles['HIST-234']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
