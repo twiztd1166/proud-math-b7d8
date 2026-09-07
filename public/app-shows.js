@@ -265,8 +265,58 @@ function historicalPlacementGuide(p){
   }
   return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
 }
+function historicalOutcomeValue(value,label,formatter=null){
+  if(value===null||value===undefined||String(value).trim()==='')return '';
+  const rendered=formatter?formatter(value):esc(value);
+  return `${rendered} ${label}`;
+}
+function historicalOccurrenceOutcomeText(p,prefix){
+  const year=p?.[`${prefix}_observed_outcome_year`];
+  if(year===null||year===undefined||String(year).trim()==='')return '';
+  const parts=[`${esc(year)}`];
+  const dates=String(p?.[`${prefix}_observed_outcome_dates`]||'').trim();
+  const booth=historicalPlacementValue(p?.[`${prefix}_observed_outcome_booth`]);
+  if(dates)parts.push(esc(dates));
+  if(booth)parts.push(`booth ${esc(booth)}`);
+  const issued=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_issued`],'issued');
+  const demos=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_demos`],'demos');
+  const sales=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_net_sales`],'net sales');
+  const revenue=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_net_revenue`],'net revenue',money);
+  const com=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_com`],'% COM');
+  for(const bit of [issued,demos,sales,revenue,com])if(bit)parts.push(bit);
+  return parts.join(' · ');
+}
+function historicalOutcomeSignature(p,prefix){
+  return [
+    p?.[`${prefix}_observed_outcome_year`],
+    p?.[`${prefix}_observed_outcome_dates`],
+    p?.[`${prefix}_observed_outcome_booth`],
+    p?.[`${prefix}_observed_outcome_issued`],
+    p?.[`${prefix}_observed_outcome_demos`],
+    p?.[`${prefix}_observed_outcome_net_sales`],
+    p?.[`${prefix}_observed_outcome_net_revenue`],
+    p?.[`${prefix}_observed_outcome_com`],
+  ].map(v=>v===null||v===undefined?'':String(v)).join('|');
+}
+function historicalOutcomeEvidence(p){
+  const status=String(p?.outcome_evidence_status||'').toUpperCase();
+  if(status==='OCCURRENCE_OUTCOME_AVAILABLE'){
+    const latest=historicalOccurrenceOutcomeText(p,'latest');
+    const best=historicalOccurrenceOutcomeText(p,'best');
+    const same=historicalOutcomeSignature(p,'latest')===historicalOutcomeSignature(p,'best');
+    const parts=[];
+    if(latest)parts.push(`Latest observed occurrence outcome: ${latest}`);
+    if(best&&!same)parts.push(`Best observed occurrence outcome: ${best}`);
+    parts.push('Occurrence outcome is source-record evidence; use the verified worked/attended line above for participation proof.');
+    return `<div class="rebookContext" data-historical-outcome-profile="${esc(p.profile_id)}" data-historical-outcome-status="OCCURRENCE_OUTCOME_AVAILABLE"><span>Historical outcome evidence</span><b>${parts.join(' · ')}</b></div>`;
+  }
+  if(status==='LIFETIME_ONLY'){
+    return `<div class="rebookContext" data-historical-outcome-profile="${esc(p.profile_id)}" data-historical-outcome-status="LIFETIME_ONLY"><span>Historical outcome evidence</span><b>No comparable occurrence-level outcome is preserved; lifetime aggregate only. Lifetime / LP attribution is not attendance proof.</b></div>`;
+  }
+  return `<div class="rebookContext" data-historical-outcome-profile="${esc(p.profile_id)}" data-historical-outcome-status="NO_COMPARABLE_OUTCOME_EVIDENCE"><span>Historical outcome evidence</span><b>No comparable occurrence-level or lifetime outcome is preserved. Do not infer performance or attendance from booking / schedule history.</b></div>`;
+}
 function historicalDecisionEvidence(p){
-  if(!p)return '';
+  if(!p?.current_rebook_opportunity&&!p?.current_rebook_review)return '';
   const bits=[];
   const latest=Number(p.latest_history_year||0);
   if(latest>0)bits.push(`latest history ${esc(latest)}`);
@@ -287,7 +337,7 @@ function historicalDecisionEvidence(p){
   if(p.lifetime_net_sales!==null&&p.lifetime_net_sales!==undefined&&p.lifetime_net_sales!=='')bits.push(`${esc(p.lifetime_net_sales)} lifetime net sales`);
   if(p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!=='')bits.push(`${money(p.lifetime_net_volume)} lifetime net aggregate`);
   if(p.lowest_preserved_com!==null&&p.lowest_preserved_com!==undefined&&p.lowest_preserved_com!=='')bits.push(`${esc(p.lowest_preserved_com)}% lowest preserved COM`);
-  return `<div class="rebookContext" data-historical-decision-evidence-profile="${esc(p.profile_id)}"><span>Historical decision evidence</span><b>${bits.join(' · ')}</b></div>`;
+  return `<div class="rebookContext" data-historical-decision-evidence-profile="${esc(p.profile_id)}"><span>Historical decision evidence</span><b>${bits.join(' · ')}</b></div>${historicalOutcomeEvidence(p)}`;
 }
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
@@ -326,7 +376,7 @@ function catalogCard(p){
   const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${preservedContext}${nextBooking}`:'';
   const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity,true):'';
   const placementGuide=liveOpportunity?historicalPlacementGuide(p):'';
-  const decisionEvidence=(liveOpportunity||candidate)?historicalDecisionEvidence(p):'';
+  const decisionEvidence=(liveOpportunity||['PURSUE','WATCH'].includes(reviewDisposition))?historicalDecisionEvidence(p):'';
   const reviewCard=currentReview?rebookReviewCard(currentReview,Boolean(liveOpportunity)):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${decisionEvidence}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
