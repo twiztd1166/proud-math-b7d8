@@ -171,6 +171,12 @@ jobs:
               grep -q 'Current schedule status' /tmp/app-shows.js
               grep -q 'Day-of-show logistics' /tmp/app-shows.js
               grep -q 'Current logistics status' /tmp/app-shows.js
+              grep -q 'Current commitment status' /tmp/app-shows.js
+              grep -q 'data-current-commitment-status-profile' /tmp/app-shows.js
+              grep -q 'opportunityCommitmentStatusLabel' /tmp/app-shows.js
+              grep -q 'fOpportunityCommitmentStatus' /tmp/app-shows.js
+              grep -q 'opportunity.current_commitment_status' /tmp/app-shows.js
+              grep -q 'currentCommitmentStatus' /tmp/app-core.js
               grep -q 'data-current-logistics-status-profile' /tmp/app-shows.js
               grep -q 'data-current-logistics-profile' /tmp/app-shows.js
               grep -q 'data-current-logistics-source-profile' /tmp/app-shows.js
@@ -973,6 +979,35 @@ jobs:
           assert 'Do not use spectator parking or hospitality access rules' in live['LIFE-076'].get('current_logistics_text','')
           assert 'Do not carry forward prior-cycle Wi-Fi' in live['LIFE-060'].get('current_logistics_text','')
           assert 'does not reopen until March 2027' in live['LIFE-014'].get('current_logistics_text','')
+          expected_current_commitment_status={
+              'HIST-234':'PARTIAL_CURRENT',
+              'LIFE-007':'VERIFIED_CURRENT',
+              'LIFE-009':'VERIFIED_CURRENT',
+              'LIFE-013':'AGREEMENT_REQUIRED',
+              'LIFE-014':'NEXT_CYCLE_CLOSED',
+              'LIFE-017':'VERIFIED_CURRENT',
+              'LIFE-018':'AGREEMENT_REQUIRED',
+              'LIFE-030':'AGREEMENT_REQUIRED',
+              'LIFE-033':'RECONCILE_EXISTING',
+              'LIFE-044':'VERIFIED_CURRENT',
+              'LIFE-046':'PARTIAL_CURRENT',
+              'LIFE-054':'VERIFIED_CURRENT',
+              'LIFE-060':'NOT_PUBLISHED_YET',
+              'LIFE-071':'AGREEMENT_REQUIRED',
+              'LIFE-076':'AGREEMENT_REQUIRED',
+              'LIFE-077':'PARTIAL_CURRENT',
+          }
+          assert set(expected_current_commitment_status)==expected_live, (set(expected_current_commitment_status),expected_live)
+          for pid,status in expected_current_commitment_status.items():
+              op=live[pid]
+              assert op.get('current_commitment_status')==status, (pid,op)
+              assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='VERIFIED_CURRENT')==5
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='PARTIAL_CURRENT')==3
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==5
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='RECONCILE_EXISTING')==1
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='NOT_PUBLISHED_YET')==1
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           expected_prior_cost_refs={
               'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
               'LIFE-013':'Paradise same-series history: 2022 event cost $3,500; 2021 cost $4,000 with Booths 705 & 706 (10x20). Historical reference only — obtain the 2027 commercial-space quote before signing.',
@@ -1509,16 +1544,17 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 40, detail.get('version')
+              assert detail.get('version') == 41, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 40, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 41, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_placement_status') == 'SPONSORSHIP_PLACEMENT_UNVERIFIED', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_status') == 'SOURCE_CONFLICT_REQUIRES_CONFIRMATION', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_logistics_status') == 'PARTIAL_CURRENT', vero_oktoberfest
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_commitment_status') == 'PARTIAL_CURRENT', vero_oktoberfest
           assert 'Vendor Village logistics' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_logistics_text',''), vero_oktoberfest
           assert '11 AM–7 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
           assert '11 AM–6 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
@@ -1530,7 +1566,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 60, x.get('version')
+          assert x.get('version') == 61, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2967,6 +3003,8 @@ jobs:
           grep -q 'data-current-placement-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / no current placement' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-placement-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-current-commitment-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'Next cycle / no current commitment' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
@@ -2986,6 +3024,8 @@ jobs:
           grep -q 'data-current-contact-actions-profile="LIFE-007"' /tmp/rebook_detail.html
           grep -q 'href="tel:5617929260"' /tmp/rebook_detail.html
           grep -q 'href="mailto:info@pottcevents.com"' /tmp/rebook_detail.html
+          grep -q 'data-current-commitment-status-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q 'Verified current commitment terms' /tmp/rebook_detail.html
           grep -q 'data-current-commitment-profile="LIFE-007"' /tmp/rebook_detail.html
           grep -q 'Payments are due 10 days before each participation date' /tmp/rebook_detail.html
           grep -q 'prepaid-date cancellations require email notice at least 10 days before the date' /tmp/rebook_detail.html
@@ -3006,6 +3046,8 @@ jobs:
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
           grep -q 'data-current-cost-status-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'data-current-commitment-status-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Reconcile existing commitment' /tmp/pembroke_detail.html
           grep -q 'Reconcile existing booking' /tmp/pembroke_detail.html
           grep -q 'Current booth / placement' /tmp/pembroke_detail.html
           grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
@@ -3055,6 +3097,8 @@ jobs:
           grep -q 'Open current source' /tmp/gunshow_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Contract / availability open / not assigned' /tmp/gunshow_detail.html
+          grep -q 'data-current-commitment-status-profile="LIFE-046"' /tmp/gunshow_detail.html
+          grep -q 'Partial current commitment terms' /tmp/gunshow_detail.html
           grep -q 'data-current-logistics-status-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Verified current logistics' /tmp/gunshow_detail.html
           grep -q 'Friday setup 1 PM-7 PM' /tmp/gunshow_detail.html
@@ -3085,6 +3129,8 @@ jobs:
           grep -q '>Open 2027 floor plan + exhibitor contract<' /tmp/treasure_detail.html
           grep -q 'professionalshowmanagement.com/home-shows' /tmp/treasure_detail.html
           grep -q 'Open current source' /tmp/treasure_detail.html
+          grep -q 'data-current-commitment-status-profile="LIFE-018"' /tmp/treasure_detail.html
+          grep -q 'Agreement / quote terms required' /tmp/treasure_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-018"' /tmp/treasure_detail.html
           grep -q 'Floor plan available / not selected' /tmp/treasure_detail.html
 
@@ -3096,6 +3142,8 @@ jobs:
           grep -q 'Feb 21, 2027' /tmp/martin_detail.html
           grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
           grep -q 'data-current-cost-status-profile="LIFE-060"' /tmp/martin_detail.html
+          grep -q 'data-current-commitment-status-profile="LIFE-060"' /tmp/martin_detail.html
+          grep -q 'Commitment terms not published yet' /tmp/martin_detail.html
           grep -q 'Not published yet' /tmp/martin_detail.html
           grep -q 'Prior cost / reference status' /tmp/martin_detail.html
           grep -q 'Official 2025 Martin County Fair vendor application reference' /tmp/martin_detail.html
