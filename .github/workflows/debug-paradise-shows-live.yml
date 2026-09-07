@@ -2518,10 +2518,10 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
-          if grep -q 'data-current-commitment-profile="LIFE-018"' /tmp/treasure_detail.html; then
-            echo "::error::Martin County rendered unverified commitment/payment terms"
-            exit 1
-          fi
+          grep -q 'data-current-commitment-profile="LIFE-018"' /tmp/treasure_detail.html
+          grep -q 'Organizer currently links a 2027 exhibitor contract and floor plan' /tmp/treasure_detail.html
+          grep -q 'have not been verified in recovered current evidence' /tmp/treasure_detail.html
+          grep -q 'obtain/read the current contract and quote before signing or paying' /tmp/treasure_detail.html
           if grep -q 'data-current-booking-cost-profile="LIFE-018"' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior cost / reference status' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
