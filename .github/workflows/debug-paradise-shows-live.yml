@@ -167,6 +167,8 @@ jobs:
               grep -q 'current_placement_text' /tmp/app-shows.js
               grep -q 'current_placement_status' /tmp/app-shows.js
               grep -q 'Current placement status' /tmp/app-shows.js
+              grep -q 'data-current-date-profile' /tmp/app-shows.js
+              grep -q 'end date not published / not verified' /tmp/app-shows.js
               grep -q 'data-current-placement-status-profile' /tmp/app-shows.js
               grep -q 'data-current-placement-profile' /tmp/app-shows.js
               grep -q 'opportunityPlacementStatusLabel' /tmp/app-shows.js
@@ -977,6 +979,8 @@ jobs:
           assert any(r.get('relation_type')=='SAME_SERIES_LEGACY_SOURCE_SPLIT' and r.get('canonical_series_profile_id')=='LIFE-009' for r in rels), rels
           assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
+          assert profiles['LIFE-014']['current_rebook_opportunity']['event_start']=='2026-10-03'
+          assert profiles['LIFE-014']['current_rebook_opportunity']['event_end'] is None
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-017']['current_rebook_opportunity']['event_start']=='2027-04-03'
           assert profiles['LIFE-071']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
@@ -2719,6 +2723,8 @@ jobs:
 
           render_view wpb_greenmarket_next_cycle "$SITE/#show/LIFE-014"
           grep -q 'WPB GreenMarket' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-current-date-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'Starts Oct 3, 2026 · end date not published / not verified' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-placement-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / no current placement' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-placement-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
