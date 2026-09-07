@@ -243,6 +243,10 @@ jobs:
               grep -q 'latest_preserved_cost' /tmp/app-shows.js
               grep -q 'latest_preserved_dates' /tmp/app-shows.js
               grep -q 'Rebook candidates 2013+' /tmp/app-shows.js
+              grep -q 'Historical outreach' /tmp/app-shows.js
+              grep -q 'ALL_HISTORICAL_OUTREACH' /tmp/app-shows.js
+              grep -q 'ALL_HISTORICAL_OUTREACH' /tmp/app-core.js
+              grep -q 'historicalOutreachCandidate' /tmp/app-shows.js
               grep -q 'Pursue now' /tmp/app-shows.js
               grep -q 'Watch / next cycle' /tmp/app-shows.js
               grep -q 'ALL_REBOOK_PURSUE' /tmp/app-shows.js
@@ -2529,6 +2533,8 @@ jobs:
           grep -q 'Show database' /tmp/shows.html
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
+          grep -q 'Historical outreach <span class="quickViewCount">6</span>' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
           grep -q 'data-current-operations-compact-profile' /tmp/shows.html
           grep -q 'rebookOpsDetails' /tmp/shows.html
