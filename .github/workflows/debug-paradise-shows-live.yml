@@ -206,6 +206,10 @@ jobs:
               grep -q 'rebookReviewCard' /tmp/app-shows.js
               grep -q 'current_rebook_review' /tmp/app-shows.js
               grep -q 'Current booking review' /tmp/app-shows.js
+              grep -q 'Historical candidate review' /tmp/app-shows.js
+              grep -q 'data-review-profile' /tmp/app-shows.js
+              grep -q 'data-review-scope' /tmp/app-shows.js
+              grep -Fq "rebookReviewCard(d.rebookReview||null,Boolean(d.rebookOpportunity))" /tmp/app-modals.js
               grep -q 'Booking readiness' /tmp/app-shows.js
               grep -q 'bookingReadinessLabel' /tmp/app-shows.js
               grep -Fq "const readiness=review.booking_readiness?" /tmp/app-shows.js
@@ -2358,7 +2362,8 @@ jobs:
 
           render_view palm_liquors_pursue "$SITE/#show/LIFE-028"
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
-          grep -q 'Current booking review' /tmp/palm_liquors_pursue.html
+          grep -q 'data-review-profile="LIFE-028" data-review-scope="historical"' /tmp/palm_liquors_pursue.html
+          grep -q 'Historical candidate review' /tmp/palm_liquors_pursue.html
           grep -q 'When to act' /tmp/palm_liquors_pursue.html
           grep -q 'NOW' /tmp/palm_liquors_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
@@ -2449,6 +2454,7 @@ jobs:
           grep -q '>Open venue map<' /tmp/bradenton_pursue.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Historical decision evidence' /tmp/bradenton_pursue.html
+          grep -q 'data-review-profile="LIFE-044" data-review-scope="live"' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'data-booking-readiness-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Booking readiness' /tmp/bradenton_pursue.html
