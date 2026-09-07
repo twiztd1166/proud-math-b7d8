@@ -322,6 +322,11 @@ jobs:
               grep -q 'Historical decision evidence' /tmp/app-shows.js
               grep -q 'Historical outcome snapshot' /tmp/app-shows.js
               grep -q 'data-live-decision-comparison' /tmp/app-shows.js
+              grep -q 'liveComparisonDecisionWhy' /tmp/app-shows.js
+              grep -q 'data-live-compare-decision-why-profile' /tmp/app-shows.js
+              grep -q 'Decision + governed why' /tmp/app-shows.js
+              grep -q 'first sentence of the governed review rationale' /tmp/app-shows.js
+              grep -q 'liveCompareDecisionCell' /tmp/app.css
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
@@ -2762,8 +2767,16 @@ jobs:
           grep -q 'class="liveCompareDecision pursue"' /tmp/shows.html
           grep -q 'class="liveCompareDecision watch"' /tmp/shows.html
           grep -q 'class="liveCompareDecision hold"' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          grep -q 'data-live-compare-decision-why-profile="LIFE-046"' /tmp/shows.html
+          grep -q 'West Palm Beach Gun &amp; Knife Show is a current low-cost PURSUE.' /tmp/shows.html
+          grep -q 'data-live-compare-decision-why-profile="LIFE-009"' /tmp/shows.html
+          grep -q 'Vero Beach Home &amp; Remodel Show remains a valuable series but should not be booked from lifetime totals alone.' /tmp/shows.html
+          grep -q 'data-live-compare-decision-why-profile="LIFE-033"' /tmp/shows.html
+          grep -q 'South Florida Home Show — Pembroke Pines is currently an account-control HOLD, not a performance rejection.' /tmp/shows.html
           grep -q 'No comparable outcome evidence' /tmp/shows.html
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
+          grep -q 'The decision reason is the first sentence of the governed review rationale, not a new summary or score.' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
