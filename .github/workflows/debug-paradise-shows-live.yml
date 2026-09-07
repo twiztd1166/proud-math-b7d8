@@ -661,7 +661,7 @@ jobs:
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
-              'LIFE-007':'Application acceptance · exact current placement · final requested footprint',
+              'LIFE-007':'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint',
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
@@ -867,24 +867,49 @@ jobs:
           assert 'no later current 2027 Tampa map or GEMS/electrical/forklift price sheet was recovered in Paradise Gmail or Drive' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
           assert 'Remaining placement/add-on fields require Patience/ECCS and venue-service response rather than more internal searching' in reviews['LIFE-017'].get('notes',''), reviews['LIFE-017']
           assert reviews['LIFE-007'].get('disposition')=='PURSUE', reviews['LIFE-007']
-          assert reviews['LIFE-007'].get('action_timing','').startswith('NOW'), reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('action_timing','').startswith('NOW — route the current Green Market Rules and Regulations and Waiver, Release and Hold Harmless Agreement to an authorized Paradise signer.'), reviews['LIFE-007']
           assert '$538,570' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert '$65/$75' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert '1 net sale / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
-          assert reviews['LIFE-007'].get('next_step','').startswith('Apply now under the published Corporate category for exactly four initial Saturdays: Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026.'), reviews['LIFE-007']
-          assert '#18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert 'does not prove #18 was best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert 'Budget the four-date test at no more than $300 using the current $75/Saturday ceiling' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert 'lower $65/Saturday rate would be $260 if the selected payment cadence qualifies' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert 'Reassess actual 2026 leads, demos, net sales and placement quality before adding Nov. 14 or later dates' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'Oct. 15-31, 2022 RPB block produced 3 LP closes / $58,900' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert 'Nov. 5-26, 2022 block produced 0 closes' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert 'most recent independently grounded Mar. 21, 2026 occurrence also carried 1 LP close / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
-          assert reviews['LIFE-007'].get('action_timing','').startswith('NOW — apply for Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026'), reviews['LIFE-007']
+          assert 'signed legal commitment' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert 'Authorized Paradise acceptance therefore comes before application submission' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('next_step','').startswith('Before submitting the live Green Market Jotform, route its current Rules and Regulations and Waiver, Release and Hold Harmless Agreement to an authorized Paradise signer.'), reviews['LIFE-007']
+          assert 'electronic signatures used to secure booth space carry original-signature authorization' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'gives up certain legal rights including the right to sue' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'claims resulting from negligence or fault' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'exactly four initial Saturdays: Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'outside/high-traffic placement comparable to historical #18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert '4 LP closes / $57,043 LP close volume / 4 issued / 4 demos' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'does not prove #18 was best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'if none arrives within 14 days, contact Kathy Gilbert / POTTC at 561-792-9260' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'Only after approval use the emailed link to select/pay dates' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'Budget the four-date test at no more than $300 using the current $75/Saturday ceiling' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'lower $65/Saturday rate would be $260 if the selected payment cadence qualifies' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'space can sell out earlier' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'Reassess actual 2026 leads, demos, net sales and placement quality before adding Nov. 14 or later dates' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'reassess before Nov. 14' in reviews['LIFE-007'].get('action_timing',''), reviews['LIFE-007']
-          assert 'LP:LP2022-075' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
-          assert 'LP:LP2022-076' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
+          assert 'if no approval email arrives within 14 days, contact kathy/pottc' in reviews['LIFE-007'].get('action_timing','').lower(), reviews['LIFE-007']
+          assert 'published 10-day payment deadline is not a safe wait-until date because space can sell out earlier' in reviews['LIFE-007'].get('action_timing',''), reviews['LIFE-007']
+          for evidence_id in ('LP2021-101','LP2022-075','LP2022-076','LP2026-005'):
+              assert ('LP:'+evidence_id) in reviews['LIFE-007'].get('source_ref',''), (evidence_id,reviews['LIFE-007'])
+          for history_id in ('2021-SCH21-0127','2026-GMAIL-RPB-0321'):
+              assert ('HISTORY:'+history_id) in reviews['LIFE-007'].get('source_ref',''), (history_id,reviews['LIFE-007'])
+          assert 'form.jotform.com/261054512266148' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
+          assert 'application--payment-forms.html' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
+          assert 'signed application/waiver' in reviews['LIFE-007'].get('source_label',''), reviews['LIFE-007']
           assert 'application-submission/organizer-response gap, not a hidden internal-data gap' in reviews['LIFE-007'].get('notes',''), reviews['LIFE-007']
+          assert 'safe sequence is authorized terms acceptance, application submission, POTTC approval, prompt date payment and current placement assignment' in reviews['LIFE-007'].get('notes',''), reviews['LIFE-007']
+          assert 'requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature' in live['LIFE-007'].get('commitment_terms_text',''), live['LIFE-007']
+          assert 'gives up certain legal rights including the right to sue' in live['LIFE-007'].get('commitment_terms_text',''), live['LIFE-007']
+          assert 'claims resulting from negligence or fault' in live['LIFE-007'].get('commitment_terms_text',''), live['LIFE-007']
+          assert 'Do not submit/sign unless an authorized Paradise signer accepts the current terms' in live['LIFE-007'].get('commitment_terms_text',''), live['LIFE-007']
+          assert 'submission is not a nonbinding inquiry' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
+          assert 'contact them if no approval arrives within 14 days' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
+          assert 'Only after approval does the emailed payment link let Paradise select/pay dates' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
+          assert 'space can sell out before that deadline' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
           assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
           assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
           assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
@@ -1587,7 +1612,7 @@ jobs:
           assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==6
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
-              'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
+              'LIFE-007':'The current Green Market application requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature · the application says to seek clarification from a legal advisor if the agreement is not understood · the waiver states it is a legal document, that signing gives up certain legal rights including the right to sue, and broadly waives/releases/indemnifies/holds harmless POTTC Events, the Village and related parties including claims resulting from negligence or fault · approved applicants must also sign the waiver before occupying a booth · all booth fees must be paid in full before occupying the space · payments are due 10 days before each participation date, but space may sell out earlier · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
               'LIFE-009':'$100 deposit due by the due date in the emailed invoice after acceptance · signed hold-harmless agreement required · failure to pay the deposit or sign the agreement can delete the booking · final balance due 30 days before the Friday setup day.',
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
@@ -3576,7 +3601,9 @@ jobs:
           grep -q 'unauthorized distribution of promotional materials is prohibited' /tmp/rpb_green_market_placement.html
           grep -q 'approval before handing out flyers or advertisements' /tmp/rpb_green_market_placement.html
           grep -q 'Still needed before booking' /tmp/rpb_green_market_placement.html
-          grep -q 'Application acceptance · exact current placement · final requested footprint' /tmp/rpb_green_market_placement.html
+          grep -q 'gives up certain legal rights including the right to sue' /tmp/rpb_green_market_placement.html
+          grep -q 'Before submitting the live Green Market Jotform' /tmp/rpb_green_market_placement.html
+          grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rpb_green_market_placement.html
 
           render_view martin_home_placement "$SITE/#show/LIFE-018"
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
@@ -3879,7 +3906,7 @@ jobs:
           grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Still needed before booking' /tmp/rebook_detail.html
-          grep -q 'Application acceptance · exact current placement · category pricing / footprint confirmation' /tmp/rebook_detail.html
+          grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
@@ -3892,6 +3919,11 @@ jobs:
           grep -q 'data-current-commitment-profile="LIFE-007"' /tmp/rebook_detail.html
           grep -q 'Payments are due 10 days before each participation date' /tmp/rebook_detail.html
           grep -q 'prepaid-date cancellations require email notice at least 10 days before the date' /tmp/rebook_detail.html
+          grep -q 'gives up certain legal rights including the right to sue' /tmp/rebook_detail.html
+          grep -q 'claims resulting from negligence or fault' /tmp/rebook_detail.html
+          grep -q 'Do not submit/sign unless an authorized Paradise signer accepts the current terms' /tmp/rebook_detail.html
+          grep -q 'no approval arrives within 14 days' /tmp/rebook_detail.html
+          grep -q 'space can sell out before that deadline' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-007"' /tmp/rebook_detail.html
