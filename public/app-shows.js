@@ -600,6 +600,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(quickView==='ALL_ACT_LATER'&&!liveOpportunityActsLater(p))return false;
   if(quickView==='ALL_QUOTE_REQUIRED'&&!liveOpportunityNeedsQuote(p))return false;
   if(quickView==='ALL_NO_PRIOR_PLACEMENT'&&!liveOpportunityMissingPriorPlacement(p))return false;
+  if(quickView==='ALL_HISTORICAL_OUTREACH'&&!historicalReviewHasOutreach(p))return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
   if(quickView==='ALL_REBOOK_PURSUE'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='PURSUE')return false;
   if(quickView==='ALL_REBOOK_WATCH'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='WATCH')return false;
@@ -998,6 +999,12 @@ function liveOpportunityMissingPriorPlacement(p){
 function liveOpportunityReadinessIs(p,value){
   return Boolean(p?.current_rebook_opportunity)&&String(p?.current_rebook_review?.booking_readiness||'').toUpperCase()===String(value||'').toUpperCase();
 }
+function historicalReviewHasOutreach(p){
+  if(p?.current_rebook_opportunity)return false;
+  const review=p?.current_rebook_review||null;
+  if(!review||!['PURSUE','WATCH'].includes(String(review.disposition||'').toUpperCase()))return false;
+  return Boolean(String(review.outreach_contact_name||'').trim()||String(review.outreach_contact_phone||'').trim()||String(review.outreach_contact_email||'').trim());
+}
 function liveOpportunityActsNow(p){
   if(!p?.current_rebook_opportunity)return false;
   return /^NOW\b/i.test(String(p?.current_rebook_review?.action_timing||'').trim());
@@ -1020,6 +1027,7 @@ function quickViewOptions(mode){
       ['ALL_ACT_LATER','Later / next cycle'],
       ['ALL_QUOTE_REQUIRED','Quote required'],
       ['ALL_NO_PRIOR_PLACEMENT','No prior booth history'],
+      ['ALL_HISTORICAL_OUTREACH','Historical outreach'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
       ['ALL_REBOOK_PURSUE','Pursue now'],
       ['ALL_REBOOK_WATCH','Watch / next cycle'],
@@ -1053,6 +1061,7 @@ function quickViewCount(key){
   if(key==='ALL_ACT_LATER')return state.catalog.filter(liveOpportunityActsLater).length;
   if(key==='ALL_QUOTE_REQUIRED')return state.catalog.filter(liveOpportunityNeedsQuote).length;
   if(key==='ALL_NO_PRIOR_PLACEMENT')return state.catalog.filter(liveOpportunityMissingPriorPlacement).length;
+  if(key==='ALL_HISTORICAL_OUTREACH')return state.catalog.filter(historicalReviewHasOutreach).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
   if(key==='ALL_REBOOK_PURSUE')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='PURSUE').length;
   if(key==='ALL_REBOOK_WATCH')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='WATCH').length;
@@ -1100,6 +1109,7 @@ function applyQuickView(key){
     if(key==='ALL_ACT_LATER')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_QUOTE_REQUIRED')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_NO_PRIOR_PLACEMENT')state.catalogSort='BOOKING_DECISION';
+    if(key==='ALL_HISTORICAL_OUTREACH')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_PURSUE')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_WATCH')state.catalogSort='LIFETIME_NET';
