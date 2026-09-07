@@ -890,6 +890,17 @@ jobs:
           assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
           assert '10x20 / 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert reviews['LIFE-092'].get('disposition')=='PURSUE' and reviews['LIFE-092'].get('action_timing','').startswith('NOW'), reviews['LIFE-092']
+          assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
+          assert 'call VIA at 561-427-0500' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
+          assert 'do not pay/sign' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
+          assert 'Paradise Gmail and Paradise Drive found no current 2026 Business Vendor agreement/packet' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
+          assert 'vendor-terms-conditions (materially stale 2019 agreement)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
+          assert 'GMAIL:no current 2026 Feast/VIA correspondence recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
+          assert 'DRIVE:no current 2026 Feast/VIA agreement or vendor packet recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
+          assert 'Paradise Gmail/Drive exhaustion' in reviews['LIFE-092'].get('source_label',''), reviews['LIFE-092']
+          assert 'current 2026 fee/date/location and the live Business Vendor interest form are verified' in live['LIFE-092'].get('notes','').lower(), live['LIFE-092']
+          assert 'no current 2026 VIA/Feast agreement or vendor packet in Paradise Gmail or Drive' in live['LIFE-092'].get('notes',''), live['LIFE-092']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200 without power or $225 with power for a 10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
@@ -3038,7 +3049,7 @@ jobs:
           assert 'Still needed: Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
           assert 'Feast of Little Italy is a strong current PURSUE.' in feast
           assert 'data-live-compare-next-step-profile="LIFE-092"' in feast
-          assert 'Submit the current $1,000 Business Vendor interest form now with Paradise windows/doors services stated clearly.' in feast
+          assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet — submit the live $1,000 Business Vendor interest form now with Paradise windows/doors services stated clearly, then call VIA at 561-427-0500 for application acceptance and the current written Business Vendor agreement.' in feast
           assert 'data-live-compare-evidence-profile="LIFE-092"' in feast
           assert '3 preserved history records · 3 history years · 1 explicit WORKED/ATTENDED year' in feast
           vero=row('LIFE-009')
@@ -3326,6 +3337,11 @@ jobs:
           grep -q 'current \$675/\$1,000 vendor pricing and Sunday 7 PM' /tmp/feast_little_italy.html
           grep -q 'data-current-commitment-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Treat those old payment/refund/setup clauses as non-current' /tmp/feast_little_italy.html
+          grep -q 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet' /tmp/feast_little_italy.html
+          grep -q 'call VIA at 561-427-0500' /tmp/feast_little_italy.html
+          grep -q 'Paradise Gmail and Paradise Drive found no current 2026 Business Vendor agreement/packet' /tmp/feast_little_italy.html
+          grep -q 'post-interest-form VIA-response blocker' /tmp/feast_little_italy.html
+          grep -q 'Official Feast 2026 vendor/about/location pages + stale linked 2019 Terms &amp; Conditions + Paradise Gmail/Drive exhaustion' /tmp/feast_little_italy.html
           grep -q 'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' /tmp/feast_little_italy.html
           grep -q 'data-booking-readiness-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Pre-booking action required' /tmp/feast_little_italy.html
