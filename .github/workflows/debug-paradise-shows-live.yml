@@ -974,6 +974,14 @@ jobs:
           for evidence_id in ('LP2022-132','LP2017-123','LP2017-124','LP2017-122','LP2018-132','LP2019-131'):
               assert ('LP:'+evidence_id) in reviews['LIFE-046'].get('source_ref',''), (evidence_id,reviews['LIFE-046'])
           assert 'annual LP fall-date attribution' in reviews['LIFE-046'].get('source_label',''), reviews['LIFE-046']
+          assert 'GMAIL:17a62508d46a5414' in reviews['LIFE-046'].get('source_ref',''), reviews['LIFE-046']
+          assert 'direct 2021 promoter non-gun approval-path precedent' in reviews['LIFE-046'].get('source_label',''), reviews['LIFE-046']
+          assert 'Jun. 28, 2021 Sport Show Specialists email to Paradise' in reviews['LIFE-046'].get('next_step',''), reviews['LIFE-046']
+          assert 'Mac Kanady said any non-gun-related items needed owner Bill Page approval at 321-777-7455' in reviews['LIFE-046'].get('next_step',''), reviews['LIFE-046']
+          assert 'ask whether Bill Page still handles non-gun approvals or who currently does' in reviews['LIFE-046'].get('next_step',''), reviews['LIFE-046']
+          assert 'obtain current 2026 approval rather than carrying the 2021 policy/person forward' in reviews['LIFE-046'].get('next_step',''), reviews['LIFE-046']
+          assert 'Treat Bill Page/that approval rule as 2021 precedent only' in reviews['LIFE-046'].get('notes',''), reviews['LIFE-046']
+          assert 'current 2026 product acceptance and the current approver still require organizer confirmation' in reviews['LIFE-046'].get('notes',''), reviews['LIFE-046']
           assert 'remaining blocker is organizer response' in reviews['LIFE-046'].get('notes',''), reviews['LIFE-046']
           assert 'Oct. 14-15, 2017 = 1 net close / $7,059' in live['LIFE-046'].get('notes',''), live['LIFE-046']
           assert 'Nov. 11-12, 2017 = 3 / $74,338' in live['LIFE-046'].get('notes',''), live['LIFE-046']
