@@ -2865,7 +2865,7 @@ jobs:
           grep -q '17 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          python3 -c 'from pathlib import Path; html=Path("/tmp/shows.html").read_text(); ordered=["LIFE-044","LIFE-046","LIFE-007","LIFE-054","LIFE-092","LIFE-018","LIFE-017","LIFE-013"]; positions=[html.index(f"data-live-compare-row=\\\"{pid}\\\"") for pid in ordered]; assert positions==sorted(positions), (ordered,positions)'
+          python3 -c 'from pathlib import Path; html=Path("/tmp/shows.html").read_text(); ordered=["LIFE-044","LIFE-046","LIFE-007","LIFE-054","LIFE-092","LIFE-018","LIFE-017","LIFE-013"]; positions=[html.index("data-live-compare-row="+chr(34)+pid+chr(34)) for pid in ordered]; assert positions==sorted(positions), (ordered,positions)'
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
