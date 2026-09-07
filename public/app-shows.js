@@ -93,8 +93,10 @@ function opportunityCostText(op){
   const min=opportunityCostNumber(op,'booking_cost_min');
   const max=opportunityCostNumber(op,'booking_cost_max');
   if(min===null&&max===null)return '';
-  const low=min??max,high=max??min;
-  const amount=low===high?money(low):`${money(low)}–${money(high)}`;
+  let amount='';
+  if(min!==null&&max===null)amount=money(min)+'+';
+  else if(min===null&&max!==null)amount='Up to '+money(max);
+  else amount=min===max?money(min):`${money(min)}–${money(max)}`;
   return amount+(op?.booking_cost_unit?` · ${op.booking_cost_unit}`:'');
 }
 function opportunityCostStatusLabel(value){
