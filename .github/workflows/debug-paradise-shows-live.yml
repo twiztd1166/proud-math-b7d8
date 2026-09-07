@@ -321,10 +321,15 @@ jobs:
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-commitment-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-deadline-profile' /tmp/app-shows.js
               grep -q 'Prior/reference:' /tmp/app-shows.js
+              grep -q 'Commitment:' /tmp/app-shows.js
+              grep -q 'Hard date:' /tmp/app-shows.js
               grep -q 'current + prior cost' /tmp/app-shows.js
               grep -q 'liveCompareCost' /tmp/app.css
               grep -q 'liveCompareContact' /tmp/app.css
+              grep -q 'liveCompareTiming' /tmp/app.css
               grep -q 'Current: ' /tmp/app-shows.js
               grep -q 'Best history:' /tmp/app-shows.js
               grep -q 'liveCompareAction' /tmp/app.css
@@ -2701,6 +2706,8 @@ jobs:
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 4
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
@@ -2722,10 +2729,20 @@ jobs:
           assert 'Dave LaBell / Tampa Bay Times Events' in manatee
           assert 'tel:7278938523' in manatee
           assert 'mailto:dlabell@tampabay.com' in manatee
+          assert 'data-live-compare-commitment-profile="LIFE-044"' in manatee
+          assert 'Commitment: Verified current commitment terms' in manatee
+          assert 'data-live-compare-deadline-profile="LIFE-044"' in manatee
+          assert 'Hard date: Sep 17, 2026 · 30-day cancellation-liability cutoff' in manatee
           vero=row('LIFE-009')
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
-          print('Live comparison cost/contact rows: PASS')
+          assert 'Commitment: Verified current commitment terms' in vero
+          assert 'Hard date: Dec 2, 2026 · Final balance due' in vero
+          tampa=row('LIFE-017')
+          assert 'Hard date: Mar 1, 2027 · Final balance due' in tampa
+          winter=row('LIFE-054')
+          assert 'Hard date: Nov 5, 2026 · 30-day no-refund boundary' in winter
+          print('Live comparison cost/contact/commitment/deadline rows: PASS')
           PY
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -q 'Show database' /tmp/shows_mobile.html
@@ -2746,7 +2763,9 @@ jobs:
           assert 'data-label="Contact"' in row
           assert 'Dave LaBell / Tampa Bay Times Events' in row
           assert 'Prior/reference:' in row
-          print('Mobile comparison cost/contact labels: PASS')
+          assert 'Commitment: Verified current commitment terms' in row
+          assert 'Hard date: Sep 17, 2026' in row
+          print('Mobile comparison cost/contact/commitment/deadline labels: PASS')
           PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
