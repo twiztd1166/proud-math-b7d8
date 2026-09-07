@@ -97,6 +97,21 @@ jobs:
               grep -q 'Live booking board' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-shows.js
               grep -q 'Booking decision / next date' /tmp/app-shows.js
+              grep -q 'CURRENT_COST_LOW' /tmp/app-shows.js
+              grep -q 'CURRENT_COST_HIGH' /tmp/app-shows.js
+              grep -q 'Current booking cost low' /tmp/app-shows.js
+              grep -q 'Current booking cost high' /tmp/app-shows.js
+              grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
+              grep -q 'fOpportunityCostBand' /tmp/app-shows.js
+              grep -q 'Current verified starting cost' /tmp/app-shows.js
+              grep -q 'Quote / comparable cost missing' /tmp/app-shows.js
+              grep -q 'booking_cost_min' /tmp/app-shows.js
+              grep -q 'booking_cost_max' /tmp/app-shows.js
+              grep -q 'booking_cost_basis' /tmp/app-shows.js
+              grep -q 'BOOKING_DECISION' /tmp/app-core.js
+              grep -q 'CURRENT_COST_LOW' /tmp/app-core.js
+              grep -q 'CURRENT_COST_HIGH' /tmp/app-core.js
+              grep -q 'currentCostBand' /tmp/app-core.js
               grep -q 'Venue / address' /tmp/app-shows.js
               grep -q 'Prior verified cost / reference' /tmp/app-shows.js
               grep -q 'rebookLiveActions' /tmp/app-shows.js
@@ -542,6 +557,26 @@ jobs:
           for pid,(label,url) in expected_actions.items():
               assert live[pid].get('action_label')==label, (pid,live[pid])
               assert live[pid].get('action_url')==url, (pid,live[pid])
+          expected_booking_costs={
+              'LIFE-007':(65,75,'per Saturday','Official 2026-27 Corporate vendor monthly/weekly rate; Paradise acceptance and selected dates still must be confirmed.'),
+              'LIFE-009':(475,635,'10x10 booth','Official 2027 standard-to-premium-corner 10x10 range; optional table/carpet add-ons excluded.'),
+              'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
+              'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
+              'LIFE-046':(100,100,'8-foot table / weekend','Official promoter vendor rate; includes 2 chairs and 2 employee badges.'),
+              'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
+          }
+          for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
+              op=live[pid]
+              assert float(op.get('booking_cost_min'))==cmin, (pid,op)
+              assert float(op.get('booking_cost_max'))==cmax, (pid,op)
+              assert op.get('booking_cost_unit')==unit, (pid,op)
+              assert op.get('booking_cost_basis')==basis, (pid,op)
+          for pid,op in live.items():
+              if pid not in expected_booking_costs:
+                  assert op.get('booking_cost_min') is None, (pid,op)
+                  assert op.get('booking_cost_max') is None, (pid,op)
+                  assert not op.get('booking_cost_unit'), (pid,op)
+                  assert not op.get('booking_cost_basis'), (pid,op)
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -924,10 +959,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 27, detail.get('version')
+              assert detail.get('version') == 28, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 27, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 28, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -939,7 +974,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 46, x.get('version')
+          assert x.get('version') == 47, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2039,6 +2074,9 @@ jobs:
           grep -q '2025 · Apr 12-13' /tmp/vero_home_placement.html
           grep -q '0 net sales' /tmp/vero_home_placement.html
           grep -q '\$0 net revenue' /tmp/vero_home_placement.html
+          grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
+          grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
+          grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
           grep -q '>Open Jan. 2-3 booth application<' /tmp/vero_home_placement.html
           grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
@@ -2078,6 +2116,8 @@ jobs:
           grep -q 'Oct 18, 2026' /tmp/bradenton_pursue.html
           grep -q '10x10 booth starts at \$995' /tmp/bradenton_pursue.html
           grep -q 'corner booth +\$100' /tmp/bradenton_pursue.html
+          grep -q 'Decision-safe current booking cost' /tmp/bradenton_pursue.html
+          grep -q '\$995–\$1,095 · 10x10 booth' /tmp/bradenton_pursue.html
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
           grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
           grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
@@ -2091,6 +2131,8 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
+          grep -q 'Decision-safe current booking cost' /tmp/tampa_2027.html
+          grep -q '\$1,295–\$1,395 · 10x10 booth' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
@@ -2162,6 +2204,8 @@ jobs:
           grep -q 'APPLICATION OPEN' /tmp/rebook_detail.html
           grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
+          grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
+          grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
@@ -2189,6 +2233,8 @@ jobs:
           grep -q 'CONTRACT REQUEST OPEN' /tmp/gunshow_detail.html
           grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
+          grep -q 'Decision-safe current booking cost' /tmp/gunshow_detail.html
+          grep -q '\$100 · 8-foot table / weekend' /tmp/gunshow_detail.html
           grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
           grep -q 'Open vendor availability info' /tmp/gunshow_detail.html
           grep -q 'flgunshows.com/shows/' /tmp/gunshow_detail.html
@@ -2202,6 +2248,7 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
+          if grep -q 'Decision-safe current booking cost' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
