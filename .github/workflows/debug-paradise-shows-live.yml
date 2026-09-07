@@ -871,10 +871,19 @@ jobs:
           assert '$538,570' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert '$65/$75' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert '1 net sale / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
-          assert 'limited first block' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('next_step','').startswith('Apply now under the published Corporate category for exactly four initial Saturdays: Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026.'), reviews['LIFE-007']
           assert '#18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'does not prove #18 was best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert reviews['LIFE-007'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for any existing 2026-27 Paradise acceptance or placement record'), reviews['LIFE-007']
+          assert 'Budget the four-date test at no more than $300 using the current $75/Saturday ceiling' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'lower $65/Saturday rate would be $260 if the selected payment cadence qualifies' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'Reassess actual 2026 leads, demos, net sales and placement quality before adding Nov. 14 or later dates' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'Oct. 15-31, 2022 RPB block produced 3 LP closes / $58,900' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert 'Nov. 5-26, 2022 block produced 0 closes' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert 'most recent independently grounded Mar. 21, 2026 occurrence also carried 1 LP close / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('action_timing','').startswith('NOW — apply for Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026'), reviews['LIFE-007']
+          assert 'reassess before Nov. 14' in reviews['LIFE-007'].get('action_timing',''), reviews['LIFE-007']
+          assert 'LP:LP2022-075' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
+          assert 'LP:LP2022-076' in reviews['LIFE-007'].get('source_ref',''), reviews['LIFE-007']
           assert 'application-submission/organizer-response gap, not a hidden internal-data gap' in reviews['LIFE-007'].get('notes',''), reviews['LIFE-007']
           assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
           assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
@@ -904,7 +913,7 @@ jobs:
               assert f'HISTORY:{history_id}' in str(review.get('source_ref') or ''), (pid,review)
               assert metrics in str(review.get('next_step') or ''), (pid,review)
               assert limitation in str(review.get('next_step') or ''), (pid,review)
-          assert 'performance-correlated reference' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'outside/high-traffic placement comparable to historical #18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'same-row outcome of 0 net sales' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'performance attribution, not attendance proof or proof the old numbering is still optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert 'outside popup placement type comparable to Paradise history' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
@@ -3863,6 +3872,10 @@ jobs:
           grep -q 'Application open / not assigned' /tmp/rebook_detail.html
           grep -q '4 LP closes / \$57,043 LP close volume / 4 issued / 4 demos' /tmp/rebook_detail.html
           grep -q 'does not prove #18 was best' /tmp/rebook_detail.html
+          grep -q 'exactly four initial Saturdays: Oct. 17, Oct. 24, Oct. 31 and Nov. 7, 2026' /tmp/rebook_detail.html
+          grep -q 'Budget the four-date test at no more than $300' /tmp/rebook_detail.html
+          grep -q 'lower $65/Saturday rate would be $260' /tmp/rebook_detail.html
+          grep -q 'before adding Nov. 14 or later dates' /tmp/rebook_detail.html
 
           render_view pembroke_detail "$SITE/#show/LIFE-033"
           grep -q 'Pembroke Home Show' /tmp/pembroke_detail.html
