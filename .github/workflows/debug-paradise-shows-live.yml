@@ -208,6 +208,7 @@ jobs:
               grep -q 'Current booking review' /tmp/app-shows.js
               grep -q 'Booking readiness' /tmp/app-shows.js
               grep -q 'bookingReadinessLabel' /tmp/app-shows.js
+              grep -Fq "const readiness=review.booking_readiness?" /tmp/app-shows.js
               grep -q 'data-booking-readiness-profile' /tmp/app-shows.js
               grep -q 'review.booking_readiness' /tmp/app-shows.js
               grep -q 'Still needed before booking' /tmp/app-shows.js
@@ -2363,6 +2364,10 @@ jobs:
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
+          if grep -q 'data-booking-readiness-profile="LIFE-028"' /tmp/palm_liquors_pursue.html; then
+            echo 'Historical-only LIFE-028 incorrectly rendered governed live booking readiness'
+            exit 1
+          fi
           grep -q 'official store/events presence is current, but no future Paradise-style pop-up date is claimed' /tmp/palm_liquors_pursue.html
           grep -q 'href="https://palmbeachliquor.com/events"' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
