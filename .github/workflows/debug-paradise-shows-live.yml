@@ -833,6 +833,10 @@ jobs:
           assert '5 net sales / $89,388' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
           assert 'current 2027 booth map' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
           assert '2024 floor plan' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert reviews['LIFE-017'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the remaining 2027 Tampa placement/add-on gaps'), reviews['LIFE-017']
+          assert 'Tampa_Floor_Plan_west_2024.pdf' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert 'no later current 2027 Tampa map or GEMS/electrical/forklift price sheet was recovered in Paradise Gmail or Drive' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert 'Remaining placement/add-on fields require Patience/ECCS and venue-service response rather than more internal searching' in reviews['LIFE-017'].get('notes',''), reviews['LIFE-017']
           assert reviews['LIFE-007'].get('disposition')=='PURSUE', reviews['LIFE-007']
           assert reviews['LIFE-007'].get('action_timing','').startswith('NOW'), reviews['LIFE-007']
           assert '$538,570' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
@@ -3125,7 +3129,7 @@ jobs:
           assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
           tampa=row('LIFE-017')
           assert 'data-live-compare-next-step-profile="LIFE-017"' in tampa
-          assert 'Contact Patience Rall at patience@eccshows.com / 407-273-7469 now and request the current 2027 booth map plus live availability.' in tampa
+          assert 'Research exhausted as of Sep. 7, 2026 for the remaining 2027 Tampa placement/add-on gaps — contact Patience Rall at patience@eccshows.com / 407-273-7469 now and request the current 2027 booth map plus live availability.' in tampa
           assert 'Still needed: Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment' in tampa
           martin=row('LIFE-018')
           assert '2017 · 23 issued' in martin
