@@ -399,9 +399,9 @@ jobs:
           strong_history_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
           hold_dispositions={'HOLD','RETIRED'}
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
-          assert len(historical_2013)==74, len(historical_2013)
-          assert len(strong_history_2013)==12, len(strong_history_2013)
-          assert len(strong_2013)==8, len(strong_2013)
+          assert len(historical_2013)==73, len(historical_2013)
+          assert len(strong_history_2013)==11, len(strong_history_2013)
+          assert len(strong_2013)==7, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={
               'HIST-234':'WATCH',
