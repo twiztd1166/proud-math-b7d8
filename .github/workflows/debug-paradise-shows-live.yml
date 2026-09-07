@@ -115,6 +115,9 @@ jobs:
               grep -q 'Current booking cost high' /tmp/app-shows.js
               grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
               grep -q 'data-current-booking-cost-profile' /tmp/app-shows.js
+              grep -q 'Commitment / payment terms' /tmp/app-shows.js
+              grep -q 'data-current-commitment-profile' /tmp/app-shows.js
+              grep -q 'opportunity.commitment_terms_text' /tmp/app-shows.js
               grep -q 'fOpportunityCostBand' /tmp/app-shows.js
               grep -q 'Current verified booking cost (max)' /tmp/app-shows.js
               grep -Fq "rangeMatch(opportunity.booking_cost_max,f.currentCostBand)" /tmp/app-shows.js
@@ -690,6 +693,19 @@ jobs:
                   assert op.get('booking_cost_max') is None, (pid,op)
                   assert not op.get('booking_cost_unit'), (pid,op)
                   assert not op.get('booking_cost_basis'), (pid,op)
+          expected_commitment_terms={
+              'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
+              'LIFE-071':'Not published / not verified — obtain deposit, balance-due, cancellation, COI, utility/furnishing and other add-on terms with the current quote before signing.',
+              'LIFE-054':'$10 non-refundable application fee · application does not guarantee acceptance · approved category/space is paid only after approval.',
+              'LIFE-009':'25% deposit due within 14 days of the emailed invoice to officially book · selected booth remains available to others until the deposit is received.',
+              'LIFE-017':'50% due with reservation · final balance due March 1, 2027 · signed cancellations are non-refundable.',
+          }
+          assert len(expected_commitment_terms)==5, expected_commitment_terms
+          for pid,terms in expected_commitment_terms.items():
+              assert live[pid].get('commitment_terms_text')==terms, (pid,live[pid])
+          for pid,op in live.items():
+              if pid not in expected_commitment_terms:
+                  assert not op.get('commitment_terms_text'), (pid,op)
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -2215,6 +2231,8 @@ jobs:
           grep -q '\$0 net revenue' /tmp/vero_home_placement.html
           grep -q 'data-current-booking-cost-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
+          grep -q 'data-current-commitment-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q '25% deposit due within 14 days' /tmp/vero_home_placement.html
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
@@ -2270,6 +2288,9 @@ jobs:
           grep -q 'corner booth +\$100' /tmp/bradenton_pursue.html
           grep -q 'data-current-booking-cost-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Decision-safe current booking cost' /tmp/bradenton_pursue.html
+          grep -q 'data-current-commitment-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Commitment / payment terms' /tmp/bradenton_pursue.html
+          grep -q 'No money due at initial reservation' /tmp/bradenton_pursue.html
           grep -q '\$995–\$1,095 · 10x10 booth' /tmp/bradenton_pursue.html
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
           grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
@@ -2293,6 +2314,9 @@ jobs:
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
           grep -q 'data-current-booking-cost-profile="LIFE-017"' /tmp/tampa_2027.html
           grep -q 'Decision-safe current booking cost' /tmp/tampa_2027.html
+          grep -q 'data-current-commitment-profile="LIFE-017"' /tmp/tampa_2027.html
+          grep -q '50% due with reservation' /tmp/tampa_2027.html
+          grep -q 'final balance due March 1, 2027' /tmp/tampa_2027.html
           grep -q '\$1,295–\$1,395 · 10x10 booth' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
@@ -2320,6 +2344,8 @@ jobs:
           grep -q '>Open venue map<' /tmp/flhs_watch.html
           grep -q 'Current booth / placement' /tmp/flhs_watch.html
           grep -q 'No Paradise 2026 booth assignment or exact placement is verified' /tmp/flhs_watch.html
+          grep -q 'data-current-commitment-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q 'Not published / not verified — obtain deposit, balance-due, cancellation' /tmp/flhs_watch.html
           grep -q 'Still needed before booking' /tmp/flhs_watch.html
           grep -q 'Current all-in booth/setup quote · exact available St. Petersburg placement' /tmp/flhs_watch.html
           grep -q 'Prior verified cost / reference' /tmp/flhs_watch.html
@@ -2453,6 +2479,10 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
+          if grep -q 'data-current-commitment-profile="LIFE-018"' /tmp/treasure_detail.html; then
+            echo "::error::Martin County rendered unverified commitment/payment terms"
+            exit 1
+          fi
           if grep -q 'data-current-booking-cost-profile="LIFE-018"' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
@@ -2507,6 +2537,8 @@ jobs:
           fi
           grep -q 'data-current-booking-cost-profile="LIFE-054"' /tmp/winterfest_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/winterfest_detail.html
+          grep -q 'data-current-commitment-profile="LIFE-054"' /tmp/winterfest_detail.html
+          grep -q '\$10 non-refundable application fee' /tmp/winterfest_detail.html
           grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'Paradise category must be confirmed before payment' /tmp/winterfest_detail.html
           grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
