@@ -3789,7 +3789,7 @@ jobs:
           grep -q '>Open schedule source<' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
-          grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
+          grep -q 'Explicitly avoid simply reusing Booth #52' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
