@@ -678,7 +678,7 @@ jobs:
               'LIFE-007':'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint',
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Exact currently available booth / final PSM assignment · authorized contract signature/payment · exact insurance/COI evidence if separately required · move-in/loading/parking instructions · Saturday public show hours',
-              'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
+              'LIFE-013':'2027-specific commercial rate sheet/application · all-in indoor price · live available space/map · application/payment deadlines · cancellation/COI/utilities/credentials terms',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
@@ -963,7 +963,7 @@ jobs:
               assert limitation in str(review.get('next_step') or ''), (pid,review)
           assert 'outside/high-traffic placement comparable to historical #18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'same-row outcome of 0 net sales' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'performance attribution, not attendance proof or proof the old numbering is still optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert 'performance attribution, not attendance proof or proof those booth numbers remain optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert 'outside popup placement type comparable to Paradise history' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
           assert 'historical Booth 131 still exists under the same numbering' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
@@ -1118,10 +1118,10 @@ jobs:
           assert 'Use that only as proof of activation format' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
           assert 'written 2027 category clearance/exclusivity status' in live['LIFE-076'].get('commitment_terms_text',''), live['LIFE-076']
           assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
-          assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert reviews['LIFE-013'].get('next_step','').startswith('Contact Sylvia Cruz-Alvarez now and ask for the 2027 indoor commercial exhibitor rate sheet/application and live space map.'), reviews['LIFE-013']
           assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
-          assert 'current 10x20 option comparable to historical 705 & 706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert 'Request a 10x20 option comparable to historical Booths 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert reviews['LIFE-092'].get('disposition')=='PURSUE' and reviews['LIFE-092'].get('action_timing','').startswith('NOW'), reviews['LIFE-092']
           assert 'call VIA at 561-427-0500 for the current 2026 Business Vendor agreement/terms before signing the live interest form' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
           assert 'submit only after the stale 2019 linked terms are reconciled in writing' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
@@ -1485,7 +1485,7 @@ jobs:
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
               'LIFE-071':'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified. Same-series 2023 organizer precedent says FLHS had two 20x20 spaces at the front of the Tampa show that were visible from the entrance and described them as strong display locations; this is organizer layout preference only, not Paradise performance evidence and not current St. Petersburg availability. Ask for the current plan and prioritize a front/entrance-visible 20x20 or current category-required equivalent only if the live layout supports it.',
-              'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
+              'LIFE-013':'The official 2027 vendor page says indoor commercial spaces are available, but no Paradise 2027 assignment or live commercial-space map was recovered. The linked online application is still labeled 2026. Request the 2027 indoor commercial map/availability from Sylvia; historical Booths 705-706 (10x20) remain reference only.',
               'LIFE-017':'No 2027 Tampa booth assignment is verified. The direct Apr. 2027 contract lets Paradise list three preferred booth locations, but ECCS makes the final location decision. Request the current 2027 booth map from Patience Rall and choose three ranked preferred spaces before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
               'LIFE-112':'No current Paradise space is assigned. The official 2027 vendor page says there is no inside commercial vendor space, so any Paradise activation must use accepted outside commercial space. Historical 2025 evidence records “Main line to the right — 10×10” with a same-row outcome of 1 net sale / $47,000 net / 13 issued / 7 demos on a $700 fair fee. Use that only as a placement reference: request a comparable high-flow outside location if available, but verify the current map, assignment and traffic pattern and do not call the 2025 location proven best.',
@@ -1517,7 +1517,7 @@ jobs:
               'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
               'LIFE-009':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
-              'LIFE-013':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-013':'CONTRACT_REQUEST_NOT_ASSIGNED',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
               'LIFE-017':'CONTRACT_REQUEST_NOT_ASSIGNED',
               'LIFE-018':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
@@ -1539,8 +1539,8 @@ jobs:
           assert sum(1 for v in expected_current_placement_status.values() if v=='ASSIGNED_VERIFIED')==0
           assert sum(1 for v in expected_current_placement_status.values() if v=='LISTED_ASSIGNMENT_UNVERIFIED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==3
-          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==7
-          assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==2
+          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==6
+          assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==3
           assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==3
           assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='NEXT_CYCLE_CLOSED')==1
@@ -1604,7 +1604,7 @@ jobs:
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'PARTIAL_CURRENT',
               'LIFE-009':'PARTIAL_CURRENT',
-              'LIFE-013':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-013':'NOT_PUBLISHED_YET',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
               'LIFE-017':'PARTIAL_CURRENT',
               'LIFE-018':'PARTIAL_CURRENT',
@@ -1630,9 +1630,9 @@ jobs:
               assert op.get('current_logistics_checked_at'), (pid,op)
           assert sum(1 for v in expected_current_logistics_status.values() if v=='VERIFIED_CURRENT')==1
           assert sum(1 for v in expected_current_logistics_status.values() if v=='PARTIAL_CURRENT')==9
-          assert sum(1 for v in expected_current_logistics_status.values() if v=='EXHIBITOR_KIT_REQUIRED')==4
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='EXHIBITOR_KIT_REQUIRED')==3
           assert sum(1 for v in expected_current_logistics_status.values() if v=='PROPOSAL_REQUIRED')==2
-          assert sum(1 for v in expected_current_logistics_status.values() if v=='NOT_PUBLISHED_YET')==1
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='NOT_PUBLISHED_YET')==2
           assert sum(1 for v in expected_current_logistics_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           assert 'Friday setup 1 PM-7 PM' in live['LIFE-046'].get('current_logistics_text','')
           assert '24-hour armed security' in live['LIFE-046'].get('current_logistics_text','')
@@ -1656,7 +1656,7 @@ jobs:
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'VERIFIED_CURRENT',
               'LIFE-009':'PARTIAL_CURRENT',
-              'LIFE-013':'AGREEMENT_REQUIRED',
+              'LIFE-013':'NOT_PUBLISHED_YET',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
               'LIFE-017':'VERIFIED_CURRENT',
               'LIFE-018':'PARTIAL_CURRENT',
@@ -1679,9 +1679,9 @@ jobs:
               assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
           assert sum(1 for v in expected_current_commitment_status.values() if v=='VERIFIED_CURRENT')==4
           assert sum(1 for v in expected_current_commitment_status.values() if v=='PARTIAL_CURRENT')==5
-          assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==6
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==5
           assert sum(1 for v in expected_current_commitment_status.values() if v=='RECONCILE_EXISTING')==1
-          assert sum(1 for v in expected_current_commitment_status.values() if v=='NOT_PUBLISHED_YET')==1
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='NOT_PUBLISHED_YET')==2
           assert sum(1 for v in expected_current_commitment_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           expected_prior_cost_refs={
               'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
@@ -1722,10 +1722,10 @@ jobs:
               'LIFE-060':('Open official fair vendor watch page','https://www.martincountyfair.com/'),
               'LIFE-071':('Open booth request','https://floridaslargesthomeshow.com/booth-info/'),
               'LIFE-076':('Open 2027 tournament / partnership site','https://thecognizantclassic.com/'),
-              'LIFE-013':('Open 2027 exhibitor portal','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
+              'LIFE-013':('Request 2027 commercial exhibitor package','https://www.fairexpo.com/participate/vendors'),
               'LIFE-017':('Request / refresh 2027 Tampa contract','https://www.tampahomeshow.com/get-contract/'),
               'LIFE-092':('Open vendor page — call VIA before signing','https://www.feastoflittleitaly.com/vendor-info'),
-              'LIFE-112':('Open 2027 vendor application','https://www.stluciecountyfair.org/p/participate/livestock1'),
+              'LIFE-112':('Open official 2027 vendor application PDF','https://cdn.saffire.com/files.ashx?cb=be9f61a3&f=2027_St_Lucie_County_New_Fair_Application_FINAL.pdf&rid=StLucieCountyFair&t=fg'),
           }
           assert set(expected_actions)==set(live), (set(expected_actions),set(live))
           for pid,(label,url) in expected_actions.items():
@@ -1805,7 +1805,7 @@ jobs:
               'LIFE-033':'Fall 2026 commitment remains RECONCILE_EXISTING because Paradise is publicly listed but no fall-specific signed contract/invoice was recovered. The recovered multi-year clause belongs to the spring Pembroke lineage and does not by itself establish the fall occurrence. ACS confirmed Aug. 31, 2026 that Paradise may enter new contracts, new contracts must be paid in full upon signing, and there are no account credits. Obtain one written fall-specific ACS statement showing whether a contract exists, exact total price, amounts paid/due, payment deadline, cancellation/refund terms, COI and utilities before any additional payment.',
               'LIFE-018':'Official 2027 contract: signed exhibitor is legally bound by the terms; all balances are due 30 days before the event unless PSM agrees otherwise in writing; unpaid balances may be billed to the card on file at that point; reserving space but failing to participate does not eliminate the balance obligation. On exhibitor default, PSM may terminate the contract, retain payments as liquidated damages, reuse the space, and seek damages/costs. Exhibitor must maintain insurance during show, move-in and move-out periods and obtain required licenses/permits at its own expense. The extracted contract text confirms an insurance requirement but did not expose a numeric coverage limit, so do not invent one.',
               'LIFE-060':'2027 fair dates are published, but the 2027 commercial-vendor application/agreement and its price, deposit/payment, cancellation/refund, COI and placement terms are not yet published on the verified fair site · do not carry forward the 2025 vendor agreement; request the 2027 package before commitment.',
-              'LIFE-013':'2027 vendor applications are live and indoor commercial spaces are offered, but Paradise-specific commercial-space price, deposit/payment schedule, application deadline, cancellation/refund, COI and add-on terms are not published on the verified vendor page · obtain the 2027 commercial rate sheet/application agreement from Sylvia before committing.',
+              'LIFE-013':'No verified 2027 commercial exhibitor agreement/rate sheet is currently published in the recovered official sources. The official vendor page is branded for Mar. 18-Apr. 11, 2027 and invites vendors to contact the Fair, but its current Online Application resolves to a portal explicitly titled 2026 Miami-Dade County Fair. Do not submit or rely on that form as a 2027 contract. Request the 2027-specific rate sheet/application, payment schedule, deadlines, cancellation/refund terms, COI and add-on terms from Sylvia.',
               'LIFE-112':'The 2027 application does not guarantee space. It requires an authorized-agent signature and agreement to comply with current Fair vendor rules/regulations. Current contract acceptance, deposit/payment schedule, cancellation/refund terms and final electrical charges are not stated in the recovered application and must be verified before Paradise makes a payment or final commitment.',
           }
           assert len(expected_commitment_terms)==15, expected_commitment_terms
@@ -1942,6 +1942,9 @@ jobs:
           rels=profiles['LIFE-005'].get('profile_relations') or []
           assert any(r.get('relation_type')=='SAME_SERIES_LEGACY_SOURCE_SPLIT' and r.get('canonical_series_profile_id')=='LIFE-009' for r in rels), rels
           assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
+          assert profiles['LIFE-013']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert 'Online Application' in profiles['LIFE-013']['current_rebook_opportunity']['booking_window_text'] and '2026 Miami-Dade County Fair' in profiles['LIFE-013']['current_rebook_opportunity']['booking_window_text']
+          assert profiles['LIFE-013']['current_rebook_opportunity']['action_label']=='Request 2027 commercial exhibitor package'
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-014']['current_rebook_opportunity']['event_start']=='2026-10-03'
           assert profiles['LIFE-014']['current_rebook_opportunity']['event_end'] is None
@@ -3521,7 +3524,8 @@ jobs:
           assert '2017 · 23 issued' in martin
           assert 'LP-attributed specific: 131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · $96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' in martin
           assert 'data-live-compare-next-step-profile="LIFE-018"' in martin
-          assert 'Research exhausted as of Sep. 7, 2026 — contact Jackielou now and request the current 2027 contract plus floor plan as a direct file/quote.' in martin
+          assert 'Use the recovered official 2027 contract now.' in martin
+          assert 'Current base economics are verified: $950 single 10x10, $1,750 double 20x10, corner +$100' in martin
           assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           rpb=row('LIFE-007')
@@ -3530,7 +3534,8 @@ jobs:
           assert 'LP-attributed specific: #18 outside popup · 2021 · Nov-6 · 4 LP closes · $57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' in rpb
           miami=row('LIFE-013')
           assert 'data-live-compare-next-step-profile="LIFE-013"' in miami
-          assert 'Research exhausted as of Sep. 7, 2026 — contact Sylvia Cruz-Alvarez now and request the 2027 indoor commercial-space rate sheet, available locations and application/payment deadlines.' in miami
+          assert 'Contact Sylvia Cruz-Alvarez now and ask for the 2027 indoor commercial exhibitor rate sheet/application and live space map.' in miami
+          assert 'current Online Application still opens a 2026 Fair portal' in miami
           assert 'LP-attributed specific: 705 & 706 (10x20) · 2021 · Nov-18 thru Dec-5 · 4 LP closes · $80,100 LP close volume · 62 issued · 19 demos · annual LP attribution · not attendance proof' in miami
           artigras=row('LIFE-030')
           assert 'LP-attributed specific: S204 (10x10) · 2022 · Feb-19 Feb-20 · 1 LP close · $38,482 LP close volume · 11 issued · 8 demos · annual LP attribution · not attendance proof' in artigras
@@ -3560,7 +3565,7 @@ jobs:
           assert '772-464-2910' in slcfair
           assert 'Pre-booking action required' in slcfair
           assert 'No verified hard deadline' in slcfair
-          assert 'Open 2027 vendor application' in slcfair
+          assert 'Open official 2027 vendor application PDF' in slcfair
           assert 'data-live-compare-next-step-profile="LIFE-112"' in slcfair
           hold=row('LIFE-033')
           assert 'data-live-compare-readiness-profile="LIFE-033"' in hold
