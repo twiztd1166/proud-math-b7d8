@@ -658,7 +658,7 @@ jobs:
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
               'LIFE-007':'Application acceptance · exact current placement · final requested footprint',
-              'LIFE-054':'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement',
+              'LIFE-054':'2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
@@ -865,7 +865,15 @@ jobs:
           assert '$200' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert reviews['LIFE-054'].get('disposition')=='PURSUE' and reviews['LIFE-054'].get('action_timing','').startswith('NOW'), reviews['LIFE-054']
           assert '1 net close / $20,025' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
-          assert '$160 Commercial/Retail' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert 'Corporate Level 2 for the 2024 Winter Fest' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert '$410 paid' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert 'does not explicitly restate the category' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert 'Budget up to $410 conservatively' in reviews['LIFE-054'].get('action_timing',''), reviews['LIFE-054']
+          assert 'current approved Corporate level' in reviews['LIFE-054'].get('next_step',''), reviews['LIFE-054']
+          assert 'do not assume the historical level automatically carries forward' in reviews['LIFE-054'].get('next_step',''), reviews['LIFE-054']
+          assert 'no prior booth number is defensibly recoverable' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
+          assert 'GMAIL:192bf9f865027f7b' in reviews['LIFE-054'].get('source_ref',''), reviews['LIFE-054']
+          assert 'direct POTTC 2024 Level 2 approval' in reviews['LIFE-054'].get('source_label',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
           assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert 'organizer-response/direct-download blocker, not an internal-search blocker' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
@@ -1142,7 +1150,7 @@ jobs:
               'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified. Reconcile the current ACS contract/account and exact booth before any new payment or re-booking.',
               'LIFE-077':'The published Grand Clam package includes a 10x10 booth, but Paradise acceptance and booth location are not verified. Ask for the exact 2026 location and whether a lower-cost normal vendor placement exists.',
-              'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. Confirm the approved vendor category and available lawn/high-traffic placement after application approval before paying the space fee.',
+              'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
               'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Review the live floor plan and choose a materially stronger available location; do not reuse Booth #52 based on history because its Apr. 2025 outcome was 0 net sales.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
@@ -1322,7 +1330,7 @@ jobs:
               'LIFE-014':'Paradise 2021-22 WPB GreenMarket outside-popup schedule reference: $310.34 final cost per listed Saturday ($413.79 event-cost field). The later preserved $11 / $11,000 strings are anomalous and are not used as pricing evidence. Historical schedule reference only; current vendor price remains unverified.',
               'LIFE-017':'Paradise Tampa Home Show references: 2024 approved/scheduled tracker $1,395; 2023 calendar schedule $1,295. Historical booking/schedule evidence only; current 2027 direct contract is $1,295 standard / $1,395 corner plus add-ons and any card surcharge.',
               'LIFE-046':'Paradise 2018 WPB Gun Show preserved cost reference: $80 per event in the cost register / archived schedules. Historical booking/schedule evidence only; not proof of completed participation. Current official 2026 vendor table rate is $100.',
-              'LIFE-054':'Paradise RPB Winter Fest history: 2025 event record $410; 2023 approved-vendor reference $285; 2021 scheduled reference $250. Historical references only; current 2026 approved-category fee is $160-$400 plus the $10 application fee.',
+              'LIFE-054':'Direct POTTC history improves the reference: Paradise was explicitly approved as Corporate Level 2 for the 2024 RPB Winter Fest. Paradise 2025 calendar/payment evidence records $410 paid on Nov. 5, 2025; that total is consistent with the current 2026 $400 Corporate Level 2 fee plus $10 application fee, but the recovered 2025 confirmation does not explicitly restate the category. Earlier references: 2023 approved-vendor $285 and 2021 scheduled $250. Historical references only; 2026 approval/category remains organizer-controlled.',
               'LIFE-009':'Paradise Vero Home Show history: Jan. 2025 $500 final cost; Apr. 2025 Booth #52 $495; 2022 occurrences $420. Historical references only; current 2027 official 10x10 range is $475-$635.',
               'LIFE-077':'Paradise 2025 Sebastian Clam Bake event record: $200, with tent display required. Historical reference only; not a 2026 sponsorship quote. Current published booth-bearing Grand Clam sponsorship is $2,000.',
               'LIFE-044':'No safe same-series prior cost is available for this current opportunity. The retained 2023 Bradenton evidence is same-market/same-venue evidence from a different organizer and is intentionally not used as a comparable prior booking cost.',
@@ -1362,7 +1370,7 @@ jobs:
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
-              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. The organizer may determine the approved category from the application; current approved Paradise tier remains unverified.'),
+              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. Paradise was explicitly approved Corporate Level 2 in 2024 and paid $410 for the 2025 event; use $410 as the conservative current exposure ceiling, not as proof of 2026 approval.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
           }
@@ -3843,7 +3851,13 @@ jobs:
           grep -q '30-day no-refund boundary' /tmp/winterfest_detail.html
           grep -q '\$170–\$410 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'plus required \$10 non-refundable application fee' /tmp/winterfest_detail.html
-          grep -q 'The organizer may determine the approved category from the application; current approved Paradise tier remains unverified' /tmp/winterfest_detail.html
+          grep -q 'Corporate Level 2 for the 2024 RPB Winter Fest' /tmp/winterfest_detail.html
+          grep -q '\$410 paid on Nov. 5, 2025' /tmp/winterfest_detail.html
+          grep -q 'conservative current exposure ceiling' /tmp/winterfest_detail.html
+          grep -q 'do not preserve a reusable booth number' /tmp/winterfest_detail.html
+          grep -q 'Do not invent a prior “best booth”' /tmp/winterfest_detail.html
+          grep -q 'do not assume the historical level automatically carries forward' /tmp/winterfest_detail.html
+          grep -q 'Paradise was explicitly approved Corporate Level 2 in 2024 and paid $410 for the 2025 event' /tmp/winterfest_detail.html
           if grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html; then
             echo "::error::Winter Fest mandatory application fee was omitted from structured booking exposure"
             exit 1
@@ -3861,7 +3875,7 @@ jobs:
           grep -q 'vendor parking pass is required' /tmp/winterfest_detail.html
           grep -q 'No early pack-up is allowed' /tmp/winterfest_detail.html
           grep -q 'Still needed before booking' /tmp/winterfest_detail.html
-          grep -q 'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement' /tmp/winterfest_detail.html
+          grep -q '2026 application approval / current approved Corporate level · exact placement' /tmp/winterfest_detail.html
           if grep -q 'data-lp-attributed-placement-profile="LIFE-054"' /tmp/winterfest_detail.html; then
             echo "::error::Winter Fest assigned-at-setup placement was mislabeled as LP-attributed specific"
             exit 1
