@@ -689,7 +689,7 @@ jobs:
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','no current official Events/pop-up page or future Paradise-style date recovered as of 2026-09-07'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo 2026 vendor package + City 2024 registration-timing precedent','official Feb.16/Mar.15/Apr.1/May.3 2024 vendor-outreach notices'),
-              'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026','Business Vendor $100, 10x10 space and 772-337-0049'),
+              'LIFE-073':('https://slcsafetyfest.com/vendors/','Direct DLF/Paradise 2024-2026 Safety Festival correspondence + official 2026 vendor agreement/site + Paradise history','GMAIL:1935453a8f4b0e19;GMAIL:19c765115e9e2375;GMAIL:19dac1371ec57cf3'),
           }
           assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
           for pid,(url,label_part,ref_part) in expected_historical_review_sources.items():
@@ -703,7 +703,7 @@ jobs:
           expected_historical_outreach={
               'LIFE-028':('Palm Beach Liquors','561-330-4777',None,'https://palmbeachliquor.com/','Current Palm Beach Liquors official storefront'),
               'LIFE-039':('City of Port St. Lucie / Hurricane Expo','772-871-5225','pslem@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','City of Port St. Lucie Office of Emergency Management'),
-              'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049','info@slcsafetyfest.com','https://slcsafetyfest.com/wp-content/uploads/2025/02/SLCSF-Sponsorship-application-25.pdf','Official St. Lucie County Safety Festival sponsorship contact artifact'),
+              'LIFE-073':('Michael Farrell / DLF Media / St. Lucie County Safety Festival','772-337-0049','mike@dlfmedia.com','https://slcsafetyfest.com/vendors/','Direct Michael Farrell DLF Gmail 2024-2026 + official Safety Festival vendor page'),
           }
           assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
           expected_historical_cycle_status={
@@ -731,7 +731,12 @@ jobs:
           assert '10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'February-April 2027 as a monitoring window' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'not as a verified 2027 deadline' in reviews['LIFE-039'].get('outreach_cycle_text','')
-          assert 'Apr. 25, 2026 at Clover Park' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert 'the 2025 package was sent Nov. 22, 2024 and 2026 registration opened Dec. 3, 2025' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert 'Paradise submitted Dec. 8 and was acknowledged Dec. 15' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert 'mid-November through early December 2026 as the active monitoring/application window' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert 'not as a claimed organizer deadline' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert '$100 Business Vendor / 10x10' in reviews['LIFE-073'].get('outreach_cycle_text','')
+          assert 'no electricity' in reviews['LIFE-073'].get('outreach_cycle_text','')
 
           expected_historical_outcome_status={
               'LIFE-028':'LIFETIME_ONLY',
@@ -873,12 +878,19 @@ jobs:
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200 without power or $225 with power for a 10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
-          assert 'November 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
+          assert 'mike@dlfmedia.com / 772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
+          assert 'registration opened Dec. 3, 2025, Paradise submitted Dec. 8, DLF acknowledged Dec. 15 and invoiced Feb. 19, 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert '772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
+          assert 'DLF opened vendor registration Dec. 3, 2025' in reviews['LIFE-073'].get('rationale',''), reviews['LIFE-073']
+          assert 'vendors supplied their own tent/table/chairs' in reviews['LIFE-073'].get('notes',''), reviews['LIFE-073']
+          assert 'electricity was unavailable' in reviews['LIFE-073'].get('notes',''), reviews['LIFE-073']
+          assert 'vehicles had to be moved by 8:45 AM' in reviews['LIFE-073'].get('notes',''), reviews['LIFE-073']
           assert all(str(reviews[pid].get('action_timing') or '').strip() for pid in expected_reviews), reviews
           assert reviews['LIFE-028'].get('action_timing','').startswith('NOW'), reviews['LIFE-028']
-          assert 'NOVEMBER 2026' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
-          assert 'JANUARY 2027' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
+          assert reviews['LIFE-073'].get('action_timing','').startswith('MID-NOVEMBER 2026'), reviews['LIFE-073']
+          assert 'Dec. 15, 2026' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
+          assert 'Jan. 15, 2027' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
+          assert 'planning triggers, not organizer deadlines' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
           assert reviews['LIFE-039'].get('action_timing','').startswith('FEBRUARY 2027'), reviews['LIFE-039']
           assert 'MARCH-APRIL' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
           assert 'planning precedent, not a 2027 deadline' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
@@ -3520,22 +3532,26 @@ jobs:
           grep -q 'Current booking review' /tmp/safety_pursue.html
           grep -q 'When to act' /tmp/safety_pursue.html
           grep -q '>PURSUE<' /tmp/safety_pursue.html
-          grep -q 'November 2026' /tmp/safety_pursue.html
+          grep -q 'MID-NOVEMBER 2026' /tmp/safety_pursue.html
           grep -q '772-337-0049' /tmp/safety_pursue.html
           grep -q 'data-historical-outreach-cycle-profile="LIFE-073"' /tmp/safety_pursue.html
           grep -q 'Next cycle not published' /tmp/safety_pursue.html
-          grep -q 'Apr. 25, 2026 at Clover Park' /tmp/safety_pursue.html
+          grep -q 'the 2025 package was sent Nov. 22, 2024 and 2026 registration opened Dec. 3, 2025' /tmp/safety_pursue.html
           grep -q 'no 2027 date/application is published yet' /tmp/safety_pursue.html
           grep -q '>Open cycle source<' /tmp/safety_pursue.html
-          grep -q '2026 cycle is verified at \$100 for a business-vendor 10x10' /tmp/safety_pursue.html
-          grep -q 'no 2027 date is yet published' /tmp/safety_pursue.html
+          grep -q '\$100 Business Vendor / 10x10' /tmp/safety_pursue.html
+          grep -q 'setup 7-9 AM' /tmp/safety_pursue.html
+          grep -q 'no electricity' /tmp/safety_pursue.html
+          grep -q 'assigned location at check-in' /tmp/safety_pursue.html
+          grep -q 'no on-site payment' /tmp/safety_pursue.html
+          grep -q 'No 2027 date/application is published yet' /tmp/safety_pursue.html
           grep -q 'href="https://slcsafetyfest.com/vendors/"' /tmp/safety_pursue.html
           grep -q 'Open review source' /tmp/safety_pursue.html
           grep -q 'data-historical-outreach-source-profile="LIFE-073"' /tmp/safety_pursue.html
-          grep -q 'href="mailto:info@slcsafetyfest.com"' /tmp/safety_pursue.html
-          grep -q 'Email info@slcsafetyfest.com' /tmp/safety_pursue.html
+          grep -q 'href="mailto:mike@dlfmedia.com"' /tmp/safety_pursue.html
+          grep -q 'Email mike@dlfmedia.com' /tmp/safety_pursue.html
           grep -q '>Open outreach source<' /tmp/safety_pursue.html
-          grep -q 'Official St. Lucie County Safety Festival sponsorship contact artifact' /tmp/safety_pursue.html
+          grep -q 'Direct Michael Farrell DLF Gmail 2024-2026 + official Safety Festival vendor page' /tmp/safety_pursue.html
 
           render_view barrett_hold "$SITE/#show/LIFE-041"
           grep -q 'Barrett Jackson' /tmp/barrett_hold.html
