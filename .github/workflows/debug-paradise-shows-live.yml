@@ -1483,13 +1483,12 @@ jobs:
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
               'LIFE-071':'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified. Same-series 2023 organizer precedent says FLHS had two 20x20 spaces at the front of the Tampa show that were visible from the entrance and described them as strong display locations; this is organizer layout preference only, not Paradise performance evidence and not current St. Petersburg availability. Ask for the current plan and prioritize a front/entrance-visible 20x20 or current category-required equivalent only if the live layout supports it.',
-              'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
               'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
               'LIFE-017':'No 2027 Tampa booth assignment is verified. The direct Apr. 2027 contract lets Paradise list three preferred booth locations, but ECCS makes the final location decision. Request the current 2027 booth map from Patience Rall and choose three ranked preferred spaces before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
               'LIFE-112':'No current Paradise space is assigned. The official 2027 vendor page says there is no inside commercial vendor space, so any Paradise activation must use accepted outside commercial space. Historical 2025 evidence records “Main line to the right — 10×10” with a same-row outcome of 1 net sale / $47,000 net / 13 issued / 7 demos on a $700 fair fee. Use that only as a placement reference: request a comparable high-flow outside location if available, but verify the current map, assignment and traffic pattern and do not call the 2025 location proven best.',
           }
-          assert (set(expected_current_placements)|{'LIFE-044','LIFE-054'})==expected_live, (set(expected_current_placements),expected_live)
+          assert (set(expected_current_placements)|{'LIFE-044','LIFE-054','LIFE-076'})==expected_live, (set(expected_current_placements),expected_live)
           for pid,placement in expected_current_placements.items():
               assert live[pid].get('current_placement_text')==placement, (pid,live[pid])
           manatee_placement=live['LIFE-044'].get('current_placement_text','')
@@ -1506,6 +1505,12 @@ jobs:
           assert 'no Level 2 placement advantage' in winterfest_placement, live['LIFE-054']
           assert 'do not pay the additional $100 unless POTTC documents a materially better location, footprint or other useful benefit' in winterfest_placement, live['LIFE-054']
           assert '$410 total as the conservative approved ceiling' in winterfest_placement, live['LIFE-054']
+          cognizant_placement=live['LIFE-076'].get('current_placement_text','')
+          assert 'No 2027 Paradise consumer-facing activation footprint/location is verified' in cognizant_placement, live['LIFE-076']
+          assert '2026 Swing Suite' in cognizant_placement and '10th green' in cognizant_placement, live['LIFE-076']
+          assert 'proof of activation format' in cognizant_placement and 'not as proof the 10th-green location' in cognizant_placement, live['LIFE-076']
+          assert 'exact activation area, traffic context and lead-generation rights' in cognizant_placement, live['LIFE-076']
+          assert 'Wright' in cognizant_placement and 'category conflict or exclusivity restriction' in cognizant_placement, live['LIFE-076']
           expected_current_placement_status={
               'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
