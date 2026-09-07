@@ -3966,7 +3966,7 @@ jobs:
           grep -q 'Oct. 11-12 Bradenton date' /tmp/bradenton_pursue.html
           grep -q 'data-current-logistics-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'requires exhibitor liability insurance' /tmp/bradenton_pursue.html
-          grep -q 'Show Management retains final space-assignment authority' /tmp/bradenton_pursue.html
+          grep -q 'gives Show Management final space-assignment authority' /tmp/bradenton_pursue.html
           grep -q 'parking/loading/unloading third-party services' /tmp/bradenton_pursue.html
           grep -q 'data-current-critical-deadline-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Critical commitment date' /tmp/bradenton_pursue.html
