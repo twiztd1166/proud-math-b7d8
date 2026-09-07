@@ -1441,7 +1441,7 @@ jobs:
           assert len(expected_missing_placement)==8
           assert len(expected_live-expected_missing_placement)==10
           expected_quote_required={pid for pid,op in live.items() if op.get('booking_cost_max') is None}
-          assert len(expected_quote_required)==10, expected_quote_required
+          assert len(expected_quote_required)==11, expected_quote_required
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
@@ -3577,7 +3577,7 @@ jobs:
           grep -q 'data-quick-view="ALL_ACT_LATER"' /tmp/shows.html
           grep -q 'Later / next cycle <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
-          grep -q 'Quote required <span class="quickViewCount">10</span>' /tmp/shows.html
+          grep -q 'Quote required <span class="quickViewCount">11</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
           grep -q 'No prior booth history <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
