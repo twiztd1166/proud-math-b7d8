@@ -6,6 +6,7 @@ function render(){
 function bindDynamic(){
   $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   document.querySelectorAll('.catalogCard[data-profile]').forEach(c=>c.onclick=e=>{if(e.target.closest('a,button,details'))return;const focusYear=Number(c.dataset.focusYear||0)||null;state.deepLinkedProfile=c.dataset.profile;state.deepLinkedYear=focusYear;syncLocationView();openCatalog(c.dataset.profile,focusYear)});
+  $$('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=()=>{const profile=String(b.dataset.profile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;syncLocationView();openCatalog(profile)});
   $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(state.showMode!=='UNLINKED'&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();render()});
   $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));

@@ -358,6 +358,74 @@ function historicalOutcomeSnapshot(p){
   }
   return `<div class="rebookContext" data-historical-outcome-profile="${esc(p.profile_id)}"><span>Historical outcome snapshot</span><b>${lines.map(esc).join('<br>')}</b></div>`;
 }
+function liveComparisonDate(op){
+  if(!op?.event_start)return 'Date not verified';
+  if(op.event_end&&op.event_end!==op.event_start)return date(op.event_start)+' – '+date(op.event_end);
+  return op.event_end?date(op.event_start):'Starts '+date(op.event_start);
+}
+function liveComparisonOutcome(p){
+  const status=String(p?.outcome_evidence_status||'').toUpperCase();
+  if(status==='OCCURRENCE_OUTCOME_AVAILABLE'){
+    const year=Number(p?.best_observed_outcome_year||p?.latest_observed_outcome_year||0);
+    const netRevenue=p?.best_observed_outcome_net_revenue??p?.latest_observed_outcome_net_revenue;
+    const netSales=p?.best_observed_outcome_net_sales??p?.latest_observed_outcome_net_sales;
+    const com=p?.best_observed_outcome_com??p?.latest_observed_outcome_com;
+    const bits=[year?String(year):''].filter(Boolean);
+    if(netSales!==null&&netSales!==undefined&&String(netSales)!=='')bits.push(String(netSales)+' net sale'+(Number(netSales)===1?'':'s'));
+    if(netRevenue!==null&&netRevenue!==undefined&&String(netRevenue)!=='')bits.push(money(netRevenue)+' net');
+    if(com!==null&&com!==undefined&&String(com)!=='')bits.push(String(com)+'% COM');
+    return bits.length?bits.join(' · '):'Occurrence outcome preserved';
+  }
+  if(status==='LIFETIME_ONLY'){
+    const bits=[];
+    if(p?.lifetime_net_sales!==null&&p?.lifetime_net_sales!==undefined&&String(p.lifetime_net_sales)!=='')bits.push(String(p.lifetime_net_sales)+' lifetime net sales');
+    if(p?.lifetime_net_volume!==null&&p?.lifetime_net_volume!==undefined&&String(p.lifetime_net_volume)!=='')bits.push(money(p.lifetime_net_volume)+' lifetime net');
+    return bits.join(' · ')||'Lifetime performance only';
+  }
+  if(status==='NO_COMPARABLE_OUTCOME_EVIDENCE')return 'No comparable outcome evidence';
+  return 'Outcome evidence not classified';
+}
+function liveComparisonPlacement(p){
+  if(historicalPlacementValue(p?.best_observed_specific_booth))return String(p.best_observed_specific_booth)+(p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'');
+  if(historicalPlacementValue(p?.best_observed_booth))return String(p.best_observed_booth)+(p.best_observed_booth_year?' · '+p.best_observed_booth_year:'');
+  if(historicalPlacementValue(p?.latest_preserved_booth))return String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
+  return 'No preserved booth';
+}
+function liveDecisionCompareBoard(profiles,open=false){
+  const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
+  const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
+    const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
+    const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
+    const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
+    const aDate=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const bDate=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
+  });
+  if(!rows.length)return '';
+  const body=rows.map(p=>{
+    const op=p.current_rebook_opportunity||{};
+    const review=p.current_rebook_review||{};
+    const cost=opportunityCostText(op)||opportunityCostStatusLabel(op.current_cost_status);
+    const readiness=bookingReadinessLabel(review.booking_readiness);
+    const timing=String(review.action_timing||'Verify timing').trim();
+    const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    return `<tr data-live-compare-row="${esc(p.profile_id)}">
+      <td><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
+      <td><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
+      <td>${esc(liveComparisonDate(op))}</td>
+      <td>${esc(cost)}</td>
+      <td>${esc(liveComparisonOutcome(p))}</td>
+      <td>${esc(liveComparisonPlacement(p))}</td>
+      <td>${esc(readiness)}</td>
+      <td>${esc(timing)}</td>
+    </tr>`;
+  }).join('');
+  return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · best placement · readiness · timing</small></summary>
+    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Current cost</th><th>Historical outcome</th><th>Best booth / placement</th><th>Readiness</th><th>When to act</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. They do not convert LeadPerfection attribution or booking records into attendance proof.</div>
+  </details>`;
+}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   const lpOnly=isLpSourceOnly(p);
@@ -1500,5 +1568,7 @@ function renderShows(){
   if(!state.catalogLoaded)return top+'<div class="loading">Opening full show database…</div>';
   const list=state.catalog.filter(catalogMatches).slice().sort(catalogComparator);
   const shown=list.slice(0,state.catalogLimit);
-  return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
+  const liveProfiles=state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
+  const comparison=liveDecisionCompareBoard(liveProfiles,state.showQuickView==='ALL_LIVE_REBOOK');
+  return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
