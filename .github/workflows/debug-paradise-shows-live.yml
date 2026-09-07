@@ -1898,12 +1898,14 @@ jobs:
           assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
-          assert 'Jul. 1, Aug. 4, Aug. 20 and Sep. 3, 2026' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'View the Floor Plan and Book Your Booth' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'exhibitor spaces are going fast' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert '$100 deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'hold-harmless agreement' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'Final balance is due 30 days before the Friday setup day' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          vero_winter_window=profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert 'Jul. 1, Aug. 4, Aug. 20 and Sep. 3, 2026' in vero_winter_window
+          assert 'View the Floor Plan and Book Your Booth' in vero_winter_window
+          assert 'exhibitor spaces are going fast' in vero_winter_window
+          assert '25% deposit within 14 days of receiving the emailed invoice' in vero_winter_window
+          assert 'selected booth remains available for others to book until the deposit is received' in vero_winter_window
+          assert 'Do not use the separate Jan. 3-4, 2026 booking-reply page' in vero_winter_window
+          assert '$100 deposit / 30-day final-balance mechanics as 2027 terms' in vero_winter_window
           for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa','GMAIL:196c45dbe6b2d861'):
               assert ref in reviews['LIFE-009'].get('source_ref',''), (ref,reviews['LIFE-009'])
           assert 'Aug. 4 subject says spaces are going fast' in reviews['LIFE-009'].get('notes',''), reviews['LIFE-009']
