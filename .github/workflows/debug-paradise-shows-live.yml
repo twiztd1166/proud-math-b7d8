@@ -300,7 +300,13 @@ jobs:
               grep -q 'annual LP attribution year' /tmp/app-shows.js
               grep -q 'LP attribution is not attendance proof' /tmp/app-shows.js
               grep -q 'lifetime net aggregate' /tmp/app-shows.js
-              grep -q '(liveOpportunity||candidate)?historicalDecisionEvidence(p)' /tmp/app-shows.js
+              grep -q "['PURSUE','WATCH'].includes(reviewDisposition)" /tmp/app-shows.js
+              grep -q 'historicalOutcomeEvidence' /tmp/app-shows.js
+              grep -q 'data-historical-outcome-profile' /tmp/app-shows.js
+              grep -q 'Latest observed occurrence outcome:' /tmp/app-shows.js
+              grep -q 'Best observed occurrence outcome:' /tmp/app-shows.js
+              grep -q 'No comparable occurrence-level outcome is preserved; lifetime aggregate only.' /tmp/app-shows.js
+              grep -q 'Do not infer performance or attendance from booking / schedule history.' /tmp/app-shows.js
               grep -q 'lifetime net sales' /tmp/app-shows.js
               grep -q 'lowest preserved COM' /tmp/app-shows.js
               grep -q 'Best observed performance placement' /tmp/app-modals.js
@@ -728,6 +734,49 @@ jobs:
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
+          expected_outcome_status={
+              'HIST-234':'NO_COMPARABLE_OUTCOME_EVIDENCE',
+              'LIFE-007':'LIFETIME_ONLY',
+              'LIFE-009':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-013':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-014':'LIFETIME_ONLY',
+              'LIFE-017':'LIFETIME_ONLY',
+              'LIFE-018':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-028':'LIFETIME_ONLY',
+              'LIFE-030':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-033':'LIFETIME_ONLY',
+              'LIFE-038':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-039':'LIFETIME_ONLY',
+              'LIFE-044':'LIFETIME_ONLY',
+              'LIFE-046':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-054':'LIFETIME_ONLY',
+              'LIFE-056':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-057':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-060':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-071':'LIFETIME_ONLY',
+              'LIFE-073':'LIFETIME_ONLY',
+              'LIFE-076':'LIFETIME_ONLY',
+              'LIFE-077':'OCCURRENCE_OUTCOME_AVAILABLE',
+          }
+          for pid,status in expected_outcome_status.items():
+              assert profiles[pid].get('outcome_evidence_status')==status, (pid,profiles[pid])
+          assert sum(1 for v in expected_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==10
+          assert sum(1 for v in expected_outcome_status.values() if v=='LIFETIME_ONLY')==11
+          assert sum(1 for v in expected_outcome_status.values() if v=='NO_COMPARABLE_OUTCOME_EVIDENCE')==1
+          vero_outcome=profiles['LIFE-009']
+          assert vero_outcome.get('latest_observed_outcome_year')==2025, vero_outcome
+          assert vero_outcome.get('latest_observed_outcome_booth')=='Booth #52', vero_outcome
+          assert vero_outcome.get('latest_observed_outcome_issued')==5 and vero_outcome.get('latest_observed_outcome_demos')==2, vero_outcome
+          assert vero_outcome.get('latest_observed_outcome_net_sales')==0 and float(vero_outcome.get('latest_observed_outcome_net_revenue'))==0, vero_outcome
+          gun_outcome=profiles['LIFE-046']
+          assert gun_outcome.get('latest_observed_outcome_year')==2017, gun_outcome
+          assert gun_outcome.get('latest_observed_outcome_issued')==0 and gun_outcome.get('latest_observed_outcome_demos')==0, gun_outcome
+          assert gun_outcome.get('best_observed_outcome_year')==2017, gun_outcome
+          assert gun_outcome.get('best_observed_outcome_issued')==6 and gun_outcome.get('best_observed_outcome_demos')==5, gun_outcome
+          clam_outcome=profiles['LIFE-077']
+          assert clam_outcome.get('latest_observed_outcome_year')==2025, clam_outcome
+          assert clam_outcome.get('latest_observed_outcome_issued')==8 and clam_outcome.get('latest_observed_outcome_demos')==3, clam_outcome
+          assert clam_outcome.get('latest_observed_outcome_net_sales')==0 and float(clam_outcome.get('latest_observed_outcome_net_revenue'))==0, clam_outcome
           expected_live_readiness={
               'LIFE-046':'PRE_BOOKING_ACTION_REQUIRED',
               'LIFE-007':'PRE_BOOKING_ACTION_REQUIRED',
@@ -1475,7 +1524,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 59, x.get('version')
+          assert x.get('version') == 60, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2581,6 +2630,9 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/palm_liquors_pursue.html
           grep -q '6 annual LP attribution years · latest LP 2025 (LP attribution is not attendance proof)' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outcome-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outcome-status="LIFETIME_ONLY"' /tmp/palm_liquors_pursue.html
+          grep -q 'No comparable occurrence-level outcome is preserved; lifetime aggregate only.' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q 'Current outreach contact' /tmp/palm_liquors_pursue.html
           grep -q 'Palm Beach Liquors · 561-330-4777' /tmp/palm_liquors_pursue.html
@@ -2621,6 +2673,15 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
+          grep -q 'data-historical-outcome-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'data-historical-outcome-status="OCCURRENCE_OUTCOME_AVAILABLE"' /tmp/vero_home_placement.html
+          grep -q 'Latest observed occurrence outcome: 2025' /tmp/vero_home_placement.html
+          grep -q 'booth Booth #52' /tmp/vero_home_placement.html
+          grep -q '5 issued' /tmp/vero_home_placement.html
+          grep -q '2 demos' /tmp/vero_home_placement.html
+          grep -q '0 net sales' /tmp/vero_home_placement.html
+          grep -q '\$0 net revenue' /tmp/vero_home_placement.html
+          grep -q 'Occurrence outcome is source-record evidence; use the verified worked/attended line above for participation proof.' /tmp/vero_home_placement.html
           grep -q 'data-current-operations-expanded-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-status-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Hours not recovered from current source' /tmp/vero_home_placement.html
@@ -2659,6 +2720,10 @@ jobs:
           grep -q 'Historical decision evidence' /tmp/rpb_green_market_placement.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/rpb_green_market_placement.html
           grep -q '7 annual LP attribution years · latest LP 2026 (LP attribution is not attendance proof)' /tmp/rpb_green_market_placement.html
+          grep -q 'data-historical-outcome-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'data-historical-outcome-status="LIFETIME_ONLY"' /tmp/rpb_green_market_placement.html
+          grep -q 'No comparable occurrence-level outcome is preserved; lifetime aggregate only.' /tmp/rpb_green_market_placement.html
+          grep -q 'Lifetime / LP attribution is not attendance proof.' /tmp/rpb_green_market_placement.html
           grep -q 'data-current-schedule-status-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Verified current schedule' /tmp/rpb_green_market_placement.html
           grep -q 'Saturdays 9 AM–1 PM' /tmp/rpb_green_market_placement.html
@@ -2873,6 +2938,10 @@ jobs:
           grep -q 'Verified current opportunity' /tmp/vero_oktoberfest.html
           grep -q 'data-booking-readiness-profile="HIST-234"' /tmp/vero_oktoberfest.html
           grep -q 'data-current-schedule-status-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'data-historical-outcome-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'data-historical-outcome-status="NO_COMPARABLE_OUTCOME_EVIDENCE"' /tmp/vero_oktoberfest.html
+          grep -q 'No comparable occurrence-level or lifetime outcome is preserved.' /tmp/vero_oktoberfest.html
+          grep -q 'Do not infer performance or attendance from booking / schedule history.' /tmp/vero_oktoberfest.html
           grep -q 'Official source conflict / confirm' /tmp/vero_oktoberfest.html
           grep -q 'official-source conflict' /tmp/vero_oktoberfest.html
           grep -q '11 AM–7 PM' /tmp/vero_oktoberfest.html
@@ -2984,6 +3053,11 @@ jobs:
           grep -q 'Contract / availability open / not assigned' /tmp/gunshow_detail.html
           grep -q 'data-current-logistics-status-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Verified current logistics' /tmp/gunshow_detail.html
+          grep -q 'data-historical-outcome-profile="LIFE-046"' /tmp/gunshow_detail.html
+          grep -q 'Latest observed occurrence outcome: 2017' /tmp/gunshow_detail.html
+          grep -q '0 issued · 0 demos' /tmp/gunshow_detail.html
+          grep -q 'Best observed occurrence outcome: 2017' /tmp/gunshow_detail.html
+          grep -q '6 issued · 5 demos' /tmp/gunshow_detail.html
           grep -q 'Friday setup 1 PM-7 PM' /tmp/gunshow_detail.html
           grep -q '24-hour armed security' /tmp/gunshow_detail.html
           grep -q 'data-current-logistics-source-profile="LIFE-046"' /tmp/gunshow_detail.html
