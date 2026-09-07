@@ -95,7 +95,7 @@ function rebookOpportunityCard(op){
     :'Current date not verified';
   const checked=String(op.checked_at||'').slice(0,10);
   const action=op.action_url?`<div class="rebookLiveActions"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open booking action')}</a></div>`:'';
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div>${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div>${opportunityBookingCostText(op)?`<div><span>Comparable current cost</span><b>${esc(opportunityBookingCostText(op))}</b></div>`:''}<div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div>${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function rebookReviewCard(review){
   if(!review)return '';
@@ -358,9 +358,24 @@ function rangeMatch(value,band){
   if(band==='5000PLUS')return n>=5000;
   return true;
 }
+function opportunityBookingCost(op){
+  if(!op)return null;
+  const minRaw=op.booking_cost_min,maxRaw=op.booking_cost_max;
+  const hasMin=minRaw!==null&&minRaw!==undefined&&minRaw!==''&&Number.isFinite(Number(minRaw));
+  const hasMax=maxRaw!==null&&maxRaw!==undefined&&maxRaw!==''&&Number.isFinite(Number(maxRaw));
+  if(!hasMin&&!hasMax)return null;
+  const min=hasMin?Number(minRaw):Number(maxRaw),max=hasMax?Number(maxRaw):Number(minRaw);
+  return {min,max,unit:String(op.booking_cost_unit||'').trim(),basis:String(op.booking_cost_basis||'').trim()};
+}
+function opportunityBookingCostText(op){
+  const cost=opportunityBookingCost(op);
+  if(!cost)return '';
+  const amount=cost.min===cost.max?money(cost.max):money(cost.min)+'–'+money(cost.max);
+  return amount+(cost.unit?' · '+cost.unit:'');
+}
 function catalogActiveFilterCount(){
   const f=state.catalogFilters;
-  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL',currentBookingCostBand:'ALL'};
   return Object.keys(defaults).filter(k=>String(f[k])!==String(defaults[k])).length;
 }
 function currentActiveFilterCount(){
@@ -394,6 +409,7 @@ function catalogFilterSummary(){
   if(f.currentTreatment!=='ALL')add('currentTreatment',labels.currentTreatment[f.currentTreatment]||f.currentTreatment);
   if(f.confirmation!=='ALL')add('confirmation','Confirmation '+f.confirmation);
   if(f.currentEventYear!=='ALL')add('currentEventYear','Current '+f.currentEventYear);
+  if(f.currentBookingCostBand!=='ALL')add('currentBookingCostBand','Current booking cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Unknown / not decision-safe'})[f.currentBookingCostBand]);
   return out;
 }
 function currentFilterSummary(){
@@ -427,7 +443,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -457,7 +473,7 @@ function catalogSearchText(p,current){
   ]);
   const review=p?.current_rebook_review||{};
   const opportunity=p?.current_rebook_opportunity||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
@@ -495,6 +511,10 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.currentTreatment==='SKIPPED'&&!current.some(s=>s.this_year==='SKIP THIS YEAR'))return false;
   if(f.confirmation!=='ALL'&&!current.some(s=>String(s.confirmation||'UNVERIFIED').toUpperCase()===f.confirmation))return false;
   if(f.currentEventYear!=='ALL'&&!current.some(s=>String(showEventYear(s))===String(f.currentEventYear)))return false;
+  if(f.currentBookingCostBand!=='ALL'){
+    const op=p?.current_rebook_opportunity||null;
+    if(!op||!rangeMatch(op.booking_cost_max,f.currentBookingCostBand))return false;
+  }
   const q=String(search||'').trim().toLowerCase();
   return !q||catalogSearchText(p,current).includes(q);
 }
@@ -533,6 +553,16 @@ function catalogComparator(a,b){
     const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
     const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
     return aw-bw||ad.localeCompare(bd)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
+  }
+  if(sort==='CURRENT_COST_LOW'||sort==='CURRENT_COST_HIGH'){
+    const value=p=>{
+      const raw=p?.current_rebook_opportunity?.booking_cost_max;
+      return raw!==null&&raw!==undefined&&raw!==''&&Number.isFinite(Number(raw))?Number(raw):null;
+    };
+    const av=value(a),bv=value(b),aa=av!==null,bb=bv!==null;
+    if(aa!==bb)return aa?-1:1;
+    if(!aa)return name(a,b);
+    return (sort==='CURRENT_COST_LOW'?av-bv:bv-av)||String(a?.current_rebook_opportunity?.event_start||'9999-12-31').localeCompare(String(b?.current_rebook_opportunity?.event_start||'9999-12-31'))||name(a,b);
   }
   if(sort==='LATEST_HISTORY')return Number(b.latest_history_year||0)-Number(a.latest_history_year||0)||name(a,b);
   if(sort==='HISTORY_DEPTH')return Number(b.history_year_count||0)-Number(a.history_year_count||0)||Number(b.history_count||0)-Number(a.history_count||0)||name(a,b);
@@ -647,6 +677,7 @@ function draftCatalogFilters(){
     currentTreatment:$('#fCurrentTreatment')?.value??state.catalogFilters.currentTreatment,
     confirmation:$('#fConfirmation')?.value??state.catalogFilters.confirmation,
     currentEventYear:$('#fCurrentEventYear')?.value??state.catalogFilters.currentEventYear,
+    currentBookingCostBand:$('#fCurrentBookingCostBand')?.value??state.catalogFilters.currentBookingCostBand,
   };
 }
 function draftCurrentFilters(){
@@ -706,7 +737,7 @@ function refreshContextFacetCounts(){
     ?{
       fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fCumulativeLpYear:'cumulativeLpYear',fTier:'tier',fHistoryDepth:'historyDepth',
       fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fHistoryPayment:'historyPayment',fApplication:'application',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
-      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
+      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fCurrentEventYear:'currentEventYear',fCurrentBookingCostBand:'currentBookingCostBand',fCurrentStatus:'currentStatus',
       fCurrentTreatment:'currentTreatment',fConfirmation:'confirmation',
     }
     :{
@@ -830,7 +861,7 @@ function countedOptions(options,counts){
   return options.map(([value,label])=>[value,label,Number(counts?.[value]||0)]);
 }
 function defaultCatalogFilters(){
-  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL',currentBookingCostBand:'ALL'};
 }
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
@@ -978,6 +1009,7 @@ function openShowFilters(cleanupRequest=false){
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Current operating linkage</div><div class="filterGrid">
         ${filterField('Current event year','fCurrentEventYear',f.currentEventYear,opts([['ALL','Any year'],...currentYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.currentYears}))}
+        ${filterField('Verified current booking cost (max)','fCurrentBookingCostBand',f.currentBookingCostBand,[['ALL','Any live-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Unknown / not decision-safe']])}
         ${filterField('Current status','fCurrentStatus',f.currentStatus,opts([['ALL','Any status'],['READY','Ready'],['RECONCILE','Reconcile'],['DATE ONLY','Date Only'],['HOLD','Hold'],['OPEN','Open']],{ALL:fc.total,...fc.status}))}
         ${filterField('Current treatment','fCurrentTreatment',f.currentTreatment,opts([['ALL','Any treatment'],['IN PLAY','In Play'],['SKIPPED','Skipped']],{ALL:fc.total,'IN PLAY':fc.treatment.IN_PLAY,SKIPPED:fc.treatment.SKIPPED}))}
         ${filterField('Confirmation','fConfirmation',f.confirmation,opts([['ALL','Any confirmation'],['VERIFIED','Verified'],['PARTIAL','Partial'],['UNVERIFIED','Unverified']],{ALL:fc.total,...fc.confirmation}))}
