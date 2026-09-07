@@ -113,6 +113,23 @@ function rebookOpportunityCard(op){
   const comparableCost=cost?`<div class="wide"><span>Decision-safe current booking cost</span><b>${esc(cost)}${op.booking_cost_basis?` · ${esc(op.booking_cost_basis)}`:''}</b></div>`:'';
   return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div>${comparableCost}${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
+const REVIEW_ACTION_MONTHS={JANUARY:1,FEBRUARY:2,MARCH:3,APRIL:4,MAY:5,JUNE:6,JULY:7,AUGUST:8,SEPTEMBER:9,OCTOBER:10,NOVEMBER:11,DECEMBER:12};
+function reviewActionTimingBucket(review){
+  const t=String(review?.action_timing||'').trim().toUpperCase();
+  if(!t)return 'MISSING';
+  if(t.startsWith('NOW'))return 'NOW';
+  if(t.startsWith('HOLD'))return 'HOLD';
+  if(t.startsWith('BEFORE'))return 'BEFORE';
+  if(/^\d{4}\b/.test(t)||new RegExp('^('+Object.keys(REVIEW_ACTION_MONTHS).join('|')+')\\s+\\d{4}\\b').test(t))return 'SCHEDULED';
+  return 'OTHER';
+}
+function reviewActionTimingDateKey(review){
+  const t=String(review?.action_timing||'').trim().toUpperCase();
+  const m=t.match(new RegExp('^('+Object.keys(REVIEW_ACTION_MONTHS).join('|')+')\\s+(\\d{4})\\b'));
+  if(m)return Number(m[2])*100+REVIEW_ACTION_MONTHS[m[1]];
+  const y=t.match(/^(\d{4})\b/);
+  return y?Number(y[1])*100+99:999999;
+}
 function rebookReviewCard(review){
   if(!review)return '';
   const disposition=String(review.disposition||'').toUpperCase()||'REVIEW';
@@ -376,7 +393,7 @@ function rangeMatch(value,band){
 }
 function catalogActiveFilterCount(){
   const f=state.catalogFilters;
-  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',actionTiming:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
   return Object.keys(defaults).filter(k=>String(f[k])!==String(defaults[k])).length;
 }
 function currentActiveFilterCount(){
@@ -407,6 +424,7 @@ function catalogFilterSummary(){
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
   if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified starting cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
+  if(f.actionTiming!=='ALL')add('actionTiming','When to act '+({NOW:'Act now',SCHEDULED:'Scheduled / future cycle',BEFORE:'Before booking / next cycle',HOLD:'Hold',OTHER:'Other timing',MISSING:'Missing timing'})[f.actionTiming]);
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
   if(f.currentTreatment!=='ALL')add('currentTreatment',labels.currentTreatment[f.currentTreatment]||f.currentTreatment);
   if(f.confirmation!=='ALL')add('confirmation','Confirmation '+f.confirmation);
@@ -444,7 +462,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['ACTION_TIMING','When to act / urgency'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -474,7 +492,7 @@ function catalogSearchText(p,current){
   ]);
   const review=p?.current_rebook_review||{};
   const opportunity=p?.current_rebook_opportunity||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.action_timing,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
@@ -503,6 +521,10 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
     const opportunity=p?.current_rebook_opportunity||null;
     if(!opportunity)return false;
     if(!rangeMatch(opportunity.booking_cost_min,f.currentCostBand))return false;
+  }
+  if(f.actionTiming!=='ALL'){
+    const review=p?.current_rebook_review||null;
+    if(!review||reviewActionTimingBucket(review)!==f.actionTiming)return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
@@ -559,6 +581,15 @@ function catalogComparator(a,b){
     const aa=av!==null,bb=bv!==null;
     if(aa!==bb)return aa?-1:1;
     return aa?bv-av||name(a,b):name(a,b);
+  }
+  if(sort==='ACTION_TIMING'){
+    const weight=p=>({NOW:0,SCHEDULED:1,BEFORE:2,OTHER:3,MISSING:8,HOLD:9})[reviewActionTimingBucket(p?.current_rebook_review)]??8;
+    const disposition=p=>({PURSUE:0,WATCH:1,HOLD:2,RETIRED:3})[String(p?.current_rebook_review?.disposition||'').toUpperCase()]??9;
+    const aw=weight(a),bw=weight(b);
+    const ak=reviewActionTimingDateKey(a?.current_rebook_review),bk=reviewActionTimingDateKey(b?.current_rebook_review);
+    const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||ak-bk||disposition(a)-disposition(b)||ad.localeCompare(bd)||name(a,b);
   }
   if(sort==='BOOKING_DECISION'){
     const weight=p=>{
@@ -680,6 +711,7 @@ function draftCatalogFilters(){
     comBand:$('#fComBand')?.value??state.catalogFilters.comBand,
     lifetimeNetBand:$('#fLifetimeNetBand')?.value??state.catalogFilters.lifetimeNetBand,
     currentCostBand:$('#fOpportunityCostBand')?.value??state.catalogFilters.currentCostBand,
+    actionTiming:$('#fActionTiming')?.value??state.catalogFilters.actionTiming,
     currentStatus:$('#fCurrentStatus')?.value??state.catalogFilters.currentStatus,
     currentTreatment:$('#fCurrentTreatment')?.value??state.catalogFilters.currentTreatment,
     confirmation:$('#fConfirmation')?.value??state.catalogFilters.confirmation,
@@ -743,7 +775,7 @@ function refreshContextFacetCounts(){
     ?{
       fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fCumulativeLpYear:'cumulativeLpYear',fTier:'tier',fHistoryDepth:'historyDepth',
       fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fHistoryPayment:'historyPayment',fApplication:'application',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
-      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fOpportunityCostBand:'currentCostBand',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
+      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fOpportunityCostBand:'currentCostBand',fActionTiming:'actionTiming',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
       fCurrentTreatment:'currentTreatment',fConfirmation:'confirmation',
     }
     :{
@@ -782,7 +814,7 @@ function catalogFacetCounts(){
   const depth={'1':0,'2':0,'3':0,'5':0};
   const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_payment','has_application','has_lp_performance','has_cumulative_lp_performance'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
-  const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0},opportunityCostBand={ALL:0,UNDER500:0,'500_1000':0,'1000_2500':0,'2500_5000':0,'5000PLUS':0,MISSING:0};
+  const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0},opportunityCostBand={ALL:0,UNDER500:0,'500_1000':0,'1000_2500':0,'2500_5000':0,'5000PLUS':0,MISSING:0},actionTiming={ALL:0,NOW:0,SCHEDULED:0,BEFORE:0,HOLD:0,OTHER:0,MISSING:0};
   for(const p of profiles){
     const current=currentByProfile.get(p.profile_id)||[];
     const hist=Number(p.history_count||0);
@@ -818,6 +850,11 @@ function catalogFacetCounts(){
       else if(net<250000)lifeBand['100_250K']++;
       else lifeBand['250KPLUS']++;
     }
+    const currentReview=p?.current_rebook_review||null;
+    if(currentReview){
+      actionTiming.ALL++;
+      actionTiming[reviewActionTimingBucket(currentReview)]++;
+    }
     const liveOpportunity=p?.current_rebook_opportunity||null;
     if(liveOpportunity){
       opportunityCostBand.ALL++;
@@ -841,7 +878,7 @@ function catalogFacetCounts(){
       if(!seenConfirm.has(cf)){seenConfirm.add(cf);confirmation[cf]=(confirmation[cf]||0)+1}
     }
   }
-  return {total:profiles.length,record,years,lpYears,cumulativeLpYears,tier,depth,flags,coi,worked,comBand,lifeBand,opportunityCostBand,currentYears,status,treatment,confirmation};
+  return {total:profiles.length,record,years,lpYears,cumulativeLpYears,tier,depth,flags,coi,worked,comBand,lifeBand,opportunityCostBand,actionTiming,currentYears,status,treatment,confirmation};
 }
 function currentFacetCounts(){
   const shows=state.shows;
@@ -878,7 +915,7 @@ function countedOptions(options,counts){
   return options.map(([value,label])=>[value,label,Number(counts?.[value]||0)]);
 }
 function defaultCatalogFilters(){
-  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',actionTiming:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
 }
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
@@ -1026,6 +1063,7 @@ function openShowFilters(cleanupRequest=false){
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Current opportunity / operating linkage</div><div class="filterGrid">
         ${filterField('Current verified starting cost','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
+        ${filterField('When to act','fActionTiming',f.actionTiming,opts([['ALL','Any reviewed timing'],['NOW','Act now'],['SCHEDULED','Scheduled / future cycle'],['BEFORE','Before booking / next cycle'],['HOLD','Hold'],['OTHER','Other timing'],['MISSING','Missing timing']],{ALL:fc.total,...fc.actionTiming}))}
         ${filterField('Current event year','fCurrentEventYear',f.currentEventYear,opts([['ALL','Any year'],...currentYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.currentYears}))}
         ${filterField('Current status','fCurrentStatus',f.currentStatus,opts([['ALL','Any status'],['READY','Ready'],['RECONCILE','Reconcile'],['DATE ONLY','Date Only'],['HOLD','Hold'],['OPEN','Open']],{ALL:fc.total,...fc.status}))}
         ${filterField('Current treatment','fCurrentTreatment',f.currentTreatment,opts([['ALL','Any treatment'],['IN PLAY','In Play'],['SKIPPED','Skipped']],{ALL:fc.total,'IN PLAY':fc.treatment.IN_PLAY,SKIPPED:fc.treatment.SKIPPED}))}
