@@ -279,6 +279,61 @@ function historicalDecisionEvidence(p){
   if(p.lowest_preserved_com!==null&&p.lowest_preserved_com!==undefined&&p.lowest_preserved_com!=='')bits.push(`${esc(p.lowest_preserved_com)}% lowest preserved COM`);
   return `<div class="rebookContext" data-historical-decision-evidence-profile="${esc(p.profile_id)}"><span>Historical decision evidence</span><b>${bits.join(' · ')}</b></div>`;
 }
+function historicalOutcomeLine(p,prefix,label){
+  const year=Number(p?.[prefix+'_year']||0);
+  if(!year)return '';
+  const bits=[String(year)];
+  const dates=String(p?.[prefix+'_dates']||'').trim();
+  const booth=String(p?.[prefix+'_booth']||'').trim();
+  if(dates)bits.push(dates);
+  if(booth)bits.push('booth '+booth);
+  const netSales=p?.[prefix+'_net_sales'];
+  const netRevenue=p?.[prefix+'_net_revenue'];
+  const issued=p?.[prefix+'_issued'];
+  const demos=p?.[prefix+'_demos'];
+  const com=p?.[prefix+'_com'];
+  if(netSales!==null&&netSales!==undefined&&String(netSales)!=='')bits.push(String(netSales)+' net sale'+(Number(netSales)===1?'':'s'));
+  if(netRevenue!==null&&netRevenue!==undefined&&String(netRevenue)!=='')bits.push(money(netRevenue)+' net revenue');
+  if(issued!==null&&issued!==undefined&&String(issued)!=='')bits.push(String(issued)+' issued');
+  if(demos!==null&&demos!==undefined&&String(demos)!=='')bits.push(String(demos)+' demos');
+  if(com!==null&&com!==undefined&&String(com)!=='')bits.push(String(com)+'% COM');
+  const participation=String(p?.[prefix+'_participation_status']||'').trim();
+  if(participation)bits.push('source status '+participation);
+  return label+': '+bits.join(' · ');
+}
+function historicalOutcomeSnapshot(p){
+  if(!p?.current_rebook_opportunity)return '';
+  const status=String(p.outcome_evidence_status||'').toUpperCase();
+  const labels={
+    OCCURRENCE_OUTCOME_AVAILABLE:'Occurrence-level outcome available',
+    LIFETIME_ONLY:'Lifetime performance only',
+    NO_COMPARABLE_OUTCOME_EVIDENCE:'No comparable outcome evidence'
+  };
+  const lines=[labels[status]||'Outcome evidence status not classified'];
+  if(status==='OCCURRENCE_OUTCOME_AVAILABLE'){
+    const latest=historicalOutcomeLine(p,'latest_observed_outcome','Latest observed');
+    const best=historicalOutcomeLine(p,'best_observed_outcome','Best observed');
+    if(latest)lines.push(latest);
+    const same=[
+      p.latest_observed_outcome_year,p.latest_observed_outcome_dates,p.latest_observed_outcome_booth,
+      p.latest_observed_outcome_net_revenue,p.latest_observed_outcome_net_sales,p.latest_observed_outcome_issued,
+      p.latest_observed_outcome_demos,p.latest_observed_outcome_com
+    ].map(v=>v===null||v===undefined?'':String(v)).join('|')===[
+      p.best_observed_outcome_year,p.best_observed_outcome_dates,p.best_observed_outcome_booth,
+      p.best_observed_outcome_net_revenue,p.best_observed_outcome_net_sales,p.best_observed_outcome_issued,
+      p.best_observed_outcome_demos,p.best_observed_outcome_com
+    ].map(v=>v===null||v===undefined?'':String(v)).join('|');
+    if(best&&!same)lines.push(best);
+    lines.push('Preserved occurrence-level outcome metrics; not attendance proof unless the source participation status explicitly says worked/attended.');
+  }else if(status==='LIFETIME_ONLY'){
+    lines.push('Lifetime profile performance exists, but no occurrence-level outcome metrics are preserved. Do not infer zero occurrence performance.');
+  }else if(status==='NO_COMPARABLE_OUTCOME_EVIDENCE'){
+    lines.push('No comparable preserved occurrence or lifetime performance is available for this current opportunity. Booking or participation references are not treated as outcome proof.');
+  }else{
+    lines.push('Outcome evidence classification is unavailable; use the preserved history and LeadPerfection sections before deciding.');
+  }
+  return `<div class="rebookContext" data-historical-outcome-profile="${esc(p.profile_id)}"><span>Historical outcome snapshot</span><b>${lines.map(esc).join('<br>')}</b></div>`;
+}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   const lpOnly=isLpSourceOnly(p);
@@ -317,9 +372,10 @@ function catalogCard(p){
   const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity,true):'';
   const placementGuide=liveOpportunity?historicalPlacementGuide(p):'';
   const decisionEvidence=liveOpportunity?historicalDecisionEvidence(p):'';
+  const outcomeEvidence=liveOpportunity?historicalOutcomeSnapshot(p):'';
   const reviewCard=currentReview?rebookReviewCard(currentReview,Boolean(liveOpportunity)):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
-  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${decisionEvidence}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${decisionEvidence}${outcomeEvidence}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
