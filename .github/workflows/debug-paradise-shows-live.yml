@@ -296,6 +296,11 @@ jobs:
               grep -q 'Historical decision evidence' /tmp/app-shows.js
               grep -q 'data-historical-decision-evidence-profile' /tmp/app-shows.js
               grep -q 'verified worked years in preserved evidence (not proof of no participation)' /tmp/app-shows.js
+              grep -q 'latest verified worked' /tmp/app-shows.js
+              grep -q 'annual LP attribution year' /tmp/app-shows.js
+              grep -q 'LP attribution is not attendance proof' /tmp/app-shows.js
+              grep -q 'lifetime net aggregate' /tmp/app-shows.js
+              grep -q '(liveOpportunity||candidate)?historicalDecisionEvidence(p)' /tmp/app-shows.js
               grep -q 'lifetime net sales' /tmp/app-shows.js
               grep -q 'lowest preserved COM' /tmp/app-shows.js
               grep -q 'Best observed performance placement' /tmp/app-modals.js
@@ -2573,6 +2578,9 @@ jobs:
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
           grep -q 'data-review-profile="LIFE-028" data-review-scope="historical"' /tmp/palm_liquors_pursue.html
           grep -q 'Historical candidate review' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/palm_liquors_pursue.html
+          grep -q '6 annual LP attribution years · latest LP 2025 (LP attribution is not attendance proof)' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q 'Current outreach contact' /tmp/palm_liquors_pursue.html
           grep -q 'Palm Beach Liquors · 561-330-4777' /tmp/palm_liquors_pursue.html
@@ -2649,6 +2657,8 @@ jobs:
           grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Historical decision evidence' /tmp/rpb_green_market_placement.html
+          grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/rpb_green_market_placement.html
+          grep -q '7 annual LP attribution years · latest LP 2026 (LP attribution is not attendance proof)' /tmp/rpb_green_market_placement.html
           grep -q 'data-current-schedule-status-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Verified current schedule' /tmp/rpb_green_market_placement.html
           grep -q 'Saturdays 9 AM–1 PM' /tmp/rpb_green_market_placement.html
@@ -2676,7 +2686,8 @@ jobs:
           grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Historical decision evidence' /tmp/martin_home_placement.html
-          grep -q '3 verified worked years' /tmp/martin_home_placement.html
+          grep -q '3 verified worked years · latest verified worked 2017' /tmp/martin_home_placement.html
+          grep -q '8 annual LP attribution years · latest LP 2023 (LP attribution is not attendance proof)' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
@@ -2776,6 +2787,9 @@ jobs:
 
           render_view flhs_watch "$SITE/#show/LIFE-071"
           grep -q 'FL Largest Home Show' /tmp/flhs_watch.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q '1 verified worked year · latest verified worked 2023' /tmp/flhs_watch.html
+          grep -q '2 annual LP attribution years · latest LP 2024 (LP attribution is not attendance proof)' /tmp/flhs_watch.html
           grep -q 'Current booking review' /tmp/flhs_watch.html
           grep -q '>WATCH<' /tmp/flhs_watch.html
           grep -q 'When to act' /tmp/flhs_watch.html
