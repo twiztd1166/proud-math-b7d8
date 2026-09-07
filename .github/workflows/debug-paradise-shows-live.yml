@@ -257,6 +257,10 @@ jobs:
               grep -q 'Watch / next cycle' /tmp/app-shows.js
               grep -q 'ALL_REBOOK_PURSUE' /tmp/app-shows.js
               grep -q 'ALL_REBOOK_WATCH' /tmp/app-shows.js
+              grep -Fq "if(key==='ALL_REBOOK_PURSUE')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)" /tmp/app-shows.js
+              grep -Fq "if(key==='ALL_REBOOK_WATCH')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)" /tmp/app-shows.js
+              grep -Fq "if(key==='ALL_REBOOK_PURSUE')state.catalogSort='BOOKING_DECISION'" /tmp/app-shows.js
+              grep -Fq "if(key==='ALL_REBOOK_WATCH')state.catalogSort='BOOKING_DECISION'" /tmp/app-shows.js
               grep -q 'ALL_REBOOK_PURSUE' /tmp/app-core.js
               grep -q 'ALL_REBOOK_WATCH' /tmp/app-core.js
               grep -q 'Hold / do not book' /tmp/app-shows.js
@@ -2650,6 +2654,8 @@ jobs:
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
           grep -q 'Historical outreach <span class="quickViewCount">6</span>' /tmp/shows.html
+          grep -q 'Pursue now <span class="quickViewCount">7</span>' /tmp/shows.html
+          grep -q 'Watch / next cycle <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
           grep -q 'data-current-operations-compact-profile' /tmp/shows.html
           grep -q 'rebookOpsDetails' /tmp/shows.html
