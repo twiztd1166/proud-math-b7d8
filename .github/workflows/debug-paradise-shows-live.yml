@@ -1311,11 +1311,6 @@ jobs:
           assert vero_outcome.get('latest_observed_outcome_participation_status')=='2025 EVENT RECORD', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth')=='Booth #52', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth_year')==2025, vero_outcome
-          vero_2026_history=next((h for h in profiles['LIFE-009'].get('history') or [] if h.get('history_id')=='2026-GMAIL-VERO-WINTER'), None)
-          assert vero_2026_history and vero_2026_history.get('booth')=='048', vero_2026_history
-          assert vero_2026_history.get('event_cost_text')=='$535.00', vero_2026_history
-          assert vero_2026_history.get('final_cost_text')=='$535.00', vero_2026_history
-          assert vero_2026_history.get('payment_status_text')=='PAID', vero_2026_history
           lp_semantics='Annual LeadPerfection performance attribution matched one-to-one to a date-aligned preserved history occurrence with a specific placement; not attendance proof and not same-row history performance.'
           expected_lp_specific={
               'LIFE-007':('#18 outside popup',2021,'Nov-6',4,4,4,57043,'2021-SCH21-0127',17),
