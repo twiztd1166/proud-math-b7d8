@@ -255,6 +255,9 @@ jobs:
               grep -q 'historicalOutreachCandidate' /tmp/app-shows.js
               grep -q 'Pursue now' /tmp/app-shows.js
               grep -q 'Watch / next cycle' /tmp/app-shows.js
+              grep -q 'Booking decision / action date' /tmp/app-shows.js
+              grep -q 'function liveDecisionActionDate' /tmp/app-shows.js
+              test "$(grep -o 'liveDecisionActionDate(a)' /tmp/app-shows.js | wc -l | tr -d ' ')" -eq 2
               grep -q 'ALL_REBOOK_PURSUE' /tmp/app-shows.js
               grep -q 'ALL_REBOOK_WATCH' /tmp/app-shows.js
               grep -Fq "if(quickView==='ALL_REBOOK_PURSUE'&&(!p?.current_rebook_opportunity" /tmp/app-shows.js
@@ -2862,6 +2865,13 @@ jobs:
           grep -q '17 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          python3 - <<'PY'
+from pathlib import Path
+html=Path('/tmp/shows.html').read_text()
+ordered=['LIFE-044','LIFE-046','LIFE-007','LIFE-054','LIFE-092','LIFE-018','LIFE-017','LIFE-013']
+positions=[html.index(f'data-live-compare-row="{pid}"') for pid in ordered]
+assert positions==sorted(positions), (ordered,positions)
+PY
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
