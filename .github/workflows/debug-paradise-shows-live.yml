@@ -3984,8 +3984,8 @@ jobs:
           grep -q 'tampabay.com/expos/tampa-bay-home-show/exhibitors/' /tmp/bradenton_pursue.html
           grep -q 'Open current source' /tmp/bradenton_pursue.html
           grep -q 'Windows/Doors category fit is verified' /tmp/bradenton_pursue.html
-          grep -q 'entrance/exit points along the front/bottom edge' /tmp/bradenton_pursue.html
-          grep -q 'layout-based preference, not proven booth-performance evidence' /tmp/bradenton_pursue.html
+          grep -q 'front/bottom left and front/bottom right' /tmp/bradenton_pursue.html
+          grep -q 'traffic/layout preference, not proven booth-performance evidence' /tmp/bradenton_pursue.html
 
           render_view tampa_2027 "$SITE/#show/LIFE-017"
           grep -q 'Tampa Home Show' /tmp/tampa_2027.html
