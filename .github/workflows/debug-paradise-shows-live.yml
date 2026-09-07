@@ -860,14 +860,15 @@ jobs:
           assert 'current public floor-plan Drive link returns 404' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
           assert 'WEB:FLOOR_PLAN_FILE_1CwBBktgNToHvlfR0oH7ZwRJHCq6nvUD0_404' in reviews['LIFE-044'].get('source_ref',''), reviews['LIFE-044']
           assert 'DRIVE:NO_CURRENT_MANATEE_FLOOR_PLAN_MATCH_2026-09-07' in reviews['LIFE-044'].get('source_ref',''), reviews['LIFE-044']
-          assert 'visually inspected and contains a Bradenton Area Convention Center floor plan' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'front row running 113 through 102' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'side-wall booths 702 / 201 nearest those front entrances' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'Layout-based request order: first ask Dave about 113 or 102' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'not proven booth-performance evidence or proof those numbers are currently available' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'De-prioritize rear 801-810' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'linked Google Drive file returns 404' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
-          assert 'Dave must confirm the current numbering and live available-space list before selection' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
+          manatee_live=profiles['LIFE-044'].get('current_rebook_opportunity') or {}
+          assert 'visually inspected and contains a Bradenton Area Convention Center floor plan' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'front row running 113 through 102' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'side-wall booths 702 / 201 nearest those front entrances' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'Layout-based request order: first ask Dave about 113 or 102' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'not proven booth-performance evidence or proof those numbers are currently available' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'De-prioritize rear 801-810' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'linked Google Drive file returns 404' in manatee_live.get('current_placement_text',''), manatee_live
+          assert 'Dave must confirm the current numbering and live available-space list before selection' in manatee_live.get('current_placement_text',''), manatee_live
           assert reviews['LIFE-044'].get('action_timing','').startswith('NOW'), reviews['LIFE-044']
           assert reviews['LIFE-017'].get('action_timing','').startswith('NOW'), reviews['LIFE-017']
           assert '$332,163' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
@@ -1556,10 +1557,10 @@ jobs:
           assert 'closed Thanksgiving, Christmas and New Year' in live['LIFE-007'].get('current_schedule_text','')
           assert '10 AM–5 PM' in live['LIFE-017'].get('current_schedule_text','')
           assert '10 AM–4 PM' in live['LIFE-017'].get('current_schedule_text','')
-          assert 'current live Tampa Bay Times event page is the governing public schedule' in live['LIFE-044'].get('current_schedule_text','')
-          assert 'Tropicana Field 2024' in live['LIFE-044'].get('current_schedule_text','')
-          assert 'Oct. 11-12 Bradenton date' in live['LIFE-044'].get('current_schedule_text','')
-          assert 'stale/conflicting provenance' in live['LIFE-044'].get('current_schedule_source_label','')
+          assert 'current live Tampa Bay Times event page is the governing public schedule' in manatee_live.get('current_schedule_text','')
+          assert 'Tropicana Field 2024' in manatee_live.get('current_schedule_text','')
+          assert 'Oct. 11-12 Bradenton date' in manatee_live.get('current_schedule_text','')
+          assert 'stale/conflicting provenance' in manatee_live.get('current_schedule_source_label','')
           assert 'current 2026–27 hours and final season date are not yet published' in live['LIFE-014'].get('current_schedule_text','')
           assert 'Sat. Jan. 2, 2027: 10 AM–5 PM' in live['LIFE-009'].get('current_schedule_text','')
           assert 'Sun. Jan. 3: 10 AM–4 PM' in live['LIFE-009'].get('current_schedule_text','')
