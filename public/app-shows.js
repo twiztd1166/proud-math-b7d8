@@ -265,17 +265,30 @@ function historicalPlacementGuide(p){
   }
   return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
 }
+function reviewedDecisionEvidenceTarget(p){
+  return Boolean(p?.current_rebook_opportunity)||historicalOutreachCandidate(p);
+}
 function historicalDecisionEvidence(p){
-  if(!p?.current_rebook_opportunity)return '';
+  if(!reviewedDecisionEvidenceTarget(p))return '';
   const bits=[];
   const latest=Number(p.latest_history_year||0);
   if(latest>0)bits.push(`latest history ${esc(latest)}`);
-  const worked=Number(p.worked_year_count||0);
+  const workedYears=Object.entries(p.history_field_states||{})
+    .filter(([,state])=>Number(state?.worked?.HAS||0)>0)
+    .map(([year])=>Number(year))
+    .filter(Number.isFinite)
+    .sort((a,b)=>b-a);
+  const worked=Number(p.worked_year_count||workedYears.length||0);
+  const latestWorked=workedYears[0]||null;
   bits.push(worked>0
-    ?`${esc(worked)} verified worked year${worked===1?'':'s'}`
+    ?`${esc(worked)} verified worked year${worked===1?'':'s'}${latestWorked?` · latest verified worked ${esc(latestWorked)}`:''}`
     :'0 verified worked years in preserved evidence (not proof of no participation)');
+  const lpYears=(Array.isArray(p.lp_years)?p.lp_years:[]).map(Number).filter(Number.isFinite).sort((a,b)=>b-a);
+  const lpCount=Number(p.lp_year_count||lpYears.length||0);
+  const latestLp=lpYears[0]||null;
+  if(lpCount>0)bits.push(`${esc(lpCount)} annual LP attribution year${lpCount===1?'':'s'}${latestLp?` · latest LP ${esc(latestLp)}`:''} (LP attribution is not attendance proof)`);
   if(p.lifetime_net_sales!==null&&p.lifetime_net_sales!==undefined&&p.lifetime_net_sales!=='')bits.push(`${esc(p.lifetime_net_sales)} lifetime net sales`);
-  if(p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!=='')bits.push(`${money(p.lifetime_net_volume)} lifetime net`);
+  if(p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!=='')bits.push(`${money(p.lifetime_net_volume)} lifetime net aggregate`);
   if(p.lowest_preserved_com!==null&&p.lowest_preserved_com!==undefined&&p.lowest_preserved_com!=='')bits.push(`${esc(p.lowest_preserved_com)}% lowest preserved COM`);
   return `<div class="rebookContext" data-historical-decision-evidence-profile="${esc(p.profile_id)}"><span>Historical decision evidence</span><b>${bits.join(' · ')}</b></div>`;
 }
@@ -302,7 +315,7 @@ function historicalOutcomeLine(p,prefix,label){
   return label+': '+bits.join(' · ');
 }
 function historicalOutcomeSnapshot(p){
-  if(!p?.current_rebook_opportunity)return '';
+  if(!reviewedDecisionEvidenceTarget(p))return '';
   const status=String(p.outcome_evidence_status||'').toUpperCase();
   const labels={
     OCCURRENCE_OUTCOME_AVAILABLE:'Occurrence-level outcome available',
@@ -326,7 +339,7 @@ function historicalOutcomeSnapshot(p){
     if(best&&!same)lines.push(best);
     lines.push('Preserved occurrence-level outcome metrics; not attendance proof unless the source participation status explicitly says worked/attended.');
   }else if(status==='LIFETIME_ONLY'){
-    lines.push('Lifetime profile performance exists, but no occurrence-level outcome metrics are preserved. Do not infer zero occurrence performance.');
+    lines.push('Lifetime profile performance exists, but no occurrence-level outcome metrics are preserved. Do not infer zero occurrence performance. Lifetime / LP attribution is not attendance proof.');
   }else if(status==='NO_COMPARABLE_OUTCOME_EVIDENCE'){
     lines.push('No comparable preserved occurrence or lifetime performance is available for this current opportunity. Booking or participation references are not treated as outcome proof.');
   }else{
@@ -371,8 +384,8 @@ function catalogCard(p){
   const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${preservedContext}${nextBooking}`:'';
   const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity,true):'';
   const placementGuide=liveOpportunity?historicalPlacementGuide(p):'';
-  const decisionEvidence=liveOpportunity?historicalDecisionEvidence(p):'';
-  const outcomeEvidence=liveOpportunity?historicalOutcomeSnapshot(p):'';
+  const decisionEvidence=reviewedDecisionEvidenceTarget(p)?historicalDecisionEvidence(p):'';
+  const outcomeEvidence=reviewedDecisionEvidenceTarget(p)?historicalOutcomeSnapshot(p):'';
   const reviewCard=currentReview?rebookReviewCard(currentReview,Boolean(liveOpportunity)):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${decisionEvidence}${outcomeEvidence}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
