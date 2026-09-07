@@ -163,6 +163,12 @@ jobs:
               grep -q 'CURRENT_COST_HIGH' /tmp/app-core.js
               grep -q 'currentCostBand' /tmp/app-core.js
               grep -q 'Venue / address' /tmp/app-shows.js
+              grep -q 'Current placement status' /tmp/app-shows.js
+              grep -q 'data-current-placement-status-profile' /tmp/app-shows.js
+              grep -q 'opportunityPlacementStatusLabel' /tmp/app-shows.js
+              grep -q 'fOpportunityPlacementStatus' /tmp/app-shows.js
+              grep -q 'opportunity.current_placement_status' /tmp/app-shows.js
+              grep -q 'currentPlacementStatus' /tmp/app-core.js
               grep -q 'Current booth / placement' /tmp/app-shows.js
               grep -q 'current_placement_text' /tmp/app-shows.js
               grep -q 'rebookContactActions' /tmp/app-shows.js
@@ -852,6 +858,36 @@ jobs:
               assert live[pid].get('current_cost_status')==status, (pid,live[pid])
           assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==7
           assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==5
+          expected_current_placement_status={
+              'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
+              'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-009':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
+              'LIFE-013':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-014':'NEXT_CYCLE_CLOSED',
+              'LIFE-017':'CONTRACT_REQUEST_NOT_ASSIGNED',
+              'LIFE-018':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
+              'LIFE-030':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
+              'LIFE-033':'LISTED_ASSIGNMENT_UNVERIFIED',
+              'LIFE-044':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
+              'LIFE-046':'CONTRACT_REQUEST_NOT_ASSIGNED',
+              'LIFE-054':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-060':'PLACEMENT_NOT_PUBLISHED',
+              'LIFE-071':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-076':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
+              'LIFE-077':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
+          }
+          assert set(expected_current_placement_status)==set(live), (set(expected_current_placement_status),set(live))
+          assert len(expected_current_placement_status)==16, expected_current_placement_status
+          for pid,status in expected_current_placement_status.items():
+              assert live[pid].get('current_placement_status')==status, (pid,live[pid])
+          assert sum(1 for v in expected_current_placement_status.values() if v=='ASSIGNED_VERIFIED')==0
+          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==4
+          assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==3
+          assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==2
+          assert sum(1 for v in expected_current_placement_status.values() if v=='LISTED_ASSIGNMENT_UNVERIFIED')==1
+          assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==4
+          assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
+          assert sum(1 for v in expected_current_placement_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
@@ -1296,10 +1332,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 36, detail.get('version')
+              assert detail.get('version') == 37, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 36, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 37, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1311,7 +1347,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 55, x.get('version')
+          assert x.get('version') == 56, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2441,6 +2477,9 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
+          grep -q 'data-current-placement-status-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'Current placement status' /tmp/vero_home_placement.html
+          grep -q 'Floor plan available · not selected' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
@@ -2667,6 +2706,8 @@ jobs:
           grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
           grep -q 'Oct 18, 2026' /tmp/vero_oktoberfest.html
           grep -q '10x10 inline \$200' /tmp/vero_oktoberfest.html
+          grep -q 'data-current-placement-status-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'Sponsorship placement unverified' /tmp/vero_oktoberfest.html
           grep -q 'Prior cost / reference status' /tmp/vero_oktoberfest.html
           grep -q '2023 Vero Oktoberfest waitlist/booking reference: \$175' /tmp/vero_oktoberfest.html
           grep -q 'not proof of completed participation' /tmp/vero_oktoberfest.html
@@ -2712,6 +2753,8 @@ jobs:
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
           grep -q 'data-current-cost-status-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Reconcile existing booking' /tmp/pembroke_detail.html
+          grep -q 'data-current-placement-status-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Listed · assignment unverified' /tmp/pembroke_detail.html
           grep -q 'Current booth / placement' /tmp/pembroke_detail.html
           grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
           grep -q 'Prior cost / reference status' /tmp/pembroke_detail.html
