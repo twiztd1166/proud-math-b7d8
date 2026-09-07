@@ -841,6 +841,8 @@ jobs:
           assert '1 net close / $20,025' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
           assert '$160 Commercial/Retail' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
+          assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
+          assert 'organizer-response/direct-download blocker, not an internal-search blocker' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
           assert '$316,198' in reviews['LIFE-018'].get('rationale',''), reviews['LIFE-018']
           assert 'historical $795/$1,500/$1,845 figures only as references' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('action_timing','').startswith('NOW'), reviews['LIFE-030']
@@ -850,6 +852,8 @@ jobs:
           assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('action_timing','').startswith('NOW'), reviews['LIFE-076']
           assert 'Hospitality alone should not be treated as marketing inventory' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
           assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
+          assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
           assert '10x20 / 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
@@ -3015,12 +3019,14 @@ jobs:
           assert '2017 · 23 issued' in martin
           assert 'LP-attributed specific: 131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · $96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' in martin
           assert 'data-live-compare-next-step-profile="LIFE-018"' in martin
-          assert 'Contact Jackielou now and request the current 2027 contract plus floor plan as a direct file/quote.' in martin
+          assert 'Research exhausted as of Sep. 7, 2026 — contact Jackielou now and request the current 2027 contract plus floor plan as a direct file/quote.' in martin
           assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           rpb=row('LIFE-007')
           assert 'LP-attributed specific: #18 outside popup · 2021 · Nov-6 · 4 LP closes · $57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' in rpb
           miami=row('LIFE-013')
+          assert 'data-live-compare-next-step-profile="LIFE-013"' in miami
+          assert 'Research exhausted as of Sep. 7, 2026 — contact Sylvia Cruz-Alvarez now and request the 2027 indoor commercial-space rate sheet, available locations and application/payment deadlines.' in miami
           assert 'LP-attributed specific: 705 & 706 (10x20) · 2021 · Nov-18 thru Dec-5 · 4 LP closes · $80,100 LP close volume · 62 issued · 19 demos · annual LP attribution · not attendance proof' in miami
           artigras=row('LIFE-030')
           assert 'LP-attributed specific: S204 (10x10) · 2022 · Feb-19 Feb-20 · 1 LP close · $38,482 LP close volume · 11 issued · 8 demos · annual LP attribution · not attendance proof' in artigras
