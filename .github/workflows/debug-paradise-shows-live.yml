@@ -154,7 +154,7 @@ jobs:
               grep -q 'data-current-contact-actions-profile' /tmp/app-shows.js
               grep -q 'href="tel:' /tmp/app-shows.js
               grep -q 'href="mailto:' /tmp/app-shows.js
-              grep -q 'Prior verified cost / reference' /tmp/app-shows.js
+              grep -q 'Prior cost / reference status' /tmp/app-shows.js
               grep -q 'rebookLiveActions' /tmp/app-shows.js
               grep -q 'Open booking action' /tmp/app-shows.js
               grep -q 'opportunity.venue_text' /tmp/app-shows.js
@@ -649,12 +649,13 @@ jobs:
               'LIFE-054':'Paradise RPB Winter Fest history: 2025 event record $410; 2023 approved-vendor reference $285; 2021 scheduled reference $250. Historical references only; current 2026 approved-category fee is $160-$400 plus the $10 application fee.',
               'LIFE-009':'Paradise Vero Home Show history: Jan. 2025 $500 final cost; Apr. 2025 Booth #52 $495; 2022 occurrences $420. Historical references only; current 2027 official 10x10 range is $475-$635.',
               'LIFE-077':'Paradise 2025 Sebastian Clam Bake event record: $200, with tent display required. Historical reference only; not a 2026 sponsorship quote. Current published booth-bearing Grand Clam sponsorship is $2,000.',
+              'LIFE-044':'No safe same-series prior cost is available for this current opportunity. The retained 2023 Bradenton evidence is same-market/same-venue evidence from a different organizer and is intentionally not used as a comparable prior booking cost.',
+              'LIFE-076':'No verified prior Paradise vendor-booth or lead-generation activation cost is preserved for this event. Prior PGA TOUR outreach / hospitality context is not treated as a comparable exhibitor cost.',
           }
-          assert len(expected_prior_cost_refs)==14, expected_prior_cost_refs
+          assert len(expected_prior_cost_refs)==16, expected_prior_cost_refs
           for pid,ref in expected_prior_cost_refs.items():
               assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
-          assert not live['LIFE-044'].get('prior_cost_text'), live['LIFE-044']
-          assert not live['LIFE-076'].get('prior_cost_text'), live['LIFE-076']
+          assert set(expected_prior_cost_refs)==set(live), (set(expected_prior_cost_refs),set(live))
           expected_actions={
               'LIFE-014':('Open next-cycle vendor page','https://www.wpb.org/Residents/Community-Events/Events/WPB-GreenMarket/Vendor-Application'),
               'LIFE-046':('Open vendor availability info','https://flgunshows.com/shows/'),
@@ -709,13 +710,20 @@ jobs:
               'LIFE-054':'$10 non-refundable application fee · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event.',
               'LIFE-071':'Not published / not verified — obtain deposit, balance-due, cancellation, COI, utility/furnishing and other add-on terms with the current quote before signing.',
               'LIFE-077':'$2,000 Grand Clam sponsorship includes a 10x10 booth · official sponsorship page says sponsorship fees/donations are payable by check to Sebastian Clambake Foundation · no refund, cancellation, deposit or payment-deadline terms are published on the verified sponsorship page.',
+              'LIFE-014':'2026-27 application cycle is closed. 2027-28 application fee, acceptance, payment, cancellation and COI terms are not yet published / verified; confirm them when the next application process opens in March 2027.',
+              'LIFE-033':'Current fall 2026 contract / payment state is not reconciled. Do not assume spring 2026 terms. Obtain the current signed contract/account statement, exact total, amounts paid/due, deadline, COI and utility/furnishing obligations before any new payment or re-booking.',
+              'LIFE-018':'A current 2027 exhibitor contract is linked by the organizer, but the exact price, deposit, payment schedule and cancellation terms have not been recovered / verified in the governed evidence. Review the current contract directly before signing.',
+              'LIFE-030':'2027 booth-bearing sponsorship commitment and payment terms are not publicly verified. Obtain the exact sponsorship agreement, booth-enabled package price, payment schedule, cancellation terms, COI and activation requirements before committing.',
+              'LIFE-060':'2027 commercial-vendor commitment terms are not yet published / verified. Confirm deposit, payment deadline, cancellation terms, COI, utilities and space obligations when the 2027 vendor application is released.',
+              'LIFE-076':'2027 partnership / on-site activation commitment and payment terms are not publicly verified. Obtain the current proposal/agreement with all-in price, payment schedule, cancellation terms, exclusivity, COI and activation obligations before committing.',
+              'LIFE-013':'The 2027 online vendor application is live, but Paradise-specific commercial-space price, deposit / payment schedule, deadline and cancellation terms are not verified in the current governed evidence. Confirm them in the exhibitor process / with the fair before signing.',
           }
-          assert len(expected_commitment_terms)==9, expected_commitment_terms
+          assert len(expected_commitment_terms)==16, expected_commitment_terms
           for pid,terms in expected_commitment_terms.items():
               assert live[pid].get('commitment_terms_text')==terms, (pid,live[pid])
+          assert set(expected_commitment_terms)==set(live), (set(expected_commitment_terms),set(live))
           for pid,op in live.items():
-              if pid not in expected_commitment_terms:
-                  assert not op.get('commitment_terms_text'), (pid,op)
+              assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
           recovered_contacts={
               'LIFE-007':('info@pottcevents.com','561-792-9260'),
               'LIFE-054':('info@pottcevents.com','561-792-9260'),
@@ -2367,7 +2375,7 @@ jobs:
           grep -q 'Not published / not verified — obtain deposit, balance-due, cancellation' /tmp/flhs_watch.html
           grep -q 'Still needed before booking' /tmp/flhs_watch.html
           grep -q 'Current all-in booth/setup quote · exact available St. Petersburg placement' /tmp/flhs_watch.html
-          grep -q 'Prior verified cost / reference' /tmp/flhs_watch.html
+          grep -q 'Prior cost / reference status' /tmp/flhs_watch.html
           grep -q 'Paradise 2024 Florida' /tmp/flhs_watch.html
           grep -q '\$5,000 for the Labor Day occurrence' /tmp/flhs_watch.html
           grep -q 'data-current-contact-profile="LIFE-071"' /tmp/flhs_watch.html
@@ -2427,7 +2435,7 @@ jobs:
           grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
           grep -q 'Oct 18, 2026' /tmp/vero_oktoberfest.html
           grep -q '10x10 inline \$200' /tmp/vero_oktoberfest.html
-          grep -q 'Prior verified cost / reference' /tmp/vero_oktoberfest.html
+          grep -q 'Prior cost / reference status' /tmp/vero_oktoberfest.html
           grep -q '2023 Vero Oktoberfest waitlist/booking reference: \$175' /tmp/vero_oktoberfest.html
           grep -q 'not proof of completed participation' /tmp/vero_oktoberfest.html
           grep -q 'Latitude-88' /tmp/vero_oktoberfest.html
@@ -2470,7 +2478,7 @@ jobs:
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
           grep -q 'Current booth / placement' /tmp/pembroke_detail.html
           grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
-          grep -q 'Prior verified cost / reference' /tmp/pembroke_detail.html
+          grep -q 'Prior cost / reference status' /tmp/pembroke_detail.html
           grep -q 'Booth 106, 8x10' /tmp/pembroke_detail.html
           grep -q '\$2,145 booth cost less \$100 Super Saver = \$2,045 invoice' /tmp/pembroke_detail.html
           grep -q 'not an Oct. 31-Nov. 1 fall 2026 quote or assignment' /tmp/pembroke_detail.html
@@ -2515,7 +2523,7 @@ jobs:
             exit 1
           fi
           if grep -q 'data-current-booking-cost-profile="LIFE-018"' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
-          grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
+          grep -q 'Prior cost / reference status' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
           grep -q 'Mar. 2021 \$1,500' /tmp/treasure_detail.html
@@ -2531,7 +2539,7 @@ jobs:
           grep -q 'Feb 12, 2027' /tmp/martin_detail.html
           grep -q 'Feb 21, 2027' /tmp/martin_detail.html
           grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
-          grep -q 'Prior verified cost / reference' /tmp/martin_detail.html
+          grep -q 'Prior cost / reference status' /tmp/martin_detail.html
           grep -q 'Official 2025 Martin County Fair vendor application reference' /tmp/martin_detail.html
           grep -q 'indoor 10x12 \$675 / 20x12 \$1,075' /tmp/martin_detail.html
           grep -q 'outdoor 10x12 \$475 / 20x12 \$725' /tmp/martin_detail.html
