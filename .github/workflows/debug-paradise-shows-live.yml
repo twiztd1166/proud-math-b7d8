@@ -3906,7 +3906,7 @@ jobs:
           grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Still needed before booking' /tmp/rebook_detail.html
-          grep -q 'Application acceptance · exact current placement · category pricing / footprint confirmation' /tmp/rebook_detail.html
+          grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
