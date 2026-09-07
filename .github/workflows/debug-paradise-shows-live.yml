@@ -667,7 +667,7 @@ jobs:
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
-              'HIST-234':'Commercial sponsorship price · actual footprint / location · lead-generation / exclusivity / payment / COI terms',
+              'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
               'LIFE-009':'Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
@@ -966,9 +966,32 @@ jobs:
           assert 'December rows in 2017, 2018 and 2019 = 0 net closes' in live['LIFE-046'].get('notes',''), live['LIFE-046']
           assert 'If Oct. 10-11 is full, ask for Nov. 14-15 before Dec. 19-20' in live['LIFE-046'].get('booking_window_text',''), live['LIFE-046']
           assert 'performance attribution, not attendance proof or a forecast of 2026 results' in live['LIFE-046'].get('booking_window_text',''), live['LIFE-046']
-          assert reviews['HIST-234'].get('disposition')=='WATCH' and 'waitlist' in reviews['HIST-234'].get('action_timing','').lower(), reviews['HIST-234']
+          assert reviews['HIST-234'].get('disposition')=='WATCH' and reviews['HIST-234'].get('booking_readiness')=='WATCH_GATED', reviews['HIST-234']
+          assert reviews['HIST-234'].get('action_timing','').startswith("NOW — contact Latitude-88 to resolve Paradise's standard-vendor eligibility versus sponsor-only path."), reviews['HIST-234']
           assert '$25,000' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
+          assert '$200 inline / $225 corner' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
+          assert 'general vendor rates are a useful benchmark, not a verified Paradise booking price' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
+          assert 'can Paradise Exteriors, an impact windows/doors home-improvement company, use the standard 2026 Vendor Village' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'If standard-vendor eligible, join the free waitlist immediately' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'If sponsorship is required, request the lowest-cost package that includes a real lead-generation footprint' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'Hours & Info says 11 AM-7 PM while the Vendor page says 11 AM-6 PM' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'mixed LIFE-061' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'Sponsor page explains sponsorship value but exposes no text-readable current package price' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
+          assert 'general vendor price is a benchmark only, not a Paradise-specific quote' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
+          assert 'WEB:VERO_OKTOBERFEST_VENDOR_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
+          assert 'WEB:VERO_OKTOBERFEST_SPONSOR_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
+          assert 'WEB:VERO_OKTOBERFEST_HOURS_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
+          assert live['HIST-234'].get('current_cost_status')=='QUOTE_REQUIRED', live['HIST-234']
+          assert live['HIST-234'].get('booking_cost_min') is None and live['HIST-234'].get('booking_cost_max') is None, live['HIST-234']
+          assert '10x10 inline $200; 10x10 corner $225; optional designated-booth electricity $30' in live['HIST-234'].get('price_text',''), live['HIST-234']
+          assert 'Paradise-specific eligibility for the standard Vendor Village price is therefore not verified' in live['HIST-234'].get('price_text',''), live['HIST-234']
+          assert 'Do not submit Paradise to the general vendor waitlist until Latitude-88 confirms' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
+          assert 'Sponsorship opportunities remain available' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
+          assert 'general Vendor Village rules, not verified Paradise sponsorship terms' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
+          assert 'at least 35 lb secured on each leg' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
+          assert live['HIST-234'].get('current_schedule_status')=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION', live['HIST-234']
+          assert 'Hours & Info page says 11 AM–7 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
+          assert 'Vendor page says 11 AM–6 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
           assert reviews['LIFE-033'].get('disposition')=='HOLD' and reviews['LIFE-033'].get('action_timing','').startswith('NOW'), reviews['LIFE-033']
           assert 'account-control HOLD' in reviews['LIFE-033'].get('rationale',''), reviews['LIFE-033']
           assert 'signed contract, exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
@@ -1341,7 +1364,7 @@ jobs:
           expected_current_placements={
               'LIFE-014':'No 2026-27 Paradise placement is available because the application cycle is closed. Treat prior outside-popup history only as next-cycle placement context; confirm the 2027-28 map/rules when applications reopen.',
               'LIFE-046':'No Oct. 10-11 West Palm inside-table location is verified. West Palm uses indoor 8 ft x 2.5 ft tables; the promoter publishes 10x10 outside spaces only for DeLand. Confirm the exact inside table/location and whether Paradise windows/doors marketing is accepted before booking the $100 weekend test.',
-              'HIST-234':'No Paradise 2026 commercial sponsorship footprint/location is verified. Retail Vendor Village is sold out/waitlist; obtain the commercial sponsorship placement before committing.',
+              'HIST-234':'No Paradise 2026 commercial footprint/location is verified. The general Vendor Village is sold out/waitlist and show management reserves the right to change requested booth locations for logistics/category conflicts. First confirm whether Paradise is eligible for the standard Vendor Village; if not, obtain the exact commercial sponsorship footprint/location before committing.',
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified. Reconcile the current ACS contract/account and exact booth before any new payment or re-booking.',
