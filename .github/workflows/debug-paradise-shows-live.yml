@@ -214,6 +214,12 @@ jobs:
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
               grep -q 'liveHistoricalPlacementHtml' /tmp/app-modals.js
               grep -q 'historicalPlacementGuide(catalogProfile)' /tmp/app-modals.js
+              grep -q 'historicalDecisionEvidence' /tmp/app-shows.js
+              grep -q 'Historical decision evidence' /tmp/app-shows.js
+              grep -q 'data-historical-decision-evidence-profile' /tmp/app-shows.js
+              grep -q 'verified worked years in preserved evidence (not proof of no participation)' /tmp/app-shows.js
+              grep -q 'lifetime net sales' /tmp/app-shows.js
+              grep -q 'lowest preserved COM' /tmp/app-shows.js
               grep -q 'Best observed performance placement' /tmp/app-modals.js
               grep -q 'Best observed specific booth' /tmp/app-modals.js
               grep -q 'bookingTiming' /tmp/app-shows.js
@@ -2276,6 +2282,9 @@ jobs:
           grep -q 'data-current-venue-actions-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'www.google.com/maps/search/?api=1&amp;query=Indian%20River%20County%20Fairgrounds' /tmp/vero_home_placement.html
           grep -q '>Open venue map<' /tmp/vero_home_placement.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
+          grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
@@ -2299,6 +2308,8 @@ jobs:
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
           grep -q 'Venue / address' /tmp/rpb_green_market_placement.html
           grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'Historical decision evidence' /tmp/rpb_green_market_placement.html
           grep -q 'Current booth / placement' /tmp/rpb_green_market_placement.html
           grep -q 'No 2026-27 Paradise space is assigned/verified yet' /tmp/rpb_green_market_placement.html
           grep -q 'do not treat #18 as proven best' /tmp/rpb_green_market_placement.html
@@ -2317,6 +2328,9 @@ jobs:
           grep -q 'Current booth / placement' /tmp/martin_home_placement.html
           grep -q 'current 2027 floor plan, but no Paradise booth assignment is verified' /tmp/martin_home_placement.html
           grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-018"' /tmp/martin_home_placement.html
+          grep -q 'Historical decision evidence' /tmp/martin_home_placement.html
+          grep -q '3 verified worked years' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
@@ -2331,6 +2345,8 @@ jobs:
           grep -q 'data-current-venue-actions-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'www.google.com/maps/search/?api=1&amp;query=Bradenton%20Area%20Convention%20Center' /tmp/bradenton_pursue.html
           grep -q '>Open venue map<' /tmp/bradenton_pursue.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Historical decision evidence' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
@@ -2589,6 +2605,8 @@ jobs:
 
           render_view cognizant_detail "$SITE/#show/LIFE-076"
           grep -q 'Honda Classic' /tmp/cognizant_detail.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-076"' /tmp/cognizant_detail.html
+          grep -q 'Historical decision evidence' /tmp/cognizant_detail.html
           grep -q 'Verified current watch' /tmp/cognizant_detail.html
           grep -q 'Still needed before booking' /tmp/cognizant_detail.html
           grep -q 'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price' /tmp/cognizant_detail.html
