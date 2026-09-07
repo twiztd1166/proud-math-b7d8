@@ -4231,17 +4231,17 @@ jobs:
           grep -q 'data-booking-readiness-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Hold / reconcile' /tmp/pembroke_detail.html
           grep -q 'Still needed before booking' /tmp/pembroke_detail.html
-          grep -q 'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities' /tmp/pembroke_detail.html
+          grep -q 'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
           grep -q 'Oct 31, 2026' /tmp/pembroke_detail.html
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
-          grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
+          grep -q 'No fall-specific Oct. 31-Nov. 1, 2026 Paradise quote or invoice was recovered' /tmp/pembroke_detail.html
           grep -q 'data-current-cost-status-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'data-current-commitment-status-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Reconcile existing commitment' /tmp/pembroke_detail.html
           grep -q 'Reconcile existing booking' /tmp/pembroke_detail.html
           grep -q 'Current booth / placement' /tmp/pembroke_detail.html
-          grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
+          grep -q 'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered' /tmp/pembroke_detail.html
           grep -q 'Prior cost / reference status' /tmp/pembroke_detail.html
           grep -q 'Booth 106, 8x10' /tmp/pembroke_detail.html
           grep -q '\$2,145 booth cost less \$100 Super Saver = \$2,045 invoice' /tmp/pembroke_detail.html
