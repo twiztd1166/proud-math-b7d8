@@ -99,6 +99,14 @@ jobs:
               grep -q 'Booking decision / next date' /tmp/app-shows.js
               grep -q 'Venue / address' /tmp/app-shows.js
               grep -q 'Prior verified cost / reference' /tmp/app-shows.js
+              grep -q 'Comparable current cost' /tmp/app-shows.js
+              grep -q 'opportunityBookingCost' /tmp/app-shows.js
+              grep -q 'currentBookingCostBand' /tmp/app-shows.js
+              grep -q 'fCurrentBookingCostBand' /tmp/app-shows.js
+              grep -q 'CURRENT_COST_LOW' /tmp/app-shows.js
+              grep -q 'CURRENT_COST_HIGH' /tmp/app-shows.js
+              grep -q 'Verified current booking cost (max)' /tmp/app-shows.js
+              grep -q 'Unknown / not decision-safe' /tmp/app-shows.js
               grep -q 'rebookLiveActions' /tmp/app-shows.js
               grep -q 'Open booking action' /tmp/app-shows.js
               grep -q 'opportunity.venue_text' /tmp/app-shows.js
@@ -542,6 +550,28 @@ jobs:
           for pid,(label,url) in expected_actions.items():
               assert live[pid].get('action_label')==label, (pid,live[pid])
               assert live[pid].get('action_url')==url, (pid,live[pid])
+          expected_booking_costs={
+              'LIFE-046':(100,100,'8-foot table / weekend'),
+              'LIFE-007':(65,75,'per Saturday'),
+              'LIFE-044':(995,1095,'10x10 booth'),
+              'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth'),
+              'LIFE-054':(160,400,'approved vendor category / event'),
+              'LIFE-009':(475,635,'10x10 booth'),
+              'LIFE-017':(1295,1395,'10x10 booth'),
+          }
+          assert len(expected_booking_costs)==7
+          for pid,(low,high,unit) in expected_booking_costs.items():
+              op=live[pid]
+              assert float(op.get('booking_cost_min'))==low, (pid,op)
+              assert float(op.get('booking_cost_max'))==high, (pid,op)
+              assert op.get('booking_cost_unit')==unit, (pid,op)
+              assert str(op.get('booking_cost_basis') or '').strip(), (pid,op)
+          for pid in expected_live-set(expected_booking_costs):
+              op=live[pid]
+              assert op.get('booking_cost_min') is None, (pid,op)
+              assert op.get('booking_cost_max') is None, (pid,op)
+              assert not op.get('booking_cost_unit'), (pid,op)
+              assert not op.get('booking_cost_basis'), (pid,op)
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -924,10 +954,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 27, detail.get('version')
+              assert detail.get('version') == 28, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 27, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 28, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -939,7 +969,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 46, x.get('version')
+          assert x.get('version') == 47, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2033,6 +2063,8 @@ jobs:
           grep -q 'Vero Home Show' /tmp/vero_home_placement.html
           grep -q 'Venue / address' /tmp/vero_home_placement.html
           grep -q 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' /tmp/vero_home_placement.html
+          grep -q 'Comparable current cost' /tmp/vero_home_placement.html
+          grep -q '10x10 booth' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
@@ -2047,6 +2079,8 @@ jobs:
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
           grep -q 'Venue / address' /tmp/rpb_green_market_placement.html
           grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
+          grep -q 'Comparable current cost' /tmp/rpb_green_market_placement.html
+          grep -q 'per Saturday' /tmp/rpb_green_market_placement.html
           grep -q 'Historical placement guide' /tmp/rpb_green_market_placement.html
           grep -q 'data-historical-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
@@ -2091,6 +2125,7 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
+          grep -q 'Comparable current cost' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
@@ -2207,6 +2242,10 @@ jobs:
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
           grep -q 'Mar. 2021 \$1,500' /tmp/treasure_detail.html
           grep -q '772-486-4969' /tmp/treasure_detail.html
+          if grep -q 'Comparable current cost' /tmp/treasure_detail.html; then
+            echo 'Quote-only Martin County show incorrectly rendered a structured current cost'
+            exit 1
+          fi
           grep -q '>Open 2027 floor plan + exhibitor contract<' /tmp/treasure_detail.html
           grep -q 'professionalshowmanagement.com/home-shows' /tmp/treasure_detail.html
           grep -q 'Open current source' /tmp/treasure_detail.html
@@ -2244,6 +2283,8 @@ jobs:
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
+          grep -q 'Comparable current cost' /tmp/winterfest_detail.html
+          grep -q 'approved vendor category / event' /tmp/winterfest_detail.html
           grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
           grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
