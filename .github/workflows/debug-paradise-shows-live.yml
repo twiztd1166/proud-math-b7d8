@@ -3008,9 +3008,9 @@ jobs:
           assert 'data-live-compare-readiness-profile="LIFE-044"' in manatee
           assert 'Pre-booking action required' in manatee
           assert 'Commitment: Verified current' in manatee
-          assert 'Still needed: Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' in manatee
+          assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in manatee
           assert 'data-live-compare-next-step-profile="LIFE-044"' in manatee
-          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and confirm windows/doors category availability, currently available booth inventory and the live floor plan.' in manatee
+          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in manatee
           assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
           assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
@@ -3125,10 +3125,10 @@ jobs:
           assert 'Prior/reference:' in row
           assert 'data-label="Readiness"' in row
           assert 'Commitment: Verified current' in row
-          assert 'Still needed: Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' in row
+          assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in row
           assert 'data-label="Next step"' in row
           assert 'data-live-compare-next-step-profile="LIFE-044"' in row
-          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and confirm windows/doors category availability, currently available booth inventory and the live floor plan.' in row
+          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
