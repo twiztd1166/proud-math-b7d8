@@ -99,8 +99,11 @@ jobs:
               grep -q 'Booking decision / next date' /tmp/app-shows.js
               grep -q 'Venue / address' /tmp/app-shows.js
               grep -q 'Prior verified cost / reference' /tmp/app-shows.js
+              grep -q 'rebookLiveActions' /tmp/app-shows.js
+              grep -q 'Open booking action' /tmp/app-shows.js
               grep -q 'opportunity.venue_text' /tmp/app-shows.js
               grep -q 'opportunity.prior_cost_text' /tmp/app-shows.js
+              grep -q 'opportunity.action_label' /tmp/app-shows.js
               grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
               grep -q 'Verified current watch' /tmp/app-shows.js
@@ -518,6 +521,22 @@ jobs:
               assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
           assert not live['LIFE-014'].get('prior_cost_text'), live['LIFE-014']
           assert not live['LIFE-076'].get('prior_cost_text'), live['LIFE-076']
+          expected_actions={
+              'HIST-234':('Open sponsorship','https://www.verobeachoktoberfest.com/sponsor'),
+              'LIFE-007':('Start vendor application','https://www.rpbgreenmarket.com/application--payment-forms.html'),
+              'LIFE-009':('Apply for booth','https://my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1'),
+              'LIFE-013':('Apply online','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
+              'LIFE-017':('Request exhibitor contract','https://www.tampahomeshow.com/get-contract/'),
+              'LIFE-018':('Open contract / floorplan','https://www.professionalshowmanagement.com/home-shows'),
+              'LIFE-030':('Request sponsorship','https://www.artigras.org/become-a-sponsor/'),
+              'LIFE-054':('Apply as vendor','https://pci.jotform.com/form/261183112155144'),
+              'LIFE-077':('Open sponsorship','https://www.sebastianclambake.org/sponsorship-info'),
+          }
+          for pid,(label,url) in expected_actions.items():
+              assert live[pid].get('action_label')==label, (pid,live[pid])
+              assert live[pid].get('action_url')==url, (pid,live[pid])
+          for pid in {'LIFE-014','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-076'}:
+              assert not live[pid].get('action_url'), (pid,live[pid])
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -900,10 +919,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 26, detail.get('version')
+              assert detail.get('version') == 27, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 26, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 27, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -915,7 +934,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 45, x.get('version')
+          assert x.get('version') == 46, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2016,6 +2035,8 @@ jobs:
           grep -q '0 net sales' /tmp/vero_home_placement.html
           grep -q '\$0 net revenue' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
+          grep -q '>Apply for booth<' /tmp/vero_home_placement.html
+          grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
 
           render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
@@ -2026,6 +2047,8 @@ jobs:
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
           grep -q '2022 · Feb-19' /tmp/rpb_green_market_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
+          grep -q '>Start vendor application<' /tmp/rpb_green_market_placement.html
+          grep -q 'application--payment-forms.html' /tmp/rpb_green_market_placement.html
 
           render_view martin_home_placement "$SITE/#show/LIFE-018"
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
@@ -2061,6 +2084,8 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
+          grep -q '>Request exhibitor contract<' /tmp/tampa_2027.html
+          grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
           render_view hurricane_watch "$SITE/#show/LIFE-039"
           grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
@@ -2171,6 +2196,8 @@ jobs:
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
           grep -q 'Mar. 2021 \$1,500' /tmp/treasure_detail.html
           grep -q '772-486-4969' /tmp/treasure_detail.html
+          grep -q '>Open contract / floorplan<' /tmp/treasure_detail.html
+          grep -q 'professionalshowmanagement.com/home-shows' /tmp/treasure_detail.html
           grep -q 'Open current source' /tmp/treasure_detail.html
 
           render_view martin_detail "$SITE/#show/LIFE-060"
@@ -2202,6 +2229,8 @@ jobs:
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
+          grep -q '>Apply as vendor<' /tmp/winterfest_detail.html
+          grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
 
