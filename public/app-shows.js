@@ -754,8 +754,8 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(quickView==='ALL_NO_PRIOR_PLACEMENT'&&!liveOpportunityMissingPriorPlacement(p))return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
   if(quickView==='ALL_HISTORICAL_OUTREACH'&&!historicalOutreachCandidate(p))return false;
-  if(quickView==='ALL_REBOOK_PURSUE'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='PURSUE')return false;
-  if(quickView==='ALL_REBOOK_WATCH'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='WATCH')return false;
+  if(quickView==='ALL_REBOOK_PURSUE'&&(!p?.current_rebook_opportunity||String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='PURSUE'))return false;
+  if(quickView==='ALL_REBOOK_WATCH'&&(!p?.current_rebook_opportunity||String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='WATCH'))return false;
   if(quickView==='ALL_REBOOK_HOLD'&&!['HOLD','RETIRED'].includes(String(p?.current_rebook_review?.disposition||'').toUpperCase()))return false;
   if(quickView==='ALL_HISTORICAL_2013'&&!historicalReviewCandidate2013(p))return false;
   if(quickView==='ALL_TOP_NET'&&(p.lifetime_net_volume===null||p.lifetime_net_volume===undefined||p.lifetime_net_volume===''||!Number.isFinite(Number(p.lifetime_net_volume))))return false;
@@ -1232,8 +1232,8 @@ function quickViewCount(key){
   if(key==='ALL_NO_PRIOR_PLACEMENT')return state.catalog.filter(liveOpportunityMissingPriorPlacement).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
   if(key==='ALL_HISTORICAL_OUTREACH')return state.catalog.filter(historicalOutreachCandidate).length;
-  if(key==='ALL_REBOOK_PURSUE')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='PURSUE').length;
-  if(key==='ALL_REBOOK_WATCH')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='WATCH').length;
+  if(key==='ALL_REBOOK_PURSUE')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)&&String(p?.current_rebook_review?.disposition||'').toUpperCase()==='PURSUE').length;
+  if(key==='ALL_REBOOK_WATCH')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)&&String(p?.current_rebook_review?.disposition||'').toUpperCase()==='WATCH').length;
   if(key==='ALL_REBOOK_HOLD')return state.catalog.filter(p=>['HOLD','RETIRED'].includes(String(p?.current_rebook_review?.disposition||'').toUpperCase())).length;
   if(key==='ALL_HISTORICAL_2013')return state.catalog.filter(historicalReviewCandidate2013).length;
   if(key==='ALL_TOP_NET')return state.catalog.filter(p=>p.lifetime_net_volume!==null&&p.lifetime_net_volume!==undefined&&p.lifetime_net_volume!==''&&Number.isFinite(Number(p.lifetime_net_volume))).length;
@@ -1280,8 +1280,8 @@ function applyQuickView(key){
     if(key==='ALL_NO_PRIOR_PLACEMENT')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_HISTORICAL_OUTREACH')state.catalogSort='LIFETIME_NET';
-    if(key==='ALL_REBOOK_PURSUE')state.catalogSort='LIFETIME_NET';
-    if(key==='ALL_REBOOK_WATCH')state.catalogSort='LIFETIME_NET';
+    if(key==='ALL_REBOOK_PURSUE')state.catalogSort='BOOKING_DECISION';
+    if(key==='ALL_REBOOK_WATCH')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_REBOOK_HOLD')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_HISTORICAL_2013')state.catalogSort='RECOMMENDED';
     if(key==='ALL_TOP_NET')state.catalogSort='LIFETIME_NET';
