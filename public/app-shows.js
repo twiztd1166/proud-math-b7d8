@@ -129,7 +129,7 @@ function historicalPlacementGuide(p){
   if(!p?.current_rebook_opportunity)return '';
   const specific=historicalPlacementValue(p.best_observed_specific_booth);
   const latest=historicalPlacementValue(p.latest_preserved_booth);
-  if(!specific&&!latest)return '';
+  if(!specific&&!latest)return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>No preserved booth / placement is available for this profile. Do not infer a booth from same-market, same-venue, or unrelated-series history — verify the current floor plan, booth numbering, and availability with the organizer before booking.</b></div>`;
   let placement='';
   const outcome=[];
   if(specific){
