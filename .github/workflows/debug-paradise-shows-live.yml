@@ -662,7 +662,7 @@ jobs:
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
               'LIFE-007':'Application acceptance · exact current placement · final requested footprint',
-              'LIFE-054':'2026 application approval / current approved Corporate level · exact placement',
+              'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
@@ -969,6 +969,20 @@ jobs:
           assert 'no prior booth number is defensibly recoverable' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
           assert 'GMAIL:192bf9f865027f7b' in reviews['LIFE-054'].get('source_ref',''), reviews['LIFE-054']
           assert 'direct POTTC 2024 Level 2 approval' in reviews['LIFE-054'].get('source_label',''), reviews['LIFE-054']
+          assert 'current linked POTTC Event Rules/Waiver' in reviews['LIFE-054'].get('source_label',''), reviews['LIFE-054']
+          assert 'event_rules_terms_and_conditions_rev_051924.pdf' in reviews['LIFE-054'].get('source_ref',''), reviews['LIFE-054']
+          assert 'requires acceptance of current POTTC legal terms/waiver and an electronic signature' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert 'route the current POTTC Event Rules Terms and Conditions and Waiver and Release to an authorized Paradise signer' in reviews['LIFE-054'].get('action_timing',''), reviews['LIFE-054']
+          assert 'authorized terms acceptance' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
+          assert 'live form processes the $10 non-refundable application fee and requires agreement checkboxes plus an electronic signature' in reviews['LIFE-054'].get('next_step',''), reviews['LIFE-054']
+          assert 'broad waiver/release/indemnity language' in reviews['LIFE-054'].get('next_step',''), reviews['LIFE-054']
+          assert 'requires acceptance of the linked Event Rules Terms and Conditions and Waiver and Release plus an electronic signature' in live['LIFE-054'].get('commitment_terms_text',''), live['LIFE-054']
+          assert 'gives up certain legal rights including the right to sue' in live['LIFE-054'].get('commitment_terms_text',''), live['LIFE-054']
+          assert 'claims arising from negligence or fault' in live['LIFE-054'].get('commitment_terms_text',''), live['LIFE-054']
+          assert 'Do not submit/sign unless an authorized Paradise signer accepts the current terms' in live['LIFE-054'].get('commitment_terms_text',''), live['LIFE-054']
+          assert 'submission is not a nonbinding inquiry' in live['LIFE-054'].get('booking_window_text',''), live['LIFE-054']
+          assert 'generic Rev.051924 rules mention that power may be accommodated for an additional fee at some events' in live['LIFE-054'].get('notes',''), live['LIFE-054']
+          assert 'event-specific 2026 Winter Fest page/form expressly says Power - Not Available / power is not available for purchase' in live['LIFE-054'].get('notes',''), live['LIFE-054']
           assert reviews['LIFE-054'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record'), reviews['LIFE-054']
           assert 'requires Paradise application submission and POTTC response' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
@@ -1530,7 +1544,7 @@ jobs:
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
-              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. Paradise was explicitly approved Corporate Level 2 in 2024 and paid $410 for the 2025 event; use $410 as the conservative current exposure ceiling, not as proof of 2026 approval.'),
+              'LIFE-054':(310,410,'approved vendor category / event','Official 2026 Corporate exposure: application asks only for Corporate; POTTC assigns the approved level after review. Corporate Level 1 = $300 and Level 2 = $400, plus required $10 non-refundable application fee. No current published Level 2 benefit/placement difference is stated. Paradise was assigned Level 2 in 2024 and paid $410 for 2025, so $410 remains the conservative ceiling; $310 is the decision-safe lower Corporate outcome if POTTC approves Level 1.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
           }
           assert len(expected_booking_costs)==7, expected_booking_costs
@@ -1578,7 +1592,7 @@ jobs:
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
-              'LIFE-054':'$10 non-refundable application fee · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event.',
+              'LIFE-054':'$10 non-refundable application fee · the live application requires acceptance of the linked Event Rules Terms and Conditions and Waiver and Release plus an electronic signature · the linked agreement expressly states it is a legal document, that signing gives up certain legal rights including the right to sue, and includes broad waiver/release/indemnity/hold-harmless language including claims arising from negligence or fault · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
               'LIFE-071':'Not published / not verified — obtain deposit, balance-due, cancellation, COI, utility/furnishing and other add-on terms with the current quote before signing.',
               'LIFE-077':'Normal 2026 Vendor Application is live, but its current fee, acceptance/payment timing and any application deadline are not published in recoverable current official text · current 2026 vendor rules do state no refunds for bad weather/acts of nature and no location change/refund if dissatisfied with the booth assigned on arrival · separate sponsorship alternative: Grand Clam $2,000 includes a 10x10 booth and sponsorship fees/donations are payable by check to Sebastian Clambake Foundation.',
               'LIFE-014':'No current new-booking commitment is available — 2025-26 and 2026-27 applications are closed · next vendor application process opens March 2027 · 2027-28 Paradise eligibility, fee, payment, cancellation and placement terms are not yet published and must be verified when the next cycle opens.',
@@ -4081,6 +4095,9 @@ jobs:
           grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
           grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
+          grep -q 'gives up certain legal rights including the right to sue' /tmp/winterfest_detail.html
+          grep -q 'Do not submit/sign unless an authorized Paradise signer accepts the current terms' /tmp/winterfest_detail.html
+          grep -q 'route the current POTTC Event Rules Terms and Conditions and Waiver and Release to an authorized Paradise signer' /tmp/winterfest_detail.html
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
           grep -q 'data-current-logistics-status-profile="LIFE-054"' /tmp/winterfest_detail.html
           grep -q 'Partial current logistics' /tmp/winterfest_detail.html
@@ -4091,7 +4108,7 @@ jobs:
           grep -q 'vendor parking pass is required' /tmp/winterfest_detail.html
           grep -q 'No early pack-up is allowed' /tmp/winterfest_detail.html
           grep -q 'Still needed before booking' /tmp/winterfest_detail.html
-          grep -q '2026 application approval / current approved Corporate level · exact placement' /tmp/winterfest_detail.html
+          grep -q 'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement' /tmp/winterfest_detail.html
           if grep -q 'data-lp-attributed-placement-profile="LIFE-054"' /tmp/winterfest_detail.html; then
             echo "::error::Winter Fest assigned-at-setup placement was mislabeled as LP-attributed specific"
             exit 1
