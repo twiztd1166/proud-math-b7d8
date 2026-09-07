@@ -391,8 +391,16 @@ function liveComparisonPlacement(p){
   if(historicalPlacementValue(p?.latest_preserved_booth))return String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
   return 'No preserved booth';
 }
-function liveDecisionCompareBoard(profiles){
-  const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity);
+function liveDecisionCompareBoard(profiles,open=false){
+  const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
+  const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
+    const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
+    const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
+    const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
+    const aDate=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const bDate=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
+  });
   if(!rows.length)return '';
   const body=rows.map(p=>{
     const op=p.current_rebook_opportunity||{};
@@ -412,11 +420,11 @@ function liveDecisionCompareBoard(profiles){
       <td>${esc(timing)}</td>
     </tr>`;
   }).join('');
-  return `<div class="liveCompareBoard" data-live-decision-comparison>
-    <div class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · best placement · readiness · timing</small></div>
+  return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · best placement · readiness · timing</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Current cost</th><th>Historical outcome</th><th>Best booth / placement</th><th>Readiness</th><th>When to act</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. They do not convert LeadPerfection attribution or booking records into attendance proof.</div>
-  </div>`;
+  </details>`;
 }
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
@@ -1560,6 +1568,7 @@ function renderShows(){
   if(!state.catalogLoaded)return top+'<div class="loading">Opening full show database…</div>';
   const list=state.catalog.filter(catalogMatches).slice().sort(catalogComparator);
   const shown=list.slice(0,state.catalogLimit);
-  const comparison=state.showQuickView==='ALL_LIVE_REBOOK'?liveDecisionCompareBoard(list):'';
+  const liveProfiles=state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
+  const comparison=liveDecisionCompareBoard(liveProfiles,state.showQuickView==='ALL_LIVE_REBOOK');
   return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
