@@ -3813,7 +3813,7 @@ jobs:
           grep -q '>Open Jan. 2-3 booth application<' /tmp/vero_home_placement.html
           grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
           grep -q '4 LP closes / \$110,038 LP close volume / 38 issued / 15 demos' /tmp/vero_home_placement.html
-          grep -q 'do not call Booth 66 proven best' /tmp/vero_home_placement.html
+          grep -q 'proof Booth 66 remains optimal' /tmp/vero_home_placement.html
 
           render_view feast_little_italy "$SITE/#show/LIFE-092"
           grep -q 'Feast of Little Italy' /tmp/feast_little_italy.html
