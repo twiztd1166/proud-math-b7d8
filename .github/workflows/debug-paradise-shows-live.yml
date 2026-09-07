@@ -444,7 +444,8 @@ jobs:
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
           }
-          assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
+          actual_live_blocker_profiles={pid for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
+          assert set(expected_live_blockers)==actual_live_blocker_profiles, (set(expected_live_blockers),actual_live_blocker_profiles)
           for pid,blockers in expected_live_blockers.items():
               assert reviews[pid].get('blockers_text')==blockers, (pid,reviews[pid])
           for pid,review in reviews.items():
