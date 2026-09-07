@@ -848,7 +848,7 @@ jobs:
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter vendor rate; includes 2 chairs and 2 employee badges.'),
-              'LIFE-054':(160,400,'approved vendor category / event','Official 2026 published range: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400; Paradise category must be confirmed before payment.'),
+              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee; Paradise category must be confirmed before booth-fee payment.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
           }
           assert len(expected_booking_costs)==7, expected_booking_costs
@@ -2880,8 +2880,13 @@ jobs:
           grep -q 'Critical commitment date' /tmp/winterfest_detail.html
           grep -q 'Nov 5, 2026' /tmp/winterfest_detail.html
           grep -q '30-day no-refund boundary' /tmp/winterfest_detail.html
-          grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html
-          grep -q 'Paradise category must be confirmed before payment' /tmp/winterfest_detail.html
+          grep -q '\$170–\$410 · approved vendor category / event' /tmp/winterfest_detail.html
+          grep -q 'plus required \$10 non-refundable application fee' /tmp/winterfest_detail.html
+          grep -q 'Paradise category must be confirmed before booth-fee payment' /tmp/winterfest_detail.html
+          if grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html; then
+            echo "::error::Winter Fest mandatory application fee was omitted from structured booking exposure"
+            exit 1
+          fi
           grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
           grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
