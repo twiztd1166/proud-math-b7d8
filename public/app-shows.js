@@ -436,7 +436,7 @@ function liveDecisionCompareBoard(profiles,open=false){
     const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
       <td data-label="Decision"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
-      <td data-label="Show"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
+      <td data-label="Show" data-live-compare-venue-profile="${esc(p.profile_id)}"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span><small>${esc(op.venue_text||'Venue / address not verified')}</small></button></td>
       <td data-label="Date">${esc(liveComparisonDate(op))}</td>
       <td data-label="Cost" data-live-compare-cost-profile="${esc(p.profile_id)}"><div class="liveCompareCost"><b>Current: ${esc(cost)}</b><span>Prior/reference: ${esc(priorCost)}</span></div></td>
       <td data-label="Historical outcome">${esc(liveComparisonOutcome(p))}</td>
