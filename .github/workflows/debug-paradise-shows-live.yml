@@ -1063,6 +1063,31 @@ jobs:
               assert p.get('best_lp_attributed_specific_booth') is None, (pid,p)
               assert p.get('lp_attributed_specific_placement_count')==0, (pid,p)
               assert p.get('lp_attributed_placement_semantics')==lp_semantics, (pid,p)
+          lp_type_semantics='Annual LeadPerfection performance attribution matched one-to-one to a date-aligned preserved history occurrence with an informative non-specific popup placement descriptor; not an exact booth, not attendance proof, and not same-row history performance.'
+          expected_lp_placement_types={
+              'LIFE-014':('outside popup',2021,'Oct-23',6,5,2,32550,'2021-SCH21-0119',1),
+          }
+          actual_lp_placement_types={pid for pid in expected_live if profiles[pid].get('best_lp_attributed_placement_type')}
+          assert actual_lp_placement_types==set(expected_lp_placement_types), (actual_lp_placement_types,expected_lp_placement_types)
+          for pid,(placement,year,dates,issued,demos,sales,volume,history_id,count) in expected_lp_placement_types.items():
+              p=profiles[pid]
+              assert p.get('best_lp_attributed_placement_type')==placement, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_year')==year, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_dates')==dates, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_issued')==issued, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_demos')==demos, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_sales')==sales, (pid,p)
+              assert float(p.get('best_lp_attributed_placement_type_volume'))==volume, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_history_id')==history_id, (pid,p)
+              assert p.get('lp_attributed_placement_type_count')==count, (pid,p)
+              assert p.get('best_lp_attributed_placement_type_metrics_scope')=='ANNUAL_MARKETING_SUBSOURCE_ROW', (pid,p)
+              assert 'NOT ATTENDANCE PROOF' in str(p.get('best_lp_attributed_placement_type_verification_status') or '').upper(), (pid,p)
+              assert p.get('lp_attributed_placement_type_semantics')==lp_type_semantics, (pid,p)
+          for pid in expected_live-set(expected_lp_placement_types):
+              p=profiles[pid]
+              assert p.get('best_lp_attributed_placement_type') is None, (pid,p)
+              assert p.get('lp_attributed_placement_type_count')==0, (pid,p)
+              assert p.get('lp_attributed_placement_type_semantics')==lp_type_semantics, (pid,p)
           gun_outcome=profiles['LIFE-046']
           assert gun_outcome.get('latest_observed_outcome_dates')=='2017-12-16 – 2017-12-17', gun_outcome
           assert gun_outcome.get('latest_observed_outcome_issued')==0, gun_outcome
@@ -3003,7 +3028,9 @@ jobs:
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           test "$(grep -o 'LP-attributed specific:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 5
-          grep -q 'LP-attributed placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/shows.html
+          test "$(grep -o 'LP-attributed placement type:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 1
+          grep -q 'LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/shows.html
+          grep -q 'LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth' /tmp/shows.html
           grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
           grep -q 'Best history:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
@@ -3085,8 +3112,12 @@ jobs:
           assert 'LP-attributed specific: 705 & 706 (10x20) · 2021 · Nov-18 thru Dec-5 · 4 LP closes · $80,100 LP close volume · 62 issued · 19 demos · annual LP attribution · not attendance proof' in miami
           artigras=row('LIFE-030')
           assert 'LP-attributed specific: S204 (10x10) · 2022 · Feb-19 Feb-20 · 1 LP close · $38,482 LP close volume · 11 issued · 8 demos · annual LP attribution · not attendance proof' in artigras
-          for pid in ('LIFE-014','LIFE-054','LIFE-092'):
+          greenmarket=row('LIFE-014')
+          assert 'LP-attributed specific:' not in greenmarket
+          assert 'LP-attributed placement type: outside popup · 2021 · Oct-23 · 2 LP closes · $32,550 LP close volume · 6 issued · 5 demos · annual LP attribution · not exact booth · not attendance proof' in greenmarket
+          for pid in ('LIFE-054','LIFE-092'):
               assert 'LP-attributed specific:' not in row(pid), (pid,row(pid))
+              assert 'LP-attributed placement type:' not in row(pid), (pid,row(pid))
           gun=row('LIFE-046')
           assert 'Latest: 2017 · 0 issued · 0 demos · Best: 2017 · 6 issued · 5 demos' in gun
           clam=row('LIFE-077')
@@ -3663,6 +3694,10 @@ jobs:
           grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-lp-attributed-placement-type-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'LP-attributed placement type' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'outside popup · 2021 · Oct-23 · 2 LP closes · $32,550 LP close volume · 6 issued · 5 demos · annual LP attribution · not exact booth · not attendance proof' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'not an exact booth, not same-row history performance, and not proof Paradise attended/worked that placement' /tmp/wpb_greenmarket_next_cycle.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
