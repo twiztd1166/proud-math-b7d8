@@ -342,6 +342,8 @@ jobs:
               grep -q 'liveCompareDecisionCell' /tmp/app.css
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
+              grep -q 'liveComparisonPriorityDate' /tmp/app-shows.js
+              grep -q 'earliest verified hard deadline or event date first' /tmp/app-shows.js
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
               grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
               grep -q 'liveComparisonEvidenceDepth' /tmp/app-shows.js
@@ -3045,6 +3047,7 @@ jobs:
           grep -q 'Live booking board' /tmp/shows.html
           grep -q 'data-live-decision-comparison' /tmp/shows.html
           grep -q 'Live opportunity comparison' /tmp/shows.html
+          grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
           grep -q '17 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
@@ -3193,6 +3196,10 @@ jobs:
           }
           live_ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
           assert len(live_ids)==17, live_ids
+          expected_pursue_order=['LIFE-044','LIFE-046','LIFE-007','LIFE-054','LIFE-092','LIFE-018','LIFE-017','LIFE-013']
+          assert live_ids[:8]==expected_pursue_order, live_ids
+          assert live_ids[0]=='LIFE-044', live_ids
+          assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row('LIFE-044'), row('LIFE-044')
           for pid,expected in expected_deadlines.items():
               r=row(pid)
               assert f'data-live-compare-deadline-profile="{pid}"' in r, (pid,r)
