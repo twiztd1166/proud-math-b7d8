@@ -678,7 +678,7 @@ jobs:
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
-              'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan before $100 invoice deposit · signed hold-harmless agreement',
+              'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms',
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
@@ -929,13 +929,15 @@ jobs:
           assert 'Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'does not prove the old booth number/zone is still best' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Explicitly reject simply reusing Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'call Mike/Latitude-88 at 772-492-6105 and request the exact available booth list before paying the $100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'call Mike/Latitude-88 at 772-492-6105 and request the exact available booth list' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '$100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'hold-harmless' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '$100 deposit' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
-          assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
+          assert '25% deposit within 14 days of the emailed invoice' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'selected booth remains available to others until the deposit is received' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Jan. 3-4, 2026 booking-reply page' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert '$100 deposit, hold-harmless or 30-day final-balance rules' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert '25% deposit within 14 days of the emailed invoice' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
+          assert 'confirm the remaining 2027 payment/agreement terms before paying' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
+          assert 'EXPLICIT_2026_PREDECESSOR_NOT_CURRENT_TERMS' in reviews['LIFE-009'].get('source_ref',''), reviews['LIFE-009']
           assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
           placement_request_evidence={
@@ -1520,6 +1522,15 @@ jobs:
           assert 'Sat. Jan. 2, 2027: 10 AM–5 PM' in live['LIFE-009'].get('current_schedule_text','')
           assert 'Sun. Jan. 3: 10 AM–4 PM' in live['LIFE-009'].get('current_schedule_text','')
           assert live['LIFE-009'].get('current_schedule_source_url')=='https://www.patriothomeshows.com/attendee-faq', live['LIFE-009']
+          assert live['LIFE-009'].get('current_commitment_status')=='PARTIAL_CURRENT', live['LIFE-009']
+          assert '25% deposit is required within 14 days of receiving the emailed invoice' in live['LIFE-009'].get('commitment_terms_text',''), live['LIFE-009']
+          assert 'selected booth number remains available for others to book until Latitude-88 receives the deposit' in live['LIFE-009'].get('commitment_terms_text',''), live['LIFE-009']
+          assert 'Jan. 3-4, 2026 Winter Edition' in live['LIFE-009'].get('commitment_terms_text',''), live['LIFE-009']
+          assert 'predecessor-cycle evidence, not decision-safe 2027 terms' in live['LIFE-009'].get('commitment_terms_text',''), live['LIFE-009']
+          assert live['LIFE-009'].get('critical_deadline_date') is None, live['LIFE-009']
+          assert not live['LIFE-009'].get('critical_deadline_type'), live['LIFE-009']
+          assert not live['LIFE-009'].get('critical_deadline_label'), live['LIFE-009']
+          assert not live['LIFE-009'].get('critical_deadline_basis'), live['LIFE-009']
           expected_current_logistics_status={
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'PARTIAL_CURRENT',
@@ -1574,7 +1585,7 @@ jobs:
           expected_current_commitment_status={
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'VERIFIED_CURRENT',
-              'LIFE-009':'VERIFIED_CURRENT',
+              'LIFE-009':'PARTIAL_CURRENT',
               'LIFE-013':'AGREEMENT_REQUIRED',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
               'LIFE-017':'VERIFIED_CURRENT',
@@ -1595,8 +1606,8 @@ jobs:
               op=live[pid]
               assert op.get('current_commitment_status')==status, (pid,op)
               assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
-          assert sum(1 for v in expected_current_commitment_status.values() if v=='VERIFIED_CURRENT')==5
-          assert sum(1 for v in expected_current_commitment_status.values() if v=='PARTIAL_CURRENT')==3
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='VERIFIED_CURRENT')==4
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='PARTIAL_CURRENT')==4
           assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==6
           assert sum(1 for v in expected_current_commitment_status.values() if v=='RECONCILE_EXISTING')==1
           assert sum(1 for v in expected_current_commitment_status.values() if v=='NOT_PUBLISHED_YET')==1
@@ -1697,7 +1708,7 @@ jobs:
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'The current Green Market application requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature · the application says to seek clarification from a legal advisor if the agreement is not understood · the waiver states it is a legal document, that signing gives up certain legal rights including the right to sue, and broadly waives/releases/indemnifies/holds harmless POTTC Events, the Village and related parties including claims resulting from negligence or fault · approved applicants must also sign the waiver before occupying a booth · all booth fees must be paid in full before occupying the space · payments are due 10 days before each participation date, but space may sell out earlier · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
-              'LIFE-009':'$100 deposit due by the due date in the emailed invoice after acceptance · signed hold-harmless agreement required · failure to pay the deposit or sign the agreement can delete the booking · final balance due 30 days before the Friday setup day.',
+              'LIFE-009':'Current Jan. 2-3, 2027 exhibitor page verifies a 25% deposit is required within 14 days of receiving the emailed invoice, not from the online booth-selection date. It also says the selected booth number remains available for others to book until Latitude-88 receives the deposit. A separate Patriot Home Shows thank-you/booking-reply page states a $100 deposit, hold-harmless signature and final balance 30 days before Friday setup, but that page explicitly identifies the Jan. 3-4, 2026 Winter Edition and is therefore predecessor-cycle evidence, not decision-safe 2027 terms. Confirm the 2027 final-balance schedule, agreement/hold-harmless requirement and cancellation/refund terms in the current invoice/agreement before payment.',
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
@@ -1722,10 +1733,9 @@ jobs:
           expected_critical_deadlines={
               'LIFE-044':('2026-09-17','CANCELLATION_LIABILITY_CUTOFF','30-day cancellation-liability cutoff','Date = 2026-10-17 minus 30 days.'),
               'LIFE-054':('2026-11-05','NO_REFUND_WINDOW_BOUNDARY','30-day no-refund boundary','Date = 2026-12-05 minus 30 days.'),
-              'LIFE-009':('2026-12-02','FINAL_BALANCE_DUE','Final balance due','30 days earlier is Dec. 2, 2026.'),
               'LIFE-017':('2027-03-01','FINAL_BALANCE_DUE','Final balance due','Direct verified contract term: final balance due March 1, 2027.'),
           }
-          assert len(expected_critical_deadlines)==4, expected_critical_deadlines
+          assert len(expected_critical_deadlines)==3, expected_critical_deadlines
           for pid,(deadline,kind,label,basis_part) in expected_critical_deadlines.items():
               op=live[pid]
               assert op.get('critical_deadline_date')==deadline, (pid,op)
@@ -3340,8 +3350,10 @@ jobs:
           assert 'Latitude-88, Inc.' in vero
           assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
           assert 'Watch / gated' in vero
-          assert 'Commitment: Verified current' in vero
-          assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
+          assert 'Commitment: Partial current commitment terms' in vero
+          assert 'Still needed: Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms' in vero
+          assert '25% deposit is required within 14 days of receiving the emailed invoice' in vero
+          assert 'Jan. 3-4, 2026 Winter Edition' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'LP-attributed specific: 66 (10x10) · 2022 · Jan-15 Jan-16 · 4 LP closes · $110,038 LP close volume · 38 issued · 15 demos · annual LP attribution · not attendance proof' in vero
@@ -3392,7 +3404,6 @@ jobs:
           expected_deadlines={
               'LIFE-044':'Sep 17, 2026 · 30-day cancellation-liability cutoff',
               'LIFE-054':'Nov 5, 2026 · 30-day no-refund boundary',
-              'LIFE-009':'Dec 2, 2026 · Final balance due',
               'LIFE-017':'Mar 1, 2027 · Final balance due',
           }
           live_ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
@@ -3612,14 +3623,14 @@ jobs:
           grep -q 'data-current-booking-cost-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
           grep -q 'data-current-commitment-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q '\$100 deposit due by the due date in the emailed invoice' /tmp/vero_home_placement.html
-          grep -q 'signed hold-harmless agreement required' /tmp/vero_home_placement.html
-          grep -q 'final balance due 30 days before the Friday setup day' /tmp/vero_home_placement.html
-          grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q 'Critical commitment date' /tmp/vero_home_placement.html
-          grep -q 'Dec 2, 2026' /tmp/vero_home_placement.html
-          grep -q 'Final balance due' /tmp/vero_home_placement.html
-          grep -q '30 days earlier is Dec. 2, 2026' /tmp/vero_home_placement.html
+          grep -q '25% deposit is required within 14 days of receiving the emailed invoice' /tmp/vero_home_placement.html
+          grep -q 'selected booth number remains available for others to book until Latitude-88 receives the deposit' /tmp/vero_home_placement.html
+          grep -q 'Jan. 3-4, 2026 Winter Edition' /tmp/vero_home_placement.html
+          grep -q 'predecessor-cycle evidence, not decision-safe 2027 terms' /tmp/vero_home_placement.html
+          if grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html; then
+            echo 'Vero Winter incorrectly rendered a verified hard deadline from predecessor-cycle terms'
+            exit 1
+          fi
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
@@ -4364,8 +4375,12 @@ jobs:
           grep -q 'Standard 10x10 \$475' /tmp/detail.html
           grep -q 'Premium 10x10 \$535' /tmp/detail.html
           grep -q 'Premium Corner 10x10 \$635' /tmp/detail.html
-          grep -q '\$100 deposit' /tmp/detail.html
-          grep -q 'Dec 2, 2026' /tmp/detail.html
+          grep -q '25% deposit' /tmp/detail.html
+          grep -q '14 days' /tmp/detail.html
+          if grep -q 'Dec 2, 2026' /tmp/detail.html; then
+            echo 'Vero detail incorrectly carried the 2026 predecessor final-balance deadline into 2027'
+            exit 1
+          fi
 
           render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
           grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
