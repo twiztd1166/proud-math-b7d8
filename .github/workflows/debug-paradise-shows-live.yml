@@ -2096,6 +2096,9 @@ jobs:
           grep -q 'Vero Home Show' /tmp/vero_home_placement.html
           grep -q 'Venue / address' /tmp/vero_home_placement.html
           grep -q 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' /tmp/vero_home_placement.html
+          grep -q 'Current booth / placement' /tmp/vero_home_placement.html
+          grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
+          grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
@@ -2114,6 +2117,9 @@ jobs:
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
           grep -q 'Venue / address' /tmp/rpb_green_market_placement.html
           grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
+          grep -q 'Current booth / placement' /tmp/rpb_green_market_placement.html
+          grep -q 'No 2026-27 Paradise space is assigned/verified yet' /tmp/rpb_green_market_placement.html
+          grep -q 'do not treat #18 as proven best' /tmp/rpb_green_market_placement.html
           grep -q 'Historical placement guide' /tmp/rpb_green_market_placement.html
           grep -q 'data-historical-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
@@ -2126,6 +2132,9 @@ jobs:
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
           grep -q 'Venue / address' /tmp/martin_home_placement.html
           grep -q 'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996' /tmp/martin_home_placement.html
+          grep -q 'Current booth / placement' /tmp/martin_home_placement.html
+          grep -q 'current 2027 floor plan, but no Paradise booth assignment is verified' /tmp/martin_home_placement.html
+          grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
@@ -2159,6 +2168,9 @@ jobs:
           grep -q 'Tampa Home Show' /tmp/tampa_2027.html
           grep -q 'Venue / address' /tmp/tampa_2027.html
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
+          grep -q 'Current booth / placement' /tmp/tampa_2027.html
+          grep -q 'No 2027 Tampa booth assignment is verified' /tmp/tampa_2027.html
+          grep -q 'do not use the attached 2024 floor plan as current availability evidence' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
           grep -q 'data-current-booking-cost-profile="LIFE-017"' /tmp/tampa_2027.html
@@ -2248,6 +2260,8 @@ jobs:
           grep -q 'Oct 31, 2026' /tmp/pembroke_detail.html
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
+          grep -q 'Current booth / placement' /tmp/pembroke_detail.html
+          grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
           grep -q 'Prior verified cost / reference' /tmp/pembroke_detail.html
           grep -q 'Booth 106, 8x10' /tmp/pembroke_detail.html
           grep -q '\$2,145 booth cost less \$100 Super Saver = \$2,045 invoice' /tmp/pembroke_detail.html
