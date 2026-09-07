@@ -485,6 +485,8 @@ jobs:
               'LIFE-071':'Current all-in booth/setup quote · exact available St. Petersburg placement · category acceptance · deposit / cancellation / COI / add-on terms',
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
+          }
+          expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
               'LIFE-038':'Next Paws in the Park date · current commercial/vendor package · live booth map/placement · current price · power · category exclusivity · payment terms',
               'LIFE-039':'2027 event date · business-exhibitor registration reopening · 2027 booth rate/power option · footprint · COI terms',
@@ -492,10 +494,12 @@ jobs:
               'LIFE-057':'Next Nurses Night Out date · current vendor inventory · current booth/activation price · footprint · attendee profile · exclusivity · payment/setup terms',
               'LIFE-073':'2027 date/application · 10x10 availability · current 2027 fee · placement · payment deadline · COI · setup rules',
           }
-          for pid,blockers in expected_live_blockers.items():
+          expected_review_blockers={**expected_live_blockers,**expected_historical_blockers}
+          assert set(expected_historical_blockers)=={'LIFE-028','LIFE-038','LIFE-039','LIFE-056','LIFE-057','LIFE-073'}, expected_historical_blockers
+          for pid,blockers in expected_review_blockers.items():
               assert reviews[pid].get('blockers_text')==blockers, (pid,reviews[pid])
           for pid,review in reviews.items():
-              if pid not in expected_live_blockers:
+              if pid not in expected_review_blockers:
                   assert not review.get('blockers_text'), (pid,review)
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
