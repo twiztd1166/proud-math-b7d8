@@ -350,28 +350,39 @@ jobs:
           assert len(strong_2013)==8, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={
+              'HIST-234':'WATCH',
+              'LIFE-007':'PURSUE',
+              'LIFE-009':'WATCH',
+              'LIFE-013':'PURSUE',
+              'LIFE-014':'WATCH',
+              'LIFE-017':'PURSUE',
+              'LIFE-018':'PURSUE',
               'LIFE-028':'PURSUE',
+              'LIFE-029':'HOLD',
+              'LIFE-030':'WATCH',
+              'LIFE-032':'HOLD',
+              'LIFE-033':'HOLD',
               'LIFE-038':'PURSUE',
               'LIFE-039':'WATCH',
               'LIFE-041':'HOLD',
               'LIFE-044':'PURSUE',
+              'LIFE-046':'PURSUE',
+              'LIFE-054':'PURSUE',
               'LIFE-056':'WATCH',
               'LIFE-057':'PURSUE',
+              'LIFE-060':'WATCH',
+              'LIFE-061':'HOLD',
               'LIFE-071':'WATCH',
               'LIFE-073':'PURSUE',
-              'LIFE-017':'PURSUE',
-              'LIFE-007':'PURSUE',
-              'LIFE-009':'WATCH',
               'LIFE-075':'WATCH',
-              'LIFE-029':'HOLD',
-              'LIFE-032':'HOLD',
-              'LIFE-061':'HOLD',
+              'LIFE-076':'WATCH',
+              'LIFE-077':'WATCH',
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==7, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==5, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='HOLD')==4, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==11, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==11, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='HOLD')==5, actual_reviews
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
@@ -405,6 +416,35 @@ jobs:
           assert 'Do not select Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert '25% deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
+          assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
+          assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
+          assert '$100 weekend test' in reviews['LIFE-046'].get('action_timing',''), reviews['LIFE-046']
+          assert '$219,783' in reviews['LIFE-046'].get('rationale',''), reviews['LIFE-046']
+          assert reviews['HIST-234'].get('disposition')=='WATCH' and 'waitlist' in reviews['HIST-234'].get('action_timing','').lower(), reviews['HIST-234']
+          assert '$25,000' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
+          assert 'mixed LIFE-061' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert reviews['LIFE-033'].get('disposition')=='HOLD' and reviews['LIFE-033'].get('action_timing','').startswith('NOW'), reviews['LIFE-033']
+          assert 'account-control HOLD' in reviews['LIFE-033'].get('rationale',''), reviews['LIFE-033']
+          assert 'signed contract, exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
+          assert reviews['LIFE-077'].get('disposition')=='WATCH' and reviews['LIFE-077'].get('action_timing','').startswith('NOW'), reviews['LIFE-077']
+          assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert '$200' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert reviews['LIFE-054'].get('disposition')=='PURSUE' and reviews['LIFE-054'].get('action_timing','').startswith('NOW'), reviews['LIFE-054']
+          assert '1 net close / $20,025' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert '$160 Commercial/Retail' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
+          assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
+          assert '$316,198' in reviews['LIFE-018'].get('rationale',''), reviews['LIFE-018']
+          assert 'historical $795/$1,500/$1,845 figures only as references' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
+          assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('action_timing','').startswith('NOW'), reviews['LIFE-030']
+          assert '$3,350-$3,850' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert reviews['LIFE-060'].get('disposition')=='WATCH' and reviews['LIFE-060'].get('action_timing','').startswith('NOW'), reviews['LIFE-060']
+          assert '2017 fair source produced 1 net close / $12,700' in reviews['LIFE-060'].get('rationale',''), reviews['LIFE-060']
+          assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('action_timing','').startswith('NOW'), reviews['LIFE-076']
+          assert 'Hospitality alone should not be treated as marketing inventory' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
+          assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
+          assert '10x20 / 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
