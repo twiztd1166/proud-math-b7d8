@@ -647,7 +647,7 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==5, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           expected_live_blockers={
-              'LIFE-046':'Current table availability · exact table location · Paradise category acceptance',
+              'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment',
               'LIFE-007':'Application acceptance · exact current placement · final requested footprint',
               'LIFE-054':'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement',
@@ -1060,7 +1060,7 @@ jobs:
               assert live[pid].get('venue_text')==venue, (pid,live[pid])
           expected_current_placements={
               'LIFE-014':'No 2026-27 Paradise placement is available because the application cycle is closed. Treat prior outside-popup history only as next-cycle placement context; confirm the 2027-28 map/rules when applications reopen.',
-              'LIFE-046':'No Oct. 10-11 table location is verified. Tables are subject to promoter availability; confirm the exact table/location before booking the $100 weekend test.',
+              'LIFE-046':'No Oct. 10-11 West Palm inside-table location is verified. West Palm uses indoor 8 ft x 2.5 ft tables; the promoter publishes 10x10 outside spaces only for DeLand. Confirm the exact inside table/location and whether Paradise windows/doors marketing is accepted before booking the $100 weekend test.',
               'HIST-234':'No Paradise 2026 commercial sponsorship footprint/location is verified. Retail Vendor Village is sold out/waitlist; obtain the commercial sponsorship placement before committing.',
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
@@ -1190,6 +1190,9 @@ jobs:
           assert sum(1 for v in expected_current_logistics_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           assert 'Friday setup 1 PM-7 PM' in live['LIFE-046'].get('current_logistics_text','')
           assert '24-hour armed security' in live['LIFE-046'].get('current_logistics_text','')
+          assert '8 ft x 2.5 ft indoor table' in live['LIFE-046'].get('current_logistics_text','')
+          assert 'contact the promoter about their products and table availability' in live['LIFE-046'].get('current_logistics_text','')
+          assert '10x10 outside-space option; that option is DeLand-only' in live['LIFE-046'].get('current_logistics_text','')
           assert 'power is not available for purchase' in live['LIFE-054'].get('current_logistics_text','')
           assert 'all materials must be removed at Paradise expense by 9 PM Sunday Apr. 4, 2027' in live['LIFE-017'].get('current_logistics_text','')
           assert 'no security is provided after 9 PM' in live['LIFE-017'].get('current_logistics_text','')
@@ -1281,7 +1284,7 @@ jobs:
               'LIFE-009':(475,635,'10x10 booth','Official 2027 standard-to-premium-corner 10x10 range; optional table/carpet add-ons excluded.'),
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
-              'LIFE-046':(100,100,'8-foot table / weekend','Official promoter vendor rate; includes 2 chairs and 2 employee badges.'),
+              'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
               'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. The organizer may determine the approved category from the application; current approved Paradise tier remains unverified.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
@@ -3597,6 +3600,9 @@ jobs:
           grep -q 'data-current-booking-cost-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/gunshow_detail.html
           grep -q '\$100 · 8-foot table / weekend' /tmp/gunshow_detail.html
+          grep -q '8 ft x 2.5 ft indoor table' /tmp/gunshow_detail.html
+          grep -q 'No West Palm 10x10 outside option is published' /tmp/gunshow_detail.html
+          grep -q 'current promoter acceptance of Paradise windows/doors marketing' /tmp/gunshow_detail.html
           grep -q 'data-current-commitment-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'email table requests are granted only after a promoter confirmation reply' /tmp/gunshow_detail.html
           grep -q 'first-come, first-served beginning Tuesday at 10:30 AM' /tmp/gunshow_detail.html
@@ -3612,6 +3618,8 @@ jobs:
           grep -q 'Verified current logistics' /tmp/gunshow_detail.html
           grep -q 'Friday setup 1 PM-7 PM' /tmp/gunshow_detail.html
           grep -q '24-hour armed security' /tmp/gunshow_detail.html
+          grep -q 'contact the promoter about their products and table availability' /tmp/gunshow_detail.html
+          grep -q 'West Palm does not have the published 10x10 outside-space option' /tmp/gunshow_detail.html
           grep -q 'data-current-logistics-source-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q '>Open logistics source<' /tmp/gunshow_detail.html
 
