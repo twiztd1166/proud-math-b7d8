@@ -107,6 +107,10 @@ jobs:
               grep -q 'Watch / gated live' /tmp/app-shows.js
               grep -q 'Hold / reconcile live' /tmp/app-shows.js
               grep -q 'liveOpportunityReadinessIs' /tmp/app-shows.js
+              grep -q 'Resolution lane' /tmp/app-shows.js
+              grep -q 'resolutionLaneLabel' /tmp/app-shows.js
+              grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
               grep -q 'ALL_READY_COMMIT' /tmp/app-core.js
               grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-core.js
               grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-core.js
@@ -683,7 +687,7 @@ jobs:
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
-              'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms',
+              'LIFE-009':'Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered',
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
@@ -927,23 +931,16 @@ jobs:
           assert 'Only after approval does the emailed payment link let Paradise select/pay dates' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
           assert 'space can sell out before that deadline' in live['LIFE-007'].get('booking_window_text',''), live['LIFE-007']
           assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
-          assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
+          assert reviews['LIFE-009'].get('action_timing','').startswith('NOW — only contact Latitude-88 for a cancellation/additional opening.'), reviews['LIFE-009']
+          assert 'sold out' in reviews['LIFE-009'].get('action_timing','').lower(), reviews['LIFE-009']
           assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Booth #52 produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Jan. 3-4, 2026 occurrence produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
-          assert reviews['LIFE-009'].get('next_step','').startswith('Open the live Jan. 2-3, 2027 BoothCentral floor plan now;'), reviews['LIFE-009']
-          assert 'floor plan is live/bookable and that exhibitor spaces are going fast' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'does not prove the old booth number/zone is still best' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Explicitly reject simply reusing Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'call Mike/Latitude-88 at 772-492-6105 and request the exact available booth list' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '25% deposit within 14 days of the emailed invoice' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'selected booth remains available to others until the deposit is received' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Jan. 3-4, 2026 booking-reply page' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '$100 deposit, hold-harmless or 30-day final-balance rules' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '25% deposit within 14 days of the emailed invoice' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
-          assert 'confirm the remaining 2027 payment/agreement terms before paying' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
+          assert reviews['LIFE-009'].get('next_step','').startswith('Call/email Latitude-88 now at 772-492-6105 / info@latitude88.com and ask to be contacted only if a Jan. 2-3, 2027 booth cancellation or additional opening becomes available.'), reviews['LIFE-009']
+          assert 'historical Booth 66' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Booth 52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Space 048' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'skip the Winter 2027 edition' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'EXPLICIT_2026_PREDECESSOR_NOT_CURRENT_TERMS' in reviews['LIFE-009'].get('source_ref',''), reviews['LIFE-009']
           assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
@@ -1429,6 +1426,23 @@ jobs:
           assert sum(1 for v in expected_live_readiness.values() if v=='HOLD_RECONCILE')==1
           assert sum(1 for v in expected_live_readiness.values() if v=='READY_TO_COMMIT')==0
           assert all(reviews[pid].get('blockers_text') for pid in expected_live if expected_live_readiness[pid]!='READY_TO_COMMIT')
+          expected_resolution_lanes={
+              'LIFE-007':'PARADISE_ACTION','LIFE-054':'PARADISE_ACTION','LIFE-112':'PARADISE_ACTION',
+              'HIST-234':'ORGANIZER_RESPONSE','LIFE-009':'ORGANIZER_RESPONSE','LIFE-013':'ORGANIZER_RESPONSE',
+              'LIFE-017':'ORGANIZER_RESPONSE','LIFE-018':'ORGANIZER_RESPONSE','LIFE-030':'ORGANIZER_RESPONSE',
+              'LIFE-044':'ORGANIZER_RESPONSE','LIFE-046':'ORGANIZER_RESPONSE','LIFE-071':'ORGANIZER_RESPONSE',
+              'LIFE-076':'ORGANIZER_RESPONSE','LIFE-077':'ORGANIZER_RESPONSE','LIFE-092':'ORGANIZER_RESPONSE',
+              'LIFE-014':'WAIT_FOR_PUBLICATION','LIFE-060':'WAIT_FOR_PUBLICATION',
+              'LIFE-033':'RECONCILE_EXISTING',
+          }
+          assert set(expected_resolution_lanes)==expected_live, (set(expected_resolution_lanes),expected_live)
+          for pid,lane in expected_resolution_lanes.items():
+              assert reviews[pid].get('resolution_lane')==lane, (pid,reviews[pid])
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='PARADISE_ACTION')==3
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='ORGANIZER_RESPONSE')==12
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='WAIT_FOR_PUBLICATION')==2
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='RECONCILE_EXISTING')==1
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='RESEARCH_REQUIRED')==0
           live_action_timing={pid:str((reviews.get(pid) or {}).get('action_timing') or '').strip() for pid in expected_live}
           act_now={pid for pid,timing in live_action_timing.items() if timing.upper().startswith('NOW')}
           act_later={pid for pid,timing in live_action_timing.items() if timing and not timing.upper().startswith('NOW')}
@@ -1482,7 +1496,7 @@ jobs:
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered. Spring Booth 106 (2026) and Booth 428 (2023) are prior-occurrence references only. Obtain the fall-specific signed contract/account statement and exact live booth before any new payment or staffing decision.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
-              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Open the live floor plan and verify current numbering/availability before paying. Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence: the Jan. 15-16, 2022 occurrence is date-matched to 4 LP closes / $110,038 LP close volume / 38 issued / 15 demos. That does not prove the old booth number/zone is still best. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0. Also do not automatically repeat Space 048: BoothCentral directly assigned 048 for Jan. 3-4, 2026, Paradise paid $535, and that exact occurrence is date-matched to 0 LP closes / $0 LP close volume / 9 issued / 3 demos. The 048 and 66 comparison is evidence, not proof that booth location caused either result, and it does not establish 2027 availability.',
+              'LIFE-009':'As of Sep. 7, 2026, the live BoothCentral page states all Jan. 2-3, 2027 booth spaces are filled. No Paradise 2027 booth is secured. Contact Latitude-88 only for cancellations/additional openings. If a space opens, require a materially stronger live placement before moving from WATCH toward PURSUE. Historical Booth 66 remains the strongest placement reference supported by Paradise evidence (Jan. 2022 date-matched 4 LP closes / $110,038), but it is not proof of causation or current availability. Avoid simply repeating Booth 52 (Apr. 2025 same-row 0 net sales) or Jan. 2026 Space 048 ($535 paid; exact date-matched 0 LP closes) unless the current traffic context materially differs.',
               'LIFE-018':'The official organizer page links a current 2027 floor plan. The contract asks for a 1st Choice plus alternates and states all exhibition space is allotted by or under Professional Show Management authority. No Paradise booth is assigned/verified. Historical Nov. 2021 notes requested Booth #131 (10x12) or #129; use those only as historical placement references until current numbering and live availability are confirmed.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
@@ -1518,7 +1532,7 @@ jobs:
           expected_current_placement_status={
               'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
-              'LIFE-009':'FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
+              'LIFE-009':'CONTRACT_REQUEST_NOT_ASSIGNED',
               'LIFE-013':'CONTRACT_REQUEST_NOT_ASSIGNED',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
               'LIFE-017':'CONTRACT_REQUEST_NOT_ASSIGNED',
@@ -1540,9 +1554,9 @@ jobs:
               assert live[pid].get('current_placement_status')==status, (pid,live[pid])
           assert sum(1 for v in expected_current_placement_status.values() if v=='ASSIGNED_VERIFIED')==0
           assert sum(1 for v in expected_current_placement_status.values() if v=='LISTED_ASSIGNMENT_UNVERIFIED')==1
-          assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==3
+          assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==2
           assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==6
-          assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==3
+          assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==4
           assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==3
           assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='NEXT_CYCLE_CLOSED')==1
@@ -1796,7 +1810,7 @@ jobs:
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'The current Green Market application requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature · the application says to seek clarification from a legal advisor if the agreement is not understood · the waiver states it is a legal document, that signing gives up certain legal rights including the right to sue, and broadly waives/releases/indemnifies/holds harmless POTTC Events, the Village and related parties including claims resulting from negligence or fault · approved applicants must also sign the waiver before occupying a booth · all booth fees must be paid in full before occupying the space · payments are due 10 days before each participation date, but space may sell out earlier · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
-              'LIFE-009':'Current Jan. 2-3, 2027 exhibitor page verifies a 25% deposit is required within 14 days of receiving the emailed invoice, not from the online booth-selection date. It also says the selected booth number remains available for others to book until Latitude-88 receives the deposit. A separate Patriot Home Shows thank-you/booking-reply page states a $100 deposit, hold-harmless signature and final balance 30 days before Friday setup, but that page explicitly identifies the Jan. 3-4, 2026 Winter Edition and is therefore predecessor-cycle evidence, not decision-safe 2027 terms. Confirm the 2027 final-balance schedule, agreement/hold-harmless requirement and cancellation/refund terms in the current invoice/agreement before payment.',
+              'LIFE-009':'Current 2027 booking terms are now partially reconciled across the official exhibitor page and live BoothCentral event: 25% deposit is due within 14 days of the emailed invoice; selected space remains available to others until the deposit is received; BoothCentral states final payments are due by default 30 days before the Friday setup day unless otherwise noted; reservations are accepted until full. The event is currently sold out, so these payment terms matter only if Latitude-88 offers Paradise an additional/cancelled space. Current refund/cancellation language was not fully recoverable from the live page and must be confirmed before accepting an opening.',
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
@@ -1899,20 +1913,18 @@ jobs:
           assert 'Latitude-88' in vero_hurricane['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
-          assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='WATCH'
           assert profiles['LIFE-009']['current_rebook_opportunity']['event_start']=='2027-01-02'
           assert profiles['LIFE-009']['current_rebook_opportunity']['event_end']=='2027-01-03'
           assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           vero_winter_window=profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'Jul. 1, Aug. 4, Aug. 20 and Sep. 3, 2026' in vero_winter_window
-          assert 'View the Floor Plan and Book Your Booth' in vero_winter_window
-          assert 'exhibitor spaces are going fast' in vero_winter_window
-          assert '25% deposit within 14 days of receiving the emailed invoice' in vero_winter_window
-          assert 'selected booth remains available for others to book until the deposit is received' in vero_winter_window
-          assert 'Do not use the separate Jan. 3-4, 2026 booking-reply page' in vero_winter_window
-          assert '$100 deposit / 30-day final-balance mechanics as 2027 terms' in vero_winter_window
+          assert 'CURRENTLY SOLD OUT in BoothCentral' in vero_winter_window
+          assert 'all booth spaces have been filled' in vero_winter_window
+          assert 'contact Latitude-88 directly to ask about additional openings' in vero_winter_window
+          assert '25% deposit within 14 days of the emailed invoice' in vero_winter_window
+          assert 'final payments are due by default 30 days before the Friday setup day unless otherwise noted' in vero_winter_window
           for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa'):
               assert ref in reviews['LIFE-009'].get('source_ref',''), (ref,reviews['LIFE-009'])
           vero_source_ref=reviews['LIFE-009'].get('source_ref','')
@@ -3510,9 +3522,11 @@ jobs:
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
           assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
+          assert 'data-live-compare-resolution-profile="LIFE-009"' in vero
+          assert 'Resolution lane: Organizer response' in vero
           assert 'Watch / gated' in vero
           assert 'Commitment: Partial current commitment terms' in vero
-          assert 'Still needed: Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms' in vero
+          assert 'Still needed: Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'LP-attributed specific: 66 (10x10) · 2022 · Jan-15 Jan-16 · 4 LP closes · $110,038 LP close volume · 38 issued · 15 demos · annual LP attribution · not attendance proof' in vero
@@ -3810,8 +3824,8 @@ jobs:
           grep -q 'patriothomeshows.com/attendee-faq' /tmp/vero_home_placement.html
           grep -q '>Open schedule source<' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
-          grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
-          grep -q 'Explicitly avoid simply reusing Booth #52' /tmp/vero_home_placement.html
+          grep -q 'all Jan. 2-3, 2027 booth spaces are filled' /tmp/vero_home_placement.html
+          grep -q 'Contact Latitude-88 only for cancellations/additional openings' /tmp/vero_home_placement.html
           grep -q 'Space 048' /tmp/vero_home_placement.html
           grep -q 'Paradise paid \$535' /tmp/vero_home_placement.html
           grep -q '0 LP closes / \$0 LP close volume / 9 issued / 3 demos' /tmp/vero_home_placement.html
@@ -3824,17 +3838,17 @@ jobs:
           grep -q 'data-current-booking-cost-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
           grep -q 'data-current-commitment-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q '25% deposit is required within 14 days of receiving the emailed invoice' /tmp/vero_home_placement.html
-          grep -q 'selected booth number remains available for others to book until Latitude-88 receives the deposit' /tmp/vero_home_placement.html
-          grep -q 'Jan. 3-4, 2026 Winter Edition' /tmp/vero_home_placement.html
-          grep -q 'predecessor-cycle evidence, not decision-safe 2027 terms' /tmp/vero_home_placement.html
+          grep -q '25% deposit is due within 14 days of the emailed invoice' /tmp/vero_home_placement.html
+          grep -q 'final payments are due by default 30 days before the Friday setup day unless otherwise noted' /tmp/vero_home_placement.html
+          grep -q 'event is currently sold out' /tmp/vero_home_placement.html
+          grep -q 'refund/cancellation language was not fully recoverable' /tmp/vero_home_placement.html
           if grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html; then
             echo 'Vero Winter incorrectly rendered a verified hard deadline from predecessor-cycle terms'
             exit 1
           fi
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
-          grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
+          grep -q 'cancellation or additional opening becomes available' /tmp/vero_home_placement.html
           grep -q '>Open Jan. 2-3 booth application<' /tmp/vero_home_placement.html
           grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
           grep -q '4 LP closes / \$110,038 LP close volume / 38 issued / 15 demos' /tmp/vero_home_placement.html
@@ -4207,6 +4221,8 @@ jobs:
           grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-resolution-lane-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q '>Wait for publication<' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-lp-attributed-placement-type-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'LP-attributed placement type' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'outside popup · 2021 · Oct-23 · 2 LP closes · $32,550 LP close volume · 6 issued · 5 demos · annual LP attribution · not exact booth · not attendance proof' /tmp/wpb_greenmarket_next_cycle.html
@@ -4222,6 +4238,8 @@ jobs:
           grep -q 'Official 2026-27 Corporate rate: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Still needed before booking' /tmp/rebook_detail.html
           grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rebook_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q '>Paradise action<' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
@@ -4255,6 +4273,8 @@ jobs:
           grep -q 'Verified current exhibitor listing' /tmp/pembroke_detail.html
           grep -q 'data-booking-readiness-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Hold / reconcile' /tmp/pembroke_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q '>Reconcile existing<' /tmp/pembroke_detail.html
           grep -q 'Still needed before booking' /tmp/pembroke_detail.html
           grep -q 'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
@@ -4363,6 +4383,8 @@ jobs:
           grep -q 'Partial current commitment terms' /tmp/treasure_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-018"' /tmp/treasure_detail.html
           grep -q 'Floor plan available / not selected' /tmp/treasure_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-018"' /tmp/treasure_detail.html
+          grep -q '>Organizer response<' /tmp/treasure_detail.html
 
           render_view martin_detail "$SITE/#show/LIFE-060"
           grep -q 'Martin County Fair' /tmp/martin_detail.html
