@@ -1876,7 +1876,7 @@ jobs:
           assert 'last year’s vendors have first refusal' in slc.get('booking_window_text','').lower(), slc
           assert 'Pop-up/easy-up tents are prohibited' in slc.get('current_logistics_text',''), slc
           assert 'current operation photo' in slc.get('current_logistics_text',''), slc
-          assert 'St. Lucie County BOCC' in slc.get('current_logistics_text',''), slc
+          assert 'St. Lucie County Board of County Commissioners (BOCC)' in slc.get('current_logistics_text',''), slc
           assert slc.get('critical_deadline_date') is None, slc
           assert reviews['LIFE-112'].get('disposition')=='PURSUE', reviews['LIFE-112']
           assert reviews['LIFE-112'].get('booking_readiness')=='PRE_BOOKING_ACTION_REQUIRED', reviews['LIFE-112']
