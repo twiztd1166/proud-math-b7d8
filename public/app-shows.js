@@ -97,12 +97,25 @@ function opportunityCostText(op){
   const amount=low===high?money(low):`${money(low)}–${money(high)}`;
   return amount+(op?.booking_cost_unit?` · ${op.booking_cost_unit}`:'');
 }
-function rebookContactActions(value,profileId){
+function rebookContactActions(value,profileId,structuredEmail,structuredPhone){
   const text=String(value||'');
-  const emails=[...new Set(text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[])];
-  const phones=[...new Set(text.match(/(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]\d{3}[\s.-]\d{4}(?:\s*(?:x|ext\.?)\s*\d+)?/gi)||[])];
+  const emailCandidates=[String(structuredEmail||'').trim(),...(text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[])].filter(Boolean);
+  const emails=[];const seenEmails=new Set();
+  for(const email of emailCandidates){
+    const key=email.toLowerCase();
+    if(seenEmails.has(key))continue;
+    seenEmails.add(key);emails.push(email);
+  }
+  const phoneCandidates=[String(structuredPhone||'').trim(),...(text.match(/(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]\d{3}[\s.-]\d{4}(?:\s*(?:x|ext\.?)\s*\d+)?/gi)||[])].filter(Boolean);
+  const phones=[];const seenPhones=new Set();
+  for(const phone of phoneCandidates){
+    const dial=phone.replace(/[^\d+]/g,'');
+    const key=dial.replace(/^\+?1(?=\d{10}$)/,'');
+    if(!key||seenPhones.has(key))continue;
+    seenPhones.add(key);phones.push({label:phone,dial});
+  }
   if(!emails.length&&!phones.length)return '';
-  return `<div class="contactActions" data-current-contact-actions-profile="${esc(profileId||'')}">${phones.map(phone=>{const dial=phone.replace(/[^\d+]/g,'');return `<a class="contactBtn" href="tel:${esc(dial)}">Call ${esc(phone)}</a>`}).join('')}${emails.map(email=>`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`).join('')}</div>`;
+  return `<div class="contactActions" data-current-contact-actions-profile="${esc(profileId||'')}">${phones.map(phone=>`<a class="contactBtn" href="tel:${esc(phone.dial)}">Call ${esc(phone.label)}</a>`).join('')}${emails.map(email=>`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`).join('')}</div>`;
 }
 function rebookVenueDirections(value,profileId){
   const text=String(value||'').trim();
@@ -125,7 +138,7 @@ function rebookOpportunityCard(op){
   const cost=opportunityCostText(op);
   const comparableCost=cost?`<div class="wide" data-current-booking-cost-profile="${esc(op.profile_id)}"><span>Decision-safe current booking cost</span><b>${esc(cost)}${op.booking_cost_basis?` · ${esc(op.booking_cost_basis)}`:''}</b></div>`:'';
   const commitment=op.commitment_terms_text?`<div class="wide" data-current-commitment-profile="${esc(op.profile_id)}"><span>Commitment / payment terms</span><b>${esc(op.commitment_terms_text)}</b></div>`:'';
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide" data-current-venue-profile="${esc(op.profile_id)}"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b>${rebookVenueDirections(op.venue_text,op.profile_id)}</div><div class="wide"><span>Current booth / placement</span><b>${esc(op.current_placement_text||'No current Paradise placement is verified; confirm with organizer before booking.')}</b></div>${comparableCost}${commitment}${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide" data-current-contact-profile="${esc(op.profile_id)}"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b>${rebookContactActions(op.contact_text,op.profile_id)}</div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide" data-current-venue-profile="${esc(op.profile_id)}"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b>${rebookVenueDirections(op.venue_text,op.profile_id)}</div><div class="wide"><span>Current booth / placement</span><b>${esc(op.current_placement_text||'No current Paradise placement is verified; confirm with organizer before booking.')}</b></div>${comparableCost}${commitment}${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide" data-current-contact-profile="${esc(op.profile_id)}"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b>${rebookContactActions(op.contact_text,op.profile_id,op.contact_email,op.contact_phone)}</div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function rebookReviewCard(review){
   if(!review)return '';
@@ -488,7 +501,7 @@ function catalogSearchText(p,current){
   ]);
   const review=p?.current_rebook_review||{};
   const opportunity=p?.current_rebook_opportunity||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.commitment_terms_text,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.commitment_terms_text,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,opportunity.contact_name,opportunity.contact_email,opportunity.contact_phone,review.disposition,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
