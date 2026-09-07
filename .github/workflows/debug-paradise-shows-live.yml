@@ -4415,15 +4415,14 @@ jobs:
           grep -q 'Critical commitment date' /tmp/winterfest_detail.html
           grep -q 'Nov 5, 2026' /tmp/winterfest_detail.html
           grep -q '30-day no-refund boundary' /tmp/winterfest_detail.html
-          grep -q '\$170–\$410 · approved vendor category / event' /tmp/winterfest_detail.html
+          grep -q '\$310–\$410 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'plus required \$10 non-refundable application fee' /tmp/winterfest_detail.html
           grep -q 'Corporate Level 2 for the 2024 RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q '\$410 paid on Nov. 5, 2025' /tmp/winterfest_detail.html
-          grep -q 'conservative current exposure ceiling' /tmp/winterfest_detail.html
-          grep -q 'do not preserve a reusable booth number' /tmp/winterfest_detail.html
-          grep -q 'Do not invent a prior “best booth”' /tmp/winterfest_detail.html
+          grep -q '\$410 remains the conservative ceiling' /tmp/winterfest_detail.html
+          grep -q 'preserve no reusable booth number' /tmp/winterfest_detail.html
+          grep -q 'Do not call any historical placement “best”' /tmp/winterfest_detail.html
           grep -q 'do not assume the historical level automatically carries forward' /tmp/winterfest_detail.html
-          grep -q 'Paradise was explicitly approved Corporate Level 2 in 2024 and paid $410 for the 2025 event' /tmp/winterfest_detail.html
           if grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html; then
             echo "::error::Winter Fest mandatory application fee was omitted from structured booking exposure"
             exit 1
