@@ -94,7 +94,11 @@ jobs:
               grep -q 'rebookCandidate' /tmp/app-shows.js
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
-              grep -q 'Verified current / watch' /tmp/app-shows.js
+              grep -q 'Live booking board' /tmp/app-shows.js
+              grep -q 'BOOKING_DECISION' /tmp/app-shows.js
+              grep -q 'Booking decision / next date' /tmp/app-shows.js
+              grep -q 'Venue / address' /tmp/app-shows.js
+              grep -q 'opportunity.venue_text' /tmp/app-shows.js
               grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
               grep -q 'Verified current watch' /tmp/app-shows.js
@@ -481,6 +485,25 @@ jobs:
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
+          expected_venues={
+              'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
+              'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
+              'HIST-234':'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967',
+              'LIFE-007':'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411',
+              'LIFE-044':'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221',
+              'LIFE-033':'Charles F. Dodge City Center · 601 SW City Center Way, Pembroke Pines, FL 33025',
+              'LIFE-077':'Riverview Park · 600 U.S. Highway 1, Sebastian, FL 32958',
+              'LIFE-054':'Royal Palm Beach Commons Park · 11600 Poinciana Blvd, Royal Palm Beach, FL 33411',
+              'LIFE-009':'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967',
+              'LIFE-018':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
+              'LIFE-030':'Gardens North County District Park · 5101 117 Court North, Palm Beach Gardens, FL',
+              'LIFE-060':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
+              'LIFE-076':'PGA National Resort — Champion Course · Palm Beach Gardens, FL',
+              'LIFE-013':'Miami-Dade County Fair & Exposition · 10901 Coral Way, Miami, FL 33165',
+              'LIFE-017':'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602',
+          }
+          for pid,venue in expected_venues.items():
+              assert live[pid].get('venue_text')==venue, (pid,live[pid])
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -1941,7 +1964,7 @@ jobs:
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
-          grep -q 'Verified current / watch' /tmp/shows.html
+          grep -q 'Live booking board' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
@@ -1970,6 +1993,8 @@ jobs:
 
           render_view vero_home_placement "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/vero_home_placement.html
+          grep -q 'Venue / address' /tmp/vero_home_placement.html
+          grep -q 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
@@ -1980,6 +2005,8 @@ jobs:
 
           render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
+          grep -q 'Venue / address' /tmp/rpb_green_market_placement.html
+          grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
           grep -q 'Historical placement guide' /tmp/rpb_green_market_placement.html
           grep -q 'data-historical-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
@@ -1988,6 +2015,8 @@ jobs:
 
           render_view martin_home_placement "$SITE/#show/LIFE-018"
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
+          grep -q 'Venue / address' /tmp/martin_home_placement.html
+          grep -q 'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
@@ -1996,6 +2025,8 @@ jobs:
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html
+          grep -q 'Venue / address' /tmp/bradenton_pursue.html
+          grep -q 'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q '>PURSUE<' /tmp/bradenton_pursue.html
@@ -2010,7 +2041,14 @@ jobs:
           grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
           grep -q 'Open current source' /tmp/bradenton_pursue.html
 
-                    render_view hurricane_watch "$SITE/#show/LIFE-039"
+                    render_view tampa_2027 "$SITE/#show/LIFE-017"
+          grep -q 'Tampa Home Show' /tmp/tampa_2027.html
+          grep -q 'Venue / address' /tmp/tampa_2027.html
+          grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
+          grep -q '>PURSUE<' /tmp/tampa_2027.html
+          grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
+
+          render_view hurricane_watch "$SITE/#show/LIFE-039"
           grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
           grep -q 'Current booking review' /tmp/hurricane_watch.html
           grep -q 'When to act' /tmp/hurricane_watch.html
