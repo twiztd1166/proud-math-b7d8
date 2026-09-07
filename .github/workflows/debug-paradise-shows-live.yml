@@ -430,6 +430,16 @@ jobs:
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert '25% deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert profiles['LIFE-009'].get('best_observed_specific_booth')=='Booth #52', profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('best_observed_specific_booth_year')==2025, profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('best_observed_specific_booth_dates')=='Apr 12-13', profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('best_observed_specific_booth_net_sales')==0, profiles['LIFE-009']
+          assert float(profiles['LIFE-009'].get('best_observed_specific_booth_net_revenue') or 0)==0, profiles['LIFE-009']
+          assert not profiles['LIFE-007'].get('best_observed_specific_booth'), profiles['LIFE-007']
+          assert '#18' in str(profiles['LIFE-007'].get('latest_preserved_booth') or ''), profiles['LIFE-007']
+          assert 'outside' in str(profiles['LIFE-007'].get('latest_preserved_booth') or '').lower(), profiles['LIFE-007']
+          assert profiles['LIFE-007'].get('latest_preserved_booth_year')==2022, profiles['LIFE-007']
+          assert profiles['LIFE-007'].get('latest_preserved_booth_dates')=='Feb-19', profiles['LIFE-007']
           assert profiles['LIFE-009'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-009']
           assert not profiles['LIFE-009'].get('related_current_profile_id'), profiles['LIFE-009']
           assert profiles['LIFE-005'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-005']
@@ -1876,6 +1886,22 @@ jobs:
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
+
+          render_view vero_home_placement "$SITE/#show/LIFE-009"
+          grep -q 'Vero Home Show' /tmp/vero_home_placement.html
+          grep -q 'Historical placement guide' /tmp/vero_home_placement.html
+          grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
+          grep -q '2025 · Apr 12-13' /tmp/vero_home_placement.html
+          grep -q '0 net sales' /tmp/vero_home_placement.html
+          grep -q '\$0 net revenue' /tmp/vero_home_placement.html
+          grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
+
+          render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
+          grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
+          grep -q 'Historical placement guide' /tmp/rpb_green_market_placement.html
+          grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
+          grep -q '2022 · Feb-19' /tmp/rpb_green_market_placement.html
+          grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html

@@ -104,6 +104,27 @@ function rebookReviewCard(review){
   const css=disposition.toLowerCase();
   return `<div class="rebookReview ${esc(css)}"><div class="rebookReviewHead"><span>Current booking review</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||'Current review requires attention.')}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||'Verified current review source')}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
 }
+function historicalPlacementGuide(p){
+  if(!p?.current_rebook_opportunity)return '';
+  const specific=String(p.best_observed_specific_booth||'').trim();
+  const latest=String(p.latest_preserved_booth||'').trim();
+  if(!specific&&!latest)return '';
+  let placement='';
+  const outcome=[];
+  if(specific){
+    const when=[p.best_observed_specific_booth_year,p.best_observed_specific_booth_dates]
+      .filter(v=>v!==null&&v!==undefined&&String(v).trim()).join(' · ');
+    placement=`Outcome-linked prior placement: ${esc(specific)}${when?` (${esc(when)})`:''}`;
+    if(p.best_observed_specific_booth_net_sales!==null&&p.best_observed_specific_booth_net_sales!==undefined)outcome.push(`${esc(p.best_observed_specific_booth_net_sales)} net sales`);
+    if(p.best_observed_specific_booth_net_revenue!==null&&p.best_observed_specific_booth_net_revenue!==undefined)outcome.push(`${money(p.best_observed_specific_booth_net_revenue)} net revenue`);
+    if(p.best_observed_specific_booth_com!==null&&p.best_observed_specific_booth_com!==undefined)outcome.push(`${esc(p.best_observed_specific_booth_com)}% COM`);
+  }else{
+    const when=[p.latest_preserved_booth_year,p.latest_preserved_booth_dates]
+      .filter(v=>v!==null&&v!==undefined&&String(v).trim()).join(' · ');
+    placement=`Latest preserved placement: ${esc(latest)}${when?` (${esc(when)})`:''}`;
+  }
+  return `<div class="rebookContext"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
+}
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
   const lpOnly=isLpSourceOnly(p);
@@ -140,9 +161,10 @@ function catalogCard(p){
   const historicalAgeNote=candidate&&Number(p.latest_history_year||0)<2023?`<div class="rebookAge"><span>Older historical evidence</span><b>Strong history remains eligible because the rebook review starts in 2013. Verify that the organizer / series still exists, the venue or market still fits, and current economics remain attractive before booking.</b></div>`:'';
   const candidateNote=candidate?`<div class="action">Rebook candidate 2013+ · ${esc(p.tier)} · latest preserved history ${esc(p.latest_history_year)} · ${money(p.lifetime_net_volume)} lifetime net${candidateSales}${candidateBooth} · no current control</div>${historicalAgeNote}${preservedContext}${nextBooking}`:'';
   const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity):'';
+  const placementGuide=liveOpportunity?historicalPlacementGuide(p):'';
   const reviewCard=currentReview?rebookReviewCard(currentReview):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
-  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${reviewCard}${opportunityCard}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
+  return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
 function showEventYear(s){
   const raw=String(s?.event_start||s?.event_end||'');
