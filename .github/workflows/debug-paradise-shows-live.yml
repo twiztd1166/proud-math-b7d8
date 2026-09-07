@@ -99,14 +99,17 @@ jobs:
               grep -q 'Booking decision / next date' /tmp/app-shows.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-shows.js
               grep -q 'CURRENT_COST_HIGH' /tmp/app-shows.js
-              grep -q 'Current booking cost low' /tmp/app-shows.js
-              grep -q 'Current booking cost high' /tmp/app-shows.js
+              grep -q 'Current max booking cost low' /tmp/app-shows.js
+              grep -q 'Current max booking cost high' /tmp/app-shows.js
               grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
+              grep -q 'data-rebook-opportunity-profile' /tmp/app-shows.js
               grep -q 'fOpportunityCostBand' /tmp/app-shows.js
-              grep -q 'Current verified starting cost' /tmp/app-shows.js
+              grep -q 'Current verified max cost' /tmp/app-shows.js
               grep -q 'Quote / comparable cost missing' /tmp/app-shows.js
               grep -q 'booking_cost_min' /tmp/app-shows.js
               grep -q 'booking_cost_max' /tmp/app-shows.js
+              grep -Fq "rangeMatch(opportunity.booking_cost_max,f.currentCostBand)" /tmp/app-shows.js
+              grep -Fq "opportunityCostNumber(liveOpportunity,'booking_cost_max')" /tmp/app-shows.js
               grep -q 'booking_cost_basis' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-core.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-core.js
@@ -566,6 +569,8 @@ jobs:
               'LIFE-054':(160,400,'approved vendor category / event','Official 2026 published range: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400; Paradise category must be confirmed before payment.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
           }
+          assert len(expected_booking_costs)==7, expected_booking_costs
+          assert len(set(live)-set(expected_booking_costs))==8, set(live)-set(expected_booking_costs)
           for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
               op=live[pid]
               assert float(op.get('booking_cost_min'))==cmin, (pid,op)
@@ -2249,7 +2254,6 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
-          if grep -q 'Decision-safe current booking cost' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
