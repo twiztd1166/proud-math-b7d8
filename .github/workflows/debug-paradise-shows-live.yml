@@ -669,7 +669,7 @@ jobs:
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
-              'LIFE-009':'Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement',
+              'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan before $100 invoice deposit · signed hold-harmless agreement',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
@@ -915,7 +915,12 @@ jobs:
           assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Booth #52 produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Jan. 3-4, 2026 occurrence produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
-          assert 'Treat historical Booth 66 (10x10) as the stronger placement reference than Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert reviews['LIFE-009'].get('next_step','').startswith('Open the live Jan. 2-3, 2027 BoothCentral floor plan now;'), reviews['LIFE-009']
+          assert 'floor plan is live/bookable and that exhibitor spaces are going fast' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'does not prove the old booth number/zone is still best' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Explicitly reject simply reusing Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'call Mike/Latitude-88 at 772-492-6105 and request the exact available booth list before paying the $100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert '$100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
@@ -926,7 +931,7 @@ jobs:
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
           placement_request_evidence={
               'LIFE-007':('LP2021-101','2021-SCH21-0127','4 LP closes / $57,043 LP close volume / 4 issued / 4 demos','not attendance proof'),
-              'LIFE-009':('LP2022-111','2022-SCH22-0005','4 LP closes / $110,038 LP close volume / 38 issued / 15 demos','do not call Booth 66 proven best'),
+              'LIFE-009':('LP2022-111','2022-SCH22-0005','4 LP closes / $110,038 LP close volume / 38 issued / 15 demos','does not prove the old booth number/zone is still best'),
               'LIFE-013':('LP2021-040','2021-SCH21-0136','4 LP closes / $80,100 LP close volume / 62 issued / 19 demos','not attendance proof'),
               'LIFE-014':('LP2021-161','2021-SCH21-0119','2 LP closes / $32,550 LP close volume / 6 issued / 5 demos','not an exact booth and not attendance proof'),
               'LIFE-018':('LP2021-138','2021-SCH21-0129','4 LP closes / $96,238 LP close volume / 16 issued / 7 demos','not attendance proof'),
@@ -1390,7 +1395,7 @@ jobs:
               'LIFE-033':'Paradise is currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified. Reconcile the current ACS contract/account and exact booth before any new payment or re-booking.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
               'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
-              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Review the live floor plan and choose a materially stronger available location; do not reuse Booth #52 based on history because its Apr. 2025 outcome was 0 net sales.',
+              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet, but current Latitude-88 emails to Paradise explicitly say the live floor plan can be viewed and the booth booked online. Open the live plan now and compare actual availability before paying a deposit. Historical Booth 66 (10x10) is the strongest placement reference currently supported by date-aligned evidence: the Jan. 15-16, 2022 occurrence is matched to annual LP attribution of 4 closes / $110,038 close volume / 38 issued / 15 demos. That is performance attribution, not attendance proof or proof Booth 66 remains optimal. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
@@ -1721,9 +1726,15 @@ jobs:
           assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
+          assert 'Jul. 1, Aug. 4, Aug. 20 and Sep. 3, 2026' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert 'View the Floor Plan and Book Your Booth' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert 'exhibitor spaces are going fast' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
           assert '$100 deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
           assert 'hold-harmless agreement' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
           assert 'Final balance is due 30 days before the Friday setup day' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa','GMAIL:196c45dbe6b2d861'):
+              assert ref in reviews['LIFE-009'].get('source_ref',''), (ref,reviews['LIFE-009'])
+          assert 'Aug. 4 subject says spaces are going fast' in reviews['LIFE-009'].get('notes',''), reviews['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth')=='Booth #52', profiles['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth_year')==2025, profiles['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth_dates')=='Apr 12-13', profiles['LIFE-009']
