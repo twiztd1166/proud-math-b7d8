@@ -4064,7 +4064,7 @@ jobs:
           grep -q 'data-current-venue-actions-profile="LIFE-071"' /tmp/flhs_watch.html
           grep -q '>Open venue map<' /tmp/flhs_watch.html
           grep -q 'Current booth / placement' /tmp/flhs_watch.html
-          grep -q 'No Paradise 2026 booth assignment or exact placement is verified' /tmp/flhs_watch.html
+          grep -q 'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified' /tmp/flhs_watch.html
           grep -q 'data-current-cost-status-profile="LIFE-071"' /tmp/flhs_watch.html
           grep -q 'Quote required' /tmp/flhs_watch.html
           grep -q 'data-current-commitment-profile="LIFE-071"' /tmp/flhs_watch.html
