@@ -169,6 +169,15 @@ jobs:
               grep -q 'Current placement status' /tmp/app-shows.js
               grep -q 'Current schedule / public hours' /tmp/app-shows.js
               grep -q 'Current schedule status' /tmp/app-shows.js
+              grep -q 'Day-of-show logistics' /tmp/app-shows.js
+              grep -q 'Current logistics status' /tmp/app-shows.js
+              grep -q 'data-current-logistics-status-profile' /tmp/app-shows.js
+              grep -q 'data-current-logistics-profile' /tmp/app-shows.js
+              grep -q 'data-current-logistics-source-profile' /tmp/app-shows.js
+              grep -q 'opportunityLogisticsStatusLabel' /tmp/app-shows.js
+              grep -q 'fOpportunityLogisticsStatus' /tmp/app-shows.js
+              grep -q 'opportunity.current_logistics_text' /tmp/app-shows.js
+              grep -q 'currentLogisticsStatus' /tmp/app-core.js
               grep -q 'data-current-schedule-status-profile' /tmp/app-shows.js
               grep -q 'data-current-schedule-profile' /tmp/app-shows.js
               grep -q 'data-current-schedule-source-profile' /tmp/app-shows.js
@@ -847,6 +856,45 @@ jobs:
           assert '10 AM–5 PM' in live['LIFE-017'].get('current_schedule_text','')
           assert '10 AM–4 PM' in live['LIFE-017'].get('current_schedule_text','')
           assert 'current 2026–27 hours and final season date are not yet published' in live['LIFE-014'].get('current_schedule_text','')
+          expected_current_logistics_status={
+              'HIST-234':'PARTIAL_CURRENT',
+              'LIFE-007':'PARTIAL_CURRENT',
+              'LIFE-009':'PARTIAL_CURRENT',
+              'LIFE-013':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-014':'NEXT_CYCLE_CLOSED',
+              'LIFE-017':'PARTIAL_CURRENT',
+              'LIFE-018':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-030':'PROPOSAL_REQUIRED',
+              'LIFE-033':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-044':'PARTIAL_CURRENT',
+              'LIFE-046':'VERIFIED_CURRENT',
+              'LIFE-054':'PARTIAL_CURRENT',
+              'LIFE-060':'NOT_PUBLISHED_YET',
+              'LIFE-071':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-076':'PROPOSAL_REQUIRED',
+              'LIFE-077':'PARTIAL_CURRENT',
+          }
+          assert set(expected_current_logistics_status)==expected_live, (set(expected_current_logistics_status),expected_live)
+          for pid,status in expected_current_logistics_status.items():
+              op=live[pid]
+              assert op.get('current_logistics_status')==status, (pid,op)
+              assert str(op.get('current_logistics_text') or '').strip(), (pid,op)
+              assert str(op.get('current_logistics_source_url') or '').startswith('https://'), (pid,op)
+              assert str(op.get('current_logistics_source_label') or '').strip(), (pid,op)
+              assert op.get('current_logistics_checked_at'), (pid,op)
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='VERIFIED_CURRENT')==1
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='PARTIAL_CURRENT')==7
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='EXHIBITOR_KIT_REQUIRED')==4
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='PROPOSAL_REQUIRED')==2
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='NOT_PUBLISHED_YET')==1
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='NEXT_CYCLE_CLOSED')==1
+          assert 'Friday setup 1 PM-7 PM' in live['LIFE-046'].get('current_logistics_text','')
+          assert '24-hour armed security' in live['LIFE-046'].get('current_logistics_text','')
+          assert 'power is not available for purchase' in live['LIFE-054'].get('current_logistics_text','')
+          assert 'Exhibitor Kit' in live['LIFE-033'].get('current_logistics_text','')
+          assert 'Do not use spectator parking or hospitality access rules' in live['LIFE-076'].get('current_logistics_text','')
+          assert 'Do not carry forward prior-cycle Wi-Fi' in live['LIFE-060'].get('current_logistics_text','')
+          assert 'does not reopen until March 2027' in live['LIFE-014'].get('current_logistics_text','')
           expected_prior_cost_refs={
               'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
               'LIFE-013':'Paradise same-series history: 2022 event cost $3,500; 2021 cost $4,000 with Booths 705 & 706 (10x20). Historical reference only — obtain the 2027 commercial-space quote before signing.',
@@ -1383,15 +1431,17 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 38, detail.get('version')
+              assert detail.get('version') == 39, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 38, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 39, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_placement_status') == 'SPONSORSHIP_PLACEMENT_UNVERIFIED', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_status') == 'SOURCE_CONFLICT_REQUIRES_CONFIRMATION', vero_oktoberfest
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_logistics_status') == 'PARTIAL_CURRENT', vero_oktoberfest
+          assert 'Vendor Village logistics' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_logistics_text',''), vero_oktoberfest
           assert '11 AM–7 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
           assert '11 AM–6 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
           assert 'did not generate much business' in (barrett_review.get('rebookReview') or {}).get('rationale',''), barrett_review
@@ -1402,7 +1452,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 57, x.get('version')
+          assert x.get('version') == 58, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2796,6 +2846,9 @@ jobs:
           grep -q 'data-current-placement-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / no current placement' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-placement-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
@@ -2848,6 +2901,9 @@ jobs:
           grep -q 'Open current source' /tmp/pembroke_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Listed / assignment unverified' /tmp/pembroke_detail.html
+          grep -q 'data-current-logistics-status-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Exhibitor kit required' /tmp/pembroke_detail.html
+          grep -q 'Exhibitor Kit for setup and breakdown access times/details' /tmp/pembroke_detail.html
 
           render_view gunshow_detail "$SITE/#show/LIFE-046"
           grep -q 'West Palm Beach Gun Show' /tmp/gunshow_detail.html
@@ -2870,6 +2926,12 @@ jobs:
           grep -q 'Open current source' /tmp/gunshow_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Contract / availability open / not assigned' /tmp/gunshow_detail.html
+          grep -q 'data-current-logistics-status-profile="LIFE-046"' /tmp/gunshow_detail.html
+          grep -q 'Verified current logistics' /tmp/gunshow_detail.html
+          grep -q 'Friday setup 1 PM-7 PM' /tmp/gunshow_detail.html
+          grep -q '24-hour armed security' /tmp/gunshow_detail.html
+          grep -q 'data-current-logistics-source-profile="LIFE-046"' /tmp/gunshow_detail.html
+          grep -q '>Open logistics source<' /tmp/gunshow_detail.html
 
           render_view treasure_detail "$SITE/#show/LIFE-018"
           grep -q 'Treasure Coast Home Show' /tmp/treasure_detail.html
@@ -2916,6 +2978,9 @@ jobs:
           grep -q 'Open current source' /tmp/martin_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-060"' /tmp/martin_detail.html
           grep -q 'Placement not published' /tmp/martin_detail.html
+          grep -q 'data-current-logistics-status-profile="LIFE-060"' /tmp/martin_detail.html
+          grep -q 'Logistics not published yet' /tmp/martin_detail.html
+          grep -q 'Do not carry forward prior-cycle Wi-Fi' /tmp/martin_detail.html
 
           render_view cognizant_detail "$SITE/#show/LIFE-076"
           grep -q 'Honda Classic' /tmp/cognizant_detail.html
@@ -2941,6 +3006,9 @@ jobs:
           grep -q 'Open 2027 tournament / partnership site' /tmp/cognizant_detail.html
           grep -q 'thecognizantclassic.com/' /tmp/cognizant_detail.html
           grep -q 'Open current source' /tmp/cognizant_detail.html
+          grep -q 'data-current-logistics-status-profile="LIFE-076"' /tmp/cognizant_detail.html
+          grep -q 'Proposal required' /tmp/cognizant_detail.html
+          grep -q 'Do not use spectator parking or hospitality access rules' /tmp/cognizant_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
@@ -2971,6 +3039,10 @@ jobs:
           grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
+          grep -q 'data-current-logistics-status-profile="LIFE-054"' /tmp/winterfest_detail.html
+          grep -q 'Partial current logistics' /tmp/winterfest_detail.html
+          grep -q 'power is not available for purchase' /tmp/winterfest_detail.html
+          grep -q 'quiet inverter generator' /tmp/winterfest_detail.html
 
           render_view sebastian_clambake_detail "$SITE/#show/LIFE-077"
           grep -q 'Sebastian Clambake' /tmp/sebastian_clambake_detail.html
