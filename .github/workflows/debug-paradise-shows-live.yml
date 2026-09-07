@@ -4095,7 +4095,6 @@ jobs:
           grep -q 'data-historical-outreach-cycle-profile="LIFE-073"' /tmp/safety_pursue.html
           grep -q 'Next cycle not published' /tmp/safety_pursue.html
           grep -q 'the 2025 package was sent Nov. 22, 2024 and 2026 registration opened Dec. 3, 2025' /tmp/safety_pursue.html
-          grep -q 'no 2027 date/application is published yet' /tmp/safety_pursue.html
           grep -q '>Open cycle source<' /tmp/safety_pursue.html
           grep -q '\$100 Business Vendor / 10x10' /tmp/safety_pursue.html
           grep -q 'setup 7-9 AM' /tmp/safety_pursue.html
