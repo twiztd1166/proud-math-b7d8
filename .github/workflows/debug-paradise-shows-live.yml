@@ -2019,7 +2019,7 @@ jobs:
           assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert 'Corporate Level 1 $300' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert 'Corporate Level 2 $400' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
-          assert '$10 application fee' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
+          assert '$10 non-refundable application fee' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
           assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
