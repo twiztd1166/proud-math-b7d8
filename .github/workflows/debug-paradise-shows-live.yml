@@ -1881,7 +1881,7 @@ jobs:
           assert reviews['LIFE-112'].get('disposition')=='PURSUE', reviews['LIFE-112']
           assert reviews['LIFE-112'].get('booking_readiness')=='PRE_BOOKING_ACTION_REQUIRED', reviews['LIFE-112']
           assert reviews['LIFE-112'].get('action_timing','').startswith('NOW'), reviews['LIFE-112']
-          assert 'planning context only' in reviews['LIFE-112'].get('action_timing',''), reviews['LIFE-112']
+          assert 'Paradise-specific deadline' in reviews['LIFE-112'].get('action_timing',''), reviews['LIFE-112']
           assert 'Main line to the right' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
           assert '$47,000' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
           assert 'not a claim that the 2025 location is proven best' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
