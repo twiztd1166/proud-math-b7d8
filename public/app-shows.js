@@ -162,14 +162,16 @@ function bookingReadinessLabel(value){
     REVIEW_REQUIRED:'Review required'
   })[v]||'Review required';
 }
-function rebookReviewCard(review){
+function rebookReviewCard(review,hasLiveOpportunity=false){
   if(!review)return '';
   const disposition=String(review.disposition||'').toUpperCase()||'REVIEW';
   const checked=String(review.checked_at||'').slice(0,10);
   const evidence=String(review.evidence_date||'').slice(0,10);
   const css=disposition.toLowerCase();
+  const live=Boolean(hasLiveOpportunity);
+  const heading=live?'Current booking review':'Historical candidate review';
   const readiness=review.booking_readiness?`<div data-booking-readiness-profile="${esc(review.profile_id)}"><span>Booking readiness</span><b>${esc(bookingReadinessLabel(review.booking_readiness))}</b></div>`:'';
-  return `<div class="rebookReview ${esc(css)}"><div class="rebookReviewHead"><span>Current booking review</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${readiness}${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}${review.blockers_text?`<div class="wide"><span>Still needed before booking</span><b>${esc(review.blockers_text)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||'Current review requires attention.')}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||'Verified current review source')}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
+  return `<div class="rebookReview ${esc(css)}" data-review-scope="${live?'live':'historical'}"><div class="rebookReviewHead"><span>${heading}</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${readiness}${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}${review.blockers_text?`<div class="wide"><span>Still needed before booking</span><b>${esc(review.blockers_text)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||(live?'Current review requires attention.':'Historical candidate review requires attention.'))}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||(live?'Verified current review source':'Verified historical review source'))}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
 }
 function historicalPlacementValue(value){
   const text=String(value||'').trim();
@@ -248,7 +250,7 @@ function catalogCard(p){
   const opportunityCard=liveOpportunity?rebookOpportunityCard(liveOpportunity):'';
   const placementGuide=liveOpportunity?historicalPlacementGuide(p):'';
   const decisionEvidence=liveOpportunity?historicalDecisionEvidence(p):'';
-  const reviewCard=currentReview?rebookReviewCard(currentReview):'';
+  const reviewCard=currentReview?rebookReviewCard(currentReview,Boolean(liveOpportunity)):'';
   const seriesRelationNote=relatedCurrentProfile?`<div class="rebookSeries"><span>Same organizer series</span><b>Series decision target is tracked under ${esc(relatedCurrentProfile)}. This legacy source profile remains preserved for history and lifetime-source provenance; it is not a second booking target.</b></div>`:'';
   return `<div class="card catalogCard${focusAttr?' cleanupQueueCard':''}" data-profile="${esc(p.profile_id)}"${focusAttr}><div class="row"><div><div class="event">${esc(p.canonical_event)}</div><div class="mfc">${esc(p.profile_id)} · ${esc(tier)}</div></div><span class="pill ${current.length?'paid':''}">${pill}</span></div><div class="catalogStats"><span><b>${hist}</b> history records</span>${years.length?`<span><b>${years.join(' · ')}</b> history years</span>`:''}<span><b>${life||'—'}</b> lifetime occurrences</span>${p.lifetime_net_volume!=null?`<span><b>${money(p.lifetime_net_volume)}</b> lifetime net</span>`:''}</div>${cleanup}${decisionEvidence}${reviewCard}${opportunityCard}${placementGuide}${candidateNote}${seriesRelationNote}${lpOnly?'<div class="action">LeadPerfection source identity only · not attendance or worked-show proof</div>':''}${current.length?`<div class="action">Linked current control: ${esc(current.join(', '))}</div>`:''}</div>`;
 }
