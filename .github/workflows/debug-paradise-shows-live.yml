@@ -2721,6 +2721,7 @@ jobs:
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
@@ -2743,9 +2744,22 @@ jobs:
           assert 'Dave LaBell / Tampa Bay Times Events' in manatee
           assert 'tel:7278938523' in manatee
           assert 'mailto:dlabell@tampabay.com' in manatee
+          assert 'data-live-compare-readiness-profile="LIFE-044"' in manatee
+          assert 'Pre-booking action required' in manatee
+          assert 'Commitment: Verified current' in manatee
+          assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in manatee
           vero=row('LIFE-009')
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
+          assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
+          assert 'Watch / gated' in vero
+          assert 'Commitment: Verified current' in vero
+          assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
+          hold=row('LIFE-033')
+          assert 'data-live-compare-readiness-profile="LIFE-033"' in hold
+          assert 'Hold / reconcile' in hold
+          assert 'Commitment: Reconcile existing booking' in hold
+          assert 'Still needed: Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities' in hold
           expected_deadlines={
               'LIFE-044':'Sep 17, 2026 · 30-day cancellation-liability cutoff',
               'LIFE-054':'Nov 5, 2026 · 30-day no-refund boundary',
@@ -2763,7 +2777,7 @@ jobs:
               r=row(pid)
               assert f'data-live-compare-deadline-profile="{pid}"' in r, (pid,r)
               assert 'No verified hard deadline' in r, (pid,r)
-          print('Live comparison cost/contact/deadline rows: PASS')
+          print('Live comparison cost/contact/readiness/deadline rows: PASS')
           PY
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -q 'Show database' /tmp/shows_mobile.html
@@ -2773,6 +2787,7 @@ jobs:
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
           grep -q 'data-label="Cost"' /tmp/shows_mobile.html
           grep -q 'data-label="Contact"' /tmp/shows_mobile.html
+          grep -q 'data-label="Readiness"' /tmp/shows_mobile.html
           grep -q 'data-label="Hard deadline"' /tmp/shows_mobile.html
           grep -q 'data-label="Action"' /tmp/shows_mobile.html
           python - <<'PY'
@@ -2785,9 +2800,12 @@ jobs:
           assert 'data-label="Contact"' in row
           assert 'Dave LaBell / Tampa Bay Times Events' in row
           assert 'Prior/reference:' in row
+          assert 'data-label="Readiness"' in row
+          assert 'Commitment: Verified current' in row
+          assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
-          print('Mobile comparison cost/contact/deadline labels: PASS')
+          print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
           PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
