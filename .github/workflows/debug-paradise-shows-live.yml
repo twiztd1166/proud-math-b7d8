@@ -1883,8 +1883,14 @@ jobs:
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
           assert '10x10 inline $200' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
-          assert 'sold out/waitlist' in profiles['HIST-234']['current_rebook_opportunity']['price_text']
-          assert 'commercial & retail businesses should use the Sponsor path' in profiles['HIST-234']['current_rebook_opportunity']['booking_window_text']
+          okt=profiles['HIST-234']['current_rebook_opportunity']
+          assert '10x10 inline $200' in okt.get('price_text',''), okt
+          assert 'Commercial & Retail Businesses are welcome too and directs them to the Sponsor page' in okt.get('price_text',''), okt
+          assert 'Paradise-specific eligibility for the standard Vendor Village price is therefore not verified' in okt.get('price_text',''), okt
+          assert 'general 2026 Vendor Village is fully sold out' in okt.get('booking_window_text',''), okt
+          assert 'waitlist is free' in okt.get('booking_window_text',''), okt
+          assert 'Do not submit Paradise to the general vendor waitlist until Latitude-88 confirms' in okt.get('booking_window_text',''), okt
+          assert 'If commercial participation requires sponsorship' in okt.get('booking_window_text',''), okt
           assert 'Latitude-88' in profiles['HIST-234']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
