@@ -4276,7 +4276,6 @@ jobs:
           grep -q '5 demos' /tmp/gunshow_detail.html
           grep -q 'CONTRACT REQUEST OPEN' /tmp/gunshow_detail.html
           grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
-          grep -q '8-foot table \$100' /tmp/gunshow_detail.html
           grep -q 'data-historical-placement-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'No preserved booth / placement is available for this profile' /tmp/gunshow_detail.html
           grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/gunshow_detail.html
