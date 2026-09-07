@@ -4244,7 +4244,9 @@ jobs:
           grep -q 'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered' /tmp/pembroke_detail.html
           grep -q 'Prior cost / reference status' /tmp/pembroke_detail.html
           grep -q 'Booth 106, 8x10' /tmp/pembroke_detail.html
-          grep -q '\$2,145 booth cost less \$100 Super Saver = \$2,045 invoice' /tmp/pembroke_detail.html
+          grep -q 'spring May 2-3, 2026 invoice 407400 assigned Booth 106, 8x10' /tmp/pembroke_detail.html
+          grep -q 'Super Saver' /tmp/pembroke_detail.html
+          grep -q 'spring-lineage references only' /tmp/pembroke_detail.html
           grep -q 'not an Oct. 31-Nov. 1 fall 2026 quote or assignment' /tmp/pembroke_detail.html
           grep -q 'cannot be carried forward as the fall price' /tmp/pembroke_detail.html
           grep -q '888-433-3976' /tmp/pembroke_detail.html
