@@ -510,6 +510,22 @@ jobs:
           for pid,review in reviews.items():
               if pid not in expected_review_blockers:
                   assert not review.get('blockers_text'), (pid,review)
+          expected_historical_review_sources={
+              'LIFE-028':('https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site','no future Paradise-style pop-up date published/found as of 2026-09-07'),
+              'LIFE-038':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Paws in the Park','linked Paws site remains dated 2022'),
+              'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo / vendor-cycle pages','2026 reservations closed and organizer says check back next year'),
+              'LIFE-056':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Palm Beach Summer Beerfest','linked Beerfest site is stale/cancelled 2020'),
+              'LIFE-057':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Nurses Night Out','no new dated occurrence found as of 2026-09-07'),
+              'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026','Business Vendor $100, 10x10 space and 772-337-0049'),
+          }
+          assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
+          for pid,(url,label_part,ref_part) in expected_historical_review_sources.items():
+              review=reviews[pid]
+              assert review.get('evidence_date')=='2026-09-07', (pid,review)
+              assert review.get('source_url')==url, (pid,review)
+              assert label_part in str(review.get('source_label') or ''), (pid,review)
+              assert ref_part in str(review.get('source_ref') or ''), (pid,review)
+              assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               if profiles[held].get('current_rebook_opportunity'):
@@ -2317,6 +2333,8 @@ jobs:
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
+          grep -q 'official store/events presence is current, but no future Paradise-style pop-up date is claimed' /tmp/palm_liquors_pursue.html
+          grep -q 'href="https://palmbeachliquor.com/events"' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
 
           render_view vero_home_placement "$SITE/#show/LIFE-009"
@@ -2460,6 +2478,8 @@ jobs:
           grep -q '>WATCH<' /tmp/hurricane_watch.html
           grep -q '2027 cycle' /tmp/hurricane_watch.html
           grep -q '\$200/\$225' /tmp/hurricane_watch.html
+          grep -q 'explicitly says to check back next year' /tmp/hurricane_watch.html
+          grep -q 'href="https://forms.cityofpsl.com/expo"' /tmp/hurricane_watch.html
           grep -q 'Open review source' /tmp/hurricane_watch.html
 
           render_view flhs_watch "$SITE/#show/LIFE-071"
@@ -2502,6 +2522,9 @@ jobs:
           grep -q '>PURSUE<' /tmp/safety_pursue.html
           grep -q 'November 2026' /tmp/safety_pursue.html
           grep -q '772-337-0049' /tmp/safety_pursue.html
+          grep -q '2026 cycle is verified at \$100 for a business-vendor 10x10' /tmp/safety_pursue.html
+          grep -q 'no 2027 date is yet published' /tmp/safety_pursue.html
+          grep -q 'href="https://slcsafetyfest.com/vendors/"' /tmp/safety_pursue.html
           grep -q 'Open review source' /tmp/safety_pursue.html
 
           render_view barrett_hold "$SITE/#show/LIFE-041"
