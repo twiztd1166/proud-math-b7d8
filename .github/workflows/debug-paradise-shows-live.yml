@@ -3347,9 +3347,9 @@ jobs:
             echo 'Historical-only LIFE-028 incorrectly rendered governed live booking readiness'
             exit 1
           fi
-          grep -q '/events route is still indexed' /tmp/palm_liquors_pursue.html
-          grep -q 'no current dated event/pop-up content' /tmp/palm_liquors_pursue.html
-          grep -q 'Do not describe the route as a current event calendar' /tmp/palm_liquors_pursue.html
+          grep -q 'no current official event/pop-up page' /tmp/palm_liquors_pursue.html
+          grep -q 'active-host outreach target requiring direct host confirmation' /tmp/palm_liquors_pursue.html
+          grep -q 'No future Paradise-style pop-up date is claimed' /tmp/palm_liquors_pursue.html
           grep -q 'href="https://palmbeachliquor.com/"' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
 
