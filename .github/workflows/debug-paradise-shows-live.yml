@@ -1478,7 +1478,6 @@ jobs:
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered. Spring Booth 106 (2026) and Booth 428 (2023) are prior-occurrence references only. Obtain the fall-specific signed contract/account statement and exact live booth before any new payment or staffing decision.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
-              'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
               'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet, but current Latitude-88 emails to Paradise explicitly say the live floor plan can be viewed and the booth booked online. Open the live plan now and compare actual availability before paying a deposit. Historical Booth 66 (10x10) is the strongest placement reference currently supported by date-aligned evidence: the Jan. 15-16, 2022 occurrence is matched to annual LP attribution of 4 closes / $110,038 close volume / 38 issued / 15 demos. That is performance attribution, not attendance proof or proof Booth 66 remains optimal. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
@@ -1490,7 +1489,7 @@ jobs:
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
               'LIFE-112':'No current Paradise space is assigned. The official 2027 vendor page says there is no inside commercial vendor space, so any Paradise activation must use accepted outside commercial space. Historical 2025 evidence records “Main line to the right — 10×10” with a same-row outcome of 1 net sale / $47,000 net / 13 issued / 7 demos on a $700 fair fee. Use that only as a placement reference: request a comparable high-flow outside location if available, but verify the current map, assignment and traffic pattern and do not call the 2025 location proven best.',
           }
-          assert (set(expected_current_placements)|{'LIFE-044'})==expected_live, (set(expected_current_placements),expected_live)
+          assert (set(expected_current_placements)|{'LIFE-044','LIFE-054'})==expected_live, (set(expected_current_placements),expected_live)
           for pid,placement in expected_current_placements.items():
               assert live[pid].get('current_placement_text')==placement, (pid,live[pid])
           manatee_placement=live['LIFE-044'].get('current_placement_text','')
@@ -1500,6 +1499,13 @@ jobs:
           assert 'proof those numbers are currently available' in manatee_placement, live['LIFE-044']
           assert 'linked Google Drive file returns 404' in manatee_placement, live['LIFE-044']
           assert 'same-venue evidence only' in manatee_placement, live['LIFE-044']
+          winterfest_placement=live['LIFE-054'].get('current_placement_text','')
+          assert 'No 2026 Winter Fest Paradise location is assigned/verified' in winterfest_placement, live['LIFE-054']
+          assert 'approved Paradise as Corporate Level 2 in 2024' in winterfest_placement, live['LIFE-054']
+          assert 'current 2026 application publishes only a standard 10x10 booth-space request' in winterfest_placement, live['LIFE-054']
+          assert 'no Level 2 placement advantage' in winterfest_placement, live['LIFE-054']
+          assert 'do not pay the additional $100 unless POTTC documents a materially better location, footprint or other useful benefit' in winterfest_placement, live['LIFE-054']
+          assert '$410 total as the conservative approved ceiling' in winterfest_placement, live['LIFE-054']
           expected_current_placement_status={
               'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
