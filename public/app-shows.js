@@ -394,6 +394,11 @@ function liveComparisonPlacement(p){
   else if(historicalPlacementValue(p?.latest_preserved_booth))historical=String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
   return current+' · Best history: '+historical;
 }
+function liveComparisonDeadline(op){
+  if(!op?.critical_deadline_date)return 'No verified hard deadline';
+  const label=String(op.critical_deadline_label||op.critical_deadline_type||'Critical deadline').replaceAll('_',' ');
+  return date(op.critical_deadline_date)+' · '+label;
+}
 function liveDecisionCompareBoard(profiles,open=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
@@ -425,13 +430,14 @@ function liveDecisionCompareBoard(profiles,open=false){
       <td data-label="Placement" data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
       <td data-label="Contact" data-live-compare-contact-profile="${esc(p.profile_id)}"><div class="liveCompareContact"><b>${esc(contactName)}</b>${contactActions}</div></td>
       <td data-label="Readiness">${esc(readiness)}</td>
+      <td data-label="Hard deadline" data-live-compare-deadline-profile="${esc(p.profile_id)}">${esc(liveComparisonDeadline(op))}</td>
       <td data-label="When to act">${esc(timing)}</td>
       <td data-label="Action">${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness · timing · direct action</small></summary>
-    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness · hard deadline · timing · direct action</small></summary>
+    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment.</div>
   </details>`;
 }
