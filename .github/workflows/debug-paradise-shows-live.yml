@@ -679,7 +679,7 @@ jobs:
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
               'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan before $100 invoice deposit · signed hold-harmless agreement',
-              'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
+              'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
@@ -1052,8 +1052,27 @@ jobs:
           assert 'organizer-response/direct-download blocker, not an internal-search blocker' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
           assert '$316,198' in reviews['LIFE-018'].get('rationale',''), reviews['LIFE-018']
           assert 'historical $795/$1,500/$1,845 figures only as references' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
-          assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('action_timing','').startswith('NOW'), reviews['LIFE-030']
+          assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-030']
+          assert reviews['LIFE-030'].get('action_timing','').startswith('NOW — request the current 2027 Presidential/custom booth-bearing proposal from Brittany.'), reviews['LIFE-030']
           assert '$3,350-$3,850' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert 'hosting an onsite booth is a Presidential Sponsor benefit' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert '$750 floor is not a Paradise booth price' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert 'No current 2027 Presidential price was recovered from the official page, Paradise Gmail or Paradise Drive' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert 'request the current 2027 Presidential Sponsor pricing plus any lower custom package that explicitly includes an onsite Paradise lead-generation booth' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
+          assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
+          assert 'Do not treat the advertised $750 sponsorship floor as booth-enabled unless the written 2027 proposal explicitly says so' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
+          assert 'Prior-year detailed sponsorship matrices are historical references only and are not carried forward as 2027 pricing' in reviews['LIFE-030'].get('notes',''), reviews['LIFE-030']
+          assert 'WEB:ARTIGRAS_2027_SPONSOR_CURRENT' in reviews['LIFE-030'].get('source_ref',''), reviews['LIFE-030']
+          assert 'WEB:ARTIGRAS_2027_EVENT_CURRENT' in reviews['LIFE-030'].get('source_ref',''), reviews['LIFE-030']
+          assert live['LIFE-030'].get('current_cost_status')=='QUOTE_REQUIRED', live['LIFE-030']
+          assert live['LIFE-030'].get('booking_cost_min') is None and live['LIFE-030'].get('booking_cost_max') is None, live['LIFE-030']
+          assert 'onsite booth is a Presidential Sponsor benefit' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert '$750 is not a decision-safe Paradise booth price' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert 'current 2027 Presidential Sponsor price is not published in recoverable official text and was not found in Paradise 2026 Gmail/Drive' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert 'current 2027 Presidential Sponsor pricing and any lower custom package that explicitly includes an onsite Paradise booth/activation' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
+          assert 'Do not submit based on the advertised $750 sponsorship floor' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
+          assert 'identifies Presidential Sponsor as the booth-hosting tier' in live['LIFE-030'].get('commitment_terms_text',''), live['LIFE-030']
+          assert 'onsite booth is a Presidential Sponsor benefit' in live['LIFE-030'].get('current_logistics_text',''), live['LIFE-030']
           assert reviews['LIFE-060'].get('disposition')=='WATCH' and reviews['LIFE-060'].get('action_timing','').startswith('NOW'), reviews['LIFE-060']
           assert '2017 fair source produced 1 net close / $12,700' in reviews['LIFE-060'].get('rationale',''), reviews['LIFE-060']
           assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('action_timing','').startswith('NOW'), reviews['LIFE-076']
@@ -1406,7 +1425,7 @@ jobs:
               'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
               'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet, but current Latitude-88 emails to Paradise explicitly say the live floor plan can be viewed and the booth booked online. Open the live plan now and compare actual availability before paying a deposit. Historical Booth 66 (10x10) is the strongest placement reference currently supported by date-aligned evidence: the Jan. 15-16, 2022 occurrence is matched to annual LP attribution of 4 closes / $110,038 close volume / 38 issued / 15 demos. That is performance attribution, not attendance proof or proof Booth 66 remains optimal. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
-              'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
+              'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
               'LIFE-071':'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified. Same-series 2023 organizer precedent says FLHS had two 20x20 spaces at the front of the Tampa show that were visible from the entrance and described them as strong display locations; this is organizer layout preference only, not Paradise performance evidence and not current St. Petersburg availability. Ask for the current plan and prioritize a front/entrance-visible 20x20 or current category-required equivalent only if the live layout supports it.',
               'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
