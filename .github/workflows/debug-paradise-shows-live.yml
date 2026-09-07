@@ -4072,8 +4072,8 @@ jobs:
           grep -q 'Still needed before booking' /tmp/flhs_watch.html
           grep -q 'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan' /tmp/flhs_watch.html
           grep -q 'Prior cost / reference status' /tmp/flhs_watch.html
-          grep -q 'Paradise 2024 Florida' /tmp/flhs_watch.html
-          grep -q '\$5,000 for the Labor Day occurrence' /tmp/flhs_watch.html
+          grep -q 'Direct same-series organizer reference' /tmp/flhs_watch.html
+          grep -q 'Paradise subsequently paid \$5,000 for the 2024 Labor Day occurrence' /tmp/flhs_watch.html
           grep -q 'data-current-contact-profile="LIFE-071"' /tmp/flhs_watch.html
           grep -q 'data-current-contact-actions-profile="LIFE-071"' /tmp/flhs_watch.html
           grep -q 'href="tel:7275638844"' /tmp/flhs_watch.html
