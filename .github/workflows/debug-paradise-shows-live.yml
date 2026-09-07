@@ -123,6 +123,15 @@ jobs:
               grep -q 'Commitment / payment terms' /tmp/app-shows.js
               grep -q 'data-current-commitment-profile' /tmp/app-shows.js
               grep -q 'opportunity.commitment_terms_text' /tmp/app-shows.js
+              grep -q 'Critical commitment date' /tmp/app-shows.js
+              grep -q 'data-current-critical-deadline-profile' /tmp/app-shows.js
+              grep -q 'opportunity.critical_deadline_date' /tmp/app-shows.js
+              grep -q 'opportunity.critical_deadline_type' /tmp/app-shows.js
+              grep -q 'opportunity.critical_deadline_label' /tmp/app-shows.js
+              grep -q 'opportunity.critical_deadline_basis' /tmp/app-shows.js
+              grep -q 'CRITICAL_DEADLINE' /tmp/app-shows.js
+              grep -q 'Critical commitment date' /tmp/app-core.js
+              grep -q 'CRITICAL_DEADLINE' /tmp/app-core.js
               grep -q 'fOpportunityCostBand' /tmp/app-shows.js
               grep -q 'Current verified booking cost (max)' /tmp/app-shows.js
               grep -Fq "rangeMatch(opportunity.booking_cost_max,f.currentCostBand)" /tmp/app-shows.js
@@ -777,6 +786,24 @@ jobs:
           assert set(expected_commitment_terms)==set(live), (set(expected_commitment_terms),set(live))
           for pid,op in live.items():
               assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
+          expected_critical_deadlines={
+              'LIFE-044':('2026-09-17','CANCELLATION_LIABILITY_CUTOFF','30-day cancellation-liability cutoff','Date = 2026-10-17 minus 30 days.'),
+              'LIFE-054':('2026-11-05','NO_REFUND_WINDOW_BOUNDARY','30-day no-refund boundary','Date = 2026-12-05 minus 30 days.'),
+              'LIFE-017':('2027-03-01','FINAL_BALANCE_DUE','Final balance due','Direct verified contract term: final balance due March 1, 2027.'),
+          }
+          assert len(expected_critical_deadlines)==3, expected_critical_deadlines
+          for pid,(deadline,kind,label,basis_part) in expected_critical_deadlines.items():
+              op=live[pid]
+              assert op.get('critical_deadline_date')==deadline, (pid,op)
+              assert op.get('critical_deadline_type')==kind, (pid,op)
+              assert op.get('critical_deadline_label')==label, (pid,op)
+              assert basis_part in str(op.get('critical_deadline_basis') or ''), (pid,op)
+          for pid,op in live.items():
+              if pid not in expected_critical_deadlines:
+                  assert op.get('critical_deadline_date') is None, (pid,op)
+                  assert not op.get('critical_deadline_type'), (pid,op)
+                  assert not op.get('critical_deadline_label'), (pid,op)
+                  assert not op.get('critical_deadline_basis'), (pid,op)
           recovered_contacts={
               'LIFE-007':('info@pottcevents.com','561-792-9260'),
               'LIFE-054':('info@pottcevents.com','561-792-9260'),
@@ -1179,10 +1206,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 33, detail.get('version')
+              assert detail.get('version') == 34, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 33, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 34, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1194,7 +1221,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 52, x.get('version')
+          assert x.get('version') == 53, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2316,6 +2343,10 @@ jobs:
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
           grep -q 'data-current-commitment-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q '25% deposit due within 14 days' /tmp/vero_home_placement.html
+          if grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html; then
+            echo "::error::Relative invoice timing was incorrectly converted into a hard current deadline"
+            exit 1
+          fi
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
@@ -2383,6 +2414,10 @@ jobs:
           grep -q 'data-current-commitment-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Commitment / payment terms' /tmp/bradenton_pursue.html
           grep -q 'No money due at initial reservation' /tmp/bradenton_pursue.html
+          grep -q 'data-current-critical-deadline-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Critical commitment date' /tmp/bradenton_pursue.html
+          grep -q 'Sep 17, 2026' /tmp/bradenton_pursue.html
+          grep -q '30-day cancellation-liability cutoff' /tmp/bradenton_pursue.html
           grep -q '\$995–\$1,095 · 10x10 booth' /tmp/bradenton_pursue.html
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
           grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
@@ -2409,6 +2444,10 @@ jobs:
           grep -q 'data-current-commitment-profile="LIFE-017"' /tmp/tampa_2027.html
           grep -q '50% due with reservation' /tmp/tampa_2027.html
           grep -q 'final balance due March 1, 2027' /tmp/tampa_2027.html
+          grep -q 'data-current-critical-deadline-profile="LIFE-017"' /tmp/tampa_2027.html
+          grep -q 'Critical commitment date' /tmp/tampa_2027.html
+          grep -q 'Mar 1, 2027' /tmp/tampa_2027.html
+          grep -q 'Final balance due' /tmp/tampa_2027.html
           grep -q '\$1,295–\$1,395 · 10x10 booth' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
@@ -2654,6 +2693,10 @@ jobs:
           grep -q '\$10 non-refundable application fee' /tmp/winterfest_detail.html
           grep -q '50% cancellation fee' /tmp/winterfest_detail.html
           grep -q 'no refund within 30 days of the event' /tmp/winterfest_detail.html
+          grep -q 'data-current-critical-deadline-profile="LIFE-054"' /tmp/winterfest_detail.html
+          grep -q 'Critical commitment date' /tmp/winterfest_detail.html
+          grep -q 'Nov 5, 2026' /tmp/winterfest_detail.html
+          grep -q '30-day no-refund boundary' /tmp/winterfest_detail.html
           grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'Paradise category must be confirmed before payment' /tmp/winterfest_detail.html
           grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
