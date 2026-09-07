@@ -233,9 +233,9 @@ function specificBoothPlacement(value){
   if(!text)return false;
   return !/(EXACT (BOOTH|SPACE|SPOT|TABLE).*(NOT STATED|UNKNOWN)|NUMBER NOT STATED|ASSIGNED (AT|ON)SITE|ASSIGNED AT SETUP|WOULD FOLLOW|NOT RECOVERED|UNVERIFIED|^N\/A$|^UNKNOWN)/i.test(text);
 }
-function boothGuidanceHtml(rows){
+function boothGuidanceHtml(rows,profileId=''){
   const placed=(rows||[]).filter(row=>sourceSemanticState(historyBoothValue(row))==='VALUE');
-  if(!placed.length)return '';
+  if(!placed.length)return `<div class="boothGuidance" data-historical-placement-profile="${esc(profileId)}"><div class="yearSubhead">Booth / placement guidance</div><div class="boothGuidanceGrid"><div class="boothBest"><span>Preserved placement evidence</span><b>No preserved booth / placement is available for this profile</b></div></div><div class="yearVerification">Do not infer a booth from same-market, same-venue, or unrelated-series history. Verify the current floor plan, booth numbering, and availability with the organizer before booking.</div></div>`;
   const latest=[...placed].sort((a,b)=>Number(b.source_year||0)-Number(a.source_year||0)||Number(b.source_row||0)-Number(a.source_row||0))[0];
   const outcomes=boothOutcomeRows(rows);
   const best=outcomes[0]||null;
@@ -244,7 +244,7 @@ function boothGuidanceHtml(rows){
   const bestHtml=best?`<div class="boothBest"><span>Best observed performance placement</span><b>${esc(historyBoothValue(best))}</b><small>${esc(best.source_year||'—')} · ${esc(boothOutcomeMetrics(best))}</small></div>`:'<div class="boothBest"><span>Best observed performance placement</span><b>Not enough booth + event-performance overlap to rank</b></div>';
   const specificHtml=bestSpecific?`<div class="boothBest"><span>Best observed specific booth</span><b>${esc(historyBoothValue(bestSpecific))}</b><small>${esc(bestSpecific.source_year||'—')} · ${esc(boothOutcomeMetrics(bestSpecific))}</small></div>`:'<div class="boothBest"><span>Best observed specific booth</span><b>No performance-backed specific booth number/location is preserved</b></div>';
   const latestHtml=latest?`<div class="boothLatest"><span>Latest preserved placement</span><b>${esc(historyBoothValue(latest))}</b><small>${esc(latest.source_year||'—')} · ${esc(latest.dates_text||'Date not stated')}</small></div>`:'';
-  return `<div class="boothGuidance"><div class="yearSubhead">Booth / placement guidance</div><div class="boothGuidanceGrid">${bestHtml}${specificHtml}${latestHtml}</div>${outcomeCards?`<div class="boothOutcomeGrid">${outcomeCards}</div>`:''}<div class="yearVerification">“Best observed” means the strongest event-level outcome among preserved records that also contain booth/placement evidence. Specific-booth guidance excludes generic “assigned onsite / exact number not stated” placements when possible. Net revenue ranks first, then net sales, COM, issued, and recency. This is correlation only; it does not prove the booth caused performance.</div></div>`;
+  return `<div class="boothGuidance" data-historical-placement-profile="${esc(profileId)}"><div class="yearSubhead">Booth / placement guidance</div><div class="boothGuidanceGrid">${bestHtml}${specificHtml}${latestHtml}</div>${outcomeCards?`<div class="boothOutcomeGrid">${outcomeCards}</div>`:''}<div class="yearVerification">“Best observed” means the strongest event-level outcome among preserved records that also contain booth/placement evidence. Specific-booth guidance excludes generic “assigned onsite / exact number not stated” placements when possible. Net revenue ranks first, then net sales, COM, issued, and recency. This is correlation only; it does not prove the booth caused performance.</div></div>`;
 }
 function lpYearHtml(items){
   if(!items.length)return '<div class="yearLpEmpty">No LeadPerfection performance source is linked to this year.</div>';
@@ -458,7 +458,7 @@ async function openCatalog(id,focusYear=null){
     const lifetimeSource=sourceRows.filter(x=>x&&x.spreadsheet_id&&Number.isFinite(Number(x.row))).map(x=>`<a class="btn secondary sourceBtn" target="_blank" href="https://docs.google.com/spreadsheets/d/${encodeURIComponent(x.spreadsheet_id)}/edit#gid=977393722&range=A${Number(x.row)}:R${Number(x.row)}">Lifetime source row ${Number(x.row)}</a>`).join('');
     const operatingRows=mfcs.map(mfc=>state.shows.find(show=>show.mfc_id===mfc)).filter(Boolean).sort((a,b)=>operatingEventYear(b)-operatingEventYear(a)||String(a.event||'').localeCompare(String(b.event||'')));
     const operatingHtml=operatingRows.length?operatingRows.map(currentOperatingScorecard).join(''):'';
-    const boothGuidance=boothGuidanceHtml(h);
+    const boothGuidance=boothGuidanceHtml(h,p?.profile_id||id);
     const rebookOpportunityHtml=typeof rebookOpportunityCard==='function'?rebookOpportunityCard(d.rebookOpportunity||null):'';
     const rebookReviewHtml=typeof rebookReviewCard==='function'?rebookReviewCard(d.rebookReview||null):'';
     const profileRelations=Array.isArray(d.profileRelations)?d.profileRelations:[];
