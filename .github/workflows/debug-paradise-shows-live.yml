@@ -3075,7 +3075,7 @@ jobs:
           grep -q 'data-current-booking-cost-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q '\$1,000 · Business Vendor / 3-day festival' /tmp/feast_little_italy.html
           grep -q 'data-current-placement-status-profile="LIFE-092"' /tmp/feast_little_italy.html
-          grep -q 'Application open · not assigned' /tmp/feast_little_italy.html
+          grep -q 'Application open / not assigned' /tmp/feast_little_italy.html
           grep -q 'data-current-schedule-status-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Verified current schedule' /tmp/feast_little_italy.html
           grep -q 'Fri. Nov. 6, 2026: 4 PM-10 PM' /tmp/feast_little_italy.html
