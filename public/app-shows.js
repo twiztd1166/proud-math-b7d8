@@ -1389,7 +1389,9 @@ function defaultCurrentFilters(){
 }
 function liveOpportunityNeedsQuote(p){
   const op=p?.current_rebook_opportunity||null;
-  return Boolean(op)&&opportunityCostNumber(op,'booking_cost_max')===null;
+  return Boolean(op)
+    &&opportunityCostNumber(op,'booking_cost_min')===null
+    &&opportunityCostNumber(op,'booking_cost_max')===null;
 }
 function liveOpportunityMissingPriorPlacement(p){
   if(!p?.current_rebook_opportunity)return false;
