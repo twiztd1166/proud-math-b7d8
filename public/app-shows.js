@@ -162,6 +162,20 @@ function bookingReadinessLabel(value){
     REVIEW_REQUIRED:'Review required'
   })[v]||'Review required';
 }
+function historicalReviewOutreach(review){
+  const name=String(review?.outreach_contact_name||'').trim();
+  const phone=String(review?.outreach_contact_phone||'').trim();
+  const email=String(review?.outreach_contact_email||'').trim();
+  if(!name&&!phone&&!email)return '';
+  const contact=[name,phone,email].filter(Boolean).join(' · ');
+  const actions=[];
+  if(phone){
+    const dial=phone.replace(/[^\d+]/g,'');
+    if(dial)actions.push(`<a class="contactBtn" href="tel:${esc(dial)}">Call ${esc(phone)}</a>`);
+  }
+  if(email)actions.push(`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`);
+  return `<div class="wide" data-historical-outreach-profile="${esc(review.profile_id)}"><span>Current outreach contact</span><b>${esc(contact)}</b>${actions.length?`<div class="contactActions" data-historical-outreach-actions-profile="${esc(review.profile_id)}">${actions.join('')}</div>`:''}</div>`;
+}
 function rebookReviewCard(review,hasLiveOpportunity=false){
   if(!review)return '';
   const disposition=String(review.disposition||'').toUpperCase()||'REVIEW';
@@ -171,7 +185,8 @@ function rebookReviewCard(review,hasLiveOpportunity=false){
   const live=Boolean(hasLiveOpportunity);
   const heading=live?'Current booking review':'Historical candidate review';
   const readiness=review.booking_readiness?`<div data-booking-readiness-profile="${esc(review.profile_id)}"><span>Booking readiness</span><b>${esc(bookingReadinessLabel(review.booking_readiness))}</b></div>`:'';
-  return `<div class="rebookReview ${esc(css)}" data-review-profile="${esc(review.profile_id)}" data-review-scope="${live?'live':'historical'}"><div class="rebookReviewHead"><span>${heading}</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${readiness}${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}${review.blockers_text?`<div class="wide"><span>Still needed before booking</span><b>${esc(review.blockers_text)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||(live?'Current review requires attention.':'Historical candidate review requires attention.'))}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||(live?'Verified current review source':'Verified historical review source'))}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
+  const outreach=live?'':historicalReviewOutreach(review);
+  return `<div class="rebookReview ${esc(css)}" data-review-profile="${esc(review.profile_id)}" data-review-scope="${live?'live':'historical'}"><div class="rebookReviewHead"><span>${heading}</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${readiness}${outreach}${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}${review.blockers_text?`<div class="wide"><span>Still needed before booking</span><b>${esc(review.blockers_text)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||(live?'Current review requires attention.':'Historical candidate review requires attention.'))}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||(live?'Verified current review source':'Verified historical review source'))}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
 }
 function historicalPlacementValue(value){
   const text=String(value||'').trim();
@@ -542,7 +557,7 @@ function catalogSearchText(p,current){
   ]);
   const review=p?.current_rebook_review||{};
   const opportunity=p?.current_rebook_opportunity||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.current_cost_status,opportunity.commitment_terms_text,opportunity.critical_deadline_date,opportunity.critical_deadline_type,opportunity.critical_deadline_label,opportunity.critical_deadline_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,opportunity.contact_name,opportunity.contact_email,opportunity.contact_phone,review.disposition,review.booking_readiness,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.current_cost_status,opportunity.commitment_terms_text,opportunity.critical_deadline_date,opportunity.critical_deadline_type,opportunity.critical_deadline_label,opportunity.critical_deadline_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,opportunity.contact_name,opportunity.contact_email,opportunity.contact_phone,review.disposition,review.booking_readiness,review.outreach_contact_name,review.outreach_contact_phone,review.outreach_contact_email,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
