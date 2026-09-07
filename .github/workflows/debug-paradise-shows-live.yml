@@ -3511,7 +3511,7 @@ jobs:
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           rpb=row('LIFE-007')
           assert 'data-live-compare-next-step-profile="LIFE-007"' in rpb
-          assert 'Research exhausted as of Sep. 7, 2026 for any existing 2026-27 Paradise acceptance or placement record — apply now under the published Corporate category for a limited first block of 2026-27 Saturdays instead of the full season; the decision-safe current rate is $65/$75 per Saturday.' in rpb
+          assert 'Before submitting the live Green Market Jotform, route its current Rules and Regulations and Waiver, Release and Hold Harmless Agreement to an authorized Paradise signer.' in rpb
           assert 'LP-attributed specific: #18 outside popup · 2021 · Nov-6 · 4 LP closes · $57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' in rpb
           miami=row('LIFE-013')
           assert 'data-live-compare-next-step-profile="LIFE-013"' in miami
@@ -3527,7 +3527,7 @@ jobs:
               assert 'LP-attributed placement type:' not in row(pid), (pid,row(pid))
           winter=row('LIFE-054')
           assert 'data-live-compare-next-step-profile="LIFE-054"' in winter
-          assert 'Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record — submit the $10 2026 Winter Fest application now and disclose Paradise windows/doors services exactly.' in winter
+          assert 'Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record — before submission, route the current linked POTTC Event Rules Terms and Conditions and Waiver and Release to an authorized Paradise signer.' in winter
           gun=row('LIFE-046')
           assert 'data-live-compare-next-step-profile="LIFE-046"' in gun
           assert 'Research exhausted as of Sep. 7, 2026 for Paradise-specific current availability and product acceptance — call Sport Show Specialists now at 321-777-7455 and ask whether an Oct. 10-11 West Palm indoor table remains available.' in gun
