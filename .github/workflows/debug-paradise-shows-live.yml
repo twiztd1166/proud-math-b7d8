@@ -1311,10 +1311,15 @@ jobs:
           assert vero_outcome.get('latest_observed_outcome_participation_status')=='2025 EVENT RECORD', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth')=='Booth #52', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth_year')==2025, vero_outcome
+          vero_2026_history=next((h for h in profiles['LIFE-009'].get('history') or [] if h.get('history_id')=='2026-GMAIL-VERO-WINTER'), None)
+          assert vero_2026_history and vero_2026_history.get('booth')=='048', vero_2026_history
+          assert vero_2026_history.get('event_cost_text')=='$535.00', vero_2026_history
+          assert vero_2026_history.get('final_cost_text')=='$535.00', vero_2026_history
+          assert vero_2026_history.get('payment_status_text')=='PAID', vero_2026_history
           lp_semantics='Annual LeadPerfection performance attribution matched one-to-one to a date-aligned preserved history occurrence with a specific placement; not attendance proof and not same-row history performance.'
           expected_lp_specific={
               'LIFE-007':('#18 outside popup',2021,'Nov-6',4,4,4,57043,'2021-SCH21-0127',17),
-              'LIFE-009':('66 (10x10)',2022,'Jan-15 Jan-16',38,15,4,110038,'2022-SCH22-0005',1),
+              'LIFE-009':('66 (10x10)',2022,'Jan-15 Jan-16',38,15,4,110038,'2022-SCH22-0005',2),
               'LIFE-013':('705 & 706 (10x20)',2021,'Nov-18 thru Dec-5',62,19,4,80100,'2021-SCH21-0136',1),
               'LIFE-018':('131 - 10x12',2021,'Nov-6 Nov-7',16,7,4,96238,'2021-SCH21-0129',1),
               'LIFE-030':('S204 (10x10)',2022,'Feb-19 Feb-20',11,8,1,38482,'2022-SCH22-0023',1),
@@ -1480,7 +1485,7 @@ jobs:
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered. Spring Booth 106 (2026) and Booth 428 (2023) are prior-occurrence references only. Obtain the fall-specific signed contract/account statement and exact live booth before any new payment or staffing decision.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
-              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet, but current Latitude-88 emails to Paradise explicitly say the live floor plan can be viewed and the booth booked online. Open the live plan now and compare actual availability before paying a deposit. Historical Booth 66 (10x10) is the strongest placement reference currently supported by date-aligned evidence: the Jan. 15-16, 2022 occurrence is matched to annual LP attribution of 4 closes / $110,038 close volume / 38 issued / 15 demos. That is performance attribution, not attendance proof or proof Booth 66 remains optimal. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0.',
+              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Open the live floor plan and verify current numbering/availability before paying. Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence: the Jan. 15-16, 2022 occurrence is date-matched to 4 LP closes / $110,038 LP close volume / 38 issued / 15 demos. That does not prove the old booth number/zone is still best. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0. Also do not automatically repeat Space 048: BoothCentral directly assigned 048 for Jan. 3-4, 2026, Paradise paid $535, and that exact occurrence is date-matched to 0 LP closes / $0 LP close volume / 9 issued / 3 demos. The 048 and 66 comparison is evidence, not proof that booth location caused either result, and it does not establish 2027 availability.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
@@ -1929,6 +1934,9 @@ jobs:
           assert profiles['LIFE-018'].get('latest_preserved_booth')=='131 - 10x12', profiles['LIFE-018']
           assert profiles['LIFE-018'].get('latest_preserved_booth_year')==2021, profiles['LIFE-018']
           assert profiles['LIFE-018'].get('latest_preserved_booth_dates')=='Nov-6 Nov-7', profiles['LIFE-018']
+          assert profiles['LIFE-009'].get('latest_preserved_booth')=='048', profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('latest_preserved_booth_year')==2026, profiles['LIFE-009']
+          assert profiles['LIFE-009'].get('latest_preserved_booth_dates')=='2026-01-03 – 2026-01-04', profiles['LIFE-009']
           assert profiles['LIFE-009'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-009']
           assert not profiles['LIFE-009'].get('related_current_profile_id'), profiles['LIFE-009']
           assert profiles['LIFE-005'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-005']
@@ -3790,6 +3798,9 @@ jobs:
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'Explicitly avoid simply reusing Booth #52' /tmp/vero_home_placement.html
+          grep -q 'Space 048' /tmp/vero_home_placement.html
+          grep -q 'Paradise paid \$535' /tmp/vero_home_placement.html
+          grep -q '0 LP closes / \$0 LP close volume / 9 issued / 3 demos' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
