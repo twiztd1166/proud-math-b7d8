@@ -741,10 +741,10 @@ jobs:
               'LIFE-054':'Royal Palm Beach Commons Park · 11600 Poinciana Blvd, Royal Palm Beach, FL 33411',
               'LIFE-009':'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967',
               'LIFE-018':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
-              'LIFE-030':'Gardens North County District Park · 5101 117 Court North, Palm Beach Gardens, FL',
+              'LIFE-030':'Gardens North County District Park · 5101 117 Court North, Palm Beach Gardens, FL 33418',
               'LIFE-060':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
               'LIFE-071':'St. Petersburg Coliseum · 535 4th Avenue North, St. Petersburg, FL 33701',
-              'LIFE-076':'PGA National Resort — Champion Course · Palm Beach Gardens, FL',
+              'LIFE-076':'PGA National Resort — Champion Course · 400 Avenue of the Champions, Palm Beach Gardens, FL 33418',
               'LIFE-013':'Miami-Dade County Fair & Exposition · 10901 Coral Way, Miami, FL 33165',
               'LIFE-017':'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602',
           }
@@ -2861,6 +2861,12 @@ jobs:
           grep -q 'Feb 28, 2027' /tmp/cognizant_detail.html
           grep -q 'partnership / activation pricing is not publicly verified' /tmp/cognizant_detail.html
           grep -q 'Do not treat hospitality as a vendor booth' /tmp/cognizant_detail.html
+          grep -q 'data-current-venue-profile="LIFE-076"' /tmp/cognizant_detail.html
+          grep -q 'PGA National Resort — Champion Course · 400 Avenue of the Champions, Palm Beach Gardens, FL 33418' /tmp/cognizant_detail.html
+          grep -q 'data-current-venue-actions-profile="LIFE-076"' /tmp/cognizant_detail.html
+          grep -q '400%20Avenue%20of%20the%20Champions' /tmp/cognizant_detail.html
+          grep -q 'Host-property street address is verified from the official PGA National Resort property map' /tmp/cognizant_detail.html
+          grep -q 'Tournament/exhibitor access, parking and the final Paradise activation entrance must still follow current organizer instructions' /tmp/cognizant_detail.html
           grep -q 'Sebastian Ascanio' /tmp/cognizant_detail.html
           grep -q 'data-historical-placement-profile="LIFE-076"' /tmp/cognizant_detail.html
           grep -q 'No preserved booth / placement is available for this profile' /tmp/cognizant_detail.html
