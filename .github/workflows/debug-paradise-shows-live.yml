@@ -435,7 +435,7 @@ jobs:
           assert '$160 Commercial/Retail' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
           assert '$316,198' in reviews['LIFE-018'].get('rationale',''), reviews['LIFE-018']
-          assert 'current 2027 price is still UNKNOWN' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
+          assert 'historical $795/$1,500/$1,845 figures only as references' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('action_timing','').startswith('NOW'), reviews['LIFE-030']
           assert '$3,350-$3,850' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
           assert reviews['LIFE-060'].get('disposition')=='WATCH' and reviews['LIFE-060'].get('action_timing','').startswith('NOW'), reviews['LIFE-060']
