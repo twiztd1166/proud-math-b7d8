@@ -1873,15 +1873,15 @@ jobs:
           assert 'No inside commercial vendor space' in slc.get('price_text',''), slc
           assert 'mid-November' in slc.get('booking_window_text',''), slc
           assert 'not a verified Paradise-specific hard deadline' in slc.get('booking_window_text',''), slc
-          assert 'last year’s vendors have first refusal' in slc.get('booking_window_text','').lower(), slc
-          assert 'Pop-up/easy-up tents are prohibited' in slc.get('current_logistics_text',''), slc
-          assert 'current photo of the operation' in slc.get('current_logistics_text',''), slc
-          assert 'St. Lucie County BOCC' in slc.get('current_logistics_text',''), slc
+          assert 'prior vendors/exhibitors receive contracts with a response date by mid-november' in slc.get('booking_window_text','').lower(), slc
+          assert 'pop-up/easy-up tents are prohibited' in slc.get('current_logistics_text',''), slc
+          assert 'current operation photo' in slc.get('current_logistics_text',''), slc
+          assert 'St. Lucie County Board of County Commissioners (BOCC)' in slc.get('current_logistics_text',''), slc
           assert slc.get('critical_deadline_date') is None, slc
           assert reviews['LIFE-112'].get('disposition')=='PURSUE', reviews['LIFE-112']
           assert reviews['LIFE-112'].get('booking_readiness')=='PRE_BOOKING_ACTION_REQUIRED', reviews['LIFE-112']
           assert reviews['LIFE-112'].get('action_timing','').startswith('NOW'), reviews['LIFE-112']
-          assert 'planning context only' in reviews['LIFE-112'].get('action_timing',''), reviews['LIFE-112']
+          assert 'Paradise-specific deadline' in reviews['LIFE-112'].get('action_timing',''), reviews['LIFE-112']
           assert 'Main line to the right' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
           assert '$47,000' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
           assert 'not a claim that the 2025 location is proven best' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
@@ -3677,7 +3677,7 @@ jobs:
           grep -q '1 net sale' /tmp/st_lucie_fair_pursue.html
           grep -q '\$47,000' /tmp/st_lucie_fair_pursue.html
           grep -q 'not a claim that the 2025 location is proven best' /tmp/st_lucie_fair_pursue.html
-          grep -q 'Pop-up/easy-up tents are prohibited' /tmp/st_lucie_fair_pursue.html
+          grep -q 'pop-up/easy-up tents are prohibited' /tmp/st_lucie_fair_pursue.html
           grep -q 'mid-November' /tmp/st_lucie_fair_pursue.html
           if grep -q 'data-current-critical-deadline-profile="LIFE-112"' /tmp/st_lucie_fair_pursue.html; then
             echo "::error::St. Lucie County Fair rendered a fabricated hard deadline"
