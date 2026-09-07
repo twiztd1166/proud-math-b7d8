@@ -1444,7 +1444,10 @@ jobs:
           expected_no_verified_max={'HIST-234','LIFE-013','LIFE-014','LIFE-018','LIFE-030','LIFE-033','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-112'}
           assert no_verified_max==expected_no_verified_max, (no_verified_max,expected_no_verified_max)
           assert live['LIFE-112'].get('booking_cost_min')==800 and live['LIFE-112'].get('booking_cost_max') is None, live['LIFE-112']
-          assert live['LIFE-112'].get('current_cost_status')=='MINIMUM_VERIFIED', live['LIFE-112']
+          assert live['LIFE-112'].get('current_cost_status')=='KNOWN_VERIFIED', live['LIFE-112']
+          assert '$800 minimum commercial space' in live['LIFE-112'].get('price_text',''), live['LIFE-112']
+          assert 'Additional frontage adds $80 per front foot' in live['LIFE-112'].get('price_text',''), live['LIFE-112']
+          assert 'larger frontage costs more' in live['LIFE-112'].get('booking_cost_basis',''), live['LIFE-112']
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
