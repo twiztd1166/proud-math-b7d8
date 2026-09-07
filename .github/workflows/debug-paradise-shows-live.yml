@@ -453,6 +453,17 @@ jobs:
           assert profiles['LIFE-013']['current_rebook_opportunity']['event_start']=='2027-03-18'
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
+          assert profiles['LIFE-017']['current_rebook_opportunity']['event_start']=='2027-04-03'
+          assert profiles['LIFE-017']['current_rebook_opportunity']['event_end']=='2027-04-04'
+          assert '$1,295 per 10x10 booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
+          assert '$1,395 per corner booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
+          assert '4% surcharge' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
+          assert '50% with reservation' in profiles['LIFE-017']['current_rebook_opportunity']['booking_window_text']
+          assert 'March 1, 2027' in profiles['LIFE-017']['current_rebook_opportunity']['booking_window_text']
+          assert 'Patience Rall' in profiles['LIFE-017']['current_rebook_opportunity']['contact_text']
+          assert 'patience@eccshows.com' in profiles['LIFE-017']['current_rebook_opportunity']['contact_text']
+          assert 'Direct Paradise Gmail' in profiles['LIFE-017']['current_rebook_opportunity']['source_label']
+          assert 'No Paradise-signed 2027 contract or booth assignment was found' in profiles['LIFE-017']['current_rebook_opportunity']['notes']
           assert profiles['LIFE-018']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-018']['current_rebook_opportunity']['event_start']=='2027-01-09'
           assert profiles['LIFE-018']['current_rebook_opportunity']['event_end']=='2027-01-10'
