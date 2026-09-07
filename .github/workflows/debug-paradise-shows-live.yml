@@ -2901,6 +2901,13 @@ jobs:
           grep -q 'no occurrence-level outcome metrics are preserved' /tmp/palm_liquors_pursue.html
           grep -q 'Lifetime / LP attribution is not attendance proof' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outreach-cycle-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'Current cycle status' /tmp/palm_liquors_pursue.html
+          grep -q 'Active host · date required' /tmp/palm_liquors_pursue.html
+          grep -q 'not a verified scheduled show' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outreach-cycle-actions-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q '>Open cycle source<' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outreach-cycle-source-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q 'Current outreach contact' /tmp/palm_liquors_pursue.html
           grep -q 'Palm Beach Liquors · 561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-actions-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
@@ -2928,6 +2935,10 @@ jobs:
           grep -q 'Occurrence-level outcome available' /tmp/paws_pursue.html
           grep -q 'Latest observed: 2017' /tmp/paws_pursue.html
           grep -q '5 issued' /tmp/paws_pursue.html
+          grep -q 'data-historical-outreach-cycle-profile="LIFE-038"' /tmp/paws_pursue.html
+          grep -q 'Active series · next date unverified' /tmp/paws_pursue.html
+          grep -q 'older 2022 occurrence' /tmp/paws_pursue.html
+          grep -q '>Open cycle source<' /tmp/paws_pursue.html
           grep -q 'data-historical-outreach-profile="LIFE-038"' /tmp/paws_pursue.html
           grep -q 'Hubbard South Florida · 561-616-4777' /tmp/paws_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
@@ -3175,6 +3186,11 @@ jobs:
           grep -q '>PURSUE<' /tmp/safety_pursue.html
           grep -q 'November 2026' /tmp/safety_pursue.html
           grep -q '772-337-0049' /tmp/safety_pursue.html
+          grep -q 'data-historical-outreach-cycle-profile="LIFE-073"' /tmp/safety_pursue.html
+          grep -q 'Next cycle not published' /tmp/safety_pursue.html
+          grep -q 'Apr. 25, 2026 at Clover Park' /tmp/safety_pursue.html
+          grep -q 'no 2027 date/application is published yet' /tmp/safety_pursue.html
+          grep -q '>Open cycle source<' /tmp/safety_pursue.html
           grep -q '2026 cycle is verified at \$100 for a business-vendor 10x10' /tmp/safety_pursue.html
           grep -q 'no 2027 date is yet published' /tmp/safety_pursue.html
           grep -q 'href="https://slcsafetyfest.com/vendors/"' /tmp/safety_pursue.html
