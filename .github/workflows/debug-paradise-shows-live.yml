@@ -360,6 +360,8 @@ jobs:
               'LIFE-071':'WATCH',
               'LIFE-073':'PURSUE',
               'LIFE-017':'PURSUE',
+              'LIFE-007':'PURSUE',
+              'LIFE-009':'WATCH',
               'LIFE-075':'WATCH',
               'LIFE-029':'HOLD',
               'LIFE-032':'HOLD',
@@ -367,8 +369,8 @@ jobs:
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==6, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==4, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==7, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==5, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==4, actual_reviews
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
@@ -387,6 +389,22 @@ jobs:
           assert '5 net sales / $89,388' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
           assert 'current 2027 booth map' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
           assert '2024 floor plan' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert reviews['LIFE-007'].get('disposition')=='PURSUE', reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('action_timing','').startswith('NOW'), reviews['LIFE-007']
+          assert '$538,570' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert '$65/$75' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert '1 net sale / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
+          assert 'limited first block' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert '#18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'do not treat #18 as proven best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
+          assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
+          assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
+          assert 'Booth #52 produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
+          assert 'Jan. 3-4, 2026 occurrence produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
+          assert 'Do not select Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert '25% deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
