@@ -111,7 +111,7 @@ function rebookOpportunityCard(op){
   const action=op.action_url?`<div class="rebookLiveActions"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open booking action')}</a></div>`:'';
   const cost=opportunityCostText(op);
   const comparableCost=cost?`<div class="wide"><span>Decision-safe current booking cost</span><b>${esc(cost)}${op.booking_cost_basis?` · ${esc(op.booking_cost_basis)}`:''}</b></div>`:'';
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div>${comparableCost}${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive" data-rebook-opportunity-profile="${esc(op.profile_id||'')}"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div>${comparableCost}${op.prior_cost_text?`<div class="wide"><span>Prior verified cost / reference</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function rebookReviewCard(review){
   if(!review)return '';
@@ -406,7 +406,7 @@ function catalogFilterSummary(){
   for(const key of ['lp','cumulativeLp'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
-  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified starting cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
+  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified max cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
   if(f.currentTreatment!=='ALL')add('currentTreatment',labels.currentTreatment[f.currentTreatment]||f.currentTreatment);
   if(f.confirmation!=='ALL')add('confirmation','Confirmation '+f.confirmation);
@@ -444,7 +444,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current max booking cost low'],['CURRENT_COST_HIGH','Current max booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -502,7 +502,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.currentCostBand!=='ALL'){
     const opportunity=p?.current_rebook_opportunity||null;
     if(!opportunity)return false;
-    if(!rangeMatch(opportunity.booking_cost_min,f.currentCostBand))return false;
+    if(!rangeMatch(opportunity.booking_cost_max,f.currentCostBand))return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
@@ -547,8 +547,8 @@ function catalogComparator(a,b){
     return ad.localeCompare(bd)||name(a,b);
   }
   if(sort==='CURRENT_COST_LOW'){
-    const av=opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_min');
-    const bv=opportunityCostNumber(b?.current_rebook_opportunity,'booking_cost_min');
+    const av=opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_max');
+    const bv=opportunityCostNumber(b?.current_rebook_opportunity,'booking_cost_max');
     const aa=av!==null,bb=bv!==null;
     if(aa!==bb)return aa?-1:1;
     return aa?av-bv||name(a,b):name(a,b);
@@ -821,7 +821,7 @@ function catalogFacetCounts(){
     const liveOpportunity=p?.current_rebook_opportunity||null;
     if(liveOpportunity){
       opportunityCostBand.ALL++;
-      const entry=opportunityCostNumber(liveOpportunity,'booking_cost_min');
+      const entry=opportunityCostNumber(liveOpportunity,'booking_cost_max');
       if(entry===null)opportunityCostBand.MISSING++;
       else if(entry<500)opportunityCostBand.UNDER500++;
       else if(entry<1000)opportunityCostBand['500_1000']++;
@@ -1025,7 +1025,7 @@ function openShowFilters(cleanupRequest=false){
         ${filterField('Lifetime net','fLifetimeNetBand',f.lifetimeNetBand,opts([['ALL','Any lifetime net'],['UNDER25K','Under $25K'],['25_100K','$25K to <$100K'],['100_250K','$100K to <$250K'],['250KPLUS','$250K+']],{ALL:fc.total,...fc.lifeBand}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Current opportunity / operating linkage</div><div class="filterGrid">
-        ${filterField('Current verified starting cost','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
+        ${filterField('Current verified max cost','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
         ${filterField('Current event year','fCurrentEventYear',f.currentEventYear,opts([['ALL','Any year'],...currentYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.currentYears}))}
         ${filterField('Current status','fCurrentStatus',f.currentStatus,opts([['ALL','Any status'],['READY','Ready'],['RECONCILE','Reconcile'],['DATE ONLY','Date Only'],['HOLD','Hold'],['OPEN','Open']],{ALL:fc.total,...fc.status}))}
         ${filterField('Current treatment','fCurrentTreatment',f.currentTreatment,opts([['ALL','Any treatment'],['IN PLAY','In Play'],['SKIPPED','Skipped']],{ALL:fc.total,'IN PLAY':fc.treatment.IN_PLAY,SKIPPED:fc.treatment.SKIPPED}))}
