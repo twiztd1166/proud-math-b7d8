@@ -178,6 +178,13 @@ jobs:
               grep -q 'fOpportunityLogisticsStatus' /tmp/app-shows.js
               grep -q 'opportunity.current_logistics_text' /tmp/app-shows.js
               grep -q 'currentLogisticsStatus' /tmp/app-core.js
+              grep -q 'rebookOpportunityCard(op,compact=false)' /tmp/app-shows.js
+              grep -q 'rebookOpportunityCard(liveOpportunity,true)' /tmp/app-shows.js
+              grep -q 'data-current-operations-compact-profile' /tmp/app-shows.js
+              grep -q 'data-current-operations-expanded-profile' /tmp/app-shows.js
+              grep -q 'Schedule & day-of-show' /tmp/app-shows.js
+              grep -q 'rebookOpsDetails' /tmp/app.css
+              grep -q "closest('a,button,details')" /tmp/app-bind.js
               grep -q 'data-current-schedule-status-profile' /tmp/app-shows.js
               grep -q 'data-current-schedule-profile' /tmp/app-shows.js
               grep -q 'data-current-schedule-source-profile' /tmp/app-shows.js
@@ -2512,6 +2519,9 @@ jobs:
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
+          grep -q 'data-current-operations-compact-profile' /tmp/shows.html
+          grep -q 'rebookOpsDetails' /tmp/shows.html
+          grep -q 'Schedule &amp; day-of-show' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
@@ -2582,6 +2592,7 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
+          grep -q 'data-current-operations-expanded-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-status-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Hours not recovered from current source' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-profile="LIFE-009"' /tmp/vero_home_placement.html
