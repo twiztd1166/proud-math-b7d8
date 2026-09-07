@@ -460,7 +460,7 @@ async function openCatalog(id,focusYear=null){
     const operatingHtml=operatingRows.length?operatingRows.map(currentOperatingScorecard).join(''):'';
     const boothGuidance=boothGuidanceHtml(h);
     const rebookOpportunityHtml=typeof rebookOpportunityCard==='function'?rebookOpportunityCard(d.rebookOpportunity||null):'';
-    const rebookReviewHtml=typeof rebookReviewCard==='function'?rebookReviewCard(d.rebookReview||null):'';
+    const rebookReviewHtml=typeof rebookReviewCard==='function'?rebookReviewCard(d.rebookReview||null,Boolean(d.rebookOpportunity)):'';
     const profileRelations=Array.isArray(d.profileRelations)?d.profileRelations:[];
     const canonicalSeriesRelation=profileRelations.find(rel=>String(rel?.canonical_series_profile_id||'')&&String(rel.canonical_series_profile_id)!==id)||null;
     const retainedSeriesRelations=profileRelations.filter(rel=>String(rel?.canonical_series_profile_id||'')===id).map(rel=>String(rel?.profile_id||'')===id?String(rel?.related_profile_id||''):String(rel?.profile_id||'')).filter(Boolean);
