@@ -691,7 +691,7 @@ jobs:
                   assert not review.get('blockers_text'), (pid,review)
 
           expected_historical_review_sources={
-              'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors official store site + 2026 store/address verification + Paradise preserved pop-up history','no current event/pop-up page recovered as of 2026-09-07'),
+              'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors official store site + 2026 store/address verification + direct Paradise 2019 host/event evidence + preserved pop-up history','GMAIL:16baf7ac9653499e 2019 Dovalo PM Liquors marketing meeting; GMAIL:16d16c2a80f422d8 2019 Palm Beach Liquors special event'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','Direct City/Paradise 2024-2026 Hurricane Expo correspondence + official 2026 City event/vendor pages + Paradise history/LP evidence','GMAIL:18f104adcadb7f0f;GMAIL:18fc51c2d9ab54db;GMAIL:1956bf9a7680f5d1;GMAIL:19de3fa30ccacf8d'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Direct DLF/Paradise 2024-2026 Safety Festival correspondence + official 2026 vendor agreement/site + Paradise history','GMAIL:1935453a8f4b0e19;GMAIL:19c765115e9e2375;GMAIL:19dac1371ec57cf3'),
           }
@@ -732,6 +732,13 @@ jobs:
           assert 'next Paradise pop-up date or current activation rate was recovered' in reviews['LIFE-028'].get('outreach_cycle_text','')
           assert reviews['LIFE-028'].get('outreach_cycle_source_url')=='https://palmbeachliquor.com/', reviews['LIFE-028']
           assert reviews['LIFE-028'].get('outreach_cycle_source_label')=='Current Palm Beach Liquors official store site; no current event/pop-up page recovered', reviews['LIFE-028']
+          assert 'GMAIL:16baf7ac9653499e' in reviews['LIFE-028'].get('source_ref',''), reviews['LIFE-028']
+          assert 'GMAIL:16d16c2a80f422d8' in reviews['LIFE-028'].get('source_ref',''), reviews['LIFE-028']
+          assert 'Dovalo PM Liquors' in reviews['LIFE-028'].get('rationale',''), reviews['LIFE-028']
+          assert 'Jul. 5, 2019' in reviews['LIFE-028'].get('rationale',''), reviews['LIFE-028']
+          assert 'Sep. 14, 2019 Palm Beach Liquors special event' in reviews['LIFE-028'].get('rationale',''), reviews['LIFE-028']
+          assert 'historical "Dovalo PM Liquors" / shopping-plaza contact lineage still applies' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
+          assert '2019 historical calendar label only, not a verified current person' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
           assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert '10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'February-April 2027 as a monitoring window' in reviews['LIFE-039'].get('outreach_cycle_text','')
@@ -3311,6 +3318,10 @@ jobs:
           grep -q 'data-historical-outreach-source-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q '>Open outreach source<' /tmp/palm_liquors_pursue.html
           grep -q 'Current Palm Beach Liquors official store site + current 2026 phone/address corroboration' /tmp/palm_liquors_pursue.html
+          grep -q 'Dovalo PM Liquors' /tmp/palm_liquors_pursue.html
+          grep -q 'Jul. 5, 2019' /tmp/palm_liquors_pursue.html
+          grep -q 'Sep. 14, 2019 Palm Beach Liquors special event' /tmp/palm_liquors_pursue.html
+          grep -q '2019 historical calendar label only, not a verified current person' /tmp/palm_liquors_pursue.html
           python - <<'PY'
           import re
           html=open('/tmp/palm_liquors_pursue.html').read()
