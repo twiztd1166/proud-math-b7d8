@@ -238,6 +238,7 @@ jobs:
               grep -q 'CURRENT WATCH' /tmp/app-shows.js
               grep -q 'NEXT-CYCLE WATCH' /tmp/app-shows.js
               grep -q 'current_rebook_opportunity' /tmp/app-shows.js
+              grep -q "amount=money(min)+'+'" /tmp/app-shows.js
               grep -q 'related_current_profile_id' /tmp/app-shows.js
               grep -q 'SAME SERIES' /tmp/app-shows.js
               grep -q 'rebookSeries' /tmp/app.css
@@ -660,10 +661,11 @@ jobs:
               'LIFE-076':'WATCH',
               'LIFE-077':'WATCH',
               'LIFE-092':'PURSUE',
+              'LIFE-112':'PURSUE',
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==11, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==12, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
@@ -685,6 +687,7 @@ jobs:
               'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
+              'LIFE-112':'Authorized application/signature + current operation photo/product list · category/space acceptance · exact outside placement · final frontage/depth · electrical service/cost · contract/payment/cancellation terms · setup/breakdown/vendor hours · COI',
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
@@ -1210,7 +1213,7 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-092'}
+          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-092','LIFE-112'}
           assert set(live)==expected_live, (set(live),expected_live)
 
           # FIELD-COMPLETENESS CONTRACT:
@@ -1255,7 +1258,7 @@ jobs:
                   assert str(review.get(field) or '').strip(), (pid,field,review)
               assert review.get('checked_at'), (pid,'review_checked_at',review)
 
-          assert len(live)==17
+          assert len(live)==18
           assert all(op.get('event_start') for op in live.values())
           assert all(str(op.get('current_placement_text') or '').strip() for op in live.values())
           assert all(str(op.get('prior_cost_text') or '').strip() for op in live.values())
@@ -1266,7 +1269,7 @@ jobs:
           assert all(str(op.get('current_schedule_text') or '').strip() for op in live.values())
           assert all(str(op.get('current_logistics_text') or '').strip() for op in live.values())
           assert all(str((reviews.get(pid) or {}).get('blockers_text') or '').strip() for pid in expected_live)
-          print('Live field-completeness contract: 17/17 PASS')
+          print('Live field-completeness contract: 18/18 PASS')
 
           expected_outcome_status={
               'HIST-234':'NO_COMPARABLE_OUTCOME_EVIDENCE',
@@ -1286,11 +1289,12 @@ jobs:
               'LIFE-076':'LIFETIME_ONLY',
               'LIFE-077':'OCCURRENCE_OUTCOME_AVAILABLE',
               'LIFE-092':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-112':'OCCURRENCE_OUTCOME_AVAILABLE',
           }
           assert set(expected_outcome_status)==expected_live, (set(expected_outcome_status),expected_live)
           for pid,status in expected_outcome_status.items():
               assert profiles[pid].get('outcome_evidence_status')==status, (pid,profiles[pid])
-          assert sum(1 for v in expected_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==8
+          assert sum(1 for v in expected_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==9
           assert sum(1 for v in expected_outcome_status.values() if v=='LIFETIME_ONLY')==8
           assert sum(1 for v in expected_outcome_status.values() if v=='NO_COMPARABLE_OUTCOME_EVIDENCE')==1
           vero_outcome=profiles['LIFE-009']
@@ -1376,6 +1380,16 @@ jobs:
           assert clam_outcome.get('latest_observed_outcome_demos')==3, clam_outcome
           assert clam_outcome.get('best_observed_booth')=='Tent display required — exact booth/location not stated', clam_outcome
           assert clam_outcome.get('best_observed_specific_booth') is None, clam_outcome
+          slc_fair_outcome=profiles['LIFE-112']
+          assert slc_fair_outcome.get('latest_observed_outcome_year')==2025, slc_fair_outcome
+          assert slc_fair_outcome.get('latest_observed_outcome_net_sales')==1, slc_fair_outcome
+          assert float(slc_fair_outcome.get('latest_observed_outcome_net_revenue'))==47000, slc_fair_outcome
+          assert slc_fair_outcome.get('latest_observed_outcome_issued')==13, slc_fair_outcome
+          assert slc_fair_outcome.get('latest_observed_outcome_demos')==7, slc_fair_outcome
+          assert slc_fair_outcome.get('best_observed_specific_booth')=='Main line to the right — 10×10', slc_fair_outcome
+          assert slc_fair_outcome.get('best_observed_specific_booth_year')==2025, slc_fair_outcome
+          assert slc_fair_outcome.get('best_observed_specific_booth_net_sales')==1, slc_fair_outcome
+          assert float(slc_fair_outcome.get('best_observed_specific_booth_net_revenue'))==47000, slc_fair_outcome
           for pid in ('LIFE-007','LIFE-014','LIFE-017','LIFE-033','LIFE-044','LIFE-054','LIFE-071','LIFE-076'):
               assert profiles[pid].get('latest_observed_outcome_year') is None, (pid,profiles[pid])
           assert profiles['HIST-234'].get('latest_observed_outcome_year') is None, profiles['HIST-234']
@@ -1399,11 +1413,12 @@ jobs:
               'LIFE-076':'WATCH_GATED',
               'LIFE-033':'HOLD_RECONCILE',
               'LIFE-092':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-112':'PRE_BOOKING_ACTION_REQUIRED',
           }
           assert set(expected_live_readiness)==expected_live, (set(expected_live_readiness),expected_live)
           for pid,readiness in expected_live_readiness.items():
               assert reviews[pid].get('booking_readiness')==readiness, (pid,reviews[pid])
-          assert sum(1 for v in expected_live_readiness.values() if v=='PRE_BOOKING_ACTION_REQUIRED')==8
+          assert sum(1 for v in expected_live_readiness.values() if v=='PRE_BOOKING_ACTION_REQUIRED')==9
           assert sum(1 for v in expected_live_readiness.values() if v=='WATCH_GATED')==8
           assert sum(1 for v in expected_live_readiness.values() if v=='HOLD_RECONCILE')==1
           assert sum(1 for v in expected_live_readiness.values() if v=='READY_TO_COMMIT')==0
@@ -1411,7 +1426,7 @@ jobs:
           live_action_timing={pid:str((reviews.get(pid) or {}).get('action_timing') or '').strip() for pid in expected_live}
           act_now={pid for pid,timing in live_action_timing.items() if timing.upper().startswith('NOW')}
           act_later={pid for pid,timing in live_action_timing.items() if timing and not timing.upper().startswith('NOW')}
-          assert len(act_now)==16, act_now
+          assert len(act_now)==17, act_now
           assert act_later=={'LIFE-014'}, act_later
           assert not {pid for pid,timing in live_action_timing.items() if not timing}, live_action_timing
           placement_unknown_values={'','unknown','n/a','na','none','tbd','tba','-','—'}
@@ -1422,9 +1437,9 @@ jobs:
           actual_missing_placement={pid for pid in expected_live if not has_preserved_placement(profiles[pid])}
           assert actual_missing_placement==expected_missing_placement, (actual_missing_placement,expected_missing_placement)
           assert len(expected_missing_placement)==8
-          assert len(expected_live-expected_missing_placement)==9
+          assert len(expected_live-expected_missing_placement)==10
           expected_quote_required={pid for pid,op in live.items() if op.get('booking_cost_max') is None}
-          assert len(expected_quote_required)==9, expected_quote_required
+          assert len(expected_quote_required)==10, expected_quote_required
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
@@ -1443,6 +1458,7 @@ jobs:
               'LIFE-013':'Miami-Dade County Fair & Exposition · 10901 Coral Way, Miami, FL 33165',
               'LIFE-017':'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602',
               'LIFE-092':'Abacoa Town Center / Abacoa Amphitheatre · 1267 Main St, Jupiter, FL 33458',
+              'LIFE-112':'St. Lucie County Fairgrounds · 15601 West Midway Road, Fort Pierce, FL 34945',
           }
           assert set(expected_venues)==expected_live, (set(expected_venues),expected_live)
           for pid,venue in expected_venues.items():
@@ -1465,6 +1481,7 @@ jobs:
               'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
               'LIFE-017':'No 2027 Tampa booth assignment is verified. The direct Apr. 2027 contract lets Paradise list three preferred booth locations, but ECCS makes the final location decision. Request the current 2027 booth map from Patience Rall and choose three ranked preferred spaces before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
+              'LIFE-112':'No current Paradise space is assigned. The official 2027 vendor page says there is no inside commercial vendor space, so any Paradise activation must use accepted outside commercial space. Historical 2025 evidence records “Main line to the right — 10×10” with a same-row outcome of 1 net sale / $47,000 net / 13 issued / 7 demos on a $700 fair fee. Use that only as a placement reference: request a comparable high-flow outside location if available, but verify the current map, assignment and traffic pattern and do not call the 2025 location proven best.',
           }
           assert set(expected_current_placements)==expected_live, (set(expected_current_placements),expected_live)
           for pid,placement in expected_current_placements.items():
@@ -1487,6 +1504,7 @@ jobs:
               'LIFE-076':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-077':'APPLICATION_OPEN_NOT_ASSIGNED',
               'LIFE-092':'APPLICATION_OPEN_NOT_ASSIGNED',
+              'LIFE-112':'APPLICATION_OPEN_NOT_ASSIGNED',
           }
           assert set(expected_current_placement_status)==expected_live, (set(expected_current_placement_status),expected_live)
           for pid,status in expected_current_placement_status.items():
@@ -1494,7 +1512,7 @@ jobs:
           assert sum(1 for v in expected_current_placement_status.values() if v=='ASSIGNED_VERIFIED')==0
           assert sum(1 for v in expected_current_placement_status.values() if v=='LISTED_ASSIGNMENT_UNVERIFIED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==3
-          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==6
+          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==7
           assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==2
           assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==3
           assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
@@ -1517,6 +1535,7 @@ jobs:
               'LIFE-076':'NOT_PUBLISHED_YET',
               'LIFE-077':'VERIFIED_CURRENT',
               'LIFE-092':'VERIFIED_CURRENT',
+              'LIFE-112':'VERIFIED_CURRENT',
           }
           assert set(expected_current_schedule_status)==expected_live, (set(expected_current_schedule_status),expected_live)
           for pid,status in expected_current_schedule_status.items():
@@ -1526,7 +1545,7 @@ jobs:
               assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,op)
               assert str(op.get('current_schedule_source_label') or '').strip(), (pid,op)
               assert op.get('current_schedule_checked_at'), (pid,op)
-          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==10
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==11
           assert sum(1 for v in expected_current_schedule_status.values() if v=='NOT_PUBLISHED_YET')==6
           assert sum(1 for v in expected_current_schedule_status.values() if v=='CURRENT_SOURCE_HOURS_NOT_RECOVERED')==0
           assert sum(1 for v in expected_current_schedule_status.values() if v=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION')==1
@@ -1572,6 +1591,7 @@ jobs:
               'LIFE-076':'PROPOSAL_REQUIRED',
               'LIFE-077':'PARTIAL_CURRENT',
               'LIFE-092':'EXHIBITOR_KIT_REQUIRED',
+              'LIFE-112':'PARTIAL_CURRENT',
           }
           assert set(expected_current_logistics_status)==expected_live, (set(expected_current_logistics_status),expected_live)
           for pid,status in expected_current_logistics_status.items():
@@ -1582,7 +1602,7 @@ jobs:
               assert str(op.get('current_logistics_source_label') or '').strip(), (pid,op)
               assert op.get('current_logistics_checked_at'), (pid,op)
           assert sum(1 for v in expected_current_logistics_status.values() if v=='VERIFIED_CURRENT')==1
-          assert sum(1 for v in expected_current_logistics_status.values() if v=='PARTIAL_CURRENT')==7
+          assert sum(1 for v in expected_current_logistics_status.values() if v=='PARTIAL_CURRENT')==8
           assert sum(1 for v in expected_current_logistics_status.values() if v=='EXHIBITOR_KIT_REQUIRED')==5
           assert sum(1 for v in expected_current_logistics_status.values() if v=='PROPOSAL_REQUIRED')==2
           assert sum(1 for v in expected_current_logistics_status.values() if v=='NOT_PUBLISHED_YET')==1
@@ -1623,6 +1643,7 @@ jobs:
               'LIFE-076':'AGREEMENT_REQUIRED',
               'LIFE-077':'PARTIAL_CURRENT',
               'LIFE-092':'AGREEMENT_REQUIRED',
+              'LIFE-112':'AGREEMENT_REQUIRED',
           }
           assert set(expected_current_commitment_status)==expected_live, (set(expected_current_commitment_status),expected_live)
           for pid,status in expected_current_commitment_status.items():
@@ -1631,7 +1652,7 @@ jobs:
               assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
           assert sum(1 for v in expected_current_commitment_status.values() if v=='VERIFIED_CURRENT')==4
           assert sum(1 for v in expected_current_commitment_status.values() if v=='PARTIAL_CURRENT')==4
-          assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==6
+          assert sum(1 for v in expected_current_commitment_status.values() if v=='AGREEMENT_REQUIRED')==7
           assert sum(1 for v in expected_current_commitment_status.values() if v=='RECONCILE_EXISTING')==1
           assert sum(1 for v in expected_current_commitment_status.values() if v=='NOT_PUBLISHED_YET')==1
           assert sum(1 for v in expected_current_commitment_status.values() if v=='NEXT_CYCLE_CLOSED')==1
@@ -1653,8 +1674,9 @@ jobs:
               'LIFE-044':'No safe same-series prior cost is available for this current opportunity. The retained 2023 Bradenton evidence is same-market/same-venue evidence from a different organizer and is intentionally not used as a comparable prior booking cost.',
               'LIFE-076':'No verified prior Paradise vendor-booth or lead-generation activation cost is preserved for this event. Prior PGA TOUR outreach / hospitality context is not treated as a comparable exhibitor cost.',
               'LIFE-092':'Paradise Feast of Little Italy history: 2021 Abacoa schedule final cost $2,000 (event-cost field $3,000); 2015 Feast schedule reference $3,000. Historical booking/schedule references only. Current 2026 Business Vendor fee is $1,000.',
+              'LIFE-112':'Paradise history: 2025 fair fee $700 / direct+setup $1,000; 2022 fair fee $700; 2021 fair fee $830. Historical references only. The 2025 preserved row also records a 10×10 “Main line to the right” placement.',
           }
-          assert len(expected_prior_cost_refs)==17, expected_prior_cost_refs
+          assert len(expected_prior_cost_refs)==18, expected_prior_cost_refs
           for pid,ref in expected_prior_cost_refs.items():
               assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
           assert set(expected_prior_cost_refs)==set(live), (set(expected_prior_cost_refs),set(live))
@@ -1676,6 +1698,7 @@ jobs:
               'LIFE-013':('Open 2027 exhibitor portal','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
               'LIFE-017':('Request / refresh 2027 Tampa contract','https://www.tampahomeshow.com/get-contract/'),
               'LIFE-092':('Open vendor page — call VIA before signing','https://www.feastoflittleitaly.com/vendor-info'),
+              'LIFE-112':('Open 2027 vendor application','https://www.stluciecountyfair.org/p/participate/livestock1'),
           }
           assert set(expected_actions)==set(live), (set(expected_actions),set(live))
           for pid,(label,url) in expected_actions.items():
@@ -1697,8 +1720,19 @@ jobs:
               assert float(op.get('booking_cost_max'))==cmax, (pid,op)
               assert op.get('booking_cost_unit')==unit, (pid,op)
               assert op.get('booking_cost_basis')==basis, (pid,op)
+          expected_min_only_booking_costs={
+              'LIFE-112':(800,'commercial frontage · 10-foot minimum','Official 2027 St. Lucie County Fair Concession & Vendor Application: $80 per front foot with a 10-foot minimum; larger frontage costs more.'),
+          }
+          for pid,(cmin,unit,basis) in expected_min_only_booking_costs.items():
+              op=live[pid]
+              assert float(op.get('booking_cost_min'))==cmin, (pid,op)
+              assert op.get('booking_cost_max') is None, (pid,op)
+              assert op.get('booking_cost_unit')==unit, (pid,op)
+              assert op.get('booking_cost_basis')==basis, (pid,op)
+              assert 'minimum' in op.get('price_text','').lower(), (pid,op)
+              assert 'additional frontage' in op.get('price_text','').lower(), (pid,op)
           for pid,op in live.items():
-              if pid not in expected_booking_costs:
+              if pid not in expected_booking_costs and pid not in expected_min_only_booking_costs:
                   assert op.get('booking_cost_min') is None, (pid,op)
                   assert op.get('booking_cost_max') is None, (pid,op)
                   assert not op.get('booking_cost_unit'), (pid,op)
@@ -1721,12 +1755,13 @@ jobs:
               'LIFE-033':'RECONCILE_EXISTING',
               'LIFE-060':'NOT_PUBLISHED_YET',
               'LIFE-014':'NEXT_CYCLE_CLOSED',
+              'LIFE-112':'KNOWN_VERIFIED',
           }
           assert set(expected_current_cost_status)==set(live), (set(expected_current_cost_status),set(live))
-          assert len(expected_current_cost_status)==17, expected_current_cost_status
+          assert len(expected_current_cost_status)==18, expected_current_cost_status
           for pid,status in expected_current_cost_status.items():
               assert live[pid].get('current_cost_status')==status, (pid,live[pid])
-          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==7
+          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==8
           assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==6
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
@@ -1746,8 +1781,9 @@ jobs:
               'LIFE-076':'2027 tournament dates and hospitality inquiry paths are live, but no Paradise-specific lead-generation activation agreement, price, payment schedule, cancellation terms, exclusivity or COI requirements are publicly published · request the current PGA TOUR partnership proposal and do not treat hospitality purchase terms as exhibit/activation terms.',
               'LIFE-013':'2027 vendor applications are live and indoor commercial spaces are offered, but Paradise-specific commercial-space price, deposit/payment schedule, application deadline, cancellation/refund, COI and add-on terms are not published on the verified vendor page · obtain the 2027 commercial rate sheet/application agreement from Sylvia before committing.',
               'LIFE-092':'The live 2026 Business Vendor interest form requires acceptance of Terms & Conditions, but its linked terms are materially stale: they still state $8 gated admission, 2019 setup dates, $500/$600 booth pricing and Sunday 8 PM, conflicting with the current 2026 free-admission page, $675 Retail / $1,000 Business Vendor fees and Sunday 7 PM. Treat those old payment/refund/setup clauses as non-current. Obtain the current 2026 agreement and confirm application acceptance, payment/refund obligations, Business Vendor footprint/inclusions and placement before paying or signing.',
+              'LIFE-112':'The 2027 application does not guarantee space. It requires an authorized-agent signature and agreement to comply with current Fair vendor rules/regulations. Current contract acceptance, deposit/payment schedule, cancellation/refund terms and final electrical charges are not stated in the recovered application and must be verified before Paradise makes a payment or final commitment.',
           }
-          assert len(expected_commitment_terms)==17, expected_commitment_terms
+          assert len(expected_commitment_terms)==18, expected_commitment_terms
           for pid,terms in expected_commitment_terms.items():
               assert live[pid].get('commitment_terms_text')==terms, (pid,live[pid])
           assert set(expected_commitment_terms)==set(live), (set(expected_commitment_terms),set(live))
@@ -1775,11 +1811,34 @@ jobs:
               'LIFE-007':('info@pottcevents.com','561-792-9260'),
               'LIFE-054':('info@pottcevents.com','561-792-9260'),
               'LIFE-077':('info@sebastianclambake.org','772-473-3836'),
+              'LIFE-112':('Robin@stluciecountyfair.org','772-464-2910'),
           }
           for pid,(email,phone) in recovered_contacts.items():
               op=live[pid]
               assert op.get('contact_email')==email, (pid,op)
               assert op.get('contact_phone')==phone, (pid,op)
+          slc=live['LIFE-112']
+          assert slc.get('event_start')=='2027-02-26', slc
+          assert slc.get('event_end')=='2027-03-07', slc
+          assert slc.get('opportunity_status')=='APPLICATION_OPEN', slc
+          assert float(slc.get('booking_cost_min'))==800, slc
+          assert slc.get('booking_cost_max') is None, slc
+          assert '$80 per front foot' in slc.get('price_text',''), slc
+          assert 'No inside commercial vendor space' in slc.get('price_text',''), slc
+          assert 'mid-November' in slc.get('booking_window_text',''), slc
+          assert 'not a verified Paradise-specific hard deadline' in slc.get('booking_window_text',''), slc
+          assert 'last year’s vendors have first refusal' in slc.get('booking_window_text','').lower(), slc
+          assert 'Pop-up/easy-up tents are prohibited' in slc.get('current_logistics_text',''), slc
+          assert 'current photo of the operation' in slc.get('current_logistics_text',''), slc
+          assert 'St. Lucie County BOCC' in slc.get('current_logistics_text',''), slc
+          assert slc.get('critical_deadline_date') is None, slc
+          assert reviews['LIFE-112'].get('disposition')=='PURSUE', reviews['LIFE-112']
+          assert reviews['LIFE-112'].get('booking_readiness')=='PRE_BOOKING_ACTION_REQUIRED', reviews['LIFE-112']
+          assert reviews['LIFE-112'].get('action_timing','').startswith('NOW'), reviews['LIFE-112']
+          assert 'planning context only' in reviews['LIFE-112'].get('action_timing',''), reviews['LIFE-112']
+          assert 'Main line to the right' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
+          assert '$47,000' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
+          assert 'not a claim that the 2025 location is proven best' in reviews['LIFE-112'].get('rationale',''), reviews['LIFE-112']
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -3271,7 +3330,7 @@ jobs:
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
           grep -q 'Historical outreach <span class="quickViewCount">3</span>' /tmp/shows.html
-          grep -q 'Pursue now <span class="quickViewCount">8</span>' /tmp/shows.html
+          grep -q 'Pursue now <span class="quickViewCount">9</span>' /tmp/shows.html
           grep -q 'Watch / next cycle <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
           grep -q 'data-current-operations-compact-profile' /tmp/shows.html
@@ -3285,10 +3344,10 @@ jobs:
           grep -q '<details class="liveCompareBoard" data-live-decision-comparison open>' /tmp/shows.html
           grep -q 'Live opportunity comparison' /tmp/shows.html
           grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
-          grep -q '17 governed targets' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          grep -q '18 governed targets' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
@@ -3297,7 +3356,7 @@ jobs:
           grep -q 'class="liveCompareDecision pursue"' /tmp/shows.html
           grep -q 'class="liveCompareDecision watch"' /tmp/shows.html
           grep -q 'class="liveCompareDecision hold"' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'data-live-compare-decision-why-profile="LIFE-046"' /tmp/shows.html
           grep -q 'West Palm Beach Gun &amp; Knife Show is a current low-cost PURSUE.' /tmp/shows.html
           grep -q 'data-live-compare-decision-why-profile="LIFE-009"' /tmp/shows.html
@@ -3309,13 +3368,13 @@ jobs:
           grep -q 'The decision reason is the first sentence of the governed review rationale, not a new summary or score.' /tmp/shows.html
           grep -q 'Next step is the first sentence of the governed review next_step, not generated advice.' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           test "$(grep -o 'LP-attributed specific:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 5
           test "$(grep -o 'LP-attributed placement type:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 1
@@ -3422,6 +3481,18 @@ jobs:
           clam=row('LIFE-077')
           assert 'Outcome-linked placement note: Tent display required — exact booth/location not stated · 2025 · 0 net sales · $0 net · 8 issued · 3 demos' in clam
           assert 'Best outcome-linked specific:' not in clam
+          slcfair=row('LIFE-112')
+          assert 'St Lucie County Fair' in slcfair or 'St. Lucie County Fair' in slcfair
+          assert 'Current: $800+ · commercial frontage · 10-foot minimum' in slcfair
+          assert 'Prior/reference: Paradise history: 2025 fair fee $700 / direct+setup $1,000' in slcfair
+          assert 'Main line to the right — 10×10' in slcfair
+          assert '1 net sale' in slcfair and '$47,000' in slcfair
+          assert 'Robin Hall' in slcfair
+          assert '772-464-2910' in slcfair
+          assert 'Pre-booking action required' in slcfair
+          assert 'No verified hard deadline' in slcfair
+          assert 'Open 2027 vendor application' in slcfair
+          assert 'data-live-compare-next-step-profile="LIFE-112"' in slcfair
           hold=row('LIFE-033')
           assert 'data-live-compare-readiness-profile="LIFE-033"' in hold
           assert 'Hold / reconcile' in hold
@@ -3433,9 +3504,9 @@ jobs:
               'LIFE-017':'Mar 1, 2027 · Final balance due',
           }
           live_ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
-          assert len(live_ids)==17, live_ids
-          expected_pursue_order=['LIFE-044','LIFE-046','LIFE-007','LIFE-054','LIFE-092','LIFE-018','LIFE-017','LIFE-013']
-          assert live_ids[:8]==expected_pursue_order, live_ids
+          assert len(live_ids)==18, live_ids
+          expected_pursue_order=['LIFE-044','LIFE-046','LIFE-007','LIFE-054','LIFE-092','LIFE-018','LIFE-112','LIFE-017','LIFE-013']
+          assert live_ids[:9]==expected_pursue_order, live_ids
           assert live_ids[0]=='LIFE-044', live_ids
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row('LIFE-044'), row('LIFE-044')
           assert re.search(r'(?:\d+ day(?:s)? to deadline|deadline today|\d+ day(?:s)? past deadline)',row('LIFE-044')), row('LIFE-044')
@@ -3454,9 +3525,9 @@ jobs:
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -q '<details class="liveCompareBoard" data-live-decision-comparison open>' /tmp/shows_mobile.html
           grep -q 'Show database' /tmp/shows_mobile.html
-          test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
-          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'LP-attributed specific:' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 5
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
@@ -3494,22 +3565,45 @@ jobs:
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
-          grep -q 'Pre-booking action <span class="quickViewCount">8</span>' /tmp/shows.html
+          grep -q 'Pre-booking action <span class="quickViewCount">9</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_WATCH_GATED_LIVE"' /tmp/shows.html
           grep -q 'Watch / gated live <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HOLD_RECONCILE_LIVE"' /tmp/shows.html
           grep -q 'Hold / reconcile live <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_ACT_NOW"' /tmp/shows.html
-          grep -q 'Act now <span class="quickViewCount">16</span>' /tmp/shows.html
+          grep -q 'Act now <span class="quickViewCount">17</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_ACT_LATER"' /tmp/shows.html
           grep -q 'Later / next cycle <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
-          grep -q 'Quote required <span class="quickViewCount">9</span>' /tmp/shows.html
+          grep -q 'Quote required <span class="quickViewCount">10</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
           grep -q 'No prior booth history <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
+
+          render_view st_lucie_fair_pursue "$SITE/#show/LIFE-112"
+          grep -q 'St Lucie County Fair' /tmp/st_lucie_fair_pursue.html
+          grep -q 'data-review-profile="LIFE-112" data-review-scope="live"' /tmp/st_lucie_fair_pursue.html
+          grep -q '>PURSUE<' /tmp/st_lucie_fair_pursue.html
+          grep -q 'data-current-booking-cost-profile="LIFE-112"' /tmp/st_lucie_fair_pursue.html
+          grep -q '\$800+' /tmp/st_lucie_fair_pursue.html
+          grep -q '10-foot minimum' /tmp/st_lucie_fair_pursue.html
+          grep -q 'Additional frontage' /tmp/st_lucie_fair_pursue.html
+          grep -q 'No inside commercial vendor space' /tmp/st_lucie_fair_pursue.html
+          grep -q 'Robin Hall' /tmp/st_lucie_fair_pursue.html
+          grep -q 'href="tel:7724642910"' /tmp/st_lucie_fair_pursue.html
+          grep -q 'href="mailto:Robin@stluciecountyfair.org"' /tmp/st_lucie_fair_pursue.html
+          grep -q 'Main line to the right — 10×10' /tmp/st_lucie_fair_pursue.html
+          grep -q '1 net sale' /tmp/st_lucie_fair_pursue.html
+          grep -q '\$47,000' /tmp/st_lucie_fair_pursue.html
+          grep -q 'not a claim that the 2025 location is proven best' /tmp/st_lucie_fair_pursue.html
+          grep -q 'Pop-up/easy-up tents are prohibited' /tmp/st_lucie_fair_pursue.html
+          grep -q 'mid-November' /tmp/st_lucie_fair_pursue.html
+          if grep -q 'data-current-critical-deadline-profile="LIFE-112"' /tmp/st_lucie_fair_pursue.html; then
+            echo "::error::St. Lucie County Fair rendered a fabricated hard deadline"
+            exit 1
+          fi
 
           render_view payments "$SITE/#payments"
           grep -q 'Contracted payments' /tmp/payments.html
