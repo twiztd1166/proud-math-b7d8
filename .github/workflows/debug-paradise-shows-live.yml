@@ -603,7 +603,7 @@ jobs:
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Commercial sponsorship price · actual footprint / location · lead-generation / exclusivity / payment / COI terms',
               'LIFE-077':'Normal lower-cost vendor option or justified $2,000 package · exact location · Paradise acceptance',
-              'LIFE-009':'Materially stronger live placement · exact booth availability before 25% deposit',
+              'LIFE-009':'Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in booth/setup quote · exact available St. Petersburg placement · category acceptance · deposit / cancellation / COI / add-on terms',
@@ -724,7 +724,11 @@ jobs:
           assert 'Jan. 3-4, 2026 occurrence produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Do not select Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert '25% deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert '$100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'hold-harmless' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert '$100 deposit' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
+          assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
           assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
           assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
@@ -953,7 +957,7 @@ jobs:
           expected_current_schedule_status={
               'HIST-234':'SOURCE_CONFLICT_REQUIRES_CONFIRMATION',
               'LIFE-007':'VERIFIED_CURRENT',
-              'LIFE-009':'CURRENT_SOURCE_HOURS_NOT_RECOVERED',
+              'LIFE-009':'VERIFIED_CURRENT',
               'LIFE-013':'NOT_PUBLISHED_YET',
               'LIFE-014':'NOT_PUBLISHED_YET',
               'LIFE-017':'VERIFIED_CURRENT',
@@ -976,9 +980,9 @@ jobs:
               assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,op)
               assert str(op.get('current_schedule_source_label') or '').strip(), (pid,op)
               assert op.get('current_schedule_checked_at'), (pid,op)
-          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==8
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==9
           assert sum(1 for v in expected_current_schedule_status.values() if v=='NOT_PUBLISHED_YET')==6
-          assert sum(1 for v in expected_current_schedule_status.values() if v=='CURRENT_SOURCE_HOURS_NOT_RECOVERED')==1
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='CURRENT_SOURCE_HOURS_NOT_RECOVERED')==0
           assert sum(1 for v in expected_current_schedule_status.values() if v=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION')==1
           assert 'official-source conflict' in live['HIST-234'].get('current_schedule_text','')
           assert '11 AM–7 PM' in live['HIST-234'].get('current_schedule_text','')
@@ -988,6 +992,9 @@ jobs:
           assert '10 AM–5 PM' in live['LIFE-017'].get('current_schedule_text','')
           assert '10 AM–4 PM' in live['LIFE-017'].get('current_schedule_text','')
           assert 'current 2026–27 hours and final season date are not yet published' in live['LIFE-014'].get('current_schedule_text','')
+          assert 'Sat. Jan. 2, 2027: 10 AM–5 PM' in live['LIFE-009'].get('current_schedule_text','')
+          assert 'Sun. Jan. 3: 10 AM–4 PM' in live['LIFE-009'].get('current_schedule_text','')
+          assert live['LIFE-009'].get('current_schedule_source_url')=='https://www.patriothomeshows.com/attendee-faq', live['LIFE-009']
           expected_current_logistics_status={
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'PARTIAL_CURRENT',
@@ -1149,7 +1156,7 @@ jobs:
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
-              'LIFE-009':'25% deposit due within 14 days of the emailed invoice to officially book · selected booth remains available to others until the deposit is received.',
+              'LIFE-009':'$100 deposit due by the due date in the emailed invoice after acceptance · signed hold-harmless agreement required · failure to pay the deposit or sign the agreement can delete the booking · final balance due 30 days before the Friday setup day.',
               'LIFE-017':'50% due with reservation · final balance due March 1, 2027 · signed cancellations are non-refundable.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
@@ -1173,9 +1180,10 @@ jobs:
           expected_critical_deadlines={
               'LIFE-044':('2026-09-17','CANCELLATION_LIABILITY_CUTOFF','30-day cancellation-liability cutoff','Date = 2026-10-17 minus 30 days.'),
               'LIFE-054':('2026-11-05','NO_REFUND_WINDOW_BOUNDARY','30-day no-refund boundary','Date = 2026-12-05 minus 30 days.'),
+              'LIFE-009':('2026-12-02','FINAL_BALANCE_DUE','Final balance due','30 days earlier is Dec. 2, 2026.'),
               'LIFE-017':('2027-03-01','FINAL_BALANCE_DUE','Final balance due','Direct verified contract term: final balance due March 1, 2027.'),
           }
-          assert len(expected_critical_deadlines)==3, expected_critical_deadlines
+          assert len(expected_critical_deadlines)==4, expected_critical_deadlines
           for pid,(deadline,kind,label,basis_part) in expected_critical_deadlines.items():
               op=live[pid]
               assert op.get('critical_deadline_date')==deadline, (pid,op)
@@ -1212,7 +1220,9 @@ jobs:
           assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
-          assert '25% deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert '$100 deposit' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert 'hold-harmless agreement' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
+          assert 'Final balance is due 30 days before the Friday setup day' in profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
           assert profiles['LIFE-009'].get('best_observed_specific_booth')=='Booth #52', profiles['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth_year')==2025, profiles['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth_dates')=='Apr 12-13', profiles['LIFE-009']
@@ -2856,10 +2866,12 @@ jobs:
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
           grep -q 'data-current-operations-expanded-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-status-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q 'Hours not recovered from current source' /tmp/vero_home_placement.html
+          grep -q 'Verified current schedule' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q 'public show hours are not verified in recoverable organizer text' /tmp/vero_home_placement.html
+          grep -q 'Sat. Jan. 2, 2027: 10 AM–5 PM' /tmp/vero_home_placement.html
+          grep -q 'Sun. Jan. 3: 10 AM–4 PM' /tmp/vero_home_placement.html
           grep -q 'data-current-schedule-source-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'patriothomeshows.com/attendee-faq' /tmp/vero_home_placement.html
           grep -q '>Open schedule source<' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
@@ -2873,11 +2885,14 @@ jobs:
           grep -q 'data-current-booking-cost-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
           grep -q 'data-current-commitment-profile="LIFE-009"' /tmp/vero_home_placement.html
-          grep -q '25% deposit due within 14 days' /tmp/vero_home_placement.html
-          if grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html; then
-            echo "::error::Relative invoice timing was incorrectly converted into a hard current deadline"
-            exit 1
-          fi
+          grep -q '\$100 deposit due by the due date in the emailed invoice' /tmp/vero_home_placement.html
+          grep -q 'signed hold-harmless agreement required' /tmp/vero_home_placement.html
+          grep -q 'final balance due 30 days before the Friday setup day' /tmp/vero_home_placement.html
+          grep -q 'data-current-critical-deadline-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'Critical commitment date' /tmp/vero_home_placement.html
+          grep -q 'Dec 2, 2026' /tmp/vero_home_placement.html
+          grep -q 'Final balance due' /tmp/vero_home_placement.html
+          grep -q '30 days earlier is Dec. 2, 2026' /tmp/vero_home_placement.html
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
@@ -3450,7 +3465,8 @@ jobs:
           grep -q 'Standard 10x10 \$475' /tmp/detail.html
           grep -q 'Premium 10x10 \$535' /tmp/detail.html
           grep -q 'Premium Corner 10x10 \$635' /tmp/detail.html
-          grep -q '25% deposit' /tmp/detail.html
+          grep -q '\$100 deposit' /tmp/detail.html
+          grep -q 'Dec 2, 2026' /tmp/detail.html
 
           render_view lponly_detail "$SITE/#show/LPONLY-2021-123"
           grep -q 'Tampa Boat Show' /tmp/lponly_detail.html
