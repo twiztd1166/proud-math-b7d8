@@ -423,14 +423,39 @@ function liveComparisonEvidenceDepth(p){
   const worked=count(p?.worked_year_count);
   return `${records} preserved history record${records===1?'':'s'} · ${years} history year${years===1?'':'s'} · ${worked} explicit WORKED/ATTENDED year${worked===1?'':'s'}`;
 }
+function liveComparisonPlacementMetrics(p,prefix){
+  const bits=[];
+  const sales=p?.[prefix+'_net_sales'];
+  const net=p?.[prefix+'_net_revenue'];
+  const issued=p?.[prefix+'_issued'];
+  const demos=p?.[prefix+'_demos'];
+  if(sales!==null&&sales!==undefined&&String(sales)!=='')bits.push(String(sales)+' net sales');
+  if(net!==null&&net!==undefined&&String(net)!=='')bits.push(money(net)+' net');
+  if(issued!==null&&issued!==undefined&&String(issued)!=='')bits.push(String(issued)+' issued');
+  if(demos!==null&&demos!==undefined&&String(demos)!=='')bits.push(String(demos)+' demos');
+  return bits.join(' · ');
+}
 function liveComparisonPlacement(p){
   const op=p?.current_rebook_opportunity||{};
   const current='Current: '+opportunityPlacementStatusLabel(op.current_placement_status);
-  let historical='No preserved booth';
-  if(historicalPlacementValue(p?.best_observed_specific_booth))historical=String(p.best_observed_specific_booth)+(p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'');
-  else if(historicalPlacementValue(p?.best_observed_booth))historical=String(p.best_observed_booth)+(p.best_observed_booth_year?' · '+p.best_observed_booth_year:'');
-  else if(historicalPlacementValue(p?.latest_preserved_booth))historical=String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
-  return current+' · Best history: '+historical;
+  const specific=historicalPlacementValue(p?.best_observed_specific_booth);
+  const outcomePlacement=historicalPlacementValue(p?.best_observed_booth);
+  const latest=historicalPlacementValue(p?.latest_preserved_booth);
+  if(specific){
+    const metrics=liveComparisonPlacementMetrics(p,'best_observed_specific_booth');
+    const when=p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'';
+    return current+' · Best outcome-linked specific: '+specific+when+(metrics?' · '+metrics:'');
+  }
+  if(outcomePlacement){
+    const metrics=liveComparisonPlacementMetrics(p,'best_observed_booth');
+    const when=p.best_observed_booth_year?' · '+p.best_observed_booth_year:'';
+    return current+' · Outcome-linked placement note: '+outcomePlacement+when+(metrics?' · '+metrics:'');
+  }
+  if(latest){
+    const when=p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'';
+    return current+' · Latest preserved placement: '+latest+when+' · no same-row outcome';
+  }
+  return current+' · No preserved booth / placement';
 }
 function liveComparisonDeadline(op){
   if(!op?.critical_deadline_date)return 'No verified hard deadline';
