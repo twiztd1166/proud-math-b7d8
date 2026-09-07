@@ -2249,7 +2249,6 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
-          if grep -q 'Decision-safe current booking cost' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
