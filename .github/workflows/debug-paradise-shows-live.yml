@@ -334,7 +334,7 @@ jobs:
               grep -q 'data-live-decision-comparison' /tmp/app-shows.js
               grep -q 'liveComparisonDecisionWhy' /tmp/app-shows.js
               grep -q 'data-live-compare-decision-why-profile' /tmp/app-shows.js
-              grep -q 'Decision + governed why' /tmp/app-shows.js
+              grep -q '<th>Decision</th>' /tmp/app-shows.js
               grep -q 'first sentence of the governed review rationale' /tmp/app-shows.js
               grep -q 'liveComparisonNextStep' /tmp/app-shows.js
               grep -q 'review.next_step' /tmp/app-shows.js
@@ -392,7 +392,7 @@ jobs:
               grep -q 'liveCompareCost' /tmp/app.css
               grep -q 'liveCompareContact' /tmp/app.css
               grep -q 'Current: ' /tmp/app-shows.js
-              grep -q 'Best history:' /tmp/app-shows.js
+              grep -q 'Best outcome-linked specific:' /tmp/app-shows.js
               grep -q 'liveCompareAction' /tmp/app.css
               grep -q 'data-label="Decision"' /tmp/app-shows.js
               grep -q 'data-label="Historical outcome"' /tmp/app-shows.js
