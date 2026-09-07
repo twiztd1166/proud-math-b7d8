@@ -440,6 +440,8 @@ jobs:
           assert 'outside' in str(profiles['LIFE-007'].get('latest_preserved_booth') or '').lower(), profiles['LIFE-007']
           assert profiles['LIFE-007'].get('latest_preserved_booth_year')==2022, profiles['LIFE-007']
           assert profiles['LIFE-007'].get('latest_preserved_booth_dates')=='Feb-19', profiles['LIFE-007']
+          assert str(profiles['LIFE-018'].get('latest_preserved_booth') or '').upper()=='N/A', profiles['LIFE-018']
+          assert str(profiles['LIFE-013'].get('latest_preserved_booth') or '').upper()=='N/A', profiles['LIFE-013']
           assert profiles['LIFE-009'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-009']
           assert not profiles['LIFE-009'].get('related_current_profile_id'), profiles['LIFE-009']
           assert profiles['LIFE-005'].get('canonical_series_profile_id')=='LIFE-009', profiles['LIFE-005']
@@ -1890,6 +1892,7 @@ jobs:
           render_view vero_home_placement "$SITE/#show/LIFE-009"
           grep -q 'Vero Home Show' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
+          grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
           grep -q '2025 · Apr 12-13' /tmp/vero_home_placement.html
           grep -q '0 net sales' /tmp/vero_home_placement.html
@@ -1899,9 +1902,17 @@ jobs:
           render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
           grep -q 'Historical placement guide' /tmp/rpb_green_market_placement.html
+          grep -q 'data-historical-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
           grep -q '2022 · Feb-19' /tmp/rpb_green_market_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
+
+          render_view martin_home_no_placement "$SITE/#show/LIFE-018"
+          grep -q 'Martin County Home Improvement Show' /tmp/martin_home_no_placement.html
+          if grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_no_placement.html; then
+            echo 'N/A booth value incorrectly rendered as historical placement'
+            exit 1
+          fi
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html

@@ -104,10 +104,14 @@ function rebookReviewCard(review){
   const css=disposition.toLowerCase();
   return `<div class="rebookReview ${esc(css)}"><div class="rebookReviewHead"><span>Current booking review</span><b>${esc(disposition)}</b></div><div class="rebookReviewGrid">${review.action_timing?`<div class="wide"><span>When to act</span><b>${esc(review.action_timing)}</b></div>`:''}<div class="wide"><span>Why</span><b>${esc(review.rationale||'Current review requires attention.')}</b></div>${review.next_step?`<div class="wide"><span>Next step</span><b>${esc(review.next_step)}</b></div>`:''}</div>${review.notes?`<div class="rebookReviewNote">${esc(review.notes)}</div>`:''}<div class="rebookReviewFoot">${evidence?`Evidence ${esc(evidence)} · `:''}${checked?`reviewed ${esc(checked)} · `:''}${esc(review.source_label||'Verified current review source')}${review.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(review.source_url)}">Open review source</a>`:''}</div></div>`;
 }
+function historicalPlacementValue(value){
+  const text=String(value||'').trim();
+  return !text||/^(?:n\/a|na|none|unknown|tbd|tba|—|-)$/i.test(text)?'':text;
+}
 function historicalPlacementGuide(p){
   if(!p?.current_rebook_opportunity)return '';
-  const specific=String(p.best_observed_specific_booth||'').trim();
-  const latest=String(p.latest_preserved_booth||'').trim();
+  const specific=historicalPlacementValue(p.best_observed_specific_booth);
+  const latest=historicalPlacementValue(p.latest_preserved_booth);
   if(!specific&&!latest)return '';
   let placement='';
   const outcome=[];
@@ -123,7 +127,7 @@ function historicalPlacementGuide(p){
       .filter(v=>v!==null&&v!==undefined&&String(v).trim()).join(' · ');
     placement=`Latest preserved placement: ${esc(latest)}${when?` (${esc(when)})`:''}`;
   }
-  return `<div class="rebookContext"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
+  return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
 }
 function catalogCard(p){
   const current=Array.isArray(p.matched_mfc_ids)?p.matched_mfc_ids:[];
