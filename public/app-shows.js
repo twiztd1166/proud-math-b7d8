@@ -406,7 +406,7 @@ function catalogFilterSummary(){
   for(const key of ['lp','cumulativeLp'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
-  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified starting cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
+  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified booking cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
   if(f.currentTreatment!=='ALL')add('currentTreatment',labels.currentTreatment[f.currentTreatment]||f.currentTreatment);
   if(f.confirmation!=='ALL')add('confirmation','Confirmation '+f.confirmation);
@@ -502,7 +502,7 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.currentCostBand!=='ALL'){
     const opportunity=p?.current_rebook_opportunity||null;
     if(!opportunity)return false;
-    if(!rangeMatch(opportunity.booking_cost_min,f.currentCostBand))return false;
+    if(!rangeMatch(opportunity.booking_cost_max,f.currentCostBand))return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
@@ -547,8 +547,8 @@ function catalogComparator(a,b){
     return ad.localeCompare(bd)||name(a,b);
   }
   if(sort==='CURRENT_COST_LOW'){
-    const av=opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_min');
-    const bv=opportunityCostNumber(b?.current_rebook_opportunity,'booking_cost_min');
+    const av=opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_max');
+    const bv=opportunityCostNumber(b?.current_rebook_opportunity,'booking_cost_max');
     const aa=av!==null,bb=bv!==null;
     if(aa!==bb)return aa?-1:1;
     return aa?av-bv||name(a,b):name(a,b);
@@ -821,7 +821,7 @@ function catalogFacetCounts(){
     const liveOpportunity=p?.current_rebook_opportunity||null;
     if(liveOpportunity){
       opportunityCostBand.ALL++;
-      const entry=opportunityCostNumber(liveOpportunity,'booking_cost_min');
+      const entry=opportunityCostNumber(liveOpportunity,'booking_cost_max');
       if(entry===null)opportunityCostBand.MISSING++;
       else if(entry<500)opportunityCostBand.UNDER500++;
       else if(entry<1000)opportunityCostBand['500_1000']++;
@@ -1025,7 +1025,7 @@ function openShowFilters(cleanupRequest=false){
         ${filterField('Lifetime net','fLifetimeNetBand',f.lifetimeNetBand,opts([['ALL','Any lifetime net'],['UNDER25K','Under $25K'],['25_100K','$25K to <$100K'],['100_250K','$100K to <$250K'],['250KPLUS','$250K+']],{ALL:fc.total,...fc.lifeBand}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Current opportunity / operating linkage</div><div class="filterGrid">
-        ${filterField('Current verified starting cost','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
+        ${filterField('Current verified booking cost (max)','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
         ${filterField('Current event year','fCurrentEventYear',f.currentEventYear,opts([['ALL','Any year'],...currentYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.currentYears}))}
         ${filterField('Current status','fCurrentStatus',f.currentStatus,opts([['ALL','Any status'],['READY','Ready'],['RECONCILE','Reconcile'],['DATE ONLY','Date Only'],['HOLD','Hold'],['OPEN','Open']],{ALL:fc.total,...fc.status}))}
         ${filterField('Current treatment','fCurrentTreatment',f.currentTreatment,opts([['ALL','Any treatment'],['IN PLAY','In Play'],['SKIPPED','Skipped']],{ALL:fc.total,'IN PLAY':fc.treatment.IN_PLAY,SKIPPED:fc.treatment.SKIPPED}))}
