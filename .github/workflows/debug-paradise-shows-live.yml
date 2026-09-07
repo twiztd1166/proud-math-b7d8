@@ -951,7 +951,7 @@ jobs:
           actual_missing_placement={pid for pid in expected_live if not has_preserved_placement(profiles[pid])}
           assert actual_missing_placement==expected_missing_placement, (actual_missing_placement,expected_missing_placement)
           assert len(expected_missing_placement)==8
-          assert len(expected_live-expected_missing_placement)==8
+          assert len(expected_live-expected_missing_placement)==9
           expected_quote_required={pid for pid,op in live.items() if op.get('booking_cost_max') is None}
           assert len(expected_quote_required)==9, expected_quote_required
           expected_venues={
@@ -971,7 +971,9 @@ jobs:
               'LIFE-076':'PGA National Resort — Champion Course · 400 Avenue of the Champions, Palm Beach Gardens, FL 33418',
               'LIFE-013':'Miami-Dade County Fair & Exposition · 10901 Coral Way, Miami, FL 33165',
               'LIFE-017':'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602',
+              'LIFE-092':'Abacoa Town Center / Abacoa Amphitheatre · 1267 Main St, Jupiter, FL 33458',
           }
+          assert set(expected_venues)==expected_live, (set(expected_venues),expected_live)
           for pid,venue in expected_venues.items():
               assert live[pid].get('venue_text')==venue, (pid,live[pid])
           expected_current_placements={
