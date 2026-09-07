@@ -445,7 +445,7 @@ function showTools(mode,resultCount){
   const sort=mode==='ALL'?state.catalogSort:state.currentSort;
   const options=showSortOptions(mode);
   const sortChanged=mode==='ALL'?state.catalogSort!=='RECOMMENDED':state.currentSort!=='BOOKING';
-  const placeholder=mode==='ALL'?'Search name, alias, contact, booth, city, MFC…':'Search current shows, owner, booking, decision…';
+  const placeholder=mode==='ALL'?'Search name, venue, alias, contact, booth, city, MFC…':'Search current shows, owner, booking, decision…';
   const chips=summary.map(item=>`<button type="button" class="activeFilterChip" data-active-filter-key="${esc(item.key)}" aria-label="Remove ${esc(item.label)}"><span>${esc(item.label)}</span><b aria-hidden="true">×</b></button>`).join('');
   return `<div class="showTools"><div class="search"><input id="searchInput" placeholder="${placeholder}" value="${esc(state.search)}"></div><div class="toolRow"><button class="toolBtn ${active?'active':''}" id="showFilterBtn">Filter${active?` <span class="toolCount">${active}</span>`:''}</button><label class="sortBox"><span>Sort</span><select id="showSortSelect">${options.map(([value,label])=>`<option value="${value}" ${sort===value?'selected':''}>${label}</option>`).join('')}</select></label><button class="toolBtn resetBtn ${active||state.search||sortChanged?'':'hidden'}" id="showResetBtn">Reset</button></div>${chips?`<div class="activeFilters" aria-label="Active filters">${chips}</div>`:''}<div class="resultLine">${resultCount.toLocaleString()} matching show${resultCount===1?'':'s'}</div></div>`;
 }
@@ -455,7 +455,8 @@ function catalogSearchText(p,current){
     s.source_detail?.needs_evidence,s.source_detail?.payment_status,s.source_detail?.follow_up_detail
   ]);
   const review=p?.current_rebook_review||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  const opportunity=p?.current_rebook_opportunity||{};
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.price_text,opportunity.booking_window_text,opportunity.contact_text,review.disposition,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
