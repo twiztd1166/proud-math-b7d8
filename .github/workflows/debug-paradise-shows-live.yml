@@ -321,6 +321,9 @@ jobs:
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
               grep -q 'liveCompareOpen' /tmp/app-shows.js
               grep -q 'data-live-compare-placement-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-venue-profile' /tmp/app-shows.js
+              grep -q 'Venue / address not verified' /tmp/app-shows.js
+              grep -q 'liveCompareOpen small' /tmp/app.css
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
@@ -2722,6 +2725,7 @@ jobs:
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
@@ -2740,6 +2744,8 @@ jobs:
               assert m, pid
               return html.unescape(m.group(1))
           manatee=row('LIFE-044')
+          assert 'data-live-compare-venue-profile="LIFE-044"' in manatee
+          assert 'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221' in manatee
           assert 'data-live-compare-cost-profile="LIFE-044"' in manatee
           assert 'Prior/reference:' in manatee
           assert 'No safe same-series prior cost is available' in manatee
@@ -2752,6 +2758,8 @@ jobs:
           assert 'Commitment: Verified current' in manatee
           assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in manatee
           vero=row('LIFE-009')
+          assert 'data-live-compare-venue-profile="LIFE-009"' in vero
+          assert 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' in vero
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
           assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
@@ -2804,6 +2812,8 @@ jobs:
           m=re.search(r'<tr data-live-compare-row="LIFE-044">(.*?)</tr>',doc,re.S)
           assert m
           row=html.unescape(m.group(1))
+          assert 'data-live-compare-venue-profile="LIFE-044"' in row
+          assert 'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221' in row
           assert 'data-label="Cost"' in row
           assert 'data-label="Contact"' in row
           assert 'Dave LaBell / Tampa Bay Times Events' in row
