@@ -103,7 +103,10 @@ jobs:
               grep -q 'Current booking cost high' /tmp/app-shows.js
               grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
               grep -q 'fOpportunityCostBand' /tmp/app-shows.js
-              grep -q 'Current verified starting cost' /tmp/app-shows.js
+              grep -q 'Current verified booking cost (max)' /tmp/app-shows.js
+              grep -Fq "rangeMatch(opportunity.booking_cost_max,f.currentCostBand)" /tmp/app-shows.js
+              grep -Fq "opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_max')" /tmp/app-shows.js
+              grep -Fq "opportunityCostNumber(liveOpportunity,'booking_cost_max')" /tmp/app-shows.js
               grep -q 'Quote / comparable cost missing' /tmp/app-shows.js
               grep -q 'booking_cost_min' /tmp/app-shows.js
               grep -q 'booking_cost_max' /tmp/app-shows.js
@@ -566,6 +569,7 @@ jobs:
               'LIFE-054':(160,400,'approved vendor category / event','Official 2026 published range: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400; Paradise category must be confirmed before payment.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
           }
+          assert len(expected_booking_costs)==7, expected_booking_costs
           for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
               op=live[pid]
               assert float(op.get('booking_cost_min'))==cmin, (pid,op)
