@@ -472,8 +472,26 @@ function liveComparisonPlacementMetrics(p,prefix){
   const bits=[];
   const sales=p?.[prefix+'_net_sales'];
   const net=p?.[prefix+'_net_revenue'];
-  const issued=p?.[prefix+'_issued'];
-  const demos=p?.[prefix+'_demos'];
+  let issued=p?.[prefix+'_issued'];
+  let demos=p?.[prefix+'_demos'];
+  if(prefix==='best_observed_specific_booth'&&(issued===null||issued===undefined||String(issued)===''||demos===null||demos===undefined||String(demos)==='')){
+    const booth=historicalPlacementValue(p?.best_observed_specific_booth);
+    const year=String(p?.best_observed_specific_booth_year??'').trim();
+    const dates=String(p?.best_observed_specific_booth_dates??'').trim();
+    const sameOccurrence=['latest_observed_outcome','best_observed_outcome']
+      .map(key=>({
+        booth:historicalPlacementValue(p?.[key+'_booth']),
+        year:String(p?.[key+'_year']??'').trim(),
+        dates:String(p?.[key+'_dates']??'').trim(),
+        issued:p?.[key+'_issued'],
+        demos:p?.[key+'_demos'],
+      }))
+      .find(row=>booth&&row.booth===booth&&row.year===year&&row.dates===dates);
+    if(sameOccurrence){
+      if(issued===null||issued===undefined||String(issued)==='')issued=sameOccurrence.issued;
+      if(demos===null||demos===undefined||String(demos)==='')demos=sameOccurrence.demos;
+    }
+  }
   if(sales!==null&&sales!==undefined&&String(sales)!=='')bits.push(String(sales)+' net sales');
   if(net!==null&&net!==undefined&&String(net)!=='')bits.push(money(net)+' net');
   if(issued!==null&&issued!==undefined&&String(issued)!=='')bits.push(String(issued)+' issued');
