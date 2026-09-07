@@ -1030,7 +1030,7 @@ jobs:
           assert '$225' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert 'preserved rather than forced into a false single price' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert reviews['LIFE-077'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for a published/current 2026 normal-vendor fee'), reviews['LIFE-077']
-          assert 'assigned on arrival and prohibit location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
+          assert 'assign normal-vendor booths on arrival and prohibit location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
           assert 'no 2026 Sebastian Clambake vendor packet/fee was found in Paradise Gmail or Drive' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
           assert 'standard 10x10 form fee $225' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
           assert 'GMAIL:1997d07e25ef4018' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
