@@ -468,6 +468,12 @@ function liveComparisonDecisionWhy(review){
   const first=text.match(/^.*?[.!?](?:\s|$)/);
   return (first?.[0]||text).trim();
 }
+function liveComparisonNextStep(review){
+  const text=String(review?.next_step||'').trim().replace(/\s+/g,' ');
+  if(!text)return 'Open the show for the governed next step.';
+  const first=text.match(/^.*?[.!?](?:\s|$)/);
+  return (first?.[0]||text).trim();
+}
 function liveDecisionCompareBoard(profiles,open=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
@@ -492,6 +498,7 @@ function liveDecisionCompareBoard(profiles,open=false){
     const timing=String(review.action_timing||'Verify timing').trim();
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
     const decisionWhy=liveComparisonDecisionWhy(review);
+    const nextStep=liveComparisonNextStep(review);
     const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
       <td data-label="Decision" data-live-compare-decision-why-profile="${esc(p.profile_id)}"><div class="liveCompareDecisionCell"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span><small>${esc(decisionWhy)}</small></div></td>
@@ -504,13 +511,14 @@ function liveDecisionCompareBoard(profiles,open=false){
       <td data-label="Readiness" data-live-compare-readiness-profile="${esc(p.profile_id)}"><div class="liveCompareReadiness"><b>${esc(readiness)}</b><span>Commitment: ${esc(commitmentStatus)}</span><small>Still needed: ${esc(blockers)}</small></div></td>
       <td data-label="Hard deadline" data-live-compare-deadline-profile="${esc(p.profile_id)}">${esc(liveComparisonDeadline(op))}</td>
       <td data-label="When to act">${esc(timing)}</td>
+      <td data-label="Next step" data-live-compare-next-step-profile="${esc(p.profile_id)}"><span class="liveCompareNextStep">${esc(nextStep)}</span></td>
       <td data-label="Action">${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision + governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline · timing · direct action</small></summary>
-    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision + governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline · timing · governed next step · direct action</small></summary>
+    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
 }
 function catalogCard(p){
