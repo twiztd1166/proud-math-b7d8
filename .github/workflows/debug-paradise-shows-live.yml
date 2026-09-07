@@ -170,6 +170,9 @@ jobs:
               grep -q 'Priority to book / review' /tmp/app-shows.js
               grep -q 'Booking recommendation uses the governed Decision/Tier' /tmp/app-shows.js
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
+              grep -q 'data-historical-placement-profile' /tmp/app-modals.js
+              grep -q 'No preserved booth / placement is available for this profile' /tmp/app-modals.js
+              grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/app-modals.js
               grep -q 'Best observed performance placement' /tmp/app-modals.js
               grep -q 'Best observed specific booth' /tmp/app-modals.js
               grep -q 'bookingTiming' /tmp/app-shows.js
