@@ -94,7 +94,7 @@ function rebookOpportunityCard(op){
     ?date(op.event_start)+(op.event_end&&op.event_end!==op.event_start?' – '+date(op.event_end):'')
     :'Current date not verified';
   const checked=String(op.checked_at||'').slice(0,10);
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div class="wide"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b></div><div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b></div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function rebookReviewCard(review){
   if(!review)return '';
@@ -426,7 +426,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -521,6 +521,16 @@ function catalogComparator(a,b){
     const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
     const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
     return ad.localeCompare(bd)||name(a,b);
+  }
+  if(sort==='BOOKING_DECISION'){
+    const weight=p=>{
+      const d=String(p?.current_rebook_review?.disposition||'').toUpperCase();
+      return ({PURSUE:0,WATCH:1,HOLD:2,RETIRED:3})[d]??9;
+    };
+    const aw=weight(a),bw=weight(b);
+    const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||ad.localeCompare(bd)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
   }
   if(sort==='LATEST_HISTORY')return Number(b.latest_history_year||0)-Number(a.latest_history_year||0)||name(a,b);
   if(sort==='HISTORY_DEPTH')return Number(b.history_year_count||0)-Number(a.history_year_count||0)||Number(b.history_count||0)-Number(a.history_count||0)||name(a,b);
@@ -827,7 +837,7 @@ function quickViewOptions(mode){
   const cleanupYear=state.catalogFilters.historyYear;
   return mode==='ALL'
     ?[
-      ['ALL_LIVE_REBOOK','Verified current / watch'],
+      ['ALL_LIVE_REBOOK','Live booking board'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
       ['ALL_REBOOK_PURSUE','Pursue now'],
       ['ALL_REBOOK_WATCH','Watch / next cycle'],
@@ -894,7 +904,7 @@ function applyQuickView(key){
   if(key.startsWith('ALL_')){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
-    if(key==='ALL_LIVE_REBOOK')state.catalogSort='NEXT_OPPORTUNITY';
+    if(key==='ALL_LIVE_REBOOK')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_PURSUE')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_WATCH')state.catalogSort='LIFETIME_NET';
