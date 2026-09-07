@@ -332,6 +332,13 @@ jobs:
               grep -q 'data-live-compare-decision-why-profile' /tmp/app-shows.js
               grep -q 'Decision + governed why' /tmp/app-shows.js
               grep -q 'first sentence of the governed review rationale' /tmp/app-shows.js
+              grep -q 'liveComparisonNextStep' /tmp/app-shows.js
+              grep -q 'review.next_step' /tmp/app-shows.js
+              grep -q 'data-live-compare-next-step-profile' /tmp/app-shows.js
+              grep -q 'data-label="Next step"' /tmp/app-shows.js
+              grep -q 'governed next step' /tmp/app-shows.js
+              grep -q 'first sentence of the governed review next_step, not generated advice' /tmp/app-shows.js
+              grep -q 'liveCompareNextStep' /tmp/app.css
               grep -q 'liveCompareDecisionCell' /tmp/app.css
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
@@ -2862,6 +2869,7 @@ jobs:
           grep -q '17 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
@@ -2880,6 +2888,7 @@ jobs:
           grep -q 'No comparable outcome evidence' /tmp/shows.html
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
           grep -q 'The decision reason is the first sentence of the governed review rationale, not a new summary or score.' /tmp/shows.html
+          grep -q 'Next step is the first sentence of the governed review next_step, not generated advice.' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
@@ -2913,7 +2922,9 @@ jobs:
           assert 'data-live-compare-readiness-profile="LIFE-044"' in manatee
           assert 'Pre-booking action required' in manatee
           assert 'Commitment: Verified current' in manatee
-          assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in manatee
+          assert 'Still needed: Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' in manatee
+          assert 'data-live-compare-next-step-profile="LIFE-044"' in manatee
+          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and confirm windows/doors category availability, currently available booth inventory and the live floor plan.' in manatee
           assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
           assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
@@ -2948,6 +2959,8 @@ jobs:
           assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
           martin=row('LIFE-018')
           assert '2017 · 23 issued' in martin
+          assert 'data-live-compare-next-step-profile="LIFE-018"' in martin
+          assert 'Contact Jackielou now and request the current 2027 contract plus floor plan as a direct file/quote.' in martin
           assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           gun=row('LIFE-046')
@@ -2983,6 +2996,7 @@ jobs:
           grep -q 'Show database' /tmp/shows_mobile.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
@@ -2990,6 +3004,7 @@ jobs:
           grep -q 'data-label="Contact"' /tmp/shows_mobile.html
           grep -q 'data-label="Readiness"' /tmp/shows_mobile.html
           grep -q 'data-label="Hard deadline"' /tmp/shows_mobile.html
+          grep -q 'data-label="Next step"' /tmp/shows_mobile.html
           grep -q 'data-label="Action"' /tmp/shows_mobile.html
           python - <<'PY'
           import re,html
@@ -3005,7 +3020,10 @@ jobs:
           assert 'Prior/reference:' in row
           assert 'data-label="Readiness"' in row
           assert 'Commitment: Verified current' in row
-          assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in row
+          assert 'Still needed: Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' in row
+          assert 'data-label="Next step"' in row
+          assert 'data-live-compare-next-step-profile="LIFE-044"' in row
+          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and confirm windows/doors category availability, currently available booth inventory and the live floor plan.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
@@ -3251,7 +3269,7 @@ jobs:
           grep -q 'Pre-booking action required' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
-          grep -q 'Windows/doors category availability · exact booth selection · total signed investment' /tmp/bradenton_pursue.html
+          grep -q 'Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' /tmp/bradenton_pursue.html
           grep -q '>PURSUE<' /tmp/bradenton_pursue.html
           grep -q 'Verified current opportunity' /tmp/bradenton_pursue.html
           grep -q 'CONTRACT REQUEST OPEN' /tmp/bradenton_pursue.html
