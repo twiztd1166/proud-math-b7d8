@@ -95,6 +95,12 @@ jobs:
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
               grep -q 'Live booking board' /tmp/app-shows.js
+              grep -q 'ALL_ACT_NOW' /tmp/app-shows.js
+              grep -q 'ALL_ACT_LATER' /tmp/app-shows.js
+              grep -q 'Act now' /tmp/app-shows.js
+              grep -q 'Later / next cycle' /tmp/app-shows.js
+              grep -q 'liveOpportunityActsNow' /tmp/app-shows.js
+              grep -q 'liveOpportunityActsLater' /tmp/app-shows.js
               grep -q 'ALL_QUOTE_REQUIRED' /tmp/app-shows.js
               grep -q 'ALL_NO_PRIOR_PLACEMENT' /tmp/app-shows.js
               grep -q 'Quote required' /tmp/app-shows.js
@@ -119,6 +125,8 @@ jobs:
               grep -q 'booking_cost_max' /tmp/app-shows.js
               grep -q 'booking_cost_basis' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-core.js
+              grep -q 'ALL_ACT_NOW' /tmp/app-core.js
+              grep -q 'ALL_ACT_LATER' /tmp/app-core.js
               grep -q 'ALL_QUOTE_REQUIRED' /tmp/app-core.js
               grep -q 'ALL_NO_PRIOR_PLACEMENT' /tmp/app-core.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-core.js
@@ -559,6 +567,12 @@ jobs:
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
+          live_action_timing={pid:str((reviews.get(pid) or {}).get('action_timing') or '').strip() for pid in expected_live}
+          act_now={pid for pid,timing in live_action_timing.items() if timing.upper().startswith('NOW')}
+          act_later={pid for pid,timing in live_action_timing.items() if timing and not timing.upper().startswith('NOW')}
+          assert len(act_now)==15, act_now
+          assert act_later=={'LIFE-014'}, act_later
+          assert not {pid for pid,timing in live_action_timing.items() if not timing}, live_action_timing
           placement_unknown_values={'','unknown','n/a','na','none','tbd','tba','-','—'}
           def has_preserved_placement(p):
               vals=(p.get('best_observed_specific_booth'),p.get('latest_preserved_booth'))
@@ -2140,6 +2154,10 @@ jobs:
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_ACT_NOW"' /tmp/shows.html
+          grep -q 'Act now <span class="quickViewCount">15</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_ACT_LATER"' /tmp/shows.html
+          grep -q 'Later / next cycle <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
           grep -q 'Quote required <span class="quickViewCount">9</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
