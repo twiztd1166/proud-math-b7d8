@@ -95,6 +95,12 @@ jobs:
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
               grep -q 'Live booking board' /tmp/app-shows.js
+              grep -q 'ALL_QUOTE_REQUIRED' /tmp/app-shows.js
+              grep -q 'ALL_NO_PRIOR_PLACEMENT' /tmp/app-shows.js
+              grep -q 'Quote required' /tmp/app-shows.js
+              grep -q 'No prior booth history' /tmp/app-shows.js
+              grep -q 'liveOpportunityNeedsQuote' /tmp/app-shows.js
+              grep -q 'liveOpportunityMissingPriorPlacement' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-shows.js
               grep -q 'Booking decision / next date' /tmp/app-shows.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-shows.js
@@ -113,6 +119,8 @@ jobs:
               grep -q 'booking_cost_max' /tmp/app-shows.js
               grep -q 'booking_cost_basis' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-core.js
+              grep -q 'ALL_QUOTE_REQUIRED' /tmp/app-core.js
+              grep -q 'ALL_NO_PRIOR_PLACEMENT' /tmp/app-core.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-core.js
               grep -q 'CURRENT_COST_HIGH' /tmp/app-core.js
               grep -q 'currentCostBand' /tmp/app-core.js
@@ -522,7 +530,10 @@ jobs:
           expected_missing_placement={'HIST-234','LIFE-017','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-076'}
           actual_missing_placement={pid for pid in expected_live if not has_preserved_placement(profiles[pid])}
           assert actual_missing_placement==expected_missing_placement, (actual_missing_placement,expected_missing_placement)
+          assert len(expected_missing_placement)==7
           assert len(expected_live-expected_missing_placement)==8
+          expected_quote_required={pid for pid,op in live.items() if op.get('booking_cost_max') is None}
+          assert len(expected_quote_required)==8, expected_quote_required
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
@@ -2078,6 +2089,10 @@ jobs:
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
+          grep -q 'Quote required <span class="quickViewCount">8</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
+          grep -q 'No prior booth history <span class="quickViewCount">7</span>' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html

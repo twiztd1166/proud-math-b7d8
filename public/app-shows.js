@@ -505,6 +505,8 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
     if(!rangeMatch(opportunity.booking_cost_max,f.currentCostBand))return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
+  if(quickView==='ALL_QUOTE_REQUIRED'&&!liveOpportunityNeedsQuote(p))return false;
+  if(quickView==='ALL_NO_PRIOR_PLACEMENT'&&!liveOpportunityMissingPriorPlacement(p))return false;
   if(quickView==='ALL_REBOOK'&&!rebookCandidate(p))return false;
   if(quickView==='ALL_REBOOK_PURSUE'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='PURSUE')return false;
   if(quickView==='ALL_REBOOK_WATCH'&&String(p?.current_rebook_review?.disposition||'').toUpperCase()!=='WATCH')return false;
@@ -883,11 +885,21 @@ function defaultCatalogFilters(){
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
 }
+function liveOpportunityNeedsQuote(p){
+  const op=p?.current_rebook_opportunity||null;
+  return Boolean(op)&&opportunityCostNumber(op,'booking_cost_max')===null;
+}
+function liveOpportunityMissingPriorPlacement(p){
+  if(!p?.current_rebook_opportunity)return false;
+  return !historicalPlacementValue(p.best_observed_specific_booth)&&!historicalPlacementValue(p.latest_preserved_booth);
+}
 function quickViewOptions(mode){
   const cleanupYear=state.catalogFilters.historyYear;
   return mode==='ALL'
     ?[
       ['ALL_LIVE_REBOOK','Live booking board'],
+      ['ALL_QUOTE_REQUIRED','Quote required'],
+      ['ALL_NO_PRIOR_PLACEMENT','No prior booth history'],
       ['ALL_REBOOK','Rebook candidates 2013+'],
       ['ALL_REBOOK_PURSUE','Pursue now'],
       ['ALL_REBOOK_WATCH','Watch / next cycle'],
@@ -913,6 +925,8 @@ function quickViewOptions(mode){
 }
 function quickViewCount(key){
   if(key==='ALL_LIVE_REBOOK')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)).length;
+  if(key==='ALL_QUOTE_REQUIRED')return state.catalog.filter(liveOpportunityNeedsQuote).length;
+  if(key==='ALL_NO_PRIOR_PLACEMENT')return state.catalog.filter(liveOpportunityMissingPriorPlacement).length;
   if(key==='ALL_REBOOK')return state.catalog.filter(rebookCandidate).length;
   if(key==='ALL_REBOOK_PURSUE')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='PURSUE').length;
   if(key==='ALL_REBOOK_WATCH')return state.catalog.filter(p=>String(p?.current_rebook_review?.disposition||'').toUpperCase()==='WATCH').length;
@@ -955,6 +969,8 @@ function applyQuickView(key){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='BOOKING_DECISION';
+    if(key==='ALL_QUOTE_REQUIRED')state.catalogSort='BOOKING_DECISION';
+    if(key==='ALL_NO_PRIOR_PLACEMENT')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_REBOOK')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_PURSUE')state.catalogSort='LIFETIME_NET';
     if(key==='ALL_REBOOK_WATCH')state.catalogSort='LIFETIME_NET';
