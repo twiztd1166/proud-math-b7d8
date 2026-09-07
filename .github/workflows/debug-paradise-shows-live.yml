@@ -641,7 +641,7 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact table location · Paradise category acceptance',
-              'LIFE-044':'Windows/doors category availability · exact booth selection · total signed investment',
+              'LIFE-044':'Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment',
               'LIFE-007':'Application acceptance · exact current placement · category pricing / footprint confirmation',
               'LIFE-054':'Application approval · Paradise vendor category · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
@@ -1113,7 +1113,7 @@ jobs:
               'LIFE-018':'NOT_PUBLISHED_YET',
               'LIFE-030':'NOT_PUBLISHED_YET',
               'LIFE-033':'VERIFIED_CURRENT',
-              'LIFE-044':'VERIFIED_CURRENT',
+              'LIFE-044':'SOURCE_CONFLICT_REQUIRES_CONFIRMATION',
               'LIFE-046':'VERIFIED_CURRENT',
               'LIFE-054':'VERIFIED_CURRENT',
               'LIFE-060':'NOT_PUBLISHED_YET',
@@ -1130,10 +1130,10 @@ jobs:
               assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,op)
               assert str(op.get('current_schedule_source_label') or '').strip(), (pid,op)
               assert op.get('current_schedule_checked_at'), (pid,op)
-          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==10
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==9
           assert sum(1 for v in expected_current_schedule_status.values() if v=='NOT_PUBLISHED_YET')==6
           assert sum(1 for v in expected_current_schedule_status.values() if v=='CURRENT_SOURCE_HOURS_NOT_RECOVERED')==0
-          assert sum(1 for v in expected_current_schedule_status.values() if v=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION')==1
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION')==2
           assert 'official-source conflict' in live['HIST-234'].get('current_schedule_text','')
           assert '11 AM–7 PM' in live['HIST-234'].get('current_schedule_text','')
           assert '11 AM–6 PM' in live['HIST-234'].get('current_schedule_text','')
@@ -1145,6 +1145,10 @@ jobs:
           assert 'Sat. Jan. 2, 2027: 10 AM–5 PM' in live['LIFE-009'].get('current_schedule_text','')
           assert 'Sun. Jan. 3: 10 AM–4 PM' in live['LIFE-009'].get('current_schedule_text','')
           assert live['LIFE-009'].get('current_schedule_source_url')=='https://www.patriothomeshows.com/attendee-faq', live['LIFE-009']
+          assert live['LIFE-044'].get('current_schedule_status')=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION', live['LIFE-044']
+          assert 'Sun. Oct. 18 10 AM-4 PM' in live['LIFE-044'].get('current_schedule_text','')
+          assert 'direct Aug. 6, 2026 organizer brochure lists Sunday 10 AM-5 PM' in live['LIFE-044'].get('current_schedule_text','')
+          assert live['LIFE-044'].get('current_schedule_source_url')=='https://www.tampabay.com/expos/tampa-bay-home-show/', live['LIFE-044']
           expected_current_logistics_status={
               'HIST-234':'PARTIAL_CURRENT',
               'LIFE-007':'PARTIAL_CURRENT',
@@ -3248,7 +3252,7 @@ jobs:
           grep -q 'Pre-booking action required' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
-          grep -q 'Windows/doors category availability · exact booth selection · total signed investment' /tmp/bradenton_pursue.html
+          grep -q 'Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment' /tmp/bradenton_pursue.html
           grep -q '>PURSUE<' /tmp/bradenton_pursue.html
           grep -q 'Verified current opportunity' /tmp/bradenton_pursue.html
           grep -q 'CONTRACT REQUEST OPEN' /tmp/bradenton_pursue.html
@@ -3263,6 +3267,11 @@ jobs:
           grep -q 'data-current-commitment-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Commitment / payment terms' /tmp/bradenton_pursue.html
           grep -q 'No money due at initial reservation' /tmp/bradenton_pursue.html
+          grep -q 'data-current-schedule-status-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Official source conflict / confirm' /tmp/bradenton_pursue.html
+          grep -q 'Current live Tampa Bay Times event page lists Sat. Oct. 17, 2026 10 AM-5 PM and Sun. Oct. 18 10 AM-4 PM' /tmp/bradenton_pursue.html
+          grep -q 'direct Aug. 6, 2026 organizer brochure lists Sunday 10 AM-5 PM' /tmp/bradenton_pursue.html
+          grep -q 'confirm the Sunday closing hour with Dave LaBell before final staffing' /tmp/bradenton_pursue.html
           grep -q 'data-current-critical-deadline-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Critical commitment date' /tmp/bradenton_pursue.html
           grep -q 'Sep 17, 2026' /tmp/bradenton_pursue.html
