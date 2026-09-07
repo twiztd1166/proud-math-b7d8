@@ -3983,7 +3983,7 @@ jobs:
           grep -q 'Open participation form + floor plan' /tmp/bradenton_pursue.html
           grep -q 'tampabay.com/expos/tampa-bay-home-show/exhibitors/' /tmp/bradenton_pursue.html
           grep -q 'Open current source' /tmp/bradenton_pursue.html
-          grep -q 'Windows &amp; Doors as a show category' /tmp/bradenton_pursue.html
+          grep -q 'Windows/Doors category fit is verified' /tmp/bradenton_pursue.html
           grep -q 'entrance/exit points along the front/bottom edge' /tmp/bradenton_pursue.html
           grep -q 'layout-based preference, not proven booth-performance evidence' /tmp/bradenton_pursue.html
 
