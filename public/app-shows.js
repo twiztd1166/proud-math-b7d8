@@ -522,17 +522,31 @@ function liveComparisonDeadline(op){
   const urgency=liveComparisonDeadlineUrgency(op);
   return date(op.critical_deadline_date)+' · '+label+(urgency?' · '+urgency:'');
 }
+function governedFirstSentence(value,fallback){
+  const text=String(value||'').trim().replace(/\s+/g,' ');
+  if(!text)return fallback;
+  const abbreviations=new Set(['jan','feb','mar','apr','jun','jul','aug','sep','sept','oct','nov','dec','mr','mrs','ms','dr','st','ave','blvd','rd','inc','llc','co','corp','vs','no']);
+  for(let i=0;i<text.length;i++){
+    const mark=text[i];
+    if(mark!=='.'&&mark!=='!'&&mark!=='?')continue;
+    const next=text[i+1];
+    if(next!==undefined&&!/\s/.test(next))continue;
+    if(mark==='.'){
+      const token=(text.slice(0,i).match(/([A-Za-z]+)$/)||[])[1];
+      if(token){
+        const lower=token.toLowerCase();
+        if(abbreviations.has(lower)||token.length===1)continue;
+      }
+    }
+    return text.slice(0,i+1).trim();
+  }
+  return text;
+}
 function liveComparisonDecisionWhy(review){
-  const text=String(review?.rationale||'').trim().replace(/\s+/g,' ');
-  if(!text)return 'Open the show for the governed rationale.';
-  const first=text.match(/^.*?[.!?](?:\s|$)/);
-  return (first?.[0]||text).trim();
+  return governedFirstSentence(review?.rationale,'Open the show for the governed rationale.');
 }
 function liveComparisonNextStep(review){
-  const text=String(review?.next_step||'').trim().replace(/\s+/g,' ');
-  if(!text)return 'Open the show for the governed next step.';
-  const first=text.match(/^.*?[.!?](?:\s|$)/);
-  return (first?.[0]||text).trim();
+  return governedFirstSentence(review?.next_step,'Open the show for the governed next step.');
 }
 function liveComparisonPriorityDate(op){
   const eventDate=String(op?.event_start||'').trim();
