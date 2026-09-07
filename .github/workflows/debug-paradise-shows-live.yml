@@ -165,6 +165,8 @@ jobs:
               grep -q 'rebookReviewCard' /tmp/app-shows.js
               grep -q 'current_rebook_review' /tmp/app-shows.js
               grep -q 'Current booking review' /tmp/app-shows.js
+              grep -q 'Still needed before booking' /tmp/app-shows.js
+              grep -q 'review.blockers_text' /tmp/app-shows.js
               grep -q 'review.action_timing' /tmp/app-shows.js
               grep -q 'rebookReviewHtml' /tmp/app-modals.js
               grep -q 'rebookReview' /tmp/app.css
@@ -425,6 +427,29 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==11, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='WATCH')==11, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==5, actual_reviews
+          expected_live_blockers={
+              'LIFE-046':'Current table availability · exact table location · Paradise category acceptance',
+              'LIFE-044':'Windows/doors category availability · exact booth selection · total signed investment',
+              'LIFE-007':'Application acceptance · exact current placement · category pricing / footprint confirmation',
+              'LIFE-054':'Application approval · Paradise vendor category · exact placement',
+              'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
+              'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
+              'LIFE-017':'Current available booth / location · add-on charges before 50% reservation payment',
+              'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
+              'HIST-234':'Commercial sponsorship price · actual footprint / location · lead-generation / exclusivity / payment / COI terms',
+              'LIFE-077':'Normal lower-cost vendor option or justified $2,000 package · exact location · Paradise acceptance',
+              'LIFE-009':'Materially stronger live placement · exact booth availability before 25% deposit',
+              'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
+              'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
+              'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
+              'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
+          }
+          assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
+          for pid,blockers in expected_live_blockers.items():
+              assert reviews[pid].get('blockers_text')==blockers, (pid,reviews[pid])
+          for pid,review in reviews.items():
+              if pid not in expected_live_blockers:
+                  assert not review.get('blockers_text'), (pid,review)
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               if profiles[held].get('current_rebook_opportunity'):
@@ -1010,10 +1035,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 29, detail.get('version')
+              assert detail.get('version') == 30, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 29, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 30, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1025,7 +1050,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 48, x.get('version')
+          assert x.get('version') == 49, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2174,6 +2199,8 @@ jobs:
           grep -q 'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
+          grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
+          grep -q 'Windows/doors category availability · exact booth selection · total signed investment' /tmp/bradenton_pursue.html
           grep -q '>PURSUE<' /tmp/bradenton_pursue.html
           grep -q 'Verified current opportunity' /tmp/bradenton_pursue.html
           grep -q 'CONTRACT REQUEST OPEN' /tmp/bradenton_pursue.html
@@ -2274,6 +2301,8 @@ jobs:
           grep -q 'APPLICATION OPEN' /tmp/rebook_detail.html
           grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Corporate vendor: \$65/\$75 per Saturday' /tmp/rebook_detail.html
+          grep -q 'Still needed before booking' /tmp/rebook_detail.html
+          grep -q 'Application acceptance · exact current placement · category pricing / footprint confirmation' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
@@ -2283,6 +2312,8 @@ jobs:
           render_view pembroke_detail "$SITE/#show/LIFE-033"
           grep -q 'Pembroke Home Show' /tmp/pembroke_detail.html
           grep -q 'Verified current exhibitor listing' /tmp/pembroke_detail.html
+          grep -q 'Still needed before booking' /tmp/pembroke_detail.html
+          grep -q 'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
           grep -q 'Oct 31, 2026' /tmp/pembroke_detail.html
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
@@ -2355,6 +2386,8 @@ jobs:
           render_view cognizant_detail "$SITE/#show/LIFE-076"
           grep -q 'Honda Classic' /tmp/cognizant_detail.html
           grep -q 'Verified current watch' /tmp/cognizant_detail.html
+          grep -q 'Still needed before booking' /tmp/cognizant_detail.html
+          grep -q 'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price' /tmp/cognizant_detail.html
           grep -q '>WATCH<' /tmp/cognizant_detail.html
           grep -q 'Feb 24, 2027' /tmp/cognizant_detail.html
           grep -q 'Feb 28, 2027' /tmp/cognizant_detail.html
