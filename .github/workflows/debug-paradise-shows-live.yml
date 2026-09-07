@@ -688,7 +688,7 @@ jobs:
 
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','no current official Events/pop-up page or future Paradise-style date recovered as of 2026-09-07'),
-              'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo / vendor-cycle pages','2026 reservations closed and organizer says check back next year'),
+              'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo 2026 vendor package + City 2024 registration-timing precedent','official Feb.16/Mar.15/Apr.1/May.3 2024 vendor-outreach notices'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026','Business Vendor $100, 10x10 space and 772-337-0049'),
           }
           assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
@@ -728,6 +728,9 @@ jobs:
           assert reviews['LIFE-028'].get('outreach_cycle_source_url')=='https://palmbeachliquor.com/', reviews['LIFE-028']
           assert reviews['LIFE-028'].get('outreach_cycle_source_label')=='Current Palm Beach Liquors official storefront + 2026 app/license evidence', reviews['LIFE-028']
           assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert '10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert 'February-April 2027 as a monitoring window' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert 'not as a verified 2027 deadline' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'Apr. 25, 2026 at Clover Park' in reviews['LIFE-073'].get('outreach_cycle_text','')
 
           expected_historical_outcome_status={
@@ -868,7 +871,7 @@ jobs:
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
           assert '10x20 / 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
-          assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
+          assert '$200 without power or $225 with power for a 10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
           assert 'November 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert '772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
@@ -876,7 +879,9 @@ jobs:
           assert reviews['LIFE-028'].get('action_timing','').startswith('NOW'), reviews['LIFE-028']
           assert 'NOVEMBER 2026' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
           assert 'JANUARY 2027' in reviews['LIFE-073'].get('action_timing',''), reviews['LIFE-073']
-          assert '2027 REGISTRATION CYCLE' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
+          assert reviews['LIFE-039'].get('action_timing','').startswith('FEBRUARY 2027'), reviews['LIFE-039']
+          assert 'MARCH-APRIL' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
+          assert 'planning precedent, not a 2027 deadline' in reviews['LIFE-039'].get('action_timing',''), reviews['LIFE-039']
           assert reviews['LIFE-032'].get('action_timing','').startswith('HOLD'), reviews['LIFE-032']
           assert any(p.get('profile_id')=='LIFE-118' for p in historical_2013), [p.get('profile_id') for p in historical_2013]
           assert next(p for p in historical_2013 if p.get('profile_id')=='LIFE-118').get('latest_history_year')==2015
@@ -3459,11 +3464,14 @@ jobs:
           grep -q 'Port St Lucie Hurricane Expo' /tmp/hurricane_watch.html
           grep -q 'Current booking review' /tmp/hurricane_watch.html
           grep -q 'When to act' /tmp/hurricane_watch.html
-          grep -q '2027 REGISTRATION CYCLE' /tmp/hurricane_watch.html
+          grep -q 'FEBRUARY 2027' /tmp/hurricane_watch.html
+          grep -q 'MARCH-APRIL' /tmp/hurricane_watch.html
           grep -q '>WATCH<' /tmp/hurricane_watch.html
-          grep -q '2027 cycle' /tmp/hurricane_watch.html
-          grep -q '\$200/\$225' /tmp/hurricane_watch.html
-          grep -q 'explicitly says to check back next year' /tmp/hurricane_watch.html
+          grep -q 'business distribution list' /tmp/hurricane_watch.html
+          grep -q '\$200 without power' /tmp/hurricane_watch.html
+          grep -q '\$225 with power' /tmp/hurricane_watch.html
+          grep -q '10x8 booth with one 8 ft table and two chairs' /tmp/hurricane_watch.html
+          grep -q 'Do not convert those 2024 dates into a claimed 2027 deadline' /tmp/hurricane_watch.html
           grep -q 'href="https://forms.cityofpsl.com/expo"' /tmp/hurricane_watch.html
           grep -q 'Open review source' /tmp/hurricane_watch.html
           grep -q 'data-historical-outreach-source-profile="LIFE-039"' /tmp/hurricane_watch.html
