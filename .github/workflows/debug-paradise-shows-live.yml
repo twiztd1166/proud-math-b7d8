@@ -411,7 +411,8 @@ jobs:
               grep -q 'LP-attributed specific:' /tmp/app-shows.js
               grep -q 'annual LP attribution · not attendance proof' /tmp/app-shows.js
               grep -q 'not same-row history performance and not proof Paradise attended/worked that placement' /tmp/app-shows.js
-              grep -q 'LP-attributed placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/app-shows.js
+              grep -q 'LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/app-shows.js
+              grep -q 'LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth' /tmp/app-shows.js
               grep -q 'No preserved booth / placement is available for this profile' /tmp/app-shows.js
               grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/app-shows.js
               grep -q 'correlation only' /tmp/app-modals.js
