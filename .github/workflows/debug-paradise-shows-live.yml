@@ -102,8 +102,12 @@ jobs:
               grep -q 'Current booking cost low' /tmp/app-shows.js
               grep -q 'Current booking cost high' /tmp/app-shows.js
               grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
+              grep -q 'data-current-booking-cost-profile' /tmp/app-shows.js
               grep -q 'fOpportunityCostBand' /tmp/app-shows.js
-              grep -q 'Current verified starting cost' /tmp/app-shows.js
+              grep -q 'Current verified booking cost (max)' /tmp/app-shows.js
+              grep -Fq "rangeMatch(opportunity.booking_cost_max,f.currentCostBand)" /tmp/app-shows.js
+              grep -Fq "opportunityCostNumber(a?.current_rebook_opportunity,'booking_cost_max')" /tmp/app-shows.js
+              grep -Fq "opportunityCostNumber(liveOpportunity,'booking_cost_max')" /tmp/app-shows.js
               grep -q 'Quote / comparable cost missing' /tmp/app-shows.js
               grep -q 'booking_cost_min' /tmp/app-shows.js
               grep -q 'booking_cost_max' /tmp/app-shows.js
@@ -566,6 +570,7 @@ jobs:
               'LIFE-054':(160,400,'approved vendor category / event','Official 2026 published range: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400; Paradise category must be confirmed before payment.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
           }
+          assert len(expected_booking_costs)==7, expected_booking_costs
           for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
               op=live[pid]
               assert float(op.get('booking_cost_min'))==cmin, (pid,op)
@@ -2075,6 +2080,7 @@ jobs:
           grep -q '2025 · Apr 12-13' /tmp/vero_home_placement.html
           grep -q '0 net sales' /tmp/vero_home_placement.html
           grep -q '\$0 net revenue' /tmp/vero_home_placement.html
+          grep -q 'data-current-booking-cost-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Decision-safe current booking cost' /tmp/vero_home_placement.html
           grep -q '\$475–\$635 · 10x10 booth' /tmp/vero_home_placement.html
           grep -q 'optional table/carpet add-ons excluded' /tmp/vero_home_placement.html
@@ -2117,6 +2123,7 @@ jobs:
           grep -q 'Oct 18, 2026' /tmp/bradenton_pursue.html
           grep -q '10x10 booth starts at \$995' /tmp/bradenton_pursue.html
           grep -q 'corner booth +\$100' /tmp/bradenton_pursue.html
+          grep -q 'data-current-booking-cost-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Decision-safe current booking cost' /tmp/bradenton_pursue.html
           grep -q '\$995–\$1,095 · 10x10 booth' /tmp/bradenton_pursue.html
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
@@ -2132,6 +2139,7 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
+          grep -q 'data-current-booking-cost-profile="LIFE-017"' /tmp/tampa_2027.html
           grep -q 'Decision-safe current booking cost' /tmp/tampa_2027.html
           grep -q '\$1,295–\$1,395 · 10x10 booth' /tmp/tampa_2027.html
           grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
@@ -2234,6 +2242,7 @@ jobs:
           grep -q 'CONTRACT REQUEST OPEN' /tmp/gunshow_detail.html
           grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
+          grep -q 'data-current-booking-cost-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/gunshow_detail.html
           grep -q '\$100 · 8-foot table / weekend' /tmp/gunshow_detail.html
           grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
@@ -2249,7 +2258,7 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
-          if grep -q 'Decision-safe current booking cost' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
+          if grep -q 'data-current-booking-cost-profile="LIFE-018"' /tmp/treasure_detail.html; then echo "::error::Quote-only Martin opportunity rendered a structured current cost"; exit 1; fi
           grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
           grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
@@ -2292,6 +2301,7 @@ jobs:
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
+          grep -q 'data-current-booking-cost-profile="LIFE-054"' /tmp/winterfest_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/winterfest_detail.html
           grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'Paradise category must be confirmed before payment' /tmp/winterfest_detail.html
