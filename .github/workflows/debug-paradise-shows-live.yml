@@ -3371,12 +3371,12 @@ jobs:
           assert live_ids[:8]==expected_pursue_order, live_ids
           assert live_ids[0]=='LIFE-044', live_ids
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row('LIFE-044'), row('LIFE-044')
-          assert re.search(r'(?:\\d+ day(?:s)? to deadline|deadline today|\\d+ day(?:s)? past deadline)',row('LIFE-044')), row('LIFE-044')
+          assert re.search(r'(?:\d+ day(?:s)? to deadline|deadline today|\d+ day(?:s)? past deadline)',row('LIFE-044')), row('LIFE-044')
           for pid,expected in expected_deadlines.items():
               r=row(pid)
               assert f'data-live-compare-deadline-profile="{pid}"' in r, (pid,r)
               assert expected in r, (pid,r)
-              assert re.search(r'(?:\\d+ day(?:s)? to deadline|deadline today|\\d+ day(?:s)? past deadline)',r), (pid,r)
+              assert re.search(r'(?:\d+ day(?:s)? to deadline|deadline today|\d+ day(?:s)? past deadline)',r), (pid,r)
           for pid in live_ids:
               if pid in expected_deadlines: continue
               r=row(pid)
@@ -3420,7 +3420,7 @@ jobs:
           assert 'Research exhausted as of Sep. 7, 2026 for live Manatee availability — call/email Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and ask him to confirm current numbering plus available spaces against the floor plan.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
-          assert re.search(r'(?:\\d+ day(?:s)? to deadline|deadline today|\\d+ day(?:s)? past deadline)',row), row
+          assert re.search(r'(?:\d+ day(?:s)? to deadline|deadline today|\d+ day(?:s)? past deadline)',row), row
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
           PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
