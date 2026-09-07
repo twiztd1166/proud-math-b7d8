@@ -677,7 +677,7 @@ jobs:
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
               'LIFE-007':'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint',
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
-              'LIFE-018':'Exact currently available booth / final selection · required application remittance · exact insurance-limit/additional-insured wording · move-in/loading/parking instructions',
+              'LIFE-018':'Exact currently available booth / final PSM assignment · authorized contract signature/payment · exact insurance/COI evidence if separately required · move-in/loading/parking instructions · Saturday public show hours',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
@@ -965,7 +965,7 @@ jobs:
           assert 'same-row outcome of 0 net sales' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'performance attribution, not attendance proof or proof the old numbering is still optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert 'outside popup placement type comparable to Paradise history' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
-          assert '#131 (10x12) with #129 as alternate' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
+          assert 'confirm whether historical Booth 131 still exists under the same numbering' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
           assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
           assert '$100 indoor-table weekend test' in reviews['LIFE-046'].get('action_timing',''), reviews['LIFE-046']
@@ -1065,10 +1065,10 @@ jobs:
           assert reviews['LIFE-054'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record'), reviews['LIFE-054']
           assert 'requires Paradise application submission and POTTC response' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
-          assert reviews['LIFE-018'].get('next_step','').startswith('Open the current PSM Martin County floor plan and contract.'), reviews['LIFE-018']
+          assert reviews['LIFE-018'].get('next_step','').startswith('Use the recovered official 2027 contract now.'), reviews['LIFE-018']
           assert 'live 2027 Professional Show Management exhibitor contract' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
           assert '$316,198' in reviews['LIFE-018'].get('rationale',''), reviews['LIFE-018']
-          assert 'Current published economics are $950 for 10x10, $1,750 for 20x10, +$100 corner' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
+          assert 'Current base economics are verified: $950 single 10x10, $1,750 double 20x10, corner +$100' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-030']
           assert reviews['LIFE-030'].get('action_timing','').startswith('NOW — request the current 2027 Presidential/custom booth-bearing proposal from Brittany.'), reviews['LIFE-030']
           assert '$3,350-$3,850' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
@@ -1481,7 +1481,7 @@ jobs:
               'LIFE-033':'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered. Spring Booth 106 (2026) and Booth 428 (2023) are prior-occurrence references only. Obtain the fall-specific signed contract/account statement and exact live booth before any new payment or staffing decision.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
               'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Open the live floor plan and verify current numbering/availability before paying. Treat historical Booth 66 (10x10) as the strongest placement reference currently supported by Paradise evidence: the Jan. 15-16, 2022 occurrence is date-matched to 4 LP closes / $110,038 LP close volume / 38 issued / 15 demos. That does not prove the old booth number/zone is still best. Explicitly avoid simply reusing Booth #52: the Apr. 12-13, 2025 occurrence at Booth #52 has a same-row outcome of 0 net sales / $0. Also do not automatically repeat Space 048: BoothCentral directly assigned 048 for Jan. 3-4, 2026, Paradise paid $535, and that exact occurrence is date-matched to 0 LP closes / $0 LP close volume / 9 issued / 3 demos. The 048 and 66 comparison is evidence, not proof that booth location caused either result, and it does not establish 2027 availability.',
-              'LIFE-018':'The official organizer page links a current 2027 floor plan. The contract asks for a 1st Choice plus alternates and states all exhibition space is allotted by or under Professional Show Management authority. No Paradise booth is assigned/verified. Historical Nov. 2021 notes requested Booth #131 (10x12) or #129; use those only as historical placement references until current numbering and live availability are confirmed.',
+              'LIFE-018':'A current 2027 floor plan is linked by Professional Show Management, but no Paradise booth is assigned or verified. The contract provides fields for 1st choice and alternates, while the terms state all exhibit space is allotted by/under PSM authority. Request current live availability and rank preferred spaces; historical Booth 131 (10x12) is reference only unless current numbering still matches.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. The current official sponsorship page verifies that an onsite booth is available at the Presidential Sponsor level, but it does not publish the current 2027 Presidential footprint/location in recoverable text. Request the current sponsor map/package and exact placement before committing; historical S204 is placement-reference evidence only.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
               'LIFE-071':'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified. Same-series 2023 organizer precedent says FLHS had two 20x20 spaces at the front of the Tampa show that were visible from the entrance and described them as strong display locations; this is organizer layout preference only, not Paradise performance evidence and not current St. Petersburg availability. Ask for the current plan and prioritize a front/entrance-visible 20x20 or current category-required equivalent only if the live layout supports it.',
@@ -1735,7 +1735,7 @@ jobs:
               'LIFE-007':(65,75,'per Saturday',"Official RPB 2026-27 Corporate monthly/weekly rate. Cross-source classification: RPB defines Corporate as more than one location or >10x10, and Paradise's current official website states multiple offices/warehouses across Florida. Application acceptance and selected dates/space remain unverified."),
               'LIFE-009':(475,635,'10x10 booth','Official 2027 standard-to-premium-corner 10x10 range; optional table/carpet add-ons excluded.'),
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
-              'LIFE-018':(950,1850,'published exhibit space (10x10 through 20x10 corner)','Official Jan. 9-10, 2027 PSM exhibitor contract: single 10x10 $950; double 20x10 $1,750; corner +$100; 300+ sq ft receives 10% discount. 110V AC 5A and Wi-Fi are included; tables/chairs are not available through Exhibitor Services.'),
+              'LIFE-018':(950,1850,'base booth before optional corner','Official 2027 Professional Show Management exhibitor contract for the Jan. 9-10, 2027 Martin County Home Improvement Show. Single 10x10 = $950; double 20x10 = $1,750; corner = +$100; 300+ sq ft = 10% discount. 110V AC/5A and Wi-Fi included. Tables/chairs are not available through exhibitor services.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
               'LIFE-054':(310,410,'approved vendor category / event','Official 2026 Corporate exposure: application asks only for Corporate; POTTC assigns the approved level after review. Corporate Level 1 = $300 and Level 2 = $400, plus required $10 non-refundable application fee. No current published Level 2 benefit/placement difference is stated. Paradise was assigned Level 2 in 2024 and paid $410 for 2025, so $410 remains the conservative ceiling; $310 is the decision-safe lower Corporate outcome if POTTC approves Level 1.'),
@@ -1803,7 +1803,7 @@ jobs:
               'LIFE-077':'Normal 2026 Vendor Application is live, but its current fee, acceptance/payment timing and any application deadline are not published in recoverable current official text · current 2026 vendor rules do state no refunds for bad weather/acts of nature and no location change/refund if dissatisfied with the booth assigned on arrival · separate sponsorship alternative: Grand Clam $2,000 includes a 10x10 booth and sponsorship fees/donations are payable by check to Sebastian Clambake Foundation.',
               'LIFE-014':'No current new-booking commitment is available — 2025-26 and 2026-27 applications are closed · next vendor application process opens March 2027 · 2027-28 Paradise eligibility, fee, payment, cancellation and placement terms are not yet published and must be verified when the next cycle opens.',
               'LIFE-033':'Fall 2026 commitment remains RECONCILE_EXISTING because Paradise is publicly listed but no fall-specific signed contract/invoice was recovered. The recovered multi-year clause belongs to the spring Pembroke lineage and does not by itself establish the fall occurrence. ACS confirmed Aug. 31, 2026 that Paradise may enter new contracts, new contracts must be paid in full upon signing, and there are no account credits. Obtain one written fall-specific ACS statement showing whether a contract exists, exact total price, amounts paid/due, payment deadline, cancellation/refund terms, COI and utilities before any additional payment.',
-              'LIFE-018':'Official 2027 contract recovered. All balances are due 30 days before the event unless written arrangements are made; unpaid balances may be billed to the card on file at that point; reserving space does not eliminate liability for the balance if the exhibitor fails to participate. Exhibitor default can terminate the contract and permit PSM to retain payments as liquidated damages; indemnification and insurance-through-event/move-in/move-out requirements apply; PSM disclaims liability for specified force-majeure events. The exact required application remittance, insurance limit/additional-insured wording, and current move-in/loading/parking instructions still need confirmation before signature/payment.',
+              'LIFE-018':'Official 2027 contract: signed exhibitor is legally bound by the terms; all balances are due 30 days before the event unless PSM agrees otherwise in writing; unpaid balances may be billed to the card on file at that point; reserving space but failing to participate does not eliminate the balance obligation. On exhibitor default, PSM may terminate the contract, retain payments as liquidated damages, reuse the space, and seek damages/costs. Exhibitor must maintain insurance during show, move-in and move-out periods and obtain required licenses/permits at its own expense. The extracted contract text confirms an insurance requirement but did not expose a numeric coverage limit, so do not invent one.',
               'LIFE-060':'2027 fair dates are published, but the 2027 commercial-vendor application/agreement and its price, deposit/payment, cancellation/refund, COI and placement terms are not yet published on the verified fair site · do not carry forward the 2025 vendor agreement; request the 2027 package before commitment.',
               'LIFE-013':'2027 vendor applications are live and indoor commercial spaces are offered, but Paradise-specific commercial-space price, deposit/payment schedule, application deadline, cancellation/refund, COI and add-on terms are not published on the verified vendor page · obtain the 2027 commercial rate sheet/application agreement from Sylvia before committing.',
               'LIFE-112':'The 2027 application does not guarantee space. It requires an authorized-agent signature and agreement to comply with current Fair vendor rules/regulations. Current contract acceptance, deposit/payment schedule, cancellation/refund terms and final electrical charges are not stated in the recovered application and must be verified before Paradise makes a payment or final commitment.',
@@ -1836,7 +1836,7 @@ jobs:
               'LIFE-044':('2026-09-17','CANCELLATION_LIABILITY_CUTOFF','30-day cancellation-liability cutoff','Date = 2026-10-17 minus 30 days.'),
               'LIFE-054':('2026-11-05','NO_REFUND_WINDOW_BOUNDARY','30-day no-refund boundary','Date = 2026-12-05 minus 30 days.'),
               'LIFE-017':('2027-03-01','FINAL_BALANCE_DUE','Final balance due','Direct verified contract term: final balance due March 1, 2027.'),
-              'LIFE-018':('2026-12-10','FINAL_BALANCE_DUE','All balances due 30 days before event','Official 2027 exhibitor contract item 12: all balances must be paid in full 30 days before the event unless prior written arrangements are made; unpaid balances may be billed to the card on file.'),
+              'LIFE-018':('2026-12-10','FINAL_BALANCE_DUE','All balances due 30 days before event','all balances must be paid in full 30 days prior to the event'),
           }
           assert len(expected_critical_deadlines)==4, expected_critical_deadlines
           for pid,(deadline,kind,label,basis_part) in expected_critical_deadlines.items():
@@ -1973,7 +1973,7 @@ jobs:
           assert profiles['LIFE-018']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-018']['current_rebook_opportunity']['event_start']=='2027-01-09'
           assert profiles['LIFE-018']['current_rebook_opportunity']['event_end']=='2027-01-10'
-          assert profiles['LIFE-018']['current_rebook_opportunity']['price_text']=='$950 single 10x10 · $1,750 double 20x10 · corner +$100 · 300+ sq ft receives 10% discount'
+          assert profiles['LIFE-018']['current_rebook_opportunity']['price_text']=='$950 single 10x10 · $1,750 double 20x10 · corner +$100 · 300+ sq ft receives 10% discount · 110V AC 5A power and Wi-Fi included · tables/chairs not available'
           assert profiles['LIFE-018']['current_rebook_opportunity']['booking_cost_min']==950
           assert profiles['LIFE-018']['current_rebook_opportunity']['booking_cost_max']==1850
           assert 'final-balance date is Dec. 10, 2026' in profiles['LIFE-018']['current_rebook_opportunity']['booking_window_text']
@@ -3920,8 +3920,8 @@ jobs:
           grep -q 'Hours not recovered from current source' /tmp/martin_home_placement.html
           grep -q 'Current Saturday public hours were not recovered' /tmp/martin_home_placement.html
           grep -q 'Current booth / placement' /tmp/martin_home_placement.html
-          grep -q 'official organizer page links a current 2027 floor plan' /tmp/martin_home_placement.html
-          grep -q 'Historical Nov. 2021 notes requested Booth #131 (10x12) or #129' /tmp/martin_home_placement.html
+          grep -q 'current 2027 floor plan is linked by Professional Show Management' /tmp/martin_home_placement.html
+          grep -q 'historical Booth 131 (10x12) is reference only unless current numbering still matches' /tmp/martin_home_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Historical decision evidence' /tmp/martin_home_placement.html
           grep -q '3 verified worked years · latest verified worked 2017' /tmp/martin_home_placement.html
@@ -3933,9 +3933,9 @@ jobs:
           grep -q 'data-lp-attributed-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q '131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · \$96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' /tmp/martin_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/martin_home_placement.html
-          grep -q 'Rank current booth choices with Jackielou before signing' /tmp/martin_home_placement.html
+          grep -q 'Ask Jackielou for current live booth availability' /tmp/martin_home_placement.html
           grep -q '4 LP closes / \$96,238 LP close volume / 16 issued / 7 demos' /tmp/martin_home_placement.html
-          grep -q 'historical placement-performance signal only' /tmp/martin_home_placement.html
+          grep -q 'not attendance proof or proof Booth 131 was best' /tmp/martin_home_placement.html
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html
@@ -4332,11 +4332,11 @@ jobs:
           grep -q 'data-current-cost-status-profile="LIFE-018"' /tmp/treasure_detail.html
           grep -q 'Known verified cost' /tmp/treasure_detail.html
           grep -q 'data-current-commitment-profile="LIFE-018"' /tmp/treasure_detail.html
-          grep -q 'Official 2027 contract recovered' /tmp/treasure_detail.html
+          grep -q 'Official 2027 contract: signed exhibitor is legally bound by the terms' /tmp/treasure_detail.html
           grep -q 'All balances are due 30 days before the event' /tmp/treasure_detail.html
-          grep -q 'exact required application remittance, insurance limit/additional-insured wording' /tmp/treasure_detail.html
+          grep -q 'did not expose a numeric coverage limit' /tmp/treasure_detail.html
           grep -q 'data-current-booking-cost-profile="LIFE-018"' /tmp/treasure_detail.html
-          grep -q '\$950–\$1,850 · published exhibit space (10x10 through 20x10 corner)' /tmp/treasure_detail.html
+          grep -q '\$950–\$1,850 · base booth before optional corner' /tmp/treasure_detail.html
           grep -q 'Critical commitment date' /tmp/treasure_detail.html
           grep -q 'Dec 10, 2026' /tmp/treasure_detail.html
           grep -q 'All balances due 30 days before event' /tmp/treasure_detail.html
