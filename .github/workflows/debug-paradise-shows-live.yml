@@ -311,6 +311,15 @@ jobs:
               grep -q 'Lifetime / LP attribution is not attendance proof' /tmp/app-shows.js
               grep -q 'Historical decision evidence' /tmp/app-shows.js
               grep -q 'Historical outcome snapshot' /tmp/app-shows.js
+              grep -q 'data-live-decision-comparison' /tmp/app-shows.js
+              grep -q 'Live opportunity comparison' /tmp/app-shows.js
+              grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
+              grep -q 'liveComparisonOutcome' /tmp/app-shows.js
+              grep -q 'liveComparisonPlacement' /tmp/app-shows.js
+              grep -q 'liveCompareOpen' /tmp/app-shows.js
+              grep -q 'liveCompareOpen' /tmp/app-bind.js
+              grep -q 'liveCompareBoard' /tmp/app.css
+              grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/app-shows.js
               grep -q 'data-historical-outcome-profile' /tmp/app-shows.js
               grep -q 'historicalOutcomeSnapshot' /tmp/app-shows.js
               grep -q 'outcome_evidence_status' /tmp/app-shows.js
@@ -2658,6 +2667,19 @@ jobs:
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
+          grep -q 'data-live-decision-comparison' /tmp/shows.html
+          grep -q 'Live opportunity comparison' /tmp/shows.html
+          grep -q '16 governed targets' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
+          grep -q 'data-live-compare-row="LIFE-033"' /tmp/shows.html
+          grep -q 'data-live-compare-row="HIST-234"' /tmp/shows.html
+          grep -q 'class="liveCompareDecision pursue"' /tmp/shows.html
+          grep -q 'class="liveCompareDecision watch"' /tmp/shows.html
+          grep -q 'class="liveCompareDecision hold"' /tmp/shows.html
+          grep -q 'No comparable outcome evidence' /tmp/shows.html
+          grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
+          grep -q 'class="liveCompareOpen"' /tmp/shows.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
