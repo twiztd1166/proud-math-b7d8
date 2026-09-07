@@ -128,6 +128,11 @@ jobs:
               grep -q 'Current booth / placement' /tmp/app-shows.js
               grep -q 'current_placement_text' /tmp/app-shows.js
               grep -q 'rebookContactActions' /tmp/app-shows.js
+              grep -q 'rebookVenueDirections' /tmp/app-shows.js
+              grep -q 'data-current-venue-profile' /tmp/app-shows.js
+              grep -q 'data-current-venue-actions-profile' /tmp/app-shows.js
+              grep -q 'www.google.com/maps/search/?api=1' /tmp/app-shows.js
+              grep -q 'Open venue map' /tmp/app-shows.js
               grep -q 'data-current-contact-profile' /tmp/app-shows.js
               grep -q 'data-current-contact-actions-profile' /tmp/app-shows.js
               grep -q 'href="tel:' /tmp/app-shows.js
@@ -2153,6 +2158,10 @@ jobs:
           grep -q 'Vero Home Show' /tmp/vero_home_placement.html
           grep -q 'Venue / address' /tmp/vero_home_placement.html
           grep -q 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' /tmp/vero_home_placement.html
+          grep -q 'data-current-venue-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'data-current-venue-actions-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'www.google.com/maps/search/?api=1&amp;query=Indian%20River%20County%20Fairgrounds' /tmp/vero_home_placement.html
+          grep -q '>Open venue map<' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
@@ -2202,6 +2211,10 @@ jobs:
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html
           grep -q 'Venue / address' /tmp/bradenton_pursue.html
           grep -q 'Bradenton Area Convention Center · 1 Haben Blvd, Palmetto, FL 34221' /tmp/bradenton_pursue.html
+          grep -q 'data-current-venue-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'data-current-venue-actions-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'www.google.com/maps/search/?api=1&amp;query=Bradenton%20Area%20Convention%20Center' /tmp/bradenton_pursue.html
+          grep -q '>Open venue map<' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
