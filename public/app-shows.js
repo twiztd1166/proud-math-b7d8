@@ -418,6 +418,8 @@ function liveDecisionCompareBoard(profiles,open=false){
     const contactName=String(op.contact_name||'Current organizer/contact').trim();
     const contactActions=rebookContactActions(op.contact_text,p.profile_id,op.contact_email,op.contact_phone);
     const readiness=bookingReadinessLabel(review.booking_readiness);
+    const commitmentStatus=opportunityCommitmentStatusLabel(op.current_commitment_status);
+    const blockers=String(review.blockers_text||'No additional blocker text recorded').trim();
     const timing=String(review.action_timing||'Verify timing').trim();
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
     const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
@@ -429,16 +431,16 @@ function liveDecisionCompareBoard(profiles,open=false){
       <td data-label="Historical outcome">${esc(liveComparisonOutcome(p))}</td>
       <td data-label="Placement" data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
       <td data-label="Contact" data-live-compare-contact-profile="${esc(p.profile_id)}"><div class="liveCompareContact"><b>${esc(contactName)}</b>${contactActions}</div></td>
-      <td data-label="Readiness">${esc(readiness)}</td>
+      <td data-label="Readiness" data-live-compare-readiness-profile="${esc(p.profile_id)}"><div class="liveCompareReadiness"><b>${esc(readiness)}</b><span>Commitment: ${esc(commitmentStatus)}</span><small>Still needed: ${esc(blockers)}</small></div></td>
       <td data-label="Hard deadline" data-live-compare-deadline-profile="${esc(p.profile_id)}">${esc(liveComparisonDeadline(op))}</td>
       <td data-label="When to act">${esc(timing)}</td>
       <td data-label="Action">${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness · hard deadline · timing · direct action</small></summary>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness + blockers · hard deadline · timing · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment.</div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
 }
 function catalogCard(p){
