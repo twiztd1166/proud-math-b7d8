@@ -457,6 +457,13 @@ function liveComparisonPlacement(p){
   }
   return current+' · No preserved booth / placement';
 }
+function liveDecisionActionDate(p){
+  const op=p?.current_rebook_opportunity||{};
+  const event=String(op.event_start||'').trim();
+  const deadline=String(op.critical_deadline_date||'').trim();
+  if(deadline&&event)return deadline<event?deadline:event;
+  return deadline||event||'9999-12-31';
+}
 function liveComparisonDeadline(op){
   if(!op?.critical_deadline_date)return 'No verified hard deadline';
   const label=String(op.critical_deadline_label||op.critical_deadline_type||'Critical deadline').replaceAll('_',' ');
@@ -474,9 +481,10 @@ function liveDecisionCompareBoard(profiles,open=false){
     const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
     const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
     const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
-    const aDate=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
-    const bDate=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
-    return aw-bw||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
+    const aDate=liveDecisionActionDate(a),bDate=liveDecisionActionDate(b);
+    const aEvent=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const bEvent=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||aDate.localeCompare(bDate)||aEvent.localeCompare(bEvent)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
   });
   if(!rows.length)return '';
   const body=rows.map(p=>{
@@ -818,7 +826,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / action date'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -974,9 +982,10 @@ function catalogComparator(a,b){
       return ({PURSUE:0,WATCH:1,HOLD:2,RETIRED:3})[d]??9;
     };
     const aw=weight(a),bw=weight(b);
-    const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
-    const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
-    return aw-bw||ad.localeCompare(bd)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
+    const ad=liveDecisionActionDate(a),bd=liveDecisionActionDate(b);
+    const ae=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
+    const be=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    return aw-bw||ad.localeCompare(bd)||ae.localeCompare(be)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
   }
   if(sort==='LATEST_HISTORY')return Number(b.latest_history_year||0)-Number(a.latest_history_year||0)||name(a,b);
   if(sort==='HISTORY_DEPTH')return Number(b.history_year_count||0)-Number(a.history_year_count||0)||Number(b.history_count||0)-Number(a.history_count||0)||name(a,b);
