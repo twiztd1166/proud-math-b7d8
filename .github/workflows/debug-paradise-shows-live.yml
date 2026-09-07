@@ -2688,7 +2688,7 @@ jobs:
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
-          grep -q 'Current: Floor plan available · not selected' /tmp/shows.html
+          grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
           grep -q 'Best history:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
           grep -q 'class="liveCompareAction"' /tmp/shows.html
