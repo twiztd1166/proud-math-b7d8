@@ -108,6 +108,15 @@ function opportunityCostStatusLabel(value){
     NEXT_CYCLE_CLOSED:'Next cycle / closed'
   })[key]||String(value||'Not classified').replaceAll('_',' ');
 }
+function opportunityScheduleStatusLabel(value){
+  const key=String(value||'').toUpperCase();
+  return ({
+    VERIFIED_CURRENT:'Verified current hours',
+    NOT_PUBLISHED_YET:'Hours not published yet',
+    CURRENT_SOURCE_HOURS_NOT_RECOVERED:'Current source found / hours not recovered',
+    SOURCE_CONFLICT_REQUIRES_CONFIRMATION:'Official sources conflict / confirm'
+  })[key]||String(value||'Not classified').replaceAll('_',' ');
+}
 function opportunityPlacementStatusLabel(value){
   const key=String(value||'').toUpperCase();
   return ({
@@ -141,6 +150,12 @@ function rebookContactActions(value,profileId,structuredEmail,structuredPhone){
   if(!emails.length&&!phones.length)return '';
   return `<div class="contactActions" data-current-contact-actions-profile="${esc(profileId||'')}">${phones.map(phone=>`<a class="contactBtn" href="tel:${esc(phone.dial)}">Call ${esc(phone.label)}</a>`).join('')}${emails.map(email=>`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`).join('')}</div>`;
 }
+function rebookScheduleSource(op){
+  const url=String(op?.current_schedule_source_url||'').trim();
+  if(!url)return '';
+  const label=String(op?.current_schedule_source_label||'Verified schedule source').trim();
+  return `<div class="contactActions" data-current-schedule-source-profile="${esc(op?.profile_id||'')}"><a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Open schedule source</a><span>${esc(label)}</span></div>`;
+}
 function rebookVenueDirections(value,profileId){
   const text=String(value||'').trim();
   if(!text)return '';
@@ -165,7 +180,7 @@ function rebookOpportunityCard(op){
   const comparableCost=cost?`<div class="wide" data-current-booking-cost-profile="${esc(op.profile_id)}"><span>Decision-safe current booking cost</span><b>${esc(cost)}${op.booking_cost_basis?` · ${esc(op.booking_cost_basis)}`:''}</b></div>`:'';
   const commitment=op.commitment_terms_text?`<div class="wide" data-current-commitment-profile="${esc(op.profile_id)}"><span>Commitment / payment terms</span><b>${esc(op.commitment_terms_text)}</b></div>`:'';
   const criticalDeadline=op.critical_deadline_date?`<div class="wide" data-current-critical-deadline-profile="${esc(op.profile_id)}"><span>Critical commitment date</span><b>${esc(date(op.critical_deadline_date))}${op.critical_deadline_label?` · ${esc(op.critical_deadline_label)}`:''}${op.critical_deadline_basis?` · ${esc(op.critical_deadline_basis)}`:''}</b></div>`:'';
-  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div data-current-date-profile="${esc(op.profile_id)}"><span>When</span><b>${esc(range)}</b></div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div data-current-cost-status-profile="${esc(op.profile_id)}"><span>Current cost status</span><b>${esc(opportunityCostStatusLabel(op.current_cost_status))}</b></div><div data-current-placement-status-profile="${esc(op.profile_id)}"><span>Current placement status</span><b>${esc(opportunityPlacementStatusLabel(op.current_placement_status))}</b></div><div class="wide" data-current-venue-profile="${esc(op.profile_id)}"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b>${rebookVenueDirections(op.venue_text,op.profile_id)}</div><div class="wide" data-current-placement-profile="${esc(op.profile_id)}"><span>Current booth / placement</span><b>${esc(op.current_placement_text||'No current Paradise placement is verified; confirm with organizer before booking.')}</b></div>${comparableCost}${commitment}${criticalDeadline}${op.prior_cost_text?`<div class="wide"><span>Prior cost / reference status</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide" data-current-contact-profile="${esc(op.profile_id)}"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b>${rebookContactActions(op.contact_text,op.profile_id,op.contact_email,op.contact_phone)}</div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
+  return `<div class="rebookLive"><div class="rebookLiveHead"><span>${esc(heading)}</span><b>${esc(status)}</b></div><div class="rebookLiveGrid"><div data-current-date-profile="${esc(op.profile_id)}"><span>When</span><b>${esc(range)}</b></div><div data-current-schedule-status-profile="${esc(op.profile_id)}"><span>Current schedule status</span><b>${esc(opportunityScheduleStatusLabel(op.current_schedule_status))}</b></div><div class="wide" data-current-schedule-profile="${esc(op.profile_id)}"><span>Current schedule / hours</span><b>${esc(op.current_schedule_text||'Current schedule / hours not published or verified')}</b>${rebookScheduleSource(op)}</div><div><span>Current price / terms</span><b>${esc(op.price_text||'Not published / not verified')}</b></div><div data-current-cost-status-profile="${esc(op.profile_id)}"><span>Current cost status</span><b>${esc(opportunityCostStatusLabel(op.current_cost_status))}</b></div><div data-current-placement-status-profile="${esc(op.profile_id)}"><span>Current placement status</span><b>${esc(opportunityPlacementStatusLabel(op.current_placement_status))}</b></div><div class="wide" data-current-venue-profile="${esc(op.profile_id)}"><span>Venue / address</span><b>${esc(op.venue_text||'Verify current venue with organizer')}</b>${rebookVenueDirections(op.venue_text,op.profile_id)}</div><div class="wide" data-current-placement-profile="${esc(op.profile_id)}"><span>Current booth / placement</span><b>${esc(op.current_placement_text||'No current Paradise placement is verified; confirm with organizer before booking.')}</b></div>${comparableCost}${commitment}${criticalDeadline}${op.prior_cost_text?`<div class="wide"><span>Prior cost / reference status</span><b>${esc(op.prior_cost_text)}</b></div>`:''}<div class="wide"><span>Booking window</span><b>${esc(op.booking_window_text||'Verify directly with organizer')}</b></div><div class="wide" data-current-contact-profile="${esc(op.profile_id)}"><span>Current contact</span><b>${esc(op.contact_text||'Not published')}</b>${rebookContactActions(op.contact_text,op.profile_id,op.contact_email,op.contact_phone)}</div></div>${op.notes?`<div class="rebookLiveNote">${esc(op.notes)}</div>`:''}${action}<div class="rebookLiveFoot">${checked?`Checked ${esc(checked)} · `:''}${esc(op.source_label||'Verified current source')}${op.source_url?` · <a target="_blank" rel="noopener noreferrer" href="${esc(op.source_url)}">Open current source</a>`:''}</div></div>`;
 }
 function bookingReadinessLabel(value){
   const v=String(value||'').toUpperCase();
@@ -473,7 +488,7 @@ function rangeMatch(value,band){
 }
 function catalogActiveFilterCount(){
   const f=state.catalogFilters;
-  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentCostStatus:'ALL',currentPlacementStatus:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  const defaults={profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentCostStatus:'ALL',currentPlacementStatus:'ALL',currentScheduleStatus:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
   return Object.keys(defaults).filter(k=>String(f[k])!==String(defaults[k])).length;
 }
 function currentActiveFilterCount(){
@@ -506,6 +521,7 @@ function catalogFilterSummary(){
   if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified booking cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
   if(f.currentCostStatus!=='ALL')add('currentCostStatus','Current cost status · '+opportunityCostStatusLabel(f.currentCostStatus));
   if(f.currentPlacementStatus!=='ALL')add('currentPlacementStatus','Current placement status · '+opportunityPlacementStatusLabel(f.currentPlacementStatus));
+  if(f.currentScheduleStatus!=='ALL')add('currentScheduleStatus','Current schedule status · '+opportunityScheduleStatusLabel(f.currentScheduleStatus));
   if(f.currentStatus!=='ALL')add('currentStatus','Status '+f.currentStatus);
   if(f.currentTreatment!=='ALL')add('currentTreatment',labels.currentTreatment[f.currentTreatment]||f.currentTreatment);
   if(f.confirmation!=='ALL')add('confirmation','Confirmation '+f.confirmation);
@@ -573,7 +589,7 @@ function catalogSearchText(p,current){
   ]);
   const review=p?.current_rebook_review||{};
   const opportunity=p?.current_rebook_opportunity||{};
-  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.current_placement_status,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.current_cost_status,opportunity.commitment_terms_text,opportunity.critical_deadline_date,opportunity.critical_deadline_type,opportunity.critical_deadline_label,opportunity.critical_deadline_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,opportunity.contact_name,opportunity.contact_email,opportunity.contact_phone,review.disposition,review.booking_readiness,review.outreach_contact_name,review.outreach_contact_phone,review.outreach_contact_email,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
+  return [p.canonical_event,p.profile_id,p.tier,...(p.aliases||[]),...(p.matched_mfc_ids||[]),...(p.search_terms||[]),opportunity.event_label,opportunity.venue_text,opportunity.current_placement_text,opportunity.current_placement_status,opportunity.current_schedule_text,opportunity.current_schedule_status,opportunity.current_schedule_source_label,opportunity.price_text,opportunity.prior_cost_text,opportunity.booking_cost_min,opportunity.booking_cost_max,opportunity.booking_cost_unit,opportunity.booking_cost_basis,opportunity.current_cost_status,opportunity.commitment_terms_text,opportunity.critical_deadline_date,opportunity.critical_deadline_type,opportunity.critical_deadline_label,opportunity.critical_deadline_basis,opportunity.action_label,opportunity.booking_window_text,opportunity.contact_text,opportunity.contact_name,opportunity.contact_email,opportunity.contact_phone,review.disposition,review.booking_readiness,review.outreach_contact_name,review.outreach_contact_phone,review.outreach_contact_email,review.blockers_text,review.rationale,review.next_step,review.source_label,...currentText].join(' ').toLowerCase();
 }
 function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   const current=profileCurrentShows(p),years=Array.isArray(p.history_years)?p.history_years:[],lpYears=Array.isArray(p.lp_years)?p.lp_years:[],cumulativeLpYears=Array.isArray(p.cumulative_years)?p.cumulative_years:[];
@@ -610,6 +626,10 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
   if(f.currentPlacementStatus!=='ALL'){
     const opportunity=p?.current_rebook_opportunity||null;
     if(!opportunity||String(opportunity.current_placement_status||'').toUpperCase()!==String(f.currentPlacementStatus).toUpperCase())return false;
+  }
+  if(f.currentScheduleStatus!=='ALL'){
+    const opportunity=p?.current_rebook_opportunity||null;
+    if(!opportunity||String(opportunity.current_schedule_status||'').toUpperCase()!==String(f.currentScheduleStatus).toUpperCase())return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
   if(quickView==='ALL_READY_COMMIT'&&!liveOpportunityReadinessIs(p,'READY_TO_COMMIT'))return false;
@@ -802,6 +822,7 @@ function draftCatalogFilters(){
     currentCostBand:$('#fOpportunityCostBand')?.value??state.catalogFilters.currentCostBand,
     currentCostStatus:$('#fOpportunityCostStatus')?.value??state.catalogFilters.currentCostStatus,
     currentPlacementStatus:$('#fOpportunityPlacementStatus')?.value??state.catalogFilters.currentPlacementStatus,
+    currentScheduleStatus:$('#fOpportunityScheduleStatus')?.value??state.catalogFilters.currentScheduleStatus,
     currentStatus:$('#fCurrentStatus')?.value??state.catalogFilters.currentStatus,
     currentTreatment:$('#fCurrentTreatment')?.value??state.catalogFilters.currentTreatment,
     confirmation:$('#fConfirmation')?.value??state.catalogFilters.confirmation,
@@ -865,7 +886,7 @@ function refreshContextFacetCounts(){
     ?{
       fProfileState:'profileState',fHistoryYear:'historyYear',fLpYear:'lpYear',fCumulativeLpYear:'cumulativeLpYear',fTier:'tier',fHistoryDepth:'historyDepth',
       fContact:'contact',fBooth:'booth',fCost:'cost',fCom:'com',fPerformance:'performance',fHistoryPayment:'historyPayment',fApplication:'application',fLp:'lp',fCumulativeLp:'cumulativeLp',fCoi:'coi',fWorked:'worked',
-      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fOpportunityCostBand:'currentCostBand',fOpportunityCostStatus:'currentCostStatus',fOpportunityPlacementStatus:'currentPlacementStatus',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
+      fComBand:'comBand',fLifetimeNetBand:'lifetimeNetBand',fOpportunityCostBand:'currentCostBand',fOpportunityCostStatus:'currentCostStatus',fOpportunityPlacementStatus:'currentPlacementStatus',fOpportunityScheduleStatus:'currentScheduleStatus',fCurrentEventYear:'currentEventYear',fCurrentStatus:'currentStatus',
       fCurrentTreatment:'currentTreatment',fConfirmation:'confirmation',
     }
     :{
@@ -904,7 +925,7 @@ function catalogFacetCounts(){
   const depth={'1':0,'2':0,'3':0,'5':0};
   const flagKeys=['has_contact','has_booth','has_cost','has_com','has_performance','has_payment','has_application','has_lp_performance','has_cumulative_lp_performance'];
   const flags=Object.fromEntries(flagKeys.map(k=>[k,{HAS:0,MISSING:0}]));
-  const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0},opportunityCostBand={ALL:0,UNDER500:0,'500_1000':0,'1000_2500':0,'2500_5000':0,'5000PLUS':0,MISSING:0},opportunityCostStatus={ALL:0,KNOWN_VERIFIED:0,QUOTE_REQUIRED:0,CONTRACT_REVIEW_REQUIRED:0,RECONCILE_EXISTING:0,NOT_PUBLISHED_YET:0,NEXT_CYCLE_CLOSED:0},opportunityPlacementStatus={ALL:0,ASSIGNED_VERIFIED:0,LISTED_ASSIGNMENT_UNVERIFIED:0,FLOOR_PLAN_AVAILABLE_NOT_SELECTED:0,APPLICATION_OPEN_NOT_ASSIGNED:0,CONTRACT_REQUEST_NOT_ASSIGNED:0,SPONSORSHIP_PLACEMENT_UNVERIFIED:0,PLACEMENT_NOT_PUBLISHED:0,NEXT_CYCLE_CLOSED:0};
+  const coi={HAS:0,NO:0,UNKNOWN:0},worked={HAS:0,MISSING:0},comBand={UNDER5:0,'5_10':0,'10_15':0,'15_25':0,'25PLUS':0},lifeBand={UNDER25K:0,'25_100K':0,'100_250K':0,'250KPLUS':0},opportunityCostBand={ALL:0,UNDER500:0,'500_1000':0,'1000_2500':0,'2500_5000':0,'5000PLUS':0,MISSING:0},opportunityCostStatus={ALL:0,KNOWN_VERIFIED:0,QUOTE_REQUIRED:0,CONTRACT_REVIEW_REQUIRED:0,RECONCILE_EXISTING:0,NOT_PUBLISHED_YET:0,NEXT_CYCLE_CLOSED:0},opportunityPlacementStatus={ALL:0,ASSIGNED_VERIFIED:0,LISTED_ASSIGNMENT_UNVERIFIED:0,FLOOR_PLAN_AVAILABLE_NOT_SELECTED:0,APPLICATION_OPEN_NOT_ASSIGNED:0,CONTRACT_REQUEST_NOT_ASSIGNED:0,SPONSORSHIP_PLACEMENT_UNVERIFIED:0,PLACEMENT_NOT_PUBLISHED:0,NEXT_CYCLE_CLOSED:0},opportunityScheduleStatus={ALL:0,VERIFIED_CURRENT:0,NOT_PUBLISHED_YET:0,CURRENT_SOURCE_HOURS_NOT_RECOVERED:0,SOURCE_CONFLICT_REQUIRES_CONFIRMATION:0};
   for(const p of profiles){
     const current=currentByProfile.get(p.profile_id)||[];
     const hist=Number(p.history_count||0);
@@ -949,6 +970,9 @@ function catalogFacetCounts(){
       opportunityPlacementStatus.ALL++;
       const placementStatus=String(liveOpportunity.current_placement_status||'').toUpperCase();
       if(placementStatus in opportunityPlacementStatus)opportunityPlacementStatus[placementStatus]++;
+      opportunityScheduleStatus.ALL++;
+      const scheduleStatus=String(liveOpportunity.current_schedule_status||'').toUpperCase();
+      if(scheduleStatus in opportunityScheduleStatus)opportunityScheduleStatus[scheduleStatus]++;
       const entry=opportunityCostNumber(liveOpportunity,'booking_cost_max');
       if(entry===null)opportunityCostBand.MISSING++;
       else if(entry<500)opportunityCostBand.UNDER500++;
@@ -969,7 +993,7 @@ function catalogFacetCounts(){
       if(!seenConfirm.has(cf)){seenConfirm.add(cf);confirmation[cf]=(confirmation[cf]||0)+1}
     }
   }
-  return {total:profiles.length,record,years,lpYears,cumulativeLpYears,tier,depth,flags,coi,worked,comBand,lifeBand,opportunityCostBand,opportunityCostStatus,opportunityPlacementStatus,currentYears,status,treatment,confirmation};
+  return {total:profiles.length,record,years,lpYears,cumulativeLpYears,tier,depth,flags,coi,worked,comBand,lifeBand,opportunityCostBand,opportunityCostStatus,opportunityPlacementStatus,opportunityScheduleStatus,currentYears,status,treatment,confirmation};
 }
 function currentFacetCounts(){
   const shows=state.shows;
@@ -1006,7 +1030,7 @@ function countedOptions(options,counts){
   return options.map(([value,label])=>[value,label,Number(counts?.[value]||0)]);
 }
 function defaultCatalogFilters(){
-  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentCostStatus:'ALL',currentPlacementStatus:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
+  return {profileState:'ALL',historyYear:'ALL',lpYear:'ALL',cumulativeLpYear:'ALL',tier:'ALL',historyDepth:'ALL',contact:'ANY',booth:'ANY',cost:'ANY',com:'ANY',performance:'ANY',historyPayment:'ANY',application:'ANY',lp:'ANY',cumulativeLp:'ANY',coi:'ANY',worked:'ANY',comBand:'ALL',lifetimeNetBand:'ALL',currentCostBand:'ALL',currentCostStatus:'ALL',currentPlacementStatus:'ALL',currentScheduleStatus:'ALL',currentStatus:'ALL',currentTreatment:'ALL',confirmation:'ALL',currentEventYear:'ALL'};
 }
 function defaultCurrentFilters(){
   return {status:'ALL',treatment:'ALL',eventYear:'ALL',timing:'ALL',confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY'};
@@ -1197,6 +1221,7 @@ function openShowFilters(cleanupRequest=false){
         ${filterField('Current verified booking cost (max)','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
         ${filterField('Current cost status','fOpportunityCostStatus',f.currentCostStatus,opts([['ALL','Any live-opportunity status'],['KNOWN_VERIFIED','Known verified cost'],['QUOTE_REQUIRED','Quote required'],['CONTRACT_REVIEW_REQUIRED','Review current contract'],['RECONCILE_EXISTING','Reconcile existing booking'],['NOT_PUBLISHED_YET','Not published yet'],['NEXT_CYCLE_CLOSED','Next cycle / closed']],fc.opportunityCostStatus))}
         ${filterField('Current placement status','fOpportunityPlacementStatus',f.currentPlacementStatus,opts([['ALL','Any current placement state'],['ASSIGNED_VERIFIED','Assigned / verified'],['LISTED_ASSIGNMENT_UNVERIFIED','Listed / assignment unverified'],['FLOOR_PLAN_AVAILABLE_NOT_SELECTED','Floor plan available / not selected'],['APPLICATION_OPEN_NOT_ASSIGNED','Application open / not assigned'],['CONTRACT_REQUEST_NOT_ASSIGNED','Contract / availability open / not assigned'],['SPONSORSHIP_PLACEMENT_UNVERIFIED','Sponsorship / activation placement unverified'],['PLACEMENT_NOT_PUBLISHED','Placement not published'],['NEXT_CYCLE_CLOSED','Next cycle / no current placement']],fc.opportunityPlacementStatus))}
+        ${filterField('Current schedule status','fOpportunityScheduleStatus',f.currentScheduleStatus,opts([['ALL','Any current schedule state'],['VERIFIED_CURRENT','Verified current hours'],['NOT_PUBLISHED_YET','Hours not published yet'],['CURRENT_SOURCE_HOURS_NOT_RECOVERED','Current source found / hours not recovered'],['SOURCE_CONFLICT_REQUIRES_CONFIRMATION','Official sources conflict / confirm']],fc.opportunityScheduleStatus))}
         ${filterField('Current event year','fCurrentEventYear',f.currentEventYear,opts([['ALL','Any year'],...currentYears.map(y=>[String(y),String(y)])],{ALL:fc.total,...fc.currentYears}))}
         ${filterField('Current status','fCurrentStatus',f.currentStatus,opts([['ALL','Any status'],['READY','Ready'],['RECONCILE','Reconcile'],['DATE ONLY','Date Only'],['HOLD','Hold'],['OPEN','Open']],{ALL:fc.total,...fc.status}))}
         ${filterField('Current treatment','fCurrentTreatment',f.currentTreatment,opts([['ALL','Any treatment'],['IN PLAY','In Play'],['SKIPPED','Skipped']],{ALL:fc.total,'IN PLAY':fc.treatment.IN_PLAY,SKIPPED:fc.treatment.SKIPPED}))}
