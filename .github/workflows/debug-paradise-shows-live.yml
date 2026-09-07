@@ -824,6 +824,9 @@ jobs:
           assert 'Sep. 17 cancellation-liability cutoff' in reviews['LIFE-044'].get('action_timing',''), reviews['LIFE-044']
           assert 'Tropicana Field 2024' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
           assert 'Oct. 11-12' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
+          assert reviews['LIFE-044'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps'), reviews['LIFE-044']
+          assert 'Jul. 14 and Aug. 6 current organizer emails with the same brochure/participation packet' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
+          assert 'require Dave/organizer response rather than more internal searching' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
           assert reviews['LIFE-044'].get('action_timing','').startswith('NOW'), reviews['LIFE-044']
           assert reviews['LIFE-017'].get('action_timing','').startswith('NOW'), reviews['LIFE-017']
           assert '$332,163' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
@@ -838,6 +841,8 @@ jobs:
           assert 'limited first block' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert '#18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'does not prove #18 was best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert reviews['LIFE-007'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for any existing 2026-27 Paradise acceptance or placement record'), reviews['LIFE-007']
+          assert 'application-submission/organizer-response gap, not a hidden internal-data gap' in reviews['LIFE-007'].get('notes',''), reviews['LIFE-007']
           assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
           assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
           assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
@@ -875,6 +880,8 @@ jobs:
           assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
           assert '$100 weekend test' in reviews['LIFE-046'].get('action_timing',''), reviews['LIFE-046']
           assert '$219,783' in reviews['LIFE-046'].get('rationale',''), reviews['LIFE-046']
+          assert reviews['LIFE-046'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for Paradise-specific current availability and product acceptance'), reviews['LIFE-046']
+          assert 'remaining blocker is organizer response' in reviews['LIFE-046'].get('notes',''), reviews['LIFE-046']
           assert reviews['HIST-234'].get('disposition')=='WATCH' and 'waitlist' in reviews['HIST-234'].get('action_timing','').lower(), reviews['HIST-234']
           assert '$25,000' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
           assert 'mixed LIFE-061' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
@@ -895,6 +902,8 @@ jobs:
           assert 'no prior booth number is defensibly recoverable' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
           assert 'GMAIL:192bf9f865027f7b' in reviews['LIFE-054'].get('source_ref',''), reviews['LIFE-054']
           assert 'direct POTTC 2024 Level 2 approval' in reviews['LIFE-054'].get('source_label',''), reviews['LIFE-054']
+          assert reviews['LIFE-054'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record'), reviews['LIFE-054']
+          assert 'requires Paradise application submission and POTTC response' in reviews['LIFE-054'].get('notes',''), reviews['LIFE-054']
           assert reviews['LIFE-018'].get('disposition')=='PURSUE' and reviews['LIFE-018'].get('action_timing','').startswith('NOW'), reviews['LIFE-018']
           assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert 'organizer-response/direct-download blocker, not an internal-search blocker' in reviews['LIFE-018'].get('notes',''), reviews['LIFE-018']
@@ -3078,7 +3087,7 @@ jobs:
           assert 'Commitment: Verified current' in manatee
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in manatee
           assert 'data-live-compare-next-step-profile="LIFE-044"' in manatee
-          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in manatee
+          assert 'Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps — contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in manatee
           assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
           assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
@@ -3126,6 +3135,8 @@ jobs:
           assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           rpb=row('LIFE-007')
+          assert 'data-live-compare-next-step-profile="LIFE-007"' in rpb
+          assert 'Research exhausted as of Sep. 7, 2026 for any existing 2026-27 Paradise acceptance or placement record — apply now under the published Corporate category for a limited first block of 2026-27 Saturdays instead of the full season; the decision-safe current rate is $65/$75 per Saturday.' in rpb
           assert 'LP-attributed specific: #18 outside popup · 2021 · Nov-6 · 4 LP closes · $57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' in rpb
           miami=row('LIFE-013')
           assert 'data-live-compare-next-step-profile="LIFE-013"' in miami
@@ -3139,7 +3150,12 @@ jobs:
           for pid in ('LIFE-054','LIFE-092'):
               assert 'LP-attributed specific:' not in row(pid), (pid,row(pid))
               assert 'LP-attributed placement type:' not in row(pid), (pid,row(pid))
+          winter=row('LIFE-054')
+          assert 'data-live-compare-next-step-profile="LIFE-054"' in winter
+          assert 'Research exhausted as of Sep. 7, 2026 for any existing 2026 Paradise Winter Fest acceptance or placement record — submit the $10 2026 Winter Fest application now and disclose Paradise windows/doors services exactly.' in winter
           gun=row('LIFE-046')
+          assert 'data-live-compare-next-step-profile="LIFE-046"' in gun
+          assert 'Research exhausted as of Sep. 7, 2026 for Paradise-specific current availability and product acceptance — call Sport Show Specialists now at 321-777-7455 and ask whether an Oct. 10-11 West Palm indoor table remains available.' in gun
           assert 'Latest: 2017 · 0 issued · 0 demos · Best: 2017 · 6 issued · 5 demos' in gun
           clam=row('LIFE-077')
           assert 'Outcome-linked placement note: Tent display required — exact booth/location not stated · 2025 · 0 net sales · $0 net · 8 issued · 3 demos' in clam
@@ -3200,7 +3216,7 @@ jobs:
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in row
           assert 'data-label="Next step"' in row
           assert 'data-live-compare-next-step-profile="LIFE-044"' in row
-          assert 'Contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in row
+          assert 'Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps — contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
