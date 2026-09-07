@@ -1801,17 +1801,32 @@ jobs:
               'LIFE-014':'No current new-booking commitment is available — 2025-26 and 2026-27 applications are closed · next vendor application process opens March 2027 · 2027-28 Paradise eligibility, fee, payment, cancellation and placement terms are not yet published and must be verified when the next cycle opens.',
               'LIFE-033':'Fall 2026 commitment remains RECONCILE_EXISTING because Paradise is publicly listed but no fall-specific signed contract/invoice was recovered. The recovered multi-year clause belongs to the spring Pembroke lineage and does not by itself establish the fall occurrence. ACS confirmed Aug. 31, 2026 that Paradise may enter new contracts, new contracts must be paid in full upon signing, and there are no account credits. Obtain one written fall-specific ACS statement showing whether a contract exists, exact total price, amounts paid/due, payment deadline, cancellation/refund terms, COI and utilities before any additional payment.',
               'LIFE-018':'Organizer currently links a 2027 exhibitor contract and floor plan, but Paradise-specific price, deposit/balance schedule, cancellation/refund terms, COI and utility/furnishing charges have not been verified in recovered current evidence · obtain/read the current contract and quote before signing or paying.',
-              'LIFE-030':'2027 sponsorships are open and start at $750, but the booth-enabled Paradise package is custom and no 2027 payment deadline, deposit, cancellation/refund or COI terms are published on the verified sponsorship page · obtain the sponsor agreement/deck for the selected booth-bearing package before commitment.',
               'LIFE-060':'2027 fair dates are published, but the 2027 commercial-vendor application/agreement and its price, deposit/payment, cancellation/refund, COI and placement terms are not yet published on the verified fair site · do not carry forward the 2025 vendor agreement; request the 2027 package before commitment.',
-              'LIFE-076':'2027 tournament dates and hospitality inquiry paths are live, but no Paradise-specific lead-generation activation agreement, price, payment schedule, cancellation terms, exclusivity or COI requirements are publicly published · request the current PGA TOUR partnership proposal and do not treat hospitality purchase terms as exhibit/activation terms.',
               'LIFE-013':'2027 vendor applications are live and indoor commercial spaces are offered, but Paradise-specific commercial-space price, deposit/payment schedule, application deadline, cancellation/refund, COI and add-on terms are not published on the verified vendor page · obtain the 2027 commercial rate sheet/application agreement from Sylvia before committing.',
-              'LIFE-092':'The live 2026 Business Vendor interest form requires acceptance of Terms & Conditions, but its linked terms are materially stale: they still state $8 gated admission, 2019 setup dates, $500/$600 booth pricing and Sunday 8 PM, conflicting with the current 2026 free-admission page, $675 Retail / $1,000 Business Vendor fees and Sunday 7 PM. Treat those old payment/refund/setup clauses as non-current. Obtain the current 2026 agreement and confirm application acceptance, payment/refund obligations, Business Vendor footprint/inclusions and placement before paying or signing.',
               'LIFE-112':'The 2027 application does not guarantee space. It requires an authorized-agent signature and agreement to comply with current Fair vendor rules/regulations. Current contract acceptance, deposit/payment schedule, cancellation/refund terms and final electrical charges are not stated in the recovered application and must be verified before Paradise makes a payment or final commitment.',
           }
-          assert len(expected_commitment_terms)==18, expected_commitment_terms
+          assert len(expected_commitment_terms)==15, expected_commitment_terms
           for pid,terms in expected_commitment_terms.items():
               assert live[pid].get('commitment_terms_text')==terms, (pid,live[pid])
-          assert set(expected_commitment_terms)==set(live), (set(expected_commitment_terms),set(live))
+          assert (set(expected_commitment_terms)|{'LIFE-030','LIFE-076','LIFE-092'})==set(live), (set(expected_commitment_terms),set(live))
+          artigras_terms=live['LIFE-030'].get('commitment_terms_text','')
+          assert '2027 sponsorships are open and start at $750' in artigras_terms, live['LIFE-030']
+          assert 'Presidential Sponsor as the booth-hosting tier' in artigras_terms, live['LIFE-030']
+          assert 'Presidential/custom booth-bearing price' in artigras_terms, live['LIFE-030']
+          assert 'payment deadline, deposit, cancellation/refund, COI and operating terms' in artigras_terms, live['LIFE-030']
+          assert 'current written sponsor agreement/deck before commitment' in artigras_terms, live['LIFE-030']
+          cognizant_terms=live['LIFE-076'].get('commitment_terms_text','')
+          assert '2027 tournament dates are verified' in cognizant_terms, live['LIFE-076']
+          assert 'consumer activation agreement, category rights, price, payment schedule, cancellation terms, exclusivity or COI requirements' in cognizant_terms, live['LIFE-076']
+          assert 'Wright' in cognizant_terms and 'category clearance/exclusivity status' in cognizant_terms, live['LIFE-076']
+          assert 'Do not treat hospitality purchase terms as exhibit/activation terms' in cognizant_terms, live['LIFE-076']
+          feast_terms=live['LIFE-092'].get('commitment_terms_text','')
+          assert 'requires both acceptance of Terms & Conditions and a signature' in feast_terms, live['LIFE-092']
+          assert '17th Annual/2019 event' in feast_terms, live['LIFE-092']
+          assert '$8 gated admission' in feast_terms and '$500/$600 10x10 pricing' in feast_terms, live['LIFE-092']
+          assert 'current 2026 free-admission page' in feast_terms and '$675 Retail / $1,000 Business Vendor fees' in feast_terms, live['LIFE-092']
+          assert 'acceptance constitutes a binding agreement' in feast_terms, live['LIFE-092']
+          assert 'Do not sign/submit the current Business Vendor interest form until VIA supplies a current 2026 agreement' in feast_terms, live['LIFE-092']
           for pid,op in live.items():
               assert str(op.get('commitment_terms_text') or '').strip(), (pid,op)
           expected_critical_deadlines={
