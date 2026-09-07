@@ -404,6 +404,14 @@ jobs:
               grep -q 'bookingTiming' /tmp/app-shows.js
               grep -q 'When to act' /tmp/app-shows.js
               grep -q 'best_observed_specific_booth' /tmp/app-shows.js
+              grep -q 'lpAttributedSpecificPlacementSummary' /tmp/app-shows.js
+              grep -q 'best_lp_attributed_specific_booth' /tmp/app-shows.js
+              grep -q 'data-lp-attributed-placement-profile' /tmp/app-shows.js
+              grep -q 'LP-attributed placement evidence' /tmp/app-shows.js
+              grep -q 'LP-attributed specific:' /tmp/app-shows.js
+              grep -q 'annual LP attribution · not attendance proof' /tmp/app-shows.js
+              grep -q 'not same-row history performance and not proof Paradise attended/worked that placement' /tmp/app-shows.js
+              grep -q 'LP-attributed placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/app-shows.js
               grep -q 'No preserved booth / placement is available for this profile' /tmp/app-shows.js
               grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/app-shows.js
               grep -q 'correlation only' /tmp/app-modals.js
@@ -968,6 +976,35 @@ jobs:
           assert vero_outcome.get('latest_observed_outcome_participation_status')=='2025 EVENT RECORD', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth')=='Booth #52', vero_outcome
           assert vero_outcome.get('best_observed_specific_booth_year')==2025, vero_outcome
+          lp_semantics='Annual LeadPerfection performance attribution matched one-to-one to a date-aligned preserved history occurrence with a specific placement; not attendance proof and not same-row history performance.'
+          expected_lp_specific={
+              'LIFE-007':('#18 outside popup',2021,'Nov-6',4,4,4,57043,'2021-SCH21-0127',17),
+              'LIFE-009':('66 (10x10)',2022,'Jan-15 Jan-16',38,15,4,110038,'2022-SCH22-0005',1),
+              'LIFE-013':('705 & 706 (10x20)',2021,'Nov-18 thru Dec-5',62,19,4,80100,'2021-SCH21-0136',1),
+              'LIFE-018':('131 - 10x12',2021,'Nov-6 Nov-7',16,7,4,96238,'2021-SCH21-0129',1),
+              'LIFE-030':('S204 (10x10)',2022,'Feb-19 Feb-20',11,8,1,38482,'2022-SCH22-0023',1),
+          }
+          actual_lp_specific={pid for pid in expected_live if profiles[pid].get('best_lp_attributed_specific_booth')}
+          assert actual_lp_specific==set(expected_lp_specific), (actual_lp_specific,expected_lp_specific)
+          for pid,(booth,year,dates,issued,demos,sales,volume,history_id,count) in expected_lp_specific.items():
+              p=profiles[pid]
+              assert p.get('best_lp_attributed_specific_booth')==booth, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_year')==year, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_dates')==dates, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_issued')==issued, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_demos')==demos, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_sales')==sales, (pid,p)
+              assert float(p.get('best_lp_attributed_specific_booth_volume'))==volume, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_history_id')==history_id, (pid,p)
+              assert p.get('lp_attributed_specific_placement_count')==count, (pid,p)
+              assert p.get('best_lp_attributed_specific_booth_metrics_scope')=='ANNUAL_MARKETING_SUBSOURCE_ROW', (pid,p)
+              assert 'NOT ATTENDANCE PROOF' in str(p.get('best_lp_attributed_specific_booth_verification_status') or '').upper(), (pid,p)
+              assert p.get('lp_attributed_placement_semantics')==lp_semantics, (pid,p)
+          for pid in ('LIFE-014','LIFE-054','LIFE-092'):
+              p=profiles[pid]
+              assert p.get('best_lp_attributed_specific_booth') is None, (pid,p)
+              assert p.get('lp_attributed_specific_placement_count')==0, (pid,p)
+              assert p.get('lp_attributed_placement_semantics')==lp_semantics, (pid,p)
           gun_outcome=profiles['LIFE-046']
           assert gun_outcome.get('latest_observed_outcome_dates')=='2017-12-16 – 2017-12-17', gun_outcome
           assert gun_outcome.get('latest_observed_outcome_issued')==0, gun_outcome
@@ -2898,6 +2935,8 @@ jobs:
           test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
+          test "$(grep -o 'LP-attributed specific:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 5
+          grep -q 'LP-attributed placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/shows.html
           grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
           grep -q 'Best history:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
@@ -2955,14 +2994,24 @@ jobs:
           assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
+          assert 'LP-attributed specific: 66 (10x10) · 2022 · Jan-15 Jan-16 · 4 LP closes · $110,038 LP close volume · 38 issued · 15 demos · annual LP attribution · not attendance proof' in vero
           assert 'data-live-compare-evidence-profile="LIFE-009"' in vero
           assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
           martin=row('LIFE-018')
           assert '2017 · 23 issued' in martin
+          assert 'LP-attributed specific: 131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · $96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' in martin
           assert 'data-live-compare-next-step-profile="LIFE-018"' in martin
           assert 'Contact Jackielou now and request the current 2027 contract plus floor plan as a direct file/quote.' in martin
           assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
           assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
+          rpb=row('LIFE-007')
+          assert 'LP-attributed specific: #18 outside popup · 2021 · Nov-6 · 4 LP closes · $57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' in rpb
+          miami=row('LIFE-013')
+          assert 'LP-attributed specific: 705 & 706 (10x20) · 2021 · Nov-18 thru Dec-5 · 4 LP closes · $80,100 LP close volume · 62 issued · 19 demos · annual LP attribution · not attendance proof' in miami
+          artigras=row('LIFE-030')
+          assert 'LP-attributed specific: S204 (10x10) · 2022 · Feb-19 Feb-20 · 1 LP close · $38,482 LP close volume · 11 issued · 8 demos · annual LP attribution · not attendance proof' in artigras
+          for pid in ('LIFE-014','LIFE-054','LIFE-092'):
+              assert 'LP-attributed specific:' not in row(pid), (pid,row(pid))
           gun=row('LIFE-046')
           assert 'Latest: 2017 · 0 issued · 0 demos · Best: 2017 · 6 issued · 5 demos' in gun
           clam=row('LIFE-077')
@@ -2997,6 +3046,7 @@ jobs:
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'LP-attributed specific:' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 5
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
@@ -3202,6 +3252,10 @@ jobs:
           grep -q 'Pre-booking action required' /tmp/feast_little_italy.html
           grep -q '>Open Business Vendor interest form<' /tmp/feast_little_italy.html
           grep -q 'feastoflittleitaly.com/vendor-info' /tmp/feast_little_italy.html
+          if grep -q 'data-lp-attributed-placement-profile="LIFE-092"' /tmp/feast_little_italy.html; then
+            echo "::error::Feast generic assigned-at-setup placement was mislabeled as LP-attributed specific"
+            exit 1
+          fi
 
           render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rpb_green_market_placement.html
@@ -3224,6 +3278,10 @@ jobs:
           grep -q 'data-historical-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
           grep -q '2022 · Feb-19' /tmp/rpb_green_market_placement.html
+          grep -q 'data-lp-attributed-placement-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'LP-attributed placement evidence' /tmp/rpb_green_market_placement.html
+          grep -q '#18 outside popup · 2021 · Nov-6 · 4 LP closes · \$57,043 LP close volume · 4 issued · 4 demos · annual LP attribution · not attendance proof' /tmp/rpb_green_market_placement.html
+          grep -q 'not same-row history performance and not proof Paradise attended/worked that placement' /tmp/rpb_green_market_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
           grep -q '>Open 2026-27 vendor application<' /tmp/rpb_green_market_placement.html
           grep -q 'form.jotform.com/261054512266148' /tmp/rpb_green_market_placement.html
@@ -3254,6 +3312,8 @@ jobs:
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
           grep -q '2021 · Nov-6 Nov-7' /tmp/martin_home_placement.html
+          grep -q 'data-lp-attributed-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
+          grep -q '131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · \$96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' /tmp/martin_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/martin_home_placement.html
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
@@ -3704,6 +3764,10 @@ jobs:
           grep -q 'No early pack-up is allowed' /tmp/winterfest_detail.html
           grep -q 'Still needed before booking' /tmp/winterfest_detail.html
           grep -q 'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement' /tmp/winterfest_detail.html
+          if grep -q 'data-lp-attributed-placement-profile="LIFE-054"' /tmp/winterfest_detail.html; then
+            echo "::error::Winter Fest assigned-at-setup placement was mislabeled as LP-attributed specific"
+            exit 1
+          fi
 
           render_view sebastian_clambake_detail "$SITE/#show/LIFE-077"
           grep -q 'Sebastian Clambake' /tmp/sebastian_clambake_detail.html
