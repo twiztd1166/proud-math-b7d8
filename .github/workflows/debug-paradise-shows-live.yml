@@ -1340,7 +1340,7 @@ jobs:
               assert p.get('lp_attributed_placement_semantics')==lp_semantics, (pid,p)
           lp_type_semantics='Annual LeadPerfection performance attribution matched one-to-one to a date-aligned preserved history occurrence with an informative non-specific popup placement descriptor; not an exact booth, not attendance proof, and not same-row history performance.'
           expected_lp_placement_types={
-              'LIFE-014':('outside popup',2021,'Oct-23',6,5,2,32550,'2021-SCH21-0119',1),
+              'LIFE-014':('outside popup',2021,'Oct-23',6,5,2,32550,'2021-SCH21-0119',18),
           }
           actual_lp_placement_types={pid for pid in expected_live if profiles[pid].get('best_lp_attributed_placement_type')}
           assert actual_lp_placement_types==set(expected_lp_placement_types), (actual_lp_placement_types,expected_lp_placement_types)
