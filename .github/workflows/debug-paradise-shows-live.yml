@@ -2068,7 +2068,7 @@ jobs:
               2023:['contact','cost','payment'],
               2024:['cost','payment','application'],
               2025:['contact','booth','cost','com','performance'],
-              2026:['contact','payment'],
+              2026:['contact','booth','payment'],
           }
           expected_queue={2014:0,2015:0,2016:0,2017:0,2018:0,2019:0,2020:0,2021:0,2022:0,2023:0,2024:0,2025:0,2026:0}
           for year,expected in expected_union_support.items():
