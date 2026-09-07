@@ -687,7 +687,7 @@ jobs:
                   assert not review.get('blockers_text'), (pid,review)
 
           expected_historical_review_sources={
-              'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','no current official Events/pop-up page or future Paradise-style date recovered as of 2026-09-07'),
+              'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','WEB palmbeachliquor.com/events route indexed but no current dated event/pop-up content recovered'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo 2026 vendor package + City 2024 registration-timing precedent','official Feb.16/Mar.15/Apr.1/May.3 2024 vendor-outreach notices'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Direct DLF/Paradise 2024-2026 Safety Festival correspondence + official 2026 vendor agreement/site + Paradise history','GMAIL:1935453a8f4b0e19;GMAIL:19c765115e9e2375;GMAIL:19dac1371ec57cf3'),
           }
@@ -724,7 +724,8 @@ jobs:
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_SERIES_DATE_UNVERIFIED')==0
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='NEXT_CYCLE_NOT_PUBLISHED')==2
           assert 'not a verified scheduled show' in reviews['LIFE-028'].get('outreach_cycle_text','')
-          assert 'no current official Events/pop-up page' in reviews['LIFE-028'].get('outreach_cycle_text','')
+          assert '/events route is still indexed' in reviews['LIFE-028'].get('outreach_cycle_text','')
+          assert 'no current dated event/pop-up content' in reviews['LIFE-028'].get('outreach_cycle_text','')
           assert reviews['LIFE-028'].get('outreach_cycle_source_url')=='https://palmbeachliquor.com/', reviews['LIFE-028']
           assert reviews['LIFE-028'].get('outreach_cycle_source_label')=='Current Palm Beach Liquors official storefront + 2026 app/license evidence', reviews['LIFE-028']
           assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
@@ -3229,7 +3230,9 @@ jobs:
             echo 'Historical-only LIFE-028 incorrectly rendered governed live booking readiness'
             exit 1
           fi
-          grep -q 'did not recover a current official Events/pop-up page or any future Paradise-style activation date' /tmp/palm_liquors_pursue.html
+          grep -q '/events route is still indexed' /tmp/palm_liquors_pursue.html
+          grep -q 'no current dated event/pop-up content' /tmp/palm_liquors_pursue.html
+          grep -q 'Do not describe the route as a current event calendar' /tmp/palm_liquors_pursue.html
           grep -q 'href="https://palmbeachliquor.com/"' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
 
