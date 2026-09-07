@@ -386,10 +386,13 @@ function liveComparisonOutcome(p){
   return 'Outcome evidence not classified';
 }
 function liveComparisonPlacement(p){
-  if(historicalPlacementValue(p?.best_observed_specific_booth))return String(p.best_observed_specific_booth)+(p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'');
-  if(historicalPlacementValue(p?.best_observed_booth))return String(p.best_observed_booth)+(p.best_observed_booth_year?' · '+p.best_observed_booth_year:'');
-  if(historicalPlacementValue(p?.latest_preserved_booth))return String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
-  return 'No preserved booth';
+  const op=p?.current_rebook_opportunity||{};
+  const current='Current: '+opportunityPlacementStatusLabel(op.current_placement_status);
+  let historical='No preserved booth';
+  if(historicalPlacementValue(p?.best_observed_specific_booth))historical=String(p.best_observed_specific_booth)+(p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'');
+  else if(historicalPlacementValue(p?.best_observed_booth))historical=String(p.best_observed_booth)+(p.best_observed_booth_year?' · '+p.best_observed_booth_year:'');
+  else if(historicalPlacementValue(p?.latest_preserved_booth))historical=String(p.latest_preserved_booth)+(p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'');
+  return current+' · Best history: '+historical;
 }
 function liveDecisionCompareBoard(profiles,open=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
@@ -409,20 +412,22 @@ function liveDecisionCompareBoard(profiles,open=false){
     const readiness=bookingReadinessLabel(review.booking_readiness);
     const timing=String(review.action_timing||'Verify timing').trim();
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
       <td><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
       <td><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
       <td>${esc(liveComparisonDate(op))}</td>
       <td>${esc(cost)}</td>
       <td>${esc(liveComparisonOutcome(p))}</td>
-      <td>${esc(liveComparisonPlacement(p))}</td>
+      <td data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
       <td>${esc(readiness)}</td>
       <td>${esc(timing)}</td>
+      <td>${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · best placement · readiness · timing</small></summary>
-    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Current cost</th><th>Historical outcome</th><th>Best booth / placement</th><th>Readiness</th><th>When to act</th></tr></thead><tbody>${body}</tbody></table></div>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · current + best placement · readiness · timing · direct action</small></summary>
+    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Current cost</th><th>Historical outcome</th><th>Placement</th><th>Readiness</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. They do not convert LeadPerfection attribution or booking records into attendance proof.</div>
   </details>`;
 }
