@@ -3436,7 +3436,8 @@ jobs:
           grep -q 'LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/shows.html
           grep -q 'LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth' /tmp/shows.html
           grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
-          grep -q 'Best history:' /tmp/shows.html
+          grep -q 'Best outcome-linked specific:' /tmp/shows.html
+          grep -q 'Latest preserved placement:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
           grep -q 'class="liveCompareAction"' /tmp/shows.html
           python - <<'PY'
