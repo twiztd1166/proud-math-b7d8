@@ -275,11 +275,33 @@ function historicalPlacementValue(value){
   const text=String(value||'').trim();
   return !text||/^(?:n\/a|na|none|unknown|tbd|tba|—|-)$/i.test(text)?'':text;
 }
+function lpAttributedSpecificPlacementSummary(p){
+  const placement=historicalPlacementValue(p?.best_lp_attributed_specific_booth);
+  if(!placement)return '';
+  const bits=[placement];
+  if(p?.best_lp_attributed_specific_booth_year)bits.push(String(p.best_lp_attributed_specific_booth_year));
+  const dates=String(p?.best_lp_attributed_specific_booth_dates||'').trim();
+  if(dates)bits.push(dates);
+  const sales=p?.best_lp_attributed_specific_booth_sales;
+  const volume=p?.best_lp_attributed_specific_booth_volume;
+  const issued=p?.best_lp_attributed_specific_booth_issued;
+  const demos=p?.best_lp_attributed_specific_booth_demos;
+  if(sales!==null&&sales!==undefined&&String(sales)!=='')bits.push(String(sales)+' LP close'+(Number(sales)===1?'':'s'));
+  if(volume!==null&&volume!==undefined&&String(volume)!=='')bits.push(money(volume)+' LP close volume');
+  if(issued!==null&&issued!==undefined&&String(issued)!=='')bits.push(String(issued)+' issued');
+  if(demos!==null&&demos!==undefined&&String(demos)!=='')bits.push(String(demos)+' demos');
+  bits.push('annual LP attribution · not attendance proof');
+  return bits.join(' · ');
+}
 function historicalPlacementGuide(p){
   if(!p?.current_rebook_opportunity)return '';
   const specific=historicalPlacementValue(p.best_observed_specific_booth);
   const latest=historicalPlacementValue(p.latest_preserved_booth);
-  if(!specific&&!latest)return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>No preserved booth / placement is available for this profile. Do not infer a booth from same-market, same-venue, or unrelated-series history — verify the current floor plan, booth numbering, and availability with the organizer before booking.</b></div>`;
+  const lpAttributed=lpAttributedSpecificPlacementSummary(p);
+  const lpHtml=lpAttributed
+    ?`<div class="rebookContext" data-lp-attributed-placement-profile="${esc(p.profile_id)}"><span>LP-attributed placement evidence</span><b>${esc(lpAttributed)} · One-to-one date-aligned attribution to a preserved history occurrence; not same-row history performance and not proof Paradise attended/worked that placement.</b></div>`
+    :'';
+  if(!specific&&!latest)return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>No preserved booth / placement is available for this profile. Do not infer a booth from same-market, same-venue, or unrelated-series history — verify the current floor plan, booth numbering, and availability with the organizer before booking.</b></div>${lpHtml}`;
   let placement='';
   const outcome=[];
   if(specific){
@@ -294,7 +316,7 @@ function historicalPlacementGuide(p){
       .filter(v=>v!==null&&v!==undefined&&String(v).trim()).join(' · ');
     placement=`Latest preserved placement: ${esc(latest)}${when?` (${esc(when)})`:''}`;
   }
-  return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>`;
+  return `<div class="rebookContext" data-historical-placement-profile="${esc(p.profile_id)}"><span>Historical placement guide</span><b>${placement}${outcome.length?' · '+outcome.join(' · '):''} · Historical reference only — verify current floor plan / booth numbering / availability before booking.</b></div>${lpHtml}`;
 }
 function reviewedDecisionEvidenceTarget(p){
   return Boolean(p?.current_rebook_opportunity)||historicalOutreachCandidate(p);
@@ -441,21 +463,23 @@ function liveComparisonPlacement(p){
   const specific=historicalPlacementValue(p?.best_observed_specific_booth);
   const outcomePlacement=historicalPlacementValue(p?.best_observed_booth);
   const latest=historicalPlacementValue(p?.latest_preserved_booth);
+  let base='';
   if(specific){
     const metrics=liveComparisonPlacementMetrics(p,'best_observed_specific_booth');
     const when=p.best_observed_specific_booth_year?' · '+p.best_observed_specific_booth_year:'';
-    return current+' · Best outcome-linked specific: '+specific+when+(metrics?' · '+metrics:'');
-  }
-  if(outcomePlacement){
+    base=current+' · Best outcome-linked specific: '+specific+when+(metrics?' · '+metrics:'');
+  }else if(outcomePlacement){
     const metrics=liveComparisonPlacementMetrics(p,'best_observed_booth');
     const when=p.best_observed_booth_year?' · '+p.best_observed_booth_year:'';
-    return current+' · Outcome-linked placement note: '+outcomePlacement+when+(metrics?' · '+metrics:'');
-  }
-  if(latest){
+    base=current+' · Outcome-linked placement note: '+outcomePlacement+when+(metrics?' · '+metrics:'');
+  }else if(latest){
     const when=p.latest_preserved_booth_year?' · '+p.latest_preserved_booth_year:'';
-    return current+' · Latest preserved placement: '+latest+when+' · no same-row outcome';
+    base=current+' · Latest preserved placement: '+latest+when+' · no same-row outcome';
+  }else{
+    base=current+' · No preserved booth / placement';
   }
-  return current+' · No preserved booth / placement';
+  const lpAttributed=lpAttributedSpecificPlacementSummary(p);
+  return lpAttributed?base+' · LP-attributed specific: '+lpAttributed:base;
 }
 function liveComparisonDeadline(op){
   if(!op?.critical_deadline_date)return 'No verified hard deadline';
@@ -518,7 +542,7 @@ function liveDecisionCompareBoard(profiles,open=false){
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
     <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision + governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline · timing · governed next step · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. LP-attributed placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
 }
 function catalogCard(p){
