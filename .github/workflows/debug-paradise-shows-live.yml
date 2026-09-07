@@ -1476,7 +1476,6 @@ jobs:
               'LIFE-046':'No Oct. 10-11 West Palm inside-table location is verified. West Palm uses indoor 8 ft x 2.5 ft tables; the promoter publishes 10x10 outside spaces only for DeLand. Confirm the exact inside table/location and whether Paradise windows/doors marketing is accepted before booking the $100 weekend test.',
               'HIST-234':'No Paradise 2026 commercial footprint/location is verified. The general Vendor Village is sold out/waitlist and show management reserves the right to change requested booth locations for logistics/category conflicts. First confirm whether Paradise is eligible for the standard Vendor Village; if not, obtain the exact commercial sponsorship footprint/location before committing.',
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
-              'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but no Oct. 31-Nov. 1 booth assignment was recovered. Spring Booth 106 (2026) and Booth 428 (2023) are prior-occurrence references only. Obtain the fall-specific signed contract/account statement and exact live booth before any new payment or staffing decision.',
               'LIFE-077':'The current official 2026 Vendor Information rules say booth space is assigned upon arrival, no location changes are allowed, and registration is not refunded because a vendor dislikes the assigned site. Therefore Paradise cannot require a preselected exact normal-vendor booth as a condition of booking. Historical 2025 organizer instructions said paid/pre-registered vendors were placed first and then directed to the next available space around Riverview Park; treat that only as prior-year operating precedent, not a 2026 placement guarantee. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but no exact current location is verified.',
               'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
@@ -1491,9 +1490,16 @@ jobs:
               'LIFE-092':'No 2026 Paradise booth/location is assigned or verified. Ask VIA for the available Business Vendor map/placement and request a high-traffic service-vendor location. The 2021 Paradise record says assigned at setup and does not establish a reusable current booth number.',
               'LIFE-112':'No current Paradise space is assigned. The official 2027 vendor page says there is no inside commercial vendor space, so any Paradise activation must use accepted outside commercial space. Historical 2025 evidence records “Main line to the right — 10×10” with a same-row outcome of 1 net sale / $47,000 net / 13 issued / 7 demos on a $700 fair fee. Use that only as a placement reference: request a comparable high-flow outside location if available, but verify the current map, assignment and traffic pattern and do not call the 2025 location proven best.',
           }
-          assert set(expected_current_placements)==expected_live, (set(expected_current_placements),expected_live)
+          assert (set(expected_current_placements)|{'LIFE-044'})==expected_live, (set(expected_current_placements),expected_live)
           for pid,placement in expected_current_placements.items():
               assert live[pid].get('current_placement_text')==placement, (pid,live[pid])
+          manatee_placement=live['LIFE-044'].get('current_placement_text','')
+          assert '113 or 102' in manatee_placement, live['LIFE-044']
+          assert '702 or 201' in manatee_placement, live['LIFE-044']
+          assert 'layout preference, not proven booth-performance evidence' in manatee_placement, live['LIFE-044']
+          assert 'proof those numbers are currently available' in manatee_placement, live['LIFE-044']
+          assert 'linked Google Drive file returns 404' in manatee_placement, live['LIFE-044']
+          assert 'same-venue evidence only' in manatee_placement, live['LIFE-044']
           expected_current_placement_status={
               'HIST-234':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
               'LIFE-007':'APPLICATION_OPEN_NOT_ASSIGNED',
