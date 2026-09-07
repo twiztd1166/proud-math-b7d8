@@ -430,6 +430,12 @@ function liveComparisonDeadline(op){
   const label=String(op.critical_deadline_label||op.critical_deadline_type||'Critical deadline').replaceAll('_',' ');
   return date(op.critical_deadline_date)+' · '+label;
 }
+function liveComparisonDecisionWhy(review){
+  const text=String(review?.rationale||'').trim().replace(/\s+/g,' ');
+  if(!text)return 'Open the show for the governed rationale.';
+  const first=text.match(/^.*?[.!?](?:\s|$)/);
+  return (first?.[0]||text).trim();
+}
 function liveDecisionCompareBoard(profiles,open=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
@@ -453,9 +459,10 @@ function liveDecisionCompareBoard(profiles,open=false){
     const blockers=String(review.blockers_text||'No additional blocker text recorded').trim();
     const timing=String(review.action_timing||'Verify timing').trim();
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    const decisionWhy=liveComparisonDecisionWhy(review);
     const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
-      <td data-label="Decision"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
+      <td data-label="Decision" data-live-compare-decision-why-profile="${esc(p.profile_id)}"><div class="liveCompareDecisionCell"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span><small>${esc(decisionWhy)}</small></div></td>
       <td data-label="Show" data-live-compare-venue-profile="${esc(p.profile_id)}"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span><small>${esc(op.venue_text||'Venue / address not verified')}</small></button></td>
       <td data-label="Date">${esc(liveComparisonDate(op))}</td>
       <td data-label="Cost" data-live-compare-cost-profile="${esc(p.profile_id)}"><div class="liveCompareCost"><b>Current: ${esc(cost)}</b><span>Prior/reference: ${esc(priorCost)}</span></div></td>
@@ -469,9 +476,9 @@ function liveDecisionCompareBoard(profiles,open=false){
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness + blockers · hard deadline · timing · direct action</small></summary>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision + governed why · date · current + prior cost · historical outcome · current + best placement · contact · readiness + blockers · hard deadline · timing · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
 }
 function catalogCard(p){
