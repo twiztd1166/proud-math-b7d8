@@ -891,7 +891,7 @@ jobs:
           assert 'space can sell out earlier' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'Reassess actual 2026 leads, demos, net sales and placement quality before adding Nov. 14 or later dates' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'reassess before Nov. 14' in reviews['LIFE-007'].get('action_timing',''), reviews['LIFE-007']
-          assert 'if no approval email arrives within 14 days, contact Kathy/POTTC' in reviews['LIFE-007'].get('action_timing','').lower(), reviews['LIFE-007']
+          assert 'if no approval email arrives within 14 days, contact kathy/pottc' in reviews['LIFE-007'].get('action_timing','').lower(), reviews['LIFE-007']
           assert 'published 10-day payment deadline is not a safe wait-until date because space can sell out earlier' in reviews['LIFE-007'].get('action_timing',''), reviews['LIFE-007']
           for evidence_id in ('LP2021-101','LP2022-075','LP2022-076','LP2026-005'):
               assert ('LP:'+evidence_id) in reviews['LIFE-007'].get('source_ref',''), (evidence_id,reviews['LIFE-007'])
