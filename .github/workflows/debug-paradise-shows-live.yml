@@ -444,7 +444,6 @@ jobs:
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
           }
-          assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
           for pid,blockers in expected_live_blockers.items():
               assert reviews[pid].get('blockers_text')==blockers, (pid,reviews[pid])
           for pid,review in reviews.items():
@@ -548,6 +547,7 @@ jobs:
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
+          assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
           placement_unknown_values={'','unknown','n/a','na','none','tbd','tba','-','—'}
           def has_preserved_placement(p):
               vals=(p.get('best_observed_specific_booth'),p.get('latest_preserved_booth'))
