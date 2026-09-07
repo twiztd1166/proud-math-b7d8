@@ -988,16 +988,27 @@ jobs:
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
           assert 'current 10x20 option comparable to historical 705 & 706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert reviews['LIFE-092'].get('disposition')=='PURSUE' and reviews['LIFE-092'].get('action_timing','').startswith('NOW'), reviews['LIFE-092']
-          assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
-          assert 'call VIA at 561-427-0500' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
-          assert 'do not pay/sign' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
-          assert 'Paradise Gmail and Paradise Drive found no current 2026 Business Vendor agreement/packet' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
-          assert 'vendor-terms-conditions (materially stale 2019 agreement)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
+          assert 'call VIA at 561-427-0500 for the current 2026 Business Vendor agreement/terms before signing the live interest form' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
+          assert 'submit only after the stale 2019 linked terms are reconciled in writing' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
+          assert reviews['LIFE-092'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the missing 2026 Business Vendor agreement — do not sign or submit the current Business Vendor interest form yet because it requires Accept Terms + signature while the linked Terms & Conditions page is still the 17th Annual/2019 agreement and says acceptance constitutes a binding agreement.'), reviews['LIFE-092']
+          assert 'Call VIA at 561-427-0500 now and request the current written 2026 Business Vendor agreement or written confirmation of exactly which terms govern' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
+          assert 'Once the current terms are reconciled and acceptable, submit promptly' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
+          assert 'pre-signature VIA-response blocker' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
+          assert 'do not submit/sign or pay until VIA supplies or confirms the current governing Business Vendor terms and placement' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
+          assert 'vendor-info (2026 Business Vendor fee + embedded signed interest form)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
+          assert 'vendor-terms-conditions (materially stale 17th Annual/2019 agreement; acceptance language)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
           assert 'GMAIL:no current 2026 Feast/VIA correspondence recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
           assert 'DRIVE:no current 2026 Feast/VIA agreement or vendor packet recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
-          assert 'Paradise Gmail/Drive exhaustion' in reviews['LIFE-092'].get('source_label',''), reviews['LIFE-092']
-          assert 'current 2026 fee/date/location and the live Business Vendor interest form are verified' in live['LIFE-092'].get('notes','').lower(), live['LIFE-092']
-          assert 'no current 2026 VIA/Feast agreement or vendor packet in Paradise Gmail or Drive' in live['LIFE-092'].get('notes',''), live['LIFE-092']
+          assert 'embedded signed interest form + stale linked 2019 Terms & Conditions' in reviews['LIFE-092'].get('source_label',''), reviews['LIFE-092']
+          assert 'embedded current interest form requires Accept Terms and a signature' in live['LIFE-092'].get('notes',''), live['LIFE-092']
+          assert 'stale 2019 text that says acceptance constitutes a binding agreement' in live['LIFE-092'].get('notes',''), live['LIFE-092']
+          assert 'no current 2026 VIA/Feast Business Vendor agreement or packet in Paradise Gmail or Drive' in live['LIFE-092'].get('notes',''), live['LIFE-092']
+          assert 'requires an Accept Terms checkbox and a signature' in live['LIFE-092'].get('booking_window_text',''), live['LIFE-092']
+          assert 'acceptance constitutes a binding agreement' in live['LIFE-092'].get('booking_window_text',''), live['LIFE-092']
+          assert 'Do not submit/sign the Business Vendor form until VIA confirms in writing' in live['LIFE-092'].get('booking_window_text',''), live['LIFE-092']
+          assert 'requires both acceptance of Terms & Conditions and a signature' in live['LIFE-092'].get('commitment_terms_text',''), live['LIFE-092']
+          assert 'stale terms page also says acceptance constitutes a binding agreement' in live['LIFE-092'].get('commitment_terms_text',''), live['LIFE-092']
+          assert 'Do not sign/submit the current Business Vendor interest form until VIA supplies a current 2026 agreement or confirms in writing exactly which terms govern' in live['LIFE-092'].get('commitment_terms_text',''), live['LIFE-092']
           assert 'rheen@cityofpsl.com / 772-344-4073' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200 without power or $225 with power for a 10x8 booth with one 8 ft table and two chairs' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert reviews['LIFE-039'].get('disposition')=='PURSUE', reviews['LIFE-039']
@@ -1507,7 +1518,7 @@ jobs:
               'LIFE-076':('Open 2027 tournament / partnership site','https://thecognizantclassic.com/'),
               'LIFE-013':('Open 2027 exhibitor portal','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
               'LIFE-017':('Request / refresh 2027 Tampa contract','https://www.tampahomeshow.com/get-contract/'),
-              'LIFE-092':('Open Business Vendor interest form','https://www.feastoflittleitaly.com/vendor-info'),
+              'LIFE-092':('Open vendor page — call VIA before signing','https://www.feastoflittleitaly.com/vendor-info'),
           }
           assert set(expected_actions)==set(live), (set(expected_actions),set(live))
           for pid,(label,url) in expected_actions.items():
@@ -3190,7 +3201,7 @@ jobs:
           assert 'Still needed: Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
           assert 'Feast of Little Italy is a strong current PURSUE.' in feast
           assert 'data-live-compare-next-step-profile="LIFE-092"' in feast
-          assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet — submit the live $1,000 Business Vendor interest form now with Paradise windows/doors services stated clearly, then call VIA at 561-427-0500 for application acceptance and the current written Business Vendor agreement.' in feast
+          assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 Business Vendor agreement — do not sign or submit the current Business Vendor interest form yet because it requires Accept Terms + signature while the linked Terms & Conditions page is still the 17th Annual/2019 agreement and says acceptance constitutes a binding agreement.' in feast
           assert 'data-live-compare-evidence-profile="LIFE-092"' in feast
           assert '3 preserved history records · 3 history years · 1 explicit WORKED/ATTENDED year' in feast
           vero=row('LIFE-009')
@@ -3499,16 +3510,17 @@ jobs:
           grep -q 'current 2026 site says free admission' /tmp/feast_little_italy.html
           grep -q 'current \$675/\$1,000 vendor pricing and Sunday 7 PM' /tmp/feast_little_italy.html
           grep -q 'data-current-commitment-profile="LIFE-092"' /tmp/feast_little_italy.html
-          grep -q 'Treat those old payment/refund/setup clauses as non-current' /tmp/feast_little_italy.html
-          grep -q 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet' /tmp/feast_little_italy.html
+          grep -q 'requires both acceptance of Terms &amp; Conditions and a signature' /tmp/feast_little_italy.html
+          grep -q 'stale terms page also says acceptance constitutes a binding agreement' /tmp/feast_little_italy.html
+          grep -q 'Research exhausted as of Sep. 7, 2026 for the missing 2026 Business Vendor agreement' /tmp/feast_little_italy.html
+          grep -q 'do not sign or submit the current Business Vendor interest form yet' /tmp/feast_little_italy.html
           grep -q 'call VIA at 561-427-0500' /tmp/feast_little_italy.html
-          grep -q 'Paradise Gmail and Paradise Drive found no current 2026 Business Vendor agreement/packet' /tmp/feast_little_italy.html
-          grep -q 'post-interest-form VIA-response blocker' /tmp/feast_little_italy.html
-          grep -q 'Official Feast 2026 vendor/about/location pages + stale linked 2019 Terms &amp; Conditions + Paradise Gmail/Drive exhaustion' /tmp/feast_little_italy.html
+          grep -q 'pre-signature VIA-response blocker' /tmp/feast_little_italy.html
+          grep -q 'embedded signed interest form + stale linked 2019 Terms &amp; Conditions' /tmp/feast_little_italy.html
           grep -q 'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' /tmp/feast_little_italy.html
           grep -q 'data-booking-readiness-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Pre-booking action required' /tmp/feast_little_italy.html
-          grep -q '>Open Business Vendor interest form<' /tmp/feast_little_italy.html
+          grep -q '>Open vendor page — call VIA before signing<' /tmp/feast_little_italy.html
           grep -q 'feastoflittleitaly.com/vendor-info' /tmp/feast_little_italy.html
           if grep -q 'data-lp-attributed-placement-profile="LIFE-092"' /tmp/feast_little_italy.html; then
             echo "::error::Feast generic assigned-at-setup placement was mislabeled as LP-attributed specific"
