@@ -3553,7 +3553,7 @@ jobs:
           assert 'data-live-compare-readiness-profile="LIFE-033"' in hold
           assert 'Hold / reconcile' in hold
           assert 'Commitment: Reconcile existing commitment' in hold
-          assert 'Still needed: Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities' in hold
+          assert 'Still needed: Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities' in hold
           expected_deadlines={
               'LIFE-044':'Sep 17, 2026 · 30-day cancellation-liability cutoff',
               'LIFE-054':'Nov 5, 2026 · 30-day no-refund boundary',
