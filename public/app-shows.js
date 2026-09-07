@@ -884,7 +884,7 @@ function catalogFilterSummary(){
   for(const key of ['lp','cumulativeLp'])if(f[key]!=='ANY')add(key,labels[key][f[key]]);
   if(f.comBand!=='ALL')add('comBand','COM '+({'UNDER5':'<5%','5_10':'5–10%','10_15':'10–15%','15_25':'15–25%','25PLUS':'25%+'})[f.comBand]);
   if(f.lifetimeNetBand!=='ALL')add('lifetimeNetBand','Lifetime net '+({'UNDER25K':'<$25K','25_100K':'$25–100K','100_250K':'$100–250K','250KPLUS':'$250K+'})[f.lifetimeNetBand]);
-  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified booking cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'Quote / comparable cost missing'})[f.currentCostBand]);
+  if(f.currentCostBand!=='ALL')add('currentCostBand','Current verified booking cost '+({'UNDER500':'<$500','500_1000':'$500–1K','1000_2500':'$1K–2.5K','2500_5000':'$2.5K–5K','5000PLUS':'$5K+','MISSING':'No verified maximum'})[f.currentCostBand]);
   if(f.currentCostStatus!=='ALL')add('currentCostStatus','Current cost status · '+opportunityCostStatusLabel(f.currentCostStatus));
   if(f.currentCommitmentStatus!=='ALL')add('currentCommitmentStatus','Current commitment status · '+opportunityCommitmentStatusLabel(f.currentCommitmentStatus));
   if(f.currentPlacementStatus!=='ALL')add('currentPlacementStatus','Current placement status · '+opportunityPlacementStatusLabel(f.currentPlacementStatus));
@@ -1422,7 +1422,9 @@ function defaultCurrentFilters(){
 }
 function liveOpportunityNeedsQuote(p){
   const op=p?.current_rebook_opportunity||null;
-  return Boolean(op)&&opportunityCostNumber(op,'booking_cost_max')===null;
+  return Boolean(op)
+    &&opportunityCostNumber(op,'booking_cost_min')===null
+    &&opportunityCostNumber(op,'booking_cost_max')===null;
 }
 function liveOpportunityMissingPriorPlacement(p){
   if(!p?.current_rebook_opportunity)return false;
@@ -1613,7 +1615,7 @@ function openShowFilters(cleanupRequest=false){
         ${filterField('Lifetime net','fLifetimeNetBand',f.lifetimeNetBand,opts([['ALL','Any lifetime net'],['UNDER25K','Under $25K'],['25_100K','$25K to <$100K'],['100_250K','$100K to <$250K'],['250KPLUS','$250K+']],{ALL:fc.total,...fc.lifeBand}))}
       </div></div>
       <div class="filterSection"><div class="filterSectionTitle">Current opportunity / operating linkage</div><div class="filterGrid">
-        ${filterField('Current verified booking cost (max)','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','Quote / comparable cost missing']],{ALL:fc.total,...fc.opportunityCostBand}))}
+        ${filterField('Current verified booking cost (max)','fOpportunityCostBand',f.currentCostBand,opts([['ALL','Any current-opportunity cost'],['UNDER500','Under $500'],['500_1000','$500 to <$1K'],['1000_2500','$1K to <$2.5K'],['2500_5000','$2.5K to <$5K'],['5000PLUS','$5K+'],['MISSING','No verified maximum']],{ALL:fc.total,...fc.opportunityCostBand}))}
         ${filterField('Current cost status','fOpportunityCostStatus',f.currentCostStatus,opts([['ALL','Any live-opportunity status'],['KNOWN_VERIFIED','Known verified cost'],['QUOTE_REQUIRED','Quote required'],['CONTRACT_REVIEW_REQUIRED','Review current contract'],['RECONCILE_EXISTING','Reconcile existing booking'],['NOT_PUBLISHED_YET','Not published yet'],['NEXT_CYCLE_CLOSED','Next cycle / closed']],fc.opportunityCostStatus))}
         ${filterField('Current commitment status','fOpportunityCommitmentStatus',f.currentCommitmentStatus,opts([['ALL','Any current commitment state'],['VERIFIED_CURRENT','Verified current commitment terms'],['PARTIAL_CURRENT','Partial current commitment terms'],['AGREEMENT_REQUIRED','Agreement / quote terms required'],['RECONCILE_EXISTING','Reconcile existing commitment'],['NOT_PUBLISHED_YET','Commitment terms not published yet'],['NEXT_CYCLE_CLOSED','Next cycle / no current commitment']],fc.opportunityCommitmentStatus))}
         ${filterField('Current placement status','fOpportunityPlacementStatus',f.currentPlacementStatus,opts([['ALL','Any current placement state'],['ASSIGNED_VERIFIED','Assigned / verified'],['LISTED_ASSIGNMENT_UNVERIFIED','Listed / assignment unverified'],['FLOOR_PLAN_AVAILABLE_NOT_SELECTED','Floor plan available / not selected'],['APPLICATION_OPEN_NOT_ASSIGNED','Application open / not assigned'],['CONTRACT_REQUEST_NOT_ASSIGNED','Contract / availability open / not assigned'],['SPONSORSHIP_PLACEMENT_UNVERIFIED','Sponsorship / activation placement unverified'],['PLACEMENT_NOT_PUBLISHED','Placement not published'],['NEXT_CYCLE_CLOSED','Next cycle / no current placement']],fc.opportunityPlacementStatus))}
