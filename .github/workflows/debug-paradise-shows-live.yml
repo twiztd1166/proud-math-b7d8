@@ -2041,7 +2041,7 @@ jobs:
           grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
           grep -q 'Open current source' /tmp/bradenton_pursue.html
 
-                    render_view tampa_2027 "$SITE/#show/LIFE-017"
+          render_view tampa_2027 "$SITE/#show/LIFE-017"
           grep -q 'Tampa Home Show' /tmp/tampa_2027.html
           grep -q 'Venue / address' /tmp/tampa_2027.html
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
