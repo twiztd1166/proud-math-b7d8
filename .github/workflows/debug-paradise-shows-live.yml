@@ -4099,7 +4099,7 @@ jobs:
           grep -q '\$100 Business Vendor / 10x10' /tmp/safety_pursue.html
           grep -q 'setup 7-9 AM' /tmp/safety_pursue.html
           grep -q 'no electricity' /tmp/safety_pursue.html
-          grep -q 'assigned location at check-in' /tmp/safety_pursue.html
+          grep -q 'assigned location came at check-in' /tmp/safety_pursue.html
           grep -q 'no on-site payment' /tmp/safety_pursue.html
           grep -q 'No 2027 date/application is published yet' /tmp/safety_pursue.html
           grep -q 'href="https://slcsafetyfest.com/vendors/"' /tmp/safety_pursue.html
