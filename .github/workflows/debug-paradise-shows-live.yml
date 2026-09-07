@@ -837,13 +837,13 @@ jobs:
           assert '1 net sale / $9,135' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
           assert 'limited first block' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert '#18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
-          assert 'do not treat #18 as proven best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'does not prove #18 was best' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert reviews['LIFE-009'].get('disposition')=='WATCH', reviews['LIFE-009']
           assert reviews['LIFE-009'].get('action_timing','').startswith('NOW'), reviews['LIFE-009']
           assert '$499,888' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Booth #52 produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
           assert 'Jan. 3-4, 2026 occurrence produced 0 net sales / $0' in reviews['LIFE-009'].get('rationale',''), reviews['LIFE-009']
-          assert 'Do not select Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Treat historical Booth 66 (10x10) as the stronger placement reference than Booth #52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Standard 10x10' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert '$100 deposit' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
@@ -852,6 +852,26 @@ jobs:
           assert 'Dec. 2, 2026' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
           assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
+          placement_request_evidence={
+              'LIFE-007':('LP2021-101','2021-SCH21-0127','4 LP closes / $57,043 LP close volume / 4 issued / 4 demos','not attendance proof'),
+              'LIFE-009':('LP2022-111','2022-SCH22-0005','4 LP closes / $110,038 LP close volume / 38 issued / 15 demos','do not call Booth 66 proven best'),
+              'LIFE-013':('LP2021-040','2021-SCH21-0136','4 LP closes / $80,100 LP close volume / 62 issued / 19 demos','not attendance proof'),
+              'LIFE-014':('LP2021-161','2021-SCH21-0119','2 LP closes / $32,550 LP close volume / 6 issued / 5 demos','not an exact booth and not attendance proof'),
+              'LIFE-018':('LP2021-138','2021-SCH21-0129','4 LP closes / $96,238 LP close volume / 16 issued / 7 demos','not attendance proof'),
+              'LIFE-030':('LP2022-005','2022-SCH22-0023','1 LP close / $38,482 LP close volume / 11 issued / 8 demos','not attendance proof'),
+          }
+          for pid,(lp_id,history_id,metrics,limitation) in placement_request_evidence.items():
+              review=reviews[pid]
+              assert f'LP:{lp_id}' in str(review.get('source_ref') or ''), (pid,review)
+              assert f'HISTORY:{history_id}' in str(review.get('source_ref') or ''), (pid,review)
+              assert metrics in str(review.get('next_step') or ''), (pid,review)
+              assert limitation in str(review.get('next_step') or ''), (pid,review)
+          assert 'performance-correlated reference' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
+          assert 'same-row outcome of 0 net sales' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'performance attribution, not attendance proof or proof the old numbering is still optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert 'outside popup placement type comparable to Paradise history' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
+          assert 'historical Booth 131 - 10x12' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
+          assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
           assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
           assert '$100 weekend test' in reviews['LIFE-046'].get('action_timing',''), reviews['LIFE-046']
           assert '$219,783' in reviews['LIFE-046'].get('rationale',''), reviews['LIFE-046']
@@ -890,7 +910,7 @@ jobs:
           assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
-          assert '10x20 / 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
+          assert 'current 10x20 option comparable to historical 705 & 706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert reviews['LIFE-092'].get('disposition')=='PURSUE' and reviews['LIFE-092'].get('action_timing','').startswith('NOW'), reviews['LIFE-092']
           assert 'Research exhausted as of Sep. 7, 2026 for the missing 2026 packet' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
           assert 'call VIA at 561-427-0500' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
@@ -3342,6 +3362,8 @@ jobs:
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
           grep -q '>Open Jan. 2-3 booth application<' /tmp/vero_home_placement.html
           grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
+          grep -q '4 LP closes / \$110,038 LP close volume / 38 issued / 15 demos' /tmp/vero_home_placement.html
+          grep -q 'do not call Booth 66 proven best' /tmp/vero_home_placement.html
 
           render_view feast_little_italy "$SITE/#show/LIFE-092"
           grep -q 'Feast of Little Italy' /tmp/feast_little_italy.html
@@ -3699,6 +3721,8 @@ jobs:
           grep -q 'LP-attributed placement type' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'outside popup · 2021 · Oct-23 · 2 LP closes · $32,550 LP close volume · 6 issued · 5 demos · annual LP attribution · not exact booth · not attendance proof' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'not an exact booth, not same-row history performance, and not proof Paradise attended/worked that placement' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q '2 LP closes / \$32,550 LP close volume / 6 issued / 5 demos' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'not an exact booth and not attendance proof' /tmp/wpb_greenmarket_next_cycle.html
 
           render_view rebook_detail "$SITE/#show/LIFE-007"
           grep -q 'RPB Green Market' /tmp/rebook_detail.html
@@ -3724,6 +3748,8 @@ jobs:
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-007"' /tmp/rebook_detail.html
           grep -q 'Application open / not assigned' /tmp/rebook_detail.html
+          grep -q '4 LP closes / \$57,043 LP close volume / 4 issued / 4 demos' /tmp/rebook_detail.html
+          grep -q 'does not prove #18 was best' /tmp/rebook_detail.html
 
           render_view pembroke_detail "$SITE/#show/LIFE-033"
           grep -q 'Pembroke Home Show' /tmp/pembroke_detail.html
