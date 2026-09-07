@@ -409,6 +409,9 @@ function liveDecisionCompareBoard(profiles,open=false){
     const op=p.current_rebook_opportunity||{};
     const review=p.current_rebook_review||{};
     const cost=opportunityCostText(op)||opportunityCostStatusLabel(op.current_cost_status);
+    const priorCost=String(op.prior_cost_text||'Prior/reference cost not verified').trim();
+    const contactName=String(op.contact_name||'Current organizer/contact').trim();
+    const contactActions=rebookContactActions(op.contact_text,p.profile_id,op.contact_email,op.contact_phone);
     const readiness=bookingReadinessLabel(review.booking_readiness);
     const timing=String(review.action_timing||'Verify timing').trim();
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
@@ -417,18 +420,19 @@ function liveDecisionCompareBoard(profiles,open=false){
       <td data-label="Decision"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
       <td data-label="Show"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
       <td data-label="Date">${esc(liveComparisonDate(op))}</td>
-      <td data-label="Current cost">${esc(cost)}</td>
+      <td data-label="Cost" data-live-compare-cost-profile="${esc(p.profile_id)}"><div class="liveCompareCost"><b>Current: ${esc(cost)}</b><span>Prior/reference: ${esc(priorCost)}</span></div></td>
       <td data-label="Historical outcome">${esc(liveComparisonOutcome(p))}</td>
       <td data-label="Placement" data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
+      <td data-label="Contact" data-live-compare-contact-profile="${esc(p.profile_id)}"><div class="liveCompareContact"><b>${esc(contactName)}</b>${contactActions}</div></td>
       <td data-label="Readiness">${esc(readiness)}</td>
       <td data-label="When to act">${esc(timing)}</td>
       <td data-label="Action">${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · cost · historical outcome · current + best placement · readiness · timing · direct action</small></summary>
-    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Current cost</th><th>Historical outcome</th><th>Placement</th><th>Readiness</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. They do not convert LeadPerfection attribution or booking records into attendance proof.</div>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness · timing · direct action</small></summary>
+    <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment.</div>
   </details>`;
 }
 function catalogCard(p){

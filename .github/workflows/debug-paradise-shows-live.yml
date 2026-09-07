@@ -319,6 +319,12 @@ jobs:
               grep -q 'liveCompareOpen' /tmp/app-shows.js
               grep -q 'data-live-compare-placement-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
+              grep -q 'Prior/reference:' /tmp/app-shows.js
+              grep -q 'current + prior cost' /tmp/app-shows.js
+              grep -q 'liveCompareCost' /tmp/app.css
+              grep -q 'liveCompareContact' /tmp/app.css
               grep -q 'Current: ' /tmp/app-shows.js
               grep -q 'Best history:' /tmp/app-shows.js
               grep -q 'liveCompareAction' /tmp/app.css
@@ -2693,19 +2699,55 @@ jobs:
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           grep -q 'Current: Floor plan available / not selected' /tmp/shows.html
           grep -q 'Best history:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
           grep -q 'class="liveCompareAction"' /tmp/shows.html
+          python - <<'PY'
+          import re,html
+          doc=open('/tmp/shows.html',encoding='utf-8').read()
+          def row(pid):
+              m=re.search(r'<tr data-live-compare-row="'+re.escape(pid)+r'">(.*?)</tr>',doc,re.S)
+              assert m, pid
+              return html.unescape(m.group(1))
+          manatee=row('LIFE-044')
+          assert 'data-live-compare-cost-profile="LIFE-044"' in manatee
+          assert 'Prior/reference:' in manatee
+          assert 'No safe same-series prior cost is available' in manatee
+          assert 'data-live-compare-contact-profile="LIFE-044"' in manatee
+          assert 'Dave LaBell / Tampa Bay Times Events' in manatee
+          assert 'tel:7278938523' in manatee
+          assert 'mailto:dlabell@tampabay.com' in manatee
+          vero=row('LIFE-009')
+          assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
+          assert 'Latitude-88, Inc.' in vero
+          print('Live comparison cost/contact rows: PASS')
+          PY
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -q 'Show database' /tmp/shows_mobile.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
+          grep -q 'data-label="Cost"' /tmp/shows_mobile.html
+          grep -q 'data-label="Contact"' /tmp/shows_mobile.html
           grep -q 'data-label="Action"' /tmp/shows_mobile.html
+          python - <<'PY'
+          import re,html
+          doc=open('/tmp/shows_mobile.html',encoding='utf-8').read()
+          m=re.search(r'<tr data-live-compare-row="LIFE-044">(.*?)</tr>',doc,re.S)
+          assert m
+          row=html.unescape(m.group(1))
+          assert 'data-label="Cost"' in row
+          assert 'data-label="Contact"' in row
+          assert 'Dave LaBell / Tampa Bay Times Events' in row
+          assert 'Prior/reference:' in row
+          print('Mobile comparison cost/contact labels: PASS')
+          PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
