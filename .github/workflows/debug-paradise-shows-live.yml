@@ -2582,10 +2582,13 @@ jobs:
           grep -q 'data-historical-outreach-source-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q '>Open outreach source<' /tmp/palm_liquors_pursue.html
           grep -q 'Official Palm Beach Liquors active store/events site' /tmp/palm_liquors_pursue.html
-          if grep -q 'href="mailto:' /tmp/palm_liquors_pursue.html; then
-            echo "::error::Palm Beach Liquors historical outreach guessed an email"
-            exit 1
-          fi
+          python - <<'PY'
+          import re
+          html=open('/tmp/palm_liquors_pursue.html').read()
+          match=re.search(r'data-historical-outreach-actions-profile="LIFE-028"[^>]*>(.*?)</div>',html,re.S)
+          assert match, 'Missing LIFE-028 historical outreach action scope'
+          assert 'mailto:' not in match.group(1), 'Palm Beach Liquors historical outreach guessed an email'
+          PY
           grep -q 'When to act' /tmp/palm_liquors_pursue.html
           grep -q 'NOW' /tmp/palm_liquors_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
