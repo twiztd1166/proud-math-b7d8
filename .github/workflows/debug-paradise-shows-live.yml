@@ -173,6 +173,8 @@ jobs:
               grep -q 'bookingTiming' /tmp/app-shows.js
               grep -q 'When to act' /tmp/app-shows.js
               grep -q 'best_observed_specific_booth' /tmp/app-shows.js
+              grep -q 'No preserved booth / placement is available for this profile' /tmp/app-shows.js
+              grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/app-shows.js
               grep -q 'correlation only' /tmp/app-modals.js
               grep -Fq "row?.[field]" /tmp/app-modals.js
               grep -Fq "value!==null&&value!==undefined&&String(value).trim()!==''" /tmp/app-modals.js
@@ -509,6 +511,14 @@ jobs:
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
+          placement_unknown_values={'','unknown','n/a','na','none','tbd','tba','-','—'}
+          def has_preserved_placement(p):
+              vals=(p.get('best_observed_specific_booth'),p.get('latest_preserved_booth'))
+              return any(str(v or '').strip().lower() not in placement_unknown_values for v in vals)
+          expected_missing_placement={'HIST-234','LIFE-017','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-076'}
+          actual_missing_placement={pid for pid in expected_live if not has_preserved_placement(profiles[pid])}
+          assert actual_missing_placement==expected_missing_placement, (actual_missing_placement,expected_missing_placement)
+          assert len(expected_live-expected_missing_placement)==8
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
@@ -2232,6 +2242,8 @@ jobs:
           grep -q 'not an Oct. 31-Nov. 1 fall 2026 quote or assignment' /tmp/pembroke_detail.html
           grep -q 'reference history only' /tmp/pembroke_detail.html
           grep -q '888-433-3976' /tmp/pembroke_detail.html
+          grep -q 'data-historical-placement-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'No preserved booth / placement is available for this profile' /tmp/pembroke_detail.html
           grep -q 'Open current exhibitor controls' /tmp/pembroke_detail.html
           grep -q 'homeshowsouthflorida.com/i-am-an-exhibitor/' /tmp/pembroke_detail.html
           grep -q 'Open current source' /tmp/pembroke_detail.html
@@ -2242,6 +2254,9 @@ jobs:
           grep -q 'CONTRACT REQUEST OPEN' /tmp/gunshow_detail.html
           grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
+          grep -q 'data-historical-placement-profile="LIFE-046"' /tmp/gunshow_detail.html
+          grep -q 'No preserved booth / placement is available for this profile' /tmp/gunshow_detail.html
+          grep -q 'Do not infer a booth from same-market, same-venue, or unrelated-series history' /tmp/gunshow_detail.html
           grep -q 'data-current-booking-cost-profile="LIFE-046"' /tmp/gunshow_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/gunshow_detail.html
           grep -q '\$100 · 8-foot table / weekend' /tmp/gunshow_detail.html
@@ -2293,6 +2308,8 @@ jobs:
           grep -q 'partnership / activation pricing is not publicly verified' /tmp/cognizant_detail.html
           grep -q 'Do not treat hospitality as a vendor booth' /tmp/cognizant_detail.html
           grep -q 'Sebastian Ascanio' /tmp/cognizant_detail.html
+          grep -q 'data-historical-placement-profile="LIFE-076"' /tmp/cognizant_detail.html
+          grep -q 'No preserved booth / placement is available for this profile' /tmp/cognizant_detail.html
           grep -q 'Open 2027 tournament / partnership site' /tmp/cognizant_detail.html
           grep -q 'thecognizantclassic.com/' /tmp/cognizant_detail.html
           grep -q 'Open current source' /tmp/cognizant_detail.html
