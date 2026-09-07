@@ -95,6 +95,19 @@ jobs:
               grep -q 'rebookOpportunityCard' /tmp/app-shows.js
               grep -q 'ALL_LIVE_REBOOK' /tmp/app-shows.js
               grep -q 'Live booking board' /tmp/app-shows.js
+              grep -q 'ALL_READY_COMMIT' /tmp/app-shows.js
+              grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-shows.js
+              grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-shows.js
+              grep -q 'ALL_HOLD_RECONCILE_LIVE' /tmp/app-shows.js
+              grep -q 'Ready to commit' /tmp/app-shows.js
+              grep -q 'Pre-booking action' /tmp/app-shows.js
+              grep -q 'Watch / gated live' /tmp/app-shows.js
+              grep -q 'Hold / reconcile live' /tmp/app-shows.js
+              grep -q 'liveOpportunityReadinessIs' /tmp/app-shows.js
+              grep -q 'ALL_READY_COMMIT' /tmp/app-core.js
+              grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-core.js
+              grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-core.js
+              grep -q 'ALL_HOLD_RECONCILE_LIVE' /tmp/app-core.js
               grep -q 'ALL_ACT_NOW' /tmp/app-shows.js
               grep -q 'ALL_ACT_LATER' /tmp/app-shows.js
               grep -q 'Act now' /tmp/app-shows.js
@@ -2336,6 +2349,14 @@ jobs:
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
+          grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
+          grep -q 'Pre-booking action <span class="quickViewCount">7</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_WATCH_GATED_LIVE"' /tmp/shows.html
+          grep -q 'Watch / gated live <span class="quickViewCount">8</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_HOLD_RECONCILE_LIVE"' /tmp/shows.html
+          grep -q 'Hold / reconcile live <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_ACT_NOW"' /tmp/shows.html
           grep -q 'Act now <span class="quickViewCount">15</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_ACT_LATER"' /tmp/shows.html
