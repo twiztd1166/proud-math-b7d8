@@ -305,6 +305,11 @@ jobs:
               grep -Fq "const readiness=review.booking_readiness?" /tmp/app-shows.js
               grep -q 'data-booking-readiness-profile' /tmp/app-shows.js
               grep -q 'review.booking_readiness' /tmp/app-shows.js
+              grep -q 'Resolution lane' /tmp/app-shows.js
+              grep -q 'resolutionLaneLabel' /tmp/app-shows.js
+              grep -Fq "const resolution=review.resolution_lane?" /tmp/app-shows.js
+              grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
+              grep -q 'review.resolution_lane' /tmp/app-shows.js
               grep -q 'Still needed before booking' /tmp/app-shows.js
               grep -q 'review.blockers_text' /tmp/app-shows.js
               grep -q 'review.action_timing' /tmp/app-shows.js
@@ -672,25 +677,48 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
+          expected_live_resolution_lanes={
+              'LIFE-007':'PARADISE_ACTION',
+              'LIFE-054':'PARADISE_ACTION',
+              'LIFE-112':'PARADISE_ACTION',
+              'LIFE-046':'ORGANIZER_RESPONSE',
+              'HIST-234':'ORGANIZER_RESPONSE',
+              'LIFE-044':'ORGANIZER_RESPONSE',
+              'LIFE-071':'ORGANIZER_RESPONSE',
+              'LIFE-092':'ORGANIZER_RESPONSE',
+              'LIFE-077':'ORGANIZER_RESPONSE',
+              'LIFE-009':'ORGANIZER_RESPONSE',
+              'LIFE-018':'ORGANIZER_RESPONSE',
+              'LIFE-030':'ORGANIZER_RESPONSE',
+              'LIFE-076':'ORGANIZER_RESPONSE',
+              'LIFE-013':'ORGANIZER_RESPONSE',
+              'LIFE-017':'ORGANIZER_RESPONSE',
+              'LIFE-014':'WAIT_FOR_PUBLICATION',
+              'LIFE-060':'WAIT_FOR_PUBLICATION',
+              'LIFE-033':'RECONCILE_EXISTING',
+          }
+          actual_live_resolution_lanes={pid:(reviews.get(pid) or {}).get('resolution_lane') for pid in expected_live_resolution_lanes}
+          assert actual_live_resolution_lanes==expected_live_resolution_lanes, actual_live_resolution_lanes
+          assert 'RESEARCH_REQUIRED' not in actual_live_resolution_lanes.values(), actual_live_resolution_lanes
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
               'LIFE-007':'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint',
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Exact currently available booth / final PSM assignment · authorized contract signature/payment · exact insurance/COI evidence if separately required · move-in/loading/parking instructions · Saturday public show hours',
-              'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
+              'LIFE-013':'2027-specific commercial rate sheet/application · all-in indoor price · live available space/map · application/payment deadlines · cancellation/COI/utilities/credentials terms',
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
               'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
-              'LIFE-009':'Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms',
+              'LIFE-009':'Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered',
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
               'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
               'LIFE-033':'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
-              'LIFE-112':'Authorized application/signature + current operation photo/product list · category/space acceptance · exact outside placement · final frontage/depth · electrical service/cost · contract/payment/cancellation terms · setup/breakdown/vendor hours · COI',
+              'LIFE-112':'Authorized application/signature + operation photo/product list · category/space acceptance · exact outside placement / final frontage and depth · electrical service/cost · accepted-vendor payment/cancellation terms · setup/breakdown/loading/vendor hours',
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
@@ -3507,7 +3535,7 @@ jobs:
           assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
           assert 'Watch / gated' in vero
           assert 'Commitment: Partial current commitment terms' in vero
-          assert 'Still needed: Materially stronger live placement · exact current booth availability/live floor plan · 25% deposit after current invoice · current 2027 final-balance / agreement / cancellation terms' in vero
+          assert 'Still needed: Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'LP-attributed specific: 66 (10x10) · 2022 · Jan-15 Jan-16 · 4 LP closes · $110,038 LP close volume · 38 issued · 15 demos · annual LP attribution · not attendance proof' in vero
@@ -3956,6 +3984,9 @@ jobs:
           grep -q 'data-booking-readiness-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Booking readiness' /tmp/bradenton_pursue.html
           grep -q 'Pre-booking action required' /tmp/bradenton_pursue.html
+          grep -q 'data-resolution-lane-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Resolution lane' /tmp/bradenton_pursue.html
+          grep -q 'Organizer response required' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
           grep -q 'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' /tmp/bradenton_pursue.html
@@ -4195,6 +4226,8 @@ jobs:
           grep -q 'data-current-placement-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-commitment-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / no current commitment' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-resolution-lane-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'Wait for publication' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
@@ -4212,6 +4245,8 @@ jobs:
           grep -q 'Oct 17, 2026' /tmp/rebook_detail.html
           grep -q 'Official 2026-27 Corporate rate: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Still needed before booking' /tmp/rebook_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q 'Paradise action required' /tmp/rebook_detail.html
           grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
@@ -4246,6 +4281,8 @@ jobs:
           grep -q 'Verified current exhibitor listing' /tmp/pembroke_detail.html
           grep -q 'data-booking-readiness-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Hold / reconcile' /tmp/pembroke_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Reconcile existing commitment' /tmp/pembroke_detail.html
           grep -q 'Still needed before booking' /tmp/pembroke_detail.html
           grep -q 'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
