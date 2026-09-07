@@ -317,6 +317,11 @@ jobs:
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
               grep -q 'liveCompareOpen' /tmp/app-shows.js
+              grep -q 'data-live-compare-placement-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
+              grep -q 'Current: ' /tmp/app-shows.js
+              grep -q 'Best history:' /tmp/app-shows.js
+              grep -q 'liveCompareAction' /tmp/app.css
               grep -q 'liveCompareOpen' /tmp/app-bind.js
               grep -q 'liveCompareBoard' /tmp/app.css
               grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/app-shows.js
@@ -2680,6 +2685,13 @@ jobs:
           grep -q 'No comparable outcome evidence' /tmp/shows.html
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
+          grep -q 'Current: Floor plan available · not selected' /tmp/shows.html
+          grep -q 'Best history:' /tmp/shows.html
+          grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
+          grep -q 'class="liveCompareAction"' /tmp/shows.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
