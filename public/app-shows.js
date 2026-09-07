@@ -414,15 +414,15 @@ function liveDecisionCompareBoard(profiles,open=false){
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
     const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
-      <td><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
-      <td><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
-      <td>${esc(liveComparisonDate(op))}</td>
-      <td>${esc(cost)}</td>
-      <td>${esc(liveComparisonOutcome(p))}</td>
-      <td data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
-      <td>${esc(readiness)}</td>
-      <td>${esc(timing)}</td>
-      <td>${action}</td>
+      <td data-label="Decision"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></td>
+      <td data-label="Show"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button></td>
+      <td data-label="Date">${esc(liveComparisonDate(op))}</td>
+      <td data-label="Current cost">${esc(cost)}</td>
+      <td data-label="Historical outcome">${esc(liveComparisonOutcome(p))}</td>
+      <td data-label="Placement" data-live-compare-placement-profile="${esc(p.profile_id)}">${esc(liveComparisonPlacement(p))}</td>
+      <td data-label="Readiness">${esc(readiness)}</td>
+      <td data-label="When to act">${esc(timing)}</td>
+      <td data-label="Action">${action}</td>
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
