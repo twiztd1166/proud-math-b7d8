@@ -98,7 +98,9 @@ jobs:
               grep -q 'BOOKING_DECISION' /tmp/app-shows.js
               grep -q 'Booking decision / next date' /tmp/app-shows.js
               grep -q 'Venue / address' /tmp/app-shows.js
+              grep -q 'Prior verified cost / reference' /tmp/app-shows.js
               grep -q 'opportunity.venue_text' /tmp/app-shows.js
+              grep -q 'opportunity.prior_cost_text' /tmp/app-shows.js
               grep -q 'NEXT_OPPORTUNITY' /tmp/app-shows.js
               grep -q 'Verified current opportunity' /tmp/app-shows.js
               grep -q 'Verified current watch' /tmp/app-shows.js
@@ -504,6 +506,18 @@ jobs:
           }
           for pid,venue in expected_venues.items():
               assert live[pid].get('venue_text')==venue, (pid,live[pid])
+          expected_prior_cost_refs={
+              'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
+              'LIFE-013':'Paradise same-series history: 2022 event cost $3,500; 2021 cost $4,000 with Booths 705 & 706 (10x20). Historical reference only — obtain the 2027 commercial-space quote before signing.',
+              'LIFE-018':'Paradise same-series history: 2022 Treasure Coast Home Show $795; Nov. 2021 Booth 131 (10x12) $795; Mar. 2021 $1,500. Historical reference only — current 2027 price remains unverified.',
+              'LIFE-030':'Paradise ArtiGras history: 2023 booking reference $3,850; 2022 Booth S204 (10x10) cost $3,400. Historical reference only — current 2027 booth-bearing sponsorship package still needs a quote.',
+              'LIFE-033':'Paradise same-series May 2-3, 2026 reference: Booth 106, 8x10; $2,145 booth cost less $100 Super Saver = $2,045 invoice. This is the spring 2026 occurrence, not an Oct. 31-Nov. 1 fall 2026 quote or assignment.',
+              'LIFE-060':'Official 2025 Martin County Fair vendor application reference: indoor 10x12 $675 / 20x12 $1,075; outdoor 10x12 $475 / 20x12 $725; larger 20x20 $1,500. Prior-cycle official rates only — 2027 commercial pricing is not yet published.',
+          }
+          for pid,ref in expected_prior_cost_refs.items():
+              assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
+          assert not live['LIFE-014'].get('prior_cost_text'), live['LIFE-014']
+          assert not live['LIFE-076'].get('prior_cost_text'), live['LIFE-076']
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -886,10 +900,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 25, detail.get('version')
+              assert detail.get('version') == 26, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 25, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 26, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -901,7 +915,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 44, x.get('version')
+          assert x.get('version') == 45, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2104,6 +2118,9 @@ jobs:
           grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
           grep -q 'Oct 18, 2026' /tmp/vero_oktoberfest.html
           grep -q '10x10 inline \$200' /tmp/vero_oktoberfest.html
+          grep -q 'Prior verified cost / reference' /tmp/vero_oktoberfest.html
+          grep -q '2023 Vero Oktoberfest waitlist/booking reference: \$175' /tmp/vero_oktoberfest.html
+          grep -q 'not proof of completed participation' /tmp/vero_oktoberfest.html
           grep -q 'Latitude-88' /tmp/vero_oktoberfest.html
           grep -q 'Open current source' /tmp/vero_oktoberfest.html
 
@@ -2124,7 +2141,10 @@ jobs:
           grep -q 'Oct 31, 2026' /tmp/pembroke_detail.html
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
-          grep -q '\$2,045' /tmp/pembroke_detail.html
+          grep -q 'Prior verified cost / reference' /tmp/pembroke_detail.html
+          grep -q 'Booth 106, 8x10' /tmp/pembroke_detail.html
+          grep -q '\$2,145 booth cost less \$100 Super Saver = \$2,045 invoice' /tmp/pembroke_detail.html
+          grep -q 'not an Oct. 31-Nov. 1 fall 2026 quote or assignment' /tmp/pembroke_detail.html
           grep -q 'reference history only' /tmp/pembroke_detail.html
           grep -q '888-433-3976' /tmp/pembroke_detail.html
           grep -q 'Open current source' /tmp/pembroke_detail.html
@@ -2146,6 +2166,10 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
+          grep -q 'Prior verified cost / reference' /tmp/treasure_detail.html
+          grep -q '2022 Treasure Coast Home Show \$795' /tmp/treasure_detail.html
+          grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
+          grep -q 'Mar. 2021 \$1,500' /tmp/treasure_detail.html
           grep -q '772-486-4969' /tmp/treasure_detail.html
           grep -q 'Open current source' /tmp/treasure_detail.html
 
@@ -2156,6 +2180,10 @@ jobs:
           grep -q 'Feb 12, 2027' /tmp/martin_detail.html
           grep -q 'Feb 21, 2027' /tmp/martin_detail.html
           grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
+          grep -q 'Prior verified cost / reference' /tmp/martin_detail.html
+          grep -q 'Official 2025 Martin County Fair vendor application reference' /tmp/martin_detail.html
+          grep -q 'indoor 10x12 \$675 / 20x12 \$1,075' /tmp/martin_detail.html
+          grep -q 'outdoor 10x12 \$475 / 20x12 \$725' /tmp/martin_detail.html
           grep -q 'fairoffice@martincountyfair.com' /tmp/martin_detail.html
           grep -q 'Open current source' /tmp/martin_detail.html
 
