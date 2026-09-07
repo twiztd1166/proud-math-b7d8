@@ -605,6 +605,7 @@ jobs:
           assert coverage.get('annual_lp_profiled_rows') + us.get('annual_rows',0) == 1235, (coverage,us)
           assert coverage.get('cumulative_lp_profiled_rows') + us.get('cumulative_rows',0) == 1251, (coverage,us)
           profiles={p.get('profile_id'):p for p in x.get('profiles') or []}
+          live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           boot=json.load(open('/tmp/bootstrap.json'))
           current_ids={row.get('mfc_id') for row in boot.get('shows') or []}
           def has_current_control(p):
