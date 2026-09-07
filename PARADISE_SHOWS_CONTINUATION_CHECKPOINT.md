@@ -3,13 +3,14 @@
 **STATUS:** COMPLETE  
 **Updated:** 2026-09-07  
 **Canonical production branch:** `paradise-shows-public`  
-**Governed app-state head:** `a2477763dbef0635aee875c651cd5f438b407f7a`  
-**Latest merged app PR:** #319 — Promote St. Lucie County Fair as 18th live target  
+**Governed production head at checkpoint write:** `1751eea0959ccd0e42e91cb7d4779c9bba259ccc`  
+**Latest merged PR at checkpoint write:** #324 — Fix Green Market live-smoke case guard  
+**Latest substantive governed live-target PR:** #319 — Promote St. Lucie County Fair as 18th live target  
 **Supabase project:** `taxlrlfsobtnbasjcnuf`  
 **shows-api:** v86 ACTIVE  
 **Pre-work semantic checkpoint:** `e8453a0a-2267-41eb-8d04-62c14cb83466`
 
-> This file lives in production and therefore its documentation commit can be newer than the governed app-state head above. On every resume, compare the live branch head and governed Supabase state first. Production wins if anything differs.
+> This file lives in production and its own documentation commit will be newer than the production head recorded above. On every resume, compare the live branch head and governed Supabase state first. Production wins if anything differs.
 
 ## Current goal
 
@@ -48,9 +49,9 @@ Make Paradise Shows immediately useful for booking decisions:
 
 ## What is verified at this checkpoint
 
-### Latest live-target change
+### Latest substantive live-target change
 
-PR #319 is merged at the governed app-state head.
+PR #319 is the latest substantive governed live-target promotion.
 
 `LIFE-112` / St. Lucie County Fair is the **18th** live target:
 
@@ -63,6 +64,26 @@ PR #319 is merged at the governed app-state head.
 - 2025 same-row reference: “Main line to the right — 10×10” / $700 fair fee / $1,000 direct+setup / 1 net sale / $47,000 / 13 issued / 7 demos
 - historical location is a placement reference only, not proven best
 - no fabricated hard deadline
+
+### Production moved after PR #319 but governed counts did not change
+
+PRs #320–#324 are merged after #319:
+
+- #320 — repaired stale public-smoke literals only
+- #321 — aligned Pembroke reconciliation smoke to already-governed fall-specific state
+- #322 — aligned Safety Festival smoke to stronger already-governed provenance
+- #323 — fixed Manatee live-smoke variable scope
+- #324 — fixed Green Market live-smoke case guard
+
+Current Supabase readback after those merges remains:
+
+- shows-api v86 ACTIVE
+- 665 / 1,086 READY catalog
+- 36 current shows
+- 4 payments
+- 18 live opportunities
+- reviews 12 PURSUE / 8 WATCH / 8 HOLD / 1 RETIRED
+- historical outreach exactly LIFE-028 / LIFE-039 / LIFE-073
 
 ### Important post-PR #284 corrections already completed
 
@@ -80,6 +101,7 @@ Subsequent completed work includes:
 - PR #317 — Vero Winter 2027 commitment terms corrected; predecessor-cycle $100/final-balance mechanics removed
 - PR #318 — Cognizant category-conflict / measurable activation path guarded
 - PR #319 — St. Lucie County Fair promoted as 18th live target
+- PRs #320–#324 — smoke/reconciliation alignment and test-only fixes listed above
 
 ## Palm Beach Liquors — resolved source-provenance state
 
@@ -168,7 +190,7 @@ Each semantic checkpoint is attached to a complete SHOW/PAYMENT snapshot.
 1. On the next `Go` / `Continue`, read this file first.
 2. Compare the live `paradise-shows-public` head, active `shows-api`, latest READY catalog, live opportunity count, review disposition counts, current shows/payments and historical outreach set.
 3. If production is ahead, reconcile this checkpoint before research.
-4. If production matches, continue the field-completeness/value audit from the **18-live-target / PR #319** baseline.
+4. If production matches, continue the field-completeness/value audit from the **18-live-target / post-PR #324** baseline.
 5. Select the next highest-value unresolved opportunity or blocker from live governed data and current official/Gmail/Drive evidence.
 6. Do not reopen Palm Beach Liquors, Hubbard continuity, Vero predecessor-cycle terms, ArtiGras stale PR #312, or other closed research unless genuinely new evidence appears.
 7. Before the next substantial batch, create a new `IN_PROGRESS` semantic checkpoint; after completion/verification, replace this canonical checkpoint and create a `COMPLETE` semantic checkpoint.
