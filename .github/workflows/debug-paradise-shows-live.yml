@@ -321,6 +321,8 @@ jobs:
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-commitment-profile' /tmp/app-shows.js
+              grep -q 'Commitment:' /tmp/app-shows.js
               grep -q 'data-live-compare-deadline-profile' /tmp/app-shows.js
               grep -q 'liveComparisonDeadline' /tmp/app-shows.js
               grep -q 'No verified hard deadline' /tmp/app-shows.js
@@ -2715,6 +2717,7 @@ jobs:
           test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
+          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 16
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
@@ -2740,6 +2743,29 @@ jobs:
           vero=row('LIFE-009')
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
+          expected_commitments={
+              'LIFE-007':'Verified current commitment terms',
+              'LIFE-009':'Verified current commitment terms',
+              'LIFE-013':'Agreement / quote terms required',
+              'LIFE-014':'Next cycle / no current commitment',
+              'LIFE-017':'Verified current commitment terms',
+              'LIFE-018':'Agreement / quote terms required',
+              'LIFE-030':'Agreement / quote terms required',
+              'LIFE-033':'Reconcile existing commitment',
+              'LIFE-044':'Verified current commitment terms',
+              'LIFE-046':'Partial current commitment terms',
+              'LIFE-054':'Verified current commitment terms',
+              'LIFE-060':'Commitment terms not published yet',
+              'LIFE-071':'Agreement / quote terms required',
+              'LIFE-076':'Agreement / quote terms required',
+              'LIFE-077':'Partial current commitment terms',
+              'HIST-234':'Partial current commitment terms',
+          }
+          assert len(expected_commitments)==16, expected_commitments
+          for pid,expected in expected_commitments.items():
+              r=row(pid)
+              assert f'data-live-compare-commitment-profile="{pid}"' in r, (pid,r)
+              assert f'Commitment: {expected}' in r, (pid,r)
           expected_deadlines={
               'LIFE-044':'Sep 17, 2026 · 30-day cancellation-liability cutoff',
               'LIFE-054':'Nov 5, 2026 · 30-day no-refund boundary',
@@ -2779,6 +2805,8 @@ jobs:
           assert 'data-label="Contact"' in row
           assert 'Dave LaBell / Tampa Bay Times Events' in row
           assert 'Prior/reference:' in row
+          assert 'Commitment: Verified current commitment terms' in row
+          assert 'data-live-compare-commitment-profile="LIFE-044"' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           print('Mobile comparison cost/contact/deadline labels: PASS')
