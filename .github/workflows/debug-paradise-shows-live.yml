@@ -1950,7 +1950,9 @@ jobs:
           assert 'floridaslargesthomeshow@bbgi.com' in profiles['LIFE-071']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-071']['current_rebook_review']['disposition']=='WATCH'
           assert profiles['LIFE-071']['current_rebook_review']['action_timing'].startswith('NOW')
-          assert '$5,000 2024 paid reference' in profiles['LIFE-071']['current_rebook_review']['next_step']
+          flhs_next=profiles['LIFE-071']['current_rebook_review']['next_step']
+          assert 'direct 2024 $5,000 / 20x20-or-10x40 same-series reference' in flhs_next
+          assert 'current all-in investment and placement' in flhs_next
           assert profiles['LIFE-017']['current_rebook_opportunity']['event_end']=='2027-04-04'
           assert '$1,295 per 10x10 booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
           assert '$1,395 per corner booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
