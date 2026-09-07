@@ -4364,7 +4364,11 @@ jobs:
           grep -q 'Historical decision evidence' /tmp/cognizant_detail.html
           grep -q 'Verified current watch' /tmp/cognizant_detail.html
           grep -q 'Still needed before booking' /tmp/cognizant_detail.html
-          grep -q 'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price' /tmp/cognizant_detail.html
+          grep -q '2027 category clearance / exclusivity vs Wright’s Impact Window &amp; Door' /tmp/cognizant_detail.html
+          grep -q 'consumer-facing activation proposal' /tmp/cognizant_detail.html
+          grep -q 'lead-capture / CRM rights' /tmp/cognizant_detail.html
+          grep -q 'exact footprint / location' /tmp/cognizant_detail.html
+          grep -q 'all-in price / payment / cancellation / COI terms' /tmp/cognizant_detail.html
           grep -q '>WATCH<' /tmp/cognizant_detail.html
           grep -q 'Feb 24, 2027' /tmp/cognizant_detail.html
           grep -q 'Feb 28, 2027' /tmp/cognizant_detail.html
