@@ -127,6 +127,11 @@ jobs:
               grep -q 'Venue / address' /tmp/app-shows.js
               grep -q 'Current booth / placement' /tmp/app-shows.js
               grep -q 'current_placement_text' /tmp/app-shows.js
+              grep -q 'rebookContactActions' /tmp/app-shows.js
+              grep -q 'data-current-contact-profile' /tmp/app-shows.js
+              grep -q 'data-current-contact-actions-profile' /tmp/app-shows.js
+              grep -q 'href="tel:' /tmp/app-shows.js
+              grep -q 'href="mailto:' /tmp/app-shows.js
               grep -q 'Prior verified cost / reference' /tmp/app-shows.js
               grep -q 'rebookLiveActions' /tmp/app-shows.js
               grep -q 'Open booking action' /tmp/app-shows.js
@@ -2213,6 +2218,10 @@ jobs:
           grep -q '\$995–\$1,095 · 10x10 booth' /tmp/bradenton_pursue.html
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
           grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
+          grep -q 'data-current-contact-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'data-current-contact-actions-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'href="tel:7278938523"' /tmp/bradenton_pursue.html
+          grep -q 'href="mailto:dlabell@tampabay.com"' /tmp/bradenton_pursue.html
           grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
           grep -q 'Open participation form + floor plan' /tmp/bradenton_pursue.html
           grep -q 'tampabay.com/expos/tampa-bay-home-show/exhibitors/' /tmp/bradenton_pursue.html
@@ -2306,6 +2315,9 @@ jobs:
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
+          grep -q 'data-current-contact-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q 'data-current-contact-actions-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q 'href="tel:5617929260"' /tmp/rebook_detail.html
           grep -q 'Open current source' /tmp/rebook_detail.html
           grep -q 'Booth / placement guidance' /tmp/rebook_detail.html
 
@@ -2404,6 +2416,11 @@ jobs:
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
+          grep -q 'data-current-contact-profile="LIFE-054"' /tmp/winterfest_detail.html
+          if grep -q 'data-current-contact-actions-profile="LIFE-054"' /tmp/winterfest_detail.html; then
+            echo "::error::Winter Fest rendered invented current contact actions"
+            exit 1
+          fi
           grep -q 'data-current-booking-cost-profile="LIFE-054"' /tmp/winterfest_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/winterfest_detail.html
           grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html
