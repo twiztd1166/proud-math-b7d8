@@ -705,7 +705,7 @@ jobs:
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors official store site + 2026 store/address verification + direct Paradise 2019 host/event evidence + preserved pop-up history','GMAIL:16baf7ac9653499e 2019 Dovalo PM Liquors marketing meeting; GMAIL:16d16c2a80f422d8 2019 Palm Beach Liquors special event'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','Direct City/Paradise 2024-2026 Hurricane Expo correspondence + official 2026 City event/vendor pages + Paradise history/LP evidence','GMAIL:18f104adcadb7f0f;GMAIL:18fc51c2d9ab54db;GMAIL:1956bf9a7680f5d1;GMAIL:19de3fa30ccacf8d'),
-              'LIFE-073':('https://slcsafetyfest.com/vendors/','Direct DLF/Paradise 2024-2026 Safety Festival correspondence + official 2026 vendor agreement/site + Paradise history','GMAIL:1935453a8f4b0e19;GMAIL:19c765115e9e2375;GMAIL:19dac1371ec57cf3'),
+              'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026 vendor agreement + direct Apr. 20, 2026 DLF vendor setup email to Paradise + preserved history','WEB:SLCSAFETYFEST_2026_VENDOR;GMAIL:19dac1371ec57cf3_DLF_SETUP_2026;HISTORY_GMAIL:LIFE-073_2023_2025'),
           }
           assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
           for pid,(url,label_part,ref_part) in expected_historical_review_sources.items():
