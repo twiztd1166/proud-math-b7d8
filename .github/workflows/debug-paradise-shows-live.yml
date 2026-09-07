@@ -837,9 +837,17 @@ jobs:
           assert 'Sep. 17 cancellation-liability cutoff' in reviews['LIFE-044'].get('action_timing',''), reviews['LIFE-044']
           assert 'Tropicana Field 2024' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
           assert 'Oct. 11-12' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
-          assert reviews['LIFE-044'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps'), reviews['LIFE-044']
+          assert reviews['LIFE-044'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 — the current official Manatee Show Floor Plan link returns 404 and no matching file/live availability list is in Paradise Drive'), reviews['LIFE-044']
+          assert 'contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now for the currently available booth list' in reviews['LIFE-044'].get('next_step',''), reviews['LIFE-044']
+          assert 'The direct Aug. 6 brochure still provides general venue-layout context, but not verified live availability' in reviews['LIFE-044'].get('next_step',''), reviews['LIFE-044']
+          assert '1CwBBktgNToHvlfR0oH7ZwRJHCq6nvUD0 returns 404' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
+          assert 'exact-ID/name searches in Paradise Drive returned no current Manatee floor-plan copy' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
+          assert 'WEB:FLOOR_PLAN_FILE_1CwBBktgNToHvlfR0oH7ZwRJHCq6nvUD0_404' in reviews['LIFE-044'].get('source_ref',''), reviews['LIFE-044']
+          assert 'DRIVE:NO_CURRENT_MANATEE_FLOOR_PLAN_MATCH_2026-09-07' in reviews['LIFE-044'].get('source_ref',''), reviews['LIFE-044']
+          assert 'linked Google Drive file (1CwBBktgNToHvlfR0oH7ZwRJHCq6nvUD0) returns 404' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
+          assert 'no matching current Manatee floor-plan file or live available-space list was recovered in Paradise Drive' in live['LIFE-044'].get('current_placement_text',''), live['LIFE-044']
           assert 'Jul. 14 and Aug. 6 current organizer emails with the same brochure/participation packet' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
-          assert 'require Dave/organizer response rather than more internal searching' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
+          assert 'Exact live booth availability therefore requires Dave/organizer response rather than more internal searching' in reviews['LIFE-044'].get('notes',''), reviews['LIFE-044']
           assert reviews['LIFE-044'].get('action_timing','').startswith('NOW'), reviews['LIFE-044']
           assert reviews['LIFE-017'].get('action_timing','').startswith('NOW'), reviews['LIFE-017']
           assert '$332,163' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
@@ -3129,7 +3137,7 @@ jobs:
           assert 'Commitment: Verified current' in manatee
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in manatee
           assert 'data-live-compare-next-step-profile="LIFE-044"' in manatee
-          assert 'Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps — contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in manatee
+          assert 'Research exhausted as of Sep. 7, 2026 — the current official Manatee Show Floor Plan link returns 404 and no matching file/live availability list is in Paradise Drive; contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now for the currently available booth list.' in manatee
           assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
           assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
@@ -3263,7 +3271,7 @@ jobs:
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in row
           assert 'data-label="Next step"' in row
           assert 'data-live-compare-next-step-profile="LIFE-044"' in row
-          assert 'Research exhausted as of Sep. 7, 2026 for the remaining Manatee selection gaps — contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and request the currently available Manatee booth list against the current floor plan.' in row
+          assert 'Research exhausted as of Sep. 7, 2026 — the current official Manatee Show Floor Plan link returns 404 and no matching file/live availability list is in Paradise Drive; contact Dave LaBell at 727-893-8523 / dlabell@tampabay.com now for the currently available booth list.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
