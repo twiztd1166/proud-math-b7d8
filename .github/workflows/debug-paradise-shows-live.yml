@@ -359,6 +359,7 @@ jobs:
               'LIFE-057':'PURSUE',
               'LIFE-071':'WATCH',
               'LIFE-073':'PURSUE',
+              'LIFE-017':'PURSUE',
               'LIFE-075':'WATCH',
               'LIFE-029':'HOLD',
               'LIFE-032':'HOLD',
@@ -366,7 +367,7 @@ jobs:
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==5, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==6, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='WATCH')==4, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==4, actual_reviews
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
@@ -381,6 +382,11 @@ jobs:
           assert 'Tampa Bay Times Events' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
           assert '$995' in reviews['LIFE-044'].get('next_step',''), reviews['LIFE-044']
           assert reviews['LIFE-044'].get('action_timing','').startswith('NOW'), reviews['LIFE-044']
+          assert reviews['LIFE-017'].get('action_timing','').startswith('NOW'), reviews['LIFE-017']
+          assert '$332,163' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
+          assert '5 net sales / $89,388' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
+          assert 'current 2027 booth map' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert '2024 floor plan' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
           assert '2027 cycle' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$200/$225' in reviews['LIFE-039'].get('next_step',''), reviews['LIFE-039']
           assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
