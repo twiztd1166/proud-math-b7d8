@@ -213,7 +213,10 @@ function historicalReviewOutreach(review){
   const name=String(review?.outreach_contact_name||'').trim();
   const phone=String(review?.outreach_contact_phone||'').trim();
   const email=String(review?.outreach_contact_email||'').trim();
-  if(!name&&!phone&&!email)return '';
+  const sourceUrl=String(review?.outreach_contact_source_url||'').trim();
+  const sourceLabel=String(review?.outreach_contact_source_label||'').trim();
+  const checked=String(review?.outreach_contact_checked_at||'').slice(0,10);
+  if(!name&&!phone&&!email&&!sourceUrl)return '';
   const contact=[name,phone,email].filter(Boolean).join(' · ');
   const actions=[];
   if(phone){
@@ -221,7 +224,9 @@ function historicalReviewOutreach(review){
     if(dial)actions.push(`<a class="contactBtn" href="tel:${esc(dial)}">Call ${esc(phone)}</a>`);
   }
   if(email)actions.push(`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`);
-  return `<div class="wide" data-historical-outreach-profile="${esc(review.profile_id)}"><span>Current outreach contact</span><b>${esc(contact)}</b>${actions.length?`<div class="contactActions" data-historical-outreach-actions-profile="${esc(review.profile_id)}">${actions.join('')}</div>`:''}</div>`;
+  if(sourceUrl)actions.push(`<a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(sourceUrl)}">Open outreach source</a>`);
+  const provenance=[checked?`checked ${checked}`:'',sourceLabel].filter(Boolean).join(' · ');
+  return `<div class="wide" data-historical-outreach-profile="${esc(review.profile_id)}"><span>Current outreach contact</span><b>${esc(contact||'Use verified outreach source')}</b>${actions.length?`<div class="contactActions" data-historical-outreach-actions-profile="${esc(review.profile_id)}">${actions.join('')}</div>`:''}${provenance?`<div class="rebookLiveFoot" data-historical-outreach-source-profile="${esc(review.profile_id)}">${esc(provenance)}</div>`:''}</div>`;
 }
 function rebookReviewCard(review,hasLiveOpportunity=false){
   if(!review)return '';
