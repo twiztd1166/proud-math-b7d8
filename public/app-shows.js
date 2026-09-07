@@ -277,7 +277,7 @@ function historicalOccurrenceOutcomeText(p,prefix){
   const dates=String(p?.[`${prefix}_observed_outcome_dates`]||'').trim();
   const booth=historicalPlacementValue(p?.[`${prefix}_observed_outcome_booth`]);
   if(dates)parts.push(esc(dates));
-  if(booth)parts.push(`booth ${esc(booth)}`);
+  if(booth)parts.push(esc(booth));
   const issued=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_issued`],'issued');
   const demos=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_demos`],'demos');
   const sales=historicalOutcomeValue(p?.[`${prefix}_observed_outcome_net_sales`],'net sales');
