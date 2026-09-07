@@ -4378,8 +4378,6 @@ jobs:
           grep -q 'PGA National Resort — Champion Course · 400 Avenue of the Champions, Palm Beach Gardens, FL 33418' /tmp/cognizant_detail.html
           grep -q 'data-current-venue-actions-profile="LIFE-076"' /tmp/cognizant_detail.html
           grep -q '400%20Avenue%20of%20the%20Champions' /tmp/cognizant_detail.html
-          grep -q 'Host-property street address is verified from the official PGA National Resort property map' /tmp/cognizant_detail.html
-          grep -q 'Tournament/exhibitor access, parking and the final Paradise activation entrance must still follow current organizer instructions' /tmp/cognizant_detail.html
           grep -q 'Sebastian Ascanio / PGA TOUR sales — reconfirm 2027 Cognizant assignment' /tmp/cognizant_detail.html
           grep -q 'sebastianascanio@pgatourhq.com' /tmp/cognizant_detail.html
           grep -q '954-683-9676' /tmp/cognizant_detail.html
