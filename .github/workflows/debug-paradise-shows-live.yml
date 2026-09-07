@@ -616,7 +616,7 @@ jobs:
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
           assert len(historical_2013)==72, len(historical_2013)
           assert len(strong_history_2013)==11, len(strong_history_2013)
-          assert len(strong_2013)==6, len(strong_2013)
+          assert len(strong_2013)==3, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={
               'HIST-234':'WATCH',
@@ -631,14 +631,14 @@ jobs:
               'LIFE-030':'WATCH',
               'LIFE-032':'HOLD',
               'LIFE-033':'HOLD',
-              'LIFE-038':'PURSUE',
+              'LIFE-038':'HOLD',
               'LIFE-039':'WATCH',
               'LIFE-041':'HOLD',
               'LIFE-044':'PURSUE',
               'LIFE-046':'PURSUE',
               'LIFE-054':'PURSUE',
-              'LIFE-056':'WATCH',
-              'LIFE-057':'PURSUE',
+              'LIFE-056':'HOLD',
+              'LIFE-057':'HOLD',
               'LIFE-060':'WATCH',
               'LIFE-061':'HOLD',
               'LIFE-071':'WATCH',
@@ -650,9 +650,9 @@ jobs:
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==12, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==10, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='HOLD')==5, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==10, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==9, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
@@ -675,25 +675,20 @@ jobs:
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
-              'LIFE-038':'Next Paws in the Park date · current commercial/vendor package · live booth map/placement · current price · power · category exclusivity · payment terms',
               'LIFE-039':'2027 event date · business-exhibitor registration reopening · 2027 booth rate/power option · footprint · COI terms',
-              'LIFE-056':'Current/future Beerfest occurrence date · current vendor/sponsor deck · activation footprint · all-in price · category exclusivity · payment schedule',
-              'LIFE-057':'Next Nurses Night Out date · current vendor inventory · current booth/activation price · footprint · attendee profile · exclusivity · payment/setup terms',
               'LIFE-073':'2027 date/application · 10x10 availability · current 2027 fee · placement · payment deadline · COI · setup rules',
           }
           expected_review_blockers={**expected_live_blockers,**expected_historical_blockers}
-          assert set(expected_historical_blockers)=={'LIFE-028','LIFE-038','LIFE-039','LIFE-056','LIFE-057','LIFE-073'}, expected_historical_blockers
+          assert set(expected_historical_blockers)=={'LIFE-028','LIFE-039','LIFE-073'}, expected_historical_blockers
           for pid,blockers in expected_review_blockers.items():
               assert reviews[pid].get('blockers_text')==blockers, (pid,reviews[pid])
           for pid,review in reviews.items():
               if pid not in expected_review_blockers:
                   assert not review.get('blockers_text'), (pid,review)
+
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site','no future Paradise-style pop-up date published/found as of 2026-09-07'),
-              'LIFE-038':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Paws in the Park','linked Paws site remains dated 2022'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo / vendor-cycle pages','2026 reservations closed and organizer says check back next year'),
-              'LIFE-056':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Palm Beach Summer Beerfest','linked Beerfest site is stale/cancelled 2020'),
-              'LIFE-057':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Nurses Night Out','no new dated occurrence found as of 2026-09-07'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026','Business Vendor $100, 10x10 space and 772-337-0049'),
           }
           assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
@@ -704,21 +699,16 @@ jobs:
               assert label_part in str(review.get('source_label') or ''), (pid,review)
               assert ref_part in str(review.get('source_ref') or ''), (pid,review)
               assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
+
           expected_historical_outreach={
               'LIFE-028':('Palm Beach Liquors','561-330-4777',None,'https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site'),
-              'LIFE-038':('Hubbard South Florida','561-616-4777',None,'https://hubbardsouthflorida.com/contact/','Official Hubbard South Florida contact page'),
               'LIFE-039':('City of Port St. Lucie / Hurricane Expo','772-871-5225','pslem@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','City of Port St. Lucie Office of Emergency Management'),
-              'LIFE-056':('Hubbard South Florida','561-616-4777',None,'https://hubbardsouthflorida.com/contact/','Official Hubbard South Florida contact page'),
-              'LIFE-057':('Hubbard South Florida','561-616-4777',None,'https://hubbardsouthflorida.com/contact/','Official Hubbard South Florida contact page'),
               'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049','info@slcsafetyfest.com','https://slcsafetyfest.com/wp-content/uploads/2025/02/SLCSF-Sponsorship-application-25.pdf','Official St. Lucie County Safety Festival sponsorship contact artifact'),
           }
           assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
           expected_historical_cycle_status={
               'LIFE-028':'ACTIVE_HOST_DATE_REQUIRED',
-              'LIFE-038':'ACTIVE_SERIES_DATE_UNVERIFIED',
               'LIFE-039':'NEXT_CYCLE_NOT_PUBLISHED',
-              'LIFE-056':'ACTIVE_SERIES_DATE_UNVERIFIED',
-              'LIFE-057':'ACTIVE_SERIES_DATE_UNVERIFIED',
               'LIFE-073':'NEXT_CYCLE_NOT_PUBLISHED',
           }
           assert set(expected_historical_cycle_status)==set(expected_historical_outreach), expected_historical_cycle_status
@@ -731,31 +721,25 @@ jobs:
               assert review.get('outreach_cycle_checked_at'), (pid,review)
               assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_HOST_DATE_REQUIRED')==1
-          assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_SERIES_DATE_UNVERIFIED')==3
+          assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_SERIES_DATE_UNVERIFIED')==0
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='NEXT_CYCLE_NOT_PUBLISHED')==2
           assert 'not a verified scheduled show' in reviews['LIFE-028'].get('outreach_cycle_text','')
-          assert 'older 2022 occurrence' in reviews['LIFE-038'].get('outreach_cycle_text','')
           assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
-          assert 'legacy 2020 cancellation/Coming Soon content' in reviews['LIFE-056'].get('outreach_cycle_text','')
-          assert 'no current 2026/2027 event date or vendor package' in reviews['LIFE-057'].get('outreach_cycle_text','')
           assert 'Apr. 25, 2026 at Clover Park' in reviews['LIFE-073'].get('outreach_cycle_text','')
+
           expected_historical_outcome_status={
               'LIFE-028':'LIFETIME_ONLY',
-              'LIFE-038':'OCCURRENCE_OUTCOME_AVAILABLE',
               'LIFE-039':'LIFETIME_ONLY',
-              'LIFE-056':'OCCURRENCE_OUTCOME_AVAILABLE',
-              'LIFE-057':'OCCURRENCE_OUTCOME_AVAILABLE',
               'LIFE-073':'LIFETIME_ONLY',
           }
           assert set(expected_historical_outcome_status)==set(expected_historical_outreach), expected_historical_outcome_status
           for pid,status in expected_historical_outcome_status.items():
               assert profiles[pid].get('outcome_evidence_status')==status, (pid,profiles[pid])
               assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid])
-          assert sum(1 for v in expected_historical_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==3
+          assert sum(1 for v in expected_historical_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==0
           assert sum(1 for v in expected_historical_outcome_status.values() if v=='LIFETIME_ONLY')==3
-          assert profiles['LIFE-038'].get('latest_observed_outcome_year')==2017, profiles['LIFE-038']
-          assert profiles['LIFE-038'].get('latest_observed_outcome_issued')==5, profiles['LIFE-038']
           assert profiles['LIFE-028'].get('latest_observed_outcome_year') is None, profiles['LIFE-028']
+
           for pid,(name,phone,email,source_url,source_label) in expected_historical_outreach.items():
               review=reviews[pid]
               assert review.get('outreach_contact_name')==name, (pid,review)
@@ -778,6 +762,27 @@ jobs:
                   assert not review.get('outreach_cycle_source_url'), (pid,review)
                   assert not review.get('outreach_cycle_source_label'), (pid,review)
                   assert not review.get('outreach_cycle_checked_at'), (pid,review)
+
+          hubbard_holds=('LIFE-038','LIFE-056','LIFE-057')
+          for pid in hubbard_holds:
+              review=reviews[pid]
+              assert review.get('disposition')=='HOLD', (pid,review)
+              assert not review.get('blockers_text'), (pid,review)
+              assert 'GMAIL:1956324bc0b0b531' in str(review.get('source_ref') or ''), (pid,review)
+              assert 'Direct Hubbard Mar. 4, 2025 event-production statement' in str(review.get('source_label') or ''), (pid,review)
+              assert 'used to produce events' in (str(review.get('notes') or '')+' '+str(review.get('rationale') or '')), (pid,review)
+              assert not review.get('outreach_cycle_status'), (pid,review)
+              assert not review.get('outreach_contact_name'), (pid,review)
+              assert not review.get('outreach_contact_phone'), (pid,review)
+              assert not review.get('outreach_contact_email'), (pid,review)
+              assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid])
+              assert profiles[pid].get('outcome_evidence_status')=='OCCURRENCE_OUTCOME_AVAILABLE', (pid,profiles[pid])
+          assert 'Orlando Pet Alliance Feb. 13, 2027 Paws in the Park is a different event and must not be merged' in reviews['LIFE-038'].get('notes','')
+          assert 'unrelated Orlando Pet Alliance Paws in the Park as identity evidence' in reviews['LIFE-038'].get('next_step','')
+          assert '2020 event was cancelled' in reviews['LIFE-056'].get('next_step','')
+          assert 'Coming Soon' in reviews['LIFE-056'].get('next_step','')
+          assert 'No later Paradise email or current dated official Nurses Night Out occurrence was found' in reviews['LIFE-057'].get('notes','')
+
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               if profiles[held].get('current_rebook_opportunity'):
@@ -2902,7 +2907,7 @@ jobs:
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
-          grep -q 'Historical outreach <span class="quickViewCount">6</span>' /tmp/shows.html
+          grep -q 'Historical outreach <span class="quickViewCount">3</span>' /tmp/shows.html
           grep -q 'Pursue now <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Watch / next cycle <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
@@ -3168,21 +3173,25 @@ jobs:
           grep -q 'When to act' /tmp/palm_liquors_pursue.html
           grep -q 'NOW' /tmp/palm_liquors_pursue.html
 
-          render_view paws_pursue "$SITE/#show/LIFE-038"
-          grep -q 'data-review-profile="LIFE-038" data-review-scope="historical"' /tmp/paws_pursue.html
-          grep -q 'data-historical-decision-evidence-profile="LIFE-038"' /tmp/paws_pursue.html
-          grep -q '3 verified worked years · latest verified worked 2017' /tmp/paws_pursue.html
-          grep -q '7 annual LP attribution years · latest LP 2021 (LP attribution is not attendance proof)' /tmp/paws_pursue.html
-          grep -q 'data-historical-outcome-profile="LIFE-038"' /tmp/paws_pursue.html
-          grep -q 'Occurrence-level outcome available' /tmp/paws_pursue.html
-          grep -q 'Latest observed: 2017' /tmp/paws_pursue.html
-          grep -q '5 issued' /tmp/paws_pursue.html
-          grep -q 'data-historical-outreach-cycle-profile="LIFE-038"' /tmp/paws_pursue.html
-          grep -q 'Active series · next date unverified' /tmp/paws_pursue.html
-          grep -q 'older 2022 occurrence' /tmp/paws_pursue.html
-          grep -q '>Open cycle source<' /tmp/paws_pursue.html
-          grep -q 'data-historical-outreach-profile="LIFE-038"' /tmp/paws_pursue.html
-          grep -q 'Hubbard South Florida · 561-616-4777' /tmp/paws_pursue.html
+          render_view paws_hold "$SITE/#show/LIFE-038"
+          grep -q 'data-review-profile="LIFE-038" data-review-scope="historical"' /tmp/paws_hold.html
+          grep -q '>HOLD<' /tmp/paws_hold.html
+          grep -q 'used to produce events' /tmp/paws_hold.html
+          grep -q 'Orlando Pet Alliance Feb. 13, 2027 Paws in the Park is a different event and must not be merged' /tmp/paws_hold.html
+          grep -q 'Do not treat Paws in the Park as an active current event cycle' /tmp/paws_hold.html
+          if grep -q 'data-historical-outreach-cycle-profile="LIFE-038"' /tmp/paws_hold.html; then
+            echo 'Held Paws profile incorrectly rendered an active current-cycle control'
+            exit 1
+          fi
+          if grep -q 'data-historical-outreach-profile="LIFE-038"' /tmp/paws_hold.html; then
+            echo 'Held Paws profile incorrectly rendered a current outreach contact'
+            exit 1
+          fi
+          if grep -q 'data-booking-readiness-profile="LIFE-038"' /tmp/paws_hold.html; then
+            echo 'Historical-only held Paws profile incorrectly rendered governed live booking readiness'
+            exit 1
+          fi
+
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
