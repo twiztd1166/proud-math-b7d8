@@ -1719,6 +1719,7 @@ function renderShows(){
   const list=state.catalog.filter(catalogMatches).slice().sort(catalogComparator);
   const shown=list.slice(0,state.catalogLimit);
   const liveProfiles=state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
-  const comparison=liveDecisionCompareBoard(liveProfiles,state.showQuickView==='ALL_LIVE_REBOOK');
+  const liveComparisonViews=new Set(['NONE','ALL_LIVE_REBOOK','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE','ALL_ACT_NOW','ALL_ACT_LATER','ALL_QUOTE_REQUIRED','ALL_NO_PRIOR_PLACEMENT','ALL_REBOOK_PURSUE','ALL_REBOOK_WATCH']);
+  const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView));
   return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
