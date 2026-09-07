@@ -633,10 +633,18 @@ jobs:
               'LIFE-033':'Paradise same-series May 2-3, 2026 reference: Booth 106, 8x10; $2,145 booth cost less $100 Super Saver = $2,045 invoice. This is the spring 2026 occurrence, not an Oct. 31-Nov. 1 fall 2026 quote or assignment.',
               'LIFE-060':'Official 2025 Martin County Fair vendor application reference: indoor 10x12 $675 / 20x12 $1,075; outdoor 10x12 $475 / 20x12 $725; larger 20x20 $1,500. Prior-cycle official rates only — 2027 commercial pricing is not yet published.',
               'LIFE-071':'Paradise 2024 Florida\'s Largest Home Show paid reference: $5,000 for the Labor Day occurrence. Historical reference only; not a 2026 St. Petersburg quote.',
+              'LIFE-007':'Paradise preserved RPB Green Market schedule reference: $107.14 per listed Saturday in late 2021 through Feb. 2022 at #18 outside popup; earlier 2021 rows preserve $92.11. Historical schedule evidence only; current 2026-27 official $65/$75 rate governs.',
+              'LIFE-014':'Paradise 2021-22 WPB GreenMarket outside-popup schedule reference: $310.34 final cost per listed Saturday ($413.79 event-cost field). The later preserved $11 / $11,000 strings are anomalous and are not used as pricing evidence. Historical schedule reference only; current vendor price remains unverified.',
+              'LIFE-017':'Paradise Tampa Home Show references: 2024 approved/scheduled tracker $1,395; 2023 calendar schedule $1,295. Historical booking/schedule evidence only; current 2027 direct contract is $1,295 standard / $1,395 corner plus add-ons and any card surcharge.',
+              'LIFE-046':'Paradise 2018 WPB Gun Show preserved cost reference: $80 per event in the cost register / archived schedules. Historical booking/schedule evidence only; not proof of completed participation. Current official 2026 vendor table rate is $100.',
+              'LIFE-054':'Paradise RPB Winter Fest history: 2025 event record $410; 2023 approved-vendor reference $285; 2021 scheduled reference $250. Historical references only; current 2026 approved-category fee is $160-$400 plus the $10 application fee.',
+              'LIFE-009':'Paradise Vero Home Show history: Jan. 2025 $500 final cost; Apr. 2025 Booth #52 $495; 2022 occurrences $420. Historical references only; current 2027 official 10x10 range is $475-$635.',
+              'LIFE-077':'Paradise 2025 Sebastian Clam Bake event record: $200, with tent display required. Historical reference only; not a 2026 sponsorship quote. Current published booth-bearing Grand Clam sponsorship is $2,000.',
           }
+          assert len(expected_prior_cost_refs)==14, expected_prior_cost_refs
           for pid,ref in expected_prior_cost_refs.items():
               assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
-          assert not live['LIFE-014'].get('prior_cost_text'), live['LIFE-014']
+          assert not live['LIFE-044'].get('prior_cost_text'), live['LIFE-044']
           assert not live['LIFE-076'].get('prior_cost_text'), live['LIFE-076']
           expected_actions={
               'LIFE-014':('Open next-cycle vendor page','https://www.wpb.org/Residents/Community-Events/Events/WPB-GreenMarket/Vendor-Application'),
