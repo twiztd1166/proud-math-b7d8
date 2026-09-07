@@ -269,6 +269,7 @@ jobs:
               grep -q 'outreach_contact_checked_at' /tmp/app-shows.js
               grep -q 'Open outreach source' /tmp/app-shows.js
               grep -q 'data-historical-outreach-source-profile' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-email-profile' /tmp/app-shows.js
               grep -q 'data-review-profile' /tmp/app-shows.js
               grep -q 'data-review-scope' /tmp/app-shows.js
               grep -Fq "rebookReviewCard(d.rebookReview||null,Boolean(d.rebookOpportunity))" /tmp/app-modals.js
@@ -2588,7 +2589,7 @@ jobs:
           grep -q 'data-historical-outreach-source-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q '>Open outreach source<' /tmp/palm_liquors_pursue.html
           grep -q 'Official Palm Beach Liquors active store/events site' /tmp/palm_liquors_pursue.html
-          if grep -q 'href="mailto:' /tmp/palm_liquors_pursue.html; then
+          if grep -q 'data-historical-outreach-email-profile="LIFE-028"' /tmp/palm_liquors_pursue.html; then
             echo "::error::Palm Beach Liquors historical outreach guessed an email"
             exit 1
           fi
@@ -2772,6 +2773,7 @@ jobs:
           grep -q 'href="https://forms.cityofpsl.com/expo"' /tmp/hurricane_watch.html
           grep -q 'Open review source' /tmp/hurricane_watch.html
           grep -q 'data-historical-outreach-source-profile="LIFE-039"' /tmp/hurricane_watch.html
+          grep -q 'data-historical-outreach-email-profile="LIFE-039"' /tmp/hurricane_watch.html
           grep -q 'href="mailto:pslem@cityofpsl.com"' /tmp/hurricane_watch.html
           grep -q 'Email pslem@cityofpsl.com' /tmp/hurricane_watch.html
           grep -q '>Open outreach source<' /tmp/hurricane_watch.html
@@ -2822,6 +2824,7 @@ jobs:
           grep -q 'href="https://slcsafetyfest.com/vendors/"' /tmp/safety_pursue.html
           grep -q 'Open review source' /tmp/safety_pursue.html
           grep -q 'data-historical-outreach-source-profile="LIFE-073"' /tmp/safety_pursue.html
+          grep -q 'data-historical-outreach-email-profile="LIFE-073"' /tmp/safety_pursue.html
           grep -q 'href="mailto:info@slcsafetyfest.com"' /tmp/safety_pursue.html
           grep -q 'Email info@slcsafetyfest.com' /tmp/safety_pursue.html
           grep -q '>Open outreach source<' /tmp/safety_pursue.html
