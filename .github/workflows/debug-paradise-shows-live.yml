@@ -665,7 +665,7 @@ jobs:
               'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
               'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
               'HIST-234':'Commercial sponsorship price · actual footprint / location · lead-generation / exclusivity / payment / COI terms',
-              'LIFE-077':'Normal lower-cost vendor option or justified $2,000 package · exact location · Paradise acceptance',
+              'LIFE-077':'Normal 2026 vendor fee / application acceptance · exact assigned site · Paradise category acceptance / payment terms · $2,000 sponsorship only if justified',
               'LIFE-009':'Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
@@ -895,6 +895,17 @@ jobs:
           assert reviews['LIFE-077'].get('disposition')=='WATCH' and reviews['LIFE-077'].get('action_timing','').startswith('NOW'), reviews['LIFE-077']
           assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert '$200' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert 'normal Vendor Application separate from sponsorship' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert 'optional sponsorship alternative' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert 'normal commercial/vendor fee' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
+          assert 'normal vendor fee is not published in recoverable official text' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
+          assert live['LIFE-077'].get('current_cost_status')=='QUOTE_REQUIRED', live['LIFE-077']
+          assert live['LIFE-077'].get('booking_cost_min') is None and live['LIFE-077'].get('booking_cost_max') is None, live['LIFE-077']
+          assert not live['LIFE-077'].get('booking_cost_unit') and not live['LIFE-077'].get('booking_cost_basis'), live['LIFE-077']
+          assert live['LIFE-077'].get('opportunity_status')=='APPLICATION_OPEN', live['LIFE-077']
+          assert live['LIFE-077'].get('current_placement_status')=='APPLICATION_OPEN_NOT_ASSIGNED', live['LIFE-077']
+          assert 'normal 2026 Vendor Application is live' in live['LIFE-077'].get('price_text',''), live['LIFE-077']
+          assert '$2,000' in live['LIFE-077'].get('price_text','') and 'Sponsorship alternative' in live['LIFE-077'].get('price_text',''), live['LIFE-077']
           assert reviews['LIFE-054'].get('disposition')=='PURSUE' and reviews['LIFE-054'].get('action_timing','').startswith('NOW'), reviews['LIFE-054']
           assert '1 net close / $20,025' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
           assert 'Corporate Level 2 for the 2024 Winter Fest' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
@@ -1219,7 +1230,7 @@ jobs:
               'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
               'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
               'LIFE-033':'Paradise is currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified. Reconcile the current ACS contract/account and exact booth before any new payment or re-booking.',
-              'LIFE-077':'The published Grand Clam package includes a 10x10 booth, but Paradise acceptance and booth location are not verified. Ask for the exact 2026 location and whether a lower-cost normal vendor placement exists.',
+              'LIFE-077':'The official 2026 Vendor Information page exposes a normal Vendor Application, but Paradise acceptance and exact site are not verified. Current vendor rules govern assigned-site use and setup; obtain the current vendor fee and actual Paradise location through the vendor application/organizer. The separate $2,000 Grand Clam sponsorship includes a 10x10 booth but should be treated only as a sponsorship alternative, not the required vendor route.',
               'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. POTTC directly approved Paradise as Corporate Level 2 in 2024, but the 2024 and 2025 confirmations say exact space assignment is provided at check-in / in event-week instructions and do not preserve a reusable booth number. Ask for the strongest available high-traffic 10x10 after 2026 approval. Do not invent a prior “best booth” from the historical cost/category evidence.',
               'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Review the live floor plan and choose a materially stronger available location; do not reuse Booth #52 based on history because its Apr. 2025 outcome was 0 net sales.',
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
@@ -1250,7 +1261,7 @@ jobs:
               'LIFE-060':'PLACEMENT_NOT_PUBLISHED',
               'LIFE-071':'APPLICATION_OPEN_NOT_ASSIGNED',
               'LIFE-076':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
-              'LIFE-077':'SPONSORSHIP_PLACEMENT_UNVERIFIED',
+              'LIFE-077':'APPLICATION_OPEN_NOT_ASSIGNED',
               'LIFE-092':'APPLICATION_OPEN_NOT_ASSIGNED',
           }
           assert set(expected_current_placement_status)==expected_live, (set(expected_current_placement_status),expected_live)
@@ -1259,9 +1270,9 @@ jobs:
           assert sum(1 for v in expected_current_placement_status.values() if v=='ASSIGNED_VERIFIED')==0
           assert sum(1 for v in expected_current_placement_status.values() if v=='LISTED_ASSIGNMENT_UNVERIFIED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='FLOOR_PLAN_AVAILABLE_NOT_SELECTED')==3
-          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==5
+          assert sum(1 for v in expected_current_placement_status.values() if v=='APPLICATION_OPEN_NOT_ASSIGNED')==6
           assert sum(1 for v in expected_current_placement_status.values() if v=='CONTRACT_REQUEST_NOT_ASSIGNED')==2
-          assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==4
+          assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==3
           assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='NEXT_CYCLE_CLOSED')==1
           expected_current_schedule_status={
@@ -1441,10 +1452,9 @@ jobs:
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
               'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. Paradise was explicitly approved Corporate Level 2 in 2024 and paid $410 for the 2025 event; use $410 as the conservative current exposure ceiling, not as proof of 2026 approval.'),
-              'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
           }
-          assert len(expected_booking_costs)==8, expected_booking_costs
+          assert len(expected_booking_costs)==7, expected_booking_costs
           for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
               op=live[pid]
               assert float(op.get('booking_cost_min'))==cmin, (pid,op)
@@ -1464,7 +1474,7 @@ jobs:
               'LIFE-044':'KNOWN_VERIFIED',
               'LIFE-046':'KNOWN_VERIFIED',
               'LIFE-054':'KNOWN_VERIFIED',
-              'LIFE-077':'KNOWN_VERIFIED',
+              'LIFE-077':'QUOTE_REQUIRED',
               'LIFE-092':'KNOWN_VERIFIED',
               'HIST-234':'QUOTE_REQUIRED',
               'LIFE-071':'QUOTE_REQUIRED',
@@ -1480,8 +1490,8 @@ jobs:
           assert len(expected_current_cost_status)==17, expected_current_cost_status
           for pid,status in expected_current_cost_status.items():
               assert live[pid].get('current_cost_status')==status, (pid,live[pid])
-          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==8
-          assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==5
+          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==7
+          assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==6
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
@@ -1491,7 +1501,7 @@ jobs:
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
               'LIFE-054':'$10 non-refundable application fee · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event.',
               'LIFE-071':'Not published / not verified — obtain deposit, balance-due, cancellation, COI, utility/furnishing and other add-on terms with the current quote before signing.',
-              'LIFE-077':'$2,000 Grand Clam sponsorship includes a 10x10 booth · official sponsorship page says sponsorship fees/donations are payable by check to Sebastian Clambake Foundation · no refund, cancellation, deposit or payment-deadline terms are published on the verified sponsorship page.',
+              'LIFE-077':'Normal 2026 Vendor Application is live, but its fee and vendor-specific payment, cancellation/refund and deadline terms are not published in the recoverable official page · obtain the current vendor terms and Paradise acceptance before payment · separate sponsorship alternative: Grand Clam $2,000 includes a 10x10 booth and sponsorship fees/donations are payable by check to Sebastian Clambake Foundation.',
               'LIFE-014':'No current new-booking commitment is available — 2025-26 and 2026-27 applications are closed · next vendor application process opens March 2027 · 2027-28 Paradise eligibility, fee, payment, cancellation and placement terms are not yet published and must be verified when the next cycle opens.',
               'LIFE-033':'Current fall 2026 Paradise contract/payment terms remain unreconciled · Paradise is listed as an exhibitor, but the public fall exhibitor forms are not available until 4 weeks before the event · obtain one written current ACS account/contract statement confirming total price, amounts paid/due, deadline, cancellation/refund terms, COI and utilities before any additional payment or re-booking.',
               'LIFE-018':'Organizer currently links a 2027 exhibitor contract and floor plan, but Paradise-specific price, deposit/balance schedule, cancellation/refund terms, COI and utility/furnishing charges have not been verified in recovered current evidence · obtain/read the current contract and quote before signing or paying.',
@@ -1652,7 +1662,7 @@ jobs:
           assert 'Corporate Level 1 $300' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert 'Corporate Level 2 $400' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
           assert '$10 application fee' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
-          assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
+          assert profiles['LIFE-077']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-077']['current_rebook_opportunity']['event_start']=='2026-11-07'
           assert '10x10 booth' in profiles['LIFE-077']['current_rebook_opportunity']['price_text']
           # Cleanup expectations are scoped to each profile's exact year + source family
@@ -3239,7 +3249,7 @@ jobs:
           grep -q 'data-quick-view="ALL_ACT_LATER"' /tmp/shows.html
           grep -q 'Later / next cycle <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
-          grep -q 'Quote required <span class="quickViewCount">9</span>' /tmp/shows.html
+          grep -q 'Quote required <span class="quickViewCount">10</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
           grep -q 'No prior booth history <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
@@ -3989,8 +3999,16 @@ jobs:
           grep -q 'href="tel:7724733836"' /tmp/sebastian_clambake_detail.html
           grep -q 'href="mailto:info@sebastianclambake.org"' /tmp/sebastian_clambake_detail.html
           grep -q 'data-current-commitment-profile="LIFE-077"' /tmp/sebastian_clambake_detail.html
-          grep -q '\$2,000 Grand Clam sponsorship includes a 10x10 booth' /tmp/sebastian_clambake_detail.html
+          grep -q 'Normal 2026 Vendor Application is live' /tmp/sebastian_clambake_detail.html
+          grep -q 'normal commercial/vendor fee' /tmp/sebastian_clambake_detail.html
+          grep -q 'Grand Clam \$2,000 includes a 10x10 booth' /tmp/sebastian_clambake_detail.html
           grep -q 'payable by check to Sebastian Clambake Foundation' /tmp/sebastian_clambake_detail.html
+          grep -q 'Normal 2026 vendor fee / application acceptance' /tmp/sebastian_clambake_detail.html
+          grep -q 'Official Sebastian Clambake 2026 Vendor Information + Sponsorship pages' /tmp/sebastian_clambake_detail.html
+          if grep -q 'data-current-booking-cost-profile="LIFE-077"' /tmp/sebastian_clambake_detail.html; then
+            echo "::error::Sebastian quote-required normal-vendor route rendered a structured numeric current cost"
+            exit 1
+          fi
 
           render_view vero_legacy "$SITE/#show/LIFE-005"
           grep -q 'LIFE-005' /tmp/vero_legacy.html
