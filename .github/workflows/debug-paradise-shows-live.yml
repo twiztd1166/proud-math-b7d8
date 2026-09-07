@@ -214,6 +214,8 @@ jobs:
               grep -q 'boothGuidanceHtml' /tmp/app-modals.js
               grep -q 'liveHistoricalPlacementHtml' /tmp/app-modals.js
               grep -q 'historicalPlacementGuide(catalogProfile)' /tmp/app-modals.js
+              grep -q 'liveHistoricalDecisionEvidenceHtml' /tmp/app-modals.js
+              grep -q 'historicalDecisionEvidence(catalogProfile)' /tmp/app-modals.js
               grep -q 'historicalDecisionEvidence' /tmp/app-shows.js
               grep -q 'Historical decision evidence' /tmp/app-shows.js
               grep -q 'data-historical-decision-evidence-profile' /tmp/app-shows.js
