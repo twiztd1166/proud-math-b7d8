@@ -117,6 +117,8 @@ jobs:
               grep -q 'CURRENT_COST_HIGH' /tmp/app-core.js
               grep -q 'currentCostBand' /tmp/app-core.js
               grep -q 'Venue / address' /tmp/app-shows.js
+              grep -q 'Current booth / placement' /tmp/app-shows.js
+              grep -q 'current_placement_text' /tmp/app-shows.js
               grep -q 'Prior verified cost / reference' /tmp/app-shows.js
               grep -q 'rebookLiveActions' /tmp/app-shows.js
               grep -q 'Open booking action' /tmp/app-shows.js
@@ -538,6 +540,26 @@ jobs:
           }
           for pid,venue in expected_venues.items():
               assert live[pid].get('venue_text')==venue, (pid,live[pid])
+          expected_current_placements={
+              'LIFE-014':'No 2026-27 Paradise placement is available because the application cycle is closed. Treat prior outside-popup history only as next-cycle placement context; confirm the 2027-28 map/rules when applications reopen.',
+              'LIFE-046':'No Oct. 10-11 table location is verified. Tables are subject to promoter availability; confirm the exact table/location before booking the $100 weekend test.',
+              'HIST-234':'No Paradise 2026 commercial sponsorship footprint/location is verified. Retail Vendor Village is sold out/waitlist; obtain the commercial sponsorship placement before committing.',
+              'LIFE-007':'No 2026-27 Paradise space is assigned/verified yet. Ask for an outside/high-traffic placement comparable to historical #18 outside popup, but verify the current map/numbering and do not treat #18 as proven best.',
+              'LIFE-044':'No 2026 Manatee booth number or exact placement is verified. Confirm the live floor plan and available space with Dave LaBell before signing; historical 2023 Bradenton placement is same-venue evidence only.',
+              'LIFE-033':'Paradise is currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified. Reconcile the current ACS contract/account and exact booth before any new payment or re-booking.',
+              'LIFE-077':'The published Grand Clam package includes a 10x10 booth, but Paradise acceptance and booth location are not verified. Ask for the exact 2026 location and whether a lower-cost normal vendor placement exists.',
+              'LIFE-054':'No 2026 Winter Fest Paradise location is assigned/verified. Confirm the approved vendor category and available lawn/high-traffic placement after application approval before paying the space fee.',
+              'LIFE-009':'No Jan. 2-3, 2027 Paradise booth is secured yet. Review the live floor plan and choose a materially stronger available location; do not reuse Booth #52 based on history because its Apr. 2025 outcome was 0 net sales.',
+              'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
+              'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
+              'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
+              'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
+              'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
+              'LIFE-017':'No 2027 Tampa booth assignment is verified. Request the current 2027 booth map from Patience Rall and select the strongest acceptable available location before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
+          }
+          assert set(expected_current_placements)==expected_live, (set(expected_current_placements),expected_live)
+          for pid,placement in expected_current_placements.items():
+              assert live[pid].get('current_placement_text')==placement, (pid,live[pid])
           expected_prior_cost_refs={
               'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
               'LIFE-013':'Paradise same-series history: 2022 event cost $3,500; 2021 cost $4,000 with Booths 705 & 706 (10x20). Historical reference only — obtain the 2027 commercial-space quote before signing.',
@@ -975,10 +997,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 28, detail.get('version')
+              assert detail.get('version') == 29, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 28, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 29, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -990,7 +1012,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 47, x.get('version')
+          assert x.get('version') == 48, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
