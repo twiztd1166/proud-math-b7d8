@@ -663,7 +663,7 @@ jobs:
               'LIFE-071':'Current all-in booth/setup quote · exact available St. Petersburg placement · category acceptance · deposit / cancellation / COI / add-on terms',
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
-              'LIFE-092':'Paradise category acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
+              'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
@@ -1336,7 +1336,7 @@ jobs:
               'LIFE-060':'2027 fair dates are published, but the 2027 commercial-vendor application/agreement and its price, deposit/payment, cancellation/refund, COI and placement terms are not yet published on the verified fair site · do not carry forward the 2025 vendor agreement; request the 2027 package before commitment.',
               'LIFE-076':'2027 tournament dates and hospitality inquiry paths are live, but no Paradise-specific lead-generation activation agreement, price, payment schedule, cancellation terms, exclusivity or COI requirements are publicly published · request the current PGA TOUR partnership proposal and do not treat hospitality purchase terms as exhibit/activation terms.',
               'LIFE-013':'2027 vendor applications are live and indoor commercial spaces are offered, but Paradise-specific commercial-space price, deposit/payment schedule, application deadline, cancellation/refund, COI and add-on terms are not published on the verified vendor page · obtain the 2027 commercial rate sheet/application agreement from Sylvia before committing.',
-              'LIFE-092':'The live interest form requires acceptance of Terms & Conditions, but the linked terms page still displays 2019 pricing, setup dates and refund language. Obtain the current 2026 vendor agreement and confirm eligibility, payment/refund obligations and business-vendor inclusions before paying or signing.',
+              'LIFE-092':'The live 2026 Business Vendor interest form requires acceptance of Terms & Conditions, but its linked terms are materially stale: they still state $8 gated admission, 2019 setup dates, $500/$600 booth pricing and Sunday 8 PM, conflicting with the current 2026 free-admission page, $675 Retail / $1,000 Business Vendor fees and Sunday 7 PM. Treat those old payment/refund/setup clauses as non-current. Obtain the current 2026 agreement and confirm application acceptance, payment/refund obligations, Business Vendor footprint/inclusions and placement before paying or signing.',
           }
           assert len(expected_commitment_terms)==17, expected_commitment_terms
           for pid,terms in expected_commitment_terms.items():
@@ -2940,8 +2940,10 @@ jobs:
           assert 'data-live-compare-readiness-profile="LIFE-092"' in feast
           assert 'Pre-booking action required' in feast
           assert 'Commitment: Agreement / quote terms required' in feast
-          assert 'Still needed: Paradise category acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
+          assert 'Still needed: Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
           assert 'Feast of Little Italy is a strong current PURSUE.' in feast
+          assert 'data-live-compare-next-step-profile="LIFE-092"' in feast
+          assert 'Submit the current $1,000 Business Vendor interest form now with Paradise windows/doors services stated clearly.' in feast
           assert 'data-live-compare-evidence-profile="LIFE-092"' in feast
           assert '3 preserved history records · 3 history years · 1 explicit WORKED/ATTENDED year' in feast
           vero=row('LIFE-009')
@@ -3195,9 +3197,18 @@ jobs:
           grep -q 'Fri. Nov. 6, 2026: 4 PM-10 PM' /tmp/feast_little_italy.html
           grep -q 'data-current-logistics-status-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Exhibitor kit required' /tmp/feast_little_italy.html
-          grep -q 'linked terms page still shows 2019 operational terms' /tmp/feast_little_italy.html
+          grep -q 'data-current-logistics-profile="LIFE-092"' /tmp/feast_little_italy.html
+          grep -q 'Business Vendor as a vendor promoting business services' /tmp/feast_little_italy.html
+          grep -q 'Do not import the separate Retail Vendor 10x10 tent/electricity package into the Business Vendor fee' /tmp/feast_little_italy.html
+          grep -q '\$8 gated admission' /tmp/feast_little_italy.html
+          grep -q '2019 setup dates' /tmp/feast_little_italy.html
+          grep -q '\$500/\$600 booth pricing' /tmp/feast_little_italy.html
+          grep -q 'Sunday 8 PM close' /tmp/feast_little_italy.html
+          grep -q 'current 2026 site says free admission' /tmp/feast_little_italy.html
+          grep -q 'current \$675/\$1,000 vendor pricing and Sunday 7 PM' /tmp/feast_little_italy.html
           grep -q 'data-current-commitment-profile="LIFE-092"' /tmp/feast_little_italy.html
-          grep -q 'linked terms page still displays 2019 pricing, setup dates and refund language' /tmp/feast_little_italy.html
+          grep -q 'Treat those old payment/refund/setup clauses as non-current' /tmp/feast_little_italy.html
+          grep -q 'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' /tmp/feast_little_italy.html
           grep -q 'data-booking-readiness-profile="LIFE-092"' /tmp/feast_little_italy.html
           grep -q 'Pre-booking action required' /tmp/feast_little_italy.html
           grep -q '>Open Business Vendor interest form<' /tmp/feast_little_italy.html
