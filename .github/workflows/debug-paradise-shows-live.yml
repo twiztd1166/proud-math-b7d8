@@ -1615,10 +1615,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 41, detail.get('version')
+              assert detail.get('version') == 42, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 41, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 42, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1637,7 +1637,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 61, x.get('version')
+          assert x.get('version') == 62, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
