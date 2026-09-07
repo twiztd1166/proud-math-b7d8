@@ -3396,7 +3396,7 @@ jobs:
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
           grep -q 'data-live-decision-comparison' /tmp/shows.html
-          grep -q '<details class="liveCompareBoard" data-live-decision-comparison open>' /tmp/shows.html
+          grep -Eq '<details class="liveCompareBoard"[^>]*data-live-decision-comparison[^>]*open(=""|)[^>]*>' /tmp/shows.html
           grep -q 'Live opportunity comparison' /tmp/shows.html
           grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
           grep -q '18 governed targets' /tmp/shows.html
