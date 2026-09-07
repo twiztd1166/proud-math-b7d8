@@ -2843,7 +2843,7 @@ jobs:
           assert 'tel:5614270500' in feast
           assert 'data-live-compare-readiness-profile="LIFE-092"' in feast
           assert 'Pre-booking action required' in feast
-          assert 'Commitment: Current agreement required' in feast
+          assert 'Commitment: Agreement / quote terms required' in feast
           assert 'Still needed: Paradise category acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
           assert 'Feast of Little Italy is a strong current PURSUE.' in feast
           vero=row('LIFE-009')
