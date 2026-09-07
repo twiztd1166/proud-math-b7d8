@@ -3464,6 +3464,9 @@ jobs:
           grep -q 'data-lp-attributed-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q '131 - 10x12 · 2021 · Nov-6 Nov-7 · 4 LP closes · \$96,238 LP close volume · 16 issued · 7 demos · annual LP attribution · not attendance proof' /tmp/martin_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/martin_home_placement.html
+          grep -q 'Ask whether a current location comparable to historical Booth 131 - 10x12 is available' /tmp/martin_home_placement.html
+          grep -q '4 LP closes / \$96,238 LP close volume / 16 issued / 7 demos' /tmp/martin_home_placement.html
+          grep -q 'not attendance proof or proof Booth 131 is still best' /tmp/martin_home_placement.html
 
           render_view bradenton_pursue "$SITE/#show/LIFE-044"
           grep -q 'Bradenton Home Show' /tmp/bradenton_pursue.html
