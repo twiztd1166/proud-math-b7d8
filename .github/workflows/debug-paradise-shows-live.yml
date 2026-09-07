@@ -3266,6 +3266,16 @@ jobs:
           grep -q 'data-current-commitment-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Commitment / payment terms' /tmp/bradenton_pursue.html
           grep -q 'No money due at initial reservation' /tmp/bradenton_pursue.html
+          grep -q 'data-current-schedule-status-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Official source conflict / confirm' /tmp/bradenton_pursue.html
+          grep -q 'data-current-schedule-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Sun. Oct. 18 10 AM-4 PM' /tmp/bradenton_pursue.html
+          grep -q 'direct Aug. 6, 2026 organizer brochure lists Sunday 10 AM-5 PM' /tmp/bradenton_pursue.html
+          grep -q 'confirm the Sunday closing hour with Dave LaBell before final staffing' /tmp/bradenton_pursue.html
+          grep -q 'data-current-logistics-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'requires exhibitor liability insurance' /tmp/bradenton_pursue.html
+          grep -q 'Show Management retains final space-assignment authority' /tmp/bradenton_pursue.html
+          grep -q 'parking/loading/unloading third-party services' /tmp/bradenton_pursue.html
           grep -q 'data-current-critical-deadline-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Critical commitment date' /tmp/bradenton_pursue.html
           grep -q 'Sep 17, 2026' /tmp/bradenton_pursue.html
