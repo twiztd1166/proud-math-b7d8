@@ -223,7 +223,7 @@ function historicalReviewOutreach(review){
     const dial=phone.replace(/[^\d+]/g,'');
     if(dial)actions.push(`<a class="contactBtn" href="tel:${esc(dial)}">Call ${esc(phone)}</a>`);
   }
-  if(email)actions.push(`<a class="contactBtn" href="mailto:${esc(email)}">Email ${esc(email)}</a>`);
+  if(email)actions.push(`<a class="contactBtn" data-historical-outreach-email-profile="${esc(review.profile_id)}" href="mailto:${esc(email)}">Email ${esc(email)}</a>`);
   if(sourceUrl)actions.push(`<a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(sourceUrl)}">Open outreach source</a>`);
   const provenance=[checked?`checked ${checked}`:'',sourceLabel].filter(Boolean).join(' · ');
   return `<div class="wide" data-historical-outreach-profile="${esc(review.profile_id)}"><span>Current outreach contact</span><b>${esc(contact||'Use verified outreach source')}</b>${actions.length?`<div class="contactActions" data-historical-outreach-actions-profile="${esc(review.profile_id)}">${actions.join('')}</div>`:''}${provenance?`<div class="rebookLiveFoot" data-historical-outreach-source-profile="${esc(review.profile_id)}">${esc(provenance)}</div>`:''}</div>`;
