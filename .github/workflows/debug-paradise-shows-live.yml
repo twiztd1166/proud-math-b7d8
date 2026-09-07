@@ -344,6 +344,11 @@ jobs:
               grep -q "return 'Latest: '+latest+' · Best: '+best" /tmp/app-shows.js
               grep -q 'occurrence rows include issued/demos and show Latest vs Best' /tmp/app-shows.js
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
+              grep -q 'liveComparisonPlacementMetrics' /tmp/app-shows.js
+              grep -q 'Best outcome-linked specific' /tmp/app-shows.js
+              grep -q 'Outcome-linked placement note' /tmp/app-shows.js
+              grep -q 'Latest preserved placement' /tmp/app-shows.js
+              grep -q 'no same-row outcome' /tmp/app-shows.js
               grep -q 'liveCompareOpen' /tmp/app-shows.js
               grep -q 'data-live-compare-placement-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-venue-profile' /tmp/app-shows.js
@@ -954,6 +959,8 @@ jobs:
           assert vero_outcome.get('latest_observed_outcome_issued')==5, vero_outcome
           assert vero_outcome.get('latest_observed_outcome_demos')==2, vero_outcome
           assert vero_outcome.get('latest_observed_outcome_participation_status')=='2025 EVENT RECORD', vero_outcome
+          assert vero_outcome.get('best_observed_specific_booth')=='Booth #52', vero_outcome
+          assert vero_outcome.get('best_observed_specific_booth_year')==2025, vero_outcome
           gun_outcome=profiles['LIFE-046']
           assert gun_outcome.get('latest_observed_outcome_dates')=='2017-12-16 – 2017-12-17', gun_outcome
           assert gun_outcome.get('latest_observed_outcome_issued')==0, gun_outcome
@@ -971,6 +978,8 @@ jobs:
           assert clam_outcome.get('latest_observed_outcome_net_sales')==0, clam_outcome
           assert clam_outcome.get('latest_observed_outcome_issued')==8, clam_outcome
           assert clam_outcome.get('latest_observed_outcome_demos')==3, clam_outcome
+          assert clam_outcome.get('best_observed_booth')=='Tent display required — exact booth/location not stated', clam_outcome
+          assert clam_outcome.get('best_observed_specific_booth') is None, clam_outcome
           for pid in ('LIFE-007','LIFE-014','LIFE-017','LIFE-033','LIFE-044','LIFE-054','LIFE-071','LIFE-076'):
               assert profiles[pid].get('latest_observed_outcome_year') is None, (pid,profiles[pid])
           assert profiles['HIST-234'].get('latest_observed_outcome_year') is None, profiles['HIST-234']
@@ -2931,6 +2940,7 @@ jobs:
           assert 'Commitment: Verified current' in vero
           assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
+          assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'data-live-compare-evidence-profile="LIFE-009"' in vero
           assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
           martin=row('LIFE-018')
