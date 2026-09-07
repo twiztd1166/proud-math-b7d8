@@ -114,6 +114,11 @@ jobs:
               grep -q 'Current booking cost low' /tmp/app-shows.js
               grep -q 'Current booking cost high' /tmp/app-shows.js
               grep -q 'Decision-safe current booking cost' /tmp/app-shows.js
+              grep -q 'Current cost status' /tmp/app-shows.js
+              grep -q 'data-current-cost-status-profile' /tmp/app-shows.js
+              grep -q 'opportunityCostStatusLabel' /tmp/app-shows.js
+              grep -q 'fOpportunityCostStatus' /tmp/app-shows.js
+              grep -q 'currentCostStatus' /tmp/app-core.js
               grep -q 'data-current-booking-cost-profile' /tmp/app-shows.js
               grep -q 'Commitment / payment terms' /tmp/app-shows.js
               grep -q 'data-current-commitment-profile' /tmp/app-shows.js
@@ -700,6 +705,30 @@ jobs:
                   assert op.get('booking_cost_max') is None, (pid,op)
                   assert not op.get('booking_cost_unit'), (pid,op)
                   assert not op.get('booking_cost_basis'), (pid,op)
+          expected_current_cost_status={
+              'LIFE-007':'KNOWN_VERIFIED',
+              'LIFE-009':'KNOWN_VERIFIED',
+              'LIFE-017':'KNOWN_VERIFIED',
+              'LIFE-044':'KNOWN_VERIFIED',
+              'LIFE-046':'KNOWN_VERIFIED',
+              'LIFE-054':'KNOWN_VERIFIED',
+              'LIFE-077':'KNOWN_VERIFIED',
+              'HIST-234':'QUOTE_REQUIRED',
+              'LIFE-071':'QUOTE_REQUIRED',
+              'LIFE-030':'QUOTE_REQUIRED',
+              'LIFE-076':'QUOTE_REQUIRED',
+              'LIFE-013':'QUOTE_REQUIRED',
+              'LIFE-018':'CONTRACT_REVIEW_REQUIRED',
+              'LIFE-033':'RECONCILE_EXISTING',
+              'LIFE-060':'NOT_PUBLISHED_YET',
+              'LIFE-014':'NEXT_CYCLE_CLOSED',
+          }
+          assert set(expected_current_cost_status)==set(live), (set(expected_current_cost_status),set(live))
+          assert len(expected_current_cost_status)==16, expected_current_cost_status
+          for pid,status in expected_current_cost_status.items():
+              assert live[pid].get('current_cost_status')==status, (pid,live[pid])
+          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==7
+          assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==5
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'Payments are due 10 days before each participation date · returning weekly vendors should pay at least 1 week ahead to help retain the same space · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy.',
@@ -1126,10 +1155,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 32, detail.get('version')
+              assert detail.get('version') == 33, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 32, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 33, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1141,7 +1170,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 51, x.get('version')
+          assert x.get('version') == 52, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2312,6 +2341,8 @@ jobs:
           grep -q 'Oct 17, 2026' /tmp/bradenton_pursue.html
           grep -q 'Oct 18, 2026' /tmp/bradenton_pursue.html
           grep -q '10x10 booth starts at \$995' /tmp/bradenton_pursue.html
+          grep -q 'data-current-cost-status-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Known verified cost' /tmp/bradenton_pursue.html
           grep -q 'corner booth +\$100' /tmp/bradenton_pursue.html
           grep -q 'data-current-booking-cost-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Decision-safe current booking cost' /tmp/bradenton_pursue.html
@@ -2371,6 +2402,8 @@ jobs:
           grep -q '>Open venue map<' /tmp/flhs_watch.html
           grep -q 'Current booth / placement' /tmp/flhs_watch.html
           grep -q 'No Paradise 2026 booth assignment or exact placement is verified' /tmp/flhs_watch.html
+          grep -q 'data-current-cost-status-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q 'Quote required' /tmp/flhs_watch.html
           grep -q 'data-current-commitment-profile="LIFE-071"' /tmp/flhs_watch.html
           grep -q 'Not published / not verified — obtain deposit, balance-due, cancellation' /tmp/flhs_watch.html
           grep -q 'Still needed before booking' /tmp/flhs_watch.html
@@ -2476,6 +2509,8 @@ jobs:
           grep -q 'Oct 31, 2026' /tmp/pembroke_detail.html
           grep -q 'Nov 1, 2026' /tmp/pembroke_detail.html
           grep -q 'Current fall 2026 Paradise booth price is not published' /tmp/pembroke_detail.html
+          grep -q 'data-current-cost-status-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Reconcile existing booking' /tmp/pembroke_detail.html
           grep -q 'Current booth / placement' /tmp/pembroke_detail.html
           grep -q 'currently listed as an exhibitor, but the Oct. 31-Nov. 1 booth assignment is not verified' /tmp/pembroke_detail.html
           grep -q 'Prior cost / reference status' /tmp/pembroke_detail.html
@@ -2518,6 +2553,8 @@ jobs:
           grep -q 'Jan 10, 2027' /tmp/treasure_detail.html
           grep -q 'Martin County Home Improvement Show' /tmp/treasure_detail.html
           grep -q 'Current 2027 Paradise booth price has not been verified' /tmp/treasure_detail.html
+          grep -q 'data-current-cost-status-profile="LIFE-018"' /tmp/treasure_detail.html
+          grep -q 'Review current contract' /tmp/treasure_detail.html
           grep -q 'data-current-commitment-profile="LIFE-018"' /tmp/treasure_detail.html
           grep -q 'Organizer currently links a 2027 exhibitor contract and floor plan' /tmp/treasure_detail.html
           grep -q 'have not been verified in recovered current evidence' /tmp/treasure_detail.html
@@ -2539,6 +2576,8 @@ jobs:
           grep -q 'Feb 12, 2027' /tmp/martin_detail.html
           grep -q 'Feb 21, 2027' /tmp/martin_detail.html
           grep -q '2027 commercial-vendor pricing is not yet published' /tmp/martin_detail.html
+          grep -q 'data-current-cost-status-profile="LIFE-060"' /tmp/martin_detail.html
+          grep -q 'Not published yet' /tmp/martin_detail.html
           grep -q 'Prior cost / reference status' /tmp/martin_detail.html
           grep -q 'Official 2025 Martin County Fair vendor application reference' /tmp/martin_detail.html
           grep -q 'indoor 10x12 \$675 / 20x12 \$1,075' /tmp/martin_detail.html
