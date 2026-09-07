@@ -331,6 +331,10 @@ jobs:
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
               grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
+              grep -q 'liveComparisonEvidenceDepth' /tmp/app-shows.js
+              grep -q 'data-live-compare-evidence-profile' /tmp/app-shows.js
+              grep -q 'liveCompareOutcome' /tmp/app.css
+              grep -q 'zero explicit worked years is not proof of no participation' /tmp/app-shows.js
               grep -q "return 'Latest: '+latest+' · Best: '+best" /tmp/app-shows.js
               grep -q 'occurrence rows include issued/demos and show Latest vs Best' /tmp/app-shows.js
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
@@ -2837,6 +2841,9 @@ jobs:
           grep -q 'Live opportunity comparison' /tmp/shows.html
           grep -q '17 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 17
+          grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
+          grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-033"' /tmp/shows.html
           grep -q 'data-live-compare-row="HIST-234"' /tmp/shows.html
@@ -2887,6 +2894,8 @@ jobs:
           assert 'Pre-booking action required' in manatee
           assert 'Commitment: Verified current' in manatee
           assert 'Still needed: Windows/doors category availability · exact booth selection · total signed investment' in manatee
+          assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
+          assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
           assert 'data-live-compare-venue-profile="LIFE-092"' in feast
           assert 'Abacoa Town Center / Abacoa Amphitheatre · 1267 Main St, Jupiter, FL 33458' in feast
@@ -2902,6 +2911,8 @@ jobs:
           assert 'Commitment: Agreement / quote terms required' in feast
           assert 'Still needed: Paradise category acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement' in feast
           assert 'Feast of Little Italy is a strong current PURSUE.' in feast
+          assert 'data-live-compare-evidence-profile="LIFE-092"' in feast
+          assert '3 preserved history records · 3 history years · 1 explicit WORKED/ATTENDED year' in feast
           vero=row('LIFE-009')
           assert 'data-live-compare-venue-profile="LIFE-009"' in vero
           assert 'Indian River County Fairgrounds · 7955 58th Ave, Vero Beach, FL 32967' in vero
@@ -2912,8 +2923,12 @@ jobs:
           assert 'Commitment: Verified current' in vero
           assert 'Still needed: Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
+          assert 'data-live-compare-evidence-profile="LIFE-009"' in vero
+          assert '8 preserved history records · 5 history years · 0 explicit WORKED/ATTENDED years' in vero
           martin=row('LIFE-018')
           assert '2017 · 23 issued' in martin
+          assert 'data-live-compare-evidence-profile="LIFE-018"' in martin
+          assert '13 preserved history records · 8 history years · 3 explicit WORKED/ATTENDED years' in martin
           gun=row('LIFE-046')
           assert 'Latest: 2017 · 0 issued · 0 demos · Best: 2017 · 6 issued · 5 demos' in gun
           hold=row('LIFE-033')
@@ -2943,6 +2958,7 @@ jobs:
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -q 'Show database' /tmp/shows_mobile.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 17
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
