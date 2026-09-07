@@ -690,7 +690,7 @@ jobs:
               'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
               'LIFE-033':'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
-              'LIFE-112':'Authorized application/signature + current operation photo/product list · category/space acceptance · exact outside placement · final frontage/depth · electrical service/cost · contract/payment/cancellation terms · setup/breakdown/vendor hours · COI',
+              'LIFE-112':'Authorized application/signature + operation photo/product list · category/space acceptance · exact outside placement / final frontage and depth · electrical service/cost · accepted-vendor payment/cancellation terms · setup/breakdown/loading/vendor hours',
           }
           expected_historical_blockers={
               'LIFE-028':'Next pop-up date · current daily rate · exact in-store/outside placement · event hours · power/setup rules · host approval',
