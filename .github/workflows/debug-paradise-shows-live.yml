@@ -522,21 +522,26 @@ jobs:
           assert not live['LIFE-014'].get('prior_cost_text'), live['LIFE-014']
           assert not live['LIFE-076'].get('prior_cost_text'), live['LIFE-076']
           expected_actions={
-              'HIST-234':('Open sponsorship','https://www.verobeachoktoberfest.com/sponsor'),
-              'LIFE-007':('Start vendor application','https://www.rpbgreenmarket.com/application--payment-forms.html'),
-              'LIFE-009':('Apply for booth','https://my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1'),
-              'LIFE-013':('Apply online','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
-              'LIFE-017':('Request exhibitor contract','https://www.tampahomeshow.com/get-contract/'),
-              'LIFE-018':('Open contract / floorplan','https://www.professionalshowmanagement.com/home-shows'),
-              'LIFE-030':('Request sponsorship','https://www.artigras.org/become-a-sponsor/'),
-              'LIFE-054':('Apply as vendor','https://pci.jotform.com/form/261183112155144'),
-              'LIFE-077':('Open sponsorship','https://www.sebastianclambake.org/sponsorship-info'),
+              'LIFE-014':('Open next-cycle vendor page','https://www.wpb.org/Residents/Community-Events/Events/WPB-GreenMarket/Vendor-Application'),
+              'LIFE-046':('Open vendor availability info','https://flgunshows.com/shows/'),
+              'HIST-234':('Open commercial sponsorship path','https://www.verobeachoktoberfest.com/sponsor'),
+              'LIFE-007':('Open 2026-27 vendor application','https://form.jotform.com/261054512266148'),
+              'LIFE-044':('Open participation form + floor plan','https://www.tampabay.com/expos/tampa-bay-home-show/exhibitors/'),
+              'LIFE-033':('Open current exhibitor controls','https://homeshowsouthflorida.com/i-am-an-exhibitor/'),
+              'LIFE-077':('Open 2026 vendor application','https://docs.google.com/forms/d/e/1FAIpQLSeRU7be3PmhlFEpBAvQtLkaTKkuVGOAqFXuY6F0Jvhd6Odskg/viewform?usp=send_form'),
+              'LIFE-054':('Open 2026 vendor application','https://pci.jotform.com/form/261183112155144'),
+              'LIFE-009':('Open Jan. 2-3 booth application','https://my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1'),
+              'LIFE-018':('Open 2027 floor plan + exhibitor contract','https://www.professionalshowmanagement.com/home-shows'),
+              'LIFE-030':('Open 2027 sponsorship page','https://www.artigras.org/become-a-sponsor/'),
+              'LIFE-060':('Open official fair vendor watch page','https://www.martincountyfair.com/'),
+              'LIFE-076':('Open 2027 tournament / partnership site','https://thecognizantclassic.com/'),
+              'LIFE-013':('Open 2027 exhibitor portal','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
+              'LIFE-017':('Request / refresh 2027 Tampa contract','https://www.tampahomeshow.com/get-contract/'),
           }
+          assert set(expected_actions)==set(live), (set(expected_actions),set(live))
           for pid,(label,url) in expected_actions.items():
               assert live[pid].get('action_label')==label, (pid,live[pid])
               assert live[pid].get('action_url')==url, (pid,live[pid])
-          for pid in {'LIFE-014','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-076'}:
-              assert not live[pid].get('action_url'), (pid,live[pid])
           assert profiles['HIST-234']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
@@ -2035,7 +2040,7 @@ jobs:
           grep -q '0 net sales' /tmp/vero_home_placement.html
           grep -q '\$0 net revenue' /tmp/vero_home_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/vero_home_placement.html
-          grep -q '>Apply for booth<' /tmp/vero_home_placement.html
+          grep -q '>Open Jan. 2-3 booth application<' /tmp/vero_home_placement.html
           grep -q 'my.boothcentral.com/v/events/vero-beach-14th-annual-winter-home-remodel-show-1' /tmp/vero_home_placement.html
 
           render_view rpb_green_market_placement "$SITE/#show/LIFE-007"
@@ -2047,8 +2052,8 @@ jobs:
           grep -q 'Latest preserved placement: #18' /tmp/rpb_green_market_placement.html
           grep -q '2022 · Feb-19' /tmp/rpb_green_market_placement.html
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
-          grep -q '>Start vendor application<' /tmp/rpb_green_market_placement.html
-          grep -q 'application--payment-forms.html' /tmp/rpb_green_market_placement.html
+          grep -q '>Open 2026-27 vendor application<' /tmp/rpb_green_market_placement.html
+          grep -q 'form.jotform.com/261054512266148' /tmp/rpb_green_market_placement.html
 
           render_view martin_home_placement "$SITE/#show/LIFE-018"
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
@@ -2076,6 +2081,8 @@ jobs:
           grep -q 'Dave LaBell' /tmp/bradenton_pursue.html
           grep -q 'Tampa Bay Times Events' /tmp/bradenton_pursue.html
           grep -q 'same-market/same-venue evidence' /tmp/bradenton_pursue.html
+          grep -q 'Open participation form + floor plan' /tmp/bradenton_pursue.html
+          grep -q 'tampabay.com/expos/tampa-bay-home-show/exhibitors/' /tmp/bradenton_pursue.html
           grep -q 'Open current source' /tmp/bradenton_pursue.html
 
           render_view tampa_2027 "$SITE/#show/LIFE-017"
@@ -2084,7 +2091,7 @@ jobs:
           grep -q 'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602' /tmp/tampa_2027.html
           grep -q '>PURSUE<' /tmp/tampa_2027.html
           grep -q '\$1,295 per 10x10 booth' /tmp/tampa_2027.html
-          grep -q '>Request exhibitor contract<' /tmp/tampa_2027.html
+          grep -q '>Request / refresh 2027 Tampa contract<' /tmp/tampa_2027.html
           grep -q 'tampahomeshow.com/get-contract/' /tmp/tampa_2027.html
 
           render_view hurricane_watch "$SITE/#show/LIFE-039"
@@ -2172,6 +2179,8 @@ jobs:
           grep -q 'not an Oct. 31-Nov. 1 fall 2026 quote or assignment' /tmp/pembroke_detail.html
           grep -q 'reference history only' /tmp/pembroke_detail.html
           grep -q '888-433-3976' /tmp/pembroke_detail.html
+          grep -q 'Open current exhibitor controls' /tmp/pembroke_detail.html
+          grep -q 'homeshowsouthflorida.com/i-am-an-exhibitor/' /tmp/pembroke_detail.html
           grep -q 'Open current source' /tmp/pembroke_detail.html
 
           render_view gunshow_detail "$SITE/#show/LIFE-046"
@@ -2181,6 +2190,8 @@ jobs:
           grep -q 'Oct 10, 2026' /tmp/gunshow_detail.html
           grep -q '8-foot table \$100' /tmp/gunshow_detail.html
           grep -q 'Sport Show Specialists' /tmp/gunshow_detail.html
+          grep -q 'Open vendor availability info' /tmp/gunshow_detail.html
+          grep -q 'flgunshows.com/shows/' /tmp/gunshow_detail.html
           grep -q 'Open current source' /tmp/gunshow_detail.html
 
           render_view treasure_detail "$SITE/#show/LIFE-018"
@@ -2196,7 +2207,7 @@ jobs:
           grep -q 'Booth 131 (10x12) \$795' /tmp/treasure_detail.html
           grep -q 'Mar. 2021 \$1,500' /tmp/treasure_detail.html
           grep -q '772-486-4969' /tmp/treasure_detail.html
-          grep -q '>Open contract / floorplan<' /tmp/treasure_detail.html
+          grep -q '>Open 2027 floor plan + exhibitor contract<' /tmp/treasure_detail.html
           grep -q 'professionalshowmanagement.com/home-shows' /tmp/treasure_detail.html
           grep -q 'Open current source' /tmp/treasure_detail.html
 
@@ -2212,6 +2223,8 @@ jobs:
           grep -q 'indoor 10x12 \$675 / 20x12 \$1,075' /tmp/martin_detail.html
           grep -q 'outdoor 10x12 \$475 / 20x12 \$725' /tmp/martin_detail.html
           grep -q 'fairoffice@martincountyfair.com' /tmp/martin_detail.html
+          grep -q 'Open official fair vendor watch page' /tmp/martin_detail.html
+          grep -q 'martincountyfair.com/' /tmp/martin_detail.html
           grep -q 'Open current source' /tmp/martin_detail.html
 
           render_view cognizant_detail "$SITE/#show/LIFE-076"
@@ -2223,13 +2236,15 @@ jobs:
           grep -q 'partnership / activation pricing is not publicly verified' /tmp/cognizant_detail.html
           grep -q 'Do not treat hospitality as a vendor booth' /tmp/cognizant_detail.html
           grep -q 'Sebastian Ascanio' /tmp/cognizant_detail.html
+          grep -q 'Open 2027 tournament / partnership site' /tmp/cognizant_detail.html
+          grep -q 'thecognizantclassic.com/' /tmp/cognizant_detail.html
           grep -q 'Open current source' /tmp/cognizant_detail.html
 
           render_view winterfest_detail "$SITE/#show/LIFE-054"
           grep -q 'LIFE-054' /tmp/winterfest_detail.html
           grep -q 'RPB Winter Fest' /tmp/winterfest_detail.html
           grep -q 'Verified current opportunity' /tmp/winterfest_detail.html
-          grep -q '>Apply as vendor<' /tmp/winterfest_detail.html
+          grep -q '>Open 2026 vendor application<' /tmp/winterfest_detail.html
           grep -q 'pci.jotform.com/form/261183112155144' /tmp/winterfest_detail.html
           grep -q 'Open current source' /tmp/winterfest_detail.html
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
