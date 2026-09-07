@@ -533,14 +533,16 @@ jobs:
               'LIFE-076':'WATCH_GATED',
               'LIFE-033':'HOLD_RECONCILE',
           }
-          assert set(expected_live_readiness)==expected_live, (set(expected_live_readiness),expected_live)
+          assert len(expected_live_readiness)==16, expected_live_readiness
+          assert all(profiles[pid].get('current_rebook_opportunity') for pid in expected_live_readiness), expected_live_readiness
           for pid,readiness in expected_live_readiness.items():
               assert reviews[pid].get('booking_readiness')==readiness, (pid,reviews[pid])
+          assert all((reviews[pid].get('booking_readiness') is None) for pid in set(reviews)-set(expected_live_readiness)), {pid:reviews[pid].get('booking_readiness') for pid in set(reviews)-set(expected_live_readiness)}
           assert sum(1 for v in expected_live_readiness.values() if v=='PRE_BOOKING_ACTION_REQUIRED')==7
           assert sum(1 for v in expected_live_readiness.values() if v=='WATCH_GATED')==8
           assert sum(1 for v in expected_live_readiness.values() if v=='HOLD_RECONCILE')==1
           assert sum(1 for v in expected_live_readiness.values() if v=='READY_TO_COMMIT')==0
-          assert all(reviews[pid].get('blockers_text') for pid in expected_live if expected_live_readiness[pid]!='READY_TO_COMMIT')
+          assert all(reviews[pid].get('blockers_text') for pid in expected_live_readiness if expected_live_readiness[pid]!='READY_TO_COMMIT')
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site','no future Paradise-style pop-up date published/found as of 2026-09-07'),
               'LIFE-038':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Paws in the Park','linked Paws site remains dated 2022'),
@@ -660,6 +662,7 @@ jobs:
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
+          assert set(expected_live_readiness)==expected_live, (set(expected_live_readiness),expected_live)
           assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
           live_action_timing={pid:str((reviews.get(pid) or {}).get('action_timing') or '').strip() for pid in expected_live}
           act_now={pid for pid,timing in live_action_timing.items() if timing.upper().startswith('NOW')}
