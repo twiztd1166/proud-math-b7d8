@@ -206,6 +206,10 @@ jobs:
               grep -q 'rebookReviewCard' /tmp/app-shows.js
               grep -q 'current_rebook_review' /tmp/app-shows.js
               grep -q 'Current booking review' /tmp/app-shows.js
+              grep -q 'Booking readiness' /tmp/app-shows.js
+              grep -q 'bookingReadinessLabel' /tmp/app-shows.js
+              grep -q 'data-booking-readiness-profile' /tmp/app-shows.js
+              grep -q 'review.booking_readiness' /tmp/app-shows.js
               grep -q 'Still needed before booking' /tmp/app-shows.js
               grep -q 'review.blockers_text' /tmp/app-shows.js
               grep -q 'review.action_timing' /tmp/app-shows.js
@@ -510,6 +514,32 @@ jobs:
           for pid,review in reviews.items():
               if pid not in expected_review_blockers:
                   assert not review.get('blockers_text'), (pid,review)
+          expected_live_readiness={
+              'LIFE-046':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-007':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-044':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-054':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-018':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-013':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-017':'PRE_BOOKING_ACTION_REQUIRED',
+              'LIFE-014':'WATCH_GATED',
+              'HIST-234':'WATCH_GATED',
+              'LIFE-071':'WATCH_GATED',
+              'LIFE-077':'WATCH_GATED',
+              'LIFE-009':'WATCH_GATED',
+              'LIFE-030':'WATCH_GATED',
+              'LIFE-060':'WATCH_GATED',
+              'LIFE-076':'WATCH_GATED',
+              'LIFE-033':'HOLD_RECONCILE',
+          }
+          assert set(expected_live_readiness)==expected_live, (set(expected_live_readiness),expected_live)
+          for pid,readiness in expected_live_readiness.items():
+              assert reviews[pid].get('booking_readiness')==readiness, (pid,reviews[pid])
+          assert sum(1 for v in expected_live_readiness.values() if v=='PRE_BOOKING_ACTION_REQUIRED')==7
+          assert sum(1 for v in expected_live_readiness.values() if v=='WATCH_GATED')==8
+          assert sum(1 for v in expected_live_readiness.values() if v=='HOLD_RECONCILE')==1
+          assert sum(1 for v in expected_live_readiness.values() if v=='READY_TO_COMMIT')==0
+          assert all(reviews[pid].get('blockers_text') for pid in expected_live if expected_live_readiness[pid]!='READY_TO_COMMIT')
           expected_historical_review_sources={
               'LIFE-028':('https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site','no future Paradise-style pop-up date published/found as of 2026-09-07'),
               'LIFE-038':('https://hubbardsouthflorida.com/events/','Hubbard South Florida current Paws in the Park','linked Paws site remains dated 2022'),
@@ -1222,10 +1252,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 34, detail.get('version')
+              assert detail.get('version') == 35, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 34, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 35, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1237,7 +1267,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 53, x.get('version')
+          assert x.get('version') == 54, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2415,6 +2445,9 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Historical decision evidence' /tmp/bradenton_pursue.html
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
+          grep -q 'data-booking-readiness-profile="LIFE-044"' /tmp/bradenton_pursue.html
+          grep -q 'Booking readiness' /tmp/bradenton_pursue.html
+          grep -q 'Pre-booking action required' /tmp/bradenton_pursue.html
           grep -q 'When to act' /tmp/bradenton_pursue.html
           grep -q 'Still needed before booking' /tmp/bradenton_pursue.html
           grep -q 'Windows/doors category availability · exact booth selection · total signed investment' /tmp/bradenton_pursue.html
@@ -2560,6 +2593,8 @@ jobs:
           render_view vero_oktoberfest "$SITE/#show/HIST-234"
           grep -q 'Vero Beach Oktoberfest' /tmp/vero_oktoberfest.html
           grep -q 'Verified current opportunity' /tmp/vero_oktoberfest.html
+          grep -q 'data-booking-readiness-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'Watch / gated' /tmp/vero_oktoberfest.html
           grep -q 'SPONSORSHIP OPEN' /tmp/vero_oktoberfest.html
           grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
           grep -q 'Oct 18, 2026' /tmp/vero_oktoberfest.html
@@ -2599,6 +2634,8 @@ jobs:
           render_view pembroke_detail "$SITE/#show/LIFE-033"
           grep -q 'Pembroke Home Show' /tmp/pembroke_detail.html
           grep -q 'Verified current exhibitor listing' /tmp/pembroke_detail.html
+          grep -q 'data-booking-readiness-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q 'Hold / reconcile' /tmp/pembroke_detail.html
           grep -q 'Still needed before booking' /tmp/pembroke_detail.html
           grep -q 'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
