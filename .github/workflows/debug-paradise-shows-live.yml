@@ -297,6 +297,12 @@ jobs:
               grep -q 'liveHistoricalDecisionEvidenceHtml' /tmp/app-modals.js
               grep -q 'historicalDecisionEvidence(catalogProfile)' /tmp/app-modals.js
               grep -q 'historicalDecisionEvidence' /tmp/app-shows.js
+              grep -q 'reviewedDecisionEvidenceTarget' /tmp/app-shows.js
+              grep -q 'latest verified worked' /tmp/app-shows.js
+              grep -q 'annual LP attribution year' /tmp/app-shows.js
+              grep -q 'LP attribution is not attendance proof' /tmp/app-shows.js
+              grep -q 'lifetime net aggregate' /tmp/app-shows.js
+              grep -q 'Lifetime / LP attribution is not attendance proof' /tmp/app-shows.js
               grep -q 'Historical decision evidence' /tmp/app-shows.js
               grep -q 'Historical outcome snapshot' /tmp/app-shows.js
               grep -q 'data-historical-outcome-profile' /tmp/app-shows.js
@@ -613,6 +619,23 @@ jobs:
               'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049','info@slcsafetyfest.com','https://slcsafetyfest.com/wp-content/uploads/2025/02/SLCSF-Sponsorship-application-25.pdf','Official St. Lucie County Safety Festival sponsorship contact artifact'),
           }
           assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
+          expected_historical_outcome_status={
+              'LIFE-028':'LIFETIME_ONLY',
+              'LIFE-038':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-039':'LIFETIME_ONLY',
+              'LIFE-056':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-057':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-073':'LIFETIME_ONLY',
+          }
+          assert set(expected_historical_outcome_status)==set(expected_historical_outreach), expected_historical_outcome_status
+          for pid,status in expected_historical_outcome_status.items():
+              assert profiles[pid].get('outcome_evidence_status')==status, (pid,profiles[pid])
+              assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid])
+          assert sum(1 for v in expected_historical_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==3
+          assert sum(1 for v in expected_historical_outcome_status.values() if v=='LIFETIME_ONLY')==3
+          assert profiles['LIFE-038'].get('latest_observed_outcome_year')==2017, profiles['LIFE-038']
+          assert profiles['LIFE-038'].get('latest_observed_outcome_issued')==5, profiles['LIFE-038']
+          assert profiles['LIFE-028'].get('latest_observed_outcome_year') is None, profiles['LIFE-028']
           for pid,(name,phone,email,source_url,source_label) in expected_historical_outreach.items():
               review=reviews[pid]
               assert review.get('outreach_contact_name')==name, (pid,review)
@@ -2635,6 +2658,13 @@ jobs:
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
           grep -q 'data-review-profile="LIFE-028" data-review-scope="historical"' /tmp/palm_liquors_pursue.html
           grep -q 'Historical candidate review' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/palm_liquors_pursue.html
+          grep -q '6 annual LP attribution years · latest LP 2025 (LP attribution is not attendance proof)' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outcome-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'Lifetime performance only' /tmp/palm_liquors_pursue.html
+          grep -q 'no occurrence-level outcome metrics are preserved' /tmp/palm_liquors_pursue.html
+          grep -q 'Lifetime / LP attribution is not attendance proof' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q 'Current outreach contact' /tmp/palm_liquors_pursue.html
           grep -q 'Palm Beach Liquors · 561-330-4777' /tmp/palm_liquors_pursue.html
@@ -2653,6 +2683,18 @@ jobs:
           PY
           grep -q 'When to act' /tmp/palm_liquors_pursue.html
           grep -q 'NOW' /tmp/palm_liquors_pursue.html
+
+          render_view paws_pursue "$SITE/#show/LIFE-038"
+          grep -q 'data-review-profile="LIFE-038" data-review-scope="historical"' /tmp/paws_pursue.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-038"' /tmp/paws_pursue.html
+          grep -q '3 verified worked years · latest verified worked 2017' /tmp/paws_pursue.html
+          grep -q '7 annual LP attribution years · latest LP 2021 (LP attribution is not attendance proof)' /tmp/paws_pursue.html
+          grep -q 'data-historical-outcome-profile="LIFE-038"' /tmp/paws_pursue.html
+          grep -q 'Occurrence-level outcome available' /tmp/paws_pursue.html
+          grep -q 'Latest observed: 2017' /tmp/paws_pursue.html
+          grep -q '5 issued' /tmp/paws_pursue.html
+          grep -q 'data-historical-outreach-profile="LIFE-038"' /tmp/paws_pursue.html
+          grep -q 'Hubbard South Florida · 561-616-4777' /tmp/paws_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
           grep -q '561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q '\$75/day' /tmp/palm_liquors_pursue.html
@@ -2752,7 +2794,8 @@ jobs:
           grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Historical decision evidence' /tmp/martin_home_placement.html
-          grep -q '3 verified worked years' /tmp/martin_home_placement.html
+          grep -q '3 verified worked years · latest verified worked 2017' /tmp/martin_home_placement.html
+          grep -q '8 annual LP attribution years · latest LP 2023 (LP attribution is not attendance proof)' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
@@ -2852,6 +2895,8 @@ jobs:
 
           render_view flhs_watch "$SITE/#show/LIFE-071"
           grep -q 'FL Largest Home Show' /tmp/flhs_watch.html
+          grep -q '1 verified worked year · latest verified worked 2023' /tmp/flhs_watch.html
+          grep -q '2 annual LP attribution years · latest LP 2024 (LP attribution is not attendance proof)' /tmp/flhs_watch.html
           grep -q 'Current booking review' /tmp/flhs_watch.html
           grep -q '>WATCH<' /tmp/flhs_watch.html
           grep -q 'When to act' /tmp/flhs_watch.html
