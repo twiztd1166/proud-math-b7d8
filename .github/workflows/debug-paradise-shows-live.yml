@@ -275,6 +275,16 @@ jobs:
               grep -q 'outreach_contact_checked_at' /tmp/app-shows.js
               grep -q 'Open outreach source' /tmp/app-shows.js
               grep -q 'data-historical-outreach-source-profile' /tmp/app-shows.js
+              grep -q 'historicalOutreachCycleStatusLabel' /tmp/app-shows.js
+              grep -q 'historicalOutreachCycle' /tmp/app-shows.js
+              grep -q 'Current cycle status' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-cycle-profile' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-cycle-actions-profile' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-cycle-source-profile' /tmp/app-shows.js
+              grep -q 'review.outreach_cycle_status' /tmp/app-shows.js
+              grep -q 'review.outreach_cycle_text' /tmp/app-shows.js
+              grep -q 'Open cycle source' /tmp/app-shows.js
+              grep -q 'rebookCycleText' /tmp/app.css
               grep -q 'data-review-profile' /tmp/app-shows.js
               grep -q 'data-review-scope' /tmp/app-shows.js
               grep -Fq "rebookReviewCard(d.rebookReview||null,Boolean(d.rebookOpportunity))" /tmp/app-modals.js
@@ -660,6 +670,32 @@ jobs:
               'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049','info@slcsafetyfest.com','https://slcsafetyfest.com/wp-content/uploads/2025/02/SLCSF-Sponsorship-application-25.pdf','Official St. Lucie County Safety Festival sponsorship contact artifact'),
           }
           assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
+          expected_historical_cycle_status={
+              'LIFE-028':'ACTIVE_HOST_DATE_REQUIRED',
+              'LIFE-038':'ACTIVE_SERIES_DATE_UNVERIFIED',
+              'LIFE-039':'NEXT_CYCLE_NOT_PUBLISHED',
+              'LIFE-056':'ACTIVE_SERIES_DATE_UNVERIFIED',
+              'LIFE-057':'ACTIVE_SERIES_DATE_UNVERIFIED',
+              'LIFE-073':'NEXT_CYCLE_NOT_PUBLISHED',
+          }
+          assert set(expected_historical_cycle_status)==set(expected_historical_outreach), expected_historical_cycle_status
+          for pid,status in expected_historical_cycle_status.items():
+              review=reviews[pid]
+              assert review.get('outreach_cycle_status')==status, (pid,review)
+              assert str(review.get('outreach_cycle_text') or '').strip(), (pid,review)
+              assert str(review.get('outreach_cycle_source_url') or '').startswith('https://'), (pid,review)
+              assert str(review.get('outreach_cycle_source_label') or '').strip(), (pid,review)
+              assert review.get('outreach_cycle_checked_at'), (pid,review)
+              assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
+          assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_HOST_DATE_REQUIRED')==1
+          assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_SERIES_DATE_UNVERIFIED')==3
+          assert sum(1 for v in expected_historical_cycle_status.values() if v=='NEXT_CYCLE_NOT_PUBLISHED')==2
+          assert 'not a verified scheduled show' in reviews['LIFE-028'].get('outreach_cycle_text','')
+          assert 'older 2022 occurrence' in reviews['LIFE-038'].get('outreach_cycle_text','')
+          assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
+          assert 'legacy 2020 cancellation/Coming Soon content' in reviews['LIFE-056'].get('outreach_cycle_text','')
+          assert 'no current 2026/2027 event date or vendor package' in reviews['LIFE-057'].get('outreach_cycle_text','')
+          assert 'Apr. 25, 2026 at Clover Park' in reviews['LIFE-073'].get('outreach_cycle_text','')
           expected_historical_outcome_status={
               'LIFE-028':'LIFETIME_ONLY',
               'LIFE-038':'OCCURRENCE_OUTCOME_AVAILABLE',
@@ -694,6 +730,11 @@ jobs:
                   assert not review.get('outreach_contact_source_url'), (pid,review)
                   assert not review.get('outreach_contact_source_label'), (pid,review)
                   assert not review.get('outreach_contact_checked_at'), (pid,review)
+                  assert not review.get('outreach_cycle_status'), (pid,review)
+                  assert not review.get('outreach_cycle_text'), (pid,review)
+                  assert not review.get('outreach_cycle_source_url'), (pid,review)
+                  assert not review.get('outreach_cycle_source_label'), (pid,review)
+                  assert not review.get('outreach_cycle_checked_at'), (pid,review)
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               if profiles[held].get('current_rebook_opportunity'):
@@ -1612,10 +1653,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 41, detail.get('version')
+              assert detail.get('version') == 42, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 41, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 42, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1634,7 +1675,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 61, x.get('version')
+          assert x.get('version') == 62, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
