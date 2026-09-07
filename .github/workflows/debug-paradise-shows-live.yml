@@ -672,7 +672,7 @@ jobs:
               'LIFE-009':'Materially stronger live placement · exact booth availability before $100 invoice deposit · signed hold-harmless agreement',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
-              'LIFE-071':'Current all-in booth/setup quote · exact available St. Petersburg placement · category acceptance · deposit / cancellation / COI / add-on terms',
+              'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
@@ -1086,7 +1086,27 @@ jobs:
           assert 'pay a sponsor premium only for documented placement/visibility value' in reviews['LIFE-039'].get('rationale',''), reviews['LIFE-039']
           assert 'Ronnie opened 2024 registration Apr. 24' in reviews['LIFE-039'].get('notes',''), reviews['LIFE-039']
           assert 'registration was delayed by email/site issues, opened May 1 and closed May 8' in reviews['LIFE-039'].get('notes',''), reviews['LIFE-039']
-          assert '$5,000 2024 paid reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert reviews['LIFE-071'].get('disposition')=='WATCH' and reviews['LIFE-071'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-071']
+          assert reviews['LIFE-071'].get('action_timing','').startswith('NOW — request the Oct. 17-18, 2026 St. Petersburg quote, current category inventory and live floor plan.'), reviews['LIFE-071']
+          assert '20x20 or 10x40' in reviews['LIFE-071'].get('rationale',''), reviews['LIFE-071']
+          assert '$5,000' in reviews['LIFE-071'].get('rationale',''), reviews['LIFE-071']
+          assert 'actively managed category caps and entrance-visible 20x20 placement' in reviews['LIFE-071'].get('rationale',''), reviews['LIFE-071']
+          assert 'request guides only, not current St. Petersburg economics or proven best-booth evidence' in reviews['LIFE-071'].get('rationale',''), reviews['LIFE-071']
+          assert 'current minimum footprint for impact windows/doors/roofing' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'current category cap and number of competing window/door/roofing exhibitors' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'front/entrance-visible 20x20 or equivalent high-visibility space' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'prior Tampa layout preference, not performance proof or current availability' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'direct 2024 $5,000 / 20x20-or-10x40 same-series reference' in reviews['LIFE-071'].get('next_step',''), reviews['LIFE-071']
+          assert 'GMAIL:18f1ae91ce433af8' in reviews['LIFE-071'].get('source_ref',''), reviews['LIFE-071']
+          assert 'GMAIL:18f1b07f793378f2' in reviews['LIFE-071'].get('source_ref',''), reviews['LIFE-071']
+          assert 'GMAIL_THREAD:187dddd5a47d2926' in reviews['LIFE-071'].get('source_ref',''), reviews['LIFE-071']
+          assert live['LIFE-071'].get('current_cost_status')=='QUOTE_REQUIRED', live['LIFE-071']
+          assert live['LIFE-071'].get('booking_cost_min') is None and live['LIFE-071'].get('booking_cost_max') is None, live['LIFE-071']
+          assert 'no current FLHS quote was recovered in Paradise 2026 Gmail/Drive search' in live['LIFE-071'].get('price_text',''), live['LIFE-071']
+          assert '$5,000 with a windows/doors/roofing minimum footprint of 20x20 or 10x40' in live['LIFE-071'].get('price_text',''), live['LIFE-071']
+          assert 'Do not carry that price or footprint forward' in live['LIFE-071'].get('price_text',''), live['LIFE-071']
+          assert 'category inventory can close' in live['LIFE-071'].get('booking_window_text',''), live['LIFE-071']
+          assert 'June and July windows/doors/roofing space was already sold out' in live['LIFE-071'].get('booking_window_text',''), live['LIFE-071']
           assert 'mike@dlfmedia.com / 772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert 'registration opened Dec. 3, 2025, Paradise submitted Dec. 8, DLF acknowledged Dec. 15 and invoiced Feb. 19, 2026' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
           assert '772-337-0049' in reviews['LIFE-073'].get('next_step',''), reviews['LIFE-073']
@@ -1374,7 +1394,7 @@ jobs:
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
-              'LIFE-071':'No Paradise 2026 booth assignment or exact placement is verified. Use the live booth-request path to obtain the current floor plan and available spaces before committing; historical Tampa/Fairgrounds placements are not current St. Petersburg availability evidence.',
+              'LIFE-071':'No Paradise 2026 St. Petersburg booth assignment or live floor plan is verified. Same-series 2023 organizer precedent says FLHS had two 20x20 spaces at the front of the Tampa show that were visible from the entrance and described them as strong display locations; this is organizer layout preference only, not Paradise performance evidence and not current St. Petersburg availability. Ask for the current plan and prioritize a front/entrance-visible 20x20 or current category-required equivalent only if the live layout supports it.',
               'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
               'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
               'LIFE-017':'No 2027 Tampa booth assignment is verified. The direct Apr. 2027 contract lets Paradise list three preferred booth locations, but ECCS makes the final location decision. Request the current 2027 booth map from Patience Rall and choose three ranked preferred spaces before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
@@ -1547,7 +1567,7 @@ jobs:
               'LIFE-030':'Paradise ArtiGras history: 2023 booking reference $3,850; 2022 Booth S204 (10x10) cost $3,400. Historical reference only — current 2027 booth-bearing sponsorship package still needs a quote.',
               'LIFE-033':'Paradise same-series May 2-3, 2026 reference: Booth 106, 8x10; $2,145 booth cost less $100 Super Saver = $2,045 invoice. This is the spring 2026 occurrence, not an Oct. 31-Nov. 1 fall 2026 quote or assignment.',
               'LIFE-060':'Official 2025 Martin County Fair vendor application reference: indoor 10x12 $675 / 20x12 $1,075; outdoor 10x12 $475 / 20x12 $725; larger 20x20 $1,500. Prior-cycle official rates only — 2027 commercial pricing is not yet published.',
-              'LIFE-071':'Paradise 2024 Florida\'s Largest Home Show paid reference: $5,000 for the Labor Day occurrence. Historical reference only; not a 2026 St. Petersburg quote.',
+              'LIFE-071':'Direct same-series organizer reference: Apr. 26, 2024 FLHS quoted Paradise $5,000 for the Aug. 30-Sep. 2 Tampa Labor Day show with a windows/doors/roofing minimum of 20x20 or 10x40. Paradise subsequently paid $5,000 for the 2024 Labor Day occurrence. Historical Tampa/Fairgrounds reference only; not a 2026 St. Petersburg price or footprint requirement.',
               'LIFE-007':'Paradise preserved RPB Green Market schedule reference: $107.14 per listed Saturday in late 2021 through Feb. 2022 at #18 outside popup; earlier 2021 rows preserve $92.11. Historical schedule evidence only; current 2026-27 official $65/$75 rate governs.',
               'LIFE-014':'Paradise 2021-22 WPB GreenMarket outside-popup schedule reference: $310.34 final cost per listed Saturday ($413.79 event-cost field). The later preserved $11 / $11,000 strings are anomalous and are not used as pricing evidence. Historical schedule reference only; current vendor price remains unverified.',
               'LIFE-017':'Paradise Tampa Home Show references: 2024 approved/scheduled tracker $1,395; 2023 calendar schedule $1,295. Historical booking/schedule evidence only; current 2027 direct contract is $1,295 standard / $1,395 corner plus add-ons and any card surcharge.',
