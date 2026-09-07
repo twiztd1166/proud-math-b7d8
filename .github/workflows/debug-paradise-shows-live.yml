@@ -399,9 +399,9 @@ jobs:
           strong_history_2013=[p for p in historical_2013 if p.get('tier') in ('Platinum','Gold')]
           hold_dispositions={'HOLD','RETIRED'}
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
-          assert len(historical_2013)==74, len(historical_2013)
-          assert len(strong_history_2013)==12, len(strong_history_2013)
-          assert len(strong_2013)==8, len(strong_2013)
+          assert len(historical_2013)==73, len(historical_2013)
+          assert len(strong_history_2013)==11, len(strong_history_2013)
+          assert len(strong_2013)==7, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
           expected_reviews={
               'HIST-234':'WATCH',
@@ -451,6 +451,7 @@ jobs:
               'LIFE-009':'Materially stronger live placement · exact booth availability before 25% deposit',
               'LIFE-030':'Booth-enabled 2027 sponsor package · all-in price · footprint / location · lead-generation rights',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
+              'LIFE-071':'Current all-in booth/setup quote · exact available St. Petersburg placement · category acceptance · deposit / cancellation / COI / add-on terms',
               'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
           }
@@ -555,20 +556,20 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-076','LIFE-077'}
+          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077'}
           assert set(live)==expected_live, (set(live),expected_live)
           assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
           placement_unknown_values={'','unknown','n/a','na','none','tbd','tba','-','—'}
           def has_preserved_placement(p):
               vals=(p.get('best_observed_specific_booth'),p.get('latest_preserved_booth'))
               return any(str(v or '').strip().lower() not in placement_unknown_values for v in vals)
-          expected_missing_placement={'HIST-234','LIFE-017','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-076'}
+          expected_missing_placement={'HIST-234','LIFE-017','LIFE-033','LIFE-044','LIFE-046','LIFE-060','LIFE-071','LIFE-076'}
           actual_missing_placement={pid for pid in expected_live if not has_preserved_placement(profiles[pid])}
           assert actual_missing_placement==expected_missing_placement, (actual_missing_placement,expected_missing_placement)
-          assert len(expected_missing_placement)==7
+          assert len(expected_missing_placement)==8
           assert len(expected_live-expected_missing_placement)==8
           expected_quote_required={pid for pid,op in live.items() if op.get('booking_cost_max') is None}
-          assert len(expected_quote_required)==8, expected_quote_required
+          assert len(expected_quote_required)==9, expected_quote_required
           expected_venues={
               'LIFE-014':'Waterfront Commons / Great Lawn · 100 N Clematis St, West Palm Beach, FL 33401',
               'LIFE-046':'South Florida Fairgrounds · 9067 Southern Blvd, West Palm Beach, FL 33411',
@@ -582,6 +583,7 @@ jobs:
               'LIFE-018':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
               'LIFE-030':'Gardens North County District Park · 5101 117 Court North, Palm Beach Gardens, FL',
               'LIFE-060':'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996',
+              'LIFE-071':'St. Petersburg Coliseum · 535 4th Avenue North, St. Petersburg, FL 33701',
               'LIFE-076':'PGA National Resort — Champion Course · Palm Beach Gardens, FL',
               'LIFE-013':'Miami-Dade County Fair & Exposition · 10901 Coral Way, Miami, FL 33165',
               'LIFE-017':'Tampa Convention Center · 333 S Franklin St, Tampa, FL 33602',
@@ -601,6 +603,7 @@ jobs:
               'LIFE-018':'The organizer exposes a current 2027 floor plan, but no Paradise booth assignment is verified. Obtain the live plan/contract and confirm the exact 10x10/10x20 location before booking; historical Booth 131 is reference only.',
               'LIFE-030':'No 2027 Paradise activation footprint/location is verified. Identify the lowest-cost sponsorship package that actually includes a usable booth, then confirm exact placement before committing.',
               'LIFE-060':'No 2027 commercial vendor placement is published/verified yet. Wait for the current vendor package/map and confirm exact indoor/outdoor space before booking; prior-year booth rates/locations are reference only.',
+              'LIFE-071':'No Paradise 2026 booth assignment or exact placement is verified. Use the live booth-request path to obtain the current floor plan and available spaces before committing; historical Tampa/Fairgrounds placements are not current St. Petersburg availability evidence.',
               'LIFE-076':'No 2027 Paradise consumer-facing activation footprint/location is verified. Require the PGA TOUR partnership proposal to specify the exact activation area and lead-generation rights before treating it as a booking opportunity.',
               'LIFE-013':'No 2027 Paradise commercial-space assignment is verified. Request the live indoor commercial-space map and available locations; historical Booths 705-706 (10x20) are reference only until current numbering/availability is confirmed.',
               'LIFE-017':'No 2027 Tampa booth assignment is verified. Request the current 2027 booth map from Patience Rall and select the strongest acceptable available location before returning the contract/deposit; do not use the attached 2024 floor plan as current availability evidence.',
@@ -615,6 +618,7 @@ jobs:
               'LIFE-030':'Paradise ArtiGras history: 2023 booking reference $3,850; 2022 Booth S204 (10x10) cost $3,400. Historical reference only — current 2027 booth-bearing sponsorship package still needs a quote.',
               'LIFE-033':'Paradise same-series May 2-3, 2026 reference: Booth 106, 8x10; $2,145 booth cost less $100 Super Saver = $2,045 invoice. This is the spring 2026 occurrence, not an Oct. 31-Nov. 1 fall 2026 quote or assignment.',
               'LIFE-060':'Official 2025 Martin County Fair vendor application reference: indoor 10x12 $675 / 20x12 $1,075; outdoor 10x12 $475 / 20x12 $725; larger 20x20 $1,500. Prior-cycle official rates only — 2027 commercial pricing is not yet published.',
+              'LIFE-071':'Paradise 2024 Florida\'s Largest Home Show paid reference: $5,000 for the Labor Day occurrence. Historical reference only; not a 2026 St. Petersburg quote.',
           }
           for pid,ref in expected_prior_cost_refs.items():
               assert live[pid].get('prior_cost_text')==ref, (pid,live[pid])
@@ -633,6 +637,7 @@ jobs:
               'LIFE-018':('Open 2027 floor plan + exhibitor contract','https://www.professionalshowmanagement.com/home-shows'),
               'LIFE-030':('Open 2027 sponsorship page','https://www.artigras.org/become-a-sponsor/'),
               'LIFE-060':('Open official fair vendor watch page','https://www.martincountyfair.com/'),
+              'LIFE-071':('Open booth request','https://floridaslargesthomeshow.com/booth-info/'),
               'LIFE-076':('Open 2027 tournament / partnership site','https://thecognizantclassic.com/'),
               'LIFE-013':('Open 2027 exhibitor portal','https://fairexpo.ungerboeck.net/prod/app85.cshtml?aat=4d59764c57533533372b4b6b4f352f48564a7370633472646f705165396146574f43733536545a344638343d'),
               'LIFE-017':('Request / refresh 2027 Tampa contract','https://www.tampahomeshow.com/get-contract/'),
@@ -703,6 +708,17 @@ jobs:
           assert profiles['LIFE-014']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_CLOSED'
           assert profiles['LIFE-017']['current_rebook_opportunity']['opportunity_status']=='CONTRACT_REQUEST_OPEN'
           assert profiles['LIFE-017']['current_rebook_opportunity']['event_start']=='2027-04-03'
+          assert profiles['LIFE-071']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-071']['current_rebook_opportunity']['event_start']=='2026-10-17'
+          assert profiles['LIFE-071']['current_rebook_opportunity']['event_end']=='2026-10-18'
+          assert profiles['LIFE-071']['current_rebook_opportunity']['venue_text']=='St. Petersburg Coliseum · 535 4th Avenue North, St. Petersburg, FL 33701'
+          assert 'not published/verified' in profiles['LIFE-071']['current_rebook_opportunity']['price_text']
+          assert profiles['LIFE-071']['current_rebook_opportunity']['booking_cost_max'] is None
+          assert '727-563-8844' in profiles['LIFE-071']['current_rebook_opportunity']['contact_text']
+          assert 'floridaslargesthomeshow@bbgi.com' in profiles['LIFE-071']['current_rebook_opportunity']['contact_text']
+          assert profiles['LIFE-071']['current_rebook_review']['disposition']=='WATCH'
+          assert profiles['LIFE-071']['current_rebook_review']['action_timing'].startswith('NOW')
+          assert '$5,000 2024 paid reference' in profiles['LIFE-071']['current_rebook_review']['next_step']
           assert profiles['LIFE-017']['current_rebook_opportunity']['event_end']=='2027-04-04'
           assert '$1,295 per 10x10 booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
           assert '$1,395 per corner booth' in profiles['LIFE-017']['current_rebook_opportunity']['price_text']
@@ -2125,9 +2141,9 @@ jobs:
           grep -q 'Positive-net history 2013+' /tmp/shows.html
           grep -q 'Live booking board' /tmp/shows.html
           grep -q 'data-quick-view="ALL_QUOTE_REQUIRED"' /tmp/shows.html
-          grep -q 'Quote required <span class="quickViewCount">8</span>' /tmp/shows.html
+          grep -q 'Quote required <span class="quickViewCount">9</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_NO_PRIOR_PLACEMENT"' /tmp/shows.html
-          grep -q 'No prior booth history <span class="quickViewCount">7</span>' /tmp/shows.html
+          grep -q 'No prior booth history <span class="quickViewCount">8</span>' /tmp/shows.html
           grep -q 'Pursue now' /tmp/shows.html
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
@@ -2264,6 +2280,35 @@ jobs:
           grep -q '2027 cycle' /tmp/hurricane_watch.html
           grep -q '\$200/\$225' /tmp/hurricane_watch.html
           grep -q 'Open review source' /tmp/hurricane_watch.html
+
+          render_view flhs_watch "$SITE/#show/LIFE-071"
+          grep -q 'FL Largest Home Show' /tmp/flhs_watch.html
+          grep -q 'Current booking review' /tmp/flhs_watch.html
+          grep -q '>WATCH<' /tmp/flhs_watch.html
+          grep -q 'When to act' /tmp/flhs_watch.html
+          grep -q 'Oct 17, 2026' /tmp/flhs_watch.html
+          grep -q 'Oct 18, 2026' /tmp/flhs_watch.html
+          grep -q 'St. Petersburg Coliseum · 535 4th Avenue North, St. Petersburg, FL 33701' /tmp/flhs_watch.html
+          grep -q 'data-current-venue-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q 'data-current-venue-actions-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q '>Open venue map<' /tmp/flhs_watch.html
+          grep -q 'Current booth / placement' /tmp/flhs_watch.html
+          grep -q 'No Paradise 2026 booth assignment or exact placement is verified' /tmp/flhs_watch.html
+          grep -q 'Still needed before booking' /tmp/flhs_watch.html
+          grep -q 'Current all-in booth/setup quote · exact available St. Petersburg placement' /tmp/flhs_watch.html
+          grep -q 'Prior verified cost / reference' /tmp/flhs_watch.html
+          grep -q 'Paradise 2024 Florida' /tmp/flhs_watch.html
+          grep -q '\$5,000 for the Labor Day occurrence' /tmp/flhs_watch.html
+          grep -q 'data-current-contact-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q 'data-current-contact-actions-profile="LIFE-071"' /tmp/flhs_watch.html
+          grep -q 'href="tel:7275638844"' /tmp/flhs_watch.html
+          grep -q 'href="mailto:floridaslargesthomeshow@bbgi.com"' /tmp/flhs_watch.html
+          grep -q '>Open booth request<' /tmp/flhs_watch.html
+          grep -q 'floridaslargesthomeshow.com/booth-info/' /tmp/flhs_watch.html
+          if grep -q 'data-current-booking-cost-profile="LIFE-071"' /tmp/flhs_watch.html; then
+            echo "::error::Florida Largest Home Show quote-only watch rendered a structured numeric current cost"
+            exit 1
+          fi
 
           render_view safety_pursue "$SITE/#show/LIFE-073"
           grep -q 'St Lucie Health, Wellness &amp; Safety Fest' /tmp/safety_pursue.html
