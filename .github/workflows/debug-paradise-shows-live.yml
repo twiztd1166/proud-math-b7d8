@@ -687,7 +687,7 @@ jobs:
                   assert not review.get('blockers_text'), (pid,review)
 
           expected_historical_review_sources={
-              'LIFE-028':('https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site','no future Paradise-style pop-up date published/found as of 2026-09-07'),
+              'LIFE-028':('https://palmbeachliquor.com/','Current Palm Beach Liquors Delray Beach store + 2026 app/license evidence + Paradise preserved pop-up history','no current official Events/pop-up page or future Paradise-style date recovered as of 2026-09-07'),
               'LIFE-039':('https://forms.cityofpsl.com/expo','City of Port St. Lucie official Hurricane Expo / vendor-cycle pages','2026 reservations closed and organizer says check back next year'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026','Business Vendor $100, 10x10 space and 772-337-0049'),
           }
@@ -701,7 +701,7 @@ jobs:
               assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
 
           expected_historical_outreach={
-              'LIFE-028':('Palm Beach Liquors','561-330-4777',None,'https://palmbeachliquor.com/events','Official Palm Beach Liquors active store/events site'),
+              'LIFE-028':('Palm Beach Liquors','561-330-4777',None,'https://palmbeachliquor.com/','Current Palm Beach Liquors official storefront'),
               'LIFE-039':('City of Port St. Lucie / Hurricane Expo','772-871-5225','pslem@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','City of Port St. Lucie Office of Emergency Management'),
               'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049','info@slcsafetyfest.com','https://slcsafetyfest.com/wp-content/uploads/2025/02/SLCSF-Sponsorship-application-25.pdf','Official St. Lucie County Safety Festival sponsorship contact artifact'),
           }
@@ -724,6 +724,9 @@ jobs:
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='ACTIVE_SERIES_DATE_UNVERIFIED')==0
           assert sum(1 for v in expected_historical_cycle_status.values() if v=='NEXT_CYCLE_NOT_PUBLISHED')==2
           assert 'not a verified scheduled show' in reviews['LIFE-028'].get('outreach_cycle_text','')
+          assert 'no current official Events/pop-up page' in reviews['LIFE-028'].get('outreach_cycle_text','')
+          assert reviews['LIFE-028'].get('outreach_cycle_source_url')=='https://palmbeachliquor.com/', reviews['LIFE-028']
+          assert reviews['LIFE-028'].get('outreach_cycle_source_label')=='Current Palm Beach Liquors official storefront + 2026 app/license evidence', reviews['LIFE-028']
           assert 'No 2027 event date or registration window is published yet' in reviews['LIFE-039'].get('outreach_cycle_text','')
           assert 'Apr. 25, 2026 at Clover Park' in reviews['LIFE-073'].get('outreach_cycle_text','')
 
@@ -799,6 +802,9 @@ jobs:
           assert 'dissolved festival corporation' in reviews['LIFE-075'].get('notes',''), reviews['LIFE-075']
           assert '561-330-4777' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
           assert '$75/day' in reviews['LIFE-028'].get('next_step',''), reviews['LIFE-028']
+          assert 'consumer app was updated in July 2026' in reviews['LIFE-028'].get('rationale',''), reviews['LIFE-028']
+          assert 'current Florida alcohol-license records identify PALM BEACH LIQUORS at 4801 Linton Blvd A-13' in reviews['LIFE-028'].get('rationale',''), reviews['LIFE-028']
+          assert 'Do not describe the old /events URL as a live current events calendar' in reviews['LIFE-028'].get('notes',''), reviews['LIFE-028']
           assert 'exact same venue' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
           assert 'Tampa Bay Times Events' in reviews['LIFE-044'].get('rationale',''), reviews['LIFE-044']
           assert '$995' in reviews['LIFE-044'].get('next_step',''), reviews['LIFE-044']
@@ -3162,7 +3168,7 @@ jobs:
           grep -q 'Call 561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q 'data-historical-outreach-source-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
           grep -q '>Open outreach source<' /tmp/palm_liquors_pursue.html
-          grep -q 'Official Palm Beach Liquors active store/events site' /tmp/palm_liquors_pursue.html
+          grep -q 'Current Palm Beach Liquors official storefront' /tmp/palm_liquors_pursue.html
           python - <<'PY'
           import re
           html=open('/tmp/palm_liquors_pursue.html').read()
@@ -3199,8 +3205,8 @@ jobs:
             echo 'Historical-only LIFE-028 incorrectly rendered governed live booking readiness'
             exit 1
           fi
-          grep -q 'official store/events presence is current, but no future Paradise-style pop-up date is claimed' /tmp/palm_liquors_pursue.html
-          grep -q 'href="https://palmbeachliquor.com/events"' /tmp/palm_liquors_pursue.html
+          grep -q 'did not recover a current official Events/pop-up page or any future Paradise-style activation date' /tmp/palm_liquors_pursue.html
+          grep -q 'href="https://palmbeachliquor.com/"' /tmp/palm_liquors_pursue.html
           grep -q 'Open review source' /tmp/palm_liquors_pursue.html
 
           render_view vero_home_placement "$SITE/#show/LIFE-009"
