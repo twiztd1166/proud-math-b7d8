@@ -3462,11 +3462,7 @@ jobs:
           assert 'Commitment: Verified current' in manatee
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in manatee
           assert 'data-live-compare-next-step-profile="LIFE-044"' in manatee
-          assert 'Research exhausted as of Sep. 7, 2026 for live Manatee availability — call/email Dave LaBell at 727-893-8523 / dlabell@tampabay.com now' in manatee
-          assert '113 or 102 first' in manatee
-          assert 'then 702 or 201' in manatee
-          assert 'layout-based traffic preferences only, not proven best booths and not evidence of current availability' in manatee
-          assert 'Sep. 17 cancellation-liability cutoff remains the key commitment date' in manatee
+          assert 'Research exhausted as of Sep. 7, 2026 for live Manatee availability — call/email Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and ask him to confirm current numbering plus available spaces against the floor plan.' in manatee
           assert 'data-live-compare-evidence-profile="LIFE-044"' in manatee
           assert '1 preserved history record · 1 history year · 0 explicit WORKED/ATTENDED years' in manatee
           feast=row('LIFE-092')
@@ -3615,11 +3611,7 @@ jobs:
           assert 'Still needed: Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it' in row
           assert 'data-label="Next step"' in row
           assert 'data-live-compare-next-step-profile="LIFE-044"' in row
-          assert 'Research exhausted as of Sep. 7, 2026 for live Manatee availability — call/email Dave LaBell at 727-893-8523 / dlabell@tampabay.com now' in row
-          assert '113 or 102 first' in row
-          assert 'then 702 or 201' in row
-          assert 'layout-based traffic preferences only, not proven best booths and not evidence of current availability' in row
-          assert 'Sep. 17 cancellation-liability cutoff remains the key commitment date' in row
+          assert 'Research exhausted as of Sep. 7, 2026 for live Manatee availability — call/email Dave LaBell at 727-893-8523 / dlabell@tampabay.com now and ask him to confirm current numbering plus available spaces against the floor plan.' in row
           assert 'data-label="Hard deadline"' in row
           assert 'Sep 17, 2026 · 30-day cancellation-liability cutoff' in row
           assert re.search(r'(?:\d+ day(?:s)? to deadline|deadline today|\d+ day(?:s)? past deadline)',row), row
