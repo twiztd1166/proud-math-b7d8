@@ -649,8 +649,8 @@ jobs:
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact table location · Paradise category acceptance',
               'LIFE-044':'Windows/doors category availability · exact currently available booth / selection · Sunday Oct. 18 closing-hour confirmation · total signed investment',
-              'LIFE-007':'Application acceptance · exact current placement · category pricing / footprint confirmation',
-              'LIFE-054':'Application approval · Paradise vendor category · exact placement',
+              'LIFE-007':'Application acceptance · exact current placement · final requested footprint',
+              'LIFE-054':'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement',
               'LIFE-018':'Current all-in price / terms · exact available booth · deposit / cancellation / COI / utilities',
               'LIFE-013':'2027 rate sheet / all-in price · live available space · application / payment deadlines',
               'LIFE-017':'Current available booth / location · add-on charges before 50% reservation payment',
@@ -1272,12 +1272,12 @@ jobs:
               assert live[pid].get('action_label')==label, (pid,live[pid])
               assert live[pid].get('action_url')==url, (pid,live[pid])
           expected_booking_costs={
-              'LIFE-007':(65,75,'per Saturday','Official 2026-27 Corporate vendor monthly/weekly rate; Paradise acceptance and selected dates still must be confirmed.'),
+              'LIFE-007':(65,75,'per Saturday',"Official RPB 2026-27 Corporate monthly/weekly rate. Cross-source classification: RPB defines Corporate as more than one location or >10x10, and Paradise's current official website states multiple offices/warehouses across Florida. Application acceptance and selected dates/space remain unverified."),
               'LIFE-009':(475,635,'10x10 booth','Official 2027 standard-to-premium-corner 10x10 range; optional table/carpet add-ons excluded.'),
               'LIFE-017':(1295,1395,'10x10 booth','Direct 2027 contract standard-to-corner range; excludes tables, chairs, electric, forklift and 4% credit-card surcharge.'),
               'LIFE-044':(995,1095,'10x10 booth','Official current package: standard 10x10 starts at $995; corner upgrade adds $100.'),
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter vendor rate; includes 2 chairs and 2 employee badges.'),
-              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee; Paradise category must be confirmed before booth-fee payment.'),
+              'LIFE-054':(170,410,'approved vendor category / event','Official 2026 mandatory cash exposure: Commercial/Retail $160, Corporate Level 1 $300, Corporate Level 2 $400, plus required $10 non-refundable application fee. The organizer may determine the approved category from the application; current approved Paradise tier remains unverified.'),
               'LIFE-077':(2000,2000,'Grand Clam sponsorship / 10x10 booth','Published sponsorship tier that explicitly includes a 10x10 booth; lower tiers do not state booth access.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
           }
@@ -3227,6 +3227,14 @@ jobs:
           grep -q 'verify current floor plan / booth numbering / availability' /tmp/rpb_green_market_placement.html
           grep -q '>Open 2026-27 vendor application<' /tmp/rpb_green_market_placement.html
           grep -q 'form.jotform.com/261054512266148' /tmp/rpb_green_market_placement.html
+          grep -q 'data-current-booking-cost-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'Official RPB 2026-27 Corporate monthly/weekly rate' /tmp/rpb_green_market_placement.html
+          grep -q 'multiple offices/warehouses across Florida' /tmp/rpb_green_market_placement.html
+          grep -q 'data-current-logistics-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'unauthorized distribution of promotional materials is prohibited' /tmp/rpb_green_market_placement.html
+          grep -q 'approval before handing out flyers or advertisements' /tmp/rpb_green_market_placement.html
+          grep -q 'Still needed before booking' /tmp/rpb_green_market_placement.html
+          grep -q 'Application acceptance · exact current placement · final requested footprint' /tmp/rpb_green_market_placement.html
 
           render_view martin_home_placement "$SITE/#show/LIFE-018"
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
@@ -3677,7 +3685,7 @@ jobs:
           grep -q '30-day no-refund boundary' /tmp/winterfest_detail.html
           grep -q '\$170–\$410 · approved vendor category / event' /tmp/winterfest_detail.html
           grep -q 'plus required \$10 non-refundable application fee' /tmp/winterfest_detail.html
-          grep -q 'Paradise category must be confirmed before booth-fee payment' /tmp/winterfest_detail.html
+          grep -q 'The organizer may determine the approved category from the application; current approved Paradise tier remains unverified' /tmp/winterfest_detail.html
           if grep -q '\$160–\$400 · approved vendor category / event' /tmp/winterfest_detail.html; then
             echo "::error::Winter Fest mandatory application fee was omitted from structured booking exposure"
             exit 1
@@ -3688,8 +3696,14 @@ jobs:
           grep -q 'Booth / placement guidance' /tmp/winterfest_detail.html
           grep -q 'data-current-logistics-status-profile="LIFE-054"' /tmp/winterfest_detail.html
           grep -q 'Partial current logistics' /tmp/winterfest_detail.html
+          grep -q 'data-current-logistics-profile="LIFE-054"' /tmp/winterfest_detail.html
+          grep -q 'standard space is 10x10' /tmp/winterfest_detail.html
           grep -q 'power is not available for purchase' /tmp/winterfest_detail.html
           grep -q 'quiet inverter generator' /tmp/winterfest_detail.html
+          grep -q 'vendor parking pass is required' /tmp/winterfest_detail.html
+          grep -q 'No early pack-up is allowed' /tmp/winterfest_detail.html
+          grep -q 'Still needed before booking' /tmp/winterfest_detail.html
+          grep -q 'Application approval · organizer-approved Commercial/Retail vs Corporate Level 1/2 tier · exact placement' /tmp/winterfest_detail.html
 
           render_view sebastian_clambake_detail "$SITE/#show/LIFE-077"
           grep -q 'Sebastian Clambake' /tmp/sebastian_clambake_detail.html
