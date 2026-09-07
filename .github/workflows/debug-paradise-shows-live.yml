@@ -168,6 +168,15 @@ jobs:
               grep -q 'current_placement_status' /tmp/app-shows.js
               grep -q 'Current placement status' /tmp/app-shows.js
               grep -q 'data-current-placement-status-profile' /tmp/app-shows.js
+              grep -q 'Current schedule / public hours' /tmp/app-shows.js
+              grep -q 'Current schedule status' /tmp/app-shows.js
+              grep -q 'data-current-schedule-status-profile' /tmp/app-shows.js
+              grep -q 'data-current-schedule-profile' /tmp/app-shows.js
+              grep -q 'data-current-schedule-source-profile' /tmp/app-shows.js
+              grep -q 'opportunityScheduleStatusLabel' /tmp/app-shows.js
+              grep -q 'fOpportunityScheduleStatus' /tmp/app-shows.js
+              grep -q 'opportunity.current_schedule_text' /tmp/app-shows.js
+              grep -q 'currentScheduleStatus' /tmp/app-core.js
               grep -q 'data-current-placement-profile' /tmp/app-shows.js
               grep -q 'opportunityPlacementStatusLabel' /tmp/app-shows.js
               grep -q 'fOpportunityPlacementStatus' /tmp/app-shows.js
@@ -798,6 +807,44 @@ jobs:
           assert sum(1 for v in expected_current_placement_status.values() if v=='SPONSORSHIP_PLACEMENT_UNVERIFIED')==4
           assert sum(1 for v in expected_current_placement_status.values() if v=='PLACEMENT_NOT_PUBLISHED')==1
           assert sum(1 for v in expected_current_placement_status.values() if v=='NEXT_CYCLE_CLOSED')==1
+          expected_current_schedule_status={
+              'HIST-234':'SOURCE_CONFLICT_REQUIRES_CONFIRMATION',
+              'LIFE-007':'VERIFIED_CURRENT',
+              'LIFE-009':'CURRENT_SOURCE_HOURS_NOT_RECOVERED',
+              'LIFE-013':'NOT_PUBLISHED_YET',
+              'LIFE-014':'NOT_PUBLISHED_YET',
+              'LIFE-017':'VERIFIED_CURRENT',
+              'LIFE-018':'NOT_PUBLISHED_YET',
+              'LIFE-030':'NOT_PUBLISHED_YET',
+              'LIFE-033':'VERIFIED_CURRENT',
+              'LIFE-044':'VERIFIED_CURRENT',
+              'LIFE-046':'VERIFIED_CURRENT',
+              'LIFE-054':'VERIFIED_CURRENT',
+              'LIFE-060':'NOT_PUBLISHED_YET',
+              'LIFE-071':'VERIFIED_CURRENT',
+              'LIFE-076':'NOT_PUBLISHED_YET',
+              'LIFE-077':'VERIFIED_CURRENT',
+          }
+          assert set(expected_current_schedule_status)==expected_live, (set(expected_current_schedule_status),expected_live)
+          for pid,status in expected_current_schedule_status.items():
+              op=live[pid]
+              assert op.get('current_schedule_status')==status, (pid,op)
+              assert str(op.get('current_schedule_text') or '').strip(), (pid,op)
+              assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,op)
+              assert str(op.get('current_schedule_source_label') or '').strip(), (pid,op)
+              assert op.get('current_schedule_checked_at'), (pid,op)
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='VERIFIED_CURRENT')==8
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='NOT_PUBLISHED_YET')==6
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='CURRENT_SOURCE_HOURS_NOT_RECOVERED')==1
+          assert sum(1 for v in expected_current_schedule_status.values() if v=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION')==1
+          assert 'official-source conflict' in live['HIST-234'].get('current_schedule_text','')
+          assert '11 AM–7 PM' in live['HIST-234'].get('current_schedule_text','')
+          assert '11 AM–6 PM' in live['HIST-234'].get('current_schedule_text','')
+          assert 'Saturdays 9 AM–1 PM' in live['LIFE-007'].get('current_schedule_text','')
+          assert 'closed Thanksgiving, Christmas and New Year' in live['LIFE-007'].get('current_schedule_text','')
+          assert '10 AM–5 PM' in live['LIFE-017'].get('current_schedule_text','')
+          assert '10 AM–4 PM' in live['LIFE-017'].get('current_schedule_text','')
+          assert 'current 2026–27 hours and final season date are not yet published' in live['LIFE-014'].get('current_schedule_text','')
           expected_prior_cost_refs={
               'HIST-234':'Paradise 2023 Vero Oktoberfest waitlist/booking reference: $175. Historical booking evidence only; not proof of completed participation and not a 2026 commercial sponsorship quote.',
               'LIFE-013':'Paradise same-series history: 2022 event cost $3,500; 2021 cost $4,000 with Booths 705 & 706 (10x20). Historical reference only — obtain the 2027 commercial-space quote before signing.',
@@ -1332,14 +1379,17 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 37, detail.get('version')
+              assert detail.get('version') == 38, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 37, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 38, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_placement_status') == 'SPONSORSHIP_PLACEMENT_UNVERIFIED', vero_oktoberfest
+          assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_status') == 'SOURCE_CONFLICT_REQUIRES_CONFIRMATION', vero_oktoberfest
+          assert '11 AM–7 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
+          assert '11 AM–6 PM' in (vero_oktoberfest.get('rebookOpportunity') or {}).get('current_schedule_text',''), vero_oktoberfest
           assert 'did not generate much business' in (barrett_review.get('rebookReview') or {}).get('rationale',''), barrett_review
           assert '2020 event was cancelled' in (ourkids_review.get('rebookReview') or {}).get('rationale',''), ourkids_review
           assert '$3,095 balance' in (sarasota_review.get('rebookReview') or {}).get('rationale',''), sarasota_review
@@ -1348,7 +1398,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 56, x.get('version')
+          assert x.get('version') == 57, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2478,6 +2528,12 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
           grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
+          grep -q 'data-current-schedule-status-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'Hours not recovered from current source' /tmp/vero_home_placement.html
+          grep -q 'data-current-schedule-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q 'public show hours are not verified in recoverable organizer text' /tmp/vero_home_placement.html
+          grep -q 'data-current-schedule-source-profile="LIFE-009"' /tmp/vero_home_placement.html
+          grep -q '>Open schedule source<' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
@@ -2507,6 +2563,10 @@ jobs:
           grep -q 'Lakeside at Village Hall · 1050 Royal Palm Beach Blvd, Royal Palm Beach, FL 33411' /tmp/rpb_green_market_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
           grep -q 'Historical decision evidence' /tmp/rpb_green_market_placement.html
+          grep -q 'data-current-schedule-status-profile="LIFE-007"' /tmp/rpb_green_market_placement.html
+          grep -q 'Verified current schedule' /tmp/rpb_green_market_placement.html
+          grep -q 'Saturdays 9 AM–1 PM' /tmp/rpb_green_market_placement.html
+          grep -q 'closed Thanksgiving, Christmas and New Year' /tmp/rpb_green_market_placement.html
           grep -q 'Current booth / placement' /tmp/rpb_green_market_placement.html
           grep -q 'No 2026-27 Paradise space is assigned/verified yet' /tmp/rpb_green_market_placement.html
           grep -q 'do not treat #18 as proven best' /tmp/rpb_green_market_placement.html
@@ -2522,6 +2582,9 @@ jobs:
           grep -q 'Martin County Home Improvement Show' /tmp/martin_home_placement.html
           grep -q 'Venue / address' /tmp/martin_home_placement.html
           grep -q 'Martin County Fairgrounds · 2616 SE Dixie Hwy, Stuart, FL 34996' /tmp/martin_home_placement.html
+          grep -q 'data-current-schedule-status-profile="LIFE-018"' /tmp/martin_home_placement.html
+          grep -q 'Hours not published yet' /tmp/martin_home_placement.html
+          grep -q 'does not publish public show hours' /tmp/martin_home_placement.html
           grep -q 'Current booth / placement' /tmp/martin_home_placement.html
           grep -q 'current 2027 floor plan, but no Paradise booth assignment is verified' /tmp/martin_home_placement.html
           grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
@@ -2699,6 +2762,11 @@ jobs:
           grep -q 'Vero Beach Oktoberfest' /tmp/vero_oktoberfest.html
           grep -q 'Verified current opportunity' /tmp/vero_oktoberfest.html
           grep -q 'data-booking-readiness-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'data-current-schedule-status-profile="HIST-234"' /tmp/vero_oktoberfest.html
+          grep -q 'Official source conflict / confirm' /tmp/vero_oktoberfest.html
+          grep -q 'official-source conflict' /tmp/vero_oktoberfest.html
+          grep -q '11 AM–7 PM' /tmp/vero_oktoberfest.html
+          grep -q '11 AM–6 PM' /tmp/vero_oktoberfest.html
           grep -q 'Watch / gated' /tmp/vero_oktoberfest.html
           grep -q 'SPONSORSHIP OPEN' /tmp/vero_oktoberfest.html
           grep -q 'Oct 16, 2026' /tmp/vero_oktoberfest.html
