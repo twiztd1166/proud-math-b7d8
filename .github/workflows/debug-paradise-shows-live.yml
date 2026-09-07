@@ -2300,14 +2300,14 @@ jobs:
           assert cleanup_queue(2022) == []
           assert cleanup_queue(2023) == []
           assert cleanup_queue(2026) == []
-life002_booth_2026=profiles['LIFE-002']['history_field_states']['2026']['booth']
-life007_booth_2026=profiles['LIFE-007']['history_field_states']['2026']['booth']
-life011_booth_2026=profiles['LIFE-011']['history_field_states']['2026']['booth']
-life027_booth_2026=profiles['LIFE-027']['history_field_states']['2026']['booth']
-assert life002_booth_2026.get('VALUE') == 1 and life002_booth_2026.get('MISSING') == 0, life002_booth_2026
-assert life007_booth_2026.get('UNKNOWN') == 2 and life007_booth_2026.get('MISSING') == 0, life007_booth_2026
-assert life011_booth_2026.get('UNKNOWN') == 1 and life011_booth_2026.get('MISSING') == 0, life011_booth_2026
-assert life027_booth_2026.get('NA') == 1 and life027_booth_2026.get('MISSING') == 0, life027_booth_2026
+          life002_booth_2026=profiles['LIFE-002']['history_field_states']['2026']['booth']
+          life007_booth_2026=profiles['LIFE-007']['history_field_states']['2026']['booth']
+          life011_booth_2026=profiles['LIFE-011']['history_field_states']['2026']['booth']
+          life027_booth_2026=profiles['LIFE-027']['history_field_states']['2026']['booth']
+          assert life002_booth_2026.get('VALUE') == 1 and life002_booth_2026.get('MISSING') == 0, life002_booth_2026
+          assert life007_booth_2026.get('UNKNOWN') == 2 and life007_booth_2026.get('MISSING') == 0, life007_booth_2026
+          assert life011_booth_2026.get('UNKNOWN') == 1 and life011_booth_2026.get('MISSING') == 0, life011_booth_2026
+          assert life027_booth_2026.get('NA') == 1 and life027_booth_2026.get('MISSING') == 0, life027_booth_2026
           barrett_review=json.load(open('/tmp/barrett_review.json'))
           ourkids_review=json.load(open('/tmp/ourkids_review.json'))
           sarasota_review=json.load(open('/tmp/sarasota_review.json'))
