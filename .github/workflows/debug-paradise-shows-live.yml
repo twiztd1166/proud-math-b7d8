@@ -1873,7 +1873,7 @@ jobs:
           assert 'No inside commercial vendor space' in slc.get('price_text',''), slc
           assert 'mid-November' in slc.get('booking_window_text',''), slc
           assert 'not a verified Paradise-specific hard deadline' in slc.get('booking_window_text',''), slc
-          assert 'last year’s vendors have first refusal' in slc.get('booking_window_text','').lower(), slc
+          assert 'prior vendors/exhibitors receive contracts with a response date by mid-november' in slc.get('booking_window_text','').lower(), slc
           assert 'Pop-up/easy-up tents are prohibited' in slc.get('current_logistics_text',''), slc
           assert 'current operation photo' in slc.get('current_logistics_text',''), slc
           assert 'St. Lucie County Board of County Commissioners (BOCC)' in slc.get('current_logistics_text',''), slc
