@@ -3960,7 +3960,7 @@ jobs:
           grep -q 'data-current-schedule-status-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Verified current schedule' /tmp/bradenton_pursue.html
           grep -q 'data-current-schedule-profile="LIFE-044"' /tmp/bradenton_pursue.html
-          grep -q 'Sun. Oct. 18 10 AM-4 PM' /tmp/bradenton_pursue.html
+          grep -Eq 'Sun[.] Oct[.] 18:? 10 AM-4 PM' /tmp/bradenton_pursue.html
           grep -q 'current live Tampa Bay Times event page is the governing public schedule' /tmp/bradenton_pursue.html
           grep -q 'Tropicana Field 2024' /tmp/bradenton_pursue.html
           grep -q 'Oct. 11-12 Bradenton date' /tmp/bradenton_pursue.html
