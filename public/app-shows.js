@@ -521,15 +521,23 @@ function liveComparisonNextStep(review){
   const first=text.match(/^.*?[.!?](?:\s|$)/);
   return (first?.[0]||text).trim();
 }
+function liveComparisonPriorityDate(op){
+  const eventDate=String(op?.event_start||'').trim();
+  const deadline=String(op?.critical_deadline_date||'').trim();
+  const candidates=[deadline,eventDate].filter(Boolean).sort();
+  return candidates[0]||'9999-12-31';
+}
 function liveDecisionCompareBoard(profiles,open=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
     const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
     const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
     const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
+    const aPriority=liveComparisonPriorityDate(a?.current_rebook_opportunity);
+    const bPriority=liveComparisonPriorityDate(b?.current_rebook_opportunity);
     const aDate=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
     const bDate=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
-    return aw-bw||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
+    return aw-bw||aPriority.localeCompare(bPriority)||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
   });
   if(!rows.length)return '';
   const body=rows.map(p=>{
@@ -563,7 +571,7 @@ function liveDecisionCompareBoard(profiles,open=false){
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision + governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline · timing · governed next step · direct action</small></summary>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision first; within each decision tier, earliest verified hard deadline or event date first · governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline · timing · governed next step · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth, and carries the same attribution / attendance limitations. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
