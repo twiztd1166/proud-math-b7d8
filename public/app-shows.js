@@ -363,18 +363,29 @@ function liveComparisonDate(op){
   if(op.event_end&&op.event_end!==op.event_start)return date(op.event_start)+' – '+date(op.event_end);
   return op.event_end?date(op.event_start):'Starts '+date(op.event_start);
 }
+function liveComparisonOutcomeMetrics(p,prefix){
+  const year=Number(p?.[prefix+'_year']||0);
+  if(!year)return '';
+  const bits=[String(year)];
+  const netSales=p?.[prefix+'_net_sales'];
+  const netRevenue=p?.[prefix+'_net_revenue'];
+  const issued=p?.[prefix+'_issued'];
+  const demos=p?.[prefix+'_demos'];
+  const com=p?.[prefix+'_com'];
+  if(netSales!==null&&netSales!==undefined&&String(netSales)!=='')bits.push(String(netSales)+' net sale'+(Number(netSales)===1?'':'s'));
+  if(netRevenue!==null&&netRevenue!==undefined&&String(netRevenue)!=='')bits.push(money(netRevenue)+' net');
+  if(issued!==null&&issued!==undefined&&String(issued)!=='')bits.push(String(issued)+' issued');
+  if(demos!==null&&demos!==undefined&&String(demos)!=='')bits.push(String(demos)+' demos');
+  if(com!==null&&com!==undefined&&String(com)!=='')bits.push(String(com)+'% COM');
+  return bits.join(' · ');
+}
 function liveComparisonOutcome(p){
   const status=String(p?.outcome_evidence_status||'').toUpperCase();
   if(status==='OCCURRENCE_OUTCOME_AVAILABLE'){
-    const year=Number(p?.best_observed_outcome_year||p?.latest_observed_outcome_year||0);
-    const netRevenue=p?.best_observed_outcome_net_revenue??p?.latest_observed_outcome_net_revenue;
-    const netSales=p?.best_observed_outcome_net_sales??p?.latest_observed_outcome_net_sales;
-    const com=p?.best_observed_outcome_com??p?.latest_observed_outcome_com;
-    const bits=[year?String(year):''].filter(Boolean);
-    if(netSales!==null&&netSales!==undefined&&String(netSales)!=='')bits.push(String(netSales)+' net sale'+(Number(netSales)===1?'':'s'));
-    if(netRevenue!==null&&netRevenue!==undefined&&String(netRevenue)!=='')bits.push(money(netRevenue)+' net');
-    if(com!==null&&com!==undefined&&String(com)!=='')bits.push(String(com)+'% COM');
-    return bits.length?bits.join(' · '):'Occurrence outcome preserved';
+    const latest=liveComparisonOutcomeMetrics(p,'latest_observed_outcome');
+    const best=liveComparisonOutcomeMetrics(p,'best_observed_outcome');
+    if(latest&&best&&latest!==best)return 'Latest: '+latest+' · Best: '+best;
+    return latest||best||'Occurrence outcome preserved';
   }
   if(status==='LIFETIME_ONLY'){
     const bits=[];
@@ -440,7 +451,7 @@ function liveDecisionCompareBoard(profiles,open=false){
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
     <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision · date · current + prior cost · historical outcome · current + best placement · contact · readiness + blockers · hard deadline · timing · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. Readiness includes the governed commitment state and current blockers; it does not create a new booking score.</div>
   </details>`;
 }
 function catalogCard(p){
