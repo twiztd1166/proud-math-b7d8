@@ -1907,8 +1907,12 @@ jobs:
           assert 'selected booth remains available for others to book until the deposit is received' in vero_winter_window
           assert 'Do not use the separate Jan. 3-4, 2026 booking-reply page' in vero_winter_window
           assert '$100 deposit / 30-day final-balance mechanics as 2027 terms' in vero_winter_window
-          for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa','GMAIL:196c45dbe6b2d861'):
-              assert ref in reviews['LIFE-009'].get('source_ref',''), (ref,reviews['LIFE-009'])
+          vero_source_ref=reviews['LIFE-009'].get('source_ref','')
+          for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa'):
+              assert ref in vero_source_ref, (ref,reviews['LIFE-009'])
+          assert 'CURRENT_2027_25_PERCENT_DEPOSIT' in vero_source_ref, reviews['LIFE-009']
+          assert 'EXPLICIT_2026_PREDECESSOR_NOT_CURRENT_TERMS' in vero_source_ref, reviews['LIFE-009']
+          assert 'CATALOG:LIFE-009' in vero_source_ref and 'HISTORY:2025-DET25-0022' in vero_source_ref, reviews['LIFE-009']
           assert 'Aug. 4 subject says spaces are going fast' in reviews['LIFE-009'].get('notes',''), reviews['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth')=='Booth #52', profiles['LIFE-009']
           assert profiles['LIFE-009'].get('best_observed_specific_booth_year')==2025, profiles['LIFE-009']
