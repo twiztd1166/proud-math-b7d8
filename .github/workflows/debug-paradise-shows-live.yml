@@ -855,6 +855,62 @@ jobs:
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
           expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-092'}
           assert set(live)==expected_live, (set(live),expected_live)
+
+          # FIELD-COMPLETENESS CONTRACT:
+          # Every governed live target must carry the complete decision/booking surface.
+          # Deliberate unknowns remain valid where semantics require them:
+          # event_end, numeric booking_cost_min/max, critical_deadline_*, and an unpublished contact email are NOT universal requirements.
+          required_live_text_fields=(
+              'event_label','venue_text','price_text','current_cost_status','prior_cost_text',
+              'current_placement_text','current_placement_status',
+              'contact_name','contact_text','contact_phone',
+              'action_label','action_url','source_label','source_url',
+              'commitment_terms_text','current_commitment_status',
+              'current_schedule_text','current_schedule_status','current_schedule_source_label','current_schedule_source_url',
+              'current_logistics_text','current_logistics_status','current_logistics_source_label','current_logistics_source_url',
+          )
+          for pid,op in live.items():
+              assert op.get('event_start'), (pid,'event_start',op)
+              assert op.get('checked_at'), (pid,'checked_at',op)
+              assert op.get('current_schedule_checked_at'), (pid,'current_schedule_checked_at',op)
+              assert op.get('current_logistics_checked_at'), (pid,'current_logistics_checked_at',op)
+              for field in required_live_text_fields:
+                  assert str(op.get(field) or '').strip(), (pid,field,op)
+              assert str(op.get('action_url') or '').startswith('https://'), (pid,'action_url',op)
+              assert str(op.get('source_url') or '').startswith('https://'), (pid,'source_url',op)
+              assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,'current_schedule_source_url',op)
+              assert str(op.get('current_logistics_source_url') or '').startswith('https://'), (pid,'current_logistics_source_url',op)
+
+          email_optional_live={'LIFE-092'}
+          for pid,op in live.items():
+              email=str(op.get('contact_email') or '').strip()
+              if pid in email_optional_live:
+                  assert not email, (pid,'contact_email must remain unpublished/unknown unless verified',op)
+                  assert str(op.get('contact_phone') or '').strip(), (pid,'contact_phone',op)
+                  assert str(op.get('action_url') or '').startswith('https://'), (pid,'official action channel',op)
+              else:
+                  assert email and '@' in email, (pid,'contact_email',op)
+
+          required_live_review_fields=('disposition','rationale','next_step','action_timing','blockers_text','booking_readiness')
+          for pid in expected_live:
+              review=reviews.get(pid) or {}
+              for field in required_live_review_fields:
+                  assert str(review.get(field) or '').strip(), (pid,field,review)
+              assert review.get('checked_at'), (pid,'review_checked_at',review)
+
+          assert len(live)==17
+          assert all(op.get('event_start') for op in live.values())
+          assert all(str(op.get('current_placement_text') or '').strip() for op in live.values())
+          assert all(str(op.get('prior_cost_text') or '').strip() for op in live.values())
+          assert all(str(op.get('contact_name') or '').strip() for op in live.values())
+          assert all(str(op.get('contact_phone') or '').strip() for op in live.values())
+          assert all(str(op.get('action_url') or '').strip() for op in live.values())
+          assert all(str(op.get('commitment_terms_text') or '').strip() for op in live.values())
+          assert all(str(op.get('current_schedule_text') or '').strip() for op in live.values())
+          assert all(str(op.get('current_logistics_text') or '').strip() for op in live.values())
+          assert all(str((reviews.get(pid) or {}).get('blockers_text') or '').strip() for pid in expected_live)
+          print('Live field-completeness contract: 17/17 PASS')
+
           expected_outcome_status={
               'HIST-234':'NO_COMPARABLE_OUTCOME_EVIDENCE',
               'LIFE-007':'LIFETIME_ONLY',
