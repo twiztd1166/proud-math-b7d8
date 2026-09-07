@@ -682,7 +682,7 @@ jobs:
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
-              'LIFE-076':'Consumer-facing activation proposal · lead-capture rights · exact footprint / location · all-in price',
+              'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
               'LIFE-033':'Written current contract / account state · exact booth assignment · balance / payment status · COI / utilities',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
           }
@@ -1085,8 +1085,31 @@ jobs:
           assert 'onsite booth is a Presidential Sponsor benefit' in live['LIFE-030'].get('current_logistics_text',''), live['LIFE-030']
           assert reviews['LIFE-060'].get('disposition')=='WATCH' and reviews['LIFE-060'].get('action_timing','').startswith('NOW'), reviews['LIFE-060']
           assert '2017 fair source produced 1 net close / $12,700' in reviews['LIFE-060'].get('rationale',''), reviews['LIFE-060']
-          assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('action_timing','').startswith('NOW'), reviews['LIFE-076']
-          assert 'Hospitality alone should not be treated as marketing inventory' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-076']
+          assert reviews['LIFE-076'].get('action_timing','').startswith('NOW — reconfirm Sebastian Ascanio/current PGA TOUR rep and resolve 2027 category eligibility vs Wright’s Impact Window & Door first'), reviews['LIFE-076']
+          assert 'Travel Insured’s 2026 Cognizant Classic Swing Suite by the 10th green captured qualified leads into its CRM' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'current tournament partner list also includes Wright’s Impact Window & Door' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'That does not prove a 2027 exclusivity block' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'hospitality alone is not acceptable substitute inventory' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'sebastianascanio@pgatourhq.com / 954-683-9676' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'first reconfirm that he is still the correct 2027 Cognizant representative' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'does Wright’s Impact Window & Door or any other current partner hold 2027 window/door/home-improvement category exclusivity' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'explicit lead-capture rights—not hospitality-only inventory' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'Use the 2026 Travel Insured 10th-green CRM activation only as proof that measurable fan-facing inventory can exist' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'WEB:COGNIZANT_CURRENT_SPONSORS_WRIGHTS_IMPACT_WINDOW_DOOR' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
+          assert 'WEB:DRYVEBOX_2026_COGNIZANT_CRM_ACTIVATION' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
+          assert 'GMAIL:1994e0559c8be01e' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
+          assert live['LIFE-076'].get('contact_name')=='Sebastian Ascanio / PGA TOUR sales — reconfirm 2027 Cognizant assignment', live['LIFE-076']
+          assert live['LIFE-076'].get('contact_email')=='sebastianascanio@pgatourhq.com', live['LIFE-076']
+          assert live['LIFE-076'].get('contact_phone')=='954-683-9676', live['LIFE-076']
+          assert 'Same PGA TOUR email/mobile remain publicly active in 2026' in live['LIFE-076'].get('contact_text',''), live['LIFE-076']
+          assert 'specific 2027 Cognizant Classic assignment is not verified' in live['LIFE-076'].get('contact_text',''), live['LIFE-076']
+          assert 'current tournament partner list includes Wright’s Impact Window & Door' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert 'real category-conflict signal, not proof of 2027 exclusivity' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert '2026 Travel Insured activation at the Cognizant Classic demonstrates that fan-facing CRM lead-capture activations are structurally possible' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert 'Travel Insured’s 2026 Swing Suite was staged by the 10th green at PGA National with qualified-lead capture' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
+          assert 'Use that only as proof of activation format' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
+          assert 'written 2027 category clearance/exclusivity status' in live['LIFE-076'].get('commitment_terms_text',''), live['LIFE-076']
           assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
           assert 'Research exhausted as of Sep. 7, 2026' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
           assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
@@ -1872,8 +1895,11 @@ jobs:
           assert profiles['LIFE-076']['current_rebook_opportunity']['event_end']=='2027-02-28'
           assert 'partnership / activation pricing is not publicly verified' in profiles['LIFE-076']['current_rebook_opportunity']['price_text']
           assert 'Do not treat hospitality as a vendor booth' in profiles['LIFE-076']['current_rebook_opportunity']['price_text']
-          assert 'lead-generation rights' in profiles['LIFE-076']['current_rebook_opportunity']['booking_window_text']
+          assert 'measurable lead capture' in profiles['LIFE-076']['current_rebook_opportunity']['booking_window_text']
+          assert 'Wright’s Impact Window & Door' in profiles['LIFE-076']['current_rebook_opportunity']['booking_window_text']
+          assert 'Travel Insured' in profiles['LIFE-076']['current_rebook_opportunity']['booking_window_text']
           assert 'Sebastian Ascanio' in profiles['LIFE-076']['current_rebook_opportunity']['contact_text']
+          assert 'reconfirm before relying on him as the assigned rep' in profiles['LIFE-076']['current_rebook_opportunity']['contact_text']
           assert profiles['LIFE-054']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-054']['current_rebook_opportunity']['event_start']=='2026-12-05'
           assert 'Commercial/Retail $160' in profiles['LIFE-054']['current_rebook_opportunity']['price_text']
@@ -4198,7 +4224,16 @@ jobs:
           grep -q '400%20Avenue%20of%20the%20Champions' /tmp/cognizant_detail.html
           grep -q 'Host-property street address is verified from the official PGA National Resort property map' /tmp/cognizant_detail.html
           grep -q 'Tournament/exhibitor access, parking and the final Paradise activation entrance must still follow current organizer instructions' /tmp/cognizant_detail.html
-          grep -q 'Sebastian Ascanio' /tmp/cognizant_detail.html
+          grep -q 'Sebastian Ascanio / PGA TOUR sales — reconfirm 2027 Cognizant assignment' /tmp/cognizant_detail.html
+          grep -q 'sebastianascanio@pgatourhq.com' /tmp/cognizant_detail.html
+          grep -q '954-683-9676' /tmp/cognizant_detail.html
+          grep -q 'specific 2027 Cognizant Classic assignment is not verified' /tmp/cognizant_detail.html
+          grep -q 'Wright’s Impact Window &amp; Door' /tmp/cognizant_detail.html
+          grep -q 'category-conflict signal, not proof of 2027 exclusivity' /tmp/cognizant_detail.html
+          grep -q 'Travel Insured' /tmp/cognizant_detail.html
+          grep -q '10th green' /tmp/cognizant_detail.html
+          grep -q 'qualified-lead capture' /tmp/cognizant_detail.html
+          grep -q 'Do not treat hospitality purchase terms as exhibit/activation terms' /tmp/cognizant_detail.html
           grep -q 'data-historical-placement-profile="LIFE-076"' /tmp/cognizant_detail.html
           grep -q 'No preserved booth / placement is available for this profile' /tmp/cognizant_detail.html
           grep -q 'Open 2027 tournament / partnership site' /tmp/cognizant_detail.html
