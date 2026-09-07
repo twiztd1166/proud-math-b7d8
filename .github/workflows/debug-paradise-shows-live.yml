@@ -321,6 +321,12 @@ jobs:
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-readiness-profile' /tmp/app-shows.js
+              grep -q 'liveCompareReadiness' /tmp/app-shows.js
+              grep -q 'liveCompareReadiness' /tmp/app.css
+              grep -q 'Commitment:' /tmp/app-shows.js
+              grep -q 'Still needed:' /tmp/app-shows.js
+              grep -q 'readiness + blockers' /tmp/app-shows.js
               grep -q 'data-live-compare-deadline-profile' /tmp/app-shows.js
               grep -q 'liveComparisonDeadline' /tmp/app-shows.js
               grep -q 'No verified hard deadline' /tmp/app-shows.js
