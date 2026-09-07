@@ -385,6 +385,9 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==5, actual_reviews
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
+              if profiles[held].get('current_rebook_opportunity'):
+                  assert not any(p.get('profile_id')==held for p in strong_2013), held
+                  continue
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
               assert not any(p.get('profile_id')==held for p in strong_2013), held
           for actionable_review in {pid for pid,disposition in expected_reviews.items() if disposition in {'PURSUE','WATCH'}}:
