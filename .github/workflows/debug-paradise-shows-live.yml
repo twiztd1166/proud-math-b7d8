@@ -2284,6 +2284,7 @@ jobs:
           grep -q '>Open venue map<' /tmp/vero_home_placement.html
           grep -q 'data-historical-decision-evidence-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Historical decision evidence' /tmp/vero_home_placement.html
+          grep -q '0 verified worked years in preserved evidence (not proof of no participation)' /tmp/vero_home_placement.html
           grep -q 'Current booth / placement' /tmp/vero_home_placement.html
           grep -q 'No Jan. 2-3, 2027 Paradise booth is secured yet' /tmp/vero_home_placement.html
           grep -q 'do not reuse Booth #52' /tmp/vero_home_placement.html
@@ -2327,6 +2328,9 @@ jobs:
           grep -q 'Current booth / placement' /tmp/martin_home_placement.html
           grep -q 'current 2027 floor plan, but no Paradise booth assignment is verified' /tmp/martin_home_placement.html
           grep -q 'historical Booth 131 is reference only' /tmp/martin_home_placement.html
+          grep -q 'data-historical-decision-evidence-profile="LIFE-018"' /tmp/martin_home_placement.html
+          grep -q 'Historical decision evidence' /tmp/martin_home_placement.html
+          grep -q '3 verified worked years' /tmp/martin_home_placement.html
           grep -q 'Historical placement guide' /tmp/martin_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-018"' /tmp/martin_home_placement.html
           grep -q 'Latest preserved placement: 131 - 10x12' /tmp/martin_home_placement.html
