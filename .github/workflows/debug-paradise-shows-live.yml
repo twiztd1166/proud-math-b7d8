@@ -322,6 +322,11 @@ jobs:
               grep -q 'Current: ' /tmp/app-shows.js
               grep -q 'Best history:' /tmp/app-shows.js
               grep -q 'liveCompareAction' /tmp/app.css
+              grep -q 'data-label="Decision"' /tmp/app-shows.js
+              grep -q 'data-label="Historical outcome"' /tmp/app-shows.js
+              grep -q 'data-label="Action"' /tmp/app-shows.js
+              grep -q 'liveCompareBoard td::before' /tmp/app.css
+              grep -q 'grid-template-columns:92px minmax(0,1fr)' /tmp/app.css
               grep -q 'liveCompareOpen' /tmp/app-bind.js
               grep -q 'liveCompareBoard' /tmp/app.css
               grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/app-shows.js
@@ -2636,8 +2641,10 @@ jobs:
           render_view() {
             name="$1"
             url="$2"
+            window_size="${3:-1280,900}"
             profile="$(mktemp -d)"
             "$chrome" \
+              --window-size="$window_size" \
               --headless=new \
               --no-sandbox \
               --disable-gpu \
@@ -2692,6 +2699,14 @@ jobs:
           grep -q 'Best history:' /tmp/shows.html
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows.html
           grep -q 'class="liveCompareAction"' /tmp/shows.html
+          render_view shows_mobile "$SITE/#shows" "390,844"
+          grep -q 'Show database' /tmp/shows_mobile.html
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 16
+          grep -q 'data-label="Decision"' /tmp/shows_mobile.html
+          grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
+          grep -q 'data-label="Placement"' /tmp/shows_mobile.html
+          grep -q 'data-label="Action"' /tmp/shows_mobile.html
+          grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
