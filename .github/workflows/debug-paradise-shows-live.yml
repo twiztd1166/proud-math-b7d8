@@ -220,6 +220,12 @@ jobs:
               grep -q 'current_rebook_review' /tmp/app-shows.js
               grep -q 'Current booking review' /tmp/app-shows.js
               grep -q 'Historical candidate review' /tmp/app-shows.js
+              grep -q 'historicalReviewOutreach' /tmp/app-shows.js
+              grep -q 'Current outreach contact' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-profile' /tmp/app-shows.js
+              grep -q 'data-historical-outreach-actions-profile' /tmp/app-shows.js
+              grep -q 'review.outreach_contact_name' /tmp/app-shows.js
+              grep -q 'review.outreach_contact_phone' /tmp/app-shows.js
               grep -q 'data-review-profile' /tmp/app-shows.js
               grep -q 'data-review-scope' /tmp/app-shows.js
               grep -Fq "rebookReviewCard(d.rebookReview||null,Boolean(d.rebookOpportunity))" /tmp/app-modals.js
@@ -548,6 +554,26 @@ jobs:
               assert label_part in str(review.get('source_label') or ''), (pid,review)
               assert ref_part in str(review.get('source_ref') or ''), (pid,review)
               assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
+          expected_historical_outreach={
+              'LIFE-028':('Palm Beach Liquors','561-330-4777'),
+              'LIFE-038':('Hubbard South Florida','561-616-4777'),
+              'LIFE-039':('City of Port St. Lucie / Hurricane Expo','772-871-5225'),
+              'LIFE-056':('Hubbard South Florida','561-616-4777'),
+              'LIFE-057':('Hubbard South Florida','561-616-4777'),
+              'LIFE-073':('DLF Media / St. Lucie County Safety Festival','772-337-0049'),
+          }
+          assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
+          for pid,(name,phone) in expected_historical_outreach.items():
+              review=reviews[pid]
+              assert review.get('outreach_contact_name')==name, (pid,review)
+              assert review.get('outreach_contact_phone')==phone, (pid,review)
+              assert not review.get('outreach_contact_email'), (pid,review)
+              assert not profiles[pid].get('current_rebook_opportunity'), (pid,profiles[pid].get('current_rebook_opportunity'))
+          for pid,review in reviews.items():
+              if pid not in expected_historical_outreach:
+                  assert not review.get('outreach_contact_name'), (pid,review)
+                  assert not review.get('outreach_contact_phone'), (pid,review)
+                  assert not review.get('outreach_contact_email'), (pid,review)
           held_profiles={pid for pid,disposition in expected_reviews.items() if disposition in hold_dispositions}
           for held in held_profiles:
               if profiles[held].get('current_rebook_opportunity'):
@@ -1270,10 +1296,10 @@ jobs:
           vero_oktoberfest=json.load(open('/tmp/vero_oktoberfest.json'))
           for detail in (barrett_review,ourkids_review,sarasota_review,oktoberfest_review):
               assert detail.get('ok') is True, detail
-              assert detail.get('version') == 35, detail.get('version')
+              assert detail.get('version') == 36, detail.get('version')
               assert (detail.get('rebookReview') or {}).get('disposition') == 'HOLD', detail
           assert vero_oktoberfest.get('ok') is True, vero_oktoberfest
-          assert vero_oktoberfest.get('version') == 35, vero_oktoberfest.get('version')
+          assert vero_oktoberfest.get('version') == 36, vero_oktoberfest.get('version')
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('opportunity_status') == 'SPONSORSHIP_OPEN', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_start') == '2026-10-16', vero_oktoberfest
           assert (vero_oktoberfest.get('rebookOpportunity') or {}).get('event_end') == '2026-10-18', vero_oktoberfest
@@ -1285,7 +1311,7 @@ jobs:
           assert '$85,436 lifetime net aggregate' in (oktoberfest_review.get('rebookReview') or {}).get('rationale',''), oktoberfest_review
           assert (ourkids_review.get('rebookReview') or {}).get('source_url') == 'https://www.adayforkids.com/', ourkids_review
           # Year-scoped historical completeness semantics.
-          assert x.get('version') == 54, x.get('version')
+          assert x.get('version') == 55, x.get('version')
           for p in profiles.values():
               assert isinstance(p.get('history_field_states'), dict), p.get('profile_id')
               assert isinstance(p.get('history_field_totals'), dict), p.get('profile_id')
@@ -2385,6 +2411,12 @@ jobs:
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
           grep -q 'data-review-profile="LIFE-028" data-review-scope="historical"' /tmp/palm_liquors_pursue.html
           grep -q 'Historical candidate review' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outreach-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'Current outreach contact' /tmp/palm_liquors_pursue.html
+          grep -q 'Palm Beach Liquors · 561-330-4777' /tmp/palm_liquors_pursue.html
+          grep -q 'data-historical-outreach-actions-profile="LIFE-028"' /tmp/palm_liquors_pursue.html
+          grep -q 'href="tel:5613304777"' /tmp/palm_liquors_pursue.html
+          grep -q 'Call 561-330-4777' /tmp/palm_liquors_pursue.html
           grep -q 'When to act' /tmp/palm_liquors_pursue.html
           grep -q 'NOW' /tmp/palm_liquors_pursue.html
           grep -q '>PURSUE<' /tmp/palm_liquors_pursue.html
@@ -2476,6 +2508,10 @@ jobs:
           grep -q 'data-historical-decision-evidence-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Historical decision evidence' /tmp/bradenton_pursue.html
           grep -q 'data-review-profile="LIFE-044" data-review-scope="live"' /tmp/bradenton_pursue.html
+          if grep -q 'data-historical-outreach-profile="LIFE-044"' /tmp/bradenton_pursue.html; then
+            echo 'Live Bradenton review incorrectly rendered historical outreach controls'
+            exit 1
+          fi
           grep -q 'Current booking review' /tmp/bradenton_pursue.html
           grep -q 'data-booking-readiness-profile="LIFE-044"' /tmp/bradenton_pursue.html
           grep -q 'Booking readiness' /tmp/bradenton_pursue.html
