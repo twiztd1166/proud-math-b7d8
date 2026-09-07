@@ -1,3 +1,9 @@
+# Paradise Shows
+
+> **Continuation / new-chat rule:** before any `Go`, `Continue`, or field-completeness work, read [PARADISE_SHOWS_CONTINUATION_CHECKPOINT.md](./PARADISE_SHOWS_CONTINUATION_CHECKPOINT.md), verify it against the live `paradise-shows-public` GitHub head and governed Supabase state, then follow [PARADISE_SHOWS_CONTINUATION_PROTOCOL.md](./PARADISE_SHOWS_CONTINUATION_PROTOCOL.md). Production wins over stale chat context.
+
+---
+
 # Astro Starter Kit: Blog
 
 ![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
