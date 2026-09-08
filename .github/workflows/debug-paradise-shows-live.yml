@@ -1,9 +1,6 @@
-name: Paradise Shows public live smoke
+name: Paradise Shows legacy snapshot audit
 
 on:
-  push:
-    branches:
-      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
