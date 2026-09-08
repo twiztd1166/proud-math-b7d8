@@ -693,6 +693,7 @@ jobs:
               'LIFE-007':'PARADISE_ACTION',
               'LIFE-054':'PARADISE_ACTION',
               'LIFE-112':'PARADISE_ACTION',
+              'LIFE-077':'PARADISE_ACTION',
               'HIST-234':'ORGANIZER_RESPONSE',
               'LIFE-009':'ORGANIZER_RESPONSE',
               'LIFE-013':'ORGANIZER_RESPONSE',
@@ -703,7 +704,6 @@ jobs:
               'LIFE-046':'ORGANIZER_RESPONSE',
               'LIFE-071':'ORGANIZER_RESPONSE',
               'LIFE-076':'ORGANIZER_RESPONSE',
-              'LIFE-077':'ORGANIZER_RESPONSE',
               'LIFE-092':'ORGANIZER_RESPONSE',
               'LIFE-014':'WAIT_FOR_PUBLICATION',
               'LIFE-060':'WAIT_FOR_PUBLICATION',
@@ -712,8 +712,8 @@ jobs:
           assert len(expected_resolution_lanes)==18, expected_resolution_lanes
           for pid,lane in expected_resolution_lanes.items():
               assert reviews[pid].get('resolution_lane')==lane, (pid,reviews[pid])
-          assert sum(1 for v in expected_resolution_lanes.values() if v=='PARADISE_ACTION')==3
-          assert sum(1 for v in expected_resolution_lanes.values() if v=='ORGANIZER_RESPONSE')==12
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='PARADISE_ACTION')==4
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='ORGANIZER_RESPONSE')==11
           assert sum(1 for v in expected_resolution_lanes.values() if v=='WAIT_FOR_PUBLICATION')==2
           assert sum(1 for v in expected_resolution_lanes.values() if v=='RECONCILE_EXISTING')==1
           assert sum(1 for v in expected_resolution_lanes.values() if v=='RESEARCH_REQUIRED')==0
@@ -724,11 +724,11 @@ jobs:
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Exact currently available booth / final PSM assignment · required application remittance / authorized contract signature-payment · explicit voluntary cancellation/refund rights · exact insurance/COI requirements · move-in/loading/parking instructions · Saturday public show hours',
               'LIFE-013':'2027-specific commercial rate sheet/application · all-in indoor price · live available space/map · application/payment deadlines · cancellation/COI/utilities/credentials terms',
-              'LIFE-017':'Current available booth / final ECCS location · GEMS/electrical/forklift add-on charges before 50% reservation payment',
-              'LIFE-014':'Next application opening date · 2027-28 eligibility / fee · next-cycle placement rules',
+              'LIFE-017':'Current available booth / final ECCS location · GEMS/forklift/material-handling add-on charges actually required before 50% reservation payment',
+              'LIFE-014':'2027-28 home-improvement eligibility / standard-vendor vs sponsor-special-activation path · next application opening date · current fee · next-cycle placement/operating rules',
               'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
-              'LIFE-077':'Normal 2026 vendor fee / application acceptance · Paradise category acceptance · payment timing · current footprint/electricity confirmation · $2,000 sponsorship only if independently justified',
-              'LIFE-009':'Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered',
+              'LIFE-077':'Paradise internal approval for controlled retest/application · organizer acceptance of Paradise category · exact normal-vendor tent-site dimensions if operationally required · voluntary cancellation/refund terms beyond the published no-refund cases',
+              'LIFE-009':'Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements',
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
@@ -986,11 +986,13 @@ jobs:
           assert 'Jan. 2026 Space 048 ($535 paid; exact date-matched 0 LP closes / $0)' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'The live Jan. 2-3, 2027 BoothCentral page is sold out.' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
           assert 'Do not plan on a normal self-service booking unless the organizer reopens inventory.' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
-          assert 'current refund/cancellation terms if an opening is offered' in reviews['LIFE-009'].get('blockers_text',''), reviews['LIFE-009']
+          assert 'refund/cancellation terms' not in reviews['LIFE-009'].get('blockers_text',''), reviews['LIFE-009']
           assert 'cancellation/additional opening' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
           assert reviews['LIFE-009'].get('resolution_lane')=='ORGANIZER_RESPONSE', reviews['LIFE-009']
           assert 'EXPLICIT_2026_PREDECESSOR_NOT_CURRENT_TERMS' in reviews['LIFE-009'].get('source_ref',''), reviews['LIFE-009']
           assert reviews['LIFE-014'].get('disposition')=='WATCH' and 'MARCH 2027' in reviews['LIFE-014'].get('action_timing',''), reviews['LIFE-014']
+          assert 'home-improvement eligibility' in reviews['LIFE-014'].get('blockers_text',''), reviews['LIFE-014']
+          assert 'standard-vendor' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
           assert '$413,462' in reviews['LIFE-014'].get('rationale',''), reviews['LIFE-014']
           placement_request_evidence={
               'LIFE-007':('LP2021-101','2021-SCH21-0127','4 LP closes / $57,043 LP close volume / 4 issued / 4 demos','not attendance proof'),
@@ -1073,12 +1075,9 @@ jobs:
           assert 'signed fall document plus exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
           assert reviews['LIFE-077'].get('disposition')=='WATCH' and reviews['LIFE-077'].get('action_timing','').startswith('NOW'), reviews['LIFE-077']
           assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
-          assert '$200' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert '$225' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
-          assert 'preserved rather than forced into a false single price' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
-          assert reviews['LIFE-077'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for a published/current 2026 normal-vendor fee'), reviews['LIFE-077']
+          assert reviews['LIFE-077'].get('next_step','').startswith('If Paradise approves a controlled retest, submit the live 2026 Vendor Form for one $225 tent site now'), reviews['LIFE-077']
           assert 'assign normal-vendor booths on arrival and prohibit location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
-          assert 'no 2026 Sebastian Clambake vendor packet/fee was found in Paradise Gmail or Drive' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
           assert 'standard 10x10 form fee $225' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
           assert 'GMAIL:1997d07e25ef4018' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
           assert 'DRIVE:1Kkc55BLjkLwr5K4fjgoAqqomDqNsGayW' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
@@ -1787,8 +1786,9 @@ jobs:
               'LIFE-046':(100,100,'8-foot table / weekend','Official promoter West Palm Beach rate for one 8 ft x 2.5 ft indoor table; includes 2 chairs and 2 employee badges. No West Palm 10x10 outside option is published.'),
               'LIFE-054':(310,410,'approved vendor category / event','Official 2026 Corporate exposure: application asks only for Corporate; POTTC assigns the approved level after review. Corporate Level 1 = $300 and Level 2 = $400, plus required $10 non-refundable application fee. No current published Level 2 benefit/placement difference is stated. Paradise was assigned Level 2 in 2024 and paid $410 for 2025, so $410 remains the conservative ceiling; $310 is the decision-safe lower Corporate outcome if POTTC approves Level 1.'),
               'LIFE-092':(1000,1000,'Business Vendor / 3-day festival','Official 2026 Business Vendor fee for promoting business services. Retail-vendor tent/electricity inclusions are not carried over to the Business Vendor category without organizer confirmation.'),
+              'LIFE-077':(225,650,'1-3 tent sites','Official 2026 Sebastian Clambake Vendor Form: 1 tent site $225, 2 tent sites $425, 3 tent sites $650; requested electricity is included at no extra charge with one 15-amp outlet.'),
           }
-          assert len(expected_booking_costs)==8, expected_booking_costs
+          assert len(expected_booking_costs)==9, expected_booking_costs
           for pid,(cmin,cmax,unit,basis) in expected_booking_costs.items():
               op=live[pid]
               assert float(op.get('booking_cost_min'))==cmin, (pid,op)
@@ -1819,7 +1819,7 @@ jobs:
               'LIFE-044':'KNOWN_VERIFIED',
               'LIFE-046':'KNOWN_VERIFIED',
               'LIFE-054':'KNOWN_VERIFIED',
-              'LIFE-077':'QUOTE_REQUIRED',
+              'LIFE-077':'KNOWN_VERIFIED',
               'LIFE-092':'KNOWN_VERIFIED',
               'HIST-234':'QUOTE_REQUIRED',
               'LIFE-071':'QUOTE_REQUIRED',
@@ -1836,23 +1836,23 @@ jobs:
           assert len(expected_current_cost_status)==18, expected_current_cost_status
           for pid,status in expected_current_cost_status.items():
               assert live[pid].get('current_cost_status')==status, (pid,live[pid])
-          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==9
-          assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==6
+          assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==10
+          assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==5
           expected_commitment_terms={
               'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
               'LIFE-007':'The current Green Market application requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature · the application says to seek clarification from a legal advisor if the agreement is not understood · the waiver states it is a legal document, that signing gives up certain legal rights including the right to sue, and broadly waives/releases/indemnifies/holds harmless POTTC Events, the Village and related parties including claims resulting from negligence or fault · approved applicants must also sign the waiver before occupying a booth · all booth fees must be paid in full before occupying the space · payments are due 10 days before each participation date, but space may sell out earlier · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
-              'LIFE-009':'Current 2027 booking terms are now partially reconciled across the official exhibitor page and live BoothCentral event: 25% deposit is due within 14 days of the emailed invoice; selected space remains available to others until the deposit is received; BoothCentral states final payments are due by default 30 days before the Friday setup day unless otherwise noted; reservations are accepted until full. The event is currently sold out, so these payment terms matter only if Latitude-88 offers Paradise an additional/cancelled space. Current refund/cancellation language was not fully recoverable from the live page and must be confirmed before accepting an opening.',
+              'LIFE-009':'Current 2027 booking terms are reconciled across the official exhibitor/refund pages and live BoothCentral event: 25% deposit is due within 14 days of the emailed invoice; selected space remains available to others until the deposit is received; BoothCentral states final payments are due by default 30 days before the Friday setup day unless otherwise noted; reservations are accepted until full. Current refund policy: approved applications incur a $25 cancellation fee; cancellation 30 days or more before the Friday setup day receives a 100% refund of deposits/paid-in-full amounts; cancellation 29 days or less receives no refund. Weather/acts-of-nature disruptions do not create credits/refunds under the published policy. The Jan. 2-3, 2027 event is currently sold out, so these terms matter only if Latitude-88 offers Paradise an additional/cancelled space.',
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
               'LIFE-044':'No money due at initial reservation · full payment due by showtime · cancellation notice at least 30 days before show opening is required to avoid full-space liability.',
               'LIFE-046':'Reservations are subject to current table availability · email table requests are granted only after a promoter confirmation reply · remaining tables are sold first-come, first-served beginning Tuesday at 10:30 AM after each show · no deposit, payment-deadline, cancellation or refund terms are published on the verified vendor page.',
               'LIFE-054':'$10 non-refundable application fee · the live application requires acceptance of the linked Event Rules Terms and Conditions and Waiver and Release plus an electronic signature · the linked agreement expressly states it is a legal document, that signing gives up certain legal rights including the right to sue, and includes broad waiver/release/indemnity/hold-harmless language including claims arising from negligence or fault · all booth fees must be paid in full before occupying the space · booth fees are fully refundable only if requested within 24 hours of submission and before approval · after 24 hours refunds are subject to a 50% cancellation fee · no refund within 30 days of the event · space assignment/check-in/setup instructions are emailed about 1 week before the event. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
               'LIFE-071':'Not published / not verified — obtain deposit, balance-due, cancellation, COI, utility/furnishing and other add-on terms with the current quote before signing.',
-              'LIFE-077':'Normal 2026 Vendor Application is live, but its current fee, acceptance/payment timing and any application deadline are not published in recoverable current official text · current 2026 vendor rules do state no refunds for bad weather/acts of nature and no location change/refund if dissatisfied with the booth assigned on arrival · separate sponsorship alternative: Grand Clam $2,000 includes a 10x10 booth and sponsorship fees/donations are payable by check to Sebastian Clambake Foundation.',
+              'LIFE-077':'Official 2026 Vendor Form: 1 tent site $225 · 2 tent sites $425 · 3 tent sites $650 · electricity has no additional charge when requested in advance and provides one 15-amp outlet · payment is due Oct. 15, 2026 · space is first come, first serve and is not guaranteed until the form and payment are received. Current vendor rules state no refunds for bad weather/acts of nature and no location change/refund if dissatisfied with the booth assigned on arrival. Separate sponsorship alternative: Grand Clam $2,000 includes a 10x10 booth; do not substitute that premium for the normal vendor route unless its added marketing benefits are independently justified.',
               'LIFE-014':'No current new-booking commitment is available — 2025-26 and 2026-27 applications are closed · next vendor application process opens March 2027 · 2027-28 Paradise eligibility, fee, payment, cancellation and placement terms are not yet published and must be verified when the next cycle opens.',
               'LIFE-033':'Fall 2026 commitment remains RECONCILE_EXISTING because Paradise is publicly listed but no fall-specific signed contract/invoice was recovered. The recovered multi-year clause belongs to the spring Pembroke lineage and does not by itself establish the fall occurrence. ACS confirmed Aug. 31, 2026 that Paradise may enter new contracts, new contracts must be paid in full upon signing, and there are no account credits. Obtain one written fall-specific ACS statement showing whether a contract exists, exact total price, amounts paid/due, payment deadline, cancellation/refund terms, COI and utilities before any additional payment.',
               'LIFE-018':'Official 2027 contract: signed exhibitor is legally bound by the terms; all balances are due 30 days before the event unless PSM agrees otherwise in writing; unpaid balances may be billed to the card on file at that point; reserving space but failing to participate does not eliminate the balance obligation. On exhibitor default, PSM may terminate the contract, retain payments as liquidated damages, reuse the space, and seek damages/costs. Exhibitor must maintain insurance during show, move-in and move-out periods and obtain required licenses/permits at its own expense. The extracted contract text confirms an insurance requirement but did not expose a numeric coverage limit, so do not invent one. Before signature/payment, confirm the exact required application remittance, any explicit voluntary cancellation/refund right, and any insurance-limit/additional-insured/COI wording not exposed in the recovered contract text.',
               'LIFE-060':'2027 fair dates are published, but the 2027 commercial-vendor application/agreement and its price, deposit/payment, cancellation/refund, COI and placement terms are not yet published on the verified fair site · do not carry forward the 2025 vendor agreement; request the 2027 package before commitment.',
-              'LIFE-013':'No verified 2027 commercial exhibitor agreement/rate sheet is currently published in the recovered official sources. The official vendor page is branded for Mar. 18-Apr. 11, 2027 and invites vendors to contact the Fair, but its current Online Application resolves to a portal explicitly titled 2026 Miami-Dade County Fair. Do not submit or rely on that form as a 2027 contract. Request the 2027-specific rate sheet/application, payment schedule, deadlines, cancellation/refund terms, COI and add-on terms from Sylvia.',
+              'LIFE-013':'No verified 2027 commercial exhibitor agreement/rate sheet is currently published in the recovered official sources. The official vendor page is branded for Mar. 18-Apr. 11, 2027 and confirms indoor commercial spaces, but its Online Application currently opens an Exhibitor Portal explicitly titled "2026 Miami-Dade County Fair" with 2026 event dates. Do not submit or rely on that portal as a 2027 contract. Request the 2027-specific commercial rate sheet/application, payment schedule, deadlines, cancellation/refund terms, COI/insurance, utilities/credentials and move-in/out terms from Sylvia.',
               'LIFE-112':'The official 2027 application states that receipt of an application does not guarantee space and incomplete applications will not be considered. It requires an authorized-agent signature agreeing to comply with Fair vendor rules/regulations. If accepted, the verified COI additional-insured requirements apply before setup. The 3-page application itself does not state a deposit, payment schedule, cancellation/refund terms, electrical charges, or accepted-vendor setup/breakdown terms; obtain the accepted-vendor contract/rules from Robin before payment or final commitment.',
           }
           assert len(expected_commitment_terms)==15, expected_commitment_terms
