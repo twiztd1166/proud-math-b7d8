@@ -2623,18 +2623,8 @@ jobs:
           grep -q 'verified hard deadline' /tmp/shows.html
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
-          expected_lp_specific_count="$(python - <<'PY'
-import json
-profiles=json.load(open('/tmp/catalog.json')).get('profiles') or []
-print(sum(1 for p in profiles if p.get('current_rebook_opportunity') and p.get('best_lp_attributed_specific_booth')))
-PY
-)"
-          expected_lp_type_count="$(python - <<'PY'
-import json
-profiles=json.load(open('/tmp/catalog.json')).get('profiles') or []
-print(sum(1 for p in profiles if p.get('current_rebook_opportunity') and p.get('best_lp_attributed_placement_type')))
-PY
-)"
+          expected_lp_specific_count="$(python -c 'import json; profiles=json.load(open("/tmp/catalog.json")).get("profiles") or []; print(sum(1 for p in profiles if p.get("current_rebook_opportunity") and p.get("best_lp_attributed_specific_booth")))' )"
+          expected_lp_type_count="$(python -c 'import json; profiles=json.load(open("/tmp/catalog.json")).get("profiles") or []; print(sum(1 for p in profiles if p.get("current_rebook_opportunity") and p.get("best_lp_attributed_placement_type")))' )"
           test "$(grep -o 'LP-attributed specific:' /tmp/shows.html | wc -l | tr -d ' ')" -eq "$expected_lp_specific_count"
           test "$(grep -o 'LP-attributed placement type:' /tmp/shows.html | wc -l | tr -d ' ')" -eq "$expected_lp_type_count"
           grep -q 'LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution' /tmp/shows.html
