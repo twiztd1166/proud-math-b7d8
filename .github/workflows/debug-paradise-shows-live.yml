@@ -1899,20 +1899,18 @@ jobs:
           assert 'Latitude-88' in vero_hurricane['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
-          assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
+          assert profiles['LIFE-009']['current_rebook_opportunity']['opportunity_status']=='WATCH'
           assert profiles['LIFE-009']['current_rebook_opportunity']['event_start']=='2027-01-02'
           assert profiles['LIFE-009']['current_rebook_opportunity']['event_end']=='2027-01-03'
           assert 'Standard 10x10 $475' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium 10x10 $535' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           assert 'Premium Corner 10x10 $635' in profiles['LIFE-009']['current_rebook_opportunity']['price_text']
           vero_winter_window=profiles['LIFE-009']['current_rebook_opportunity']['booking_window_text']
-          assert 'Jul. 1, Aug. 4, Aug. 20 and Sep. 3, 2026' in vero_winter_window
-          assert 'View the Floor Plan and Book Your Booth' in vero_winter_window
-          assert 'exhibitor spaces are going fast' in vero_winter_window
-          assert '25% deposit within 14 days of receiving the emailed invoice' in vero_winter_window
-          assert 'selected booth remains available for others to book until the deposit is received' in vero_winter_window
-          assert 'Do not use the separate Jan. 3-4, 2026 booking-reply page' in vero_winter_window
-          assert '$100 deposit / 30-day final-balance mechanics as 2027 terms' in vero_winter_window
+          assert 'CURRENTLY SOLD OUT in BoothCentral' in vero_winter_window
+          assert 'all booth spaces have been filled' in vero_winter_window
+          assert 'contact Latitude-88 directly to ask about additional openings' in vero_winter_window
+          assert '25% deposit within 14 days of the emailed invoice' in vero_winter_window
+          assert 'final payments are due by default 30 days before the Friday setup day unless otherwise noted' in vero_winter_window
           for ref in ('GMAIL:19f1e5972f8ede72','GMAIL:19fcdb7fc4e45955','GMAIL:1a01fafa5a24d8e3','GMAIL:1a067928da9cd0aa'):
               assert ref in reviews['LIFE-009'].get('source_ref',''), (ref,reviews['LIFE-009'])
           vero_source_ref=reviews['LIFE-009'].get('source_ref','')
