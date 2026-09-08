@@ -541,13 +541,13 @@ async function saveEdit(id){
   try{await callWrite('updateShow',{mfcId:id,patch});closeModal('editModal');toast('Show updated');await bootstrap();}
   catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save changes'}
 }
-async function openPayment(id){
+function openPayment(id){
   const p=state.payments.find(x=>x.payment_id===id);if(!p)return;
-  if(!await ensureWriteAuth())return;
   $('#paymentBody').innerHTML=`<h2>${esc(p.event)} · ${esc(p.contract_year)}</h2><div class="subtitle">${esc(p.installment)} · due ${date(p.due)}</div><div class="detailGrid"><div class="detail"><div class="k">Contract amount</div><div class="val">${money(p.amount)}</div></div><div class="detail"><div class="k">Balance</div><div class="val">${money(p.balance??p.amount)}</div></div><div class="detail"><div class="k">Status</div><div class="val">${paymentPill(p)}</div></div><div class="detail"><div class="k">Due status</div><div class="val">${esc(p.due_status||'—')}</div></div></div><div class="field"><label>POSTED AMOUNT</label><input id="pPosted" inputmode="decimal" type="number" min="0" max="${Number(p.amount||0)}" step="0.01" value="${esc(p.posted_amount??'')}" /></div><div class="field"><label>POSTED DATE</label><input id="pDate" type="date" value="${esc(p.posted_date||'')}" /></div><div class="field"><label>CLEARING</label><select id="pClearing"><option value="">—</option>${['UNVERIFIED','PENDING','CLEARED'].map(v=>`<option ${p.clearing===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>PAYMENT OWNER</label><input id="pOwner" value="${esc(p.payment_owner||'')}" /></div><div class="field"><label>OPERATING NOTE</label><textarea id="pNotes">${esc(p.notes||'')}</textarea></div><div class="editnote">Contract amount, installment, due date and agreement references are protected. Status, approval, balance and due status are calculated by the app from posting/clearing.</div><div class="actions"><button class="btn secondary" id="paymentCancelBtn">Cancel</button><button class="btn primary" id="paySaveBtn">Save payment</button></div>`;
   $('#paymentCancelBtn').onclick=()=>closeModal('paymentModal');$('#paySaveBtn').onclick=()=>savePayment(p.payment_id);$('#paymentModal').classList.add('show');
 }
 async function savePayment(id){
+  if(!await ensureWriteAuth())return;
   const patch={posted_amount:$('#pPosted').value,posted_date:$('#pDate').value||null,clearing:$('#pClearing').value||null,payment_owner:$('#pOwner').value,notes:$('#pNotes').value};
   const b=$('#paySaveBtn');b.disabled=true;b.textContent='Saving…';
   try{const d=await callWrite('updatePayment',{paymentId:id,patch});state.payments=state.payments.map(p=>p.payment_id===id?d.payment:p);closeModal('paymentModal');toast('Payment updated');await bootstrap();}
