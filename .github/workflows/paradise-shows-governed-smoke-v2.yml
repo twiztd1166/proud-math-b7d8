@@ -1,0 +1,299 @@
+name: Paradise Shows governed smoke v2
+
+on:
+  pull_request:
+    branches:
+      - paradise-shows-public
+  push:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: paradise-shows-governed-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Publish pending governed-smoke status
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg state pending --arg context paradise-shows/governed-smoke-v2 \
+            --arg description 'Governed smoke v2 is running' --arg target_url "$RUN_URL" \
+            '{state:$state,context:$context,description:$description,target_url:$target_url}' >/tmp/status.json
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$STATUS_SHA" \
+            --data-binary @/tmp/status.json >/dev/null
+
+      - name: Validate source structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-core.js
+          node --check public/app-shows.js
+          node --check public/app-control.js
+          node --check public/app-bind.js
+          node --check public/app-modals.js
+          grep -q "'RESOLUTION_ACTION'" public/app-core.js
+          grep -q "'RESOLUTION_ACTION','Action due / next event'" public/app-shows.js
+          grep -q "op.critical_deadline_date||op.event_start" public/app-shows.js
+          grep -q "ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE" public/app-shows.js
+          python - <<'PY'
+          import pathlib,re
+          bad=[]
+          for path in sorted(pathlib.Path('public').glob('app-*.js')):
+              for number,line in enumerate(path.read_text().splitlines(),1):
+                  if re.search(r'(?<!\$)\$\([^)]*\)\.forEach',line):
+                      bad.append(f'{path}:{number}: {line.strip()}')
+          assert not bad, 'Single-element $() used as a collection:\n'+'\n'.join(bad)
+          print('Source structure: PASS')
+          PY
+
+      - name: Validate governed API structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -D /tmp/options.headers -o /tmp/options.body \
+            -X OPTIONS "$API" \
+            -H "Origin: $SITE" \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: content-type'
+          grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/bootstrap.json \
+            -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"bootstrap"}'
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/catalog.json \
+            -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"catalog"}'
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unlinked.json \
+            -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"catalogUnlinked"}'
+
+          python - <<'PY'
+          import json
+          from collections import Counter
+
+          boot=json.load(open('/tmp/bootstrap.json'))
+          assert boot.get('ok') is True, boot
+          assert len(boot.get('shows') or []) == 36, len(boot.get('shows') or [])
+          assert len(boot.get('payments') or []) == 4, len(boot.get('payments') or [])
+
+          catalog=json.load(open('/tmp/catalog.json'))
+          assert catalog.get('ok') is True, catalog
+          profiles=catalog.get('profiles') or []
+          summary=catalog.get('summary') or {}
+          coverage=catalog.get('coverage') or {}
+          assert summary.get('profile_count') == 665, summary
+          assert summary.get('occurrence_count') == 1086, summary
+          assert len(profiles) == 665, len(profiles)
+          assert coverage.get('profile_rows') == 665, coverage
+          assert coverage.get('history_rows') == 1086, coverage
+          unlinked=json.load(open('/tmp/unlinked.json'))
+          us=unlinked.get('summary') or {}
+          assert coverage.get('annual_lp_profiled_rows',0) + us.get('annual_rows',0) == 1235, (coverage,us)
+          assert coverage.get('cumulative_lp_profiled_rows',0) + us.get('cumulative_rows',0) == 1251, (coverage,us)
+
+          live_profiles=[p for p in profiles if p.get('current_rebook_opportunity')]
+          assert len(live_profiles) == 18, len(live_profiles)
+          ids=[p.get('profile_id') for p in live_profiles]
+          assert len(ids) == len(set(ids)) == 18, ids
+
+          allowed_lanes={'PARADISE_ACTION','ORGANIZER_RESPONSE','WAIT_FOR_PUBLICATION','RECONCILE_EXISTING','RESEARCH_REQUIRED'}
+          allowed_dispositions={'PURSUE','WATCH','HOLD','RETIRED'}
+          allowed_readiness={'READY_TO_COMMIT','PRE_BOOKING_ACTION_REQUIRED','WATCH_GATED','HOLD_RECONCILE','REVIEW_REQUIRED'}
+          lane_counts=Counter()
+          required_op_fields=('profile_id','event_label','event_start','opportunity_status','price_text','booking_window_text',
+                              'contact_text','source_url','source_label','identity_status','venue_text','current_placement_text',
+                              'current_cost_status','current_placement_status','current_schedule_text','current_schedule_status',
+                              'current_logistics_text','current_logistics_status','commitment_terms_text','current_commitment_status')
+          for p in live_profiles:
+              pid=p.get('profile_id')
+              op=p.get('current_rebook_opportunity') or {}
+              review=p.get('current_rebook_review') or {}
+              assert review, (pid,'missing current review')
+              assert op.get('profile_id') == pid, (pid,op.get('profile_id'))
+              assert review.get('profile_id') == pid, (pid,review.get('profile_id'))
+              for field in required_op_fields:
+                  assert str(op.get(field) or '').strip(), (pid,'missing opportunity field',field)
+              assert str(op.get('contact_name') or '').strip(), (pid,'missing contact name')
+              assert str(op.get('contact_email') or '').strip() or str(op.get('contact_phone') or '').strip(), (pid,'missing contact channel')
+              assert str(review.get('rationale') or '').strip(), (pid,'missing rationale')
+              assert str(review.get('next_step') or '').strip(), (pid,'missing next step')
+              assert str(review.get('action_timing') or '').strip(), (pid,'missing action timing')
+              assert str(review.get('blockers_text') or '').strip(), (pid,'missing blockers')
+              disposition=str(review.get('disposition') or '').upper()
+              readiness=str(review.get('booking_readiness') or '').upper()
+              lane=str(review.get('resolution_lane') or '').upper()
+              assert disposition in allowed_dispositions, (pid,disposition)
+              assert readiness in allowed_readiness, (pid,readiness)
+              assert lane in allowed_lanes, (pid,lane)
+              lane_counts[lane]+=1
+              historical_outreach_fields=('outreach_contact_name','outreach_contact_phone','outreach_contact_email',
+                                          'outreach_contact_source_url','outreach_contact_source_label','outreach_contact_checked_at')
+              assert not any(review.get(k) for k in historical_outreach_fields), (pid,'historical-only outreach fields populated on live review')
+              if str(op.get('current_cost_status') or '').upper() == 'KNOWN_VERIFIED':
+                  assert op.get('booking_cost_min') is not None, (pid,'known cost missing numeric minimum')
+              if op.get('booking_cost_min') is not None or op.get('booking_cost_max') is not None:
+                  assert str(op.get('booking_cost_basis') or '').strip(), (pid,'numeric cost missing basis')
+                  assert str(op.get('booking_cost_unit') or '').strip(), (pid,'numeric cost missing unit')
+              if op.get('critical_deadline_date'):
+                  for field in ('critical_deadline_type','critical_deadline_label','critical_deadline_basis'):
+                      assert str(op.get(field) or '').strip(), (pid,'deadline missing companion field',field)
+
+          assert sum(lane_counts.values()) == 18, lane_counts
+          assert lane_counts.get('PARADISE_ACTION',0) > 0, lane_counts
+          assert lane_counts.get('ORGANIZER_RESPONSE',0) > 0, lane_counts
+          json.dump(dict(lane_counts),open('/tmp/governed_lane_counts.json','w'),sort_keys=True)
+          open('/tmp/live_profile_ids.txt','w').write('\n'.join(sorted(ids))+'\n')
+          print({'live_profiles':18,'resolution_lanes':dict(lane_counts),'governed_api':'PASS'})
+          PY
+
+      - name: Wait for exact production asset convergence
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(app.css app-core.js app-shows.js app-control.js app-bind.js app-modals.js manifest.webmanifest sw.js)
+          for attempt in $(seq 1 36); do
+            ok=1
+            for asset in "${assets[@]}"; do
+              if ! curl -fsS "$SITE/$asset" -o "/tmp/live-$asset"; then
+                ok=0
+                break
+              fi
+              expected="$(sha256sum "public/$asset" | awk '{print $1}')"
+              actual="$(sha256sum "/tmp/live-$asset" | awk '{print $1}')"
+              if [[ "$expected" != "$actual" ]]; then
+                echo "Attempt $attempt: $asset not converged"
+                ok=0
+                break
+              fi
+            done
+            if [[ "$ok" -eq 1 ]]; then
+              grep -q "'RESOLUTION_ACTION'" /tmp/live-app-core.js
+              grep -q "op.critical_deadline_date||op.event_start" /tmp/live-app-shows.js
+              echo 'Exact production assets converged.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::Production assets did not converge to the exact pushed source.'
+          exit 1
+
+      - name: Render governed production UI
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$chrome" || { echo 'Chrome not found'; exit 1; }
+
+          render_view() {
+            name="$1"
+            url="$2"
+            profile="$(mktemp -d)"
+            timeout --signal=TERM --kill-after=5s 40s "$chrome" \
+              --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+              --window-size=1280,900 --user-data-dir="$profile" \
+              --virtual-time-budget=18000 --enable-logging=stderr --log-level=0 \
+              --dump-dom "$url" >"/tmp/$name.html" 2>"/tmp/$name.log"
+            if grep -Eq 'Loading shows…|Opening full show database…' "/tmp/$name.html"; then
+              echo "::error::$name remained in a loading state"
+              return 1
+            fi
+            if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError|SyntaxError)' "/tmp/$name.log"; then
+              echo "::error::$name browser console contains an uncaught JavaScript error"
+              return 1
+            fi
+          }
+
+          render_view root "$SITE/"
+          grep -q 'Work today / this week' /tmp/root.html
+          render_view shows "$SITE/#shows"
+          grep -q 'Show database' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+
+          python - <<'PY'
+          import json
+          doc=open('/tmp/shows.html',encoding='utf-8').read()
+          counts=json.load(open('/tmp/governed_lane_counts.json'))
+          labels={
+              'PARADISE_ACTION':'Paradise action',
+              'ORGANIZER_RESPONSE':'Organizer response',
+              'WAIT_FOR_PUBLICATION':'Wait for publication',
+              'RECONCILE_EXISTING':'Reconcile existing',
+          }
+          keys={
+              'PARADISE_ACTION':'ALL_RESOLUTION_PARADISE_ACTION',
+              'ORGANIZER_RESPONSE':'ALL_RESOLUTION_ORGANIZER_RESPONSE',
+              'WAIT_FOR_PUBLICATION':'ALL_RESOLUTION_WAIT_PUBLICATION',
+              'RECONCILE_EXISTING':'ALL_RESOLUTION_RECONCILE_EXISTING',
+          }
+          for lane,label in labels.items():
+              count=int(counts.get(lane,0))
+              assert f'data-quick-view="{keys[lane]}"' in doc, (lane,'missing quick view')
+              assert f'{label} <span class="quickViewCount">{count}</span>' in doc, (lane,count)
+          print({'rendered_lane_counts':counts,'quick_views':'PASS'})
+          PY
+
+          while IFS= read -r pid; do
+            [[ -n "$pid" ]] || continue
+            safe="${pid//[^A-Za-z0-9_-]/_}"
+            render_view "show-$safe" "$SITE/#show/$pid"
+            doc="/tmp/show-$safe.html"
+            grep -q "data-review-profile=\"$pid\"" "$doc"
+            grep -q "data-current-date-profile=\"$pid\"" "$doc"
+            grep -q "data-resolution-lane-profile=\"$pid\"" "$doc"
+          done </tmp/live_profile_ids.txt
+          echo 'All 18 governed live deep links rendered with current review/date/resolution controls.'
+
+      - name: Publish final governed-smoke status
+        if: ${{ always() }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          description='Governed smoke v2 failed'
+          if [[ "$JOB_STATUS" == 'success' ]]; then
+            state=success
+            description='Governed smoke v2 passed'
+          fi
+          jq -n --arg state "$state" --arg context paradise-shows/governed-smoke-v2 \
+            --arg description "$description" --arg target_url "$RUN_URL" \
+            '{state:$state,context:$context,description:$description,target_url:$target_url}' >/tmp/final-status.json
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$STATUS_SHA" \
+            --data-binary @/tmp/final-status.json >/dev/null
+          echo "$description -> $STATUS_SHA"
