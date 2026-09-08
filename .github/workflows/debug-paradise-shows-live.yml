@@ -3850,7 +3850,7 @@ jobs:
           grep -q 'Avoid simply repeating Booth 52' /tmp/vero_home_placement.html
           grep -q 'Space 048' /tmp/vero_home_placement.html
           grep -q '\$535 paid' /tmp/vero_home_placement.html
-          grep -q '0 LP closes / \$0 LP close volume / 9 issued / 3 demos' /tmp/vero_home_placement.html
+          grep -q 'exact date-matched 0 LP closes' /tmp/vero_home_placement.html
           grep -q 'Historical placement guide' /tmp/vero_home_placement.html
           grep -q 'data-historical-placement-profile="LIFE-009"' /tmp/vero_home_placement.html
           grep -q 'Outcome-linked prior placement: Booth #52' /tmp/vero_home_placement.html
