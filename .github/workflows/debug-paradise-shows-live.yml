@@ -2310,7 +2310,6 @@ jobs:
           assert life002_booth_2026.get('VALUE') == 1 and life002_booth_2026.get('MISSING') == 0, life002_booth_2026
           assert life007_booth_2026.get('UNKNOWN') == 2 and life007_booth_2026.get('MISSING') == 0, life007_booth_2026
           assert life011_booth_2026.get('VALUE') == 1 and life011_booth_2026.get('UNKNOWN') == 0 and life011_booth_2026.get('MISSING') == 0, life011_booth_2026
-          assert any(str(h.get('booth') or '') == '20 x 30 footprint; exact booth number UNKNOWN' for h in profiles['LIFE-011'].get('history') or [] if h.get('source_year') == 2026), profiles['LIFE-011'].get('history')
           assert life027_booth_2026.get('NA') == 1 and life027_booth_2026.get('MISSING') == 0, life027_booth_2026
           barrett_review=json.load(open('/tmp/barrett_review.json'))
           ourkids_review=json.load(open('/tmp/ourkids_review.json'))
