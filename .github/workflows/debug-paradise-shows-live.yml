@@ -1066,7 +1066,7 @@ jobs:
           assert 'treat sponsorship as Paradise\'s default path unless Latitude-88 expressly confirms standard-vendor eligibility' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
           assert 'current sponsor package is live' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
           assert 'sponsor promo-booth options require the sponsor to provide its own pop-up tent' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
-          assert 'at least 35 lb secured on each leg' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
+          assert 'at least 35 lb secured per leg' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
           assert live['HIST-234'].get('current_schedule_status')=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION', live['HIST-234']
           assert 'Hours & Info page says 11 AM–7 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
           assert 'Vendor page says 11 AM–6 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
