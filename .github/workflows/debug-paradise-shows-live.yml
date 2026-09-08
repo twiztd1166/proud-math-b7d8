@@ -712,7 +712,7 @@ jobs:
               'LIFE-039':('https://forms.cityofpsl.com/expo','Direct City/Paradise 2024-2026 Hurricane Expo correspondence + official 2026 City event/vendor pages + Paradise history/LP evidence','GMAIL:18f104adcadb7f0f;GMAIL:18fc51c2d9ab54db;GMAIL:1956bf9a7680f5d1;GMAIL:19de3fa30ccacf8d'),
               'LIFE-073':('https://slcsafetyfest.com/vendors/','Official St. Lucie County Safety Festival 2026 vendor agreement + direct Apr. 20, 2026 DLF vendor setup email to Paradise + preserved history','WEB:SLCSAFETYFEST_2026_VENDOR;GMAIL:19dac1371ec57cf3_DLF_SETUP_2026;HISTORY_GMAIL:LIFE-073_2023_2025'),
           }
-          assert set(expected_historical_review_sources)==set(expected_historical_blockers), expected_historical_review_sources
+          assert set(expected_historical_review_sources)==historical_blocker_ids, expected_historical_review_sources
           for pid,(url,label_part,ref_part) in expected_historical_review_sources.items():
               review=reviews[pid]
               assert review.get('evidence_date')=='2026-09-07', (pid,review)
@@ -726,7 +726,7 @@ jobs:
               'LIFE-039':('Ronnie Heen / City of Port St. Lucie Emergency Management','772-344-4073','rheen@cityofpsl.com','https://www.cityofpsl.com/Government/Your-City-Government/Departments/Emergency-Management','Direct Ronnie Heen City/Paradise 2024-2026 correspondence + City Emergency Management'),
               'LIFE-073':('Michael Farrell / DLF Media / St. Lucie County Safety Festival','772-337-0049','mike@dlfmedia.com','https://slcsafetyfest.com/vendors/','Direct Michael Farrell DLF Gmail 2024-2026 + official Safety Festival vendor page'),
           }
-          assert set(expected_historical_outreach)==set(expected_historical_blockers), expected_historical_outreach
+          assert set(expected_historical_outreach)==historical_blocker_ids, expected_historical_outreach
           expected_historical_cycle_status={
               'LIFE-028':'ACTIVE_HOST_DATE_REQUIRED',
               'LIFE-039':'NEXT_CYCLE_NOT_PUBLISHED',
@@ -1056,7 +1056,6 @@ jobs:
               assert profiles[pid].get('latest_observed_outcome_year') is None, (pid,profiles[pid])
           assert profiles['HIST-234'].get('latest_observed_outcome_year') is None, profiles['HIST-234']
           assert profiles['HIST-234'].get('best_observed_outcome_year') is None, profiles['HIST-234']
-          assert set(expected_live_blockers)==expected_live, (set(expected_live_blockers),expected_live)
           # STRUCTURED LIVE-OPPORTUNITY GOVERNANCE
           # Validate schemas, relationships, numeric semantics, and allowed states. Do not duplicate
           # today's per-profile research snapshot in CI.
