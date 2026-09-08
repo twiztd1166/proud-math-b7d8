@@ -1566,7 +1566,7 @@ function applyQuickView(key){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='BOOKING_DECISION';
-    if(['ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE'].includes(key))state.catalogSort='BOOKING_DECISION';
+    if(['ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE'].includes(key))state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_ACT_NOW')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_ACT_LATER')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_QUOTE_REQUIRED')state.catalogSort='BOOKING_DECISION';
@@ -1793,8 +1793,11 @@ function renderShows(){
   if(!state.catalogLoaded)return top+'<div class="loading">Opening full show database…</div>';
   const list=state.catalog.filter(catalogMatches).slice().sort(catalogComparator);
   const shown=list.slice(0,state.catalogLimit);
-  const liveProfiles=state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
-  const liveComparisonViews=new Set(['NONE','ALL_LIVE_REBOOK','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE','ALL_ACT_NOW','ALL_ACT_LATER','ALL_QUOTE_REQUIRED','ALL_NO_PRIOR_PLACEMENT','ALL_REBOOK_PURSUE','ALL_REBOOK_WATCH']);
+  const liveComparisonViews=new Set(['NONE','ALL_LIVE_REBOOK','ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE','ALL_ACT_NOW','ALL_ACT_LATER','ALL_QUOTE_REQUIRED','ALL_NO_PRIOR_PLACEMENT','ALL_REBOOK_PURSUE','ALL_REBOOK_WATCH']);
+  const scopedLiveComparison=state.showQuickView!=='NONE'&&liveComparisonViews.has(state.showQuickView);
+  const liveProfiles=scopedLiveComparison
+    ?list.filter(p=>Boolean(p?.current_rebook_opportunity))
+    :state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
   const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView));
   return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
