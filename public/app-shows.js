@@ -584,7 +584,7 @@ function liveComparisonPriorityDate(op){
   const candidates=[deadline,eventDate].filter(Boolean).sort();
   return candidates[0]||'9999-12-31';
 }
-function liveDecisionCompareBoard(profiles,open=false){
+function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
     const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
@@ -594,9 +594,13 @@ function liveDecisionCompareBoard(profiles,open=false){
     const bPriority=liveComparisonPriorityDate(b?.current_rebook_opportunity);
     const aDate=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
     const bDate=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
+    if(actionDateFirst)return aPriority.localeCompare(bPriority)||aw-bw||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
     return aw-bw||aPriority.localeCompare(bPriority)||aDate.localeCompare(bDate)||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''));
   });
   if(!rows.length)return '';
+  const ordering=actionDateFirst
+    ?'Action date first: earliest verified hard deadline or event date first; decision is next tie-breaker'
+    :'Decision first; within each decision tier, earliest verified hard deadline or event date first';
   const body=rows.map(p=>{
     const op=p.current_rebook_opportunity||{};
     const review=p.current_rebook_review||{};
@@ -629,7 +633,7 @@ function liveDecisionCompareBoard(profiles,open=false){
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>Decision first; within each decision tier, earliest verified hard deadline or event date first · governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline + live countdown · timing · governed next step · direct action</small></summary>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>${esc(ordering)} · governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · hard deadline + live countdown · timing · governed next step · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Hard deadline</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth, and carries the same attribution / attendance limitations. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score. Resolution lane identifies who or what must resolve the remaining blocker: Paradise action, organizer response, publication wait, existing-booking reconciliation, or further research.</div>
   </details>`;
@@ -1801,6 +1805,6 @@ function renderShows(){
   const liveProfiles=scopedLiveComparison
     ?list.filter(p=>Boolean(p?.current_rebook_opportunity))
     :state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
-  const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView));
+  const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView),String(state.showQuickView||'').startsWith('ALL_RESOLUTION_'));
   return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }

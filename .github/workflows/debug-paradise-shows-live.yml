@@ -369,6 +369,10 @@ jobs:
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
               grep -q "liveComparisonViews=new Set(\['NONE','ALL_LIVE_REBOOK'" /tmp/app-shows.js
               grep -q 'liveComparisonPriorityDate' /tmp/app-shows.js
+              grep -Fq 'if(actionDateFirst)return aPriority.localeCompare(bPriority)||aw-bw' /tmp/app-shows.js
+              grep -Fq "startsWith('ALL_RESOLUTION_')" /tmp/app-shows.js
+              grep -q 'Action date first: earliest verified hard deadline or event date first; decision is next tie-breaker' /tmp/app-shows.js
+              grep -q 'Decision first; within each decision tier, earliest verified hard deadline or event date first' /tmp/app-shows.js
               grep -q 'earliest verified hard deadline or event date first' /tmp/app-shows.js
               grep -q 'liveComparisonOutcome' /tmp/app-shows.js
               grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
