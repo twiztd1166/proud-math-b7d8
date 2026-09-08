@@ -107,11 +107,20 @@ jobs:
               grep -q 'Watch / gated live' /tmp/app-shows.js
               grep -q 'Hold / reconcile live' /tmp/app-shows.js
               grep -q 'liveOpportunityReadinessIs' /tmp/app-shows.js
+              grep -q 'liveOpportunityResolutionIs' /tmp/app-shows.js
+              grep -q 'ALL_RESOLUTION_PARADISE_ACTION' /tmp/app-shows.js
+              grep -q 'ALL_RESOLUTION_ORGANIZER_RESPONSE' /tmp/app-shows.js
+              grep -q 'ALL_RESOLUTION_WAIT_PUBLICATION' /tmp/app-shows.js
+              grep -q 'ALL_RESOLUTION_RECONCILE_EXISTING' /tmp/app-shows.js
               grep -q 'resolutionLaneLabel' /tmp/app-shows.js
               grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
               grep -q 'review.resolution_lane' /tmp/app-shows.js
               grep -q 'resolutionLaneLabel(review.resolution_lane)' /tmp/app-shows.js
+              grep -q 'ALL_RESOLUTION_PARADISE_ACTION' /tmp/app-core.js
+              grep -q 'ALL_RESOLUTION_ORGANIZER_RESPONSE' /tmp/app-core.js
+              grep -q 'ALL_RESOLUTION_WAIT_PUBLICATION' /tmp/app-core.js
+              grep -q 'ALL_RESOLUTION_RECONCILE_EXISTING' /tmp/app-core.js
               grep -q 'ALL_READY_COMMIT' /tmp/app-core.js
               grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-core.js
               grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-core.js
@@ -3676,6 +3685,14 @@ jobs:
           print('Mobile comparison cost/contact/readiness/deadline labels: PASS')
           PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
+          grep -q 'data-quick-view="ALL_RESOLUTION_PARADISE_ACTION"' /tmp/shows.html
+          grep -q 'Paradise action <span class="quickViewCount">3</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_RESOLUTION_ORGANIZER_RESPONSE"' /tmp/shows.html
+          grep -q 'Organizer response <span class="quickViewCount">12</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_RESOLUTION_WAIT_PUBLICATION"' /tmp/shows.html
+          grep -q 'Wait for publication <span class="quickViewCount">2</span>' /tmp/shows.html
+          grep -q 'data-quick-view="ALL_RESOLUTION_RECONCILE_EXISTING"' /tmp/shows.html
+          grep -q 'Reconcile existing <span class="quickViewCount">1</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_READY_COMMIT"' /tmp/shows.html
           grep -q 'Ready to commit <span class="quickViewCount">0</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_PREBOOK_REQUIRED"' /tmp/shows.html
