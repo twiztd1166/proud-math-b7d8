@@ -652,7 +652,8 @@ function paradiseActionFirstScreen(profiles){
     return aPriority.localeCompare(bPriority)||aw-bw||String(a?.canonical_event||'').localeCompare(String(b?.canonical_event||''));
   });
   if(!rows.length)return '';
-  const body=rows.map(p=>{
+  const visible=rows.slice(0,8);
+  const body=visible.map(p=>{
     const op=p.current_rebook_opportunity||{};
     const review=p.current_rebook_review||{};
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
@@ -670,7 +671,7 @@ function paradiseActionFirstScreen(profiles){
     </article>`;
   }).join('');
   return `<section class="paradiseActionQueue" data-paradise-action-queue>
-    <div class="paradiseActionQueueHead"><div><span>Next Paradise actions</span><b>${rows.length} items Paradise can move now</b><small>Action date uses the verified hard deadline when present; otherwise event start is shown only as the ordering fallback. No new score is created here.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_PARADISE_ACTION">Open full Paradise action board</button></div>
+    <div class="paradiseActionQueueHead"><div><span>Next Paradise actions</span><b>${rows.length} items Paradise can move now · showing ${visible.length} most urgent</b><small>Ordered by the same governed effective action date used by the live board, then decision. Action date uses the verified hard deadline when present; otherwise event start is shown only as the ordering fallback. No new score is created here.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_PARADISE_ACTION">Open full Paradise action board</button></div>
     <div class="paradiseActionList">${body}</div>
   </section>`;
 }
