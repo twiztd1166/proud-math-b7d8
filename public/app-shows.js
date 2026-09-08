@@ -674,6 +674,41 @@ function paradiseActionFirstScreen(profiles){
     <div class="paradiseActionList">${body}</div>
   </section>`;
 }
+function organizerResponseFirstScreen(profiles){
+  const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
+  const rows=(profiles||[]).filter(p=>liveOpportunityResolutionIs(p,'ORGANIZER_RESPONSE')).slice().sort((a,b)=>{
+    const aPriority=liveComparisonPriorityDate(a?.current_rebook_opportunity);
+    const bPriority=liveComparisonPriorityDate(b?.current_rebook_opportunity);
+    const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
+    const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
+    const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
+    return aPriority.localeCompare(bPriority)||aw-bw||String(a?.canonical_event||'').localeCompare(String(b?.canonical_event||''));
+  });
+  if(!rows.length)return '';
+  const visible=rows.slice(0,6);
+  const body=visible.map(p=>{
+    const op=p.current_rebook_opportunity||{};
+    const review=p.current_rebook_review||{};
+    const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    const timing=governedFirstSentence(review.action_timing,'Verify timing');
+    const blockers=String(review.blockers_text||'').split(' · ')[0].trim()||'Organizer response still required';
+    const nextStep=liveComparisonNextStep(review);
+    const contactActions=rebookContactActions(op.contact_text,p.profile_id,op.contact_email,op.contact_phone);
+    const actions=contactActions||`<button type="button" class="btn secondary liveCompareOpen" data-profile="${esc(p.profile_id)}">Open show</button>`;
+    return `<article class="paradiseActionRow organizerResponseRow" data-organizer-response-row="${esc(p.profile_id)}">
+      <div class="paradiseActionTop"><button type="button" class="liveCompareOpen paradiseActionShow" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
+      <div class="paradiseActionFacts"><div><small>Action date</small><b>${esc(liveComparisonActionDate(op))}</b></div><div><small>Current cost</small><b>${esc(liveComparisonCurrentCost(op))}</b></div></div>
+      <div class="paradiseActionLine" data-organizer-response-state-profile="${esc(p.profile_id)}"><small>State</small><span>${esc(timing)}</span></div>
+      <div class="paradiseActionLine" data-organizer-response-blocker-profile="${esc(p.profile_id)}"><small>Waiting for</small><span>${esc(blockers)}</span></div>
+      <div class="paradiseActionLine"><small>Next step</small><span>${esc(nextStep)}</span></div>
+      <div class="paradiseActionRowActions">${actions}</div>
+    </article>`;
+  }).join('');
+  return `<section class="paradiseActionQueue organizerResponseQueue" data-organizer-response-queue>
+    <div class="paradiseActionQueueHead"><div><span>Waiting on organizers</span><b>${rows.length} organizer-blocked items · showing ${visible.length} most urgent</b><small>Ordered by the same governed effective action date used by the live board, then decision. State, blocker and next step come directly from governed review fields; no new score is created.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_ORGANIZER_RESPONSE">Open full organizer response board</button></div>
+    <div class="paradiseActionList">${body}</div>
+  </section>`;
+}
 function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
@@ -1898,5 +1933,6 @@ function renderShows(){
     :state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
   const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView),String(state.showQuickView||'').startsWith('ALL_RESOLUTION_'));
   const actionFirstScreen=['NONE','ALL_LIVE_REBOOK'].includes(state.showQuickView)?paradiseActionFirstScreen(state.catalog):'';
-  return top+quickViewsBar('ALL')+actionFirstScreen+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
+  const organizerFirstScreen=['NONE','ALL_LIVE_REBOOK'].includes(state.showQuickView)?organizerResponseFirstScreen(state.catalog):'';
+  return top+quickViewsBar('ALL')+actionFirstScreen+organizerFirstScreen+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
