@@ -1020,6 +1020,10 @@ function catalogMatchesWith(p,f,quickView='NONE',search=state.search){
     if(!opportunity||String(opportunity.current_logistics_status||'').toUpperCase()!==String(f.currentLogisticsStatus).toUpperCase())return false;
   }
   if(quickView==='ALL_LIVE_REBOOK'&&!p?.current_rebook_opportunity)return false;
+  if(quickView==='ALL_RESOLUTION_PARADISE_ACTION'&&!liveOpportunityResolutionIs(p,'PARADISE_ACTION'))return false;
+  if(quickView==='ALL_RESOLUTION_ORGANIZER_RESPONSE'&&!liveOpportunityResolutionIs(p,'ORGANIZER_RESPONSE'))return false;
+  if(quickView==='ALL_RESOLUTION_WAIT_PUBLICATION'&&!liveOpportunityResolutionIs(p,'WAIT_FOR_PUBLICATION'))return false;
+  if(quickView==='ALL_RESOLUTION_RECONCILE_EXISTING'&&!liveOpportunityResolutionIs(p,'RECONCILE_EXISTING'))return false;
   if(quickView==='ALL_READY_COMMIT'&&!liveOpportunityReadinessIs(p,'READY_TO_COMMIT'))return false;
   if(quickView==='ALL_PREBOOK_REQUIRED'&&!liveOpportunityReadinessIs(p,'PRE_BOOKING_ACTION_REQUIRED'))return false;
   if(quickView==='ALL_WATCH_GATED_LIVE'&&!liveOpportunityReadinessIs(p,'WATCH_GATED'))return false;
@@ -1445,6 +1449,9 @@ function liveOpportunityMissingPriorPlacement(p){
 function liveOpportunityReadinessIs(p,value){
   return Boolean(p?.current_rebook_opportunity)&&String(p?.current_rebook_review?.booking_readiness||'').toUpperCase()===String(value||'').toUpperCase();
 }
+function liveOpportunityResolutionIs(p,value){
+  return Boolean(p?.current_rebook_opportunity)&&String(p?.current_rebook_review?.resolution_lane||'').toUpperCase()===String(value||'').toUpperCase();
+}
 function liveOpportunityActsNow(p){
   if(!p?.current_rebook_opportunity)return false;
   return /^NOW\b/i.test(String(p?.current_rebook_review?.action_timing||'').trim());
@@ -1466,6 +1473,10 @@ function quickViewOptions(mode){
   return mode==='ALL'
     ?[
       ['ALL_LIVE_REBOOK','Live booking board'],
+      ['ALL_RESOLUTION_PARADISE_ACTION','Paradise action'],
+      ['ALL_RESOLUTION_ORGANIZER_RESPONSE','Organizer response'],
+      ['ALL_RESOLUTION_WAIT_PUBLICATION','Wait for publication'],
+      ['ALL_RESOLUTION_RECONCILE_EXISTING','Reconcile existing'],
       ['ALL_READY_COMMIT','Ready to commit'],
       ['ALL_PREBOOK_REQUIRED','Pre-booking action'],
       ['ALL_WATCH_GATED_LIVE','Watch / gated live'],
@@ -1500,6 +1511,10 @@ function quickViewOptions(mode){
 }
 function quickViewCount(key){
   if(key==='ALL_LIVE_REBOOK')return state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity)).length;
+  if(key==='ALL_RESOLUTION_PARADISE_ACTION')return state.catalog.filter(p=>liveOpportunityResolutionIs(p,'PARADISE_ACTION')).length;
+  if(key==='ALL_RESOLUTION_ORGANIZER_RESPONSE')return state.catalog.filter(p=>liveOpportunityResolutionIs(p,'ORGANIZER_RESPONSE')).length;
+  if(key==='ALL_RESOLUTION_WAIT_PUBLICATION')return state.catalog.filter(p=>liveOpportunityResolutionIs(p,'WAIT_FOR_PUBLICATION')).length;
+  if(key==='ALL_RESOLUTION_RECONCILE_EXISTING')return state.catalog.filter(p=>liveOpportunityResolutionIs(p,'RECONCILE_EXISTING')).length;
   if(key==='ALL_READY_COMMIT')return state.catalog.filter(p=>liveOpportunityReadinessIs(p,'READY_TO_COMMIT')).length;
   if(key==='ALL_PREBOOK_REQUIRED')return state.catalog.filter(p=>liveOpportunityReadinessIs(p,'PRE_BOOKING_ACTION_REQUIRED')).length;
   if(key==='ALL_WATCH_GATED_LIVE')return state.catalog.filter(p=>liveOpportunityReadinessIs(p,'WATCH_GATED')).length;
