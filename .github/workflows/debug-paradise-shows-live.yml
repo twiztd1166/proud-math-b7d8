@@ -451,6 +451,14 @@ jobs:
               grep -q 'grid-template-columns:92px minmax(0,1fr)' /tmp/app.css
               grep -q 'liveCompareOpen' /tmp/app-bind.js
               grep -q 'liveCompareBoard' /tmp/app.css
+              grep -q 'WRITE_SESSION_STORAGE' /tmp/app-core.js
+              grep -q 'ensureWriteAuth' /tmp/app-core.js
+              grep -q "headers.Authorization='Bearer '+writeSessionToken" /tmp/app-core.js
+              grep -q "call('login'" /tmp/app-core.js
+              grep -q "call('authStatus'" /tmp/app-core.js
+              grep -q "callWrite('updateShow'" /tmp/app-modals.js
+              grep -q "callWrite('updatePayment'" /tmp/app-modals.js
+              grep -q "callWrite('resolveConflict'" /tmp/app-bind.js
               grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/app-shows.js
               grep -q 'data-historical-outcome-profile' /tmp/app-shows.js
               grep -q 'historicalOutcomeSnapshot' /tmp/app-shows.js
@@ -528,8 +536,9 @@ jobs:
             -X OPTIONS "$API" \
             -H "Origin: $SITE" \
             -H "Access-Control-Request-Method: POST" \
-            -H "Access-Control-Request-Headers: content-type"
+            -H "Access-Control-Request-Headers: content-type,authorization"
           grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
+          grep -Fi 'access-control-allow-headers:' /tmp/options.headers | grep -qi 'authorization'
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -D /tmp/bootstrap.headers -o /tmp/bootstrap.json \
             -X POST "$API" \
@@ -537,6 +546,32 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"bootstrap"}'
           grep -Fi "access-control-allow-origin: $SITE" /tmp/bootstrap.headers
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/auth-status.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"authStatus"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/auth-status.json'))
+          assert x.get('ok') is True, x
+          assert x.get('authorized') is False, x
+          PY
+
+          unauth_code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth-write.json -w '%{http_code}' \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"UNAUTH_TEST_MUST_NOT_WRITE"}}')"
+          test "$unauth_code" = "401"
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/unauth-write.json'))
+          assert x.get('ok') is False, x
+          assert x.get('error') == 'Edit access required', x
+          PY
+
           python - <<'PY'
           import json
           x=json.load(open('/tmp/bootstrap.json'))
