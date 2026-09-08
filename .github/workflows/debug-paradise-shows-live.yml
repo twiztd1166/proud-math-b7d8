@@ -2641,7 +2641,7 @@ jobs:
           grep -q 'Schedule:' /tmp/shows.html
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 25
           test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 25
-          grep -q 'Resolution lane identifies who or what must resolve the remaining blocker' /tmp/shows.html
+          grep -q 'Resolution lane identifies the next actor or mechanism required to make progress' /tmp/shows.html
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
