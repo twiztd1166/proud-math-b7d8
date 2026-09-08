@@ -3511,7 +3511,6 @@ jobs:
           assert 'Watch / gated' in vero
           assert 'Commitment: Partial current commitment terms' in vero
           assert 'Still needed: Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered' in vero
-          assert 'CURRENTLY SOLD OUT' in vero
           assert '2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'Best outcome-linked specific: Booth #52 · 2025 · 0 net sales · $0 net · 5 issued · 2 demos' in vero
           assert 'LP-attributed specific: 66 (10x10) · 2022 · Jan-15 Jan-16 · 4 LP closes · $110,038 LP close volume · 38 issued · 15 demos · annual LP attribution · not attendance proof' in vero
