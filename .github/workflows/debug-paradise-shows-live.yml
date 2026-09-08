@@ -383,6 +383,8 @@ jobs:
               grep -q "return 'Latest: '+latest+' · Best: '+best" /tmp/app-shows.js
               grep -q 'occurrence rows include issued/demos and show Latest vs Best' /tmp/app-shows.js
               grep -q 'liveComparisonPlacement' /tmp/app-shows.js
+              grep -Fq "governedFirstSentence(op.current_placement_text,'')" /tmp/app-shows.js
+              grep -q 'Current guidance:' /tmp/app-shows.js
               grep -q 'liveComparisonPlacementMetrics' /tmp/app-shows.js
               grep -q 'Best outcome-linked specific' /tmp/app-shows.js
               grep -q 'Outcome-linked placement note' /tmp/app-shows.js
