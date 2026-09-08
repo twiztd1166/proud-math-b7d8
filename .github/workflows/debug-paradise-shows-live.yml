@@ -378,8 +378,10 @@ jobs:
               grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
               grep -q 'liveComparisonEvidenceDepth' /tmp/app-shows.js
               grep -q 'data-live-compare-evidence-profile' /tmp/app-shows.js
+              grep -q 'governedScheduleExcerpt' /tmp/app-shows.js
               grep -q 'liveComparisonSchedule' /tmp/app-shows.js
-              grep -Fq "governedFirstSentence(op?.current_schedule_text,'Schedule detail not recorded.')" /tmp/app-shows.js
+              grep -q 'const hasClock=' /tmp/app-shows.js
+              grep -q "second&&hasClock(second)?first+' '+second:first" /tmp/app-shows.js
               grep -q 'data-live-compare-schedule-profile' /tmp/app-shows.js
               grep -q 'Schedule:' /tmp/app-shows.js
               grep -q 'liveCompareDate' /tmp/app.css
