@@ -1052,7 +1052,7 @@ jobs:
           assert 'lowest 2026 sponsorship tier available to Paradise Exteriors that permits an onsite 10x10 lead-generation booth all weekend' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'use the free general-vendor waitlist only if Latitude-88 expressly confirms Paradise is eligible for it' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'exact booth add-on/discount and all-in price' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
-          assert 'Hours & Info says 11 AM-7 PM while the Vendor page says 11 AM-6 PM' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'the current Hours & Info page says 7 PM, while the Vendor page says 6 PM' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'Sunday operating time governs the Paradise activation' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'Current sponsor PDF recovered' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
           assert 'no tier mapping was inferred' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
