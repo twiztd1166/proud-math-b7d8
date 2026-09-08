@@ -579,9 +579,19 @@ function liveComparisonDecisionWhy(review){
 function liveComparisonNextStep(review){
   return governedFirstSentence(review?.next_step,'Open the show for the governed next step.');
 }
+function governedScheduleExcerpt(value){
+  const text=String(value||'').trim().replace(/\s+/g,' ');
+  if(!text)return 'Schedule detail not recorded.';
+  const first=governedFirstSentence(text,'Schedule detail not recorded.');
+  const hasClock=s=>/(?:\b(?:AM|PM|noon|midnight)\b|\b\d{1,2}:\d{2}\b)/i.test(String(s||''));
+  if(hasClock(first)||first.length>=text.length)return first;
+  const rest=text.slice(first.length).trim();
+  const second=governedFirstSentence(rest,'');
+  return second&&hasClock(second)?first+' '+second:first;
+}
 function liveComparisonSchedule(op){
   const status=opportunityScheduleStatusLabel(op?.current_schedule_status);
-  const detail=governedFirstSentence(op?.current_schedule_text,'Schedule detail not recorded.');
+  const detail=governedScheduleExcerpt(op?.current_schedule_text);
   return status+(detail?' · '+detail:'');
 }
 function liveComparisonPriorityDate(op){
@@ -656,7 +666,7 @@ function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
     </tr>`;
   }).join('');
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
-    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>${esc(ordering)} · governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · date + governed schedule status/detail · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · effective action date + basis + live countdown · timing · governed next step · direct action</small></summary>
+    <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>${esc(ordering)} · governed why · date + governed schedule status/detail · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · effective action date + basis + live countdown · timing · governed next step · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Action date</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth, and carries the same attribution / attendance limitations. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score. Resolution lane identifies who or what must resolve the remaining blocker: Paradise action, organizer response, publication wait, existing-booking reconciliation, or further research. Action date uses the verified hard deadline when one exists; otherwise event start is shown only as the ordering fallback and is not promoted to a deadline. The Date cell adds the governed current schedule status plus the first sentence of current_schedule_text; unpublished or unrecovered hours remain labeled as such rather than inferred.</div>
   </details>`;
