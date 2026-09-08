@@ -405,13 +405,17 @@ jobs:
               grep -q 'data-live-compare-deadline-profile' /tmp/app-shows.js
               grep -q 'liveComparisonDeadline' /tmp/app-shows.js
               grep -q 'liveComparisonDeadlineUrgency' /tmp/app-shows.js
+              grep -q 'liveComparisonActionDate' /tmp/app-shows.js
+              grep -Fq "return deadline||eventDate||'9999-12-31';" /tmp/app-shows.js
+              grep -q 'event start ordering fallback · not a hard deadline' /tmp/app-shows.js
               grep -q 'daysFromToday(op?.critical_deadline_date)' /tmp/app-shows.js
               grep -q 'past deadline' /tmp/app-shows.js
               grep -q 'deadline today' /tmp/app-shows.js
               grep -q 'to deadline' /tmp/app-shows.js
-              grep -q 'hard deadline + live countdown' /tmp/app-shows.js
+              grep -q 'effective action date + basis + live countdown' /tmp/app-shows.js
               grep -q 'No verified hard deadline' /tmp/app-shows.js
-              grep -q 'data-label="Hard deadline"' /tmp/app-shows.js
+              grep -q 'data-label="Action date"' /tmp/app-shows.js
+              grep -q 'data-live-compare-action-date-profile' /tmp/app-shows.js
               grep -q 'Prior/reference:' /tmp/app-shows.js
               grep -q 'current + prior cost' /tmp/app-shows.js
               grep -q 'liveCompareCost' /tmp/app.css
@@ -2540,6 +2544,9 @@ jobs:
           test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          grep -q 'event start ordering fallback · not a hard deadline' /tmp/shows.html
+          grep -q 'verified hard deadline' /tmp/shows.html
           test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           test "$(grep -o 'LP-attributed specific:' /tmp/shows.html | wc -l | tr -d ' ')" -eq 5
@@ -2567,6 +2574,7 @@ jobs:
               'data-live-compare-contact-profile',
               'data-live-compare-readiness-profile',
               'data-live-compare-deadline-profile',
+              'data-live-compare-action-date-profile',
               'data-live-compare-next-step-profile',
               'data-live-compare-resolution-profile',
               'data-live-compare-action-profile',
@@ -2597,7 +2605,8 @@ jobs:
           grep -q 'data-label="Cost"' /tmp/shows_mobile.html
           grep -q 'data-label="Contact"' /tmp/shows_mobile.html
           grep -q 'data-label="Readiness"' /tmp/shows_mobile.html
-          grep -q 'data-label="Hard deadline"' /tmp/shows_mobile.html
+          grep -q 'data-label="Action date"' /tmp/shows_mobile.html
+          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'data-label="Next step"' /tmp/shows_mobile.html
           grep -q 'data-label="Action"' /tmp/shows_mobile.html
           python - <<'PY'
@@ -2606,7 +2615,7 @@ jobs:
           ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
           assert len(ids)==18 and len(set(ids))==18, ids
           for pid in ids:
-              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-deadline-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
+              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
                   assert f'{attr}="{pid}"' in doc, (pid,attr)
           print({'mobile_live_comparison_structural':'PASS','rows':len(ids)})
           PY
