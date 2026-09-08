@@ -141,7 +141,9 @@ jobs:
               grep -q 'liveOpportunityNeedsQuote' /tmp/app-shows.js
               grep -q 'liveOpportunityMissingPriorPlacement' /tmp/app-shows.js
               grep -q 'BOOKING_DECISION' /tmp/app-shows.js
-              grep -q 'Booking decision / next date' /tmp/app-shows.js
+              grep -q 'Booking decision / action date' /tmp/app-shows.js
+          grep -Fq "op.critical_deadline_date||op.event_start||'9999-12-31'" /tmp/app-shows.js
+          grep -Fq 'return ad.localeCompare(bd)||aw-bw' /tmp/app-shows.js
               grep -q 'CURRENT_COST_LOW' /tmp/app-shows.js
               grep -q 'CURRENT_COST_HIGH' /tmp/app-shows.js
               grep -q 'Current booking cost low' /tmp/app-shows.js
