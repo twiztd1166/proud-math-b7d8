@@ -371,6 +371,12 @@ jobs:
               grep -q 'data-paradise-action-action-profile' /tmp/app-shows.js
               grep -q 'Next Paradise actions' /tmp/app-shows.js
               grep -q 'Open full Paradise action board' /tmp/app-shows.js
+              grep -q 'organizerResponseFirstScreen' /tmp/app-shows.js
+              grep -q 'data-organizer-response-queue' /tmp/app-shows.js
+              grep -q 'data-organizer-response-row' /tmp/app-shows.js
+              grep -q 'data-organizer-response-state-profile' /tmp/app-shows.js
+              grep -q 'Waiting on organizers' /tmp/app-shows.js
+              grep -q 'Open full organizer response board' /tmp/app-shows.js
               grep -q 'paradiseActionQueue' /tmp/app.css
               grep -q 'paradiseActionRow' /tmp/app.css
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
@@ -2622,6 +2628,9 @@ jobs:
           grep -q 'data-paradise-action-queue' /tmp/shows.html
           grep -q 'Next Paradise actions' /tmp/shows.html
           python -c "import re; d=open('/tmp/shows.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m, 'Paradise action quick-view count missing'; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); actions=re.findall(r'data-paradise-action-action-profile=\"([^\"]+)\"',d); assert sorted(actions)==sorted(ids), (actions,ids); print({'paradise_action_first_screen':'PASS','rows':len(ids)})"
+          python -c "import re; d=open('/tmp/shows.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_ORGANIZER_RESPONSE\"[^>]*>Organizer response <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m, 'Organizer response quick-view count missing'; total=int(m.group(1)); ids=re.findall(r'data-organizer-response-row=\"([^\"]+)\"',d); assert len(ids)==min(6,total) and len(set(ids))==len(ids), (len(ids),total,ids); assert 'LIFE-044' in ids, ids; assert re.search(r'data-organizer-response-state-profile=\"LIFE-044\"[^>]*>.*?OUTREACH SENT',d,re.S), 'Manatee outreach state not visible'; print({'organizer_response_first_screen':'PASS','visible':len(ids),'total':total})"
+          grep -q 'Waiting on organizers' /tmp/shows.html
+          grep -q 'Open full organizer response board' /tmp/shows.html
           grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
           grep -q '25 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 25
@@ -2715,6 +2724,7 @@ jobs:
           grep -q 'Show database' /tmp/shows_mobile.html
           grep -q 'data-paradise-action-queue' /tmp/shows_mobile.html
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); print({'mobile_paradise_action_first_screen':'PASS','rows':len(ids)})"
+          python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_ORGANIZER_RESPONSE\"[^>]*>Organizer response <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; total=int(m.group(1)); ids=re.findall(r'data-organizer-response-row=\"([^\"]+)\"',d); assert len(ids)==min(6,total) and len(set(ids))==len(ids), (len(ids),total,ids); assert 'LIFE-044' in ids, ids; assert re.search(r'data-organizer-response-state-profile=\"LIFE-044\"[^>]*>.*?OUTREACH SENT',d,re.S); print({'mobile_organizer_response_first_screen':'PASS','visible':len(ids),'total':total})"
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 25
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 25
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 25
