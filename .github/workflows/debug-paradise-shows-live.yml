@@ -378,6 +378,11 @@ jobs:
               grep -q 'liveComparisonOutcomeMetrics' /tmp/app-shows.js
               grep -q 'liveComparisonEvidenceDepth' /tmp/app-shows.js
               grep -q 'data-live-compare-evidence-profile' /tmp/app-shows.js
+              grep -q 'liveComparisonSchedule' /tmp/app-shows.js
+              grep -Fq "governedFirstSentence(op?.current_schedule_text,'Schedule detail not recorded.')" /tmp/app-shows.js
+              grep -q 'data-live-compare-schedule-profile' /tmp/app-shows.js
+              grep -q 'Schedule:' /tmp/app-shows.js
+              grep -q 'liveCompareDate' /tmp/app.css
               grep -q 'liveCompareOutcome' /tmp/app.css
               grep -q 'zero explicit worked years is not proof of no participation' /tmp/app-shows.js
               grep -q "return 'Latest: '+latest+' · Best: '+best" /tmp/app-shows.js
@@ -2522,6 +2527,8 @@ jobs:
           grep -q '18 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          grep -q 'Schedule:' /tmp/shows.html
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'Resolution lane identifies who or what must resolve the remaining blocker' /tmp/shows.html
@@ -2570,6 +2577,7 @@ jobs:
           required_attrs=(
               'data-live-compare-decision-why-profile',
               'data-live-compare-evidence-profile',
+              'data-live-compare-schedule-profile',
               'data-live-compare-placement-profile',
               'data-live-compare-venue-profile',
               'data-live-compare-cost-profile',
@@ -2603,6 +2611,8 @@ jobs:
           test "$(grep -o 'LP-attributed specific:' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 5
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
+          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
+          grep -q 'Schedule:' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
           grep -q 'data-label="Cost"' /tmp/shows_mobile.html
           grep -q 'data-label="Contact"' /tmp/shows_mobile.html
@@ -2617,7 +2627,7 @@ jobs:
           ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
           assert len(ids)==18 and len(set(ids))==18, ids
           for pid in ids:
-              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
+              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-schedule-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
                   assert f'{attr}="{pid}"' in doc, (pid,attr)
           print({'mobile_live_comparison_structural':'PASS','rows':len(ids)})
           PY
