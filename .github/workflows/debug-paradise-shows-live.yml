@@ -733,7 +733,7 @@ jobs:
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
               'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint/category capacity and organizer acceptance · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
               'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
-              'LIFE-033':'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities',
+              'LIFE-033':'Written ACS confirmation of fall-2026 contract/account state · if contracted: signed fall document, exact booth, total price, amounts paid/due, payment deadline, cancellation/refund, COI/utilities · if not contracted: corrected listing + fresh quote',
               'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement · windows/doors/roofing category clearance / any exclusivity',
               'LIFE-112':'Authorized application/signature + operation photo/product list · category/space acceptance · exact outside placement / final frontage and depth · electrical service/cost · accepted-vendor payment/cancellation terms · setup/breakdown/loading/vendor hours',
           }
