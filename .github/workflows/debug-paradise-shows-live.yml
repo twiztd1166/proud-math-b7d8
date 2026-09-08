@@ -3689,9 +3689,9 @@ jobs:
           PY
           grep -q 'data-live-compare-action-profile="LIFE-044"' /tmp/shows_mobile.html
           grep -q 'data-quick-view="ALL_RESOLUTION_PARADISE_ACTION"' /tmp/shows.html
-          grep -q 'Paradise action <span class="quickViewCount">3</span>' /tmp/shows.html
+          grep -q 'Paradise action <span class="quickViewCount">4</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_RESOLUTION_ORGANIZER_RESPONSE"' /tmp/shows.html
-          grep -q 'Organizer response <span class="quickViewCount">12</span>' /tmp/shows.html
+          grep -q 'Organizer response <span class="quickViewCount">11</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_RESOLUTION_WAIT_PUBLICATION"' /tmp/shows.html
           grep -q 'Wait for publication <span class="quickViewCount">2</span>' /tmp/shows.html
           grep -q 'data-quick-view="ALL_RESOLUTION_RECONCILE_EXISTING"' /tmp/shows.html
