@@ -1182,7 +1182,7 @@ jobs:
           assert 'DRIVE:no current 2026 Feast/VIA agreement or vendor packet recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
           assert 'embedded signed interest form + stale linked 2019 Terms & Conditions' in reviews['LIFE-092'].get('source_label',''), reviews['LIFE-092']
           assert 'embedded current interest form contains no Business Vendor footprint/electricity/payment fields and requires Terms acceptance + signature' in live['LIFE-092'].get('notes',''), live['LIFE-092']
-          assert 'stale 2019 text that says acceptance constitutes a binding agreement' in live['LIFE-092'].get('notes',''), live['LIFE-092']
+          assert 'linked Terms page is materially stale 2019 text and says acceptance forms a binding agreement' in live['LIFE-092'].get('notes',''), live['LIFE-092']
           assert 'no current 2026 VIA/Feast Business Vendor agreement or packet in Paradise Gmail or Drive' in live['LIFE-092'].get('notes',''), live['LIFE-092']
           assert 'requires an Accept Terms checkbox and a signature' in live['LIFE-092'].get('booking_window_text',''), live['LIFE-092']
           assert 'acceptance constitutes a binding agreement' in live['LIFE-092'].get('booking_window_text',''), live['LIFE-092']
