@@ -1072,7 +1072,7 @@ jobs:
           assert 'Vendor page says 11 AM–6 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
           assert reviews['LIFE-033'].get('disposition')=='HOLD' and reviews['LIFE-033'].get('action_timing','').startswith('NOW'), reviews['LIFE-033']
           assert 'account-control HOLD' in reviews['LIFE-033'].get('rationale',''), reviews['LIFE-033']
-          assert 'signed fall document plus exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
+          assert 'signed fall-2026 document plus exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
           assert reviews['LIFE-077'].get('disposition')=='WATCH' and reviews['LIFE-077'].get('action_timing','').startswith('NOW'), reviews['LIFE-077']
           assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert '$225' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
