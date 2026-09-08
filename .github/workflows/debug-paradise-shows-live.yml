@@ -421,8 +421,13 @@ jobs:
               grep -q 'data-live-compare-freshness-profile' /tmp/app-shows.js
               grep -q 'Opportunity checked' /tmp/app-shows.js
               grep -q 'Decision reviewed' /tmp/app-shows.js
+              grep -q 'liveComparisonLogistics' /tmp/app-shows.js
+              grep -Fq "opportunityLogisticsStatusLabel(op?.current_logistics_status)" /tmp/app-shows.js
+              grep -Fq "governedFirstSentence(op?.current_logistics_text,'Logistics detail not recorded.')" /tmp/app-shows.js
+              grep -q 'data-live-compare-logistics-profile' /tmp/app-shows.js
+              grep -q 'Ops:' /tmp/app-shows.js
               grep -q 'Still needed:' /tmp/app-shows.js
-              grep -q 'readiness + governed commitment terms + row-level freshness + blockers' /tmp/app-shows.js
+              grep -q 'readiness + governed commitment terms + governed logistics + row-level freshness + blockers' /tmp/app-shows.js
               grep -q 'data-live-compare-deadline-profile' /tmp/app-shows.js
               grep -q 'liveComparisonDeadline' /tmp/app-shows.js
               grep -q 'liveComparisonDeadlineUrgency' /tmp/app-shows.js
@@ -2603,7 +2608,9 @@ jobs:
           test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'Freshness:' /tmp/shows.html
+          grep -q 'Ops:' /tmp/shows.html
           test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'event start ordering fallback · not a hard deadline' /tmp/shows.html
@@ -2637,6 +2644,7 @@ jobs:
               'data-live-compare-readiness-profile',
               'data-live-compare-commitment-profile',
               'data-live-compare-freshness-profile',
+              'data-live-compare-logistics-profile',
               'data-live-compare-deadline-profile',
               'data-live-compare-action-date-profile',
               'data-live-compare-next-step-profile',
@@ -2673,7 +2681,9 @@ jobs:
           grep -q 'data-label="Readiness"' /tmp/shows_mobile.html
           test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'Freshness:' /tmp/shows_mobile.html
+          grep -q 'Ops:' /tmp/shows_mobile.html
           grep -q 'data-label="Action date"' /tmp/shows_mobile.html
           test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           grep -q 'data-label="Next step"' /tmp/shows_mobile.html
@@ -2684,7 +2694,7 @@ jobs:
           ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
           assert len(ids)==18 and len(set(ids))==18, ids
           for pid in ids:
-              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-commitment-profile','data-live-compare-freshness-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-schedule-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
+              for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-commitment-profile','data-live-compare-freshness-profile','data-live-compare-logistics-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-schedule-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
                   assert f'{attr}="{pid}"' in doc, (pid,attr)
           print({'mobile_live_comparison_structural':'PASS','rows':len(ids)})
           PY
