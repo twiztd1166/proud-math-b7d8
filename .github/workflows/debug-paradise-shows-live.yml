@@ -593,7 +593,7 @@ jobs:
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
           assert x.get('version') == 17, x.get('version')
-          assert len(x.get('shows') or []) == 36, len(x.get('shows') or [])
+          assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
           acs=current['MFC-063']
@@ -611,6 +611,21 @@ jobs:
           assert sd.get('multi_year_accepted') is True, sd
           assert sd.get('payment_receipt_found') is False, sd
           assert sd.get('payment_clearing') == 'UNVERIFIED', sd
+          touch=current['MFC-084']
+          assert touch.get('event') == 'Sebastian Family Fun Day & Touch A Truck — Sponsor Activation', touch
+          assert touch.get('event_start') == '2026-09-12', touch
+          assert touch.get('event_end') == '2026-09-12', touch
+          assert touch.get('show_status') == 'DATE ONLY', touch
+          assert touch.get('decision') == 'OPTIONAL SPONSOR ACTIVATION — VERIFY STAFFING', touch
+          assert touch.get('max_booking_cost') is None, touch
+          assert touch.get('booking_status') == '2025-26 CITY SPONSORSHIP PAID / ACCEPTED — SEP. 12 PARTICIPATION RIGHT VERIFIED — PARADISE 2026 BOOTH ACTIVATION / STAFFING NOT CONFIRMED', touch
+          assert touch.get('confirmation') == 'PARTIAL — sponsor/payment/right/date verified; 2026 booth activation unconfirmed', touch
+          tsd=touch.get('source_detail') or {}
+          assert tsd.get('payment_status') == 'SEASON SPONSORSHIP RECEIVED BY CITY — ACTIVATION NOT CONFIRMED', tsd
+          assert tsd.get('historical_profile_id') == 'HIST-098', tsd
+          assert tsd.get('activation_confirmed') is False, tsd
+          assert tsd.get('attendance_inference') is False, tsd
+          assert tsd.get('calendar_event_id') == '7j66m38ivlnptu6an1n2rqu7f6', tsd
           payments={p.get('payment_id'):p for p in x.get('payments') or []}
           pid='MFC-063|2026|PIF|2026-09-04|2110.50'
           assert pid in payments, payments
@@ -620,7 +635,7 @@ jobs:
           assert pay.get('due') == '2026-09-04', pay
           assert pay.get('clearing') == 'UNVERIFIED', pay
           assert pay.get('status') == 'HOLD / REVIEW', pay
-          print({'shows':36,'payments':4,'acs_signed_contract':'PASS'})
+          print({'shows':37,'payments':4,'acs_signed_contract':'PASS','sebastian_touch_activation':'PASS'})
           PY
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/catalog.json \
@@ -2579,6 +2594,14 @@ jobs:
 
           render_view shows "$SITE/#shows"
           grep -q 'Show database' /tmp/shows.html
+          render_view current_controls "$SITE/#current"
+          grep -q 'Current 37' /tmp/current_controls.html
+          grep -q 'data-id="MFC-084"' /tmp/current_controls.html
+          grep -q 'Sebastian Family Fun Day &amp; Touch A Truck — Sponsor Activation' /tmp/current_controls.html
+          grep -q 'OPTIONAL SPONSOR ACTIVATION — VERIFY STAFFING' /tmp/current_controls.html
+          render_view touch_profile "$SITE/#show/HIST-098"
+          grep -q 'HIST-098' /tmp/touch_profile.html
+          grep -q 'Linked current control: MFC-084' /tmp/touch_profile.html
           grep -q '665 show profiles' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
