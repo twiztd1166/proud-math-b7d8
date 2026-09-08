@@ -1565,6 +1565,7 @@ function applyQuickView(key){
   if(key.startsWith('ALL_')){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
+    if(['ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING'].includes(key))state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='BOOKING_DECISION';
     if(['ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE'].includes(key))state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_ACT_NOW')state.catalogSort='BOOKING_DECISION';
