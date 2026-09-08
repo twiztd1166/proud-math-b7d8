@@ -576,6 +576,16 @@ function governedFirstSentence(value,fallback){
 function liveComparisonDecisionWhy(review){
   return governedFirstSentence(review?.rationale,'Open the show for the governed rationale.');
 }
+function liveComparisonCurrentCost(op){
+  const structured=opportunityCostText(op);
+  if(structured)return structured;
+  const status=opportunityCostStatusLabel(op?.current_cost_status);
+  const context=governedFirstSentence(op?.price_text,'');
+  return context?status+' · '+context:status;
+}
+function liveComparisonPriorCost(op){
+  return governedFirstSentence(op?.prior_cost_text,'Prior/reference cost not verified');
+}
 function liveComparisonNextStep(review){
   return governedFirstSentence(review?.next_step,'Open the show for the governed next step.');
 }
@@ -622,8 +632,8 @@ function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
   const body=rows.map(p=>{
     const op=p.current_rebook_opportunity||{};
     const review=p.current_rebook_review||{};
-    const cost=opportunityCostText(op)||opportunityCostStatusLabel(op.current_cost_status);
-    const priorCost=String(op.prior_cost_text||'Prior/reference cost not verified').trim();
+    const cost=liveComparisonCurrentCost(op);
+    const priorCost=liveComparisonPriorCost(op);
     const contactName=String(op.contact_name||'Current organizer/contact').trim();
     const contactActions=rebookContactActions(op.contact_text,p.profile_id,op.contact_email,op.contact_phone);
     const readiness=bookingReadinessLabel(review.booking_readiness);
@@ -653,7 +663,7 @@ function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
   return `<details class="liveCompareBoard" data-live-decision-comparison ${open?'open':''}>
     <summary class="liveCompareHead"><div><span>Live opportunity comparison</span><b>${rows.length} governed targets</b></div><small>${esc(ordering)} · governed why · date · current + prior cost · historical outcome + evidence depth · current + best placement · contact · readiness + blockers · effective action date + basis + live countdown · timing · governed next step · direct action</small></summary>
     <div class="liveCompareScroll"><table><thead><tr><th>Decision</th><th>Show</th><th>Date</th><th>Cost</th><th>Historical outcome</th><th>Placement</th><th>Contact</th><th>Readiness</th><th>Action date</th><th>When to act</th><th>Next step</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current. Historical placement remains distinct from current assignment. LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth, and carries the same attribution / attendance limitations. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score. Resolution lane identifies who or what must resolve the remaining blocker: Paradise action, organizer response, publication wait, existing-booking reconciliation, or further research. Action date uses the verified hard deadline when one exists; otherwise event start is shown only as the ordering fallback and is not promoted to a deadline.</div>
+    <div class="liveCompareNote">Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction; occurrence rows include issued/demos and show Latest vs Best when those preserved observations differ. Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED; zero explicit worked years is not proof of no participation. Current cost uses the structured verified amount when available; when no structured amount exists, the comparison shows the governed cost status plus the first governed sentence of current price context. Prior/reference cost is historical or reference evidence only unless the text explicitly says it is current, and the comparison shows only its first governed sentence for scanability. Historical placement remains distinct from current assignment. LP-attributed specific placement, when shown, is one-to-one date-aligned annual LeadPerfection performance attribution to a preserved history occurrence; it is not attendance proof and not same-row history performance. LP-attributed placement type is a separate non-specific descriptor tier, is not an exact booth, and carries the same attribution / attendance limitations. The decision reason is the first sentence of the governed review rationale, not a new summary or score. Next step is the first sentence of the governed review next_step, not generated advice. Readiness includes the governed commitment state and current blockers; it does not create a new booking score. Resolution lane identifies who or what must resolve the remaining blocker: Paradise action, organizer response, publication wait, existing-booking reconciliation, or further research. Action date uses the verified hard deadline when one exists; otherwise event start is shown only as the ordering fallback and is not promoted to a deadline.</div>
   </details>`;
 }
 function catalogCard(p){
