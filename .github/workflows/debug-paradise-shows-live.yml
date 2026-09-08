@@ -397,6 +397,11 @@ jobs:
               grep -q 'liveCompareOpen small' /tmp/app.css
               grep -q 'data-live-compare-action-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-cost-profile' /tmp/app-shows.js
+              grep -q 'liveComparisonCurrentCost' /tmp/app-shows.js
+              grep -q 'liveComparisonPriorCost' /tmp/app-shows.js
+              grep -Fq "const context=governedFirstSentence(op?.price_text,'');" /tmp/app-shows.js
+              grep -Fq "return governedFirstSentence(op?.prior_cost_text,'Prior/reference cost not verified');" /tmp/app-shows.js
+              grep -q 'structured verified amount when available' /tmp/app-shows.js
               grep -q 'data-live-compare-contact-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-readiness-profile' /tmp/app-shows.js
               grep -q 'liveCompareReadiness' /tmp/app-shows.js
