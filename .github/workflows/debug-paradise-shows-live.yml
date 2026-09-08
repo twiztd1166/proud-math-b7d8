@@ -767,11 +767,13 @@ jobs:
               'LIFE-077':'WATCH',
               'LIFE-092':'PURSUE',
               'LIFE-112':'PURSUE',
+              'LIFE-137':'PURSUE',
+              'LIFE-162':'WATCH',
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==15, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==16, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==9, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           # LIVE GOVERNANCE CONTRACT — resolution lanes and blockers are governed data.
