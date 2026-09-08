@@ -3712,7 +3712,7 @@ jobs:
           grep -q '1 net sale' /tmp/st_lucie_fair_pursue.html
           grep -q '\$47,000' /tmp/st_lucie_fair_pursue.html
           grep -q 'not a claim that the 2025 location is proven best' /tmp/st_lucie_fair_pursue.html
-          grep -q 'Pop-up/easy-up tents are prohibited' /tmp/st_lucie_fair_pursue.html
+          grep -q 'pop-up/easy-up tents are prohibited' /tmp/st_lucie_fair_pursue.html
           grep -q 'mid-November' /tmp/st_lucie_fair_pursue.html
           if grep -q 'data-current-critical-deadline-profile="LIFE-112"' /tmp/st_lucie_fair_pursue.html; then
             echo "::error::St. Lucie County Fair rendered a fabricated hard deadline"
