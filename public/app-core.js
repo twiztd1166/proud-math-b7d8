@@ -100,18 +100,65 @@ function syncLocationView(){
 }
 applyLocationView();
 
+const WRITE_SESSION_STORAGE='paradise-shows-write-session-v1';
+let writeSessionToken='';
+try{writeSessionToken=String(sessionStorage.getItem(WRITE_SESSION_STORAGE)||'').trim()}catch{}
+function clearWriteSession(){
+  writeSessionToken='';
+  try{sessionStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
+}
+function saveWriteSession(token){
+  writeSessionToken=String(token||'').trim();
+  try{
+    if(writeSessionToken)sessionStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
+    else sessionStorage.removeItem(WRITE_SESSION_STORAGE);
+  }catch{}
+}
 async function call(action,payload={}){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try{
-    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...payload}),signal:controller.signal});
+    const headers={'Content-Type':'application/json'};
+    if(writeSessionToken)headers.Authorization='Bearer '+writeSessionToken;
+    const r=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...payload}),signal:controller.signal});
     const j=await r.json().catch(()=>({ok:false,error:'Invalid response'}));
-    if(!r.ok||!j.ok) throw new Error(j.error||'Request failed');
+    if(!r.ok||!j.ok){
+      if(r.status===401&&action!=='login')clearWriteSession();
+      const error=new Error(j.error||'Request failed');error.status=r.status;throw error;
+    }
     return j;
   }catch(e){
     if(e&&e.name==='AbortError')throw new Error('Request timed out. Tap Reload to try again.');
     throw e;
   }finally{clearTimeout(timer)}
+}
+async function ensureWriteAuth(){
+  if(writeSessionToken){
+    try{
+      const status=await call('authStatus');
+      if(status.authorized)return true;
+    }catch{}
+    clearWriteSession();
+  }
+  const accessCode=window.prompt('Enter Paradise edit access code');
+  if(accessCode===null)return false;
+  if(!String(accessCode).trim()){toast('Edit access code required');return false}
+  try{
+    const session=await call('login',{accessCode:String(accessCode).trim()});
+    saveWriteSession(session.token);
+    toast('Editing unlocked for this browser session');
+    return true;
+  }catch(e){
+    toast(e.message||'Unable to unlock editing');
+    return false;
+  }
+}
+async function callWrite(action,payload={}){
+  try{return await call(action,payload)}
+  catch(e){
+    if(e&&e.status===401&&await ensureWriteAuth())return call(action,payload);
+    throw e;
+  }
 }
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}

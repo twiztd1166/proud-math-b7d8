@@ -25,11 +25,12 @@ function bindDynamic(){
   $$('.conflictChoice').forEach(b=>b.onclick=()=>resolveConflict(b));
 }
 async function resolveConflict(btn){
+  if(!await ensureWriteAuth())return;
   const resolution=btn.dataset.resolution,field=btn.dataset.field,mfc=btn.dataset.mfc,run=btn.dataset.run;
   const verb=resolution==='KEEP APP'?'Keep the app value and accept the Sheet as the new baseline?':'Replace the app value with the current Sheet value?';
   if(!confirm(`${fieldLabel(field)} · ${mfc}\n\n${verb}`))return;
   const peers=$$('.conflictChoice').filter(x=>x.dataset.run===run&&x.dataset.mfc===mfc&&x.dataset.field===field);peers.forEach(x=>x.disabled=true);
-  try{await call('resolveConflict',{runId:run,mfcId:mfc,fieldName:field,resolution});toast(resolution==='KEEP APP'?'App value kept':'Sheet value applied');await bootstrap();state.tab='control';render();}
+  try{await callWrite('resolveConflict',{runId:run,mfcId:mfc,fieldName:field,resolution});toast(resolution==='KEEP APP'?'App value kept':'Sheet value applied');await bootstrap();state.tab='control';render();}
   catch(e){toast(e.message);peers.forEach(x=>x.disabled=false)}
 }
 
