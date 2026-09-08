@@ -365,6 +365,14 @@ jobs:
               grep -q 'first sentence of the governed review next_step, not generated advice' /tmp/app-shows.js
               grep -q 'liveCompareNextStep' /tmp/app.css
               grep -q 'liveCompareDecisionCell' /tmp/app.css
+              grep -q 'paradiseActionFirstScreen' /tmp/app-shows.js
+              grep -q 'data-paradise-action-queue' /tmp/app-shows.js
+              grep -q 'data-paradise-action-row' /tmp/app-shows.js
+              grep -q 'data-paradise-action-action-profile' /tmp/app-shows.js
+              grep -q 'Next Paradise actions' /tmp/app-shows.js
+              grep -q 'Open full Paradise action board' /tmp/app-shows.js
+              grep -q 'paradiseActionQueue' /tmp/app.css
+              grep -q 'paradiseActionRow' /tmp/app.css
               grep -q 'Live opportunity comparison' /tmp/app-shows.js
               grep -q 'liveDecisionCompareBoard' /tmp/app-shows.js
               grep -q "liveComparisonViews=new Set(\['NONE','ALL_LIVE_REBOOK'" /tmp/app-shows.js
@@ -2583,6 +2591,9 @@ jobs:
           grep -q 'data-live-decision-comparison' /tmp/shows.html
           grep -Eq '<details class="liveCompareBoard"[^>]*data-live-decision-comparison[^>]*open(=""|)[^>]*>' /tmp/shows.html
           grep -q 'Live opportunity comparison' /tmp/shows.html
+          grep -q 'data-paradise-action-queue' /tmp/shows.html
+          grep -q 'Next Paradise actions' /tmp/shows.html
+          python -c "import re; d=open('/tmp/shows.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m, 'Paradise action quick-view count missing'; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); actions=re.findall(r'data-paradise-action-action-profile=\"([^\"]+)\"',d); assert sorted(actions)==sorted(ids), (actions,ids); print({'paradise_action_first_screen':'PASS','rows':len(ids)})"
           grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
           grep -q '21 governed targets' /tmp/shows.html
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
@@ -2674,6 +2685,8 @@ jobs:
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -Eq '<details class="liveCompareBoard"[^>]*data-live-decision-comparison[^>]*open(=""|)[^>]*>' /tmp/shows_mobile.html
           grep -q 'Show database' /tmp/shows_mobile.html
+          grep -q 'data-paradise-action-queue' /tmp/shows_mobile.html
+          python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); print({'mobile_paradise_action_first_screen':'PASS','rows':len(ids)})"
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21

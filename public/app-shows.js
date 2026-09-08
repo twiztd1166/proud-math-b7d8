@@ -641,6 +641,39 @@ function liveComparisonActionDate(op){
   }
   return date(eventDate)+' · event start ordering fallback · not a hard deadline'+(urgency?' · '+urgency:'');
 }
+function paradiseActionFirstScreen(profiles){
+  const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
+  const rows=(profiles||[]).filter(p=>liveOpportunityResolutionIs(p,'PARADISE_ACTION')).slice().sort((a,b)=>{
+    const aPriority=liveComparisonPriorityDate(a?.current_rebook_opportunity);
+    const bPriority=liveComparisonPriorityDate(b?.current_rebook_opportunity);
+    const ad=String(a?.current_rebook_review?.disposition||'').toUpperCase();
+    const bd=String(b?.current_rebook_review?.disposition||'').toUpperCase();
+    const aw=decisionWeight[ad]??9,bw=decisionWeight[bd]??9;
+    return aPriority.localeCompare(bPriority)||aw-bw||String(a?.canonical_event||'').localeCompare(String(b?.canonical_event||''));
+  });
+  if(!rows.length)return '';
+  const body=rows.map(p=>{
+    const op=p.current_rebook_opportunity||{};
+    const review=p.current_rebook_review||{};
+    const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    const placement=governedFirstSentence(op.current_placement_text,'Current placement guidance not recorded.');
+    const nextStep=liveComparisonNextStep(review);
+    const action=op.action_url
+      ?`<a class="liveCompareAction paradiseActionDirect" data-paradise-action-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`
+      :`<button type="button" class="btn secondary liveCompareOpen paradiseActionDirect" data-paradise-action-action-profile="${esc(p.profile_id)}" data-profile="${esc(p.profile_id)}">Open show</button>`;
+    return `<article class="paradiseActionRow" data-paradise-action-row="${esc(p.profile_id)}">
+      <div class="paradiseActionTop"><button type="button" class="liveCompareOpen paradiseActionShow" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
+      <div class="paradiseActionFacts"><div><small>Action date</small><b>${esc(liveComparisonActionDate(op))}</b></div><div><small>Current cost</small><b>${esc(liveComparisonCurrentCost(op))}</b></div></div>
+      <div class="paradiseActionLine"><small>Placement</small><span>${esc(placement)}</span></div>
+      <div class="paradiseActionLine"><small>Next step</small><span>${esc(nextStep)}</span></div>
+      <div class="paradiseActionRowActions">${action}</div>
+    </article>`;
+  }).join('');
+  return `<section class="paradiseActionQueue" data-paradise-action-queue>
+    <div class="paradiseActionQueueHead"><div><span>Next Paradise actions</span><b>${rows.length} items Paradise can move now</b><small>Action date uses the verified hard deadline when present; otherwise event start is shown only as the ordering fallback. No new score is created here.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_PARADISE_ACTION">Open full Paradise action board</button></div>
+    <div class="paradiseActionList">${body}</div>
+  </section>`;
+}
 function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>p?.current_rebook_opportunity).slice().sort((a,b)=>{
@@ -1864,5 +1897,6 @@ function renderShows(){
     ?list.filter(p=>Boolean(p?.current_rebook_opportunity))
     :state.catalog.filter(p=>Boolean(p?.current_rebook_opportunity));
   const comparison=liveDecisionCompareBoard(liveProfiles,liveComparisonViews.has(state.showQuickView),String(state.showQuickView||'').startsWith('ALL_RESOLUTION_'));
-  return top+quickViewsBar('ALL')+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
+  const actionFirstScreen=['NONE','ALL_LIVE_REBOOK'].includes(state.showQuickView)?paradiseActionFirstScreen(state.catalog):'';
+  return top+quickViewsBar('ALL')+actionFirstScreen+cleanupQueueIntro()+showTools('ALL',list.length)+comparison+`${shown.map(catalogCard).join('')||'<div class="empty">No shows match these filters.</div>'}${shown.length<list.length?`<div class="loadMore"><button class="btn secondary" id="catalogMore">Show ${Math.min(60,list.length-shown.length)} more</button></div>`:''}`;
 }
