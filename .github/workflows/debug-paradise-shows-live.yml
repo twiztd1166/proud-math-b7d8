@@ -111,6 +111,7 @@ jobs:
               grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
               grep -q 'review.resolution_lane' /tmp/app-shows.js
+              grep -q 'resolutionLaneLabel(review.resolution_lane)' /tmp/app-shows.js
               grep -q 'ALL_READY_COMMIT' /tmp/app-core.js
               grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-core.js
               grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-core.js
@@ -3370,7 +3371,7 @@ jobs:
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
           profile="$(mktemp -d)"
-          "$chrome" \
+          timeout --signal=TERM --kill-after=5s 45s "$chrome" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -3407,7 +3408,7 @@ jobs:
             url="$2"
             window_size="${3:-1280,900}"
             profile="$(mktemp -d)"
-            "$chrome" \
+            timeout --signal=TERM --kill-after=5s 50s "$chrome" \
               --window-size="$window_size" \
               --headless=new \
               --no-sandbox \
@@ -3453,6 +3454,8 @@ jobs:
           test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 18
+          grep -q 'Resolution lane identifies who or what must resolve the remaining blocker' /tmp/shows.html
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
           grep -q 'data-live-compare-row="LIFE-044"' /tmp/shows.html
@@ -3638,6 +3641,7 @@ jobs:
           test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
+          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 18
           test "$(grep -o 'LP-attributed specific:' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 5
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
