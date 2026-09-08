@@ -2637,7 +2637,7 @@ jobs:
           rows=re.findall(r'<tr data-live-compare-row="([^"]+)">(.*?)</tr>',doc,re.S)
           assert len(rows)==19, len(rows)
           ids=[pid for pid,_ in rows]
-          assert len(set(ids))==18, ids
+          assert len(set(ids))==19, ids
           required_attrs=(
               'data-live-compare-decision-why-profile',
               'data-live-compare-evidence-profile',
