@@ -1175,7 +1175,7 @@ jobs:
           assert 'Call VIA at 561-427-0500 now and request the current written 2026 Business Vendor agreement or written confirmation of exactly which terms govern' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
           assert 'Once current terms and category clearance are confirmed and acceptable, submit promptly' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
           assert 'category clearance/exclusivity should be asked explicitly without inferring a current exclusive contract' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
-          assert 'do not submit/sign or pay until VIA supplies or confirms the current governing Business Vendor terms and placement' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
+          assert 'embedded current interest form adds no hidden Business Vendor footprint/electricity/payment terms' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
           assert 'vendor-info (2026 Business Vendor fee + embedded signed interest form)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
           assert 'vendor-terms-conditions (materially stale 17th Annual/2019 agreement; acceptance language)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
           assert 'GMAIL:no current 2026 Feast/VIA correspondence recovered' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
