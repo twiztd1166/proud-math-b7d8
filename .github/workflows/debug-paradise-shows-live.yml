@@ -724,17 +724,17 @@ jobs:
               'LIFE-054':'Authorized Paradise acceptance of current POTTC terms/waiver · 2026 application approval / current approved Corporate level · exact placement',
               'LIFE-018':'Exact currently available booth / final PSM assignment · required application remittance / authorized contract signature-payment · explicit voluntary cancellation/refund rights · exact insurance/COI requirements · move-in/loading/parking instructions · Saturday public show hours',
               'LIFE-013':'2027-specific commercial rate sheet/application · all-in indoor price · live available space/map · application/payment deadlines · cancellation/COI/utilities/credentials terms',
-              'LIFE-017':'Current available booth / final ECCS location · GEMS/forklift/material-handling add-on charges actually required before 50% reservation payment',
+              'LIFE-017':'Current available booth / final ECCS location · Apr. 2027 GEMS furniture/decorator/material-handling/forklift charges only if needed · move-in/loading/parking instructions',
               'LIFE-014':'2027-28 home-improvement eligibility / standard-vendor vs sponsor-special-activation path · next application opening date · current fee · next-cycle placement/operating rules',
-              'HIST-234':'Paradise eligibility for standard Vendor Village vs sponsor path · Paradise-specific all-in price · actual footprint/location · Sunday close-time confirmation · lead-generation/exclusivity/payment/COI terms',
+              'HIST-234':'Exact lowest Paradise booth-bearing sponsor tier/add-on and all-in price · actual/guaranteed footprint/location · Sunday close-time confirmation · industry exclusivity/category terms · sponsorship-specific payment/cancellation/COI terms',
               'LIFE-077':'Paradise internal approval for controlled retest/application · organizer acceptance of Paradise category · exact normal-vendor tent-site dimensions if operationally required · voluntary cancellation/refund terms beyond the published no-refund cases',
               'LIFE-009':'Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements',
               'LIFE-030':'Current 2027 Presidential/custom booth-bearing price · exact footprint/location · lead-generation/category rights · payment/cancellation/COI/power/setup terms',
               'LIFE-060':'2027 vendor application / package release · current price · exact indoor / outdoor placement · terms',
-              'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint and category capacity · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
+              'LIFE-071':'Current all-in St. Petersburg quote · current windows/doors/roofing minimum footprint/category capacity and organizer acceptance · exact available placement/live floor plan · deposit/cancellation/COI/power/furnishing/load-in terms',
               'LIFE-076':'2027 category clearance / exclusivity vs Wright’s Impact Window & Door · consumer-facing activation proposal · lead-capture / CRM rights · exact footprint / location · all-in price / payment / cancellation / COI terms',
               'LIFE-033':'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities',
-              'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement',
+              'LIFE-092':'Business Vendor application acceptance · current 2026 agreement/payment/refund terms · exact Business Vendor footprint/inclusions · exact placement · windows/doors/roofing category clearance / any exclusivity',
               'LIFE-112':'Authorized application/signature + operation photo/product list · category/space acceptance · exact outside placement / final frontage and depth · electrical service/cost · accepted-vendor payment/cancellation terms · setup/breakdown/loading/vendor hours',
           }
           expected_historical_blockers={
@@ -923,10 +923,10 @@ jobs:
           assert '5 net sales / $89,388' in reviews['LIFE-017'].get('rationale',''), reviews['LIFE-017']
           assert 'current 2027 booth map' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
           assert '2024 floor plan' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
-          assert reviews['LIFE-017'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the remaining 2027 Tampa placement/add-on gaps'), reviews['LIFE-017']
-          assert 'Tampa_Floor_Plan_west_2024.pdf' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
-          assert 'no later current 2027 Tampa map or GEMS/electrical/forklift price sheet was recovered in Paradise Gmail or Drive' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
-          assert 'Remaining placement/add-on fields require Patience/ECCS and venue-service response rather than more internal searching' in reviews['LIFE-017'].get('notes',''), reviews['LIFE-017']
+          assert reviews['LIFE-017'].get('next_step','').startswith('Contact Patience Rall at patience@eccshows.com / 407-273-7469 now and request the current 2027 booth map plus live availability.'), reviews['LIFE-017']
+          assert 'Do not use the attached 2024 floor plan as current availability evidence' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert '5A/500W $117.42 advance' in reviews['LIFE-017'].get('next_step',''), reviews['LIFE-017']
+          assert 'electrical price removed from unresolved blocker set' in reviews['LIFE-017'].get('notes',''), reviews['LIFE-017']
           assert reviews['LIFE-007'].get('disposition')=='PURSUE', reviews['LIFE-007']
           assert reviews['LIFE-007'].get('action_timing','').startswith('NOW — route the current Green Market Rules and Regulations and Waiver, Release and Hold Harmless Agreement to an authorized Paradise signer.'), reviews['LIFE-007']
           assert '$538,570' in reviews['LIFE-007'].get('rationale',''), reviews['LIFE-007']
@@ -998,7 +998,7 @@ jobs:
               'LIFE-007':('LP2021-101','2021-SCH21-0127','4 LP closes / $57,043 LP close volume / 4 issued / 4 demos','not attendance proof'),
               'LIFE-009':('LP2022-111','2022-SCH22-0005','4 LP closes / $110,038 LP close volume / 38 issued / 15 demos','as a placement reference, while explicitly avoiding causal claims'),
               'LIFE-013':('LP2021-040','2021-SCH21-0136','4 LP closes / $80,100 LP close volume / 62 issued / 19 demos','not attendance proof'),
-              'LIFE-014':('LP2021-161','2021-SCH21-0119','2 LP closes / $32,550 LP close volume / 6 issued / 5 demos','not an exact booth and not attendance proof'),
+              'LIFE-014':('LP2021-161','2021-SCH21-0119','2 closes / $32,550 LP close volume / 6 issued / 5 demos','not an exact booth, attendance proof'),
               'LIFE-018':('LP2021-138','2021-SCH21-0129','4 LP closes / $96,238 LP close volume / 16 issued / 7 demos','not attendance proof'),
               'LIFE-030':('LP2022-005','2022-SCH22-0023','1 LP close / $38,482 LP close volume / 11 issued / 8 demos','not attendance proof'),
           }
@@ -1011,7 +1011,7 @@ jobs:
           assert 'outside/high-traffic placement comparable to historical #18 outside popup' in reviews['LIFE-007'].get('next_step',''), reviews['LIFE-007']
           assert 'Apr. 2025 same-row 0 net sales' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'performance attribution, not attendance proof or proof those booth numbers remain optimal' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
-          assert 'outside popup placement type comparable to Paradise history' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
+          assert 'standard GreenMarket vendor application' in reviews['LIFE-014'].get('next_step',''), reviews['LIFE-014']
           assert 'request #131 (10x12) with #129 as alternate only if current numbering and availability still support those historical references' in reviews['LIFE-018'].get('next_step',''), reviews['LIFE-018']
           assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
           assert reviews['LIFE-046'].get('disposition')=='PURSUE' and reviews['LIFE-046'].get('action_timing','').startswith('NOW'), reviews['LIFE-046']
@@ -1045,27 +1045,27 @@ jobs:
           assert 'If Oct. 10-11 is full, ask for Nov. 14-15 before Dec. 19-20' in live['LIFE-046'].get('booking_window_text',''), live['LIFE-046']
           assert 'performance attribution, not attendance proof or a forecast of 2026 results' in live['LIFE-046'].get('booking_window_text',''), live['LIFE-046']
           assert reviews['HIST-234'].get('disposition')=='WATCH' and reviews['HIST-234'].get('booking_readiness')=='WATCH_GATED', reviews['HIST-234']
-          assert reviews['HIST-234'].get('action_timing','').startswith("NOW — contact Latitude-88 to resolve Paradise's standard-vendor eligibility versus sponsor-only path."), reviews['HIST-234']
+          assert reviews['HIST-234'].get('action_timing','').startswith('NOW — request the exact lowest booth-bearing sponsor configuration from Crystal.'), reviews['HIST-234']
           assert '$25,000' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
           assert '$200 inline / $225 corner' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
-          assert 'general vendor rates are a useful benchmark, not a verified Paradise booking price' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
-          assert 'can Paradise Exteriors, an impact windows/doors home-improvement company, use the standard 2026 Vendor Village' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
-          assert 'If standard-vendor eligible, join the free waitlist immediately' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
-          assert 'If sponsorship is required, request the lowest-cost package that includes a real lead-generation footprint' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'exact lowest Paradise booth-bearing all-in sponsor price still needs organizer confirmation' in reviews['HIST-234'].get('rationale',''), reviews['HIST-234']
+          assert 'lowest 2026 sponsorship tier available to Paradise Exteriors that permits an onsite 10x10 lead-generation booth all weekend' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'use the free general-vendor waitlist only if Latitude-88 expressly confirms Paradise is eligible for it' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'exact booth add-on/discount and all-in price' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
           assert 'Hours & Info says 11 AM-7 PM while the Vendor page says 11 AM-6 PM' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
-          assert 'mixed LIFE-061' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
-          assert 'Sponsor page explains sponsorship value but exposes no text-readable current package price' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
-          assert 'general vendor price is a benchmark only, not a Paradise-specific quote' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
+          assert 'Sunday operating time governs the Paradise activation' in reviews['HIST-234'].get('next_step',''), reviews['HIST-234']
+          assert 'Current sponsor PDF recovered' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
+          assert 'no tier mapping was inferred' in reviews['HIST-234'].get('notes',''), reviews['HIST-234']
           assert 'WEB:VERO_OKTOBERFEST_VENDOR_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
           assert 'WEB:VERO_OKTOBERFEST_SPONSOR_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
           assert 'WEB:VERO_OKTOBERFEST_HOURS_2026' in reviews['HIST-234'].get('source_ref',''), reviews['HIST-234']
           assert live['HIST-234'].get('current_cost_status')=='QUOTE_REQUIRED', live['HIST-234']
           assert live['HIST-234'].get('booking_cost_min') is None and live['HIST-234'].get('booking_cost_max') is None, live['HIST-234']
-          assert '10x10 inline $200; 10x10 corner $225; optional designated-booth electricity $30' in live['HIST-234'].get('price_text',''), live['HIST-234']
-          assert 'Paradise-specific eligibility for the standard Vendor Village price is therefore not verified' in live['HIST-234'].get('price_text',''), live['HIST-234']
-          assert 'Do not submit Paradise to the general vendor waitlist until Latitude-88 confirms' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
-          assert 'Sponsorship opportunities remain available' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
-          assert 'general Vendor Village rules, not verified Paradise sponsorship terms' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
+          assert '$350 Banner Sponsor' in live['HIST-234'].get('price_text','') and '$5,000 Biergarten Presenting' in live['HIST-234'].get('price_text',''), live['HIST-234']
+          assert 'lowest booth-bearing all-in price' in live['HIST-234'].get('price_text',''), live['HIST-234']
+          assert 'treat sponsorship as Paradise\'s default path unless Latitude-88 expressly confirms standard-vendor eligibility' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
+          assert 'current sponsor package is live' in live['HIST-234'].get('booking_window_text',''), live['HIST-234']
+          assert 'sponsor promo-booth options require the sponsor to provide its own pop-up tent' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
           assert 'at least 35 lb secured on each leg' in live['HIST-234'].get('current_logistics_text',''), live['HIST-234']
           assert live['HIST-234'].get('current_schedule_status')=='SOURCE_CONFLICT_REQUIRES_CONFIRMATION', live['HIST-234']
           assert 'Hours & Info page says 11 AM–7 PM' in live['HIST-234'].get('current_schedule_text',''), live['HIST-234']
@@ -1077,10 +1077,10 @@ jobs:
           assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert '$225' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert reviews['LIFE-077'].get('next_step','').startswith('If Paradise approves a controlled retest, submit the live 2026 Vendor Form for one $225 tent site now'), reviews['LIFE-077']
-          assert 'assign normal-vendor booths on arrival and prohibit location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
-          assert 'standard 10x10 form fee $225' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
-          assert 'GMAIL:1997d07e25ef4018' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
-          assert 'DRIVE:1Kkc55BLjkLwr5K4fjgoAqqomDqNsGayW' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
+          assert 'assigned on arrival with no location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
+          assert 'Prior blockers for normal vendor fee, payment deadline and electricity are closed' in reviews['LIFE-077'].get('notes',''), reviews['LIFE-077']
+          assert 'WEB:SEBASTIAN_CLAMBAKE_2026_VENDOR_FORM' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
+          assert 'WEB:SEBASTIAN_CLAMBAKE_2026_VENDOR_INFO' in reviews['LIFE-077'].get('source_ref',''), reviews['LIFE-077']
           assert reviews['LIFE-054'].get('disposition')=='PURSUE' and reviews['LIFE-054'].get('action_timing','').startswith('NOW'), reviews['LIFE-054']
           assert '1 net close / $20,025' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
           assert 'Corporate Level 2 for the 2024 Winter Fest' in reviews['LIFE-054'].get('rationale',''), reviews['LIFE-054']
@@ -1118,37 +1118,37 @@ jobs:
           assert reviews['LIFE-030'].get('disposition')=='WATCH' and reviews['LIFE-030'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-030']
           assert reviews['LIFE-030'].get('action_timing','').startswith('NOW — request the current 2027 Presidential/custom booth-bearing proposal from Brittany.'), reviews['LIFE-030']
           assert '$3,350-$3,850' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
-          assert 'hosting an onsite booth is a Presidential Sponsor benefit' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
-          assert '$750 floor is not a Paradise booth price' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
-          assert 'No current 2027 Presidential price was recovered from the official page, Paradise Gmail or Paradise Drive' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert 'same page still carries stale 40th-year copy' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert '$750 is not governed as verified 2027 pricing' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
+          assert 'current Presidential/custom booth-bearing economics still require a written quote' in reviews['LIFE-030'].get('rationale',''), reviews['LIFE-030']
           assert 'request the current 2027 Presidential Sponsor pricing plus any lower custom package that explicitly includes an onsite Paradise lead-generation booth' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
           assert 'historical S204 (10x10)' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
-          assert 'Do not treat the advertised $750 sponsorship floor as booth-enabled unless the written 2027 proposal explicitly says so' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
-          assert 'Prior-year detailed sponsorship matrices are historical references only and are not carried forward as 2027 pricing' in reviews['LIFE-030'].get('notes',''), reviews['LIFE-030']
+          assert 'Do not use the webpage\'s $750 text as current 2027 pricing unless the written 2027 proposal independently confirms it' in reviews['LIFE-030'].get('next_step',''), reviews['LIFE-030']
+          assert 'stale 40th-year copy' in reviews['LIFE-030'].get('notes',''), reviews['LIFE-030']
           assert 'WEB:ARTIGRAS_2027_SPONSOR_CURRENT' in reviews['LIFE-030'].get('source_ref',''), reviews['LIFE-030']
-          assert 'WEB:ARTIGRAS_2027_EVENT_CURRENT' in reviews['LIFE-030'].get('source_ref',''), reviews['LIFE-030']
+          assert 'WEB:PALM_BEACHES_ARTIGRAS_2027' in reviews['LIFE-030'].get('source_ref',''), reviews['LIFE-030']
           assert live['LIFE-030'].get('current_cost_status')=='QUOTE_REQUIRED', live['LIFE-030']
           assert live['LIFE-030'].get('booking_cost_min') is None and live['LIFE-030'].get('booking_cost_max') is None, live['LIFE-030']
-          assert 'onsite booth is a Presidential Sponsor benefit' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
-          assert '$750 is not a decision-safe Paradise booth price' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
-          assert 'current 2027 Presidential Sponsor price is not published in recoverable official text and was not found in Paradise 2026 Gmail/Drive' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
-          assert 'current 2027 Presidential Sponsor pricing and any lower custom package that explicitly includes an onsite Paradise booth/activation' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
-          assert 'Do not submit based on the advertised $750 sponsorship floor' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
-          assert 'identifies Presidential Sponsor as the booth-hosting tier' in live['LIFE-030'].get('commitment_terms_text',''), live['LIFE-030']
+          assert 'Treat the $750 webpage text as stale/uncorroborated copy' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert 'current 2027 Presidential/custom booth-bearing price remains QUOTE_REQUIRED' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert '40th year celebration' in live['LIFE-030'].get('price_text',''), live['LIFE-030']
+          assert 'current written Presidential Sponsor pricing and any lower custom package that explicitly includes an onsite Paradise lead-generation booth/activation' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
+          assert 'Do not commit from the webpage\'s $750 text' in live['LIFE-030'].get('booking_window_text',''), live['LIFE-030']
+          assert 'internally stale/uncorroborated' in live['LIFE-030'].get('commitment_terms_text',''), live['LIFE-030']
           assert 'onsite booth is a Presidential Sponsor benefit' in live['LIFE-030'].get('current_logistics_text',''), live['LIFE-030']
           assert reviews['LIFE-060'].get('disposition')=='WATCH' and reviews['LIFE-060'].get('action_timing','').startswith('NOW'), reviews['LIFE-060']
           assert '2017 fair source produced 1 net close / $12,700' in reviews['LIFE-060'].get('rationale',''), reviews['LIFE-060']
           assert reviews['LIFE-076'].get('disposition')=='WATCH' and reviews['LIFE-076'].get('booking_readiness')=='WATCH_GATED', reviews['LIFE-076']
           assert reviews['LIFE-076'].get('action_timing','').startswith('NOW — reconfirm Sebastian Ascanio/current PGA TOUR rep and resolve 2027 category eligibility vs Wright’s Impact Window & Door first'), reviews['LIFE-076']
-          assert 'Travel Insured’s 2026 Cognizant Classic Swing Suite by the 10th green captured qualified leads into its CRM' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
-          assert 'current tournament partner list also includes Wright’s Impact Window & Door' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
-          assert 'That does not prove a 2027 exclusivity block' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
-          assert 'hospitality alone is not acceptable substitute inventory' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'Travel Insured’s 2026 CRM lead-capture Swing Suite' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'Wright’s Impact Window & Door is listed as a tournament partner and appeared in the 2026 fan-facing 18th & Co area' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'not proof of 2027 exclusivity' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
+          assert 'hospitality-only inventory is not an adequate substitute' in reviews['LIFE-076'].get('rationale',''), reviews['LIFE-076']
           assert 'sebastianascanio@pgatourhq.com / 954-683-9676' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
           assert 'first reconfirm that he is still the correct 2027 Cognizant representative' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
-          assert 'does Wright’s Impact Window & Door or any other current partner hold 2027 window/door/home-improvement category exclusivity' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
-          assert 'explicit lead-capture rights—not hospitality-only inventory' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
-          assert 'Use the 2026 Travel Insured 10th-green CRM activation only as proof that measurable fan-facing inventory can exist' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'does Wright’s Impact Window & Door or any other partner hold 2027 windows/doors/home-improvement category exclusivity' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'consumer-facing lead generation, not hospitality-only inventory' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
+          assert 'Do not assume the 2026 10th-green or 18th & Co inventory carries into 2027' in reviews['LIFE-076'].get('next_step',''), reviews['LIFE-076']
           assert 'WEB:COGNIZANT_CURRENT_SPONSORS_WRIGHTS_IMPACT_WINDOW_DOOR' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
           assert 'WEB:DRYVEBOX_2026_COGNIZANT_CRM_ACTIVATION' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
           assert 'GMAIL:1994e0559c8be01e' in reviews['LIFE-076'].get('source_ref',''), reviews['LIFE-076']
@@ -1157,11 +1157,11 @@ jobs:
           assert live['LIFE-076'].get('contact_phone')=='954-683-9676', live['LIFE-076']
           assert 'Same PGA TOUR email/mobile remain publicly active in 2026' in live['LIFE-076'].get('contact_text',''), live['LIFE-076']
           assert 'specific 2027 Cognizant Classic assignment is not verified' in live['LIFE-076'].get('contact_text',''), live['LIFE-076']
-          assert 'current tournament partner list includes Wright’s Impact Window & Door' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
-          assert 'real category-conflict signal, not proof of 2027 exclusivity' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
-          assert '2026 Travel Insured activation at the Cognizant Classic demonstrates that fan-facing CRM lead-capture activations are structurally possible' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
-          assert 'Travel Insured’s 2026 Swing Suite was staged by the 10th green at PGA National with qualified-lead capture' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
-          assert 'Use that only as proof of activation format' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
+          assert 'current sponsor list names Wright’s Impact Window & Door as a tournament partner' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert 'stronger real-world category-conflict signal than a logo alone' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert 'consumer-facing on-site activation proposal with measurable lead capture' in live['LIFE-076'].get('booking_window_text',''), live['LIFE-076']
+          assert 'Travel Insured operated a CRM lead-capture Swing Suite by the 10th green' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
+          assert 'format/category-conflict precedents only' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
           assert 'written 2027 category clearance/exclusivity status' in live['LIFE-076'].get('commitment_terms_text',''), live['LIFE-076']
           assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
           assert reviews['LIFE-013'].get('next_step','').startswith('Contact Sylvia Cruz-Alvarez now and ask for the 2027 indoor commercial exhibitor rate sheet/application and live space map.'), reviews['LIFE-013']
@@ -1171,9 +1171,9 @@ jobs:
           assert reviews['LIFE-092'].get('disposition')=='PURSUE' and reviews['LIFE-092'].get('action_timing','').startswith('NOW'), reviews['LIFE-092']
           assert 'call VIA at 561-427-0500 for the current 2026 Business Vendor agreement/terms before signing the live interest form' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
           assert 'submit only after the stale 2019 linked terms are reconciled in writing' in reviews['LIFE-092'].get('action_timing',''), reviews['LIFE-092']
-          assert reviews['LIFE-092'].get('next_step','').startswith('Research exhausted as of Sep. 7, 2026 for the missing 2026 Business Vendor agreement — do not sign or submit the current Business Vendor interest form yet because it requires Accept Terms + signature while the linked Terms & Conditions page is still the 17th Annual/2019 agreement and says acceptance constitutes a binding agreement.'), reviews['LIFE-092']
+          assert reviews['LIFE-092'].get('next_step','').startswith('Do not sign or submit the current Business Vendor interest form yet because it requires Terms acceptance + signature while the linked Terms page is still the 17th Annual/2019 agreement and says acceptance constitutes a binding agreement.'), reviews['LIFE-092']
           assert 'Call VIA at 561-427-0500 now and request the current written 2026 Business Vendor agreement or written confirmation of exactly which terms govern' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
-          assert 'Once the current terms are reconciled and acceptable, submit promptly' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
+          assert 'Once current terms and category clearance are confirmed and acceptable, submit promptly' in reviews['LIFE-092'].get('next_step',''), reviews['LIFE-092']
           assert 'pre-signature VIA-response blocker' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
           assert 'do not submit/sign or pay until VIA supplies or confirms the current governing Business Vendor terms and placement' in reviews['LIFE-092'].get('notes',''), reviews['LIFE-092']
           assert 'vendor-info (2026 Business Vendor fee + embedded signed interest form)' in reviews['LIFE-092'].get('source_ref',''), reviews['LIFE-092']
@@ -1839,7 +1839,7 @@ jobs:
           assert sum(1 for v in expected_current_cost_status.values() if v=='KNOWN_VERIFIED')==10
           assert sum(1 for v in expected_current_cost_status.values() if v=='QUOTE_REQUIRED')==5
           expected_commitment_terms={
-              'HIST-234':'Published Latitude-88 vendor/exhibitor policy (not a verified sponsorship-specific contract): cancellations must be made in writing/email · $25 cancellation fee for processed/approved applications · cancel 30+ days before the Friday setup day for a 100% refund of deposits/paid-in-full amounts · 29 days or less receives no refund · early departure and ordinary weather disruption do not receive refunds · confirm any sponsorship-specific payment/cancellation terms before committing.',
+              'HIST-234':'Current 2026 sponsor form lists Check or Credit Card as payment methods and directs completed sponsorship materials/logo to crystal@latitude88.com. Sponsorship-specific cancellation/refund timing was not recovered from the sponsor PDF. The separate general vendor policy has a $25 processed-application cancellation fee, 100% refund at 30+ days before Friday setup, and no refund at 29 days or less, but do not apply those vendor terms to a sponsorship without Latitude-88 confirmation.',
               'LIFE-007':'The current Green Market application requires agreement to the Rules and Regulations and Waiver, Release and Hold Harmless Agreement plus an electronic signature deemed an original signature · the application says to seek clarification from a legal advisor if the agreement is not understood · the waiver states it is a legal document, that signing gives up certain legal rights including the right to sue, and broadly waives/releases/indemnifies/holds harmless POTTC Events, the Village and related parties including claims resulting from negligence or fault · approved applicants must also sign the waiver before occupying a booth · all booth fees must be paid in full before occupying the space · payments are due 10 days before each participation date, but space may sell out earlier · prepaid-date cancellations require email notice at least 10 days before the date to receive credit · no-call/no-show or late cancellation forfeits the credit · management-canceled dates are refunded/credited per the published weekly/monthly/seasonal policy. Do not submit/sign unless an authorized Paradise signer accepts the current terms.',
               'LIFE-009':'Current 2027 booking terms are reconciled across the official exhibitor/refund pages and live BoothCentral event: 25% deposit is due within 14 days of the emailed invoice; selected space remains available to others until the deposit is received; BoothCentral states final payments are due by default 30 days before the Friday setup day unless otherwise noted; reservations are accepted until full. Current refund policy: approved applications incur a $25 cancellation fee; cancellation 30 days or more before the Friday setup day receives a 100% refund of deposits/paid-in-full amounts; cancellation 29 days or less receives no refund. Weather/acts-of-nature disruptions do not create credits/refunds under the published policy. The Jan. 2-3, 2027 event is currently sold out, so these terms matter only if Latitude-88 offers Paradise an additional/cancelled space.',
               'LIFE-017':'Direct Apr. 2027 contract: $1,295 standard 10x10 / $1,395 corner · 50% due with reservation · final balance due Mar. 1, 2027 · signed exhibitor cancellations receive no refund · ECCS may charge the card on file for an unpaid balance after the due date · 4% surcharge on credit-card payments · American Express not accepted. The organizer email describes sending a deposit with the contract to hold the booth, but the contract controls the amount at 50%.',
@@ -1860,11 +1860,11 @@ jobs:
               assert live[pid].get('commitment_terms_text')==terms, (pid,live[pid])
           assert (set(expected_commitment_terms)|{'LIFE-030','LIFE-076','LIFE-092'})==set(live), (set(expected_commitment_terms),set(live))
           artigras_terms=live['LIFE-030'].get('commitment_terms_text','')
-          assert '2027 sponsorships are open and start at $750' in artigras_terms, live['LIFE-030']
-          assert 'Presidential Sponsor as the booth-hosting tier' in artigras_terms, live['LIFE-030']
+          assert 'public page does not provide decision-safe booth-bearing economics or agreement terms' in artigras_terms, live['LIFE-030']
+          assert '$750 line is internally stale/uncorroborated' in artigras_terms, live['LIFE-030']
           assert 'Presidential/custom booth-bearing price' in artigras_terms, live['LIFE-030']
-          assert 'payment deadline, deposit, cancellation/refund, COI and operating terms' in artigras_terms, live['LIFE-030']
-          assert 'current written sponsor agreement/deck before commitment' in artigras_terms, live['LIFE-030']
+          assert 'payment deadline/deposit, cancellation/refund, COI, power and operating terms' in artigras_terms, live['LIFE-030']
+          assert 'before commitment' in artigras_terms, live['LIFE-030']
           cognizant_terms=live['LIFE-076'].get('commitment_terms_text','')
           assert '2027 tournament dates are verified' in cognizant_terms, live['LIFE-076']
           assert 'consumer activation agreement, category rights, price, payment schedule, cancellation terms, exclusivity or COI requirements' in cognizant_terms, live['LIFE-076']
@@ -1934,13 +1934,13 @@ jobs:
           assert profiles['HIST-234']['current_rebook_opportunity']['event_start']=='2026-10-16'
           assert profiles['HIST-234']['current_rebook_opportunity']['event_end']=='2026-10-18'
           vero_hurricane=profiles['HIST-234']['current_rebook_opportunity']
-          assert '10x10 inline $200' in vero_hurricane['price_text']
-          assert 'Commercial & Retail Businesses' in vero_hurricane['price_text'] and 'Sponsor page' in vero_hurricane['price_text']
-          assert 'Paradise-specific eligibility for the standard Vendor Village price is therefore not verified' in vero_hurricane['price_text']
-          assert 'fully sold out' in vero_hurricane['booking_window_text'] and 'waitlist is free' in vero_hurricane['booking_window_text']
-          assert 'Do not submit Paradise to the general vendor waitlist until Latitude-88 confirms' in vero_hurricane['booking_window_text']
-          assert 'if commercial participation requires sponsorship' in vero_hurricane['booking_window_text']
-          assert 'Sponsorship opportunities remain available' in vero_hurricane['booking_window_text']
+          assert '$350 Banner Sponsor' in vero_hurricane['price_text']
+          assert '$750 Brass Band Bronze Event Sponsor' in vero_hurricane['price_text'] and '$5,000 Biergarten Presenting' in vero_hurricane['price_text']
+          assert 'lowest booth-bearing all-in price' in vero_hurricane['price_text']
+          assert 'Vendor Village is sold out' in vero_hurricane['booking_window_text'] and 'free cancellation waitlist' in vero_hurricane['booking_window_text']
+          assert 'treat sponsorship as Paradise\'s default path' in vero_hurricane['booking_window_text']
+          assert 'Commercial & Retail Businesses' in vero_hurricane['booking_window_text']
+          assert 'current sponsor package is live' in vero_hurricane['booking_window_text']
           assert 'Latitude-88' in vero_hurricane['contact_text']
           assert profiles['LIFE-007']['current_rebook_opportunity']['opportunity_status']=='APPLICATION_OPEN'
           assert profiles['LIFE-007']['current_rebook_opportunity']['event_start']=='2026-10-17'
