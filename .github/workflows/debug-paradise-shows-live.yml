@@ -112,6 +112,9 @@ jobs:
               grep -q 'ALL_RESOLUTION_ORGANIZER_RESPONSE' /tmp/app-shows.js
               grep -q 'ALL_RESOLUTION_WAIT_PUBLICATION' /tmp/app-shows.js
               grep -q 'ALL_RESOLUTION_RECONCILE_EXISTING' /tmp/app-shows.js
+              grep -q 'scopedLiveComparison' /tmp/app-shows.js
+              grep -q '?list.filter(p=>Boolean(p?.current_rebook_opportunity))' /tmp/app-shows.js
+              grep -q "'ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING','ALL_READY_COMMIT'" /tmp/app-shows.js
               grep -q 'resolutionLaneLabel' /tmp/app-shows.js
               grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
