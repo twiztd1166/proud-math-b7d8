@@ -1074,7 +1074,7 @@ jobs:
           assert 'account-control HOLD' in reviews['LIFE-033'].get('rationale',''), reviews['LIFE-033']
           assert 'signed fall-2026 document plus exact booth, total price' in reviews['LIFE-033'].get('next_step',''), reviews['LIFE-033']
           assert reviews['LIFE-077'].get('disposition')=='WATCH' and reviews['LIFE-077'].get('action_timing','').startswith('NOW'), reviews['LIFE-077']
-          assert '$2,000 Grand Clam' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
+          assert '$2,000 sponsorship' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert '$225' in reviews['LIFE-077'].get('rationale',''), reviews['LIFE-077']
           assert reviews['LIFE-077'].get('next_step','').startswith('If Paradise approves a controlled retest, submit the live 2026 Vendor Form for one $225 tent site now'), reviews['LIFE-077']
           assert 'assigned on arrival with no location changes' in reviews['LIFE-077'].get('next_step',''), reviews['LIFE-077']
