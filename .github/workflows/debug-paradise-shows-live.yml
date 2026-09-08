@@ -112,6 +112,7 @@ jobs:
               grep -q 'ALL_RESOLUTION_ORGANIZER_RESPONSE' /tmp/app-shows.js
               grep -q 'ALL_RESOLUTION_WAIT_PUBLICATION' /tmp/app-shows.js
               grep -q 'ALL_RESOLUTION_RECONCILE_EXISTING' /tmp/app-shows.js
+              grep -Fq "if(['ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING'].includes(key))state.catalogSort='BOOKING_DECISION';" /tmp/app-shows.js
               grep -q 'resolutionLaneLabel' /tmp/app-shows.js
               grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
               grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
