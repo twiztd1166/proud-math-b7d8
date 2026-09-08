@@ -939,7 +939,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['RESOLUTION_ACTION','Action due / next event'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -1102,6 +1102,17 @@ function catalogComparator(a,b){
     const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
     const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
     return aw-bw||ad.localeCompare(bd)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
+  }
+  if(sort==='RESOLUTION_ACTION'){
+    const effectiveDate=p=>{
+      const op=p?.current_rebook_opportunity||{};
+      return String(op.critical_deadline_date||op.event_start||'9999-12-31');
+    };
+    const weight=p=>{
+      const d=String(p?.current_rebook_review?.disposition||'').toUpperCase();
+      return ({PURSUE:0,WATCH:1,HOLD:2,RETIRED:3})[d]??9;
+    };
+    return effectiveDate(a).localeCompare(effectiveDate(b))||weight(a)-weight(b)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
   }
   if(sort==='LATEST_HISTORY')return Number(b.latest_history_year||0)-Number(a.latest_history_year||0)||name(a,b);
   if(sort==='HISTORY_DEPTH')return Number(b.history_year_count||0)-Number(a.history_year_count||0)||Number(b.history_count||0)-Number(a.history_count||0)||name(a,b);
@@ -1566,7 +1577,8 @@ function applyQuickView(key){
     const selectedHistoryYear=state.catalogFilters.historyYear;
     state.showMode='ALL';state.catalogFilters=defaultCatalogFilters();state.catalogSort='RECOMMENDED';
     if(key==='ALL_LIVE_REBOOK')state.catalogSort='BOOKING_DECISION';
-    if(['ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE','ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE'].includes(key))state.catalogSort='BOOKING_DECISION';
+    if(['ALL_RESOLUTION_PARADISE_ACTION','ALL_RESOLUTION_ORGANIZER_RESPONSE'].includes(key))state.catalogSort='RESOLUTION_ACTION';
+    if(['ALL_RESOLUTION_WAIT_PUBLICATION','ALL_RESOLUTION_RECONCILE_EXISTING','ALL_READY_COMMIT','ALL_PREBOOK_REQUIRED','ALL_WATCH_GATED_LIVE','ALL_HOLD_RECONCILE_LIVE'].includes(key))state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_ACT_NOW')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_ACT_LATER')state.catalogSort='BOOKING_DECISION';
     if(key==='ALL_QUOTE_REQUIRED')state.catalogSort='BOOKING_DECISION';
