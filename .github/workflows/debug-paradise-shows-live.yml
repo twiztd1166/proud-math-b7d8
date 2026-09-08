@@ -880,15 +880,13 @@ jobs:
               assert str(op.get('current_schedule_source_url') or '').startswith('https://'), (pid,'current_schedule_source_url',op)
               assert str(op.get('current_logistics_source_url') or '').startswith('https://'), (pid,'current_logistics_source_url',op)
 
-          email_optional_live={'LIFE-092'}
+          # Contact email may legitimately be unpublished; require a usable contact channel instead.
           for pid,op in live.items():
               email=str(op.get('contact_email') or '').strip()
-              if pid in email_optional_live:
-                  assert not email, (pid,'contact_email must remain unpublished/unknown unless verified',op)
-                  assert str(op.get('contact_phone') or '').strip(), (pid,'contact_phone',op)
-                  assert str(op.get('action_url') or '').startswith('https://'), (pid,'official action channel',op)
-              else:
-                  assert email and '@' in email, (pid,'contact_email',op)
+              phone=str(op.get('contact_phone') or '').strip()
+              assert phone or email, (pid,'contact channel',op)
+              if email:
+                  assert '@' in email and '.' in email.split('@')[-1], (pid,'contact_email',email)
 
           required_live_review_fields=('disposition','rationale','next_step','action_timing','blockers_text','booking_readiness')
           for pid in expected_live:
@@ -1038,7 +1036,15 @@ jobs:
           # Validate internal consistency and typed semantics instead of maintaining a second snapshot here.
           import datetime as _dt
           allowed_readiness={'READY_TO_COMMIT','PRE_BOOKING_ACTION_REQUIRED','WATCH_GATED','HOLD_RECONCILE'}
-          enumish=lambda v: bool(str(v or '').strip()) and str(v).upper()==str(v) and ' ' not in str(v)
+          allowed_cost_status={'KNOWN_VERIFIED','QUOTE_REQUIRED','RECONCILE_EXISTING','NOT_PUBLISHED_YET','NEXT_CYCLE_CLOSED'}
+          allowed_placement_status={
+              'ASSIGNED_VERIFIED','LISTED_ASSIGNMENT_UNVERIFIED','FLOOR_PLAN_AVAILABLE_NOT_SELECTED',
+              'APPLICATION_OPEN_NOT_ASSIGNED','CONTRACT_REQUEST_NOT_ASSIGNED',
+              'SPONSORSHIP_PLACEMENT_UNVERIFIED','PLACEMENT_NOT_PUBLISHED','NEXT_CYCLE_CLOSED'
+          }
+          allowed_schedule_status={'VERIFIED_CURRENT','NOT_PUBLISHED_YET','CURRENT_SOURCE_HOURS_NOT_RECOVERED','SOURCE_CONFLICT_REQUIRES_CONFIRMATION'}
+          allowed_logistics_status={'VERIFIED_CURRENT','PARTIAL_CURRENT','EXHIBITOR_KIT_REQUIRED','PROPOSAL_REQUIRED','NOT_PUBLISHED_YET','NEXT_CYCLE_CLOSED'}
+          allowed_commitment_status={'VERIFIED_CURRENT','PARTIAL_CURRENT','AGREEMENT_REQUIRED','RECONCILE_EXISTING','NOT_PUBLISHED_YET','NEXT_CYCLE_CLOSED'}
           for pid in expected_live:
               op=live[pid]
               review=reviews[pid]
@@ -1052,8 +1058,11 @@ jobs:
                   end=_dt.date.fromisoformat(str(op.get('event_end')))
                   assert end>=start, (pid,start,end)
 
-              for status_field in ('current_cost_status','current_placement_status','current_schedule_status','current_logistics_status','current_commitment_status'):
-                  assert enumish(op.get(status_field)), (pid,status_field,op.get(status_field))
+              assert op.get('current_cost_status') in allowed_cost_status, (pid,'current_cost_status',op.get('current_cost_status'))
+              assert op.get('current_placement_status') in allowed_placement_status, (pid,'current_placement_status',op.get('current_placement_status'))
+              assert op.get('current_schedule_status') in allowed_schedule_status, (pid,'current_schedule_status',op.get('current_schedule_status'))
+              assert op.get('current_logistics_status') in allowed_logistics_status, (pid,'current_logistics_status',op.get('current_logistics_status'))
+              assert op.get('current_commitment_status') in allowed_commitment_status, (pid,'current_commitment_status',op.get('current_commitment_status'))
 
               cmin=op.get('booking_cost_min')
               cmax=op.get('booking_cost_max')
@@ -1067,12 +1076,15 @@ jobs:
                   assert cmin is not None and cmax>=cmin, (pid,'booking_cost_range',cmin,cmax)
               if op.get('current_cost_status')=='KNOWN_VERIFIED':
                   assert cmin is not None, (pid,'KNOWN_VERIFIED requires numeric minimum',op)
+              else:
+                  assert cmin is None and cmax is None, (pid,'non-verified cost must not expose governed numeric booking range',op)
 
               deadline=op.get('critical_deadline_date')
               deadline_companions=(op.get('critical_deadline_type'),op.get('critical_deadline_label'),op.get('critical_deadline_basis'))
               if deadline:
-                  _dt.date.fromisoformat(str(deadline))
+                  deadline_date=_dt.date.fromisoformat(str(deadline))
                   assert all(str(v or '').strip() for v in deadline_companions), (pid,'critical_deadline_fields',op)
+                  assert deadline_date<=start, (pid,'critical deadline after event start',deadline_date,start)
               else:
                   assert not any(str(v or '').strip() for v in deadline_companions), (pid,'partial critical deadline',op)
 
@@ -1081,6 +1093,22 @@ jobs:
               assert phone or email, (pid,'contact channel',op)
               if email:
                   assert '@' in email and '.' in email.split('@')[-1], (pid,'contact_email',email)
+
+
+          # Placement recommendations may use historical evidence, but must remain source-linked
+          # and explicitly non-causal / not-proven-best in the current decision guidance.
+          placement_guidance_ids={'LIFE-007','LIFE-009','LIFE-013','LIFE-014','LIFE-018','LIFE-030','LIFE-112'}
+          placement_caution_terms=('not attendance proof','not proven best','not prove','placement reference','not an exact booth','historical reference')
+          for pid in placement_guidance_ids:
+              review=reviews[pid]
+              p=profiles[pid]
+              source_ref=str(review.get('source_ref') or '')
+              guidance=(str(review.get('next_step') or '')+' '+str(review.get('rationale') or '')).lower()
+              has_profile_placement=bool(p.get('best_lp_attributed_specific_booth') or p.get('best_lp_attributed_placement_type') or p.get('best_observed_specific_booth') or p.get('latest_preserved_booth'))
+              assert has_profile_placement, (pid,'historical placement evidence missing',p)
+              assert ('LP:' in source_ref or p.get('best_observed_specific_booth')), (pid,'placement LP/source link',source_ref)
+              assert ('HISTORY:' in source_ref or p.get('best_observed_specific_booth')), (pid,'placement history/source link',source_ref)
+              assert any(term in guidance for term in placement_caution_terms), (pid,'placement non-causality boundary',guidance)
 
           print('Current live structural consistency: 18/18 PASS')
 
