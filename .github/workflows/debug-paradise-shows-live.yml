@@ -1164,7 +1164,7 @@ jobs:
           assert 'format/category-conflict precedents only' in live['LIFE-076'].get('current_placement_text',''), live['LIFE-076']
           assert 'written 2027 category clearance/exclusivity status' in live['LIFE-076'].get('commitment_terms_text',''), live['LIFE-076']
           assert reviews['LIFE-013'].get('disposition')=='PURSUE' and reviews['LIFE-013'].get('action_timing','').startswith('NOW'), reviews['LIFE-013']
-          assert reviews['LIFE-013'].get('next_step','').startswith('Contact Sylvia Cruz-Alvarez now and ask for the 2027 indoor commercial exhibitor rate sheet/application and live space map.'), reviews['LIFE-013']
+          assert reviews['LIFE-013'].get('next_step','').startswith('Contact Sylvia Cruz-Alvarez now at scruz@fairexpo.com / 305-223-7060 and ask for the 2027 indoor commercial exhibitor rate sheet/application and live space map.'), reviews['LIFE-013']
           assert 'Sylvia/organizer-response blocker, not an internal-search blocker' in reviews['LIFE-013'].get('notes',''), reviews['LIFE-013']
           assert '$422,930' in reviews['LIFE-013'].get('rationale',''), reviews['LIFE-013']
           assert 'Request a 10x20 option comparable to historical Booths 705-706' in reviews['LIFE-013'].get('next_step',''), reviews['LIFE-013']
