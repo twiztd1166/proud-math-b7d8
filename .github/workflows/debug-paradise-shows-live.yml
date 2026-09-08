@@ -1981,7 +1981,7 @@ jobs:
           assert profiles['LIFE-018']['current_rebook_opportunity']['booking_cost_max']==1850
           assert 'final-balance date is Dec. 10, 2026' in profiles['LIFE-018']['current_rebook_opportunity']['booking_window_text']
           assert '772-486-4969' in profiles['LIFE-018']['current_rebook_opportunity']['contact_text']
-          assert 'Professional Show Management' in profiles['LIFE-018']['current_rebook_opportunity']['source_label']
+          assert 'PSM Martin County Home Improvement Show exhibitor contract' in profiles['LIFE-018']['current_rebook_opportunity']['source_label']
           assert profiles['LIFE-030']['current_rebook_opportunity']['opportunity_status']=='SPONSORSHIP_OPEN'
           assert profiles['LIFE-033']['current_rebook_opportunity']['opportunity_status']=='EXHIBITOR_LISTED'
           assert profiles['LIFE-033']['current_rebook_opportunity']['event_start']=='2026-10-31'
