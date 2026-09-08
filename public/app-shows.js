@@ -939,7 +939,7 @@ function removeActiveShowFilter(key){
 function showSortOptions(mode){
   return mode==='ALL'
     ?[
-      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / next date'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
+      ['RECOMMENDED','Recommended'],['BOOKING_DECISION','Booking decision / action date'],['CRITICAL_DEADLINE','Critical commitment date'],['CURRENT_FIRST','Current controls first'],['NEXT_OPPORTUNITY','Next verified opportunity'],['CURRENT_COST_LOW','Current booking cost low'],['CURRENT_COST_HIGH','Current booking cost high'],['NAME_ASC','Name A–Z'],['NAME_DESC','Name Z–A'],
       ['LATEST_HISTORY','Latest history year'],['HISTORY_DEPTH','Most history years'],['HISTORY_RECORDS','Most preserved records'],['OCCURRENCES','Most lifetime occurrences'],['WORKED_YEARS','Most verified worked years'],
       ['LOWEST_COM','Lowest preserved COM'],['HIGHEST_COM','Highest preserved COM'],
       ['LIFETIME_NET','Highest lifetime net'],['LIFETIME_SALES','Most lifetime net sales'],['CLOSE_VOLUME','Highest lifetime close volume'],['ISSUED','Most issued'],
@@ -1098,10 +1098,13 @@ function catalogComparator(a,b){
       const d=String(p?.current_rebook_review?.disposition||'').toUpperCase();
       return ({PURSUE:0,WATCH:1,HOLD:2,RETIRED:3})[d]??9;
     };
+    const actionDate=p=>{
+      const op=p?.current_rebook_opportunity||{};
+      return String(op.critical_deadline_date||op.event_start||'9999-12-31');
+    };
+    const ad=actionDate(a),bd=actionDate(b);
     const aw=weight(a),bw=weight(b);
-    const ad=String(a?.current_rebook_opportunity?.event_start||'9999-12-31');
-    const bd=String(b?.current_rebook_opportunity?.event_start||'9999-12-31');
-    return aw-bw||ad.localeCompare(bd)||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
+    return ad.localeCompare(bd)||aw-bw||Number(b.lifetime_net_volume||0)-Number(a.lifetime_net_volume||0)||name(a,b);
   }
   if(sort==='LATEST_HISTORY')return Number(b.latest_history_year||0)-Number(a.latest_history_year||0)||name(a,b);
   if(sort==='HISTORY_DEPTH')return Number(b.history_year_count||0)-Number(a.history_year_count||0)||Number(b.history_count||0)-Number(a.history_count||0)||name(a,b);
