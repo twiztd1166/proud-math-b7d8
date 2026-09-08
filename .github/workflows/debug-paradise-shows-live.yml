@@ -10,7 +10,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: paradise-shows-public-live-smoke
+  # Isolate stale/manual reruns by commit so an obsolete head cannot cancel verification for current production.
+  # Duplicate reruns of the same head still share a group and cancel one another normally.
+  group: paradise-shows-public-live-smoke-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
