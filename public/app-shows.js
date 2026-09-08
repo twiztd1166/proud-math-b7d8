@@ -511,7 +511,8 @@ function liveComparisonPlacementMetrics(p,prefix){
 }
 function liveComparisonPlacement(p){
   const op=p?.current_rebook_opportunity||{};
-  const current='Current: '+opportunityPlacementStatusLabel(op.current_placement_status);
+  const currentGuidance=governedFirstSentence(op.current_placement_text,'');
+  const current='Current: '+opportunityPlacementStatusLabel(op.current_placement_status)+(currentGuidance?' · Current guidance: '+currentGuidance:'');
   const specific=historicalPlacementValue(p?.best_observed_specific_booth);
   const outcomePlacement=historicalPlacementValue(p?.best_observed_booth);
   const latest=historicalPlacementValue(p?.latest_preserved_booth);
