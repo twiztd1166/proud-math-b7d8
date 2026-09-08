@@ -3576,6 +3576,7 @@ jobs:
           expected_deadlines={
               'LIFE-044':'Sep 17, 2026 · 30-day cancellation-liability cutoff',
               'LIFE-054':'Nov 5, 2026 · 30-day no-refund boundary',
+              'LIFE-018':'Dec 10, 2026 · All balances due 30 days before event',
               'LIFE-017':'Mar 1, 2027 · Final balance due',
           }
           live_ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
