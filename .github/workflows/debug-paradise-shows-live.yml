@@ -779,7 +779,7 @@ jobs:
           # move a profile between lanes or improve blocker wording without an app-code change.
           allowed_resolution_lanes={'PARADISE_ACTION','ORGANIZER_RESPONSE','WAIT_FOR_PUBLICATION','RECONCILE_EXISTING','RESEARCH_REQUIRED'}
           live_review_ids={pid for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          assert len(live_review_ids)==21, live_review_ids
+          assert len(live_review_ids)==23, live_review_ids
           for pid in live_review_ids:
               review=reviews.get(pid) or {}
               lane=review.get('resolution_lane')
@@ -1005,7 +1005,7 @@ jobs:
                   assert str(review.get(field) or '').strip(), (pid,field,review)
               assert review.get('checked_at'), (pid,'review_checked_at',review)
 
-          assert len(live)==21
+          assert len(live)==23
           assert all(op.get('event_start') for op in live.values())
           assert all(str(op.get('current_placement_text') or '').strip() for op in live.values())
           assert all(str(op.get('prior_cost_text') or '').strip() for op in live.values())
@@ -1016,7 +1016,7 @@ jobs:
           assert all(str(op.get('current_schedule_text') or '').strip() for op in live.values())
           assert all(str(op.get('current_logistics_text') or '').strip() for op in live.values())
           assert all(str((reviews.get(pid) or {}).get('blockers_text') or '').strip() for pid in expected_live)
-          print('Live field-completeness contract: 21/21 PASS')
+          print('Live field-completeness contract: 23/23 PASS')
 
           expected_outcome_status={
               'HIST-234':'NO_COMPARABLE_OUTCOME_EVIDENCE',
@@ -2595,13 +2595,13 @@ jobs:
           grep -q 'Next Paradise actions' /tmp/shows.html
           python -c "import re; d=open('/tmp/shows.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m, 'Paradise action quick-view count missing'; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); actions=re.findall(r'data-paradise-action-action-profile=\"([^\"]+)\"',d); assert sorted(actions)==sorted(ids), (actions,ids); print({'paradise_action_first_screen':'PASS','rows':len(ids)})"
           grep -q 'earliest verified hard deadline or event date first' /tmp/shows.html
-          grep -q '21 governed targets' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          grep -q '23 governed targets' /tmp/shows.html
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'Schedule:' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'Resolution lane identifies who or what must resolve the remaining blocker' /tmp/shows.html
           grep -q 'Evidence depth counts preserved history records, distinct history years, and years explicitly coded WORKED/ATTENDED' /tmp/shows.html
           grep -q 'zero explicit worked years is not proof of no participation' /tmp/shows.html
@@ -2611,28 +2611,28 @@ jobs:
           grep -q 'class="liveCompareDecision pursue"' /tmp/shows.html
           grep -q 'class="liveCompareDecision watch"' /tmp/shows.html
           grep -q 'class="liveCompareDecision hold"' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-decision-why-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'No comparable outcome evidence' /tmp/shows.html
           grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/shows.html
           grep -q 'The decision reason is the first sentence of the governed review rationale, not a new summary or score.' /tmp/shows.html
           grep -q 'Next step is the first sentence of the governed review next_step, not generated advice.' /tmp/shows.html
           grep -q 'class="liveCompareOpen"' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-placement-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-venue-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-cost-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-contact-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-readiness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'Freshness:' /tmp/shows.html
           grep -q 'Ops:' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-deadline-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'event start ordering fallback · not a hard deadline' /tmp/shows.html
           grep -q 'verified hard deadline' /tmp/shows.html
-          test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-action-profile=' /tmp/shows.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'data-live-compare-placement-profile="LIFE-044"' /tmp/shows.html
           expected_lp_specific_count="$(python -c 'import json; profiles=json.load(open("/tmp/catalog.json")).get("profiles") or []; print(sum(1 for p in profiles if p.get("current_rebook_opportunity") and p.get("best_lp_attributed_specific_booth")))' )"
           expected_lp_type_count="$(python -c 'import json; profiles=json.load(open("/tmp/catalog.json")).get("profiles") or []; print(sum(1 for p in profiles if p.get("current_rebook_opportunity") and p.get("best_lp_attributed_placement_type")))' )"
@@ -2649,9 +2649,9 @@ jobs:
           import re,html
           doc=open('/tmp/shows.html',encoding='utf-8').read()
           rows=re.findall(r'<tr data-live-compare-row="([^"]+)">(.*?)</tr>',doc,re.S)
-          assert len(rows)==21, len(rows)
+          assert len(rows)==23, len(rows)
           ids=[pid for pid,_ in rows]
-          assert len(set(ids))==21, ids
+          assert len(set(ids))==23, ids
           required_attrs=(
               'data-live-compare-decision-why-profile',
               'data-live-compare-evidence-profile',
@@ -2687,33 +2687,33 @@ jobs:
           grep -q 'Show database' /tmp/shows_mobile.html
           grep -q 'data-paradise-action-queue' /tmp/shows_mobile.html
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==int(m.group(1)) and len(set(ids))==len(ids), (len(ids),m.group(1),ids); print({'mobile_paradise_action_first_screen':'PASS','rows':len(ids)})"
-          test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-row=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-evidence-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-next-step-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-resolution-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
           test "$(grep -o 'LP-attributed specific:' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq "$expected_lp_specific_count"
           grep -q 'data-label="Decision"' /tmp/shows_mobile.html
           grep -q 'data-label="Historical outcome"' /tmp/shows_mobile.html
-          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-schedule-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'Schedule:' /tmp/shows_mobile.html
           grep -q 'data-label="Placement"' /tmp/shows_mobile.html
           grep -q 'data-label="Cost"' /tmp/shows_mobile.html
           grep -q 'data-label="Contact"' /tmp/shows_mobile.html
           grep -q 'data-label="Readiness"' /tmp/shows_mobile.html
-          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
-          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-commitment-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-freshness-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
+          test "$(grep -o 'data-live-compare-logistics-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'Freshness:' /tmp/shows_mobile.html
           grep -q 'Ops:' /tmp/shows_mobile.html
           grep -q 'data-label="Action date"' /tmp/shows_mobile.html
-          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 21
+          test "$(grep -o 'data-live-compare-action-date-profile=' /tmp/shows_mobile.html | wc -l | tr -d ' ')" -eq 23
           grep -q 'data-label="Next step"' /tmp/shows_mobile.html
           grep -q 'data-label="Action"' /tmp/shows_mobile.html
           python - <<'PY'
           import re
           doc=open('/tmp/shows_mobile.html',encoding='utf-8').read()
           ids=re.findall(r'<tr data-live-compare-row="([^"]+)">',doc)
-          assert len(ids)==21 and len(set(ids))==21, ids
+          assert len(ids)==23 and len(set(ids))==23, ids
           for pid in ids:
               for attr in ('data-live-compare-cost-profile','data-live-compare-contact-profile','data-live-compare-readiness-profile','data-live-compare-commitment-profile','data-live-compare-freshness-profile','data-live-compare-logistics-profile','data-live-compare-deadline-profile','data-live-compare-action-date-profile','data-live-compare-schedule-profile','data-live-compare-next-step-profile','data-live-compare-resolution-profile'):
                   assert f'{attr}="{pid}"' in doc, (pid,attr)
@@ -2747,7 +2747,7 @@ jobs:
           grep -q 'Watch / next cycle' /tmp/shows.html
           grep -q 'Hold / do not book' /tmp/shows.html
 
-          live_detail_ids=(HIST-234 LIFE-007 LIFE-009 LIFE-011 LIFE-013 LIFE-014 LIFE-017 LIFE-018 LIFE-023 LIFE-027 LIFE-030 LIFE-033 LIFE-044 LIFE-046 LIFE-054 LIFE-060 LIFE-071 LIFE-076 LIFE-077 LIFE-092 LIFE-112)
+          live_detail_ids=(HIST-234 LIFE-007 LIFE-009 LIFE-011 LIFE-013 LIFE-014 LIFE-017 LIFE-018 LIFE-023 LIFE-027 LIFE-030 LIFE-033 LIFE-044 LIFE-046 LIFE-054 LIFE-060 LIFE-071 LIFE-076 LIFE-077 LIFE-092 LIFE-112 LIFE-137 LIFE-162)
           for pid in "${live_detail_ids[@]}"; do
             safe="$(printf '%s' "$pid" | tr -cd '[:alnum:]_')"
             render_view "live_${safe}" "$SITE/#show/$pid"
@@ -2763,7 +2763,7 @@ jobs:
             grep -q 'Still needed before booking' "$file"
             grep -q 'Open current source' "$file"
           done
-          echo "All 21 live detail deep links structural markers: PASS"
+          echo "All 23 live detail deep links structural markers: PASS"
 
           render_view palm_liquors_pursue "$SITE/#show/LIFE-028"
           grep -q 'Palm Beach Liquors' /tmp/palm_liquors_pursue.html
