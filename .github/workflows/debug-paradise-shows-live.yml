@@ -767,11 +767,13 @@ jobs:
               'LIFE-077':'WATCH',
               'LIFE-092':'PURSUE',
               'LIFE-112':'PURSUE',
+              'LIFE-137':'PURSUE',
+              'LIFE-162':'WATCH',
           }
           actual_reviews={pid:(review or {}).get('disposition') for pid,review in reviews.items()}
           assert actual_reviews==expected_reviews, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==15, actual_reviews
-          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='PURSUE')==16, actual_reviews
+          assert sum(1 for v in actual_reviews.values() if v=='WATCH')==9, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
           # LIVE GOVERNANCE CONTRACT — resolution lanes and blockers are governed data.
@@ -960,7 +962,7 @@ jobs:
               assert profiles[legacy].get('canonical_series_profile_id')==canonical, (legacy,profiles[legacy])
               assert not any(p.get('profile_id')==legacy for p in historical_2013), legacy
           live={pid:p.get('current_rebook_opportunity') for pid,p in profiles.items() if p.get('current_rebook_opportunity')}
-          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-011','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-023','LIFE-027','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-092','LIFE-112'}
+          expected_live={'HIST-234','LIFE-007','LIFE-009','LIFE-011','LIFE-013','LIFE-014','LIFE-017','LIFE-018','LIFE-023','LIFE-027','LIFE-030','LIFE-033','LIFE-044','LIFE-046','LIFE-054','LIFE-060','LIFE-071','LIFE-076','LIFE-077','LIFE-092','LIFE-112','LIFE-137','LIFE-162'}
           assert set(live)==expected_live, (set(live),expected_live)
 
           # FIELD-COMPLETENESS CONTRACT:
@@ -1040,11 +1042,13 @@ jobs:
               'LIFE-077':'OCCURRENCE_OUTCOME_AVAILABLE',
               'LIFE-092':'OCCURRENCE_OUTCOME_AVAILABLE',
               'LIFE-112':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-137':'OCCURRENCE_OUTCOME_AVAILABLE',
+              'LIFE-162':'OCCURRENCE_OUTCOME_AVAILABLE',
           }
           assert set(expected_outcome_status)==expected_live, (set(expected_outcome_status),expected_live)
           for pid,status in expected_outcome_status.items():
               assert profiles[pid].get('outcome_evidence_status')==status, (pid,profiles[pid])
-          assert sum(1 for v in expected_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==11
+          assert sum(1 for v in expected_outcome_status.values() if v=='OCCURRENCE_OUTCOME_AVAILABLE')==13
           assert sum(1 for v in expected_outcome_status.values() if v=='LIFETIME_ONLY')==9
           assert sum(1 for v in expected_outcome_status.values() if v=='NO_COMPARABLE_OUTCOME_EVIDENCE')==1
           vero_outcome=profiles['LIFE-009']
