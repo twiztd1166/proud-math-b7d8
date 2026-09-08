@@ -3338,7 +3338,7 @@ jobs:
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
           profile="$(mktemp -d)"
-          "$chrome" \
+          timeout --kill-after=5s 60s "$chrome" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -3347,7 +3347,7 @@ jobs:
             --virtual-time-budget=20000 \
             --enable-logging=stderr \
             --log-level=0 \
-            --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log
+            --dump-dom "$SITE/" >/tmp/dom.html 2>/tmp/chrome.log || { rc=$?; echo "::error::Fresh Chrome failed or timed out (rc=$rc)."; tail -80 /tmp/chrome.log || true; exit "$rc"; }
 
           if grep -q 'Loading shows…' /tmp/dom.html; then
             echo "::error::Rendered DOM remained stuck on Loading shows."
@@ -3375,7 +3375,7 @@ jobs:
             url="$2"
             window_size="${3:-1280,900}"
             profile="$(mktemp -d)"
-            "$chrome" \
+            timeout --kill-after=5s 60s "$chrome" \
               --window-size="$window_size" \
               --headless=new \
               --no-sandbox \
@@ -3385,7 +3385,7 @@ jobs:
               --virtual-time-budget=25000 \
               --enable-logging=stderr \
               --log-level=0 \
-              --dump-dom "$url" >"/tmp/${name}.html" 2>"/tmp/${name}.log"
+              --dump-dom "$url" >"/tmp/${name}.html" 2>"/tmp/${name}.log" || { rc=$?; echo "::error::$name Chrome failed or timed out (rc=$rc)."; tail -80 "/tmp/${name}.log" || true; return "$rc"; }
             if grep -q 'Loading shows…' "/tmp/${name}.html"; then
               echo "::error::$name remained stuck on Loading shows."
               grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' "/tmp/${name}.log" | tail -80 || true
