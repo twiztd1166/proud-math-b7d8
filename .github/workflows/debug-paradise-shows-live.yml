@@ -982,7 +982,7 @@ jobs:
           assert 'as a placement reference, while explicitly avoiding causal claims' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'De-prioritize a simple repeat of Booth 52' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'If no materially better opening appears, skip Winter 2027 rather than force a weak placement' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
-          assert 'Confirm the current live location, category/price, refund/cancellation terms and final-payment date before accepting.' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
+          assert 'Confirm only the live location/category and exact final-payment date for the offered opening.' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'Jan. 2026 Space 048 ($535 paid; exact date-matched 0 LP closes / $0)' in reviews['LIFE-009'].get('next_step',''), reviews['LIFE-009']
           assert 'The live Jan. 2-3, 2027 BoothCentral page is sold out.' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
           assert 'Do not plan on a normal self-service booking unless the organizer reopens inventory.' in reviews['LIFE-009'].get('action_timing',''), reviews['LIFE-009']
