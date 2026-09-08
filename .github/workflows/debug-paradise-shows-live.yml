@@ -107,6 +107,10 @@ jobs:
               grep -q 'Watch / gated live' /tmp/app-shows.js
               grep -q 'Hold / reconcile live' /tmp/app-shows.js
               grep -q 'liveOpportunityReadinessIs' /tmp/app-shows.js
+              grep -q 'resolutionLaneLabel' /tmp/app-shows.js
+              grep -q 'data-resolution-lane-profile' /tmp/app-shows.js
+              grep -q 'data-live-compare-resolution-profile' /tmp/app-shows.js
+              grep -q 'review.resolution_lane' /tmp/app-shows.js
               grep -q 'ALL_READY_COMMIT' /tmp/app-core.js
               grep -q 'ALL_PREBOOK_REQUIRED' /tmp/app-core.js
               grep -q 'ALL_WATCH_GATED_LIVE' /tmp/app-core.js
@@ -672,6 +676,34 @@ jobs:
           assert sum(1 for v in actual_reviews.values() if v=='WATCH')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='HOLD')==8, actual_reviews
           assert sum(1 for v in actual_reviews.values() if v=='RETIRED')==1, actual_reviews
+          expected_resolution_lanes={
+              'LIFE-007':'PARADISE_ACTION',
+              'LIFE-054':'PARADISE_ACTION',
+              'LIFE-112':'PARADISE_ACTION',
+              'HIST-234':'ORGANIZER_RESPONSE',
+              'LIFE-009':'ORGANIZER_RESPONSE',
+              'LIFE-013':'ORGANIZER_RESPONSE',
+              'LIFE-017':'ORGANIZER_RESPONSE',
+              'LIFE-018':'ORGANIZER_RESPONSE',
+              'LIFE-030':'ORGANIZER_RESPONSE',
+              'LIFE-044':'ORGANIZER_RESPONSE',
+              'LIFE-046':'ORGANIZER_RESPONSE',
+              'LIFE-071':'ORGANIZER_RESPONSE',
+              'LIFE-076':'ORGANIZER_RESPONSE',
+              'LIFE-077':'ORGANIZER_RESPONSE',
+              'LIFE-092':'ORGANIZER_RESPONSE',
+              'LIFE-014':'WAIT_FOR_PUBLICATION',
+              'LIFE-060':'WAIT_FOR_PUBLICATION',
+              'LIFE-033':'RECONCILE_EXISTING',
+          }
+          assert len(expected_resolution_lanes)==18, expected_resolution_lanes
+          for pid,lane in expected_resolution_lanes.items():
+              assert reviews[pid].get('resolution_lane')==lane, (pid,reviews[pid])
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='PARADISE_ACTION')==3
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='ORGANIZER_RESPONSE')==12
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='WAIT_FOR_PUBLICATION')==2
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='RECONCILE_EXISTING')==1
+          assert sum(1 for v in expected_resolution_lanes.values() if v=='RESEARCH_REQUIRED')==0
           expected_live_blockers={
               'LIFE-046':'Current table availability · exact inside table location · current promoter acceptance of Paradise windows/doors marketing',
               'LIFE-044':'Exact currently available booth / final selection · optional electricity/add-on price if Paradise needs it',
@@ -3508,6 +3540,8 @@ jobs:
           assert 'Vero Home Show history: Jan. 2025 $500 final cost' in vero
           assert 'Latitude-88, Inc.' in vero
           assert 'data-live-compare-readiness-profile="LIFE-009"' in vero
+          assert 'data-live-compare-resolution-profile="LIFE-009"' in vero
+          assert 'Resolution lane: Organizer response' in vero
           assert 'Watch / gated' in vero
           assert 'Commitment: Partial current commitment terms' in vero
           assert 'Still needed: Organizer-confirmed cancellation/additional opening · materially stronger live placement than recent weak placements · current refund/cancellation terms if an opening is offered' in vero
@@ -4205,6 +4239,8 @@ jobs:
           grep -q 'data-current-logistics-status-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'Next cycle / logistics unavailable' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'does not reopen until March 2027' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q 'data-resolution-lane-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
+          grep -q '>Wait for publication<' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'data-lp-attributed-placement-type-profile="LIFE-014"' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'LP-attributed placement type' /tmp/wpb_greenmarket_next_cycle.html
           grep -q 'outside popup · 2021 · Oct-23 · 2 LP closes · $32,550 LP close volume · 6 issued · 5 demos · annual LP attribution · not exact booth · not attendance proof' /tmp/wpb_greenmarket_next_cycle.html
@@ -4220,6 +4256,8 @@ jobs:
           grep -q 'Official 2026-27 Corporate rate: \$65/\$75 per Saturday' /tmp/rebook_detail.html
           grep -q 'Still needed before booking' /tmp/rebook_detail.html
           grep -q 'Authorized Paradise acceptance of current Green Market terms/waiver · Application acceptance · exact current placement · final requested footprint' /tmp/rebook_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-007"' /tmp/rebook_detail.html
+          grep -q '>Paradise action<' /tmp/rebook_detail.html
           grep -q 'Decision-safe current booking cost' /tmp/rebook_detail.html
           grep -q '\$65–\$75 · per Saturday' /tmp/rebook_detail.html
           grep -q 'Kathy Gilbert / POTTC Events' /tmp/rebook_detail.html
@@ -4253,6 +4291,8 @@ jobs:
           grep -q 'Verified current exhibitor listing' /tmp/pembroke_detail.html
           grep -q 'data-booking-readiness-profile="LIFE-033"' /tmp/pembroke_detail.html
           grep -q 'Hold / reconcile' /tmp/pembroke_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-033"' /tmp/pembroke_detail.html
+          grep -q '>Reconcile existing<' /tmp/pembroke_detail.html
           grep -q 'Still needed before booking' /tmp/pembroke_detail.html
           grep -q 'Fall-specific signed contract / account state · exact fall booth assignment · fall total price / amounts paid or due · payment deadline · COI / utilities' /tmp/pembroke_detail.html
           grep -q 'EXHIBITOR LISTED' /tmp/pembroke_detail.html
@@ -4361,6 +4401,8 @@ jobs:
           grep -q 'Partial current commitment terms' /tmp/treasure_detail.html
           grep -q 'data-current-placement-status-profile="LIFE-018"' /tmp/treasure_detail.html
           grep -q 'Floor plan available / not selected' /tmp/treasure_detail.html
+          grep -q 'data-resolution-lane-profile="LIFE-018"' /tmp/treasure_detail.html
+          grep -q '>Organizer response<' /tmp/treasure_detail.html
 
           render_view martin_detail "$SITE/#show/LIFE-060"
           grep -q 'Martin County Fair' /tmp/martin_detail.html
