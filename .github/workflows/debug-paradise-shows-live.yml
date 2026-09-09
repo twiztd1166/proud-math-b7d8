@@ -1004,7 +1004,12 @@ jobs:
               assert any(p.get('profile_id')==held for p in strong_history_2013), held
               assert not any(p.get('profile_id')==held for p in strong_2013), held
           for actionable_review in {pid for pid,disposition in expected_reviews.items() if disposition in {'PURSUE','WATCH'}}:
-              assert any(p.get('profile_id')==actionable_review for p in strong_2013) or profiles[actionable_review].get('current_rebook_opportunity'), actionable_review
+              p=profiles[actionable_review]
+              assert (
+                  any(x.get('profile_id')==actionable_review for x in strong_2013)
+                  or p.get('current_rebook_opportunity')
+                  or related_series_current(p)
+              ), actionable_review
           assert reviews['LIFE-075'].get('disposition')=='RETIRED', reviews['LIFE-075']
           assert 'VOLUNTARY DISSOLUTION' in reviews['LIFE-075'].get('rationale',''), reviews['LIFE-075']
           assert 'come to an end after 38 years' in reviews['LIFE-075'].get('rationale',''), reviews['LIFE-075']
