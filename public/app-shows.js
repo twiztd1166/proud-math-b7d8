@@ -641,6 +641,18 @@ function liveComparisonActionDate(op){
   }
   return date(eventDate)+' · event start ordering fallback · not a hard deadline'+(urgency?' · '+urgency:'');
 }
+function paradiseActionPreSubmitGuard(op,review){
+  if(!op?.action_url)return false;
+  const formText=[op.action_label,op.action_url].filter(Boolean).join(' ');
+  const formLike=/(application|form|contract|jotform|docs\.google\.com\/forms|files\.ashx|\.pdf(?:$|\?))/i.test(formText);
+  if(!formLike)return false;
+  const gateText=[review?.action_timing,review?.next_step,review?.blockers_text].filter(Boolean).join(' ');
+  return /(signer|authorized|go\/?no-go|staffing|conflict|approve|approval|resolve[^.]{0,80}first|before[^.]{0,80}(submit|sign|pay)|do not[^.]{0,80}(submit|sign|pay|prepay)|inventory first|decision first|retest approval first)/i.test(gateText);
+}
+function paradiseActionSafeLinkLabel(op,review){
+  const base=String(op?.action_label||'Open action').trim();
+  return paradiseActionPreSubmitGuard(op,review)?`Review only — ${base}`:base;
+}
 function paradiseActionFirstScreen(profiles){
   const decisionWeight={PURSUE:0,WATCH:1,HOLD:2,RETIRED:3};
   const rows=(profiles||[]).filter(p=>liveOpportunityResolutionIs(p,'PARADISE_ACTION')).slice().sort((a,b)=>{
@@ -660,8 +672,9 @@ function paradiseActionFirstScreen(profiles){
     const timing=governedFirstSentence(review.action_timing,'Verify timing');
     const placement=governedFirstSentence(op.current_placement_text,'Current placement guidance not recorded.');
     const nextStep=liveComparisonNextStep(review);
+    const submitGuard=paradiseActionPreSubmitGuard(op,review);
     const action=op.action_url
-      ?`<a class="liveCompareAction paradiseActionDirect" data-paradise-action-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`
+      ?`<a class="liveCompareAction paradiseActionDirect" data-paradise-action-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(paradiseActionSafeLinkLabel(op,review))}</a>`
       :`<button type="button" class="btn secondary liveCompareOpen paradiseActionDirect" data-paradise-action-action-profile="${esc(p.profile_id)}" data-profile="${esc(p.profile_id)}">Open show</button>`;
     return `<article class="paradiseActionRow" data-paradise-action-row="${esc(p.profile_id)}">
       <div class="paradiseActionTop"><button type="button" class="liveCompareOpen paradiseActionShow" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
@@ -669,6 +682,7 @@ function paradiseActionFirstScreen(profiles){
       <div class="paradiseActionLine" data-paradise-action-state-profile="${esc(p.profile_id)}"><small>State</small><span>${esc(timing)}</span></div>
       <div class="paradiseActionLine"><small>Placement</small><span>${esc(placement)}</span></div>
       <div class="paradiseActionLine"><small>Next step</small><span>${esc(nextStep)}</span></div>
+      ${submitGuard?`<div class="paradiseActionLine" data-paradise-action-submit-gate-profile="${esc(p.profile_id)}"><small>Guardrail</small><span>Review only — clear the governed State / Next step before submitting, signing, or paying from this link.</span></div>`:''}
       <div class="paradiseActionRowActions">${action}</div>
     </article>`;
   }).join('');
@@ -745,7 +759,7 @@ function liveDecisionCompareBoard(profiles,open=false,actionDateFirst=false){
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
     const decisionWhy=liveComparisonDecisionWhy(review);
     const nextStep=liveComparisonNextStep(review);
-    const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(op.action_label||'Open action')}</a>`:'—';
+    const action=op.action_url?`<a class="liveCompareAction" data-live-compare-action-profile="${esc(p.profile_id)}" target="_blank" rel="noopener noreferrer" href="${esc(op.action_url)}">${esc(liveOpportunityResolutionIs(p,'PARADISE_ACTION')?paradiseActionSafeLinkLabel(op,review):(op.action_label||'Open action'))}</a>`:'—';
     return `<tr data-live-compare-row="${esc(p.profile_id)}">
       <td data-label="Decision" data-live-compare-decision-why-profile="${esc(p.profile_id)}"><div class="liveCompareDecisionCell"><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span><small>${esc(decisionWhy)}</small></div></td>
       <td data-label="Show" data-live-compare-venue-profile="${esc(p.profile_id)}"><button type="button" class="liveCompareOpen" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span><small>${esc(op.venue_text||'Venue / address not verified')}</small></button></td>
