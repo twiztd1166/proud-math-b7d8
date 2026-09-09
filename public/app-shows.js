@@ -647,7 +647,7 @@ function paradiseActionPreSubmitGuard(op,review){
   const formLike=/(application|form|contract|jotform|docs\.google\.com\/forms|files\.ashx|\.pdf(?:$|\?))/i.test(formText);
   if(!formLike)return false;
   const gateText=[review?.action_timing,review?.next_step,review?.blockers_text].filter(Boolean).join(' ');
-  return /(signer|authorized|go\/?no-go|staffing|conflict|approve|approval|resolve[^.]{0,80}first|before[^.]{0,80}(submit|sign|pay)|do not[^.]{0,80}(submit|sign|pay|prepay)|inventory first|decision first|retest approval first)/i.test(gateText);
+  return /(signer|authorized|go(?:\/|-|\s)?no-go|staffing|conflict|approve|approval|resolve[^.]{0,80}first|before[^.]{0,80}(submit|sign|pay)|do not[^.]{0,80}(submit|sign|pay|prepay)|inventory first|decision first|retest approval first)/i.test(gateText);
 }
 function paradiseActionSafeLinkLabel(op,review){
   const base=String(op?.action_label||'Open action').trim();
