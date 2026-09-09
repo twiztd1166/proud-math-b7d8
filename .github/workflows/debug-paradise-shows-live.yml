@@ -549,6 +549,11 @@ jobs:
               grep -q 'Active year filter' /tmp/app-modals.js
               grep -q 'selectedEvidenceYears' /tmp/app-modals.js
               grep -q 'Selected evidence years shown first' /tmp/app-modals.js
+              grep -q '2027 Plan' /tmp/app-shows.js
+              grep -q 'renderAnnualPlan' /tmp/app-shows.js
+              grep -q 'data-annual-filter' /tmp/app-shows.js
+              grep -q 'loadAnnualPlan' /tmp/app-core.js
+              grep -q "hash==='plan2027'" /tmp/app-core.js
               echo "Public assets match this exact GitHub commit."
               exit 0
             fi
@@ -575,6 +580,37 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"bootstrap"}'
           grep -Fi "access-control-allow-origin: $SITE" /tmp/bootstrap.headers
+
+          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/annual-plan.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"annualPlan","year":2027}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/annual-plan.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 1, x
+          run=x.get('run') or {}
+          assert run.get('id') == 'f221378d-5951-4785-873c-c53df89716c1', run
+          assert run.get('status') == 'READY', run
+          assert run.get('row_count') == 74, run
+          summary=x.get('summary') or {}
+          assert summary.get('rows') == 74, summary
+          assert summary.get('profiles') == 73, summary
+          assert summary.get('pursue') == 26, summary
+          assert summary.get('watch') == 27, summary
+          assert summary.get('research') == 21, summary
+          assert summary.get('exact') == 19, summary
+          assert summary.get('expected') == 32, summary
+          assert summary.get('conflicts') == 11, summary
+          rows={r.get('plan_id'):r for r in x.get('rows') or []}
+          assert rows['2027-LIFE-036-PRIMARY'].get('event_start') == '2027-01-16', rows['2027-LIFE-036-PRIMARY']
+          assert rows['2027-LIFE-015-PRIMARY'].get('event_start') == '2027-03-05', rows['2027-LIFE-015-PRIMARY']
+          assert rows['2027-LIFE-066-PRIMARY'].get('event_start') == '2027-05-28', rows['2027-LIFE-066-PRIMARY']
+          assert rows['2027-LIFE-004-PRIMARY'].get('action_due') == '2027-06-01', rows['2027-LIFE-004-PRIMARY']
+          print('2027 annual plan API: PASS')
+          PY
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/auth-status.json \
             -X POST "$API" \
@@ -2609,6 +2645,14 @@ jobs:
           grep -q 'Show database' /tmp/shows.html
           render_view current_controls "$SITE/#current"
           grep -q 'Current 37' /tmp/current_controls.html
+          render_view annual_plan "$SITE/#plan2027"
+          grep -q '2027 booking plan' /tmp/annual_plan.html
+          grep -q '74 plan rows' /tmp/annual_plan.html
+          grep -q 'Pursue 26' /tmp/annual_plan.html
+          grep -q 'Identity research' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-002-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-036-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'Staffing / conflict' /tmp/annual_plan.html
           grep -q 'data-id="MFC-084"' /tmp/current_controls.html
           grep -q 'Sebastian Family Fun Day &amp; Touch A Truck — Sponsor Activation' /tmp/current_controls.html
           grep -q 'OPTIONAL SPONSOR ACTIVATION — VERIFY STAFFING' /tmp/current_controls.html
