@@ -88,6 +88,7 @@ function applyLocationView(){
   if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase();state.deepLinkedYear=profileMatch[2]?Number(profileMatch[2]):null}
   else if(hash==='shows'){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else if(hash==='plan2027'){state.tab='shows';state.showMode='PLAN2027';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(['today','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null;state.deepLinkedYear=null}
 }
@@ -95,7 +96,7 @@ function syncLocationView(){
   const hash=state.deepLinkedProfile
     ?'show/'+state.deepLinkedProfile+(Number.isFinite(Number(state.deepLinkedYear))?'/year/'+Number(state.deepLinkedYear):'')
     :(state.tab==='shows'
-      ?(state.showMode==='CURRENT'?'current':state.showMode==='UNLINKED'?'unlinked':'shows')
+      ?(state.showMode==='CURRENT'?'current':state.showMode==='PLAN2027'?'plan2027':state.showMode==='UNLINKED'?'unlinked':'shows')
       :state.tab);
   try{history.replaceState(null,'','#'+hash)}catch{}
 }
