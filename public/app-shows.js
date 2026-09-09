@@ -1932,11 +1932,134 @@ function renderCurrentShows(){
   const intro=`<div class="bookingBoard"><div><span>Priority to book / review</span><b>${board.book}</b></div><div><span>Committed</span><b>${board.committed}</b></div><div><span>Test / negotiate</span><b>${board.test}</b></div><div><span>Watch / gated / next</span><b>${board.watch}</b></div></div><div class="sourceWarn bookingBoardNote"><b>Booking recommendation uses the governed Decision/Tier plus current booking status and dates.</b> Historical sales, COM, costs, and booth evidence remain visible separately; this layer does not overwrite source evidence.</div>`;
   return intro+`${quickViewsBar('CURRENT')}${showTools('CURRENT',list.length)}${list.map(showCard).join('')||'<div class="empty">No current shows match these filters.</div>'}`;
 }
+function annualPlanDateText(row){
+  if(row.schedule_type==='RECURRING_SEASON')return row.expected_window_text||'Recurring 2027 season';
+  if(row.schedule_type==='ON_DEMAND')return 'On demand · no fixed date';
+  if(row.event_start){
+    const start=date(row.event_start),end=row.event_end?date(row.event_end):'';
+    return end&&row.event_end!==row.event_start?start+' – '+end:start;
+  }
+  return row.expected_window_text||'2027 date not yet published';
+}
+
+function annualPlanBudgetText(row){
+  const min=row.budget_min===null||row.budget_min===undefined?'':money(row.budget_min);
+  const max=row.budget_max===null||row.budget_max===undefined?'':money(row.budget_max);
+  let amount='Not verified';
+  if(min&&max)amount=Number(row.budget_min)===Number(row.budget_max)?min:min+' – '+max;
+  else if(min)amount='From '+min;
+  else if(max)amount='Up to '+max;
+  const status=String(row.cost_status||'').replaceAll('_',' ');
+  if(row.cost_status==='PRIOR_CYCLE_GUIDE_ONLY'&&max)return max+' prior-cycle guide';
+  if(row.cost_status==='QUOTE_REQUIRED'&&!min&&!max)return 'Quote required';
+  if(row.cost_status==='NOT_PUBLISHED_YET')return 'Not published yet';
+  if(row.cost_status==='UNKNOWN_2027')return '2027 cost unknown';
+  return amount+(status?' · '+status:'');
+}
+
+function annualPlanPublicationText(row){
+  const status=String(row.publication_status||'').replaceAll('_',' ');
+  const confidence=String(row.date_confidence||'').replaceAll('_',' ');
+  return [status,confidence].filter(Boolean).join(' · ');
+}
+
+function annualPlanMonthKey(row){
+  if(row.event_start)return String(row.event_start);
+  if(row.expected_month)return `2027-${String(row.expected_month).padStart(2,'0')}-15`;
+  if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
+  return '9999-12-31';
+}
+
+function annualPlanMatches(row){
+  const filter=String(state.annualPlan?.filter||'ALL');
+  if(filter==='PURSUE'&&row.plan_decision!=='PURSUE')return false;
+  if(filter==='WATCH'&&row.plan_decision!=='WATCH')return false;
+  if(filter==='RESEARCH'&&row.plan_decision!=='RESEARCH_IDENTITY')return false;
+  if(filter==='EXACT'&&!row.event_start)return false;
+  if(filter==='EXPECTED'&&!(row.schedule_type==='EXPECTED_WINDOW'||row.schedule_type==='UNSCHEDULED_WATCH'))return false;
+  if(filter==='CONFLICTS'&&!String(row.conflict_notes||'').trim())return false;
+  const q=String(state.search||'').trim().toLowerCase();
+  if(!q)return true;
+  return [
+    row.profile_id,row.canonical_event,row.occurrence_label,row.plan_decision,row.priority,row.publication_status,row.date_confidence,
+    row.expected_window_text,row.action_window_text,row.cost_status,row.budget_basis,row.placement_reference,row.historical_signal,
+    row.next_action,row.source_basis,row.conflict_notes
+  ].some(v=>String(v||'').toLowerCase().includes(q));
+}
+
+function annualPlanCard(row){
+  const decision=String(row.plan_decision||'WATCH');
+  const label=decision==='RESEARCH_IDENTITY'?'RESEARCH IDENTITY':decision;
+  const signalClass=decision==='PURSUE'?'book':decision==='WATCH'?'watch':'gated';
+  const conflict=String(row.conflict_notes||'').trim()
+    ?`<div class="sourceWarn"><b>Staffing / conflict</b> ${esc(row.conflict_notes)}</div>`:'';
+  const placement=String(row.placement_reference||'').trim()
+    ?`<div class="bookingStatusLine"><span>Placement reference</span><b>${esc(row.placement_reference)}</b></div>`:'';
+  const sources=Array.isArray(row.source_refs)?row.source_refs.filter(Boolean):[];
+  const sourceLinks=sources.length
+    ?`<div class="contactActions">${sources.slice(0,3).map((url,i)=>`<a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Source ${i+1}</a>`).join('')}</div>`:'';
+  const actionDue=row.action_due?` · operating date ${date(row.action_due)}`:'';
+  return `<article class="card bookingCard annualPlanCard" data-plan-id="${esc(row.plan_id)}">
+    <div class="row"><div><div class="event">${esc(row.occurrence_label||row.canonical_event)}</div><div class="mfc">${esc(row.profile_id)} · ${esc(row.schedule_type||'PLAN')}</div></div><span class="badge ${decision==='PURSUE'?'ready':decision==='WATCH'?'date':'hold'}">${esc(label)}</span></div>
+    <div class="bookingSignal ${esc(signalClass)}"><b>${esc(row.priority||'MEDIUM')} priority</b><span>${esc(annualPlanPublicationText(row))}</span></div>
+    <div class="bookingGrid">
+      <div><span>2027 timing</span><b>${esc(annualPlanDateText(row))}</b></div>
+      <div><span>Budget</span><b>${esc(annualPlanBudgetText(row))}</b></div>
+      <div><span>When to act</span><b>${esc(row.action_window_text||'Review when 2027 terms publish')}${esc(actionDue)}</b></div>
+      <div><span>Coverage</span><b>${esc(String(row.coverage_class||'').replaceAll('_',' '))}</b></div>
+    </div>
+    ${conflict}
+    <div class="bookingPerformance"><span>Historical signal</span><b>${esc(row.historical_signal||'No comparable historical signal')}</b></div>
+    ${placement}
+    <div class="bookingStatusLine"><span>Budget basis</span><b>${esc(row.budget_basis||'No safe 2027 budget basis yet.')}</b></div>
+    <div class="action"><b>Next action</b><br>${esc(row.next_action||'No action stated')}</div>
+    <div class="bookingStatusLine"><span>Source basis</span><b>${esc(row.source_basis||'Governed annual-plan source')}</b></div>
+    ${sourceLinks}
+    <div class="actions"><button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">Open full show history</button></div>
+  </article>`;
+}
+
+function renderAnnualPlan(){
+  const p=state.annualPlan;
+  if(p.loading&&!p.loaded)return '<div class="loading">Loading 2027 annual plan…</div>';
+  if(p.error&&!p.loaded)return `<div class="alert"><div class="event">2027 plan unavailable</div><div class="action">${esc(p.error)}</div><div class="actions"><button class="btn primary" id="annualPlanRetry">Try again</button></div></div>`;
+  if(!p.loaded)return '<div class="loading">Opening 2027 annual plan…</div>';
+  if(!p.run)return '<div class="empty">No READY 2027 annual plan is published.</div>';
+  const summary=p.summary||{};
+  const weights={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
+  const rows=(p.rows||[]).filter(annualPlanMatches).slice().sort((a,b)=>
+    annualPlanMonthKey(a).localeCompare(annualPlanMonthKey(b))||
+    (weights[a.plan_decision]??9)-(weights[b.plan_decision]??9)||
+    String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))
+  );
+  const filters=[
+    ['ALL','All '+Number(summary.rows||0)],
+    ['PURSUE','Pursue '+Number(summary.pursue||0)],
+    ['WATCH','Watch '+Number(summary.watch||0)],
+    ['RESEARCH','Research '+Number(summary.research||0)],
+    ['EXACT','Exact/current '+Number(summary.exact||0)],
+    ['EXPECTED','Expected / unpublished '+Number(summary.expected||0)],
+    ['CONFLICTS','Conflicts '+Number(summary.conflicts||0)],
+  ];
+  const controls=`<div class="filterbar">${filters.map(([key,label])=>`<button class="chip ${p.filter===key?'active':''}" data-annual-filter="${key}">${esc(label)}</button>`).join('')}</div>`;
+  const metrics=`<div class="bookingBoardMetrics">
+    <div><span>Plan rows</span><b>${Number(summary.rows||0)}</b></div>
+    <div><span>Profiles covered</span><b>${Number(summary.profiles||0)}</b></div>
+    <div><span>Pursue</span><b>${Number(summary.pursue||0)}</b></div>
+    <div><span>Watch</span><b>${Number(summary.watch||0)}</b></div>
+    <div><span>Identity research</span><b>${Number(summary.research||0)}</b></div>
+    <div><span>Exact/current dates</span><b>${Number(summary.exact||0)}</b></div>
+  </div>`;
+  const intro=`<div class="sourceWarn"><b>2027 planning semantics.</b> Exact/current dates are governed from a current opportunity, contract, official schedule or governed annual rule. Expected windows preserve recurrence only and are not booking dates. Prior-cycle prices are guides only unless the card explicitly says current/known verified. Identity-research rows cannot be booked until the legacy name is reconciled to a current series.</div>`;
+  return `<div class="annualPlanHead"><div class="hero compactHero"><h2>2027 booking plan</h2><p>${Number(summary.rows||0)} plan rows · ${Number(summary.profiles||0)} profiles · READY run ${esc(String(p.run.id||'').slice(0,8))}</p></div>${metrics}${intro}${controls}<div class="filterbar"><label class="searchbox"><span>Search 2027 plan</span><input id="searchInput" value="${esc(state.search)}" placeholder="Event, month, action, conflict, placement…"></label></div></div>${rows.map(annualPlanCard).join('')||'<div class="empty">No 2027 plan rows match this view.</div>'}`;
+}
+
 function renderShows(){
   const profileCount=Number(state.catalogSummary?.profile_count||state.catalog.length||0),occCount=Number(state.catalogSummary?.occurrence_count||0);
-  const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0);
-  const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Unlinked LP${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
+  const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0),annualCount=Number(state.annualPlan?.summary?.rows||0);
+  const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='PLAN2027'?'active':''}" data-show-mode="PLAN2027">2027 Plan${annualCount?' '+annualCount:''}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Unlinked LP${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
   if(state.showMode==='CURRENT')return top+renderCurrentShows();
+  if(state.showMode==='PLAN2027')return top+renderAnnualPlan();
   if(state.showMode==='UNLINKED')return top+renderUnlinkedLp();
   if(state.catalogLoading&&!state.catalogLoaded)return top+'<div class="loading">Loading full show database…</div>';
   if(state.catalogError&&!state.catalogLoaded)return top+`<div class="alert"><div class="event">Full database unavailable</div><div class="action">${esc(state.catalogError)}</div><div class="actions"><button class="btn primary" id="catalogRetry">Try again</button></div></div>`;
