@@ -592,23 +592,38 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == 'f221378d-5951-4785-873c-c53df89716c1', run
+          assert run.get('id') == '5d48fd6a-cbf9-42d0-8dc8-0f7121e274a0', run
           assert run.get('status') == 'READY', run
-          assert run.get('row_count') == 74, run
+          assert run.get('row_count') == 75, run
           summary=x.get('summary') or {}
-          assert summary.get('rows') == 74, summary
+          assert summary.get('rows') == 75, summary
           assert summary.get('profiles') == 73, summary
-          assert summary.get('pursue') == 26, summary
-          assert summary.get('watch') == 27, summary
-          assert summary.get('research') == 21, summary
-          assert summary.get('exact') == 19, summary
-          assert summary.get('expected') == 32, summary
-          assert summary.get('conflicts') == 11, summary
+          assert summary.get('pursue') == 32, summary
+          assert summary.get('watch') == 40, summary
+          assert summary.get('research') == 3, summary
+          assert summary.get('exact') == 23, summary
+          assert summary.get('expected') == 37, summary
+          assert summary.get('conflicts') == 15, summary
           rows={r.get('plan_id'):r for r in x.get('rows') or []}
           assert rows['2027-LIFE-036-PRIMARY'].get('event_start') == '2027-01-16', rows['2027-LIFE-036-PRIMARY']
           assert rows['2027-LIFE-015-PRIMARY'].get('event_start') == '2027-03-05', rows['2027-LIFE-015-PRIMARY']
           assert rows['2027-LIFE-066-PRIMARY'].get('event_start') == '2027-05-28', rows['2027-LIFE-066-PRIMARY']
           assert rows['2027-LIFE-004-PRIMARY'].get('action_due') == '2027-06-01', rows['2027-LIFE-004-PRIMARY']
+          fsf=rows['2027-LIFE-062-LEGACY-RESEARCH']
+          assert fsf.get('event_start') == '2027-02-04' and fsf.get('event_end') == '2027-02-15', fsf
+          assert fsf.get('publication_status') == 'OFFICIAL_2027_DATE_AND_VENDOR_PACKAGE_VERIFIED', fsf
+          assert float(fsf.get('budget_min')) == 1400 and float(fsf.get('budget_max')) == 2510, fsf
+          assert rows['2027-LIFE-025-LEGACY-RESEARCH'].get('event_start') == '2027-01-08', rows['2027-LIFE-025-LEGACY-RESEARCH']
+          assert rows['2027-LIFE-032-LEGACY-RESEARCH'].get('event_start') == '2027-04-09', rows['2027-LIFE-032-LEGACY-RESEARCH']
+          sar_fall=rows['2027-LIFE-025-SEP']
+          assert sar_fall.get('event_start') == '2027-09-10' and sar_fall.get('event_end') == '2027-09-12', sar_fall
+          assert 'ACS West Palm Beach Home Show' in (sar_fall.get('conflict_notes') or ''), sar_fall
+          slcf=rows['2027-LIFE-112-PRIMARY']
+          assert float(slcf.get('budget_min')) == 800 and slcf.get('budget_max') is None, slcf
+          assert 'No finite maximum' in (slcf.get('budget_basis') or ''), slcf
+          assert rows['2027-LIFE-006-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL', rows['2027-LIFE-006-LEGACY-RESEARCH']
+          holds={pid for pid,row in rows.items() if row.get('plan_decision') == 'RESEARCH_IDENTITY'}
+          assert holds == {'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds
           print('2027 annual plan API: PASS')
           PY
 
@@ -2647,11 +2662,17 @@ jobs:
           grep -q 'Current 37' /tmp/current_controls.html
           render_view annual_plan "$SITE/#plan2027"
           grep -q '2027 booking plan' /tmp/annual_plan.html
-          grep -q '74 plan rows' /tmp/annual_plan.html
-          grep -q 'Pursue 26' /tmp/annual_plan.html
+          grep -q '75 plan rows' /tmp/annual_plan.html
+          grep -q 'Pursue 32' /tmp/annual_plan.html
+          grep -q 'Research 3' /tmp/annual_plan.html
           grep -q 'Identity research' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-002-PRIMARY"' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-036-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-062-LEGACY-RESEARCH"' /tmp/annual_plan.html
+          grep -q 'Florida State Fair — Feb. 4–15, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-025-SEP"' /tmp/annual_plan.html
+          grep -q 'Sarasota Bradenton Home Show — Sep. 10–12, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-050-LEGACY-RESEARCH"' /tmp/annual_plan.html
           grep -q 'Staffing / conflict' /tmp/annual_plan.html
           grep -q 'data-id="MFC-084"' /tmp/current_controls.html
           grep -q 'Sebastian Family Fun Day &amp; Touch A Truck — Sponsor Activation' /tmp/current_controls.html
