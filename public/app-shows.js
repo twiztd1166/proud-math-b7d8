@@ -657,6 +657,7 @@ function paradiseActionFirstScreen(profiles){
     const op=p.current_rebook_opportunity||{};
     const review=p.current_rebook_review||{};
     const disposition=String(review.disposition||'REVIEW').toUpperCase();
+    const timing=governedFirstSentence(review.action_timing,'Verify timing');
     const placement=governedFirstSentence(op.current_placement_text,'Current placement guidance not recorded.');
     const nextStep=liveComparisonNextStep(review);
     const action=op.action_url
@@ -665,13 +666,14 @@ function paradiseActionFirstScreen(profiles){
     return `<article class="paradiseActionRow" data-paradise-action-row="${esc(p.profile_id)}">
       <div class="paradiseActionTop"><button type="button" class="liveCompareOpen paradiseActionShow" data-profile="${esc(p.profile_id)}"><b>${esc(p.canonical_event)}</b><span>${esc(p.profile_id)}</span></button><span class="liveCompareDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
       <div class="paradiseActionFacts"><div><small>Action date</small><b>${esc(liveComparisonActionDate(op))}</b></div><div><small>Current cost</small><b>${esc(liveComparisonCurrentCost(op))}</b></div></div>
+      <div class="paradiseActionLine" data-paradise-action-state-profile="${esc(p.profile_id)}"><small>State</small><span>${esc(timing)}</span></div>
       <div class="paradiseActionLine"><small>Placement</small><span>${esc(placement)}</span></div>
       <div class="paradiseActionLine"><small>Next step</small><span>${esc(nextStep)}</span></div>
       <div class="paradiseActionRowActions">${action}</div>
     </article>`;
   }).join('');
   return `<section class="paradiseActionQueue" data-paradise-action-queue>
-    <div class="paradiseActionQueueHead"><div><span>Next Paradise actions</span><b>${rows.length} items Paradise can move now · showing ${visible.length} most urgent</b><small>Ordered by the same governed effective action date used by the live board, then decision. Action date uses the verified hard deadline when present; otherwise event start is shown only as the ordering fallback. No new score is created here.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_PARADISE_ACTION">Open full Paradise action board</button></div>
+    <div class="paradiseActionQueueHead"><div><span>Next Paradise actions</span><b>${rows.length} items Paradise can move now · showing ${visible.length} most urgent</b><small>Ordered by the same governed effective action date used by the live board, then decision. Action date uses the verified hard deadline when present; otherwise event start is shown only as the ordering fallback. State and next step come directly from governed review fields; no new score is created here.</small></div><button type="button" class="btn secondary" data-quick-view="ALL_RESOLUTION_PARADISE_ACTION">Open full Paradise action board</button></div>
     <div class="paradiseActionList">${body}</div>
   </section>`;
 }
