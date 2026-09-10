@@ -1,0 +1,45 @@
+name: Patch R4 relation-aware smoke invariant once
+
+on:
+  push:
+    branches:
+      - fix/2027-r4-relation-aware-smoke-20260910
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Patch exact historical candidate assertion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/debug-paradise-shows-live.yml')
+          s=p.read_text()
+          old="assert len(historical_2013)==71, len(historical_2013)"
+          new="assert len(historical_2013)==66, len(historical_2013)"
+          n=s.count(old)
+          if n == 0:
+              print('Exact stale assertion already absent; no patch required.')
+              raise SystemExit(0)
+          assert n == 1, f'Expected exactly one stale assertion, found {n}'
+          assert "assert len(strong_history_2013)==10, len(strong_history_2013)" in s
+          assert "assert len(strong_2013)==2, len(strong_2013)" in s
+          p.write_text(s.replace(old,new,1))
+          print('Patched exactly 71 -> 66; 10/2 stronger controls preserved.')
+          PY
+          if git diff --quiet -- .github/workflows/debug-paradise-shows-live.yml; then
+            echo 'No change to commit.'
+            exit 0
+          fi
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/debug-paradise-shows-live.yml
+          git commit -m 'Fix relation-aware historical candidate smoke count'
+          git push origin HEAD:fix/2027-r4-relation-aware-smoke-20260910
