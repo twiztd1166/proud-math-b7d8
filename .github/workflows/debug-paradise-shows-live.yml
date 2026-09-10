@@ -592,18 +592,18 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == '5d48fd6a-cbf9-42d0-8dc8-0f7121e274a0', run
+          assert run.get('id') == '88ba9e46-3c56-4d9f-bc49-f76c9d65491a', run
           assert run.get('status') == 'READY', run
-          assert run.get('row_count') == 75, run
+          assert run.get('row_count') == 77, run
           summary=x.get('summary') or {}
-          assert summary.get('rows') == 75, summary
-          assert summary.get('profiles') == 73, summary
-          assert summary.get('pursue') == 32, summary
-          assert summary.get('watch') == 40, summary
+          assert summary.get('rows') == 77, summary
+          assert summary.get('profiles') == 74, summary
+          assert summary.get('pursue') == 33, summary
+          assert summary.get('watch') == 41, summary
           assert summary.get('research') == 3, summary
-          assert summary.get('exact') == 23, summary
-          assert summary.get('expected') == 37, summary
-          assert summary.get('conflicts') == 15, summary
+          assert summary.get('exact') == 28, summary
+          assert summary.get('expected') == 33, summary
+          assert summary.get('conflicts') == 18, summary
           rows={r.get('plan_id'):r for r in x.get('rows') or []}
           assert rows['2027-LIFE-036-PRIMARY'].get('event_start') == '2027-01-16', rows['2027-LIFE-036-PRIMARY']
           assert rows['2027-LIFE-015-PRIMARY'].get('event_start') == '2027-03-05', rows['2027-LIFE-015-PRIMARY']
@@ -622,6 +622,27 @@ jobs:
           assert float(slcf.get('budget_min')) == 800 and slcf.get('budget_max') is None, slcf
           assert 'No finite maximum' in (slcf.get('budget_basis') or ''), slcf
           assert rows['2027-LIFE-006-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL', rows['2027-LIFE-006-LEGACY-RESEARCH']
+          taste=rows['2027-LIFE-092-TASTE-FEB']
+          assert taste.get('event_start') == '2027-02-05' and taste.get('event_end') == '2027-02-07', taste
+          assert taste.get('cost_status') == 'KNOWN_VERIFIED' and float(taste.get('budget_min')) == 1000 and float(taste.get('budget_max')) == 1000, taste
+          assert taste.get('plan_decision') == 'WATCH', taste
+          egg=rows['2027-HIST-062-PRIMARY']
+          assert egg.get('event_start') == '2027-03-27' and egg.get('event_end') == '2027-03-27', egg
+          assert 'Miami-Dade County Fair' in (egg.get('conflict_notes') or ''), egg
+          brevard=rows['2027-HIST-085-PRIMARY']
+          assert brevard.get('event_start') == '2027-07-17' and brevard.get('event_end') == '2027-07-18', brevard
+          boynton=rows['2027-LIFE-168-PRIMARY']
+          assert boynton.get('event_start') == '2027-07-30' and boynton.get('event_end') == '2027-07-31', boynton
+          assert boynton.get('publication_status') == 'OFFICIAL_2027_DATE_VERIFIED_APPLICATION_NOT_RELEASED', boynton
+          bacon=rows['2027-HIST-101-PRIMARY']
+          assert bacon.get('event_start') == '2027-09-25' and bacon.get('event_end') == '2027-09-26', bacon
+          greenmarket=rows['2027-LIFE-014-PRIMARY']
+          assert greenmarket.get('action_start') == '2027-03-01', greenmarket
+          assert greenmarket.get('publication_status') == '2026_27_APPLICATION_CLOSED_2027_APPLICATION_REOPENS_MARCH', greenmarket
+          safety=rows['2027-LIFE-073-PRIMARY']
+          assert safety.get('plan_decision') == 'PURSUE' and safety.get('priority') == 'HIGH', safety
+          assert safety.get('action_start') == '2026-11-15' and safety.get('action_due') == '2027-01-15', safety
+          assert rows['2027-HIST-065-PRIMARY'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL', rows['2027-HIST-065-PRIMARY']
           holds={pid for pid,row in rows.items() if row.get('plan_decision') == 'RESEARCH_IDENTITY'}
           assert holds == {'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds
           print('2027 annual plan API: PASS')
@@ -1051,6 +1072,7 @@ jobs:
               'LIFE-055':'LIFE-119',
               'LIFE-048':'LIFE-027',
               'LIFE-031':'LIFE-003',
+              'HIST-065':'LIFE-073',
           }
           for legacy,canonical in expected_series_links.items():
               assert profiles[legacy].get('related_current_profile_id')==canonical, (legacy,profiles[legacy])
@@ -2676,8 +2698,8 @@ jobs:
           grep -q 'Current 37' /tmp/current_controls.html
           render_view annual_plan "$SITE/#plan2027"
           grep -q '2027 booking plan' /tmp/annual_plan.html
-          grep -q '75 plan rows' /tmp/annual_plan.html
-          grep -q 'Pursue 32' /tmp/annual_plan.html
+          grep -q '77 plan rows' /tmp/annual_plan.html
+          grep -q 'Pursue 33' /tmp/annual_plan.html
           grep -q 'Research 3' /tmp/annual_plan.html
           grep -q 'Identity research' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-002-PRIMARY"' /tmp/annual_plan.html
@@ -2687,6 +2709,18 @@ jobs:
           grep -q 'data-plan-id="2027-LIFE-025-SEP"' /tmp/annual_plan.html
           grep -q 'Sarasota Bradenton Home Show — Sep. 10–12, 2027' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-050-LEGACY-RESEARCH"' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-092-TASTE-FEB"' /tmp/annual_plan.html
+          grep -q 'Galbani Taste of Little Italy — Feb. 5–7, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-HIST-062-PRIMARY"' /tmp/annual_plan.html
+          grep -q "Greenacres Egg'stravaganza — Mar. 27, 2027" /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-HIST-085-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'Brevard Home &amp; Garden Expo — Jul. 17–18, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-168-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'Boynton Beach Night Market — Jul. 30–31, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-HIST-101-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'PSL Bacon &amp; BBQ Festival — Sep. 25–26, 2027' /tmp/annual_plan.html
+          grep -q 'data-plan-id="2027-LIFE-073-PRIMARY"' /tmp/annual_plan.html
+          grep -q 'St. Lucie County Safety Festival — 2027 planning' /tmp/annual_plan.html
           grep -q 'Staffing / conflict' /tmp/annual_plan.html
           grep -q 'data-id="MFC-084"' /tmp/current_controls.html
           grep -q 'Sebastian Family Fun Day &amp; Touch A Truck — Sponsor Activation' /tmp/current_controls.html
