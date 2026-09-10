@@ -1,0 +1,163 @@
+name: Paradise Shows 2027 R4 live verifier
+
+on:
+  push:
+    branches:
+      - verify-2027-r4-live
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Verify R4 annual plan API and invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual-plan.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"annualPlan","year":2027}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/annual-plan.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 1, x
+          run=x.get('run') or {}
+          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
+          assert run.get('status') == 'READY', run
+          assert run.get('row_count') == 104, run
+          s=x.get('summary') or {}
+          assert s.get('rows') == 104, s
+          assert s.get('profiles') == 100, s
+          assert s.get('pursue') == 35, s
+          assert s.get('watch') == 66, s
+          assert s.get('research') == 3, s
+          assert s.get('exact') == 37, s
+          assert s.get('expected') == 43, s
+          assert s.get('conflicts') == 26, s
+          rows={r.get('plan_id'):r for r in x.get('rows') or []}
+          assert len(rows)==104, len(rows)
+
+          # R3 anchors remain intact.
+          assert rows['2027-LIFE-062-LEGACY-RESEARCH'].get('event_start')=='2027-02-04'
+          assert float(rows['2027-LIFE-062-LEGACY-RESEARCH'].get('budget_min'))==1400
+          assert float(rows['2027-LIFE-062-LEGACY-RESEARCH'].get('budget_max'))==2510
+          assert rows['2027-LIFE-092-TASTE-FEB'].get('event_start')=='2027-02-05'
+          assert float(rows['2027-LIFE-092-TASTE-FEB'].get('budget_min'))==1000
+          assert rows['2027-HIST-085-PRIMARY'].get('event_start')=='2027-07-17'
+          assert 'LIFE-084 Brevard Home & Garden Expo' in (rows['2027-HIST-085-PRIMARY'].get('historical_signal') or '')
+          assert rows['2027-LIFE-014-PRIMARY'].get('action_start')=='2027-03-01'
+          assert rows['2027-LIFE-073-PRIMARY'].get('plan_decision')=='PURSUE'
+
+          # Exhaustive R4 recovered opportunities.
+          orchid=rows['2027-LIFE-090-PRIMARY']
+          assert orchid.get('event_start')=='2027-01-15' and orchid.get('event_end')=='2027-01-17', orchid
+          assert orchid.get('plan_decision')=='WATCH' and orchid.get('priority')=='HIGH', orchid
+          seafood=rows['2027-LIFE-128-PRIMARY']
+          assert seafood.get('event_start')=='2027-01-30' and seafood.get('event_end')=='2027-01-31', seafood
+          assert seafood.get('plan_decision')=='PURSUE' and seafood.get('cost_status')=='KNOWN_VERIFIED', seafood
+          assert float(seafood.get('budget_min'))==225 and float(seafood.get('budget_max'))==500, seafood
+          charlotte=rows['2027-LIFE-109-PRIMARY']
+          assert charlotte.get('event_start')=='2027-02-05' and charlotte.get('event_end')=='2027-02-14', charlotte
+          assert charlotte.get('cost_status')=='KNOWN_VERIFIED' and float(charlotte.get('budget_min'))==650 and charlotte.get('budget_max') is None, charlotte
+          turtle=rows['2027-LIFE-086-PRIMARY']
+          assert turtle.get('event_start')=='2027-02-20' and turtle.get('event_end')=='2027-02-21', turtle
+          assert turtle.get('action_due')=='2026-11-02', turtle
+          venice=rows['2027-LIFE-172-PRIMARY']
+          assert venice.get('event_start')=='2027-02-27' and venice.get('event_end')=='2027-02-28', venice
+          artsea=rows['2027-LIFE-108-PRIMARY']
+          assert artsea.get('event_start')=='2027-03-13' and artsea.get('event_end')=='2027-03-14', artsea
+          assert 'LIFE-091 Art Fest Juno' in (artsea.get('historical_signal') or ''), artsea
+          strawberry=rows['2027-LIFE-130-PRIMARY']
+          assert strawberry.get('event_start')=='2027-04-03' and strawberry.get('event_end')=='2027-04-04', strawberry
+          stonewall=rows['2027-LIFE-176-PRIMARY']
+          assert stonewall.get('event_start')=='2027-06-19' and stonewall.get('event_end')=='2027-06-19', stonewall
+          psl2=rows['2027-LIFE-027-SEP']
+          assert psl2.get('event_start')=='2027-09-11' and psl2.get('event_end')=='2027-09-12', psl2
+          assert psl2.get('action_due')=='2027-05-15', psl2
+          assert 'ACS West Palm' in (psl2.get('conflict_notes') or '') and 'Sarasota' in (psl2.get('conflict_notes') or ''), psl2
+          jazz=rows['2027-LIFE-111-PRIMARY']
+          assert jazz.get('event_start') is None and jazz.get('expected_month')==3, jazz
+          assert jazz.get('publication_status')=='OFFICIAL_2027_MONTH_VERIFIED_EXACT_DATE_AND_ACTIVATION_PACKAGE_PENDING', jazz
+
+          # Immediate controls are structured, not only prose.
+          for pid in ['2027-LIFE-011-PRIMARY','2027-LIFE-013-PRIMARY','2027-LIFE-017-PRIMARY','2027-LIFE-018-PRIMARY','2027-LIFE-027-PRIMARY']:
+              assert rows[pid].get('action_start')=='2026-09-10', (pid,rows[pid].get('action_start'))
+
+          # Only the three source-grain identity holds remain RESEARCH_IDENTITY.
+          holds={pid for pid,row in rows.items() if row.get('plan_decision')=='RESEARCH_IDENTITY'}
+          assert holds=={'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds
+          print('R4 annual plan API invariants: PASS')
+          PY
+
+      - name: Verify current-show population and unauthenticated write guard unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/bootstrap.json \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"bootstrap"}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 17, x.get('version')
+          assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
+          assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
+          current={r.get('mfc_id'):r for r in x.get('shows') or []}
+          acs=current['MFC-063']
+          assert acs.get('show_status')=='RECONCILE', acs
+          assert acs.get('max_booking_cost')==2110.5, acs
+          assert (acs.get('source_detail') or {}).get('payment_clearing')=='UNVERIFIED', acs
+          print('Current Shows bootstrap unchanged: PASS')
+          PY
+          code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth.json -w '%{http_code}' \
+            -X POST "$API" -H "Origin: $SITE" -H "Content-Type: application/json" \
+            --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"R4_UNAUTH_TEST_MUST_NOT_WRITE"}}')"
+          test "$code" = "401"
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/unauth.json'))
+          assert x.get('ok') is False and x.get('error')=='Edit access required', x
+          print('Unauthenticated write guard: PASS')
+          PY
+
+      - name: Verify live 2027 route in fresh Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          for attempt in $(seq 1 12); do
+            "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=8000 --dump-dom "$SITE/#plan2027" > /tmp/plan2027.html 2>/tmp/chrome.err || true
+            if grep -q '104 plan rows' /tmp/plan2027.html \
+              && grep -q 'Pursue 35' /tmp/plan2027.html \
+              && grep -q 'Research 3' /tmp/plan2027.html \
+              && grep -q 'data-plan-id="2027-LIFE-128-PRIMARY"' /tmp/plan2027.html \
+              && grep -q 'Port St. Lucie Seafood Festival' /tmp/plan2027.html \
+              && grep -q 'data-plan-id="2027-LIFE-086-PRIMARY"' /tmp/plan2027.html \
+              && grep -q 'TurtleFest' /tmp/plan2027.html \
+              && grep -q 'data-plan-id="2027-LIFE-027-SEP"' /tmp/plan2027.html \
+              && grep -q 'Port St. Lucie Home Show' /tmp/plan2027.html; then
+              echo 'Fresh Chrome #plan2027 R4 render: PASS'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::R4 #plan2027 live render did not converge.'
+          tail -80 /tmp/chrome.err || true
+          exit 1
