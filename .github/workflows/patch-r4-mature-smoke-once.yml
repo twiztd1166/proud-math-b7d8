@@ -21,61 +21,56 @@ jobs:
           from pathlib import Path
           p=Path('.github/workflows/debug-paradise-shows-live.yml')
           s=p.read_text()
-          old="""          assert run.get('id') == '88ba9e46-3c56-4d9f-bc49-f76c9d65491a', run
-          assert run.get('status') == 'READY', run
-          assert run.get('row_count') == 77, run
-          summary=x.get('summary') or {}
-          assert summary.get('rows') == 77, summary
-          assert summary.get('profiles') == 74, summary
-          assert summary.get('pursue') == 33, summary
-          assert summary.get('watch') == 41, summary
-          assert summary.get('research') == 3, summary
-          assert summary.get('exact') == 28, summary
-          assert summary.get('expected') == 33, summary
-          assert summary.get('conflicts') == 18, summary
-          rows={r.get('plan_id'):r for r in x.get('rows') or []}
-          """
-          new="""          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
-          assert run.get('status') == 'READY', run
-          assert run.get('row_count') == 104, run
-          summary=x.get('summary') or {}
-          assert summary.get('rows') == 104, summary
-          assert summary.get('profiles') == 100, summary
-          assert summary.get('pursue') == 35, summary
-          assert summary.get('watch') == 66, summary
-          assert summary.get('research') == 3, summary
-          assert summary.get('exact') == 37, summary
-          assert summary.get('expected') == 43, summary
-          assert summary.get('conflicts') == 28, summary
-          rows={r.get('plan_id'):r for r in x.get('rows') or []}
-          assert len(rows) == 104, len(rows)
-
-          # R4 release invariant: every fixed overlap must be controlled on both rows.
-          fixed=[r for r in rows.values() if r.get('schedule_type')=='FIXED_EVENT' and r.get('event_start') and r.get('event_end')]
-          overlap_pairs=[]
-          for i,a in enumerate(fixed):
-              for b in fixed[i+1:]:
-                  if max(a.get('event_start'),b.get('event_start')) <= min(a.get('event_end'),b.get('event_end')):
-                      overlap_pairs.append((a,b))
-          assert len(overlap_pairs) == 31, len(overlap_pairs)
-          uncontrolled=[(a.get('plan_id'),b.get('plan_id')) for a,b in overlap_pairs if not ((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip())]
-          assert not uncontrolled, uncontrolled
-          pursue_pairs=[(a,b) for a,b in overlap_pairs if a.get('plan_decision')=='PURSUE' and b.get('plan_decision')=='PURSUE']
-          assert len(pursue_pairs) == 10, len(pursue_pairs)
-          assert all((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip() for a,b in pursue_pairs), [(a.get('plan_id'),b.get('plan_id')) for a,b in pursue_pairs]
-
-          # R4 signature opportunities recovered by the exhaustive 2027 pass.
-          seafood=rows['2027-LIFE-128-PRIMARY']
-          assert seafood.get('event_start') == '2027-01-30' and seafood.get('event_end') == '2027-01-31', seafood
-          assert seafood.get('plan_decision') == 'PURSUE', seafood
-          turtle=rows['2027-LIFE-086-PRIMARY']
-          assert turtle.get('event_start') == '2027-02-20' and turtle.get('event_end') == '2027-02-21', turtle
-          psl2=rows['2027-LIFE-027-SEP']
-          assert psl2.get('event_start') == '2027-09-11' and psl2.get('event_end') == '2027-09-12', psl2
-          """
-          n=s.count(old)
-          assert n == 1, f'Expected one R3 annual-plan block, found {n}'
-          s=s.replace(old,new,1)
+          start_marker="assert run.get('id') == '88ba9e46-3c56-4d9f-bc49-f76c9d65491a', run"
+          end_marker="print('2027 annual plan API: PASS')"
+          assert s.count(start_marker)==1, s.count(start_marker)
+          start=s.index(start_marker)
+          end=s.index(end_marker,start)+len(end_marker)
+          block=s[start:end]
+          replacements={
+            "assert run.get('id') == '88ba9e46-3c56-4d9f-bc49-f76c9d65491a', run":"assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run",
+            "assert run.get('row_count') == 77, run":"assert run.get('row_count') == 104, run",
+            "assert summary.get('rows') == 77, summary":"assert summary.get('rows') == 104, summary",
+            "assert summary.get('profiles') == 74, summary":"assert summary.get('profiles') == 100, summary",
+            "assert summary.get('pursue') == 33, summary":"assert summary.get('pursue') == 35, summary",
+            "assert summary.get('watch') == 41, summary":"assert summary.get('watch') == 66, summary",
+            "assert summary.get('exact') == 28, summary":"assert summary.get('exact') == 37, summary",
+            "assert summary.get('expected') == 33, summary":"assert summary.get('expected') == 43, summary",
+            "assert summary.get('conflicts') == 18, summary":"assert summary.get('conflicts') == 28, summary",
+          }
+          for old,new in replacements.items():
+              assert block.count(old)==1, (old,block.count(old))
+              block=block.replace(old,new,1)
+          anchor="rows={r.get('plan_id'):r for r in x.get('rows') or []}\n"
+          assert block.count(anchor)==1, block.count(anchor)
+          insertion=(
+            "          assert len(rows) == 104, len(rows)\n\n"
+            "          # R4 release invariant: every fixed overlap must be controlled on both rows.\n"
+            "          fixed=[r for r in rows.values() if r.get('schedule_type')=='FIXED_EVENT' and r.get('event_start') and r.get('event_end')]\n"
+            "          overlap_pairs=[]\n"
+            "          for i,a in enumerate(fixed):\n"
+            "              for b in fixed[i+1:]:\n"
+            "                  if max(a.get('event_start'),b.get('event_start')) <= min(a.get('event_end'),b.get('event_end')):\n"
+            "                      overlap_pairs.append((a,b))\n"
+            "          assert len(overlap_pairs) == 31, len(overlap_pairs)\n"
+            "          uncontrolled=[(a.get('plan_id'),b.get('plan_id')) for a,b in overlap_pairs if not ((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip())]\n"
+            "          assert not uncontrolled, uncontrolled\n"
+            "          pursue_pairs=[(a,b) for a,b in overlap_pairs if a.get('plan_decision')=='PURSUE' and b.get('plan_decision')=='PURSUE']\n"
+            "          assert len(pursue_pairs) == 10, len(pursue_pairs)\n"
+            "          assert all((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip() for a,b in pursue_pairs), [(a.get('plan_id'),b.get('plan_id')) for a,b in pursue_pairs]\n\n"
+            "          # R4 signature opportunities recovered by the exhaustive 2027 pass.\n"
+            "          seafood=rows['2027-LIFE-128-PRIMARY']\n"
+            "          assert seafood.get('event_start') == '2027-01-30' and seafood.get('event_end') == '2027-01-31', seafood\n"
+            "          assert seafood.get('plan_decision') == 'PURSUE', seafood\n"
+            "          turtle=rows['2027-LIFE-086-PRIMARY']\n"
+            "          assert turtle.get('event_start') == '2027-02-20' and turtle.get('event_end') == '2027-02-21', turtle\n"
+            "          psl2=rows['2027-LIFE-027-SEP']\n"
+            "          assert psl2.get('event_start') == '2027-09-11' and psl2.get('event_end') == '2027-09-12', psl2\n"
+          )
+          block=block.replace(anchor,anchor+insertion,1)
+          s=s[:start]+block+s[end:]
+          assert start_marker not in s
+          assert "assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run" in s
           assert "assert len(historical_2013)==66, len(historical_2013)" in s
           assert "assert len(strong_history_2013)==10, len(strong_history_2013)" in s
           assert "assert len(strong_2013)==2, len(strong_2013)" in s
