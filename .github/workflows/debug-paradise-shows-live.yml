@@ -592,7 +592,7 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
+          assert run.get('id') == 'b922deb4-9416-45f4-a467-9a1f6e317a6f', run
           assert run.get('status') == 'READY', run
           assert run.get('row_count') == 104, run
           summary=x.get('summary') or {}
@@ -2722,8 +2722,8 @@ jobs:
           grep -q 'Current 37' /tmp/current_controls.html
           render_view annual_plan "$SITE/#plan2027"
           grep -q '2027 booking plan' /tmp/annual_plan.html
-          grep -q '77 plan rows' /tmp/annual_plan.html
-          grep -q 'Pursue 33' /tmp/annual_plan.html
+          grep -q '104 plan rows' /tmp/annual_plan.html
+          grep -q 'Pursue 35' /tmp/annual_plan.html
           grep -q 'Research 3' /tmp/annual_plan.html
           grep -q 'Identity research' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-002-PRIMARY"' /tmp/annual_plan.html
