@@ -1,0 +1,59 @@
+name: One-shot R5 mature smoke patcher
+
+on:
+  push:
+    branches:
+      - release-r5-identity-smoke
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: release-r5-identity-smoke
+          fetch-depth: 0
+      - name: Patch only stale R4 identity assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/debug-paradise-shows-live.yml')
+          text=p.read_text()
+          replacements={
+            "b922deb4-9416-4cf8-a218-e3e693b0ac85":"0294bac9-5400-4f31-9a13-fc7897b4ddfd",
+            "assert summary.get('watch') == 66, summary":"assert summary.get('watch') == 69, summary",
+            "assert summary.get('research') == 3, summary":"assert summary.get('research') == 0, summary",
+            "grep -q 'Research 3' /tmp/annual_plan.html":"grep -q 'Watch 69' /tmp/annual_plan.html\n          grep -q 'Research 0' /tmp/annual_plan.html",
+            "assert holds == {'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds":"assert not holds, holds\n          assert rows['2027-LIFE-050-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'\n          assert rows['2027-LIFE-050-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL'\n          assert 'LIFE-050 → LIFE-018' in (rows['2027-LIFE-050-LEGACY-RESEARCH'].get('source_basis') or '')\n          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'\n          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('publication_status') == 'VERIFIED_MIXED_SOURCE_AGGREGATE_NONBOOKABLE'\n          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('expected_month') == 10\n          assert 'no whole-profile SAME_SERIES relation is valid' in (rows['2027-LIFE-061-LEGACY-RESEARCH'].get('source_basis') or '')\n          assert rows['2027-LIFE-067-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'\n          assert rows['2027-LIFE-067-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL'\n          assert 'LIFE-067 → LIFE-018' in (rows['2027-LIFE-067-LEGACY-RESEARCH'].get('source_basis') or '')",
+            "              'HIST-065':'LIFE-073',\n          }":"              'HIST-065':'LIFE-073',\n              'LIFE-050':'LIFE-018',\n              'LIFE-067':'LIFE-018',\n          }",
+          }
+          for old,new in replacements.items():
+              count=text.count(old)
+              if count < 1:
+                  raise SystemExit(f'missing expected stale assertion: {old!r}')
+              text=text.replace(old,new)
+          stale=[
+            "b922deb4-9416-4cf8-a218-e3e693b0ac85",
+            "assert summary.get('watch') == 66, summary",
+            "assert summary.get('research') == 3, summary",
+            "grep -q 'Research 3' /tmp/annual_plan.html",
+            "assert holds == {'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds",
+          ]
+          for s in stale:
+              if s in text:
+                  raise SystemExit(f'stale assertion remains: {s!r}')
+          p.write_text(text)
+          PY
+          git diff --check
+          git diff -- .github/workflows/debug-paradise-shows-live.yml
+          git rm .github/workflows/patch-r5-identity-smoke.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/debug-paradise-shows-live.yml
+          git commit -m 'Update mature smoke for R5 identity resolution'
+          git push origin HEAD:release-r5-identity-smoke
