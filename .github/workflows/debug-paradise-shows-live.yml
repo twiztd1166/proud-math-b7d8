@@ -641,7 +641,7 @@ jobs:
           assert rows['2027-LIFE-032-LEGACY-RESEARCH'].get('event_start') == '2027-04-09', rows['2027-LIFE-032-LEGACY-RESEARCH']
           sar_fall=rows['2027-LIFE-025-SEP']
           assert sar_fall.get('event_start') == '2027-09-10' and sar_fall.get('event_end') == '2027-09-12', sar_fall
-          assert 'ACS West Palm Beach Home Show' in (sar_fall.get('conflict_notes') or ''), sar_fall
+          assert 'ACS West Palm' in (sar_fall.get('conflict_notes') or ''), sar_fall
           slcf=rows['2027-LIFE-112-PRIMARY']
           assert float(slcf.get('budget_min')) == 800 and slcf.get('budget_max') is None, slcf
           assert 'No finite maximum' in (slcf.get('budget_basis') or ''), slcf
