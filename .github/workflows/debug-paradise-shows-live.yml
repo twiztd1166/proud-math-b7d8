@@ -832,7 +832,7 @@ jobs:
           strong_2013=[p for p in strong_history_2013 if str((p.get('current_rebook_review') or {}).get('disposition') or '').upper() not in hold_dispositions]
           # Revision-2 identity reconciliation removes newly verified source-split duplicates
           # from the historical rebook candidate pool without deleting source-grain history/performance.
-          assert len(historical_2013)==71, len(historical_2013)
+          assert len(historical_2013)==66, len(historical_2013)
           assert len(strong_history_2013)==10, len(strong_history_2013)
           assert len(strong_2013)==2, len(strong_2013)
           reviews={pid:p.get('current_rebook_review') for pid,p in profiles.items() if p.get('current_rebook_review')}
