@@ -46,7 +46,7 @@ jobs:
           assert s.get('research') == 3, s
           assert s.get('exact') == 37, s
           assert s.get('expected') == 43, s
-          assert s.get('conflicts') == 26, s
+          assert s.get('conflicts') == 28, s
           rows={r.get('plan_id'):r for r in x.get('rows') or []}
           assert len(rows)==104, len(rows)
 
@@ -95,6 +95,25 @@ jobs:
           # Immediate controls are structured, not only prose.
           for pid in ['2027-LIFE-011-PRIMARY','2027-LIFE-013-PRIMARY','2027-LIFE-017-PRIMARY','2027-LIFE-018-PRIMARY','2027-LIFE-027-PRIMARY']:
               assert rows[pid].get('action_start')=='2026-09-10', (pid,rows[pid].get('action_start'))
+
+          # Fixed-overlap controls must be complete, not just summarized.
+          fixed=[r for r in rows.values() if r.get('schedule_type')=='FIXED_EVENT' and r.get('event_start') and r.get('event_end')]
+          overlap_pairs=[]
+          for i,a in enumerate(fixed):
+              for b in fixed[i+1:]:
+                  if max(a.get('event_start'),b.get('event_start')) <= min(a.get('event_end'),b.get('event_end')):
+                      overlap_pairs.append((a,b))
+          assert len(overlap_pairs)==31, len(overlap_pairs)
+          uncontrolled=[(a.get('plan_id'),b.get('plan_id')) for a,b in overlap_pairs if not ((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip())]
+          assert not uncontrolled, uncontrolled
+          pursue_pairs=[(a,b) for a,b in overlap_pairs if a.get('plan_decision')=='PURSUE' and b.get('plan_decision')=='PURSUE']
+          assert len(pursue_pairs)==10, len(pursue_pairs)
+          uncontrolled_pursue=[(a.get('plan_id'),b.get('plan_id')) for a,b in pursue_pairs if not ((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip())]
+          assert not uncontrolled_pursue, uncontrolled_pursue
+          miami=rows['2027-LIFE-013-PRIMARY']
+          sarasota_spring=rows['2027-LIFE-032-LEGACY-RESEARCH']
+          assert 'Sarasota' in (miami.get('conflict_notes') or ''), miami
+          assert 'Miami-Dade' in (sarasota_spring.get('conflict_notes') or ''), sarasota_spring
 
           # Only the three source-grain identity holds remain RESEARCH_IDENTITY.
           holds={pid for pid,row in rows.items() if row.get('plan_decision')=='RESEARCH_IDENTITY'}
