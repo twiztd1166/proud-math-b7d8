@@ -592,19 +592,43 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == '88ba9e46-3c56-4d9f-bc49-f76c9d65491a', run
+          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
           assert run.get('status') == 'READY', run
-          assert run.get('row_count') == 77, run
+          assert run.get('row_count') == 104, run
           summary=x.get('summary') or {}
-          assert summary.get('rows') == 77, summary
-          assert summary.get('profiles') == 74, summary
-          assert summary.get('pursue') == 33, summary
-          assert summary.get('watch') == 41, summary
+          assert summary.get('rows') == 104, summary
+          assert summary.get('profiles') == 100, summary
+          assert summary.get('pursue') == 35, summary
+          assert summary.get('watch') == 66, summary
           assert summary.get('research') == 3, summary
-          assert summary.get('exact') == 28, summary
-          assert summary.get('expected') == 33, summary
-          assert summary.get('conflicts') == 18, summary
+          assert summary.get('exact') == 37, summary
+          assert summary.get('expected') == 43, summary
+          assert summary.get('conflicts') == 28, summary
           rows={r.get('plan_id'):r for r in x.get('rows') or []}
+          assert len(rows) == 104, len(rows)
+
+          # R4 release invariant: every fixed overlap must be controlled on both rows.
+          fixed=[r for r in rows.values() if r.get('schedule_type')=='FIXED_EVENT' and r.get('event_start') and r.get('event_end')]
+          overlap_pairs=[]
+          for i,a in enumerate(fixed):
+              for b in fixed[i+1:]:
+                  if max(a.get('event_start'),b.get('event_start')) <= min(a.get('event_end'),b.get('event_end')):
+                      overlap_pairs.append((a,b))
+          assert len(overlap_pairs) == 31, len(overlap_pairs)
+          uncontrolled=[(a.get('plan_id'),b.get('plan_id')) for a,b in overlap_pairs if not ((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip())]
+          assert not uncontrolled, uncontrolled
+          pursue_pairs=[(a,b) for a,b in overlap_pairs if a.get('plan_decision')=='PURSUE' and b.get('plan_decision')=='PURSUE']
+          assert len(pursue_pairs) == 10, len(pursue_pairs)
+          assert all((a.get('conflict_notes') or '').strip() and (b.get('conflict_notes') or '').strip() for a,b in pursue_pairs), [(a.get('plan_id'),b.get('plan_id')) for a,b in pursue_pairs]
+
+          # R4 signature opportunities recovered by the exhaustive 2027 pass.
+          seafood=rows['2027-LIFE-128-PRIMARY']
+          assert seafood.get('event_start') == '2027-01-30' and seafood.get('event_end') == '2027-01-31', seafood
+          assert seafood.get('plan_decision') == 'PURSUE', seafood
+          turtle=rows['2027-LIFE-086-PRIMARY']
+          assert turtle.get('event_start') == '2027-02-20' and turtle.get('event_end') == '2027-02-21', turtle
+          psl2=rows['2027-LIFE-027-SEP']
+          assert psl2.get('event_start') == '2027-09-11' and psl2.get('event_end') == '2027-09-12', psl2
           assert rows['2027-LIFE-036-PRIMARY'].get('event_start') == '2027-01-16', rows['2027-LIFE-036-PRIMARY']
           assert rows['2027-LIFE-015-PRIMARY'].get('event_start') == '2027-03-05', rows['2027-LIFE-015-PRIMARY']
           assert rows['2027-LIFE-066-PRIMARY'].get('event_start') == '2027-05-28', rows['2027-LIFE-066-PRIMARY']
