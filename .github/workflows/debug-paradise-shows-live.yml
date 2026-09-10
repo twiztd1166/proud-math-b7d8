@@ -592,15 +592,15 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
+          assert run.get('id') == '0294bac9-5400-4f31-9a13-fc7897b4ddfd', run
           assert run.get('status') == 'READY', run
           assert run.get('row_count') == 104, run
           summary=x.get('summary') or {}
           assert summary.get('rows') == 104, summary
           assert summary.get('profiles') == 100, summary
           assert summary.get('pursue') == 35, summary
-          assert summary.get('watch') == 66, summary
-          assert summary.get('research') == 3, summary
+          assert summary.get('watch') == 69, summary
+          assert summary.get('research') == 0, summary
           assert summary.get('exact') == 37, summary
           assert summary.get('expected') == 43, summary
           assert summary.get('conflicts') == 28, summary
@@ -668,7 +668,17 @@ jobs:
           assert safety.get('action_start') == '2026-11-15' and safety.get('action_due') == '2027-01-15', safety
           assert rows['2027-HIST-065-PRIMARY'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL', rows['2027-HIST-065-PRIMARY']
           holds={pid for pid,row in rows.items() if row.get('plan_decision') == 'RESEARCH_IDENTITY'}
-          assert holds == {'2027-LIFE-050-LEGACY-RESEARCH','2027-LIFE-061-LEGACY-RESEARCH','2027-LIFE-067-LEGACY-RESEARCH'}, holds
+          assert not holds, holds
+          assert rows['2027-LIFE-050-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'
+          assert rows['2027-LIFE-050-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL'
+          assert 'LIFE-050 → LIFE-018' in (rows['2027-LIFE-050-LEGACY-RESEARCH'].get('source_basis') or '')
+          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'
+          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('publication_status') == 'VERIFIED_MIXED_SOURCE_AGGREGATE_NONBOOKABLE'
+          assert rows['2027-LIFE-061-LEGACY-RESEARCH'].get('expected_month') == 10
+          assert 'no whole-profile SAME_SERIES relation is valid' in (rows['2027-LIFE-061-LEGACY-RESEARCH'].get('source_basis') or '')
+          assert rows['2027-LIFE-067-LEGACY-RESEARCH'].get('plan_decision') == 'WATCH'
+          assert rows['2027-LIFE-067-LEGACY-RESEARCH'].get('publication_status') == 'DUPLICATE_SUPPRESSED_TO_CANONICAL'
+          assert 'LIFE-067 → LIFE-018' in (rows['2027-LIFE-067-LEGACY-RESEARCH'].get('source_basis') or '')
           print('2027 annual plan API: PASS')
           PY
 
@@ -1097,6 +1107,8 @@ jobs:
               'LIFE-048':'LIFE-027',
               'LIFE-031':'LIFE-003',
               'HIST-065':'LIFE-073',
+              'LIFE-050':'LIFE-018',
+              'LIFE-067':'LIFE-018',
           }
           for legacy,canonical in expected_series_links.items():
               assert profiles[legacy].get('related_current_profile_id')==canonical, (legacy,profiles[legacy])
@@ -2724,7 +2736,8 @@ jobs:
           grep -q '2027 booking plan' /tmp/annual_plan.html
           grep -q '104 plan rows' /tmp/annual_plan.html
           grep -q 'Pursue 35' /tmp/annual_plan.html
-          grep -q 'Research 3' /tmp/annual_plan.html
+          grep -q 'Watch 69' /tmp/annual_plan.html
+          grep -q 'Research 0' /tmp/annual_plan.html
           grep -q 'Identity research' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-002-PRIMARY"' /tmp/annual_plan.html
           grep -q 'data-plan-id="2027-LIFE-036-PRIMARY"' /tmp/annual_plan.html
