@@ -592,7 +592,7 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 1, x
           run=x.get('run') or {}
-          assert run.get('id') == 'b922deb4-9416-45f4-a467-9a1f6e317a6f', run
+          assert run.get('id') == 'b922deb4-9416-4cf8-a218-e3e693b0ac85', run
           assert run.get('status') == 'READY', run
           assert run.get('row_count') == 104, run
           summary=x.get('summary') or {}
