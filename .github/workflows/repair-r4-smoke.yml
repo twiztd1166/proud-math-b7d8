@@ -16,23 +16,24 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: fix/r4-run-id-smoke-20260910
-      - name: Replace malformed R4 run UUID only
+      - name: Stage corrected workflow bytes at non-workflow path
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          path=Path('.github/workflows/debug-paradise-shows-live.yml')
-          src=path.read_text()
+          src_path=Path('.github/workflows/debug-paradise-shows-live.yml')
+          src=src_path.read_text()
           old='b922deb4-9416-45f4-a467-9a1f6e317a6f'
           new='b922deb4-9416-4cf8-a218-e3e693b0ac85'
           assert src.count(old)==1, src.count(old)
-          assert new not in src, 'Correct UUID already present; refusing broad rewrite.'
-          path.write_text(src.replace(old,new,1))
+          assert new not in src, 'Correct UUID already present; staging no longer needed.'
+          fixed=src.replace(old,new,1)
+          Path('r4-smoke-fixed.txt').write_text(fixed)
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/workflows/debug-paradise-shows-live.yml
+          git add r4-smoke-fixed.txt
           git diff --cached --exit-code && exit 0
-          git commit -m 'Fix R4 annual-plan run ID assertion'
+          git commit -m 'Stage corrected R4 smoke blob'
           git push origin HEAD:fix/r4-run-id-smoke-20260910
