@@ -16,10 +16,15 @@ jobs:
         with:
           ref: release-r5-identity-smoke
           fetch-depth: 0
-      - name: Patch only stale R4 identity assertions
+      - name: Stage exact patched mature smoke as ordinary blob
         shell: bash
         run: |
           set -euo pipefail
+          out='r5-patched-debug-paradise-shows-live.yml.txt'
+          if [[ -f "$out" ]]; then
+            echo 'Patched smoke blob already staged; no further action.'
+            exit 0
+          fi
           python - <<'PY'
           from pathlib import Path
           p=Path('.github/workflows/debug-paradise-shows-live.yml')
@@ -48,12 +53,12 @@ jobs:
               if s in text:
                   raise SystemExit(f'stale assertion remains: {s!r}')
           p.write_text(text)
+          Path('r5-patched-debug-paradise-shows-live.yml.txt').write_text(text)
           PY
-          git diff --check
-          git diff -- .github/workflows/debug-paradise-shows-live.yml
-          git rm .github/workflows/patch-r5-identity-smoke.yml
+          git diff --check -- .github/workflows/debug-paradise-shows-live.yml
+          git checkout -- .github/workflows/debug-paradise-shows-live.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/workflows/debug-paradise-shows-live.yml
-          git commit -m 'Update mature smoke for R5 identity resolution'
+          git add "$out"
+          git commit -m 'Stage exact R5 mature smoke blob'
           git push origin HEAD:release-r5-identity-smoke
