@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-validated-commit:
@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          persist-credentials: false
+          persist-credentials: true
           fetch-depth: 0
 
-      - name: Build exact mature-smoke correction commit
+      - name: Build and publish exact mature-smoke correction commit
         shell: bash
         run: |
           set -euo pipefail
@@ -52,3 +52,4 @@ jobs:
           git diff --cached -- .github/workflows/debug-paradise-shows-live.yml
           git commit -m 'Fix final 2027 R4 mature smoke snapshots'
           echo "TARGET_COMMIT=$(git rev-parse HEAD)"
+          git push origin HEAD:refs/heads/release/r4-mature-smoke-finalize-20260910-2
