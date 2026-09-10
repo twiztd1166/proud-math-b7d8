@@ -1,0 +1,19 @@
+name: Dispatch R5 mature smoke
+
+on:
+  push:
+    branches:
+      - release-r5-identity-smoke-clean
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch mature smoke on this release ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run debug-paradise-shows-live.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
