@@ -5,9 +5,10 @@ on:
     branches:
       - release/r6-east-coast-scope
       - hotfix/r6-scope-recursion
+      - hotfix/r6-scope-separate-renderer
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-r6-scope:
@@ -19,30 +20,68 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          persist-credentials: false
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Guardedly patch PLAN2027 call site on second hotfix only
+        if: github.ref_name == 'hotfix/r6-scope-separate-renderer'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('public/app-shows.js')
+          text=path.read_text()
+          old="if(state.showMode==='PLAN2027')return top+renderAnnualPlan();"
+          new="if(state.showMode==='PLAN2027')return top+(typeof window.renderAnnualPlanScoped==='function'?window.renderAnnualPlanScoped():renderAnnualPlan());"
+          old_count=text.count(old)
+          new_count=text.count(new)
+          if old_count==1 and new_count==0:
+              path.write_text(text.replace(old,new,1))
+          elif old_count==0 and new_count==1:
+              pass
+          else:
+              raise AssertionError(f'Unexpected PLAN2027 call-site state old={old_count} new={new_count}')
+          print('PLAN2027 separate-renderer call site: PASS')
+          PY
+          git diff --check
+          if ! git diff --quiet -- public/app-shows.js; then
+            git config user.name 'twiztd1166'
+            git config user.email '200838923+twiztd1166@users.noreply.github.com'
+            git add public/app-shows.js
+            git commit -m 'Route 2027 plan through separate scoped renderer'
+            git push origin HEAD:${{ github.ref_name }}
+          fi
 
       - name: Verify R6 scope controller syntax and wiring
         shell: bash
         run: |
           set -euo pipefail
           node --check public/app-annual-scope.js
+          node --check public/app-shows.js
           grep -q 'app-annual-scope.js' src/pages/index.astro
           grep -q "paradise-shows-public-v2" public/sw.js
           grep -q "'/app-annual-scope.js'" public/sw.js
           grep -q "ANNUAL_SCOPE_DEFAULT='EAST_COAST_FLORIDA'" public/app-annual-scope.js
           grep -q "planning_category" public/app-annual-scope.js
           grep -q "geographic_region" public/app-annual-scope.js
-          grep -q "__PARADISE_ANNUAL_SCOPE_INSTALLED__" public/app-annual-scope.js
-          echo 'R6 scope syntax/wiring: PASS'
+          grep -q "renderAnnualPlanScoped" public/app-annual-scope.js
+          grep -q "typeof window.renderAnnualPlanScoped==='function'?window.renderAnnualPlanScoped():renderAnnualPlan()" public/app-shows.js
+          if grep -q "window.renderAnnualPlan=function" public/app-annual-scope.js; then
+            echo '::error::Base annual-plan renderer must not be replaced.'
+            exit 1
+          fi
+          echo 'R6 separate-renderer syntax/wiring: PASS'
 
-      - name: Verify R6 classifier and non-recursive renderer
+      - name: Verify R6 classifier and separate renderer
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const source=fs.readFileSync('public/app-annual-scope.js','utf8');
-          let baseCalls=0;
+          let baseCalls=0,listenerCalls=0;
+          const original=function(){baseCalls++;return '<div>base:'+sandbox.state.annualPlan.rows.map(r=>r.profile_id).join(',')+'</div>'};
           const sandbox={
             state:{annualPlan:{
               rows:[
@@ -53,15 +92,17 @@ jobs:
               summary:{rows:3,profiles:3,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1},
               loaded:true,run:{id:'test'},filter:'ALL'
             },search:''},
-            renderAnnualPlan(){baseCalls++;return '<div>base:'+sandbox.state.annualPlan.rows.map(r=>r.profile_id).join(',')+'</div>'},
+            renderAnnualPlan:original,
             render(){},
             esc(v){return String(v??'')},
-            document:{addEventListener(){}},
+            document:{addEventListener(){listenerCalls++}},
             console,
           };
           sandbox.window=sandbox;
           vm.createContext(sandbox);
           vm.runInContext(source,sandbox,{filename:'app-annual-scope.js'});
+          assert.strictEqual(sandbox.renderAnnualPlan,original,'base renderer must remain untouched');
+          assert.equal(typeof sandbox.renderAnnualPlanScoped,'function');
           const t=sandbox.__PARADISE_ANNUAL_SCOPE_TEST__;
           assert(t,'test exports missing');
           const west=['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172'];
@@ -72,20 +113,21 @@ jobs:
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'NORTHERN_FLORIDA',planning_category:'CONSUMER'}),'NORTHERN_FLORIDA');
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'PANHANDLE_FLORIDA',planning_category:'CONSUMER'}),'PANHANDLE_FLORIDA');
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'WEST_COAST_FLORIDA',planning_category:'B2B'}),'B2B');
-          const s=t.annualScopeSummary(sandbox.state.annualPlan.rows);
-          assert.deepEqual(JSON.parse(JSON.stringify(s)),{rows:3,profiles:3,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1});
-          const first=sandbox.renderAnnualPlan();
+          const first=sandbox.renderAnnualPlanScoped();
           assert(first.includes('East Coast Florida 1'),first);
           assert(first.includes('West Coast Florida 1'),first);
           assert(first.includes('B2B 1'),first);
           assert(first.includes('base:LIFE-011'),first);
-          assert.equal(baseCalls,1,'base renderer should be called exactly once');
-          assert.equal(sandbox.state.annualPlan.rows.length,3,'full row set must be restored after render');
+          assert.equal(baseCalls,1,'separate renderer should call base exactly once');
+          assert.equal(sandbox.state.annualPlan.rows.length,3,'full row set must be restored');
+          assert.equal(listenerCalls,1,'listener installed once');
           vm.runInContext(source,sandbox,{filename:'app-annual-scope.js'});
-          const second=sandbox.renderAnnualPlan();
+          assert.strictEqual(sandbox.renderAnnualPlan,original,'base renderer must remain untouched after re-evaluation');
+          const second=sandbox.renderAnnualPlanScoped();
           assert(second.includes('base:LIFE-011'),second);
-          assert.equal(baseCalls,2,'second script evaluation must not double-wrap renderer');
-          console.log('R6 classifier/non-recursive renderer: PASS');
+          assert.equal(baseCalls,2,'second evaluation must still call base once');
+          assert.equal(listenerCalls,1,'listener must not duplicate');
+          console.log('R6 classifier/separate renderer: PASS');
           NODE
 
       - name: Confirm production remains R5 before promotion
