@@ -5,6 +5,7 @@ on:
     branches:
       - paradise-shows-public
       - hotfix/r6-scope-smoke-contract
+      - hotfix/r6-ready-smoke-counts
   workflow_dispatch:
 
 permissions:
