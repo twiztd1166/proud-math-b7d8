@@ -55,9 +55,10 @@ jobs:
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
           assert.equal(annual.ok,true);
           const expectedByRun={
-            '0294bac9-5400-4f31-9a13-fc7897b4ddfd':{rows:104,profiles:100,pursue:35,watch:69,east:92},
-            '893343f8-8347-4c63-bfce-9eff4b351667':{rows:107,profiles:103,pursue:35,watch:72,east:95},
-            '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':{rows:112,profiles:108,pursue:37,watch:75,east:100},
+            '0294bac9-5400-4f31-9a13-fc7897b4ddfd':{rows:104,profiles:100,pursue:35,watch:69,exact:37,expectedMonth:43,conflicts:28,east:92,eastProfiles:89,eastPursue:30,eastWatch:62},
+            '893343f8-8347-4c63-bfce-9eff4b351667':{rows:107,profiles:103,pursue:35,watch:72,exact:42,expectedMonth:42,conflicts:29,east:95,eastProfiles:92,eastPursue:30,eastWatch:65},
+            '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':{rows:112,profiles:108,pursue:37,watch:75,exact:44,expectedMonth:45,conflicts:31,east:100,eastProfiles:97,eastPursue:32,eastWatch:68},
+            '6570ebf8-7b5f-4314-a65d-030100f644a3':{rows:121,profiles:116,pursue:37,watch:84,exact:54,expectedMonth:44,conflicts:40,east:109,eastProfiles:105,eastPursue:32,eastWatch:77},
           };
           const run=annual.run||{};
           const expected=expectedByRun[run.id];
@@ -68,6 +69,10 @@ jobs:
           assert.equal(annual.summary.profiles,expected.profiles,annual.summary);
           assert.equal(annual.summary.pursue,expected.pursue,annual.summary);
           assert.equal(annual.summary.watch,expected.watch,annual.summary);
+          assert.equal(annual.summary.research,0,annual.summary);
+          assert.equal(annual.summary.exact,expected.exact,annual.summary);
+          assert.equal(annual.summary.expected,expected.expectedMonth,annual.summary);
+          assert.equal(annual.summary.conflicts,expected.conflicts,annual.summary);
           const source=fs.readFileSync('/tmp/app-annual-scope.js','utf8');
           const sandbox={
             state:{annualPlan:{rows:[],summary:{},loaded:true,run:{id:'test'},filter:'ALL'},search:''},
@@ -83,6 +88,11 @@ jobs:
           assert.equal(counts.NORTHERN_FLORIDA,0,counts);
           assert.equal(counts.PANHANDLE_FLORIDA,0,counts);
           assert.equal(counts.EAST_COAST_FLORIDA,expected.east,counts);
+          const eastSummary=t.annualScopeSummary(t.annualScopeRows('EAST_COAST_FLORIDA',annual.rows));
+          assert.equal(eastSummary.rows,expected.east,eastSummary);
+          assert.equal(eastSummary.profiles,expected.eastProfiles,eastSummary);
+          assert.equal(eastSummary.pursue,expected.eastPursue,eastSummary);
+          assert.equal(eastSummary.watch,expected.eastWatch,eastSummary);
           if(run.id==='910320e9-5942-4cb6-aa3e-5203bb1fb3e2'){
             const required=new Set([
               '2027-HIST-059-PRIMARY','2027-HIST-109-PRIMARY','2027-HIST-111-PRIMARY',
@@ -96,6 +106,43 @@ jobs:
             }
             assert.equal(required.size,0,{missing:[...required]});
           }
-          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts});
+          if(run.id==='6570ebf8-7b5f-4314-a65d-030100f644a3'){
+            const rows=Object.fromEntries((annual.rows||[]).map(row=>[row.plan_id,row]));
+            const added=[
+              '2027-HIST-055-PRIMARY','2027-HIST-079-PRIMARY','2027-HIST-105-PRIMARY',
+              '2027-HIST-110-PRIMARY','2027-HIST-118-PRIMARY','2027-HIST-152-PRIMARY',
+              '2027-HIST-240-PRIMARY','2027-HIST-431-PRIMARY','2027-LIFE-009-APR',
+            ];
+            for(const planId of added){
+              assert(rows[planId],{missing:planId});
+              assert.equal(t.annualScopeKey(rows[planId]),'EAST_COAST_FLORIDA',rows[planId]);
+            }
+            assert.equal(rows['2027-HIST-240-PRIMARY'].event_start,'2027-01-15');
+            assert.equal(rows['2027-HIST-240-PRIMARY'].event_end,'2027-01-18');
+            assert.equal(Number(rows['2027-HIST-240-PRIMARY'].budget_min),1750);
+            assert.equal(Number(rows['2027-HIST-240-PRIMARY'].budget_max),1750);
+            assert.equal(rows['2027-HIST-055-PRIMARY'].event_start,'2027-02-20');
+            assert.equal(rows['2027-HIST-055-PRIMARY'].event_end,'2027-02-21');
+            assert.equal(rows['2027-LIFE-009-APR'].event_start,'2027-04-10');
+            assert.equal(rows['2027-LIFE-009-APR'].event_end,'2027-04-11');
+            assert.equal(rows['2027-HIST-431-PRIMARY'].event_start,'2027-05-01');
+            assert.equal(rows['2027-HIST-152-PRIMARY'].event_start,'2027-06-18');
+            assert.equal(rows['2027-HIST-152-PRIMARY'].event_end,'2027-06-20');
+            assert.equal(rows['2027-HIST-152-PRIMARY'].date_confidence,'CURRENT_SAME_NAME_SUCCESSOR_IDENTITY_UNVERIFIED');
+            assert.equal(rows['2027-HIST-079-PRIMARY'].event_start,'2027-07-04');
+            const sebastian=rows['2027-HIST-098-PRIMARY'];
+            assert(sebastian,{'missing':'2027-HIST-098-PRIMARY'});
+            assert.equal(sebastian.event_start,'2027-09-11');
+            assert.equal(sebastian.cost_status,'KNOWN_VERIFIED');
+            assert.equal(Number(sebastian.budget_min),500);
+            assert.equal(Number(sebastian.budget_max),500);
+            assert.equal(rows['2027-HIST-105-PRIMARY'].event_start,'2027-10-02');
+            assert.equal(rows['2027-HIST-105-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
+            assert.equal(rows['2027-HIST-110-PRIMARY'].event_start,'2027-10-29');
+            assert.equal(rows['2027-HIST-110-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
+            assert.equal(rows['2027-HIST-118-PRIMARY'].event_start,'2027-12-04');
+            assert.equal(rows['2027-HIST-118-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
+          }
+          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts,east_summary:eastSummary});
           console.log('Live annual scope classification: PASS');
           NODE
