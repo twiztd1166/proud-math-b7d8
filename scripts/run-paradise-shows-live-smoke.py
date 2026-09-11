@@ -39,7 +39,7 @@ SCOPE_AWARE_ANNUAL_API_BLOCK = """expected_runs = {
     },
     '6570ebf8-7b5f-4314-a65d-030100f644a3': {
         'row_count': 121, 'rows': 121, 'profiles': 116, 'pursue': 37, 'watch': 84,
-        'research': 0, 'exact': 54, 'expected_month': 44, 'conflicts': 40,
+        'research': 0, 'exact': 54, 'expected_month': 44, 'conflicts': 43,
         'row_len': 121, 'overlap_pairs': 52, 'pursue_pairs': 12,
     },
 }
