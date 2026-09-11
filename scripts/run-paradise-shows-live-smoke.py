@@ -37,6 +37,11 @@ SCOPE_AWARE_ANNUAL_API_BLOCK = """expected_runs = {
         'research': 0, 'exact': 44, 'expected_month': 45, 'conflicts': 31,
         'row_len': 112, 'overlap_pairs': 36, 'pursue_pairs': 12,
     },
+    '6570ebf8-7b5f-4314-a65d-030100f644a3': {
+        'row_count': 121, 'rows': 121, 'profiles': 116, 'pursue': 37, 'watch': 84,
+        'research': 0, 'exact': 54, 'expected_month': 44, 'conflicts': 40,
+        'row_len': 121, 'overlap_pairs': 52, 'pursue_pairs': 12,
+    },
 }
 expected = expected_runs.get(run.get('id'))
 assert expected is not None, run
@@ -202,6 +207,10 @@ def verify_scope_contract():
             'statewide_rows': 112, 'east_rows': 100, 'east_profiles': 97,
             'east_pursue': 32, 'east_watch': 68,
         },
+        '6570ebf8-7b5f-4314-a65d-030100f644a3': {
+            'statewide_rows': 121, 'east_rows': 109, 'east_profiles': 105,
+            'east_pursue': 32, 'east_watch': 77,
+        },
     }
     expected = expected_runs.get(run_id)
     assert expected is not None, run
@@ -277,6 +286,47 @@ def verify_scope_contract():
         assert r7_added.issubset(by_plan), (r7_added - set(by_plan), 'missing R7 additions')
         for plan_id in r7_added:
             assert f'data-plan-id="{plan_id}"' in d, (plan_id, 'R7 East row not visible in default scope')
+
+    if run_id == '6570ebf8-7b5f-4314-a65d-030100f644a3':
+        r8_added = {
+            '2027-HIST-055-PRIMARY',
+            '2027-HIST-079-PRIMARY',
+            '2027-HIST-105-PRIMARY',
+            '2027-HIST-110-PRIMARY',
+            '2027-HIST-118-PRIMARY',
+            '2027-HIST-152-PRIMARY',
+            '2027-HIST-240-PRIMARY',
+            '2027-HIST-431-PRIMARY',
+            '2027-LIFE-009-APR',
+        }
+        assert r8_added.issubset(by_plan), (r8_added - set(by_plan), 'missing R8 additions')
+        for plan_id in r8_added:
+            assert f'data-plan-id="{plan_id}"' in d, (plan_id, 'R8 East row not visible in default scope')
+        strawberry = by_plan['2027-HIST-240-PRIMARY']
+        assert strawberry.get('event_start') == '2027-01-15', strawberry
+        assert strawberry.get('event_end') == '2027-01-18', strawberry
+        assert float(strawberry.get('budget_min')) == 1750, strawberry
+        assert float(strawberry.get('budget_max')) == 1750, strawberry
+        assert by_plan['2027-HIST-055-PRIMARY'].get('event_start') == '2027-02-20'
+        assert by_plan['2027-LIFE-009-APR'].get('event_start') == '2027-04-10'
+        assert by_plan['2027-HIST-431-PRIMARY'].get('event_start') == '2027-05-01'
+        boat = by_plan['2027-HIST-152-PRIMARY']
+        assert boat.get('event_start') == '2027-06-18' and boat.get('event_end') == '2027-06-20', boat
+        assert boat.get('date_confidence') == 'CURRENT_SAME_NAME_SUCCESSOR_IDENTITY_UNVERIFIED', boat
+        assert by_plan['2027-HIST-079-PRIMARY'].get('event_start') == '2027-07-04'
+        sebastian = by_plan.get('2027-HIST-098-PRIMARY')
+        assert sebastian, 'missing Sebastian package anchor'
+        assert sebastian.get('event_start') == '2027-09-11', sebastian
+        assert sebastian.get('cost_status') == 'KNOWN_VERIFIED', sebastian
+        assert float(sebastian.get('budget_min')) == 500 and float(sebastian.get('budget_max')) == 500, sebastian
+        for plan_id, event_start in {
+            '2027-HIST-105-PRIMARY': '2027-10-02',
+            '2027-HIST-110-PRIMARY': '2027-10-29',
+            '2027-HIST-118-PRIMARY': '2027-12-04',
+        }.items():
+            row = by_plan[plan_id]
+            assert row.get('event_start') == event_start, row
+            assert row.get('cost_status') == 'PACKAGE_COVERED_BY_HIST-098', row
 
     print({
         'annual_default_scope': 'PASS',
