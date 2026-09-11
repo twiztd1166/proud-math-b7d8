@@ -93,8 +93,8 @@ jobs:
           assert.equal(history.summary.consumer_rows,168,history.summary);
           assert.equal(history.summary.b2b_rows,1,history.summary);
           assert.equal(history.summary.direct_profiles,58,history.summary);
-          assert.equal(history.summary.active_routes,7,history.summary);
-          assert.equal(history.summary.staged_routes,4,history.summary);
+          assert.equal(history.summary.active_routes,11,history.summary);
+          assert.equal(history.summary.staged_routes,0,history.summary);
           assert.equal(history.summary.gap_dispositions,100,history.summary);
           assert.equal((history.rows||[]).length,169);
           assert.equal(new Set((history.rows||[]).map(row=>row.profile_id)).size,169);
@@ -107,13 +107,13 @@ jobs:
             DIRECT_R8_PROFILE:58,
             LOCAL_POPUP_HISTORY:6,
             PUBLICATION_WATCH:17,
-            VERIFIED_CANONICAL_ROUTE_ACTIVE:7,
-            VERIFIED_CANONICAL_ROUTE_STAGED:4,
+            VERIFIED_CANONICAL_ROUTE_ACTIVE:11,
           });
-          const staged=(history.rows||[]).find(row=>row.profile_id==='HIST-052');
-          assert(staged,history.rows?.slice(0,5));
-          assert.equal(staged.classification,'VERIFIED_CANONICAL_ROUTE_STAGED');
-          assert.equal(staged.canonical_profile_id,'LIFE-023');
+          const activated=(history.rows||[]).find(row=>row.profile_id==='HIST-052');
+          assert(activated,history.rows?.slice(0,5));
+          assert.equal(activated.classification,'VERIFIED_CANONICAL_ROUTE_ACTIVE');
+          assert.equal(activated.canonical_profile_id,'LIFE-023');
+          assert.equal(activated.current_2027_status,'COVERED_BY_ACTIVE_R8_CANONICAL_LIFE-023');
 
           const source=fs.readFileSync('/tmp/app-annual-scope.js','utf8');
           const sandbox={
@@ -152,7 +152,7 @@ jobs:
           const historyHtml=sandbox.window.renderAnnualPlanScoped();
           assert(historyHtml.includes('East Coast Historical Coverage'));
           assert(historyHtml.includes('data-historical-coverage-summary'));
-          assert(historyHtml.includes('Coverage equation: 58 direct + 7 active verified routes + 4 staged verified routes + 100 gap dispositions = 169 East Coast identities.'));
+          assert(historyHtml.includes('Coverage equation: 58 direct + 11 active verified routes + 0 staged verified routes + 100 gap dispositions = 169 East Coast identities.'));
           assert(historyHtml.includes('data-historical-coverage-profile="HIST-052"'));
           assert(!historyHtml.includes('data-historical-coverage-profile="HIST-096"'));
           if(history.preview)assert(historyHtml.includes('does not make that run current'));
