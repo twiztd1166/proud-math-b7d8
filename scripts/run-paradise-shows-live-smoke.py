@@ -97,7 +97,7 @@ def verify_scope_contract():
     d = path.read_text(encoding='utf-8')
 
     pairs = re.findall(
-        r'data-annual-scope="([A-Z_]+)"[^>]*>[^<]*?([0-9]+)</button>', d
+        r'data-annual-scope="([A-Z0-9_]+)"[^>]*>[^<]*?([0-9]+)</button>', d
     )
     counts = {k: int(v) for k, v in pairs}
     expected_parked = {
