@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - paradise-shows-public
+      - release/r7-preflight
   workflow_dispatch:
 
 permissions:
