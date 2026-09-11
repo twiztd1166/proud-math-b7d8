@@ -24,9 +24,13 @@ assert summary.get('watch') == 69, summary"""
 SCOPE_AWARE_ANNUAL_API_BLOCK = """expected_runs = {
     '0294bac9-5400-4f31-9a13-fc7897b4ddfd': {
         'row_count': 104, 'rows': 104, 'profiles': 100, 'pursue': 35, 'watch': 69,
+        'research': 0, 'exact': 37, 'expected_month': 43, 'conflicts': 28,
+        'row_len': 104, 'overlap_pairs': 31,
     },
     '893343f8-8347-4c63-bfce-9eff4b351667': {
         'row_count': 107, 'rows': 107, 'profiles': 103, 'pursue': 35, 'watch': 72,
+        'research': 0, 'exact': 42, 'expected_month': 42, 'conflicts': 29,
+        'row_len': 107, 'overlap_pairs': 33,
     },
 }
 expected = expected_runs.get(run.get('id'))
@@ -38,6 +42,33 @@ assert summary.get('rows') == expected['rows'], (summary, expected)
 assert summary.get('profiles') == expected['profiles'], (summary, expected)
 assert summary.get('pursue') == expected['pursue'], (summary, expected)
 assert summary.get('watch') == expected['watch'], (summary, expected)"""
+
+STALE_ANNUAL_API_LINES = [
+    (
+        "assert summary.get('research') == 0, summary",
+        "assert summary.get('research') == expected['research'], (summary, expected)",
+    ),
+    (
+        "assert summary.get('exact') == 37, summary",
+        "assert summary.get('exact') == expected['exact'], (summary, expected)",
+    ),
+    (
+        "assert summary.get('expected') == 43, summary",
+        "assert summary.get('expected') == expected['expected_month'], (summary, expected)",
+    ),
+    (
+        "assert summary.get('conflicts') == 28, summary",
+        "assert summary.get('conflicts') == expected['conflicts'], (summary, expected)",
+    ),
+    (
+        "assert len(rows) == 104, len(rows)",
+        "assert len(rows) == expected['row_len'], (len(rows), expected)",
+    ),
+    (
+        "assert len(overlap_pairs) == 31, len(overlap_pairs)",
+        "assert len(overlap_pairs) == expected['overlap_pairs'], (len(overlap_pairs), expected)",
+    ),
+]
 
 STALE_DEEP_LINK_LINES = [
     "grep -q '104 plan rows' /tmp/annual_plan.html",
@@ -85,11 +116,19 @@ def scope_aware_annual_api_script(script: str) -> str:
         raise RuntimeError(
             f'Expected exactly one stale annual-plan API assertion block, got {count}'
         )
-    return script.replace(
+    script = script.replace(
         STALE_ANNUAL_API_BLOCK,
         SCOPE_AWARE_ANNUAL_API_BLOCK,
         1,
     )
+    for stale, replacement in STALE_ANNUAL_API_LINES:
+        count = script.count(stale)
+        if count != 1:
+            raise RuntimeError(
+                f'Expected exactly one stale annual-plan API assertion, got {count}: {stale}'
+            )
+        script = script.replace(stale, replacement, 1)
+    return script
 
 
 def scope_aware_deep_link_script(script: str) -> str:
@@ -148,8 +187,8 @@ def verify_scope_contract():
         'NORTHERN_FLORIDA': 0,
         'PANHANDLE_FLORIDA': 0,
     }
-    for key, expected in expected_parked.items():
-        assert counts.get(key) == expected, (key, counts)
+    for key, expected_count in expected_parked.items():
+        assert counts.get(key) == expected_count, (key, counts)
     assert counts.get('EAST_COAST_FLORIDA') in (92, 95), counts
     assert re.search(
         r'class="chip active" data-annual-scope="EAST_COAST_FLORIDA"', d
