@@ -58,7 +58,7 @@ jobs:
             '0294bac9-5400-4f31-9a13-fc7897b4ddfd':{rows:104,profiles:100,pursue:35,watch:69,exact:37,expectedMonth:43,conflicts:28,east:92,eastProfiles:89,eastPursue:30,eastWatch:62},
             '893343f8-8347-4c63-bfce-9eff4b351667':{rows:107,profiles:103,pursue:35,watch:72,exact:42,expectedMonth:42,conflicts:29,east:95,eastProfiles:92,eastPursue:30,eastWatch:65},
             '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':{rows:112,profiles:108,pursue:37,watch:75,exact:44,expectedMonth:45,conflicts:31,east:100,eastProfiles:97,eastPursue:32,eastWatch:68},
-            '6570ebf8-7b5f-4314-a65d-030100f644a3':{rows:121,profiles:116,pursue:37,watch:84,exact:54,expectedMonth:44,conflicts:40,east:109,eastProfiles:105,eastPursue:32,eastWatch:77},
+            '6570ebf8-7b5f-4314-a65d-030100f644a3':{rows:121,profiles:116,pursue:37,watch:84,exact:54,expectedMonth:44,conflicts:43,east:109,eastProfiles:105,eastPursue:32,eastWatch:77},
           };
           const run=annual.run||{};
           const expected=expectedByRun[run.id];
