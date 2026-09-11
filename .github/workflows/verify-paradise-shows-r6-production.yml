@@ -51,9 +51,12 @@ jobs:
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
+          run_id="$(jq -r '.run.id // empty' /tmp/annual.json)"
+          test -n "$run_id"
+          history_payload="$(jq -nc --arg runId "$run_id" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            --data '{"year":2027,"allowLatestAuditPreview":true}'
+            --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
@@ -81,8 +84,11 @@ jobs:
           assert.equal(annual.summary.conflicts,expected.conflicts,annual.summary);
 
           const historyRun=history.run||{};
+          const requestedHistoryRun=history.requested_run||{};
+          assert.equal(requestedHistoryRun.id,run.id,{requestedHistoryRun,run});
           assert.equal(historyRun.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',historyRun);
           assert(['DRAFT','READY'].includes(historyRun.status),historyRun);
+          assert.equal(Boolean(history.preview),historyRun.id!==run.id,{historyRun,run,preview:history.preview});
           assert.equal(history.summary.rows,169,history.summary);
           assert.equal(history.summary.consumer_rows,168,history.summary);
           assert.equal(history.summary.b2b_rows,1,history.summary);
@@ -142,13 +148,14 @@ jobs:
           assert.equal(historyCounts.B2B_SEPARATE,1,historyCounts);
 
           sandbox.state.annualPlan={...annual,year:2027,loaded:true,filter:'ALL',scope:'EAST_COAST_FLORIDA'};
-          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:annual.run,requestedRunId:annual.run?.id||'',preview:Boolean(annual.run&&history.run&&annual.run.id!==history.run.id),previewSource:'LATEST_AUDITED_RUN',view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
+          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:history.requested_run,requestedRunId:annual.run?.id||'',preview:Boolean(history.preview),previewSource:history.preview_source||null,view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
           const historyHtml=sandbox.window.renderAnnualPlanScoped();
           assert(historyHtml.includes('East Coast Historical Coverage'));
           assert(historyHtml.includes('data-historical-coverage-summary'));
           assert(historyHtml.includes('Coverage equation: 58 direct + 7 active verified routes + 4 staged verified routes + 100 gap dispositions = 169 East Coast identities.'));
           assert(historyHtml.includes('data-historical-coverage-profile="HIST-052"'));
           assert(!historyHtml.includes('data-historical-coverage-profile="HIST-096"'));
+          if(history.preview)assert(historyHtml.includes('does not make that run current'));
 
           if(run.id==='910320e9-5942-4cb6-aa3e-5203bb1fb3e2'){
             const required=new Set([
@@ -200,6 +207,6 @@ jobs:
             assert.equal(rows['2027-HIST-118-PRIMARY'].event_start,'2027-12-04');
             assert.equal(rows['2027-HIST-118-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
           }
-          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts,east_summary:eastSummary,history_run:historyRun.id,history_summary:history.summary,history_counts:historyCounts});
+          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts,east_summary:eastSummary,history_run:historyRun.id,history_preview:history.preview,history_summary:history.summary,history_counts:historyCounts});
           console.log('Live annual scope + historical coverage: PASS');
           NODE
