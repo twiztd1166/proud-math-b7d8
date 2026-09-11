@@ -49,16 +49,14 @@
 
   if(typeof window==='undefined')return;
   window.__PARADISE_ANNUAL_SCOPE_TEST__={annualScopeKey,annualScopeRows,annualScopeSummary,ANNUAL_SCOPE_KEYS};
-  if(window.__PARADISE_ANNUAL_SCOPE_INSTALLED__)return;
-  const originalRender=window.renderAnnualPlan;
-  if(typeof originalRender!=='function')return;
-  const baseRenderAnnualPlan=originalRender.bind(window);
-  window.__PARADISE_ANNUAL_SCOPE_INSTALLED__=true;
-
   if(!state.annualPlan.scope)state.annualPlan.scope=ANNUAL_SCOPE_DEFAULT;
-  window.renderAnnualPlan=function scopedRenderAnnualPlan(){
+
+  // Intentionally do not replace window.renderAnnualPlan. Browser global-function bindings
+  // can alias an assigned window property and recurse. The PLAN2027 route calls this separate
+  // renderer, which invokes the untouched base renderer exactly once.
+  window.renderAnnualPlanScoped=function renderAnnualPlanScoped(){
     const p=state.annualPlan;
-    if(!p.loaded||!p.run)return baseRenderAnnualPlan();
+    if(!p.loaded||!p.run)return renderAnnualPlan();
     const allRows=Array.isArray(p.rows)?p.rows:[];
     const allSummary=p.summary;
     const scope=ANNUAL_SCOPE_KEYS.includes(p.scope)?p.scope:ANNUAL_SCOPE_DEFAULT;
@@ -66,19 +64,22 @@
     p.rows=scopedRows;
     p.summary=annualScopeSummary(scopedRows);
     let html;
-    try{html=baseRenderAnnualPlan()}
+    try{html=renderAnnualPlan()}
     finally{p.rows=allRows;p.summary=allSummary}
     return annualScopeBar(allRows,scope)+html;
   };
 
-  document.addEventListener('click',event=>{
-    const button=event.target.closest?.('[data-annual-scope]');
-    if(!button)return;
-    const scope=String(button.dataset.annualScope||'');
-    if(!ANNUAL_SCOPE_KEYS.includes(scope))return;
-    state.annualPlan.scope=scope;
-    state.annualPlan.filter='ALL';
-    state.search='';
-    render();
-  });
+  if(!window.__PARADISE_ANNUAL_SCOPE_LISTENER_INSTALLED__){
+    window.__PARADISE_ANNUAL_SCOPE_LISTENER_INSTALLED__=true;
+    document.addEventListener('click',event=>{
+      const button=event.target.closest?.('[data-annual-scope]');
+      if(!button)return;
+      const scope=String(button.dataset.annualScope||'');
+      if(!ANNUAL_SCOPE_KEYS.includes(scope))return;
+      state.annualPlan.scope=scope;
+      state.annualPlan.filter='ALL';
+      state.search='';
+      render();
+    });
+  }
 })();
