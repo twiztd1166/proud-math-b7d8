@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - release/r6-east-coast-scope
+      - hotfix/r6-scope-recursion
 
 permissions:
   contents: read
@@ -31,27 +32,37 @@ jobs:
           grep -q "ANNUAL_SCOPE_DEFAULT='EAST_COAST_FLORIDA'" public/app-annual-scope.js
           grep -q "planning_category" public/app-annual-scope.js
           grep -q "geographic_region" public/app-annual-scope.js
+          grep -q "__PARADISE_ANNUAL_SCOPE_INSTALLED__" public/app-annual-scope.js
           echo 'R6 scope syntax/wiring: PASS'
 
-      - name: Verify R6 geography/category classifier
+      - name: Verify R6 classifier and non-recursive renderer
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const source=fs.readFileSync('public/app-annual-scope.js','utf8');
+          let baseCalls=0;
           const sandbox={
-            state:{annualPlan:{rows:[],summary:{},loaded:true,run:{id:'test'},filter:'ALL'},search:''},
-            renderAnnualPlan(){return '<div>base</div>'},
+            state:{annualPlan:{
+              rows:[
+                {profile_id:'LIFE-011',plan_decision:'PURSUE',event_start:'2027-01-01'},
+                {profile_id:'LIFE-017',plan_decision:'WATCH',expected_month:2},
+                {profile_id:'HIST-108',plan_decision:'WATCH',conflict_notes:'controlled'},
+              ],
+              summary:{rows:3,profiles:3,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1},
+              loaded:true,run:{id:'test'},filter:'ALL'
+            },search:''},
+            renderAnnualPlan(){baseCalls++;return '<div>base:'+sandbox.state.annualPlan.rows.map(r=>r.profile_id).join(',')+'</div>'},
             render(){},
             esc(v){return String(v??'')},
             document:{addEventListener(){}},
-            window:{},
             console,
           };
+          sandbox.window=sandbox;
           vm.createContext(sandbox);
           vm.runInContext(source,sandbox,{filename:'app-annual-scope.js'});
-          const t=sandbox.window.__PARADISE_ANNUAL_SCOPE_TEST__;
+          const t=sandbox.__PARADISE_ANNUAL_SCOPE_TEST__;
           assert(t,'test exports missing');
           const west=['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172'];
           for(const profile_id of west)assert.equal(t.annualScopeKey({profile_id}),'WEST_COAST_FLORIDA',profile_id);
@@ -61,14 +72,20 @@ jobs:
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'NORTHERN_FLORIDA',planning_category:'CONSUMER'}),'NORTHERN_FLORIDA');
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'PANHANDLE_FLORIDA',planning_category:'CONSUMER'}),'PANHANDLE_FLORIDA');
           assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'WEST_COAST_FLORIDA',planning_category:'B2B'}),'B2B');
-          const rows=[
-            {profile_id:'A',plan_decision:'PURSUE',event_start:'2027-01-01'},
-            {profile_id:'A',plan_decision:'WATCH',expected_month:2},
-            {profile_id:'B',plan_decision:'WATCH',conflict_notes:'controlled'},
-          ];
-          const s=t.annualScopeSummary(rows);
-          assert.deepEqual(JSON.parse(JSON.stringify(s)),{rows:3,profiles:2,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1});
-          console.log('R6 geography/category classifier: PASS');
+          const s=t.annualScopeSummary(sandbox.state.annualPlan.rows);
+          assert.deepEqual(JSON.parse(JSON.stringify(s)),{rows:3,profiles:3,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1});
+          const first=sandbox.renderAnnualPlan();
+          assert(first.includes('East Coast Florida 1'),first);
+          assert(first.includes('West Coast Florida 1'),first);
+          assert(first.includes('B2B 1'),first);
+          assert(first.includes('base:LIFE-011'),first);
+          assert.equal(baseCalls,1,'base renderer should be called exactly once');
+          assert.equal(sandbox.state.annualPlan.rows.length,3,'full row set must be restored after render');
+          vm.runInContext(source,sandbox,{filename:'app-annual-scope.js'});
+          const second=sandbox.renderAnnualPlan();
+          assert(second.includes('base:LIFE-011'),second);
+          assert.equal(baseCalls,2,'second script evaluation must not double-wrap renderer');
+          console.log('R6 classifier/non-recursive renderer: PASS');
           NODE
 
       - name: Confirm production remains R5 before promotion
