@@ -1,0 +1,92 @@
+name: Paradise Shows R6 scope verifier
+
+on:
+  push:
+    branches:
+      - release/r6-east-coast-scope
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r6-scope:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Verify R6 scope controller syntax and wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-annual-scope.js
+          grep -q 'app-annual-scope.js' src/pages/index.astro
+          grep -q "paradise-shows-public-v2" public/sw.js
+          grep -q "'/app-annual-scope.js'" public/sw.js
+          grep -q "ANNUAL_SCOPE_DEFAULT='EAST_COAST_FLORIDA'" public/app-annual-scope.js
+          grep -q "planning_category" public/app-annual-scope.js
+          grep -q "geographic_region" public/app-annual-scope.js
+          echo 'R6 scope syntax/wiring: PASS'
+
+      - name: Verify R6 geography/category classifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm'),assert=require('assert');
+          const source=fs.readFileSync('public/app-annual-scope.js','utf8');
+          const sandbox={
+            state:{annualPlan:{rows:[],summary:{},loaded:true,run:{id:'test'},filter:'ALL'},search:''},
+            renderAnnualPlan(){return '<div>base</div>'},
+            render(){},
+            esc(v){return String(v??'')},
+            document:{addEventListener(){}},
+            window:{},
+            console,
+          };
+          vm.createContext(sandbox);
+          vm.runInContext(source,sandbox,{filename:'app-annual-scope.js'});
+          const t=sandbox.window.__PARADISE_ANNUAL_SCOPE_TEST__;
+          assert(t,'test exports missing');
+          const west=['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172'];
+          for(const profile_id of west)assert.equal(t.annualScopeKey({profile_id}),'WEST_COAST_FLORIDA',profile_id);
+          assert.equal(t.annualScopeKey({profile_id:'HIST-108'}),'B2B');
+          assert.equal(t.annualScopeKey({profile_id:'LIFE-011'}),'EAST_COAST_FLORIDA');
+          assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'CENTRAL_FLORIDA',planning_category:'CONSUMER'}),'CENTRAL_FLORIDA');
+          assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'NORTHERN_FLORIDA',planning_category:'CONSUMER'}),'NORTHERN_FLORIDA');
+          assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'PANHANDLE_FLORIDA',planning_category:'CONSUMER'}),'PANHANDLE_FLORIDA');
+          assert.equal(t.annualScopeKey({profile_id:'X',geographic_region:'WEST_COAST_FLORIDA',planning_category:'B2B'}),'B2B');
+          const rows=[
+            {profile_id:'A',plan_decision:'PURSUE',event_start:'2027-01-01'},
+            {profile_id:'A',plan_decision:'WATCH',expected_month:2},
+            {profile_id:'B',plan_decision:'WATCH',conflict_notes:'controlled'},
+          ];
+          const s=t.annualScopeSummary(rows);
+          assert.deepEqual(JSON.parse(JSON.stringify(s)),{rows:3,profiles:2,pursue:1,watch:2,research:0,exact:1,expected:1,conflicts:1});
+          console.log('R6 geography/category classifier: PASS');
+          NODE
+
+      - name: Confirm production remains R5 before promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual-plan.json \
+            -X POST "$API" -H "Origin: $SITE" -H "Content-Type: application/json" \
+            --data '{"action":"annualPlan","year":2027}'
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/annual-plan.json'))
+          assert x.get('ok') is True, x
+          run=x.get('run') or {}
+          summary=x.get('summary') or {}
+          assert run.get('id')=='0294bac9-5400-4f31-9a13-fc7897b4ddfd', run
+          assert run.get('status')=='READY', run
+          assert summary.get('rows')==104 and summary.get('profiles')==100, summary
+          assert summary.get('pursue')==35 and summary.get('watch')==69, summary
+          print('Production R5 pre-promotion control: PASS')
+          PY
