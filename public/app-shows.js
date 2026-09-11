@@ -2059,7 +2059,7 @@ function renderShows(){
   const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0),annualCount=Number(state.annualPlan?.summary?.rows||0);
   const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='PLAN2027'?'active':''}" data-show-mode="PLAN2027">2027 Plan${annualCount?' '+annualCount:''}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Unlinked LP${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
   if(state.showMode==='CURRENT')return top+renderCurrentShows();
-  if(state.showMode==='PLAN2027')return top+renderAnnualPlan();
+  if(state.showMode==='PLAN2027')return top+(typeof window.renderAnnualPlanScoped==='function'?window.renderAnnualPlanScoped():renderAnnualPlan());
   if(state.showMode==='UNLINKED')return top+renderUnlinkedLp();
   if(state.catalogLoading&&!state.catalogLoaded)return top+'<div class="loading">Loading full show database…</div>';
   if(state.catalogError&&!state.catalogLoaded)return top+`<div class="alert"><div class="event">Full database unavailable</div><div class="action">${esc(state.catalogError)}</div><div class="actions"><button class="btn primary" id="catalogRetry">Try again</button></div></div>`;
