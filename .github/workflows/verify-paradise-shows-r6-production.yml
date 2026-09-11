@@ -1,4 +1,4 @@
-name: Paradise Shows R6 production scope verifier
+name: Paradise Shows annual-plan production scope verifier
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  verify-r6-production-scope:
+  verify-production-scope:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
@@ -21,7 +21,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Wait for R6 scope asset and page wiring
+      - name: Wait for annual scope asset and page wiring
         shell: bash
         run: |
           set -euo pipefail
@@ -33,14 +33,14 @@ jobs:
               && curl -fsS -H 'Cache-Control: no-cache' "$page_url" -o /tmp/index.html; then
               actual="$(sha256sum /tmp/app-annual-scope.js | awk '{print $1}')"
               if [[ "$expected" == "$actual" ]] && grep -q 'app-annual-scope.js' /tmp/index.html; then
-                echo 'R6 production scope asset/wiring: PASS'
+                echo 'Annual-plan production scope asset/wiring: PASS'
                 exit 0
               fi
             fi
-            echo "Attempt $attempt: R6 scope deployment not converged"
+            echo "Attempt $attempt: annual scope deployment not converged"
             sleep 5
           done
-          echo '::error::Stable site did not converge to the R6 scope controller.'
+          echo '::error::Stable site did not converge to the annual scope controller.'
           exit 1
 
       - name: Verify deployed classifier against live annual plan
@@ -54,7 +54,20 @@ jobs:
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
           assert.equal(annual.ok,true);
-          assert([104,107].includes(annual.summary.rows),annual.summary);
+          const expectedByRun={
+            '0294bac9-5400-4f31-9a13-fc7897b4ddfd':{rows:104,profiles:100,pursue:35,watch:69,east:92},
+            '893343f8-8347-4c63-bfce-9eff4b351667':{rows:107,profiles:103,pursue:35,watch:72,east:95},
+            '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':{rows:112,profiles:108,pursue:37,watch:75,east:100},
+          };
+          const run=annual.run||{};
+          const expected=expectedByRun[run.id];
+          assert(expected,{run,summary:annual.summary});
+          assert.equal(run.status,'READY',run);
+          assert.equal(run.row_count,expected.rows,run);
+          assert.equal(annual.summary.rows,expected.rows,annual.summary);
+          assert.equal(annual.summary.profiles,expected.profiles,annual.summary);
+          assert.equal(annual.summary.pursue,expected.pursue,annual.summary);
+          assert.equal(annual.summary.watch,expected.watch,annual.summary);
           const source=fs.readFileSync('/tmp/app-annual-scope.js','utf8');
           const sandbox={
             state:{annualPlan:{rows:[],summary:{},loaded:true,run:{id:'test'},filter:'ALL'},search:''},
@@ -69,7 +82,20 @@ jobs:
           assert.equal(counts.CENTRAL_FLORIDA,0,counts);
           assert.equal(counts.NORTHERN_FLORIDA,0,counts);
           assert.equal(counts.PANHANDLE_FLORIDA,0,counts);
-          assert.equal(counts.EAST_COAST_FLORIDA,annual.summary.rows===107?95:92,counts);
-          console.log({run:annual.run?.id,rows:annual.summary.rows,scope_counts:counts});
-          console.log('R6 live scope classification: PASS');
+          assert.equal(counts.EAST_COAST_FLORIDA,expected.east,counts);
+          if(run.id==='910320e9-5942-4cb6-aa3e-5203bb1fb3e2'){
+            const required=new Set([
+              '2027-HIST-059-PRIMARY','2027-HIST-109-PRIMARY','2027-HIST-111-PRIMARY',
+              '2027-HIST-122-PRIMARY','2027-HIST-210-PRIMARY',
+            ]);
+            for(const row of annual.rows||[]){
+              if(required.has(row.plan_id)){
+                assert.equal(t.annualScopeKey(row),'EAST_COAST_FLORIDA',row);
+                required.delete(row.plan_id);
+              }
+            }
+            assert.equal(required.size,0,{missing:[...required]});
+          }
+          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts});
+          console.log('Live annual scope classification: PASS');
           NODE

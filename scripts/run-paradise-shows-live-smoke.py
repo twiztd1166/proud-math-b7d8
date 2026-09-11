@@ -25,12 +25,17 @@ SCOPE_AWARE_ANNUAL_API_BLOCK = """expected_runs = {
     '0294bac9-5400-4f31-9a13-fc7897b4ddfd': {
         'row_count': 104, 'rows': 104, 'profiles': 100, 'pursue': 35, 'watch': 69,
         'research': 0, 'exact': 37, 'expected_month': 43, 'conflicts': 28,
-        'row_len': 104, 'overlap_pairs': 31,
+        'row_len': 104, 'overlap_pairs': 31, 'pursue_pairs': 10,
     },
     '893343f8-8347-4c63-bfce-9eff4b351667': {
         'row_count': 107, 'rows': 107, 'profiles': 103, 'pursue': 35, 'watch': 72,
         'research': 0, 'exact': 42, 'expected_month': 42, 'conflicts': 29,
-        'row_len': 107, 'overlap_pairs': 33,
+        'row_len': 107, 'overlap_pairs': 33, 'pursue_pairs': 10,
+    },
+    '910320e9-5942-4cb6-aa3e-5203bb1fb3e2': {
+        'row_count': 112, 'rows': 112, 'profiles': 108, 'pursue': 37, 'watch': 75,
+        'research': 0, 'exact': 44, 'expected_month': 45, 'conflicts': 31,
+        'row_len': 112, 'overlap_pairs': 36, 'pursue_pairs': 12,
     },
 }
 expected = expected_runs.get(run.get('id'))
@@ -67,6 +72,10 @@ STALE_ANNUAL_API_LINES = [
     (
         "assert len(overlap_pairs) == 31, len(overlap_pairs)",
         "assert len(overlap_pairs) == expected['overlap_pairs'], (len(overlap_pairs), expected)",
+    ),
+    (
+        "assert len(pursue_pairs) == 10, len(pursue_pairs)",
+        "assert len(pursue_pairs) == expected['pursue_pairs'], (len(pursue_pairs), expected)",
     ),
 ]
 
@@ -176,6 +185,28 @@ def verify_scope_contract():
         raise AssertionError('annual plan DOM was not produced by mature deep-link step')
     d = path.read_text(encoding='utf-8')
 
+    annual = post_annual_plan()
+    assert annual.get('ok') is True, annual
+    run = annual.get('run') or {}
+    run_id = run.get('id')
+    expected_runs = {
+        '0294bac9-5400-4f31-9a13-fc7897b4ddfd': {
+            'statewide_rows': 104, 'east_rows': 92, 'east_profiles': 89,
+            'east_pursue': 30, 'east_watch': 62,
+        },
+        '893343f8-8347-4c63-bfce-9eff4b351667': {
+            'statewide_rows': 107, 'east_rows': 95, 'east_profiles': 92,
+            'east_pursue': 30, 'east_watch': 65,
+        },
+        '910320e9-5942-4cb6-aa3e-5203bb1fb3e2': {
+            'statewide_rows': 112, 'east_rows': 100, 'east_profiles': 97,
+            'east_pursue': 32, 'east_watch': 68,
+        },
+    }
+    expected = expected_runs.get(run_id)
+    assert expected is not None, run
+    assert run.get('status') == 'READY', run
+
     pairs = re.findall(
         r'data-annual-scope="([A-Z0-9_]+)"[^>]*>[^<]*?([0-9]+)</button>', d
     )
@@ -189,7 +220,7 @@ def verify_scope_contract():
     }
     for key, expected_count in expected_parked.items():
         assert counts.get(key) == expected_count, (key, counts)
-    assert counts.get('EAST_COAST_FLORIDA') in (92, 95), counts
+    assert counts.get('EAST_COAST_FLORIDA') == expected['east_rows'], (counts, expected)
     assert re.search(
         r'class="chip active" data-annual-scope="EAST_COAST_FLORIDA"', d
     ), 'East Coast scope is not active by default'
@@ -200,8 +231,8 @@ def verify_scope_contract():
     assert header, (counts, d[:2000])
     visible_rows = int(header.group(1))
     visible_profiles = int(header.group(2))
-    assert visible_rows == counts['EAST_COAST_FLORIDA'], (visible_rows, counts)
-    assert visible_profiles in (89, 92), visible_profiles
+    assert visible_rows == expected['east_rows'], (visible_rows, expected)
+    assert visible_profiles == expected['east_profiles'], (visible_profiles, expected)
 
     top = re.search(
         r'data-show-mode="PLAN2027"[^>]*>2027 Plan ([0-9]+)</button>', d
@@ -209,10 +240,10 @@ def verify_scope_contract():
     assert top, (counts, d[:2000])
     statewide_rows = int(top.group(1))
     assert statewide_rows == sum(counts.values()), (statewide_rows, counts)
-    assert statewide_rows in (104, 107), statewide_rows
+    assert statewide_rows == expected['statewide_rows'], (statewide_rows, expected)
 
-    assert 'Pursue 30' in d
-    assert ('Watch 62' in d) or ('Watch 65' in d)
+    assert f"Pursue {expected['east_pursue']}" in d, expected
+    assert f"Watch {expected['east_watch']}" in d, expected
     assert 'Research 0' in d
 
     parked_dom_markers = (
@@ -224,8 +255,6 @@ def verify_scope_contract():
     for marker in parked_dom_markers:
         assert marker not in d, ('parked West Coast record leaked into East default', marker)
 
-    annual = post_annual_plan()
-    assert annual.get('ok') is True, annual
     rows = annual.get('rows') or []
     by_plan = {r.get('plan_id'): r for r in rows}
     preserved = {
@@ -237,8 +266,21 @@ def verify_scope_contract():
         assert row, (plan_id, 'missing from preserved statewide plan')
         assert row.get('occurrence_label') == label, (plan_id, row.get('occurrence_label'))
 
+    if run_id == '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':
+        r7_added = {
+            '2027-HIST-059-PRIMARY',
+            '2027-HIST-109-PRIMARY',
+            '2027-HIST-111-PRIMARY',
+            '2027-HIST-122-PRIMARY',
+            '2027-HIST-210-PRIMARY',
+        }
+        assert r7_added.issubset(by_plan), (r7_added - set(by_plan), 'missing R7 additions')
+        for plan_id in r7_added:
+            assert f'data-plan-id="{plan_id}"' in d, (plan_id, 'R7 East row not visible in default scope')
+
     print({
         'annual_default_scope': 'PASS',
+        'run_id': run_id,
         'scope_counts': counts,
         'visible_rows': visible_rows,
         'visible_profiles': visible_profiles,
