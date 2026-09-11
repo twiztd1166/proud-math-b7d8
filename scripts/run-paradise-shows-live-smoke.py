@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -57,6 +58,22 @@ def scope_aware_deep_link_script(script: str) -> str:
             raise RuntimeError(f'Expected exactly one stale mature-smoke assertion, got {count}: {stale}')
         script = script.replace(stale, f": # replaced by scope-aware verifier: {stale}", 1)
     return script
+
+
+def run_shell_block(script: str, env: dict):
+    path = None
+    try:
+        with tempfile.NamedTemporaryFile('w', encoding='utf-8', suffix='.sh', delete=False) as handle:
+            handle.write(script)
+            path = handle.name
+        subprocess.run(
+            ['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', path],
+            check=True,
+            env=env,
+        )
+    finally:
+        if path:
+            Path(path).unlink(missing_ok=True)
 
 
 def post_annual_plan():
@@ -164,11 +181,7 @@ def main():
         print(f'\n=== Preserved mature smoke {index}/{len(steps)}: {name} ===', flush=True)
         if name == DEEP_LINK_STEP:
             script = scope_aware_deep_link_script(script)
-        subprocess.run(
-            ['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', script],
-            check=True,
-            env=env,
-        )
+        run_shell_block(script, env)
         if name == DEEP_LINK_STEP:
             verify_scope_contract()
 
