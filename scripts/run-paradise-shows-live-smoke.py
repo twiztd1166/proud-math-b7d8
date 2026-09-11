@@ -9,7 +9,35 @@ import urllib.request
 from pathlib import Path
 
 SOURCE = Path('scripts/debug-paradise-shows-live-source.yml')
+ANNUAL_API_STEP = 'Verify live CORS and operating population'
 DEEP_LINK_STEP = 'Execute show database deep links in fresh headless Chrome'
+
+STALE_ANNUAL_API_BLOCK = """assert run.get('id') == '0294bac9-5400-4f31-9a13-fc7897b4ddfd', run
+assert run.get('status') == 'READY', run
+assert run.get('row_count') == 104, run
+summary=x.get('summary') or {}
+assert summary.get('rows') == 104, summary
+assert summary.get('profiles') == 100, summary
+assert summary.get('pursue') == 35, summary
+assert summary.get('watch') == 69, summary"""
+
+SCOPE_AWARE_ANNUAL_API_BLOCK = """expected_runs = {
+    '0294bac9-5400-4f31-9a13-fc7897b4ddfd': {
+        'row_count': 104, 'rows': 104, 'profiles': 100, 'pursue': 35, 'watch': 69,
+    },
+    '893343f8-8347-4c63-bfce-9eff4b351667': {
+        'row_count': 107, 'rows': 107, 'profiles': 103, 'pursue': 35, 'watch': 72,
+    },
+}
+expected = expected_runs.get(run.get('id'))
+assert expected is not None, run
+assert run.get('status') == 'READY', run
+assert run.get('row_count') == expected['row_count'], (run, expected)
+summary=x.get('summary') or {}
+assert summary.get('rows') == expected['rows'], (summary, expected)
+assert summary.get('profiles') == expected['profiles'], (summary, expected)
+assert summary.get('pursue') == expected['pursue'], (summary, expected)
+assert summary.get('watch') == expected['watch'], (summary, expected)"""
 
 STALE_DEEP_LINK_LINES = [
     "grep -q '104 plan rows' /tmp/annual_plan.html",
@@ -49,6 +77,19 @@ def extract_run_steps(text: str):
             continue
         i += 1
     return steps
+
+
+def scope_aware_annual_api_script(script: str) -> str:
+    count = script.count(STALE_ANNUAL_API_BLOCK)
+    if count != 1:
+        raise RuntimeError(
+            f'Expected exactly one stale annual-plan API assertion block, got {count}'
+        )
+    return script.replace(
+        STALE_ANNUAL_API_BLOCK,
+        SCOPE_AWARE_ANNUAL_API_BLOCK,
+        1,
+    )
 
 
 def scope_aware_deep_link_script(script: str) -> str:
@@ -173,12 +214,16 @@ def main():
     if len(steps) != 5:
         raise RuntimeError(f'Expected exactly 5 preserved mature-smoke run steps, found {len(steps)}')
     names = [name for name, _ in steps]
+    if ANNUAL_API_STEP not in names:
+        raise RuntimeError('Preserved mature smoke is missing the annual-plan API step')
     if DEEP_LINK_STEP not in names:
         raise RuntimeError('Preserved mature smoke is missing the deep-link step')
 
     env = os.environ.copy()
     for index, (name, script) in enumerate(steps, 1):
         print(f'\n=== Preserved mature smoke {index}/{len(steps)}: {name} ===', flush=True)
+        if name == ANNUAL_API_STEP:
+            script = scope_aware_annual_api_script(script)
         if name == DEEP_LINK_STEP:
             script = scope_aware_deep_link_script(script)
         run_shell_block(script, env)
