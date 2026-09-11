@@ -1,0 +1,112 @@
+name: Paradise Shows governed annual-read verifier
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-governed-annual-read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Wait for governed annual-read assets and wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            if curl -fsS -H 'Cache-Control: no-cache' "$SITE/app-annual-api.js?release=${GITHUB_SHA}" -o /tmp/app-annual-api.js \
+              && curl -fsS -H 'Cache-Control: no-cache' "$SITE/sw.js?release=${GITHUB_SHA}" -o /tmp/sw.js \
+              && curl -fsS -H 'Cache-Control: no-cache' "$SITE/?release=${GITHUB_SHA}" -o /tmp/index.html; then
+              adapter_expected="$(sha256sum public/app-annual-api.js | awk '{print $1}')"
+              adapter_actual="$(sha256sum /tmp/app-annual-api.js | awk '{print $1}')"
+              sw_expected="$(sha256sum public/sw.js | awk '{print $1}')"
+              sw_actual="$(sha256sum /tmp/sw.js | awk '{print $1}')"
+              if [[ "$adapter_expected" == "$adapter_actual" ]] \
+                && [[ "$sw_expected" == "$sw_actual" ]] \
+                && grep -q 'app-annual-api.js' /tmp/index.html \
+                && grep -q "app-annual-api.js" /tmp/sw.js; then
+                echo 'Governed annual-read assets/wiring: PASS'
+                exit 0
+              fi
+            fi
+            echo "Attempt $attempt: governed annual-read deployment not converged"
+            sleep 5
+          done
+          echo '::error::Stable site did not converge to governed annual-read assets.'
+          exit 1
+
+      - name: Verify governed annual-plan contract and historical compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"annualPlan","year":2027}'
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"year":2027,"runId":"6570ebf8-7b5f-4314-a65d-030100f644a3","allowLatestAuditPreview":true}'
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
+          const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
+          assert.equal(annual.ok,true,annual);
+          assert.equal(annual.version,2,annual);
+          assert.equal(annual.year,2027,annual);
+          assert.equal(annual.run?.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',annual.run);
+          assert.equal(annual.run?.status,'READY',annual.run);
+          assert.equal(annual.run?.row_count,121,annual.run);
+          assert.deepEqual({
+            rows:annual.summary?.rows,
+            profiles:annual.summary?.profiles,
+            pursue:annual.summary?.pursue,
+            watch:annual.summary?.watch,
+            research:annual.summary?.research,
+            exact:annual.summary?.exact,
+            expected:annual.summary?.expected,
+            conflicts:annual.summary?.conflicts,
+          },{rows:121,profiles:116,pursue:37,watch:84,research:0,exact:54,expected:44,conflicts:43});
+          const rows=annual.rows||[];
+          assert.equal(rows.length,121);
+          assert.equal(new Set(rows.map(row=>row.profile_id)).size,116);
+          assert.equal(rows.filter(row=>!String(row.geographic_region||'').trim()).length,0,'missing geographic_region');
+          assert.equal(rows.filter(row=>!String(row.planning_category||'').trim()).length,0,'missing planning_category');
+          const regions=new Set(['EAST_COAST_FLORIDA','WEST_COAST_FLORIDA','CENTRAL_FLORIDA','NORTHERN_FLORIDA','PANHANDLE_FLORIDA']);
+          const categories=new Set(['CONSUMER','B2B']);
+          assert.equal(rows.filter(row=>!regions.has(String(row.geographic_region||''))).length,0,'invalid geographic_region');
+          assert.equal(rows.filter(row=>!categories.has(String(row.planning_category||''))).length,0,'invalid planning_category');
+          const governedScope=row=>row.planning_category==='B2B'?'B2B':row.geographic_region;
+          const westFallback=new Set(['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172']);
+          const fallbackScope=row=>row.profile_id==='HIST-108'?'B2B':westFallback.has(row.profile_id)?'WEST_COAST_FLORIDA':'EAST_COAST_FLORIDA';
+          const mismatches=rows.filter(row=>governedScope(row)!==fallbackScope(row));
+          assert.equal(mismatches.length,0,mismatches);
+          const scopeCounts=rows.reduce((acc,row)=>{const key=governedScope(row);acc[key]=(acc[key]||0)+1;return acc;},{});
+          assert.deepEqual(scopeCounts,{EAST_COAST_FLORIDA:109,WEST_COAST_FLORIDA:11,B2B:1});
+          assert.equal(rows.filter(row=>row.planning_category==='CONSUMER').length,120);
+          assert.equal(rows.filter(row=>row.planning_category==='B2B').length,1);
+
+          assert.equal(history.ok,true,history);
+          assert.equal(history.version,1,history);
+          assert.equal(history.run?.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',history.run);
+          assert.equal(Boolean(history.preview),false,history);
+          assert.equal(history.summary?.rows,169,history.summary);
+          assert.equal(history.summary?.consumer_rows,168,history.summary);
+          assert.equal(history.summary?.b2b_rows,1,history.summary);
+          assert.equal(history.summary?.direct_profiles,58,history.summary);
+          assert.equal(history.summary?.active_routes,11,history.summary);
+          assert.equal(history.summary?.staged_routes,0,history.summary);
+          assert.equal(history.summary?.gap_dispositions,100,history.summary);
+          console.log({annual_run:annual.run.id,annual_summary:annual.summary,scope_counts:scopeCounts,history_summary:history.summary});
+          console.log('Governed annual-plan read + historical compatibility: PASS');
+          NODE
