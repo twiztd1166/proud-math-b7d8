@@ -1,6 +1,5 @@
 // Annual-plan geography/category scope + historical coverage controller.
-// The annual-plan database fields are authoritative when the API returns them. The explicit
-// fallback keeps the v91 annualPlan contract compatible while historical coverage stays read-only.
+// Governed annual-plan fields are authoritative. Defensive fallbacks remain read-only compatibility only.
 (()=>{
   const ANNUAL_SCOPE_DEFAULT='EAST_COAST_FLORIDA';
   const ANNUAL_SCOPE_KEYS=['EAST_COAST_FLORIDA','WEST_COAST_FLORIDA','CENTRAL_FLORIDA','NORTHERN_FLORIDA','PANHANDLE_FLORIDA','B2B'];
@@ -13,14 +12,15 @@
     B2B:'B2B',
   };
   const ANNUAL_SCOPE_WEST_FALLBACK=new Set(['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172']);
-  const ANNUAL_SCOPE_B2B_FALLBACK=new Set(['HIST-108']);
+  const ANNUAL_SCOPE_B2B_FALLBACK=new Set(['HIST-108','PROSPECT-COCOA-ECONOMIC-SHOWCASE','PROSPECT-COOPERATOR-SOFL','PROSPECT-FORTEM-DISASTER-RESILIENCE-EXPO','PROSPECT-LONGEVITY-SPRINGFEST','PROSPECT-PB-CONDO-HOA-EXPO']);
   const HISTORY_API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api';
   const HISTORY_DEFAULT_FILTER='CONSUMER';
-  const HISTORY_FILTER_KEYS=['CONSUMER','ALL','DIRECT_R8_PROFILE','VERIFIED_ROUTE','PUBLICATION_WATCH','CURRENT_IDENTITY_WATCH','LOCAL_POPUP_HISTORY','ARCHIVE_CONTINUITY_UNVERIFIED','B2B_SEPARATE'];
+  const DIRECT_PLAN_PROFILE_RE=/^DIRECT_R\d+_PROFILE$/;
+  const HISTORY_FILTER_KEYS=['CONSUMER','ALL','DIRECT_PLAN_PROFILE','VERIFIED_ROUTE','PUBLICATION_WATCH','CURRENT_IDENTITY_WATCH','LOCAL_POPUP_HISTORY','ARCHIVE_CONTINUITY_UNVERIFIED','B2B_SEPARATE'];
   const HISTORY_FILTER_LABELS={
     CONSUMER:'East Coast consumer',
     ALL:'All East Coast history',
-    DIRECT_R8_PROFILE:'Direct in 2027 plan',
+    DIRECT_PLAN_PROFILE:'Direct in 2027 plan',
     VERIFIED_ROUTE:'Verified canonical route',
     PUBLICATION_WATCH:'Publication watch',
     CURRENT_IDENTITY_WATCH:'Current identity watch',
@@ -29,7 +29,6 @@
     B2B_SEPARATE:'B2B',
   };
   const HISTORY_CLASS_LABELS={
-    DIRECT_R8_PROFILE:'Direct R8 profile',
     VERIFIED_CANONICAL_ROUTE_ACTIVE:'Verified route · active',
     VERIFIED_CANONICAL_ROUTE_STAGED:'Verified route · staged',
     PUBLICATION_WATCH:'Publication watch',
@@ -39,6 +38,17 @@
     B2B_SEPARATE:'B2B separate',
     ARCHIVE_CONTINUITY_UNVERIFIED:'Archive · continuity unverified',
   };
+
+  // app-shows.js defines the base sorter. Replace only its annual-plan month key after that file loads.
+  if(typeof annualPlanMonthKey==='function'){
+    annualPlanMonthKey=function annualPlanMonthKeyStructured(row){
+      if(row.event_start)return String(row.event_start);
+      if(row.estimated_start)return String(row.estimated_start);
+      if(row.expected_month)return `2027-${String(row.expected_month).padStart(2,'0')}-15`;
+      if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
+      return '9999-12-31';
+    };
+  }
 
   function annualScopeKey(row){
     const category=String(row?.planning_category||'').trim().toUpperCase();
@@ -61,6 +71,8 @@
       research:list.filter(row=>row.plan_decision==='RESEARCH_IDENTITY').length,
       exact:list.filter(row=>!!row.event_start).length,
       expected:list.filter(row=>!row.event_start&&!!row.expected_month).length,
+      estimated:list.filter(row=>!!row.estimated_start).length,
+      broad_estimated:list.filter(row=>!!row.estimated_start&&!row.expected_month).length,
       conflicts:list.filter(row=>!!String(row.conflict_notes||'').trim()).length,
     };
   }
@@ -76,6 +88,7 @@
     const classification=String(row?.classification||'');
     if(filter==='ALL')return true;
     if(filter==='CONSUMER')return classification!=='B2B_SEPARATE';
+    if(filter==='DIRECT_PLAN_PROFILE')return DIRECT_PLAN_PROFILE_RE.test(classification);
     if(filter==='VERIFIED_ROUTE')return classification==='VERIFIED_CANONICAL_ROUTE_ACTIVE'||classification==='VERIFIED_CANONICAL_ROUTE_STAGED';
     if(filter==='CURRENT_IDENTITY_WATCH')return classification==='CURRENT_SUCCESSOR_WATCH'||classification==='CURRENT_SIMILAR_EVENT_IDENTITY_UNPROVEN';
     return classification===filter;
@@ -94,6 +107,8 @@
   }
   function historicalClassificationLabel(value){
     const key=String(value||'');
+    const direct=key.match(/^DIRECT_R(\d+)_PROFILE$/);
+    if(direct)return `Direct R${direct[1]} profile`;
     return HISTORY_CLASS_LABELS[key]||key.replaceAll('_',' ');
   }
   function historicalStatusLabel(value){return String(value||'Not classified').replaceAll('_',' ')}
@@ -123,6 +138,11 @@
   }
   function historicalCoverageSummaryHtml(a){
     const s=a.summary||{};
+    const rows=Array.isArray(a.rows)?a.rows:[];
+    const direct=historicalCoverageRows('DIRECT_PLAN_PROFILE',rows).length;
+    const active=rows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_ACTIVE').length;
+    const staged=rows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_STAGED').length;
+    const gaps=rows.length-direct-active-staged;
     const preview=a.preview&&a.run&&a.requestedRun&&a.run.id!==a.requestedRun.id;
     const runStatus=String(a.run?.status||'UNKNOWN');
     const checked=String(s.checked_at||'').slice(0,10);
@@ -131,14 +151,14 @@
       :`Historical coverage is tied to the selected annual-plan run (${esc(runStatus)}).`;
     return `<div class="sourceWarn" data-historical-coverage-context><b>East Coast Historical Coverage:</b> ${context} ${esc(s.participation_semantics||'')}</div>
       <div class="stats" data-historical-coverage-summary>
-        <div class="stat"><div class="v">${Number(s.rows||0)}</div><div class="l">East Coast identities</div></div>
+        <div class="stat"><div class="v">${Number(s.rows||rows.length||0)}</div><div class="l">East Coast identities</div></div>
         <div class="stat"><div class="v">${Number(s.consumer_rows||0)}</div><div class="l">Consumer identities</div></div>
-        <div class="stat"><div class="v">${Number(s.direct_profiles||0)}</div><div class="l">Direct 2027 profiles</div></div>
-        <div class="stat"><div class="v">${Number(s.active_routes||0)+Number(s.staged_routes||0)}</div><div class="l">Verified routes</div></div>
-        <div class="stat"><div class="v">${Number(s.gap_dispositions||0)}</div><div class="l">Fully dispositioned gaps</div></div>
+        <div class="stat"><div class="v">${direct}</div><div class="l">Direct 2027 profiles</div></div>
+        <div class="stat"><div class="v">${active+staged}</div><div class="l">Verified routes</div></div>
+        <div class="stat"><div class="v">${gaps}</div><div class="l">Fully dispositioned gaps</div></div>
         <div class="stat"><div class="v">${Number(s.b2b_rows||0)}</div><div class="l">B2B separate</div></div>
       </div>
-      <div class="mfc">Coverage equation: ${Number(s.direct_profiles||0)} direct + ${Number(s.active_routes||0)} active verified routes + ${Number(s.staged_routes||0)} staged verified routes + ${Number(s.gap_dispositions||0)} gap dispositions = ${Number(s.rows||0)} East Coast identities.${checked?` · checked ${esc(checked)}`:''}</div>`;
+      <div class="mfc">Coverage equation: ${direct} direct + ${active} active verified routes + ${staged} staged verified routes + ${gaps} gap dispositions = ${rows.length} East Coast identities.${checked?` · checked ${esc(checked)}`:''}</div>`;
   }
   function historicalCoverageFilterBar(a){
     const rows=Array.isArray(a.rows)?a.rows:[];
