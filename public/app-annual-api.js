@@ -1,6 +1,6 @@
-// Read-only annual-plan adapter. The dedicated annual/history endpoint returns governed geography/category fields.
+// Read-only annual-plan adapter. The dedicated annual-plan endpoint returns governed scope and structured estimate fields.
 (()=>{
-  const ANNUAL_READ_API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api';
+  const ANNUAL_READ_API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api';
 
   async function callAnnualPlanRead(year){
     const controller=new AbortController();
