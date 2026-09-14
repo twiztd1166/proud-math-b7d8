@@ -63,7 +63,7 @@ jobs:
           echo '::error::Stable site did not converge to the annual scope controller.'
           exit 1
 
-      - name: Verify deployed R19 classifier and historical coverage
+      - name: Verify deployed published R19 classifier and historical coverage
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -81,6 +81,9 @@ jobs:
           const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
           const R19=process.env.R19_RUN;
           assert.equal(annual.ok,true,annual);
+          assert.equal(annual.version,3,annual);
+          assert.equal(annual.publication?.run_id,R19,annual.publication);
+          assert.equal(annual.published,true,annual);
           assert.equal(annual.run?.id,R19,annual.run);
           assert.equal(history.ok,true,history);
           assert.equal(history.run?.id,R19,history.run);
@@ -126,6 +129,6 @@ jobs:
           assert(html.includes('East Coast Historical Coverage'));
           assert(html.includes('Coverage equation: 61 direct + 11 active verified routes + 0 staged verified routes + 99 gap dispositions = 171 East Coast identities.'));
           assert(html.includes('Direct in 2027 plan 61'));
-          console.log({run:R19,scope_counts:counts,east_summary:east,history_counts:historyCounts});
-          console.log('R19 live annual scope + historical coverage: PASS');
+          console.log({run:R19,published:annual.published,publication:annual.publication,scope_counts:counts,east_summary:east,history_counts:historyCounts});
+          console.log('R19 live published annual scope + historical coverage: PASS');
           NODE
