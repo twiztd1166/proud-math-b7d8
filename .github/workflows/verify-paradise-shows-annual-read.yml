@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - paradise-shows-public
+  pull_request:
+    branches:
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
@@ -15,28 +18,50 @@ jobs:
     timeout-minutes: 10
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
-      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+      HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
+      - name: Verify R19 release source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-annual-api.js
+          node --check public/app-annual-scope.js
+          grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
+          grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
+          grep -q 'estimated_start' public/app-annual-scope.js
+          grep -q 'paradise-shows-public-v4' public/sw.js
+          python -m py_compile scripts/run-paradise-shows-live-smoke-r19.py
+          echo 'R19 release source contract: PASS'
+
       - name: Wait for governed annual-read assets and wiring
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           for attempt in $(seq 1 36); do
             if curl -fsS -H 'Cache-Control: no-cache' "$SITE/app-annual-api.js?release=${GITHUB_SHA}" -o /tmp/app-annual-api.js \
+              && curl -fsS -H 'Cache-Control: no-cache' "$SITE/app-annual-scope.js?release=${GITHUB_SHA}" -o /tmp/app-annual-scope.js \
               && curl -fsS -H 'Cache-Control: no-cache' "$SITE/sw.js?release=${GITHUB_SHA}" -o /tmp/sw.js \
               && curl -fsS -H 'Cache-Control: no-cache' "$SITE/?release=${GITHUB_SHA}" -o /tmp/index.html; then
-              adapter_expected="$(sha256sum public/app-annual-api.js | awk '{print $1}')"
-              adapter_actual="$(sha256sum /tmp/app-annual-api.js | awk '{print $1}')"
+              annual_expected="$(sha256sum public/app-annual-api.js | awk '{print $1}')"
+              annual_actual="$(sha256sum /tmp/app-annual-api.js | awk '{print $1}')"
+              scope_expected="$(sha256sum public/app-annual-scope.js | awk '{print $1}')"
+              scope_actual="$(sha256sum /tmp/app-annual-scope.js | awk '{print $1}')"
               sw_expected="$(sha256sum public/sw.js | awk '{print $1}')"
               sw_actual="$(sha256sum /tmp/sw.js | awk '{print $1}')"
-              if [[ "$adapter_expected" == "$adapter_actual" ]] \
+              if [[ "$annual_expected" == "$annual_actual" ]] \
+                && [[ "$scope_expected" == "$scope_actual" ]] \
                 && [[ "$sw_expected" == "$sw_actual" ]] \
                 && grep -q 'app-annual-api.js' /tmp/index.html \
-                && grep -q "app-annual-api.js" /tmp/sw.js; then
+                && grep -q 'app-annual-scope.js' /tmp/index.html \
+                && grep -q 'app-annual-api.js' /tmp/sw.js \
+                && grep -q 'app-annual-scope.js' /tmp/sw.js; then
                 echo 'Governed annual-read assets/wiring: PASS'
                 exit 0
               fi
@@ -47,26 +72,29 @@ jobs:
           echo '::error::Stable site did not converge to governed annual-read assets.'
           exit 1
 
-      - name: Verify governed annual-plan contract and historical compatibility
+      - name: Verify R19 annual-plan and historical contracts
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
+          history_payload="$(jq -nc --arg runId "$R19_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            --data '{"year":2027,"runId":"6570ebf8-7b5f-4314-a65d-030100f644a3","allowLatestAuditPreview":true}'
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
           const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
+          const R19=process.env.R19_RUN;
           assert.equal(annual.ok,true,annual);
           assert.equal(annual.version,2,annual);
           assert.equal(annual.year,2027,annual);
-          assert.equal(annual.run?.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',annual.run);
+          assert.equal(annual.run?.id,R19,annual.run);
           assert.equal(annual.run?.status,'READY',annual.run);
-          assert.equal(annual.run?.row_count,121,annual.run);
+          assert.equal(annual.run?.row_count,291,annual.run);
           assert.deepEqual({
             rows:annual.summary?.rows,
             profiles:annual.summary?.profiles,
@@ -75,38 +103,69 @@ jobs:
             research:annual.summary?.research,
             exact:annual.summary?.exact,
             expected:annual.summary?.expected,
+            estimated:annual.summary?.estimated,
+            broad_estimated:annual.summary?.broad_estimated,
             conflicts:annual.summary?.conflicts,
-          },{rows:121,profiles:116,pursue:37,watch:84,research:0,exact:54,expected:44,conflicts:43});
+          },{rows:291,profiles:284,pursue:45,watch:246,research:0,exact:151,expected:102,estimated:125,broad_estimated:25,conflicts:176});
+
           const rows=annual.rows||[];
-          assert.equal(rows.length,121);
-          assert.equal(new Set(rows.map(row=>row.profile_id)).size,116);
+          assert.equal(rows.length,291);
+          assert.equal(new Set(rows.map(row=>row.profile_id)).size,284);
           assert.equal(rows.filter(row=>!String(row.geographic_region||'').trim()).length,0,'missing geographic_region');
           assert.equal(rows.filter(row=>!String(row.planning_category||'').trim()).length,0,'missing planning_category');
-          const regions=new Set(['EAST_COAST_FLORIDA','WEST_COAST_FLORIDA','CENTRAL_FLORIDA','NORTHERN_FLORIDA','PANHANDLE_FLORIDA']);
-          const categories=new Set(['CONSUMER','B2B']);
-          assert.equal(rows.filter(row=>!regions.has(String(row.geographic_region||''))).length,0,'invalid geographic_region');
-          assert.equal(rows.filter(row=>!categories.has(String(row.planning_category||''))).length,0,'invalid planning_category');
-          const governedScope=row=>row.planning_category==='B2B'?'B2B':row.geographic_region;
-          const westFallback=new Set(['LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062','LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172']);
-          const fallbackScope=row=>row.profile_id==='HIST-108'?'B2B':westFallback.has(row.profile_id)?'WEST_COAST_FLORIDA':'EAST_COAST_FLORIDA';
-          const mismatches=rows.filter(row=>governedScope(row)!==fallbackScope(row));
-          assert.equal(mismatches.length,0,mismatches);
-          const scopeCounts=rows.reduce((acc,row)=>{const key=governedScope(row);acc[key]=(acc[key]||0)+1;return acc;},{});
-          assert.deepEqual(scopeCounts,{EAST_COAST_FLORIDA:109,WEST_COAST_FLORIDA:11,B2B:1});
-          assert.equal(rows.filter(row=>row.planning_category==='CONSUMER').length,120);
-          assert.equal(rows.filter(row=>row.planning_category==='B2B').length,1);
+          assert.equal(rows.filter(row=>row.estimated_start&&(!row.estimated_end||!row.estimate_confidence||!row.estimate_basis)).length,0,'incomplete estimate structure');
+          const scope=row=>row.planning_category==='B2B'?'B2B':row.geographic_region;
+          const scopeCounts=rows.reduce((acc,row)=>{const key=scope(row);acc[key]=(acc[key]||0)+1;return acc;},{});
+          assert.deepEqual(scopeCounts,{EAST_COAST_FLORIDA:273,WEST_COAST_FLORIDA:11,B2B:7});
+          assert.equal(rows.filter(row=>row.planning_category==='CONSUMER').length,284);
+          assert.equal(rows.filter(row=>row.planning_category==='B2B').length,7);
+
+          const fixed=rows.filter(row=>row.schedule_type==='FIXED_EVENT'&&row.event_start);
+          const overlap=(a,b)=>{
+            const as=a.event_start, ae=a.event_end||a.event_start;
+            const bs=b.event_start, be=b.event_end||b.event_start;
+            return as<=be&&bs<=ae;
+          };
+          const note=row=>Boolean(String(row.conflict_notes||'').trim());
+          const pairs=[];
+          for(let i=0;i<fixed.length;i++)for(let j=i+1;j<fixed.length;j++)if(overlap(fixed[i],fixed[j]))pairs.push([fixed[i],fixed[j]]);
+          const uncontrolled=pairs.filter(([a,b])=>!note(a)||!note(b));
+          const pursuePairs=pairs.filter(([a,b])=>a.plan_decision==='PURSUE'&&b.plan_decision==='PURSUE');
+          const pursueUncontrolled=pursuePairs.filter(([a,b])=>!note(a)||!note(b));
+          assert.equal(pairs.length,381,pairs.length);
+          assert.equal(uncontrolled.length,0,uncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
+          assert.equal(pursuePairs.length,17,pursuePairs.length);
+          assert.equal(pursueUncontrolled.length,0,pursueUncontrolled);
 
           assert.equal(history.ok,true,history);
           assert.equal(history.version,1,history);
-          assert.equal(history.run?.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',history.run);
+          assert.equal(history.requested_run?.id,R19,history.requested_run);
+          assert.equal(history.run?.id,R19,history.run);
+          assert.equal(history.run?.status,'READY',history.run);
           assert.equal(Boolean(history.preview),false,history);
-          assert.equal(history.summary?.rows,169,history.summary);
-          assert.equal(history.summary?.consumer_rows,168,history.summary);
+          assert.equal(history.summary?.rows,171,history.summary);
+          assert.equal(history.summary?.consumer_rows,170,history.summary);
           assert.equal(history.summary?.b2b_rows,1,history.summary);
-          assert.equal(history.summary?.direct_profiles,58,history.summary);
+          assert.equal(history.summary?.direct_profiles,61,history.summary);
           assert.equal(history.summary?.active_routes,11,history.summary);
           assert.equal(history.summary?.staged_routes,0,history.summary);
-          assert.equal(history.summary?.gap_dispositions,100,history.summary);
-          console.log({annual_run:annual.run.id,annual_summary:annual.summary,scope_counts:scopeCounts,history_summary:history.summary});
-          console.log('Governed annual-plan read + historical compatibility: PASS');
+          assert.equal(history.summary?.gap_dispositions,99,history.summary);
+          assert.deepEqual(history.summary?.classifications,{
+            ARCHIVE_CONTINUITY_UNVERIFIED:71,
+            B2B_SEPARATE:1,
+            CURRENT_SIMILAR_EVENT_IDENTITY_UNPROVEN:4,
+            CURRENT_SUCCESSOR_WATCH:1,
+            DIRECT_R12_PROFILE:1,
+            DIRECT_R18_PROFILE:2,
+            DIRECT_R8_PROFILE:58,
+            LOCAL_POPUP_HISTORY:6,
+            PUBLICATION_WATCH:16,
+            VERIFIED_CANONICAL_ROUTE_ACTIVE:11,
+          });
+          const historyRows=history.rows||[];
+          assert.equal(historyRows.length,171);
+          assert.equal(historyRows.filter(row=>/^DIRECT_R\d+_PROFILE$/.test(String(row.classification||''))).length,61);
+          assert.equal(historyRows.filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0);
+          console.log({annual_run:annual.run.id,annual_summary:annual.summary,scope_counts:scopeCounts,fixed_pairs:pairs.length,history_summary:history.summary});
+          console.log('R19 governed annual-plan + historical contract: PASS');
           NODE
