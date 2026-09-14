@@ -36,7 +36,9 @@ jobs:
           python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-r19.py
           grep -q '83a90da8-d460-413f-8ca4-7735bcbe0f88' scripts/run-paradise-shows-live-smoke-r19.py
           grep -q 'ANNUAL_API' scripts/run-paradise-shows-live-smoke-r19.py
-          echo 'R19 mature-smoke adapter source: PASS'
+          grep -q "assert annual.get('version') == 3" scripts/run-paradise-shows-live-smoke-r19.py
+          grep -q "assert annual.get('published') is True" scripts/run-paradise-shows-live-smoke-r19.py
+          echo 'R19 publication-gated mature-smoke adapter source: PASS'
 
       - name: Execute preserved mature smoke suite
         if: github.event_name != 'pull_request'

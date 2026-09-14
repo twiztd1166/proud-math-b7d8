@@ -21,6 +21,7 @@ jobs:
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
       R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
+      R18_RUN: 70cc8e46-4f36-4a1b-8e6e-02e877dcbf0f
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -72,7 +73,7 @@ jobs:
           echo '::error::Stable site did not converge to governed annual-read assets.'
           exit 1
 
-      - name: Verify R19 annual-plan and historical contracts
+      - name: Verify R19 published annual-plan and historical contracts
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -80,6 +81,10 @@ jobs:
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
+          candidate_payload="$(jq -nc --arg runId "$R18_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data "$candidate_payload"
           history_payload="$(jq -nc --arg runId "$R19_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
@@ -87,14 +92,29 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
+          const candidate=JSON.parse(fs.readFileSync('/tmp/candidate.json','utf8'));
           const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
-          const R19=process.env.R19_RUN;
+          const R19=process.env.R19_RUN,R18=process.env.R18_RUN;
+
           assert.equal(annual.ok,true,annual);
-          assert.equal(annual.version,2,annual);
+          assert.equal(annual.version,3,annual);
           assert.equal(annual.year,2027,annual);
+          assert.equal(annual.publication?.run_id,R19,annual.publication);
+          assert.equal(annual.requested_run_id,null,annual);
+          assert.equal(annual.published,true,annual);
           assert.equal(annual.run?.id,R19,annual.run);
           assert.equal(annual.run?.status,'READY',annual.run);
           assert.equal(annual.run?.row_count,291,annual.run);
+
+          // READY no longer means publicly current: R18 can be read explicitly but remains unpublished.
+          assert.equal(candidate.ok,true,candidate);
+          assert.equal(candidate.version,3,candidate);
+          assert.equal(candidate.requested_run_id,R18,candidate);
+          assert.equal(candidate.run?.id,R18,candidate.run);
+          assert.equal(candidate.run?.status,'READY',candidate.run);
+          assert.equal(candidate.publication?.run_id,R19,candidate.publication);
+          assert.equal(candidate.published,false,candidate);
+
           assert.deepEqual({
             rows:annual.summary?.rows,
             profiles:annual.summary?.profiles,
@@ -120,12 +140,32 @@ jobs:
           assert.equal(rows.filter(row=>row.planning_category==='CONSUMER').length,284);
           assert.equal(rows.filter(row=>row.planning_category==='B2B').length,7);
 
-          const fixed=rows.filter(row=>row.schedule_type==='FIXED_EVENT'&&row.event_start);
-          const overlap=(a,b)=>{
-            const as=a.event_start, ae=a.event_end||a.event_start;
-            const bs=b.event_start, be=b.event_end||b.event_start;
-            return as<=be&&bs<=ae;
+          // API order is now a governed contract: exact -> structured estimate -> expected month -> on-demand -> undated,
+          // with explicit decision and HIGH/MEDIUM/LOW tie-breaks.
+          const decisionRank={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
+          const priorityRank={HIGH:0,MEDIUM:1,LOW:2};
+          const planningDate=row=>{
+            if(row.event_start)return String(row.event_start);
+            if(row.estimated_start)return String(row.estimated_start);
+            if(Number.isInteger(Number(row.expected_month))&&Number(row.expected_month)>=1&&Number(row.expected_month)<=12)
+              return `2027-${String(Number(row.expected_month)).padStart(2,'0')}-15`;
+            if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
+            return '9999-12-31';
           };
+          const compare=(a,b)=>planningDate(a).localeCompare(planningDate(b))
+            ||(decisionRank[a.plan_decision]??9)-(decisionRank[b.plan_decision]??9)
+            ||(priorityRank[a.priority]??9)-(priorityRank[b.priority]??9)
+            ||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))
+            ||String(a.plan_id||'').localeCompare(String(b.plan_id||''));
+          for(let i=1;i<rows.length;i++)assert.ok(compare(rows[i-1],rows[i])<=0,{i,previous:rows[i-1].plan_id,current:rows[i].plan_id});
+          const rank=id=>rows.findIndex(row=>row.plan_id===id)+1;
+          assert.equal(rank('2027-LIFE-190-PRIMARY'),216);
+          assert.equal(rank('2027-LIFE-061-LEGACY-RESEARCH'),257);
+          assert.equal(rank('2027-LIFE-028-LEGACY-RESEARCH'),279);
+          assert.equal(rank('2027-HIST-088-PRIMARY'),280);
+
+          const fixed=rows.filter(row=>row.schedule_type==='FIXED_EVENT'&&row.event_start);
+          const overlap=(a,b,as=a.event_start,ae=a.event_end||a.event_start,bs=b.event_start,be=b.event_end||b.event_start)=>as<=be&&bs<=ae;
           const note=row=>Boolean(String(row.conflict_notes||'').trim());
           const pairs=[];
           for(let i=0;i<fixed.length;i++)for(let j=i+1;j<fixed.length;j++)if(overlap(fixed[i],fixed[j]))pairs.push([fixed[i],fixed[j]]);
@@ -136,6 +176,29 @@ jobs:
           assert.equal(uncontrolled.length,0,uncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
           assert.equal(pursuePairs.length,17,pursuePairs.length);
           assert.equal(pursueUncontrolled.length,0,pursueUncontrolled);
+
+          // Estimate-aware decision gate: exact fixed windows plus HIGH/MEDIUM structured estimates <=7 calendar days.
+          const day=iso=>Math.floor(Date.parse(`${iso}T00:00:00Z`)/86400000);
+          const window=row=>{
+            if(row.schedule_type==='FIXED_EVENT'&&row.event_start)return {row,start:row.event_start,end:row.event_end||row.event_start,kind:'EXACT'};
+            if(row.estimated_start&&row.estimated_end&&['HIGH','MEDIUM'].includes(row.estimate_confidence)
+              && day(row.estimated_end)-day(row.estimated_start)<=6)
+              return {row,start:row.estimated_start,end:row.estimated_end,kind:'ESTIMATE'};
+            return null;
+          };
+          const windows=rows.map(window).filter(Boolean);
+          const estimatePursue=[];
+          for(let i=0;i<windows.length;i++)for(let j=i+1;j<windows.length;j++){
+            const a=windows[i],b=windows[j];
+            if(a.start<=b.end&&b.start<=a.end&&a.row.plan_decision==='PURSUE'&&b.row.plan_decision==='PURSUE'&&(a.kind==='ESTIMATE'||b.kind==='ESTIMATE')) estimatePursue.push([a,b]);
+          }
+          assert.equal(estimatePursue.length,2,estimatePursue.map(([a,b])=>[a.row.plan_id,b.row.plan_id]));
+          assert.equal(estimatePursue.filter(([a,b])=>!note(a.row)||!note(b.row)).length,0,estimatePursue);
+          const estimatePairKeys=estimatePursue.map(([a,b])=>[a.row.plan_id,b.row.plan_id].sort().join('|')).sort();
+          assert.deepEqual(estimatePairKeys,[
+            ['2027-LIFE-004-PRIMARY','2027-LIFE-137-PRIMARY'].sort().join('|'),
+            ['2027-LIFE-041-LEGACY-RESEARCH','2027-PROSPECT-MAKER-FAIRE-MIAMI'].sort().join('|'),
+          ].sort());
 
           assert.equal(history.ok,true,history);
           assert.equal(history.version,1,history);
@@ -166,6 +229,6 @@ jobs:
           assert.equal(historyRows.length,171);
           assert.equal(historyRows.filter(row=>/^DIRECT_R\d+_PROFILE$/.test(String(row.classification||''))).length,61);
           assert.equal(historyRows.filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0);
-          console.log({annual_run:annual.run.id,annual_summary:annual.summary,scope_counts:scopeCounts,fixed_pairs:pairs.length,history_summary:history.summary});
-          console.log('R19 governed annual-plan + historical contract: PASS');
+          console.log({annual_run:annual.run.id,published:annual.published,publication:annual.publication,annual_summary:annual.summary,scope_counts:scopeCounts,fixed_pairs:pairs.length,estimate_pursue_pairs:estimatePairKeys,history_summary:history.summary});
+          console.log('R19 published annual-plan + historical contract: PASS');
           NODE
