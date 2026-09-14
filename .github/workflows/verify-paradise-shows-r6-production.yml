@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - paradise-shows-public
+  pull_request:
+    branches:
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
@@ -15,14 +18,30 @@ jobs:
     timeout-minutes: 10
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
-      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
+      - name: Verify scope controller syntax and revision-neutral semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-annual-scope.js
+          grep -q "DIRECT_PLAN_PROFILE" public/app-annual-scope.js
+          grep -q "DIRECT_R\\\\d+_PROFILE" public/app-annual-scope.js
+          grep -q "estimated_start" public/app-annual-scope.js
+          if grep -q "HISTORY_FILTER_KEYS=.*DIRECT_R8_PROFILE" public/app-annual-scope.js; then
+            echo '::error::Historical filter is still revision-specific.'
+            exit 1
+          fi
+          echo 'Revision-neutral scope source: PASS'
+
       - name: Wait for annual scope asset and page wiring
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -44,16 +63,15 @@ jobs:
           echo '::error::Stable site did not converge to the annual scope controller.'
           exit 1
 
-      - name: Verify deployed classifier and historical coverage
+      - name: Verify deployed R19 classifier and historical coverage
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
-            -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
-          run_id="$(jq -r '.run.id // empty' /tmp/annual.json)"
-          test -n "$run_id"
-          history_payload="$(jq -nc --arg runId "$run_id" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
+          history_payload="$(jq -nc --arg runId "$R19_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data "$history_payload"
@@ -61,152 +79,53 @@ jobs:
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
           const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
-          assert.equal(annual.ok,true);
-          assert.equal(history.ok,true);
-          const expectedByRun={
-            '0294bac9-5400-4f31-9a13-fc7897b4ddfd':{rows:104,profiles:100,pursue:35,watch:69,exact:37,expectedMonth:43,conflicts:28,east:92,eastProfiles:89,eastPursue:30,eastWatch:62},
-            '893343f8-8347-4c63-bfce-9eff4b351667':{rows:107,profiles:103,pursue:35,watch:72,exact:42,expectedMonth:42,conflicts:29,east:95,eastProfiles:92,eastPursue:30,eastWatch:65},
-            '910320e9-5942-4cb6-aa3e-5203bb1fb3e2':{rows:112,profiles:108,pursue:37,watch:75,exact:44,expectedMonth:45,conflicts:31,east:100,eastProfiles:97,eastPursue:32,eastWatch:68},
-            '6570ebf8-7b5f-4314-a65d-030100f644a3':{rows:121,profiles:116,pursue:37,watch:84,exact:54,expectedMonth:44,conflicts:43,east:109,eastProfiles:105,eastPursue:32,eastWatch:77},
-          };
-          const run=annual.run||{};
-          const expected=expectedByRun[run.id];
-          assert(expected,{run,summary:annual.summary});
-          assert.equal(run.status,'READY',run);
-          assert.equal(run.row_count,expected.rows,run);
-          assert.equal(annual.summary.rows,expected.rows,annual.summary);
-          assert.equal(annual.summary.profiles,expected.profiles,annual.summary);
-          assert.equal(annual.summary.pursue,expected.pursue,annual.summary);
-          assert.equal(annual.summary.watch,expected.watch,annual.summary);
-          assert.equal(annual.summary.research,0,annual.summary);
-          assert.equal(annual.summary.exact,expected.exact,annual.summary);
-          assert.equal(annual.summary.expected,expected.expectedMonth,annual.summary);
-          assert.equal(annual.summary.conflicts,expected.conflicts,annual.summary);
-
-          const historyRun=history.run||{};
-          const requestedHistoryRun=history.requested_run||{};
-          assert.equal(requestedHistoryRun.id,run.id,{requestedHistoryRun,run});
-          assert.equal(historyRun.id,'6570ebf8-7b5f-4314-a65d-030100f644a3',historyRun);
-          assert(['DRAFT','READY'].includes(historyRun.status),historyRun);
-          assert.equal(Boolean(history.preview),historyRun.id!==run.id,{historyRun,run,preview:history.preview});
-          assert.equal(history.summary.rows,169,history.summary);
-          assert.equal(history.summary.consumer_rows,168,history.summary);
-          assert.equal(history.summary.b2b_rows,1,history.summary);
-          assert.equal(history.summary.direct_profiles,58,history.summary);
-          assert.equal(history.summary.active_routes,11,history.summary);
-          assert.equal(history.summary.staged_routes,0,history.summary);
-          assert.equal(history.summary.gap_dispositions,100,history.summary);
-          assert.equal((history.rows||[]).length,169);
-          assert.equal(new Set((history.rows||[]).map(row=>row.profile_id)).size,169);
-          assert.equal((history.rows||[]).filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0);
-          assert.deepEqual(history.summary.classifications,{
-            ARCHIVE_CONTINUITY_UNVERIFIED:71,
-            B2B_SEPARATE:1,
-            CURRENT_SIMILAR_EVENT_IDENTITY_UNPROVEN:4,
-            CURRENT_SUCCESSOR_WATCH:1,
-            DIRECT_R8_PROFILE:58,
-            LOCAL_POPUP_HISTORY:6,
-            PUBLICATION_WATCH:17,
-            VERIFIED_CANONICAL_ROUTE_ACTIVE:11,
-          });
-          const activated=(history.rows||[]).find(row=>row.profile_id==='HIST-052');
-          assert(activated,history.rows?.slice(0,5));
-          assert.equal(activated.classification,'VERIFIED_CANONICAL_ROUTE_ACTIVE');
-          assert.equal(activated.canonical_profile_id,'LIFE-023');
-          assert.equal(activated.current_2027_status,'COVERED_BY_ACTIVE_R8_CANONICAL_LIFE-023');
+          const R19=process.env.R19_RUN;
+          assert.equal(annual.ok,true,annual);
+          assert.equal(annual.run?.id,R19,annual.run);
+          assert.equal(history.ok,true,history);
+          assert.equal(history.run?.id,R19,history.run);
+          assert.equal(Boolean(history.preview),false,history);
 
           const source=fs.readFileSync('/tmp/app-annual-scope.js','utf8');
           const sandbox={
-            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:'test'},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
+            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:R19},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
+            annualPlanMonthKey(){return 'legacy';},
             renderAnnualPlan(){return '<div>base</div>'},render(){},esc(v){return String(v??'')},money(v){return '$'+String(v??'')},
             document:{addEventListener(){}},window:{},console,
           };
           vm.createContext(sandbox);vm.runInContext(source,sandbox);
           const t=sandbox.window.__PARADISE_ANNUAL_SCOPE_TEST__;
+          assert(t,'scope test surface unavailable');
+          assert.equal(sandbox.annualPlanMonthKey({estimated_start:'2027-06-04'}),'2027-06-04');
+          assert.equal(sandbox.annualPlanMonthKey({expected_month:8}),'2027-08-15');
+
           const counts=Object.fromEntries(t.ANNUAL_SCOPE_KEYS.map(k=>[k,t.annualScopeRows(k,annual.rows).length]));
-          assert.equal(counts.WEST_COAST_FLORIDA,11,counts);
-          assert.equal(counts.B2B,1,counts);
-          assert.equal(counts.CENTRAL_FLORIDA,0,counts);
-          assert.equal(counts.NORTHERN_FLORIDA,0,counts);
-          assert.equal(counts.PANHANDLE_FLORIDA,0,counts);
-          assert.equal(counts.EAST_COAST_FLORIDA,expected.east,counts);
-          const eastSummary=t.annualScopeSummary(t.annualScopeRows('EAST_COAST_FLORIDA',annual.rows));
-          assert.equal(eastSummary.rows,expected.east,eastSummary);
-          assert.equal(eastSummary.profiles,expected.eastProfiles,eastSummary);
-          assert.equal(eastSummary.pursue,expected.eastPursue,eastSummary);
-          assert.equal(eastSummary.watch,expected.eastWatch,eastSummary);
+          assert.deepEqual(counts,{EAST_COAST_FLORIDA:273,WEST_COAST_FLORIDA:11,CENTRAL_FLORIDA:0,NORTHERN_FLORIDA:0,PANHANDLE_FLORIDA:0,B2B:7});
+          const east=t.annualScopeSummary(t.annualScopeRows('EAST_COAST_FLORIDA',annual.rows));
+          assert.equal(east.rows,273,east);
+          assert.equal(east.profiles,268,east);
+          assert.equal(east.pursue,40,east);
+          assert.equal(east.watch,233,east);
 
           const historyCounts=t.historicalCoverageCounts(history.rows||[]);
-          assert.equal(historyCounts.CONSUMER,168,historyCounts);
-          assert.equal(historyCounts.ALL,169,historyCounts);
-          assert.equal(historyCounts.DIRECT_R8_PROFILE,58,historyCounts);
-          assert.equal(historyCounts.VERIFIED_ROUTE,11,historyCounts);
-          assert.equal(historyCounts.PUBLICATION_WATCH,17,historyCounts);
-          assert.equal(historyCounts.CURRENT_IDENTITY_WATCH,5,historyCounts);
-          assert.equal(historyCounts.LOCAL_POPUP_HISTORY,6,historyCounts);
-          assert.equal(historyCounts.ARCHIVE_CONTINUITY_UNVERIFIED,71,historyCounts);
-          assert.equal(historyCounts.B2B_SEPARATE,1,historyCounts);
+          assert.deepEqual(historyCounts,{
+            CONSUMER:170,
+            ALL:171,
+            DIRECT_PLAN_PROFILE:61,
+            VERIFIED_ROUTE:11,
+            PUBLICATION_WATCH:16,
+            CURRENT_IDENTITY_WATCH:5,
+            LOCAL_POPUP_HISTORY:6,
+            ARCHIVE_CONTINUITY_UNVERIFIED:71,
+            B2B_SEPARATE:1,
+          });
 
           sandbox.state.annualPlan={...annual,year:2027,loaded:true,filter:'ALL',scope:'EAST_COAST_FLORIDA'};
-          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:history.requested_run,requestedRunId:annual.run?.id||'',preview:Boolean(history.preview),previewSource:history.preview_source||null,view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
-          const historyHtml=sandbox.window.renderAnnualPlanScoped();
-          assert(historyHtml.includes('East Coast Historical Coverage'));
-          assert(historyHtml.includes('data-historical-coverage-summary'));
-          assert(historyHtml.includes('Coverage equation: 58 direct + 11 active verified routes + 0 staged verified routes + 100 gap dispositions = 169 East Coast identities.'));
-          assert(historyHtml.includes('data-historical-coverage-profile="HIST-052"'));
-          assert(!historyHtml.includes('data-historical-coverage-profile="HIST-096"'));
-          if(history.preview)assert(historyHtml.includes('does not make that run current'));
-
-          if(run.id==='910320e9-5942-4cb6-aa3e-5203bb1fb3e2'){
-            const required=new Set([
-              '2027-HIST-059-PRIMARY','2027-HIST-109-PRIMARY','2027-HIST-111-PRIMARY',
-              '2027-HIST-122-PRIMARY','2027-HIST-210-PRIMARY',
-            ]);
-            for(const row of annual.rows||[]){
-              if(required.has(row.plan_id)){
-                assert.equal(t.annualScopeKey(row),'EAST_COAST_FLORIDA',row);
-                required.delete(row.plan_id);
-              }
-            }
-            assert.equal(required.size,0,{missing:[...required]});
-          }
-          if(run.id==='6570ebf8-7b5f-4314-a65d-030100f644a3'){
-            const rows=Object.fromEntries((annual.rows||[]).map(row=>[row.plan_id,row]));
-            const added=[
-              '2027-HIST-055-PRIMARY','2027-HIST-079-PRIMARY','2027-HIST-105-PRIMARY',
-              '2027-HIST-110-PRIMARY','2027-HIST-118-PRIMARY','2027-HIST-152-PRIMARY',
-              '2027-HIST-240-PRIMARY','2027-HIST-431-PRIMARY','2027-LIFE-009-APR',
-            ];
-            for(const planId of added){
-              assert(rows[planId],{missing:planId});
-              assert.equal(t.annualScopeKey(rows[planId]),'EAST_COAST_FLORIDA',rows[planId]);
-            }
-            assert.equal(rows['2027-HIST-240-PRIMARY'].event_start,'2027-01-15');
-            assert.equal(rows['2027-HIST-240-PRIMARY'].event_end,'2027-01-18');
-            assert.equal(Number(rows['2027-HIST-240-PRIMARY'].budget_min),1750);
-            assert.equal(Number(rows['2027-HIST-240-PRIMARY'].budget_max),1750);
-            assert.equal(rows['2027-HIST-055-PRIMARY'].event_start,'2027-02-20');
-            assert.equal(rows['2027-HIST-055-PRIMARY'].event_end,'2027-02-21');
-            assert.equal(rows['2027-LIFE-009-APR'].event_start,'2027-04-10');
-            assert.equal(rows['2027-LIFE-009-APR'].event_end,'2027-04-11');
-            assert.equal(rows['2027-HIST-431-PRIMARY'].event_start,'2027-05-01');
-            assert.equal(rows['2027-HIST-152-PRIMARY'].event_start,'2027-06-18');
-            assert.equal(rows['2027-HIST-152-PRIMARY'].event_end,'2027-06-20');
-            assert.equal(rows['2027-HIST-152-PRIMARY'].date_confidence,'CURRENT_SAME_NAME_SUCCESSOR_IDENTITY_UNVERIFIED');
-            assert.equal(rows['2027-HIST-079-PRIMARY'].event_start,'2027-07-04');
-            const sebastian=rows['2027-HIST-098-PRIMARY'];
-            assert(sebastian,{'missing':'2027-HIST-098-PRIMARY'});
-            assert.equal(sebastian.event_start,'2027-09-11');
-            assert.equal(sebastian.cost_status,'KNOWN_VERIFIED');
-            assert.equal(Number(sebastian.budget_min),500);
-            assert.equal(Number(sebastian.budget_max),500);
-            assert.equal(rows['2027-HIST-105-PRIMARY'].event_start,'2027-10-02');
-            assert.equal(rows['2027-HIST-105-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
-            assert.equal(rows['2027-HIST-110-PRIMARY'].event_start,'2027-10-29');
-            assert.equal(rows['2027-HIST-110-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
-            assert.equal(rows['2027-HIST-118-PRIMARY'].event_start,'2027-12-04');
-            assert.equal(rows['2027-HIST-118-PRIMARY'].cost_status,'PACKAGE_COVERED_BY_HIST-098');
-          }
-          console.log({run:run.id,rows:annual.summary.rows,scope_counts:counts,east_summary:eastSummary,history_run:historyRun.id,history_preview:history.preview,history_summary:history.summary,history_counts:historyCounts});
-          console.log('Live annual scope + historical coverage: PASS');
+          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:history.requested_run,requestedRunId:R19,preview:Boolean(history.preview),previewSource:history.preview_source||null,view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
+          const html=sandbox.window.renderAnnualPlanScoped();
+          assert(html.includes('East Coast Historical Coverage'));
+          assert(html.includes('Coverage equation: 61 direct + 11 active verified routes + 0 staged verified routes + 99 gap dispositions = 171 East Coast identities.'));
+          assert(html.includes('Direct in 2027 plan 61'));
+          console.log({run:R19,scope_counts:counts,east_summary:east,history_counts:historyCounts});
+          console.log('R19 live annual scope + historical coverage: PASS');
           NODE

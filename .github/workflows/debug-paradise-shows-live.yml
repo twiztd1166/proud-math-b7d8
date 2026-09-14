@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - paradise-shows-public
-      - hotfix/r6-scope-smoke-contract
+  pull_request:
+    branches:
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
@@ -21,11 +23,22 @@ jobs:
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
       API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
-      - name: Execute preserved mature smoke suite
+      - name: Validate R19 mature-smoke adapter
         shell: bash
-        run: python scripts/run-paradise-shows-live-smoke.py
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-r19.py
+          grep -q '83a90da8-d460-413f-8ca4-7735bcbe0f88' scripts/run-paradise-shows-live-smoke-r19.py
+          grep -q 'ANNUAL_API' scripts/run-paradise-shows-live-smoke-r19.py
+          echo 'R19 mature-smoke adapter source: PASS'
+
+      - name: Execute preserved mature smoke suite
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: python scripts/run-paradise-shows-live-smoke-r19.py
