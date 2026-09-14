@@ -2,8 +2,8 @@
 """R19 compatibility layer for the preserved Paradise Shows mature smoke.
 
 The preserved source remains authoritative for the broad operating smoke. This wrapper changes
-only the annual-plan read contract: shows-api remains the operating API, while annualPlan is read
-from shows-annual-plan-api v4 and validated against the current R19 READY run.
+the annual-plan read contract for R19 and reconciles the later verified LIFE-190 -> LIFE-171
+series relation that legitimately removes one Silver profile from the historical candidate pool.
 """
 import importlib.util
 import json
@@ -74,6 +74,21 @@ def scope_aware_annual_api_script_r19(script: str) -> str:
     script, count = pattern.subn(r'\1"$ANNUAL_API"', script, count=1)
     if count != 1:
         raise RuntimeError(f'Expected one annual-plan API curl target, got {count}')
+
+    # The preserved source predates the Sep. 12 verified identity relation that maps the legacy
+    # LIFE-190 source-grain profile to the continuing LIFE-171 canonical series. Reconcile the
+    # historical-candidate count only while also asserting the exact governed reason for the delta.
+    stale = "assert len(historical_2013)==66, len(historical_2013)"
+    if script.count(stale) != 1:
+        raise RuntimeError('Expected exactly one pre-LIFE-190 historical candidate assertion')
+    replacement = """life190=profiles['LIFE-190']
+assert life190.get('related_current_profile_id') == 'LIFE-171', life190
+assert not life190.get('current_rebook_opportunity'), life190
+assert not has_current_control(life190), life190
+assert float(life190.get('lifetime_net_volume') or 0) > 0, life190
+assert int(life190.get('latest_history_year') or 0) >= 2013, life190
+assert len(historical_2013)==65, len(historical_2013)"""
+    script = script.replace(stale, replacement, 1)
     return script
 
 
