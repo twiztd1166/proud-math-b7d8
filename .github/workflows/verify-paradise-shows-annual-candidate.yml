@@ -1,0 +1,153 @@
+name: Paradise Shows annual candidate prepublication verifier
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: READY annual-plan candidate UUID to validate before publication
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+      HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      CANDIDATE_RUN: ${{ inputs.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Validate candidate input
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_RUN" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
+            echo '::error::run_id must be a valid lowercase/uppercase UUID.'
+            exit 1
+          }
+
+      - name: Fetch READY candidate and matching historical ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          annual_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
+          history_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:false}')"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$annual_payload"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
+
+      - name: Verify generic prepublication invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const annual=JSON.parse(fs.readFileSync('/tmp/candidate.json','utf8'));
+          const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
+          const candidate=process.env.CANDIDATE_RUN;
+
+          assert.equal(annual.ok,true,annual);
+          assert.equal(annual.version,3,annual);
+          assert.equal(annual.requested_run_id,candidate,annual);
+          assert.equal(annual.run?.id,candidate,annual.run);
+          assert.equal(annual.run?.status,'READY',annual.run);
+          assert.equal(annual.published,false,'Candidate is already public; this gate must run before publication.');
+          assert.notEqual(annual.publication?.run_id,candidate,'Candidate unexpectedly matches current publication pointer.');
+
+          const rows=annual.rows||[];
+          assert.equal(rows.length,Number(annual.run?.row_count),{rows:rows.length,row_count:annual.run?.row_count});
+          assert.ok(rows.length>0,'Candidate has no annual-plan rows.');
+          assert.equal(rows.filter(row=>!String(row.geographic_region||'').trim()).length,0,'missing geographic_region');
+          assert.equal(rows.filter(row=>!String(row.planning_category||'').trim()).length,0,'missing planning_category');
+          assert.equal(rows.filter(row=>row.estimated_start&&(!row.estimated_end||!row.estimate_confidence||!row.estimate_basis)).length,0,'incomplete estimate structure');
+          assert.equal(rows.filter(row=>!['PURSUE','WATCH','RESEARCH_IDENTITY'].includes(String(row.plan_decision||''))).length,0,'unknown plan_decision');
+          assert.equal(rows.filter(row=>!['HIGH','MEDIUM','LOW'].includes(String(row.priority||''))).length,0,'unknown priority');
+
+          const decisionRank={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
+          const priorityRank={HIGH:0,MEDIUM:1,LOW:2};
+          const planningDate=row=>{
+            if(row.event_start)return String(row.event_start);
+            if(row.estimated_start)return String(row.estimated_start);
+            if(Number.isInteger(Number(row.expected_month))&&Number(row.expected_month)>=1&&Number(row.expected_month)<=12)
+              return `2027-${String(Number(row.expected_month)).padStart(2,'0')}-15`;
+            if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
+            return '9999-12-31';
+          };
+          const compare=(a,b)=>planningDate(a).localeCompare(planningDate(b))
+            ||(decisionRank[a.plan_decision]??9)-(decisionRank[b.plan_decision]??9)
+            ||(priorityRank[a.priority]??9)-(priorityRank[b.priority]??9)
+            ||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))
+            ||String(a.plan_id||'').localeCompare(String(b.plan_id||''));
+          for(let i=1;i<rows.length;i++)assert.ok(compare(rows[i-1],rows[i])<=0,{i,previous:rows[i-1].plan_id,current:rows[i].plan_id});
+
+          const note=row=>Boolean(String(row.conflict_notes||'').trim());
+          const fixed=rows.filter(row=>row.schedule_type==='FIXED_EVENT'&&row.event_start);
+          const fixedPairs=[];
+          for(let i=0;i<fixed.length;i++)for(let j=i+1;j<fixed.length;j++){
+            const a=fixed[i],b=fixed[j],as=a.event_start,ae=a.event_end||a.event_start,bs=b.event_start,be=b.event_end||b.event_start;
+            if(as<=be&&bs<=ae)fixedPairs.push([a,b]);
+          }
+          const fixedUncontrolled=fixedPairs.filter(([a,b])=>!note(a)||!note(b));
+          const fixedPursue=fixedPairs.filter(([a,b])=>a.plan_decision==='PURSUE'&&b.plan_decision==='PURSUE');
+          const fixedPursueUncontrolled=fixedPursue.filter(([a,b])=>!note(a)||!note(b));
+          assert.equal(fixedUncontrolled.length,0,fixedUncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
+          assert.equal(fixedPursueUncontrolled.length,0,fixedPursueUncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
+
+          const day=iso=>Math.floor(Date.parse(`${iso}T00:00:00Z`)/86400000);
+          const window=row=>{
+            if(row.schedule_type==='FIXED_EVENT'&&row.event_start)return {row,start:row.event_start,end:row.event_end||row.event_start,kind:'EXACT'};
+            if(row.estimated_start&&row.estimated_end&&['HIGH','MEDIUM'].includes(row.estimate_confidence)
+              && day(row.estimated_end)-day(row.estimated_start)<=6)
+              return {row,start:row.estimated_start,end:row.estimated_end,kind:'ESTIMATE'};
+            return null;
+          };
+          const windows=rows.map(window).filter(Boolean),estimatePursue=[];
+          for(let i=0;i<windows.length;i++)for(let j=i+1;j<windows.length;j++){
+            const a=windows[i],b=windows[j];
+            if(a.start<=b.end&&b.start<=a.end&&a.row.plan_decision==='PURSUE'&&b.row.plan_decision==='PURSUE'&&(a.kind==='ESTIMATE'||b.kind==='ESTIMATE')) estimatePursue.push([a,b]);
+          }
+          const estimateUncontrolled=estimatePursue.filter(([a,b])=>!note(a.row)||!note(b.row));
+          assert.equal(estimateUncontrolled.length,0,estimateUncontrolled.map(([a,b])=>[a.row.plan_id,b.row.plan_id]));
+
+          assert.equal(history.ok,true,history);
+          assert.equal(history.requested_run?.id,candidate,history.requested_run);
+          assert.equal(history.run?.id,candidate,history.run);
+          assert.equal(Boolean(history.preview),false,history);
+          const historyRows=history.rows||[];
+          assert.ok(historyRows.length>0,'Candidate has no historical audit ledger.');
+          assert.equal(historyRows.filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0,'historical rows missing source_refs');
+          const direct=historyRows.filter(row=>/^DIRECT_R\d+_PROFILE$/.test(String(row.classification||''))).length;
+          const active=historyRows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_ACTIVE').length;
+          const staged=historyRows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_STAGED').length;
+          const gaps=historyRows.length-direct-active-staged;
+          assert.equal(Number(history.summary?.direct_profiles),direct,history.summary);
+          assert.equal(Number(history.summary?.active_routes),active,history.summary);
+          assert.equal(Number(history.summary?.staged_routes),staged,history.summary);
+          assert.equal(Number(history.summary?.gap_dispositions),gaps,history.summary);
+
+          console.log({
+            candidate,
+            published:annual.published,
+            current_publication:annual.publication?.run_id||null,
+            rows:rows.length,
+            profiles:new Set(rows.map(row=>row.profile_id)).size,
+            fixed_pairs:fixedPairs.length,
+            fixed_pursue_pairs:fixedPursue.length,
+            estimate_driven_pursue_pairs:estimatePursue.length,
+            history_rows:historyRows.length,
+            history_direct:direct,
+            history_active:active,
+            history_staged:staged,
+            history_gaps:gaps,
+          });
+          console.log('Annual candidate prepublication invariants: PASS');
+          NODE
