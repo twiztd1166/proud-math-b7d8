@@ -2,8 +2,9 @@
 """R19 compatibility layer for the preserved Paradise Shows mature smoke.
 
 The preserved source remains authoritative for the broad operating smoke. This wrapper changes
-the annual-plan read contract for R19 and reconciles the later verified LIFE-190 -> LIFE-171
-series relation that legitimately removes one Silver profile from the historical candidate pool.
+the annual-plan read contract for the publication-gated R19 API and reconciles the later verified
+LIFE-190 -> LIFE-171 series relation that legitimately removes one Silver profile from the
+historical candidate pool.
 """
 import importlib.util
 import json
@@ -58,6 +59,8 @@ assert summary.get('profiles') == expected['profiles'], (summary, expected)
 assert summary.get('pursue') == expected['pursue'], (summary, expected)
 assert summary.get('watch') == expected['watch'], (summary, expected)
 if run.get('id') == '83a90da8-d460-413f-8ca4-7735bcbe0f88':
+    assert x.get('published') is True, x
+    assert (x.get('publication') or {}).get('run_id') == '83a90da8-d460-413f-8ca4-7735bcbe0f88', x.get('publication')
     assert summary.get('estimated') == 125, summary
     assert summary.get('broad_estimated') == 25, summary"""
 
@@ -69,7 +72,7 @@ def scope_aware_annual_api_script_r19(script: str) -> str:
     count = script.count("assert x.get('version') == 1, x")
     if count != 1:
         raise RuntimeError(f'Expected one annual response-version assertion, got {count}')
-    script = script.replace("assert x.get('version') == 1, x", "assert x.get('version') == 2, x", 1)
+    script = script.replace("assert x.get('version') == 1, x", "assert x.get('version') == 3, x", 1)
     pattern = re.compile(r'(-o /tmp/annual-plan\.json \\\n\s*-X POST )"\$API"')
     script, count = pattern.subn(r'\1"$ANNUAL_API"', script, count=1)
     if count != 1:
@@ -119,6 +122,9 @@ def verify_scope_contract_r19():
     dom = path.read_text(encoding='utf-8')
     annual = post_annual_plan_r19()
     assert annual.get('ok') is True, annual
+    assert annual.get('version') == 3, annual
+    assert annual.get('published') is True, annual
+    assert (annual.get('publication') or {}).get('run_id') == R19_RUN, annual.get('publication')
     run = annual.get('run') or {}
     assert run.get('id') == R19_RUN, run
     assert run.get('status') == 'READY', run
@@ -155,6 +161,8 @@ def verify_scope_contract_r19():
     assert sum(1 for row in rows if row.get('estimated_start') and not row.get('expected_month')) == 25
     print({
         'run': R19_RUN,
+        'published': annual.get('published'),
+        'publication': annual.get('publication'),
         'scope_counts': counts,
         'east_rows': 273,
         'east_profiles': 268,
