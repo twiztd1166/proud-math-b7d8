@@ -1,0 +1,88 @@
+name: Paradise Shows legacy annual compatibility verifier
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+  pull_request:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-legacy-annual-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+      HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Verify canonical browser annual endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-annual-api.js
+          grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
+          if grep -q 'functions/v1/shows-api' public/app-annual-api.js; then
+            echo '::error::Annual browser adapter must not use the general operating API.'
+            exit 1
+          fi
+          if grep -q 'functions/v1/shows-history-api' public/app-annual-api.js; then
+            echo '::error::Annual browser adapter must not use the historical compatibility API.'
+            exit 1
+          fi
+          echo 'Canonical annual browser endpoint: PASS'
+
+      - name: Verify published and legacy-history annual reads agree on R19
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/canonical.json \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"annualPlan","year":2027}'
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/legacy-history.json \
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"annualPlan","year":2027}'
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const canonical=JSON.parse(fs.readFileSync('/tmp/canonical.json','utf8'));
+          const legacy=JSON.parse(fs.readFileSync('/tmp/legacy-history.json','utf8'));
+          const R19=process.env.R19_RUN;
+
+          assert.equal(canonical.ok,true,canonical);
+          assert.equal(canonical.version,3,canonical);
+          assert.equal(canonical.publication?.run_id,R19,canonical.publication);
+          assert.equal(canonical.run?.id,R19,canonical.run);
+          assert.equal(canonical.published,true,canonical);
+
+          // shows-history-api keeps its old annual response shape for compatibility,
+          // but the selected run must follow the explicit publication pointer.
+          assert.equal(legacy.ok,true,legacy);
+          assert.equal(legacy.version,2,legacy);
+          assert.equal(legacy.run?.id,R19,legacy.run);
+          assert.equal(legacy.run?.status,'READY',legacy.run);
+          assert.equal(legacy.run?.row_count,291,legacy.run);
+          assert.deepEqual({
+            rows:legacy.summary?.rows,
+            profiles:legacy.summary?.profiles,
+            pursue:legacy.summary?.pursue,
+            watch:legacy.summary?.watch,
+            research:legacy.summary?.research,
+            exact:legacy.summary?.exact,
+            expected:legacy.summary?.expected,
+            conflicts:legacy.summary?.conflicts,
+          },{rows:291,profiles:284,pursue:45,watch:246,research:0,exact:151,expected:102,conflicts:176});
+          assert.equal((legacy.rows||[]).length,291);
+
+          console.log({published_run:canonical.run.id,legacy_history_run:legacy.run.id,legacy_summary:legacy.summary});
+          console.log('Legacy history annual compatibility follows publication pointer: PASS');
+          NODE
