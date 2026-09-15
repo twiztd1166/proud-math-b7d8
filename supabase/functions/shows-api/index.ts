@@ -167,7 +167,7 @@ function sourceLabeledPerformanceValue(row:any){
     ['appts','Appts'],['contacts','Contacts'],['raw_leads','Raw leads'],['set_appts_unconfirmed','Set appts (unconfirmed)'],
     ['sets','Sets'],['sales','Sales'],['gross','Gross'],['gross_sale','Gross sale'],
   ];
-  const values=[];
+  const values:string[]=[];
   for(const [key,label] of specs){
     const value=fields[key];
     if(value!==null&&value!==undefined&&String(value).trim()!=='')values.push(label+' '+String(value).trim());
@@ -831,7 +831,7 @@ Deno.serve(async r => {
       const historyFieldSupport:any={};
       const historyCoiSummary={affirmative:0,known_nonaffirmative:0};
       for(const [year,y] of item.year_fields.entries()){
-        for(const key of Object.keys(historyFieldTotals))sumStateCounts(historyFieldTotals[key],y[key]);
+        for(const key of Object.keys(historyFieldTotals) as Array<keyof typeof historyFieldTotals>)sumStateCounts(historyFieldTotals[key],y[key]);
         historyCoiSummary.affirmative+=Number(y.coi_affirmative||0);
         historyCoiSummary.known_nonaffirmative+=Number(y.coi_known_nonaffirmative||0);
         const coms=(y.com_values as number[]).filter(Number.isFinite);
