@@ -46,9 +46,9 @@ Compatibility-only. As of `shows-history-api` v4, this legacy annual read select
 
 ### `shows-api?action=annualPlan`
 
-**Compatibility-only / non-authoritative.** As of `shows-api` v92, this legacy annual read resolves the explicit `shows_app_annual_plan_publication` pointer and then requires the selected run to remain READY for the same plan year. It preserves the legacy v1 annual response shape and downstream row/summary behavior.
+**Compatibility-only / non-authoritative.** As of `shows-api` v93, this legacy annual read resolves the explicit `shows_app_annual_plan_publication` pointer and then requires the selected run to remain READY for the same plan year. It preserves the legacy v1 annual response shape and downstream row/summary behavior.
 
-The complete pre-change v91 operating-function source was mechanically captured from Supabase into version control before modification, with a tested rollback path. The v92 release changed only the legacy `annualPlan` run selector and passed operating authentication checks plus the full production regression stack. The current production browser still must not use this route as its annual-plan authority; `shows-annual-plan-api` remains the sole authoritative browser annual endpoint.
+The complete pre-change v91 operating-function source was mechanically captured from Supabase into version control before modification, with a tested rollback path. The v92 release changed only the legacy `annualPlan` run selector. The v93 successor changes only two inherited TypeScript annotations; standalone and function-config Deno checks pass, and the emitted JavaScript is byte-identical to v92. Both releases passed the controlled production regression stack. The current production browser still must not use this route as its annual-plan authority; `shows-annual-plan-api` remains the sole authoritative browser annual endpoint.
 
 The repository regression must continue to prove that `public/app-annual-api.js` points only to `shows-annual-plan-api`, that `shows-history-api` annual compatibility resolves the published run, and that legacy `shows-api?action=annualPlan` cannot define public currentness independently of the publication pointer.
 
@@ -70,7 +70,7 @@ Current release-control stack:
 
 - `shows-annual-plan-api` v5 / response contract v3;
 - `shows-history-api` v4 for publication-aligned legacy annual compatibility;
-- `shows-api` v92 for publication-aligned general-API annual compatibility while preserving its operating API role;
+- `shows-api` v93 for publication-aligned general-API annual compatibility while preserving its operating API role;
 - explicit 2027 publication pointer -> R19;
 - READY candidate preview remains separate from publication.
 
