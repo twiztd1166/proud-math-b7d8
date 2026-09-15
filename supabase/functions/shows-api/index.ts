@@ -405,13 +405,23 @@ Deno.serve(async r => {
   if(action==='annualPlan'){
     const year=Number(body.year||2027);
     if(!Number.isInteger(year)||year<2026||year>2035)return out(r,{ok:false,error:'Valid annual plan year required'},400);
-    const latest=await db.from('shows_app_annual_plan_runs')
+    const publication=await db.from('shows_app_annual_plan_publication')
+      .select('run_id')
+      .eq('plan_year',year)
+      .maybeSingle();
+    if(publication.error)return out(r,{ok:false,error:'Unable to load annual plan'},500);
+    const publishedRunId=String(publication.data?.run_id||'');
+    if(!publishedRunId)return out(r,{ok:true,version:1,year,run:null,summary:{rows:0,profiles:0,pursue:0,watch:0,research:0,exact:0,expected:0,conflicts:0},rows:[]});
+
+    const selected=await db.from('shows_app_annual_plan_runs')
       .select('id,plan_year,status,created_at,source_scope,notes,row_count')
-      .eq('plan_year',year).eq('status','READY')
-      .order('created_at',{ascending:false}).limit(1);
-    if(latest.error)return out(r,{ok:false,error:'Unable to load annual plan'},500);
-    const run=latest.data?.[0]||null;
-    if(!run)return out(r,{ok:true,version:1,year,run:null,summary:{rows:0,profiles:0,pursue:0,watch:0,research:0,exact:0,expected:0,conflicts:0},rows:[]});
+      .eq('id',publishedRunId)
+      .eq('plan_year',year)
+      .eq('status','READY')
+      .maybeSingle();
+    if(selected.error)return out(r,{ok:false,error:'Unable to load annual plan'},500);
+    const run=selected.data||null;
+    if(!run)return out(r,{ok:false,error:'Unable to load annual plan'},500);
     const plan=await db.from('shows_app_annual_plan')
       .select('plan_id,plan_year,profile_id,canonical_event,occurrence_label,coverage_class,plan_decision,priority,publication_status,date_confidence,event_start,event_end,expected_month,expected_window_text,action_start,action_due,action_window_text,cost_status,budget_min,budget_max,budget_basis,placement_reference,historical_signal,next_action,source_basis,source_refs,mfc_ids,schedule_type,conflict_notes')
       .eq('run_id',run.id)
