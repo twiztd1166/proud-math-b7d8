@@ -54,16 +54,16 @@ The repository regression must continue to prove that `public/app-annual-api.js`
 
 ## Current 2027 control
 
-Published run: `83a90da8-d460-413f-8ca4-7735bcbe0f88` (R19).
+Published run: `e32e4fb7-1fd3-4f1d-aa93-102a88090482` (R20).
 
-Stable R19 invariants:
+Stable R20 invariants:
 
-- 291 annual rows;
-- 284 profiles;
-- 45 PURSUE / 246 WATCH / 0 RESEARCH;
-- 381 fixed overlap pairs / 0 reciprocal-uncontrolled;
+- 292 annual rows;
+- 285 profiles;
+- 46 PURSUE / 246 WATCH / 0 RESEARCH;
+- 387 fixed overlap pairs / 0 reciprocal-uncontrolled;
 - 17 fixed PURSUE/PURSUE pairs / 0 uncontrolled;
-- 2 estimate-driven PURSUE/PURSUE pairs / 0 uncontrolled;
+- 3 estimate-driven PURSUE/PURSUE pairs / 0 uncontrolled;
 - 171 historical-audit rows.
 
 Current release-control stack:
@@ -71,10 +71,14 @@ Current release-control stack:
 - `shows-annual-plan-api` v5 / response contract v3;
 - `shows-history-api` v4 for publication-aligned legacy annual compatibility;
 - `shows-api` v93 for publication-aligned general-API annual compatibility while preserving its operating API role;
-- explicit 2027 publication pointer -> R19;
-- READY candidate preview remains separate from publication.
+- explicit 2027 publication pointer -> R20;
+- READY candidate preview remains separate from publication;
+- governed annual-read, production-scope/history, legacy-compatibility, and mature-smoke verifiers resolve the current publication dynamically rather than hard-coding an annual revision;
+- the active mature-smoke workflow uses `scripts/run-paradise-shows-live-smoke-current.py`; the R19-specific wrapper is retained only as historical rollback evidence.
 
-Read the R19 row in `shows_app_annual_plan_release_validations` for the exact validated commit, workflow run IDs, attempt numbers, timestamps, and hardening evidence.
+R20 is a bounded successor to R19: one net-new Jupiter Irish Fest PURSUE/MEDIUM row plus one reciprocal estimate-aware `conflict_notes` repair on `2027-LIFE-085-PRIMARY`; the 171-row historical audit remains logically unchanged.
+
+Read the R20 row in `shows_app_annual_plan_release_validations` for the exact validated production commit, workflow evidence, timestamps, and hardening record. Historical R19 validation/recovery artifacts remain preserved as point-in-time evidence and must not be interpreted as the current publication.
 
 ## Safety boundary
 
