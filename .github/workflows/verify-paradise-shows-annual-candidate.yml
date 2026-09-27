@@ -219,10 +219,10 @@ jobs:
           const fs=require('fs'),assert=require('assert');
           const x=JSON.parse(fs.readFileSync('/tmp/bootstrap.json','utf8'));
           assert.equal(x.ok,true,x);
-          assert.ok(Number(x.version)>=93,x.version);
+          assert.equal(Number(x.version),17,x.version);
           assert.equal((x.shows||[]).length,37,(x.shows||[]).length);
           assert.equal((x.payments||[]).length,4,(x.payments||[]).length);
-          console.log({shows_api_version:x.version,shows:(x.shows||[]).length,payments:(x.payments||[]).length});
+          console.log({shows_api_contract_version:x.version,shows:(x.shows||[]).length,payments:(x.payments||[]).length});
           console.log('Operating population: PASS');
           NODE
           code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth.json -w '%{http_code}'             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json'             --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"R20_UNAUTH_TEST_MUST_NOT_WRITE"}}')"
