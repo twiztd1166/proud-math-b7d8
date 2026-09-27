@@ -97,8 +97,11 @@ jobs:
               watch:x.summary?.watch,research:x.summary?.research,exact:x.summary?.exact,
               expected:x.summary?.expected,conflicts:x.summary?.conflicts,
             },core,{label,summary:x.summary,core});
-            assert.equal((x.rows||[]).length,rows.length,{label});
-            assert.deepEqual((x.rows||[]).map(r=>r.plan_id),rows.map(r=>r.plan_id),{label});
+            const compatRows=x.rows||[];
+            assert.equal(compatRows.length,rows.length,{label});
+            const fields=['plan_id','profile_id','plan_decision','priority','event_start','event_end','expected_month','estimated_start','estimated_end','conflict_notes'];
+            const normalize=list=>list.map(row=>Object.fromEntries(fields.map(k=>[k,row?.[k]??null]))).sort((a,b)=>String(a.plan_id).localeCompare(String(b.plan_id)));
+            assert.deepEqual(normalize(compatRows),normalize(rows),{label});
           }
 
           console.log({published_run:canonical.run.id,canonical_version:canonical.version,history_version:history.version,shows_version:shows.version,summary:core});
