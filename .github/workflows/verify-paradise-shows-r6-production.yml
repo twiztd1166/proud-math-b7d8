@@ -20,7 +20,6 @@ jobs:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
-      R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -32,10 +31,10 @@ jobs:
           set -euo pipefail
           node --check public/app-annual-scope.js
           grep -q "DIRECT_PLAN_PROFILE" public/app-annual-scope.js
-          grep -q "DIRECT_R\\\\d+_PROFILE" public/app-annual-scope.js
+          grep -Fq 'DIRECT_R\d+_PROFILE' public/app-annual-scope.js
           grep -q "estimated_start" public/app-annual-scope.js
           if grep -q "HISTORY_FILTER_KEYS=.*DIRECT_R8_PROFILE" public/app-annual-scope.js; then
-            echo '::error::Historical filter is still revision-specific.'
+            echo '::error::Historical filter is revision-specific.'
             exit 1
           fi
           echo 'Revision-neutral scope source: PASS'
@@ -63,35 +62,35 @@ jobs:
           echo '::error::Stable site did not converge to the annual scope controller.'
           exit 1
 
-      - name: Verify deployed published R19 classifier and historical coverage
-        if: github.event_name != 'pull_request'
+      - name: Verify current published classifier and historical coverage
         shell: bash
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
-          history_payload="$(jq -nc --arg runId "$R19_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
+          CURRENT_RUN="$(jq -er '.run.id' /tmp/annual.json)"
+          history_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            --data "$history_payload"
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
           const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
-          const R19=process.env.R19_RUN;
           assert.equal(annual.ok,true,annual);
           assert.equal(annual.version,3,annual);
-          assert.equal(annual.publication?.run_id,R19,annual.publication);
           assert.equal(annual.published,true,annual);
-          assert.equal(annual.run?.id,R19,annual.run);
+          assert.ok(annual.publication?.run_id,annual.publication);
+          assert.equal(annual.run?.id,annual.publication.run_id,annual);
+          assert.equal(annual.run?.status,'READY',annual.run);
           assert.equal(history.ok,true,history);
-          assert.equal(history.run?.id,R19,history.run);
+          assert.equal(history.run?.id,annual.run.id,history.run);
           assert.equal(Boolean(history.preview),false,history);
 
-          const source=fs.readFileSync('/tmp/app-annual-scope.js','utf8');
+          const source=fs.readFileSync('public/app-annual-scope.js','utf8');
+          const runId=annual.run.id;
           const sandbox={
-            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:R19},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
+            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:runId},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
             annualPlanMonthKey(){return 'legacy';},
             renderAnnualPlan(){return '<div>base</div>'},render(){},esc(v){return String(v??'')},money(v){return '$'+String(v??'')},
             document:{addEventListener(){}},window:{},console,
@@ -102,33 +101,43 @@ jobs:
           assert.equal(sandbox.annualPlanMonthKey({estimated_start:'2027-06-04'}),'2027-06-04');
           assert.equal(sandbox.annualPlanMonthKey({expected_month:8}),'2027-08-15');
 
-          const counts=Object.fromEntries(t.ANNUAL_SCOPE_KEYS.map(k=>[k,t.annualScopeRows(k,annual.rows).length]));
-          assert.deepEqual(counts,{EAST_COAST_FLORIDA:273,WEST_COAST_FLORIDA:11,CENTRAL_FLORIDA:0,NORTHERN_FLORIDA:0,PANHANDLE_FLORIDA:0,B2B:7});
-          const east=t.annualScopeSummary(t.annualScopeRows('EAST_COAST_FLORIDA',annual.rows));
-          assert.equal(east.rows,273,east);
-          assert.equal(east.profiles,268,east);
-          assert.equal(east.pursue,40,east);
-          assert.equal(east.watch,233,east);
+          const rows=annual.rows||[];
+          const counts=Object.fromEntries(t.ANNUAL_SCOPE_KEYS.map(k=>[k,t.annualScopeRows(k,rows).length]));
+          assert.equal(Object.values(counts).reduce((a,b)=>a+b,0),rows.length,counts);
+          for(const row of rows){
+            const matches=t.ANNUAL_SCOPE_KEYS.filter(k=>t.annualScopeRows(k,[row]).length===1);
+            assert.equal(matches.length,1,{plan_id:row.plan_id,matches});
+          }
 
-          const historyCounts=t.historicalCoverageCounts(history.rows||[]);
-          assert.deepEqual(historyCounts,{
-            CONSUMER:170,
-            ALL:171,
-            DIRECT_PLAN_PROFILE:61,
-            VERIFIED_ROUTE:11,
-            PUBLICATION_WATCH:16,
-            CURRENT_IDENTITY_WATCH:5,
-            LOCAL_POPUP_HISTORY:6,
-            ARCHIVE_CONTINUITY_UNVERIFIED:71,
-            B2B_SEPARATE:1,
-          });
+          const eastRows=t.annualScopeRows('EAST_COAST_FLORIDA',rows);
+          const east=t.annualScopeSummary(eastRows);
+          assert.equal(east.rows,eastRows.length,east);
+          assert.equal(east.profiles,new Set(eastRows.map(row=>row.profile_id)).size,east);
+          assert.equal(east.pursue,eastRows.filter(row=>row.plan_decision==='PURSUE').length,east);
+          assert.equal(east.watch,eastRows.filter(row=>row.plan_decision==='WATCH').length,east);
+          assert.equal(east.research,eastRows.filter(row=>row.plan_decision==='RESEARCH_IDENTITY').length,east);
+
+          const historyRows=history.rows||[];
+          const historyCounts=t.historicalCoverageCounts(historyRows);
+          assert.equal(historyCounts.ALL,historyRows.length,historyCounts);
+          assert.equal(historyCounts.DIRECT_PLAN_PROFILE,Number(history.summary?.direct_profiles),historyCounts);
+          assert.equal(historyCounts.VERIFIED_ROUTE,Number(history.summary?.active_routes)+Number(history.summary?.staged_routes),historyCounts);
+          assert.equal(historyCounts.B2B_SEPARATE,Number(history.summary?.b2b_rows),historyCounts);
 
           sandbox.state.annualPlan={...annual,year:2027,loaded:true,filter:'ALL',scope:'EAST_COAST_FLORIDA'};
-          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:history.requested_run,requestedRunId:R19,preview:Boolean(history.preview),previewSource:history.preview_source||null,view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
+          sandbox.state.annualProfileAudit={
+            rows:historyRows,summary:history.summary,run:history.run,requestedRun:history.requested_run,
+            requestedRunId:runId,preview:false,previewSource:null,view:'HISTORY',filter:'CONSUMER',
+            loaded:true,loading:false,error:null
+          };
           const html=sandbox.window.renderAnnualPlanScoped();
           assert(html.includes('East Coast Historical Coverage'));
-          assert(html.includes('Coverage equation: 61 direct + 11 active verified routes + 0 staged verified routes + 99 gap dispositions = 171 East Coast identities.'));
-          assert(html.includes('Direct in 2027 plan 61'));
-          console.log({run:R19,published:annual.published,publication:annual.publication,scope_counts:counts,east_summary:east,history_counts:historyCounts});
-          console.log('R19 live published annual scope + historical coverage: PASS');
+          const direct=Number(history.summary?.direct_profiles)||0;
+          const active=Number(history.summary?.active_routes)||0;
+          const staged=Number(history.summary?.staged_routes)||0;
+          const gaps=Number(history.summary?.gap_dispositions)||0;
+          assert(html.includes(`Coverage equation: ${direct} direct + ${active} active verified routes + ${staged} staged verified routes + ${gaps} gap dispositions = ${historyRows.length} East Coast identities.`));
+
+          console.log({run:runId,scope_counts:counts,east_summary:east,history_counts:historyCounts});
+          console.log('Current published annual scope + historical coverage: PASS');
           NODE

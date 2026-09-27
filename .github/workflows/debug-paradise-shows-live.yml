@@ -29,18 +29,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate R19 mature-smoke adapter
+      - name: Validate current-publication mature-smoke adapter
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-r19.py
-          grep -q '83a90da8-d460-413f-8ca4-7735bcbe0f88' scripts/run-paradise-shows-live-smoke-r19.py
-          grep -q 'ANNUAL_API' scripts/run-paradise-shows-live-smoke-r19.py
-          grep -q "assert annual.get('version') == 3" scripts/run-paradise-shows-live-smoke-r19.py
-          grep -q "assert annual.get('published') is True" scripts/run-paradise-shows-live-smoke-r19.py
-          echo 'R19 publication-gated mature-smoke adapter source: PASS'
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
+          grep -q 'CURRENT_RUN' scripts/run-paradise-shows-live-smoke-current.py
+          grep -q 'ANNUAL_API' scripts/run-paradise-shows-live-smoke-current.py
+          grep -q "assert annual.get('published') is True" scripts/run-paradise-shows-live-smoke-current.py
+          if grep -q '83a90da8-d460-413f-8ca4-7735bcbe0f88' scripts/run-paradise-shows-live-smoke-current.py; then
+            echo '::error::Current mature-smoke adapter contains an R19 run UUID.'
+            exit 1
+          fi
+          echo 'Current-publication mature-smoke adapter source: PASS'
 
       - name: Execute preserved mature smoke suite
-        if: github.event_name != 'pull_request'
         shell: bash
-        run: python scripts/run-paradise-shows-live-smoke-r19.py
+        run: python scripts/run-paradise-shows-live-smoke-current.py
