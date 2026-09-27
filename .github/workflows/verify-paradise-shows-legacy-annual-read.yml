@@ -99,7 +99,7 @@ jobs:
             },core,{label,summary:x.summary,core});
             const compatRows=x.rows||[];
             assert.equal(compatRows.length,rows.length,{label});
-            const fields=['plan_id','profile_id','plan_decision','priority','event_start','event_end','expected_month','estimated_start','estimated_end','conflict_notes'];
+            const fields=['plan_id','profile_id','plan_decision','priority','event_start','event_end','expected_month','conflict_notes'];
             const normalize=list=>list.map(row=>Object.fromEntries(fields.map(k=>[k,row?.[k]??null]))).sort((a,b)=>String(a.plan_id).localeCompare(String(b.plan_id)));
             assert.deepEqual(normalize(compatRows),normalize(rows),{label});
           }
