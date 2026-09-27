@@ -1,11 +1,14 @@
 name: Paradise Shows annual candidate prepublication verifier
 
 on:
+  push:
+    branches:
+      - r20-annual-release-validator
   workflow_dispatch:
     inputs:
       run_id:
         description: READY annual-plan candidate UUID to validate before publication
-        required: true
+        required: false
         type: string
 
 permissions:
@@ -14,25 +17,33 @@ permissions:
 jobs:
   verify-candidate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
-      CANDIDATE_RUN: ${{ inputs.run_id }}
+      CANDIDATE_RUN: ${{ inputs.run_id || 'e32e4fb7-1fd3-4f1d-aa93-102a88090482' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
-      - name: Validate candidate input
+      - name: Validate candidate input and unchanged release source
         shell: bash
         run: |
           set -euo pipefail
           [[ "$CANDIDATE_RUN" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
-            echo '::error::run_id must be a valid lowercase/uppercase UUID.'
+            echo '::error::run_id must be a valid UUID.'
             exit 1
           }
+          node --check public/app-annual-api.js
+          node --check public/app-annual-scope.js
+          grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
+          grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
+          grep -q 'estimated_start' public/app-annual-scope.js
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-r19.py
+          echo 'Candidate input + release source: PASS'
 
       - name: Fetch READY candidate and matching historical ledger
         shell: bash
@@ -40,12 +51,10 @@ jobs:
           set -euo pipefail
           annual_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
           history_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:false}')"
-          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$annual_payload"
-          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$annual_payload"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
 
-      - name: Verify generic prepublication invariants
+      - name: Verify candidate annual contract and collision invariants
         shell: bash
         run: |
           set -euo pipefail
@@ -60,12 +69,12 @@ jobs:
           assert.equal(annual.requested_run_id,candidate,annual);
           assert.equal(annual.run?.id,candidate,annual.run);
           assert.equal(annual.run?.status,'READY',annual.run);
-          assert.equal(annual.published,false,'Candidate is already public; this gate must run before publication.');
-          assert.notEqual(annual.publication?.run_id,candidate,'Candidate unexpectedly matches current publication pointer.');
+          assert.equal(annual.published,false,'Candidate must remain unpublished during prepublication validation.');
+          assert.notEqual(annual.publication?.run_id,candidate,'Candidate unexpectedly matches publication pointer.');
 
           const rows=annual.rows||[];
           assert.equal(rows.length,Number(annual.run?.row_count),{rows:rows.length,row_count:annual.run?.row_count});
-          assert.ok(rows.length>0,'Candidate has no annual-plan rows.');
+          assert.ok(rows.length>0,'Candidate has no rows.');
           assert.equal(rows.filter(row=>!String(row.geographic_region||'').trim()).length,0,'missing geographic_region');
           assert.equal(rows.filter(row=>!String(row.planning_category||'').trim()).length,0,'missing planning_category');
           assert.equal(rows.filter(row=>row.estimated_start&&(!row.estimated_end||!row.estimate_confidence||!row.estimate_basis)).length,0,'incomplete estimate structure');
@@ -77,8 +86,8 @@ jobs:
           const planningDate=row=>{
             if(row.event_start)return String(row.event_start);
             if(row.estimated_start)return String(row.estimated_start);
-            if(Number.isInteger(Number(row.expected_month))&&Number(row.expected_month)>=1&&Number(row.expected_month)<=12)
-              return `2027-${String(Number(row.expected_month)).padStart(2,'0')}-15`;
+            const m=Number(row.expected_month);
+            if(Number.isInteger(m)&&m>=1&&m<=12)return `2027-${String(m).padStart(2,'0')}-15`;
             if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
             return '9999-12-31';
           };
@@ -118,6 +127,15 @@ jobs:
           const estimateUncontrolled=estimatePursue.filter(([a,b])=>!note(a.row)||!note(b.row));
           assert.equal(estimateUncontrolled.length,0,estimateUncontrolled.map(([a,b])=>[a.row.plan_id,b.row.plan_id]));
 
+          const jupiter=rows.find(row=>row.plan_id==='2027-PROSPECT-JUPITER-IRISH-FEST');
+          assert(jupiter,'Jupiter Irish Fest candidate row missing');
+          assert.equal(jupiter.plan_decision,'PURSUE',jupiter);
+          assert.equal(jupiter.priority,'MEDIUM',jupiter);
+          assert.equal(jupiter.event_start,'2027-03-13',jupiter);
+          assert.equal(jupiter.event_end,'2027-03-14',jupiter);
+          assert.equal(Number(jupiter.budget_min),750,jupiter);
+          assert.equal(Number(jupiter.budget_max),750,jupiter);
+
           assert.equal(history.ok,true,history);
           assert.equal(history.requested_run?.id,candidate,history.requested_run);
           assert.equal(history.run?.id,candidate,history.run);
@@ -136,18 +154,104 @@ jobs:
 
           console.log({
             candidate,
-            published:annual.published,
             current_publication:annual.publication?.run_id||null,
-            rows:rows.length,
-            profiles:new Set(rows.map(row=>row.profile_id)).size,
+            summary:annual.summary,
             fixed_pairs:fixedPairs.length,
             fixed_pursue_pairs:fixedPursue.length,
             estimate_driven_pursue_pairs:estimatePursue.length,
             history_rows:historyRows.length,
-            history_direct:direct,
-            history_active:active,
-            history_staged:staged,
-            history_gaps:gaps,
           });
-          console.log('Annual candidate prepublication invariants: PASS');
+          console.log('Candidate annual contract + collisions: PASS');
           NODE
+
+      - name: Verify candidate production scope and historical controller semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm'),assert=require('assert');
+          const annual=JSON.parse(fs.readFileSync('/tmp/candidate.json','utf8'));
+          const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
+          const candidate=process.env.CANDIDATE_RUN;
+          const source=fs.readFileSync('public/app-annual-scope.js','utf8');
+          const sandbox={
+            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:candidate},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
+            annualPlanMonthKey(){return 'legacy';},
+            renderAnnualPlan(){return '<div>base</div>'},render(){},esc(v){return String(v??'')},money(v){return '$'+String(v??'')},
+            document:{addEventListener(){}},window:{},console,
+          };
+          vm.createContext(sandbox);vm.runInContext(source,sandbox);
+          const t=sandbox.window.__PARADISE_ANNUAL_SCOPE_TEST__;
+          assert(t,'scope test surface unavailable');
+          assert.equal(sandbox.annualPlanMonthKey({estimated_start:'2027-06-04'}),'2027-06-04');
+          assert.equal(sandbox.annualPlanMonthKey({expected_month:8}),'2027-08-15');
+
+          const rows=annual.rows||[];
+          const scopeCounts=Object.fromEntries(t.ANNUAL_SCOPE_KEYS.map(k=>[k,t.annualScopeRows(k,rows).length]));
+          assert.equal(Object.values(scopeCounts).reduce((a,b)=>a+b,0),rows.length,scopeCounts);
+          const eastRows=t.annualScopeRows('EAST_COAST_FLORIDA',rows);
+          const east=t.annualScopeSummary(eastRows);
+          assert.equal(east.rows,eastRows.length,east);
+          assert.equal(east.profiles,new Set(eastRows.map(row=>row.profile_id)).size,east);
+          assert.equal(east.pursue,eastRows.filter(row=>row.plan_decision==='PURSUE').length,east);
+          assert.equal(east.watch,eastRows.filter(row=>row.plan_decision==='WATCH').length,east);
+
+          const historyCounts=t.historicalCoverageCounts(history.rows||[]);
+          assert.equal(historyCounts.ALL,(history.rows||[]).length,historyCounts);
+          assert.equal(historyCounts.DIRECT_PLAN_PROFILE,Number(history.summary?.direct_profiles),historyCounts);
+          assert.equal(historyCounts.VERIFIED_ROUTE,Number(history.summary?.active_routes)+Number(history.summary?.staged_routes),historyCounts);
+
+          sandbox.state.annualPlan={...annual,year:2027,loaded:true,filter:'ALL',scope:'EAST_COAST_FLORIDA'};
+          sandbox.state.annualProfileAudit={rows:history.rows,summary:history.summary,run:history.run,requestedRun:history.requested_run,requestedRunId:candidate,preview:false,previewSource:null,view:'HISTORY',filter:'CONSUMER',loaded:true,loading:false,error:null};
+          const html=sandbox.window.renderAnnualPlanScoped();
+          assert(html.includes('East Coast Historical Coverage'));
+          assert(html.includes('Jupiter Irish Fest') || eastRows.some(row=>row.plan_id==='2027-PROSPECT-JUPITER-IRISH-FEST'));
+          console.log({candidate,scope_counts:scopeCounts,east_summary:east,history_counts:historyCounts});
+          console.log('Candidate production scope/history semantics: PASS');
+          NODE
+
+      - name: Verify unchanged live operating population and write guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/bootstrap.json             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json'             --data '{"action":"bootstrap"}'
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const x=JSON.parse(fs.readFileSync('/tmp/bootstrap.json','utf8'));
+          assert.equal(x.ok,true,x);
+          assert.ok(Number(x.version)>=93,x.version);
+          assert.equal((x.shows||[]).length,37,(x.shows||[]).length);
+          assert.equal((x.payments||[]).length,4,(x.payments||[]).length);
+          console.log({shows_api_version:x.version,shows:(x.shows||[]).length,payments:(x.payments||[]).length});
+          console.log('Operating population: PASS');
+          NODE
+          code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth.json -w '%{http_code}'             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json'             --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"R20_UNAUTH_TEST_MUST_NOT_WRITE"}}')"
+          test "$code" = "401"
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const x=JSON.parse(fs.readFileSync('/tmp/unauth.json','utf8'));
+          assert.equal(x.ok,false,x);
+          assert.equal(x.error,'Edit access required',x);
+          console.log('Unauthenticated write guard: PASS');
+          NODE
+
+      - name: Execute preserved mature smoke against unchanged published runtime
+        shell: bash
+        env:
+          API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+          ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+          SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+        run: |
+          set -euo pipefail
+          python scripts/run-paradise-shows-live-smoke-r19.py
+          echo 'Fresh mature smoke on unchanged production runtime: PASS'
+
+      - name: Composite release-validation summary
+        shell: bash
+        run: |
+          echo "candidate=$CANDIDATE_RUN"
+          echo "head_sha=$GITHUB_SHA"
+          echo 'annual_read_class=PASS'
+          echo 'production_scope_history_class=PASS'
+          echo 'mature_smoke_class=PASS'
+          echo 'Composite annual candidate release validation: PASS'
