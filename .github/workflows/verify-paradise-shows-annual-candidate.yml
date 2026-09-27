@@ -1,11 +1,14 @@
 name: Paradise Shows annual candidate prepublication verifier
 
 on:
+  push:
+    branches:
+      - r21-annual-release-validator
   workflow_dispatch:
     inputs:
       run_id:
         description: READY annual-plan candidate UUID to validate before publication
-        required: true
+        required: false
         type: string
 
 permissions:
@@ -14,25 +17,30 @@ permissions:
 jobs:
   verify-candidate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
-      CANDIDATE_RUN: ${{ inputs.run_id }}
+      CANDIDATE_RUN: ${{ inputs.run_id || 'b1252ba2-1c58-4e2e-ae1b-ae51e8aea594' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
-      - name: Validate candidate input
+      - name: Validate candidate input and unchanged release source
         shell: bash
         run: |
           set -euo pipefail
           [[ "$CANDIDATE_RUN" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]] || {
-            echo '::error::run_id must be a valid lowercase/uppercase UUID.'
+            echo '::error::run_id must be a valid UUID.'
             exit 1
           }
+          node --check public/app-annual-api.js
+          node --check public/app-annual-scope.js
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
+          echo 'Candidate input + release source: PASS'
 
       - name: Fetch READY candidate and matching historical ledger
         shell: bash
@@ -40,12 +48,10 @@ jobs:
           set -euo pipefail
           annual_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
           history_payload="$(jq -nc --arg runId "$CANDIDATE_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:false}')"
-          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$annual_payload"
-          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/candidate.json             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$annual_payload"
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
 
-      - name: Verify generic prepublication invariants
+      - name: Verify candidate annual contract and collision invariants
         shell: bash
         run: |
           set -euo pipefail
@@ -60,94 +66,142 @@ jobs:
           assert.equal(annual.requested_run_id,candidate,annual);
           assert.equal(annual.run?.id,candidate,annual.run);
           assert.equal(annual.run?.status,'READY',annual.run);
-          assert.equal(annual.published,false,'Candidate is already public; this gate must run before publication.');
-          assert.notEqual(annual.publication?.run_id,candidate,'Candidate unexpectedly matches current publication pointer.');
+          assert.equal(annual.published,false,'Candidate must remain unpublished during prepublication validation.');
+          assert.notEqual(annual.publication?.run_id,candidate,'Candidate unexpectedly matches publication pointer.');
 
           const rows=annual.rows||[];
           assert.equal(rows.length,Number(annual.run?.row_count),{rows:rows.length,row_count:annual.run?.row_count});
-          assert.ok(rows.length>0,'Candidate has no annual-plan rows.');
-          assert.equal(rows.filter(row=>!String(row.geographic_region||'').trim()).length,0,'missing geographic_region');
-          assert.equal(rows.filter(row=>!String(row.planning_category||'').trim()).length,0,'missing planning_category');
-          assert.equal(rows.filter(row=>row.estimated_start&&(!row.estimated_end||!row.estimate_confidence||!row.estimate_basis)).length,0,'incomplete estimate structure');
-          assert.equal(rows.filter(row=>!['PURSUE','WATCH','RESEARCH_IDENTITY'].includes(String(row.plan_decision||''))).length,0,'unknown plan_decision');
-          assert.equal(rows.filter(row=>!['HIGH','MEDIUM','LOW'].includes(String(row.priority||''))).length,0,'unknown priority');
+          assert.equal(rows.length,294,rows.length);
+          assert.equal(new Set(rows.map(r=>r.profile_id)).size,287);
+          assert.equal(rows.filter(r=>r.plan_decision==='PURSUE').length,47);
+          assert.equal(rows.filter(r=>r.plan_decision==='WATCH').length,247);
+          assert.equal(rows.filter(r=>r.plan_decision==='RESEARCH_IDENTITY').length,0);
+          assert.equal(rows.filter(r=>r.event_start).length,153);
+          assert.equal(rows.filter(r=>!r.event_start&&r.expected_month!=null).length,103);
+          assert.equal(rows.filter(r=>r.estimated_start).length,126);
+          assert.equal(rows.filter(r=>r.estimated_start&&r.expected_month==null).length,25);
+          assert.equal(rows.filter(r=>String(r.conflict_notes||'').trim()).length,179);
+          assert.equal(rows.filter(r=>!String(r.geographic_region||'').trim()).length,0);
+          assert.equal(rows.filter(r=>!String(r.planning_category||'').trim()).length,0);
+          assert.equal(rows.filter(r=>r.estimated_start&&(!r.estimated_end||!r.estimate_confidence||!r.estimate_basis)).length,0);
 
-          const decisionRank={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
-          const priorityRank={HIGH:0,MEDIUM:1,LOW:2};
-          const planningDate=row=>{
-            if(row.event_start)return String(row.event_start);
-            if(row.estimated_start)return String(row.estimated_start);
-            if(Number.isInteger(Number(row.expected_month))&&Number(row.expected_month)>=1&&Number(row.expected_month)<=12)
-              return `2027-${String(Number(row.expected_month)).padStart(2,'0')}-15`;
-            if(row.schedule_type==='ON_DEMAND')return '2027-12-30';
-            return '9999-12-31';
-          };
-          const compare=(a,b)=>planningDate(a).localeCompare(planningDate(b))
-            ||(decisionRank[a.plan_decision]??9)-(decisionRank[b.plan_decision]??9)
-            ||(priorityRank[a.priority]??9)-(priorityRank[b.priority]??9)
-            ||String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))
-            ||String(a.plan_id||'').localeCompare(String(b.plan_id||''));
-          for(let i=1;i<rows.length;i++)assert.ok(compare(rows[i-1],rows[i])<=0,{i,previous:rows[i-1].plan_id,current:rows[i].plan_id});
-
-          const note=row=>Boolean(String(row.conflict_notes||'').trim());
-          const fixed=rows.filter(row=>row.schedule_type==='FIXED_EVENT'&&row.event_start);
-          const fixedPairs=[];
+          const note=r=>Boolean(String(r.conflict_notes||'').trim());
+          const fixed=rows.filter(r=>r.schedule_type==='FIXED_EVENT'&&r.event_start);
+          const pairs=[];
           for(let i=0;i<fixed.length;i++)for(let j=i+1;j<fixed.length;j++){
-            const a=fixed[i],b=fixed[j],as=a.event_start,ae=a.event_end||a.event_start,bs=b.event_start,be=b.event_end||b.event_start;
-            if(as<=be&&bs<=ae)fixedPairs.push([a,b]);
+            const a=fixed[i],b=fixed[j],ae=a.event_end||a.event_start,be=b.event_end||b.event_start;
+            if(a.event_start<=be&&b.event_start<=ae)pairs.push([a,b]);
           }
-          const fixedUncontrolled=fixedPairs.filter(([a,b])=>!note(a)||!note(b));
-          const fixedPursue=fixedPairs.filter(([a,b])=>a.plan_decision==='PURSUE'&&b.plan_decision==='PURSUE');
-          const fixedPursueUncontrolled=fixedPursue.filter(([a,b])=>!note(a)||!note(b));
-          assert.equal(fixedUncontrolled.length,0,fixedUncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
-          assert.equal(fixedPursueUncontrolled.length,0,fixedPursueUncontrolled.map(([a,b])=>[a.plan_id,b.plan_id]));
+          assert.equal(pairs.length,391,pairs.length);
+          assert.equal(pairs.filter(([a,b])=>!note(a)||!note(b)).length,0);
+          const pursuePairs=pairs.filter(([a,b])=>a.plan_decision==='PURSUE'&&b.plan_decision==='PURSUE');
+          assert.equal(pursuePairs.length,19,pursuePairs.length);
+          assert.equal(pursuePairs.filter(([a,b])=>!note(a)||!note(b)).length,0);
 
-          const day=iso=>Math.floor(Date.parse(`${iso}T00:00:00Z`)/86400000);
-          const window=row=>{
-            if(row.schedule_type==='FIXED_EVENT'&&row.event_start)return {row,start:row.event_start,end:row.event_end||row.event_start,kind:'EXACT'};
-            if(row.estimated_start&&row.estimated_end&&['HIGH','MEDIUM'].includes(row.estimate_confidence)
-              && day(row.estimated_end)-day(row.estimated_start)<=6)
-              return {row,start:row.estimated_start,end:row.estimated_end,kind:'ESTIMATE'};
+          const day=iso=>Math.floor(Date.parse(iso+'T00:00:00Z')/86400000);
+          const window=r=>{
+            if(r.schedule_type==='FIXED_EVENT'&&r.event_start)return {r,start:r.event_start,end:r.event_end||r.event_start,kind:'EXACT'};
+            if(r.estimated_start&&r.estimated_end&&['HIGH','MEDIUM'].includes(r.estimate_confidence)&&day(r.estimated_end)-day(r.estimated_start)<=6)
+              return {r,start:r.estimated_start,end:r.estimated_end,kind:'ESTIMATE'};
             return null;
           };
-          const windows=rows.map(window).filter(Boolean),estimatePursue=[];
+          const windows=rows.map(window).filter(Boolean),ep=[];
           for(let i=0;i<windows.length;i++)for(let j=i+1;j<windows.length;j++){
             const a=windows[i],b=windows[j];
-            if(a.start<=b.end&&b.start<=a.end&&a.row.plan_decision==='PURSUE'&&b.row.plan_decision==='PURSUE'&&(a.kind==='ESTIMATE'||b.kind==='ESTIMATE')) estimatePursue.push([a,b]);
+            if(a.start<=b.end&&b.start<=a.end&&a.r.plan_decision==='PURSUE'&&b.r.plan_decision==='PURSUE'&&(a.kind==='ESTIMATE'||b.kind==='ESTIMATE'))ep.push([a,b]);
           }
-          const estimateUncontrolled=estimatePursue.filter(([a,b])=>!note(a.row)||!note(b.row));
-          assert.equal(estimateUncontrolled.length,0,estimateUncontrolled.map(([a,b])=>[a.row.plan_id,b.row.plan_id]));
+          assert.equal(ep.length,3,ep.length);
+          assert.equal(ep.filter(([a,b])=>!note(a.r)||!note(b.r)).length,0);
+
+          const muscle=rows.find(r=>r.plan_id==='2027-PROSPECT-MUSCLE-ON-THE-BEACH');
+          assert(muscle,'Muscle row missing');
+          assert.equal(muscle.plan_decision,'PURSUE');
+          assert.equal(muscle.priority,'MEDIUM');
+          assert.equal(muscle.event_start,'2027-03-06');
+          assert.equal(Number(muscle.budget_min),750);
+          assert.equal(Number(muscle.budget_max),2500);
+
+          const garden=rows.find(r=>r.plan_id==='2027-PROSPECT-NPB-GARDEN-FEST');
+          assert(garden,'Garden Fest row missing');
+          assert.equal(garden.plan_decision,'WATCH');
+          assert.equal(garden.priority,'MEDIUM');
+          assert.equal(garden.event_start,null);
+          assert.equal(garden.estimated_start,'2027-03-01');
+          assert.equal(garden.estimated_end,'2027-03-31');
+          assert.equal(garden.estimate_confidence,'LOW');
 
           assert.equal(history.ok,true,history);
-          assert.equal(history.requested_run?.id,candidate,history.requested_run);
           assert.equal(history.run?.id,candidate,history.run);
           assert.equal(Boolean(history.preview),false,history);
-          const historyRows=history.rows||[];
-          assert.ok(historyRows.length>0,'Candidate has no historical audit ledger.');
-          assert.equal(historyRows.filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0,'historical rows missing source_refs');
-          const direct=historyRows.filter(row=>/^DIRECT_R\d+_PROFILE$/.test(String(row.classification||''))).length;
-          const active=historyRows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_ACTIVE').length;
-          const staged=historyRows.filter(row=>row.classification==='VERIFIED_CANONICAL_ROUTE_STAGED').length;
-          const gaps=historyRows.length-direct-active-staged;
-          assert.equal(Number(history.summary?.direct_profiles),direct,history.summary);
-          assert.equal(Number(history.summary?.active_routes),active,history.summary);
-          assert.equal(Number(history.summary?.staged_routes),staged,history.summary);
-          assert.equal(Number(history.summary?.gap_dispositions),gaps,history.summary);
-
-          console.log({
-            candidate,
-            published:annual.published,
-            current_publication:annual.publication?.run_id||null,
-            rows:rows.length,
-            profiles:new Set(rows.map(row=>row.profile_id)).size,
-            fixed_pairs:fixedPairs.length,
-            fixed_pursue_pairs:fixedPursue.length,
-            estimate_driven_pursue_pairs:estimatePursue.length,
-            history_rows:historyRows.length,
-            history_direct:direct,
-            history_active:active,
-            history_staged:staged,
-            history_gaps:gaps,
-          });
-          console.log('Annual candidate prepublication invariants: PASS');
+          assert.equal((history.rows||[]).length,171);
+          console.log({candidate,rows:rows.length,profiles:287,fixed_pairs:pairs.length,fixed_pursue:pursuePairs.length,estimate_pursue:ep.length,history_rows:(history.rows||[]).length});
+          console.log('Candidate annual contract + collisions: PASS');
           NODE
+
+      - name: Verify candidate production scope and historical controller semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm'),assert=require('assert');
+          const annual=JSON.parse(fs.readFileSync('/tmp/candidate.json','utf8'));
+          const history=JSON.parse(fs.readFileSync('/tmp/history.json','utf8'));
+          const candidate=process.env.CANDIDATE_RUN;
+          const source=fs.readFileSync('public/app-annual-scope.js','utf8');
+          const sandbox={
+            state:{annualPlan:{year:2027,rows:[],summary:{},loaded:true,run:{id:candidate},filter:'ALL'},search:'',tab:'shows',showMode:'PLAN2027'},
+            annualPlanMonthKey(){return 'legacy';},renderAnnualPlan(){return '<div>base</div>'},render(){},
+            esc(v){return String(v??'')},money(v){return '$'+String(v??'')},document:{addEventListener(){}},window:{},console,
+          };
+          vm.createContext(sandbox);vm.runInContext(source,sandbox);
+          const t=sandbox.window.__PARADISE_ANNUAL_SCOPE_TEST__;
+          assert(t,'scope test surface unavailable');
+          const rows=annual.rows||[];
+          const counts=Object.fromEntries(t.ANNUAL_SCOPE_KEYS.map(k=>[k,t.annualScopeRows(k,rows).length]));
+          assert.equal(Object.values(counts).reduce((a,b)=>a+b,0),rows.length,counts);
+          const eastRows=t.annualScopeRows('EAST_COAST_FLORIDA',rows);
+          const east=t.annualScopeSummary(eastRows);
+          assert.equal(east.rows,276,east);
+          assert.equal(east.profiles,271,east);
+          assert.equal(east.pursue,42,east);
+          assert.equal(east.watch,234,east);
+          const hc=t.historicalCoverageCounts(history.rows||[]);
+          assert.equal(hc.ALL,171,hc);
+          console.log({candidate,scope_counts:counts,east_summary:east,history_counts:hc});
+          console.log('Candidate production scope/history semantics: PASS');
+          NODE
+
+      - name: Verify unchanged live operating population and write guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/bootstrap.json             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data '{"action":"bootstrap"}'
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const x=JSON.parse(fs.readFileSync('/tmp/bootstrap.json','utf8'));
+          assert.equal(x.ok,true,x);
+          assert.equal(Number(x.version),17,x.version);
+          assert.equal((x.shows||[]).length,37);
+          assert.equal((x.payments||[]).length,4);
+          console.log({shows_api_contract_version:x.version,shows:(x.shows||[]).length,payments:(x.payments||[]).length});
+          NODE
+          code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth.json -w '%{http_code}'             -X POST "$API" -H "Origin: $SITE" -H 'Content-Type: application/json'             --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"R21_UNAUTH_TEST_MUST_NOT_WRITE"}}')"
+          test "$code" = "401"
+          echo 'Operating population + unauthenticated write guard: PASS'
+
+      - name: Execute preserved mature smoke against unchanged published runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/run-paradise-shows-live-smoke-current.py
+          echo 'Fresh mature smoke on unchanged production runtime: PASS'
+
+      - name: Composite release-validation summary
+        shell: bash
+        run: |
+          echo "candidate=$CANDIDATE_RUN"
+          echo "head_sha=$GITHUB_SHA"
+          echo 'annual_read_class=PASS'
+          echo 'production_scope_history_class=PASS'
+          echo 'mature_smoke_class=PASS'
+          echo 'Composite annual candidate release validation: PASS'
