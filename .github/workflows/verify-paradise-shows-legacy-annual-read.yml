@@ -20,7 +20,7 @@ jobs:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
-      R19_RUN: 83a90da8-d460-413f-8ca4-7735bcbe0f88
+      SHOWS_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -42,47 +42,65 @@ jobs:
           fi
           echo 'Canonical annual browser endpoint: PASS'
 
-      - name: Verify published and legacy-history annual reads agree on R19
+      - name: Verify all annual read paths follow current publication
         shell: bash
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/canonical.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
-          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/legacy-history.json \
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history-compat.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            --data '{"action":"annualPlan","year":2027}'
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/shows-compat.json \
+            -X POST "$SHOWS_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
             --data '{"action":"annualPlan","year":2027}'
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
           const canonical=JSON.parse(fs.readFileSync('/tmp/canonical.json','utf8'));
-          const legacy=JSON.parse(fs.readFileSync('/tmp/legacy-history.json','utf8'));
-          const R19=process.env.R19_RUN;
+          const history=JSON.parse(fs.readFileSync('/tmp/history-compat.json','utf8'));
+          const shows=JSON.parse(fs.readFileSync('/tmp/shows-compat.json','utf8'));
 
           assert.equal(canonical.ok,true,canonical);
           assert.equal(canonical.version,3,canonical);
-          assert.equal(canonical.publication?.run_id,R19,canonical.publication);
-          assert.equal(canonical.run?.id,R19,canonical.run);
           assert.equal(canonical.published,true,canonical);
+          assert.ok(canonical.publication?.run_id,canonical.publication);
+          assert.equal(canonical.run?.id,canonical.publication.run_id,canonical);
+          assert.equal(canonical.run?.status,'READY',canonical.run);
 
-          // shows-history-api keeps its old annual response shape for compatibility,
-          // but the selected run must follow the explicit publication pointer.
-          assert.equal(legacy.ok,true,legacy);
-          assert.equal(legacy.version,2,legacy);
-          assert.equal(legacy.run?.id,R19,legacy.run);
-          assert.equal(legacy.run?.status,'READY',legacy.run);
-          assert.equal(legacy.run?.row_count,291,legacy.run);
+          const rows=canonical.rows||[];
+          assert.equal(rows.length,Number(canonical.run?.row_count),canonical.run);
+          const core={
+            rows:rows.length,
+            profiles:new Set(rows.map(row=>row.profile_id)).size,
+            pursue:rows.filter(row=>row.plan_decision==='PURSUE').length,
+            watch:rows.filter(row=>row.plan_decision==='WATCH').length,
+            research:rows.filter(row=>row.plan_decision==='RESEARCH_IDENTITY').length,
+            exact:rows.filter(row=>row.event_start).length,
+            expected:rows.filter(row=>!row.event_start&&row.expected_month!=null).length,
+            conflicts:rows.filter(row=>String(row.conflict_notes||'').trim()).length,
+          };
           assert.deepEqual({
-            rows:legacy.summary?.rows,
-            profiles:legacy.summary?.profiles,
-            pursue:legacy.summary?.pursue,
-            watch:legacy.summary?.watch,
-            research:legacy.summary?.research,
-            exact:legacy.summary?.exact,
-            expected:legacy.summary?.expected,
-            conflicts:legacy.summary?.conflicts,
-          },{rows:291,profiles:284,pursue:45,watch:246,research:0,exact:151,expected:102,conflicts:176});
-          assert.equal((legacy.rows||[]).length,291);
+            rows:canonical.summary?.rows,profiles:canonical.summary?.profiles,pursue:canonical.summary?.pursue,
+            watch:canonical.summary?.watch,research:canonical.summary?.research,exact:canonical.summary?.exact,
+            expected:canonical.summary?.expected,conflicts:canonical.summary?.conflicts,
+          },core);
 
-          console.log({published_run:canonical.run.id,legacy_history_run:legacy.run.id,legacy_summary:legacy.summary});
-          console.log('Legacy history annual compatibility follows publication pointer: PASS');
+          for(const [label,x,version] of [['history',history,2],['shows',shows,1]]){
+            assert.equal(x.ok,true,{label,x});
+            assert.equal(x.version,version,{label,x});
+            assert.equal(x.run?.id,canonical.run.id,{label,run:x.run,canonical:canonical.run});
+            assert.equal(x.run?.status,'READY',{label,run:x.run});
+            assert.equal(Number(x.run?.row_count),rows.length,{label,run:x.run});
+            assert.deepEqual({
+              rows:x.summary?.rows,profiles:x.summary?.profiles,pursue:x.summary?.pursue,
+              watch:x.summary?.watch,research:x.summary?.research,exact:x.summary?.exact,
+              expected:x.summary?.expected,conflicts:x.summary?.conflicts,
+            },core,{label,summary:x.summary,core});
+            assert.equal((x.rows||[]).length,rows.length,{label});
+            assert.deepEqual((x.rows||[]).map(r=>r.plan_id),rows.map(r=>r.plan_id),{label});
+          }
+
+          console.log({published_run:canonical.run.id,canonical_version:canonical.version,history_version:history.version,shows_version:shows.version,summary:core});
+          console.log('All annual compatibility paths follow current publication: PASS');
           NODE
