@@ -54,15 +54,15 @@ The repository regression must continue to prove that `public/app-annual-api.js`
 
 ## Current 2027 control
 
-Published run: `e32e4fb7-1fd3-4f1d-aa93-102a88090482` (R20).
+Published run: `b1252ba2-1c58-4e2e-ae1b-ae51e8aea594` (R21).
 
-Stable R20 invariants:
+Stable R21 invariants:
 
-- 292 annual rows;
-- 285 profiles;
-- 46 PURSUE / 246 WATCH / 0 RESEARCH;
-- 387 fixed overlap pairs / 0 reciprocal-uncontrolled;
-- 17 fixed PURSUE/PURSUE pairs / 0 uncontrolled;
+- 294 annual rows;
+- 287 profiles;
+- 47 PURSUE / 247 WATCH / 0 RESEARCH;
+- 391 fixed overlap pairs / 0 reciprocal-uncontrolled;
+- 19 fixed PURSUE/PURSUE pairs / 0 uncontrolled;
 - 3 estimate-driven PURSUE/PURSUE pairs / 0 uncontrolled;
 - 171 historical-audit rows.
 
@@ -71,14 +71,14 @@ Current release-control stack:
 - `shows-annual-plan-api` v5 / response contract v3;
 - `shows-history-api` v4 for publication-aligned legacy annual compatibility;
 - `shows-api` v93 for publication-aligned general-API annual compatibility while preserving its operating API role;
-- explicit 2027 publication pointer -> R20;
+- explicit 2027 publication pointer -> R21;
 - READY candidate preview remains separate from publication;
 - governed annual-read, production-scope/history, legacy-compatibility, and mature-smoke verifiers resolve the current publication dynamically rather than hard-coding an annual revision;
 - the active mature-smoke workflow uses `scripts/run-paradise-shows-live-smoke-current.py`; the R19-specific wrapper is retained only as historical rollback evidence.
 
-R20 is a bounded successor to R19: one net-new Jupiter Irish Fest PURSUE/MEDIUM row plus one reciprocal estimate-aware `conflict_notes` repair on `2027-LIFE-085-PRIMARY`; the 171-row historical audit remains logically unchanged.
+R21 is a bounded successor to R20: two net-new East Coast prospect rows — Muscle on the Beach PURSUE/MEDIUM and North Palm Beach Garden Fest WATCH/MEDIUM — plus two reciprocal fixed-conflict note updates on ACS West Palm Beach Home Show and St. Lucie County Fair. The 171-row historical audit remains logically unchanged.
 
-Read the R20 row in `shows_app_annual_plan_release_validations` for the exact validated production commit, workflow evidence, timestamps, and hardening record. Historical R19 validation/recovery artifacts remain preserved as point-in-time evidence and must not be interpreted as the current publication.
+Read the R21 row in `shows_app_annual_plan_release_validations` for the exact prepublication production commit, workflow evidence, timestamps, and post-publication closeout evidence. Historical R20/R19 validation and recovery artifacts remain preserved as point-in-time evidence and must not be interpreted as the current publication.
 
 ## Safety boundary
 
