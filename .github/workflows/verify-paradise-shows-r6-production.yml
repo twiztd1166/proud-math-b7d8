@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
           node --check public/app-annual-scope.js
           grep -q "DIRECT_PLAN_PROFILE" public/app-annual-scope.js
-          grep -q "DIRECT_R\\d+_PROFILE" public/app-annual-scope.js
+          grep -Fq 'DIRECT_R\d+_PROFILE' public/app-annual-scope.js
           grep -q "estimated_start" public/app-annual-scope.js
           if grep -q "HISTORY_FILTER_KEYS=.*DIRECT_R8_PROFILE" public/app-annual-scope.js; then
             echo '::error::Historical filter is revision-specific.'
