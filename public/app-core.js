@@ -222,7 +222,7 @@ async function loadCatalog(force=false){
     toast('Full show database unavailable');
   }finally{
     state.catalogLoading=false;
-    if(state.tab==='shows')render();
+    if(state.tab==='today'||state.tab==='shows')render();
     if(state.catalogLoaded&&state.deepLinkedProfile&&typeof openCatalog==='function')openCatalog(state.deepLinkedProfile);
   }
 }
