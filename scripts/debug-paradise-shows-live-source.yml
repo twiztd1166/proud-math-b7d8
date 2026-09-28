@@ -2897,7 +2897,7 @@ jobs:
           PY
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -Eq '<details class="liveCompareBoard"[^>]*data-live-decision-comparison[^>]*open(=""|)[^>]*>' /tmp/shows_mobile.html
-          grep -q 'Show database' /tmp/shows_mobile.html
+          grep -q 'Shows &amp; history' /tmp/shows_mobile.html
           grep -q 'data-paradise-action-queue' /tmp/shows_mobile.html
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; total=int(m.group(1)); ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==min(8,total) and len(set(ids))==len(ids), (len(ids),total,ids); states=re.findall(r'data-paradise-action-state-profile=\"([^\"]+)\"',d); assert states==ids, (states,ids); print({'mobile_paradise_action_first_screen':'PASS','visible':len(ids),'total':total})"
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); gates=re.findall(r'data-paradise-action-submit-gate-profile=\"([^\"]+)\"',d); assert gates and len(gates)==len(set(gates)) and set(gates).issubset(set(ids)), (gates,ids); articles=dict(re.findall(r'<article class=\"paradiseActionRow\" data-paradise-action-row=\"([^\"]+)\">(.*?)</article>',d,re.S)); assert all('Review only —' in articles[p] and 'Guardrail' in articles[p] and 'mail.google.com' not in articles[p] for p in gates), [(p,articles[p][:600]) for p in gates]; print({'mobile_paradise_action_submit_guards':'PASS','gated':gates})"
