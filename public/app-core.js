@@ -90,7 +90,7 @@ function applyLocationView(){
   else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='plan2027'){state.tab='shows';state.showMode='PLAN2027';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null;state.deepLinkedYear=null}
-  else if(['today','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else if(['today','calendar','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null;state.deepLinkedYear=null}
 }
 function syncLocationView(){
   const hash=state.deepLinkedProfile
@@ -198,7 +198,7 @@ async function loadAnnualPlan(force=false){
   const p=state.annualPlan;
   if(p.loading||(!force&&p.loaded))return;
   p.loading=true;p.error=null;
-  if(state.tab==='shows'&&state.showMode==='PLAN2027')render();
+  if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
   try{
     const d=await call('annualPlan',{year:p.year});
     p.rows=d.rows||[];p.summary=d.summary||null;p.run=d.run||null;p.loaded=true;
@@ -207,7 +207,7 @@ async function loadAnnualPlan(force=false){
     toast('2027 annual plan unavailable');
   }finally{
     p.loading=false;
-    if(state.tab==='shows'&&state.showMode==='PLAN2027')render();
+    if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
   }
 }
 async function loadCatalog(force=false){
@@ -233,7 +233,7 @@ async function bootstrap(){
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
-    if(state.tab==='shows'&&state.showMode==='PLAN2027'&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
+    if((state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
   }catch(e){toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'}
 }
 
