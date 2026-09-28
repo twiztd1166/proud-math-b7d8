@@ -121,7 +121,11 @@ assert not life190.get('current_rebook_opportunity'), life190
 assert not has_current_control(life190), life190
 assert float(life190.get('lifetime_net_volume') or 0) > 0, life190
 assert int(life190.get('latest_history_year') or 0) >= 2013, life190
-assert len(historical_2013)==65, len(historical_2013)"""
+life106=profiles['LIFE-106']
+assert life106.get('related_current_profile_id') == 'LIFE-124', life106
+assert life106.get('canonical_series_profile_id') == 'LIFE-124', life106
+assert not any(p.get('profile_id')=='LIFE-106' for p in historical_2013), life106
+assert len(historical_2013)==64, len(historical_2013)"""
     return script.replace(stale, replacement, 1)
 
 
