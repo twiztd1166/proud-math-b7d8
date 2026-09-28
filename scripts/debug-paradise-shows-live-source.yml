@@ -2782,7 +2782,7 @@ jobs:
           render_view touch_profile "$SITE/#show/HIST-098"
           grep -q 'HIST-098' /tmp/touch_profile.html
           grep -q 'Linked current control: MFC-084' /tmp/touch_profile.html
-          grep -q '665 show profiles' /tmp/shows.html
+          grep -q 'All history 665' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
           grep -Eq 'Historical outreach <span class="quickViewCount">[0-9]+</span>' /tmp/shows.html
@@ -2897,7 +2897,7 @@ jobs:
           PY
           render_view shows_mobile "$SITE/#shows" "390,844"
           grep -Eq '<details class="liveCompareBoard"[^>]*data-live-decision-comparison[^>]*open(=""|)[^>]*>' /tmp/shows_mobile.html
-          grep -q 'Show database' /tmp/shows_mobile.html
+          grep -q 'Shows &amp; history' /tmp/shows_mobile.html
           grep -q 'data-paradise-action-queue' /tmp/shows_mobile.html
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); m=re.search(r'data-quick-view=\"ALL_RESOLUTION_PARADISE_ACTION\"[^>]*>Paradise action <span class=\"quickViewCount\">([0-9]+)</span>',d); assert m; total=int(m.group(1)); ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); assert len(ids)==min(8,total) and len(set(ids))==len(ids), (len(ids),total,ids); states=re.findall(r'data-paradise-action-state-profile=\"([^\"]+)\"',d); assert states==ids, (states,ids); print({'mobile_paradise_action_first_screen':'PASS','visible':len(ids),'total':total})"
           python -c "import re; d=open('/tmp/shows_mobile.html',encoding='utf-8').read(); ids=re.findall(r'data-paradise-action-row=\"([^\"]+)\"',d); gates=re.findall(r'data-paradise-action-submit-gate-profile=\"([^\"]+)\"',d); assert gates and len(gates)==len(set(gates)) and set(gates).issubset(set(ids)), (gates,ids); articles=dict(re.findall(r'<article class=\"paradiseActionRow\" data-paradise-action-row=\"([^\"]+)\">(.*?)</article>',d,re.S)); assert all('Review only —' in articles[p] and 'Guardrail' in articles[p] and 'mail.google.com' not in articles[p] for p in gates), [(p,articles[p][:600]) for p in gates]; print({'mobile_paradise_action_submit_guards':'PASS','gated':gates})"
@@ -3239,7 +3239,7 @@ jobs:
           grep -q '0 records · 2 annual LP · 2 cumulative LP' /tmp/lponly_detail.html
 
           render_view unlinked "$SITE/#unlinked"
-          grep -q 'Unlinked LP 17' /tmp/unlinked.html
+          grep -q 'Data cleanup 17' /tmp/unlinked.html
           grep -q 'Administrative / aggregate 5' /tmp/unlinked.html
           grep -q 'Generic / locationless 8' /tmp/unlinked.html
           grep -q 'Competing identity 2' /tmp/unlinked.html
