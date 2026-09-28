@@ -77,11 +77,114 @@ function showCard(s){
   return `<div class="card bookingCard" data-id="${esc(s.mfc_id)}"><div class="row"><div><div class="event">${esc(s.event)}</div><div class="mfc">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div></div><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="bookingDecision">${esc(s.decision||'Decision not stated')}</div><div class="bookingGrid"><div><span>Event</span><b>${esc(bookingEventRange(s))}</b></div><div><span>Max booking cost</span><b>${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</b></div><div><span>History</span><b>${history?esc(history):'Loading linked history…'}</b>${boothHint?`<small class="bookingBoothHint">${esc(boothHint)}</small>`:''}</div><div><span>When to act</span><b>${esc(bookingTiming(s))}</b></div></div>${s.performance?`<div class="bookingPerformance"><span>Historical signal</span><b>${esc(s.performance)}</b></div>`:''}${s.booking_status?`<div class="bookingStatusLine"><span>Booking status</span><b>${esc(s.booking_status)}</b></div>`:''}${s.payment_terms&&s.payment_terms!=='—'?`<div class="bookingStatusLine"><span>Booking / payment terms</span><b>${esc(s.payment_terms)}</b></div>`:''}${follow}<div class="meta"><span>${esc(s.owner||'Unassigned')}</span>${s.source_detail?.needs_evidence&&s.source_detail.needs_evidence!=='NONE'?`<span class="pill review">Needs ${esc(s.source_detail.needs_evidence)}</span>`:''}${s.this_year==='SKIP THIS YEAR'?'<span class="pill review">SKIPPED THIS YEAR</span>':''}</div></div>`;
 }
 
-function renderToday(){
-  const actions=activeActions();const counts=countStatuses();const pay=paymentAttention();const rs=state.reconciliation.summary||{};
-  const drift=Number(rs.changed||0),sourceReview=(state.sourceRefresh.conflicts||[]).length;const rh=state.recoveryHealth,recoveryReview=!rh||rh.integrity_status!=='HEALTHY'||rh.hashes_valid!==true||rh.row_counts_valid!==true||rh.coverage_current!==true;
-  return `<div class="hero"><h1>Work today / this week</h1><p>Only actionable show work and payment exceptions are surfaced here.</p></div>${recoveryReview?`<div class="alert"><div class="event">Recovery checkpoint needs review</div><div class="action">The latest operating recovery checkpoint did not pass every integrity/coverage control. Review Recovery health in Control before relying on rollback.</div></div>`:''}${sourceReview?`<div class="alert"><div class="event">Google Sheet refresh needs review</div><div class="action">${sourceReview} conflicting field${sourceReview===1?'':'s'} were preserved. Review in Control; nothing conflicting was overwritten.</div></div>`:''}${drift?`<div class="alert"><div class="event">Source reconciliation needs review</div><div class="action">${drift} show${drift===1?'':'s'} changed in the app since the last verified Sheet snapshot. Review in Control before treating the Sheet and app as identical.</div></div>`:''}<div class="stats"><div class="stat"><div class="v">${actions.length}</div><div class="l">Show actions</div></div><div class="stat"><div class="v">${pay.length}</div><div class="l">Payment alerts</div></div><div class="stat"><div class="v">${counts.RECONCILE||0}</div><div class="l">Reconcile</div></div></div>${pay.length?`<div class="sectionTitle"><span>Payment attention</span><span>${pay.length} open</span></div>${pay.map(p=>`<div class="alert paymentCard" data-payment="${esc(p.payment_id)}"><div class="row"><div><div class="event">${esc(p.event)} · ${esc(p.contract_year)}</div><div class="mfc">${esc(p.installment)} · due ${date(p.due)}</div></div>${paymentPill(p)}</div><div class="action">${money(p.balance??p.amount)} remaining · ${esc(p.clearing||'UNVERIFIED')}</div></div>`).join('')}`:''}<div class="sectionTitle"><span>Show priority queue</span><span>${state.shows.length} shows controlled</span></div>${actions.length?actions.map(showCard).join(''):'<div class="empty">No dated show actions are open.</div>'}`
+function nextStepOwner(p){
+  const ids=Array.isArray(p?.matched_mfc_ids)?p.matched_mfc_ids:[];
+  const current=state.shows.find(s=>ids.includes(s.mfc_id)&&String(s.owner||'').trim()&&String(s.owner||'').trim()!=='—');
+  return current?String(current.owner).trim():'Unassigned';
 }
+function nextStepLane(p){
+  const review=p?.current_rebook_review||{};
+  const op=p?.current_rebook_opportunity||{};
+  const lane=String(review.resolution_lane||'').toUpperCase();
+  if(lane==='ORGANIZER_RESPONSE')return 'WAITING';
+  if(lane==='WAIT_FOR_PUBLICATION')return 'SCHEDULED';
+  if(lane==='RECONCILE_EXISTING')return 'REVIEW';
+  if(lane==='PARADISE_ACTION')return paradiseActionPreSubmitGuard(op,review)?'REVIEW':'ACTION';
+  if(liveOpportunityActsNow(p))return 'ACTION';
+  return 'SCHEDULED';
+}
+function nextStepProfiles(lane){
+  return state.catalog
+    .filter(p=>Boolean(p?.current_rebook_opportunity)&&nextStepLane(p)===lane)
+    .slice()
+    .sort((a,b)=>liveComparisonPriorityDate(a.current_rebook_opportunity).localeCompare(liveComparisonPriorityDate(b.current_rebook_opportunity))||String(a.canonical_event||'').localeCompare(String(b.canonical_event||'')));
+}
+function nextStepCard(p,lane){
+  const op=p.current_rebook_opportunity||{};
+  const review=p.current_rebook_review||{};
+  const disposition=String(review.disposition||'REVIEW').toUpperCase();
+  const next=liveComparisonNextStep(review)||'Open the show record and review the current control.';
+  const timing=governedFirstSentence(review.action_timing,liveComparisonActionDate(op));
+  const owner=nextStepOwner(p);
+  const cost=liveComparisonCurrentCost(op);
+  const when=op.event_start?(op.event_end&&op.event_end!==op.event_start?date(op.event_start)+' – '+date(op.event_end):date(op.event_start)):'Date not yet verified';
+  const laneLabel={ACTION:'Team action',REVIEW:'Decision / review',WAITING:'Waiting on organizer',SCHEDULED:'Scheduled / monitoring'}[lane]||lane;
+  return `<article class="nextStepCard nextStep-${esc(lane.toLowerCase())}" data-next-step-profile="${esc(p.profile_id)}">
+    <div class="nextStepTop"><div><span class="nextStepLane">${esc(laneLabel)}</span><h3>${esc(p.canonical_event)}</h3></div><span class="nextStepDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
+    <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
+    <div class="nextStepFacts"><div><span>When</span><b>${esc(timing)}</b></div><div><span>Event</span><b>${esc(when)}</b></div><div><span>Owner</span><b>${esc(owner)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div></div>
+    <button type="button" class="btn secondary liveCompareOpen nextStepOpen" data-profile="${esc(p.profile_id)}">Open show</button>
+  </article>`;
+}
+function nextStepSection(title,subtitle,rows,lane,limit){
+  const visible=rows.slice(0,limit);
+  if(!rows.length)return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><span>0</span></div><div class="nextStepEmpty">Nothing in this lane right now.</div></section>`;
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><span>${rows.length}</span></div>${visible.map(p=>nextStepCard(p,lane)).join('')}${rows.length>visible.length?`<div class="nextStepMore">+${rows.length-visible.length} more available in Shows → Live booking board</div>`:''}</section>`;
+}
+function renderToday(){
+  const pay=paymentAttention();
+  const rs=state.reconciliation.summary||{};
+  const drift=Number(rs.changed||0);
+  const sourceReview=(state.sourceRefresh.conflicts||[]).length;
+  const rh=state.recoveryHealth;
+  const recoveryReview=!rh||rh.integrity_status!=='HEALTHY'||rh.hashes_valid!==true||rh.row_counts_valid!==true||rh.coverage_current!==true;
+  if(state.catalogLoading&&!state.catalogLoaded)return '<div class="hero nextHero"><h1>Next Steps</h1><p>Loading the current action lanes and linked show history…</p></div><div class="loading">Loading operating priorities…</div>';
+  if(state.catalogError&&!state.catalogLoaded)return `<div class="hero nextHero"><h1>Next Steps</h1><p>What the team should do next, separated from research and system controls.</p></div><div class="alert"><div class="event">Action lanes unavailable</div><div class="action">${esc(state.catalogError)}</div><div class="actions"><button class="btn primary" id="catalogRetry">Try again</button></div></div>`;
+  const action=nextStepProfiles('ACTION');
+  const review=nextStepProfiles('REVIEW');
+  const waiting=nextStepProfiles('WAITING');
+  const scheduled=nextStepProfiles('SCHEDULED');
+  const systemCount=(recoveryReview?1:0)+(sourceReview?1:0)+(drift?1:0);
+  const paymentHtml=pay.length?`<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Payment attention</h2><p>Payments that are due, incomplete, or need clearing evidence.</p></div><span>${pay.length}</span></div>${pay.slice(0,5).map(p=>`<div class="nextPaymentCard paymentCard" data-payment="${esc(p.payment_id)}"><div><b>${esc(p.event)} · ${esc(p.installment)}</b><span>Due ${date(p.due)} · ${money(p.balance??p.amount)} remaining</span></div>${paymentPill(p)}</div>`).join('')}${pay.length>5?`<div class="nextStepMore">+${pay.length-5} more in Payments</div>`:''}</section>`:'';
+  const systemHtml=systemCount?`<details class="systemAttention"><summary>System / data attention · ${systemCount}</summary><div class="systemAttentionBody">${recoveryReview?'<p><b>Recovery health:</b> latest checkpoint needs review in More.</p>':''}${sourceReview?`<p><b>Source conflicts:</b> ${sourceReview} field conflict${sourceReview===1?'':'s'} preserved for review.</p>`:''}${drift?`<p><b>Reconciliation:</b> ${drift} current show${drift===1?'':'s'} differ from the last verified Sheet snapshot.</p>`:''}</div></details>`:'';
+  return `<div class="hero nextHero"><div class="nextHeroEyebrow">Paradise Shows</div><h1>Next Steps</h1><p>Start here. Work is grouped by who or what must move next; research depth stays inside each show.</p></div>
+    <div class="nextStepStats"><div><b>${action.length}</b><span>Team action</span></div><div><b>${review.length}</b><span>Decision / review</span></div><div><b>${waiting.length}</b><span>Waiting</span></div><div><b>${pay.length}</b><span>Payment attention</span></div></div>
+    ${nextStepSection('Team action','The company can move these now.',action,'ACTION',8)}
+    ${nextStepSection('Decision / review needed','A decision, approval, conflict check, or internal review is the next gate.',review,'REVIEW',6)}
+    ${paymentHtml}
+    ${nextStepSection('Waiting on organizer','Current-cycle contact is already in motion; the organizer or another external dependency is next.',waiting,'WAITING',5)}
+    ${nextStepSection('Scheduled / monitoring','No immediate team move is required; watch the governed timing or publication trigger.',scheduled,'SCHEDULED',4)}
+    ${systemHtml}`;
+}
+
+function calendarMonthNumber(row){
+  if(row?.event_start){const m=Number(String(row.event_start).slice(5,7));if(m>=1&&m<=12)return m}
+  const expected=Number(row?.expected_month);return expected>=1&&expected<=12?expected:null;
+}
+function calendarPursueItem(row){
+  const conflict=String(row.conflict_notes||'').trim();
+  const next=String(row.next_action||'').trim();
+  return `<article class="calendarItem ${conflict?'hasConflict':''}">
+    <div class="calendarDate"><b>${esc(annualPlanDateText(row))}</b><span>${esc(row.priority||'MEDIUM')} priority</span></div>
+    <div class="calendarMain"><div><h3>${esc(row.occurrence_label||row.canonical_event)}</h3><p>${esc(annualPlanBudgetText(row))}</p></div><span class="calendarDecision pursue">PURSUE</span></div>
+    ${conflict?`<div class="calendarConflict"><b>Conflict:</b> ${esc(conflict)}</div>`:''}
+    ${next?`<div class="calendarNext"><span>Next</span><b>${esc(next)}</b></div>`:''}
+    <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open show</button>
+  </article>`;
+}
+function renderCalendar(){
+  const p=state.annualPlan;
+  if(p.loading&&!p.loaded)return '<div class="hero"><h1>Calendar</h1><p>Loading the published 2027 plan…</p></div><div class="loading">Loading calendar…</div>';
+  if(p.error&&!p.loaded)return `<div class="hero"><h1>Calendar</h1><p>Published annual-plan schedule and conflicts.</p></div><div class="alert"><div class="event">Calendar unavailable</div><div class="action">${esc(p.error)}</div><div class="actions"><button class="btn primary" id="annualPlanRetry">Try again</button></div></div>`;
+  if(!p.loaded)return '<div class="loading">Opening calendar…</div>';
+  const rows=p.rows||[];
+  const pursue=rows.filter(r=>r.plan_decision==='PURSUE');
+  const watch=rows.filter(r=>r.plan_decision==='WATCH');
+  const conflicts=pursue.filter(r=>String(r.conflict_notes||'').trim());
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthHtml=months.map((name,index)=>{
+    const month=index+1;
+    const pRows=pursue.filter(r=>calendarMonthNumber(r)===month).slice().sort((a,b)=>annualPlanMonthKey(a).localeCompare(annualPlanMonthKey(b))||String(a.canonical_event||'').localeCompare(String(b.canonical_event||'')));
+    const wCount=watch.filter(r=>calendarMonthNumber(r)===month).length;
+    if(!pRows.length&&!wCount)return '';
+    const visible=pRows.slice(0,10);
+    return `<section class="calendarMonth"><div class="calendarMonthHead"><div><h2>${name}</h2><p>${pRows.length} pursue · ${wCount} watch</p></div></div>${visible.map(calendarPursueItem).join('')}${pRows.length>visible.length?`<div class="nextStepMore">+${pRows.length-visible.length} more PURSUE rows in the full annual plan</div>`:''}${!pRows.length&&wCount?`<div class="calendarWatchOnly">${wCount} WATCH opportunit${wCount===1?'y':'ies'} · no PURSUE rows scheduled for this month.</div>`:''}</section>`;
+  }).join('');
+  return `<div class="hero calendarHero"><div><h1>2027 Calendar</h1><p>The published annual plan, simplified to the events the team intends to pursue. WATCH opportunities remain counted for awareness.</p></div><button type="button" class="btn secondary" id="calendarOpenPlan">Open full plan</button></div>
+    <div class="calendarStats"><div><b>${pursue.length}</b><span>PURSUE</span></div><div><b>${watch.length}</b><span>WATCH</span></div><div><b>${conflicts.length}</b><span>PURSUE conflicts</span></div></div>
+    ${monthHtml||'<div class="empty">No dated or estimated 2027 plan rows available.</div>'}`;
+}
+
 function countStatuses(){return state.shows.reduce((a,s)=>(a[s.show_status]=(a[s.show_status]||0)+1,a),{})}
 function opportunityCostNumber(op,key){
   const v=op?.[key];
@@ -2057,7 +2160,7 @@ function renderAnnualPlan(){
 function renderShows(){
   const profileCount=Number(state.catalogSummary?.profile_count||state.catalog.length||0),occCount=Number(state.catalogSummary?.occurrence_count||0);
   const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0),annualCount=Number(state.annualPlan?.summary?.rows||0);
-  const top=`<div class="hero"><h1>Show database</h1><p>${profileCount||'—'} show profiles · ${occCount||'—'} preserved evidence records · ${state.shows.length} current controls</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All Shows</button><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='PLAN2027'?'active':''}" data-show-mode="PLAN2027">2027 Plan${annualCount?' '+annualCount:''}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Unlinked LP${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
+  const top=`<div class="hero"><h1>Shows & history</h1><p>Search current controls, the published annual plan, and preserved historical evidence.</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='PLAN2027'?'active':''}" data-show-mode="PLAN2027">2027 Plan${annualCount?' '+annualCount:''}</button><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All history ${profileCount||''}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Data cleanup${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
   if(state.showMode==='CURRENT')return top+renderCurrentShows();
   if(state.showMode==='PLAN2027')return top+(typeof window.renderAnnualPlanScoped==='function'?window.renderAnnualPlanScoped():renderAnnualPlan());
   if(state.showMode==='UNLINKED')return top+renderUnlinkedLp();
