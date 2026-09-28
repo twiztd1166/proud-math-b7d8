@@ -54,31 +54,33 @@ The repository regression must continue to prove that `public/app-annual-api.js`
 
 ## Current 2027 control
 
-Published run: `b1252ba2-1c58-4e2e-ae1b-ae51e8aea594` (R21).
+Published run: `81975a13-ddaf-41ab-83e6-fd4f0ae16599` (R32).
 
-Stable R21 invariants:
+Stable R32 invariants:
 
-- 294 annual rows;
-- 287 profiles;
-- 47 PURSUE / 247 WATCH / 0 RESEARCH;
-- 391 fixed overlap pairs / 0 reciprocal-uncontrolled;
-- 19 fixed PURSUE/PURSUE pairs / 0 uncontrolled;
-- 3 estimate-driven PURSUE/PURSUE pairs / 0 uncontrolled;
-- 171 historical-audit rows.
+- 342 annual rows;
+- 331 profiles;
+- 54 PURSUE / 288 WATCH / 0 RESEARCH;
+- 453 fixed overlap pairs / 0 reciprocal-uncontrolled;
+- 23 fixed PURSUE/PURSUE pairs / 0 uncontrolled;
+- 5 estimate-driven PURSUE/PURSUE pairs / 0 uncontrolled;
+- 171 historical-audit rows;
+- 0 stale verified-relation mismatches;
+- 0 literal duplicate rows.
 
 Current release-control stack:
 
 - `shows-annual-plan-api` v5 / response contract v3;
 - `shows-history-api` v4 for publication-aligned legacy annual compatibility;
 - `shows-api` v93 for publication-aligned general-API annual compatibility while preserving its operating API role;
-- explicit 2027 publication pointer -> R21;
+- explicit 2027 publication pointer -> R32;
 - READY candidate preview remains separate from publication;
 - governed annual-read, production-scope/history, legacy-compatibility, and mature-smoke verifiers resolve the current publication dynamically rather than hard-coding an annual revision;
 - the active mature-smoke workflow uses `scripts/run-paradise-shows-live-smoke-current.py`; the R19-specific wrapper is retained only as historical rollback evidence.
 
-R21 is a bounded successor to R20: two net-new East Coast prospect rows — Muscle on the Beach PURSUE/MEDIUM and North Palm Beach Garden Fest WATCH/MEDIUM — plus two reciprocal fixed-conflict note updates on ACS West Palm Beach Home Show and St. Lucie County Fair. The 171-row historical audit remains logically unchanged.
+R32 is the full-year post-monthly adversarial-reconciliation successor. It adds exactly three rows (Doc Reno's WingsFest under LIFE-215, South Florida Build Expo under HIST-193, and Jupiter Farmers Market under HIST-057), rekeys Fort Lauderdale Air Dot Show to historical LIFE-201 while preserving its plan ID, normalizes the LIFE-190 duplicate-suppressed health-fair row under canonical LIFE-171, adds five verified SAME_SERIES_LEGACY_SOURCE_SPLIT relations, and corrects five stale rows in the 171-row annual historical audit. No inherited annual row is deleted.
 
-Read the R21 row in `shows_app_annual_plan_release_validations` for the exact prepublication production commit, workflow evidence, timestamps, and post-publication closeout evidence. Historical R20/R19 validation and recovery artifacts remain preserved as point-in-time evidence and must not be interpreted as the current publication.
+Read the R32 row in `shows_app_annual_plan_release_validations` for the exact prepublication production commit, workflow evidence, timestamps, and post-publication closeout evidence. Historical R21/R20/R19 validation and recovery artifacts remain preserved as point-in-time evidence and must not be interpreted as the current publication.
 
 ## Safety boundary
 
