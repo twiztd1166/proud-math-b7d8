@@ -554,8 +554,8 @@ async function savePayment(id){
   catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save payment'}
 }
 function closeModal(id){$('#'+id).classList.remove('show');if(id==='detailModal'){state.deepLinkedProfile=null;state.deepLinkedYear=null;syncLocationView()}}
-$$('.nav button').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.tab=b.dataset.tab;syncLocationView();render();if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
-$('#refreshBtn').onclick=async()=>{toast('Reloading operating data…');await bootstrap();if(state.catalogLoaded)await loadCatalog(true);if(state.unlinkedLp.loaded)await loadUnlinkedLp(true);toast('Current')};
+$$('.nav button').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.tab=b.dataset.tab;syncLocationView();render();if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();if((state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();window.scrollTo(0,0)});
+$('#refreshBtn').onclick=async()=>{toast('Reloading operating data…');await bootstrap();if(state.catalogLoaded)await loadCatalog(true);if(state.annualPlan.loaded)await loadAnnualPlan(true);if(state.unlinkedLp.loaded)await loadUnlinkedLp(true);toast('Current')};
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){m.classList.remove('show');if(m.id==='detailModal'){state.deepLinkedProfile=null;state.deepLinkedYear=null;syncLocationView()}}}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 bootstrap();
