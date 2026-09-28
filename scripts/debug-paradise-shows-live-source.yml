@@ -2735,7 +2735,16 @@ jobs:
           render_view shows "$SITE/#shows"
           grep -q 'Shows &amp; history' /tmp/shows.html
           render_view calendar "$SITE/#calendar"
-          grep -q '2027 Calendar' /tmp/calendar.html
+          if ! grep -q '2027 Calendar' /tmp/calendar.html; then
+            echo "::error::Calendar deep link did not reach the loaded 2027 Calendar view."
+            python - <<'PY'
+          import re
+          d=open('/tmp/calendar.html',encoding='utf-8').read()
+          m=re.search(r'<main id="content"[^>]*>(.*?)</main>',d,re.S)
+          print((m.group(1) if m else d[:5000])[:5000])
+          PY
+            exit 1
+          fi
           grep -q 'Open full plan' /tmp/calendar.html
           grep -q 'PURSUE' /tmp/calendar.html
           render_view current_controls "$SITE/#current"
