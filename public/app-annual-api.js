@@ -27,7 +27,7 @@
     const p=state.annualPlan;
     if(p.loading||(!force&&p.loaded))return;
     p.loading=true;p.error=null;
-    if(state.tab==='shows'&&state.showMode==='PLAN2027')render();
+    if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
     try{
       const d=await callAnnualPlanRead(p.year);
       p.rows=d.rows||[];p.summary=d.summary||null;p.run=d.run||null;p.loaded=true;
@@ -36,7 +36,7 @@
       toast('2027 annual plan unavailable');
     }finally{
       p.loading=false;
-      if(state.tab==='shows'&&state.showMode==='PLAN2027')render();
+      if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
     }
   };
 })();

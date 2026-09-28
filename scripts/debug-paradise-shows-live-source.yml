@@ -2685,7 +2685,11 @@ jobs:
             grep -Ei 'uncaught|typeerror|referenceerror|cors|blocked|refused|content security' /tmp/chrome.log | tail -80 || true
             exit 1
           fi
-          grep -q 'Work today / this week' /tmp/dom.html
+          grep -q 'Next Steps' /tmp/dom.html
+          grep -q 'Team action' /tmp/dom.html
+          grep -q 'Decision / review needed' /tmp/dom.html
+          grep -q 'Waiting on organizer' /tmp/dom.html
+          grep -q 'Scheduled / monitoring' /tmp/dom.html
           if grep -Ei 'INFO:CONSOLE:.*(Uncaught|TypeError|ReferenceError|SyntaxError)' /tmp/chrome.log; then
             echo "::error::Browser console contains an uncaught JavaScript error."
             exit 1
@@ -2729,7 +2733,20 @@ jobs:
           }
 
           render_view shows "$SITE/#shows"
-          grep -q 'Show database' /tmp/shows.html
+          grep -q 'Shows &amp; history' /tmp/shows.html
+          render_view calendar "$SITE/#calendar"
+          if ! grep -q '2027 Calendar' /tmp/calendar.html; then
+            echo "::error::Calendar deep link did not reach the loaded 2027 Calendar view."
+            python - <<'PY'
+          import re
+          d=open('/tmp/calendar.html',encoding='utf-8').read()
+          m=re.search(r'<main id="content"[^>]*>(.*?)</main>',d,re.S)
+          print((m.group(1) if m else d[:5000])[:5000])
+          PY
+            exit 1
+          fi
+          grep -q 'Open full plan' /tmp/calendar.html
+          grep -q 'PURSUE' /tmp/calendar.html
           render_view current_controls "$SITE/#current"
           grep -q 'Current 37' /tmp/current_controls.html
           render_view annual_plan "$SITE/#plan2027"
