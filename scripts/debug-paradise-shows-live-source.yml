@@ -2782,7 +2782,7 @@ jobs:
           render_view touch_profile "$SITE/#show/HIST-098"
           grep -q 'HIST-098' /tmp/touch_profile.html
           grep -q 'Linked current control: MFC-084' /tmp/touch_profile.html
-          grep -q '665 show profiles' /tmp/shows.html
+          grep -q 'All history 665' /tmp/shows.html
           grep -q 'Rebook candidates 2013+' /tmp/shows.html
           grep -q 'data-quick-view="ALL_HISTORICAL_OUTREACH"' /tmp/shows.html
           grep -Eq 'Historical outreach <span class="quickViewCount">[0-9]+</span>' /tmp/shows.html
