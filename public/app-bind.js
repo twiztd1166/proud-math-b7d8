@@ -17,7 +17,7 @@ function bindDynamic(){
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
   $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
-  $('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;state.showMode='ALL';syncLocationView();if(!state.catalogLoaded)await loadCatalog();if(state.catalogLoaded)openCatalog(profile)});
+  $$('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;state.showMode='ALL';syncLocationView();if(!state.catalogLoaded)await loadCatalog();if(state.catalogLoaded)openCatalog(profile)});
   const cp=$('#calendarOpenPlan');if(cp)cp.onclick=()=>{state.tab='shows';state.showMode='PLAN2027';state.search='';state.showQuickView='NONE';syncLocationView();if(!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();};
   $$('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
