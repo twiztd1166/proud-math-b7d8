@@ -34,7 +34,7 @@ jobs:
           grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
           grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
           grep -q 'estimated_start' public/app-annual-scope.js
-          grep -q 'paradise-shows-public-v4' public/sw.js
+          grep -Eq 'paradise-shows-public-v[0-9]+' public/sw.js
           python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
           echo 'Revision-neutral release source contract: PASS'
 
