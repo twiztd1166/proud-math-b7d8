@@ -926,6 +926,36 @@ Deno.serve(async r => {
     return out(r,{ok:true,version:17,show:show.data,history:{changes:audit.data||[],reconciliation:reconciliation.data||null,baseline:baseline.data||null,sourceCaptures:snapshots.data||[],conflicts:conflicts.data||[],relatedPayments:payments.data||[],paymentChanges}});
   }
 
+  if(action==='listShowNotes'){
+    const id=String(body.mfcId||'').trim();
+    if(!/^MFC-\d{3}$/.test(id))return out(r,{ok:false,error:'Valid MFC ID required'},400);
+    const notes=await db.from('shows_app_notes')
+      .select('id,mfc_id,note,created_at')
+      .eq('mfc_id',id)
+      .order('created_at',{ascending:false})
+      .order('id',{ascending:false})
+      .limit(250);
+    if(notes.error)return out(r,{ok:false,error:'Unable to load show notes'},500);
+    return out(r,{ok:true,notes:notes.data||[]});
+  }
+
+  if(action==='addShowNote'){
+    const id=String(body.mfcId||'').trim();
+    const note=String(body.note||'').trim();
+    if(!/^MFC-\d{3}$/.test(id))return out(r,{ok:false,error:'Valid MFC ID required'},400);
+    if(!note)return out(r,{ok:false,error:'Enter a note'},400);
+    if(note.length>4000)return out(r,{ok:false,error:'Note must be 4,000 characters or less'},400);
+    const show=await db.from('shows_app_shows').select('mfc_id').eq('mfc_id',id).maybeSingle();
+    if(show.error)return out(r,{ok:false,error:'Unable to verify show'},500);
+    if(!show.data)return out(r,{ok:false,error:'Show not found'},404);
+    const created=await db.from('shows_app_notes')
+      .insert({mfc_id:id,note})
+      .select('id,mfc_id,note,created_at')
+      .single();
+    if(created.error)return out(r,{ok:false,error:'Unable to save note'},500);
+    return out(r,{ok:true,note:created.data});
+  }
+
   if(action==='resolveConflict'){
     const runId=String(body.runId||'').trim(),id=String(body.mfcId||'').trim(),field=String(body.fieldName||'').trim(),resolution=String(body.resolution||'').trim();
     if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId))return out(r,{ok:false,error:'Valid refresh run required'},400);
