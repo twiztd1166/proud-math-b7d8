@@ -156,7 +156,7 @@ def scope_aware_deep_link_script(script: str) -> str:
 
 
 def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
-    token = str(env.get('PARADISE_SHOWS_CI_OIDC') or '').strip()
+    token = str(env.get('PARADISE_SHOWS_CI_SESSION_TOKEN') or '').strip()
     if not token:
         return script
 
@@ -172,10 +172,10 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         for j in range(i - 1, max(-1, i - 10), -1):
             if 'Content-Type: application/json' not in lines[j]:
                 continue
-            if j + 1 < len(lines) and 'X-Paradise-CI-OIDC: $PARADISE_SHOWS_CI_OIDC' in lines[j + 1]:
+            if j + 1 < len(lines) and 'Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN' in lines[j + 1]:
                 break
             indent = lines[j][:len(lines[j]) - len(lines[j].lstrip())]
-            lines.insert(j + 1, indent + '-H "X-Paradise-CI-OIDC: $PARADISE_SHOWS_CI_OIDC" \\')
+            lines.insert(j + 1, indent + '-H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \\')
             break
         else:
             raise RuntimeError(f'Unable to add CI authorization header for action {match.group(1)}')
@@ -184,7 +184,7 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
 
     if name == LIVE_PAGE_STEP:
         target = '--dump-dom "$SITE/"'
-        replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_OIDC|today"'
+        replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
         if target not in script:
             raise RuntimeError('Unable to locate live-page browser target for CI auth')
         script = script.replace(target, replacement, 1)
@@ -192,11 +192,11 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
     if name == DEEP_LINK_STEP:
         marker = '            url="$2"\n'
         injection = r'''            url="$2"
-            if [[ -n "${PARADISE_SHOWS_CI_OIDC:-}" ]]; then
+            if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
               route="${url#"$SITE/"}"
               route="${route#\#}"
               route="${route:-today}"
-              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_OIDC|$route"
+              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
             fi
 '''
         if marker not in script:
@@ -233,8 +233,8 @@ def post_annual_plan():
         headers={
             'Origin': site,
             'Content-Type': 'application/json',
-            **({'X-Paradise-CI-OIDC': os.environ['PARADISE_SHOWS_CI_OIDC']}
-               if os.environ.get('PARADISE_SHOWS_CI_OIDC') else {}),
+            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_CI_SESSION_TOKEN']}
+               if os.environ.get('PARADISE_SHOWS_CI_SESSION_TOKEN') else {}),
         },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
