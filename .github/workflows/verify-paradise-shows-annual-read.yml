@@ -269,7 +269,7 @@ jobs:
           p=Path('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png')
           data=p.read_bytes()
           assert data[:8] == b'\x89PNG\r\n\x1a\n'
-          width,height,bit_depth,color_type,_,_,_=struct.unpack('>IIBBBBB', data[24:37])
+          width,height,bit_depth,color_type,_,_,_=struct.unpack('>IIBBBBB', data[16:29])
           assert (width,height)==(1024,1024), (width,height)
           assert bit_depth==8, bit_depth
           assert color_type==2, f'App icon must be RGB/no alpha, PNG color type={color_type}'
