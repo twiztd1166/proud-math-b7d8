@@ -45,7 +45,7 @@ Key capabilities include:
 - Native iOS share sheet, haptic navigation feedback, and deep links
 - Mobile-first show detail and operational workflow
 
-Paradise Shows is designed for authorized business use.
+Paradise Shows is designed for Paradise Exteriors business operations.
 
 ### Keywords
 events,shows,operations,calendar,booking,payments,history,planning,workflow
@@ -74,7 +74,7 @@ Suggested review paths:
 - Payments: payment-control records
 - More: system controls, support, and privacy
 
-No consumer account creation is required. The submitted build opens to a role-neutral access-code screen. Provide Apple a temporary reviewer access code only in App Store Connect Review Information; never commit that code to source control or place it in screenshots.
+No consumer account creation or login is required. The submitted build opens directly to the role-neutral operating interface; App Review does not need credentials.
 
 ## App Privacy / privacy-manifest gate
 
@@ -85,7 +85,7 @@ Current source contains:
 - an app privacy manifest declaring no tracking, no app-level required-reason API use, and user-entered operational content as Other User Content used for App Functionality
 - Capacitor 8.5.0 as the current native Swift Package Manager binary runtime; the main Capacitor toolchain is at 8.5.2, while the current SPM binary release is 8.5.0. Its SDK privacy manifest/signature requirements are handled by the upstream package
 
-**Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, authentication, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
+**Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, access-control, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
 
 ## Age rating
 
@@ -114,37 +114,22 @@ Recommended sequence:
 
 Screenshots must not contain alpha/transparency.
 
-## Private-read security gate — PASS
+## No-auth access model — intentional
 
-**Status: PASS as of September 29, 2026.**
+**Status: ACTIVE as of September 29, 2026.**
 
-Authenticated reads are now enforced and production-validated across:
+Paradise Shows currently has no app-level authentication requirement. The web/PWA and native iOS interface open directly, and the operating, historical, annual-plan, and write APIs do not require an access code, user account, bearer session, or reviewer credential.
 
-- `shows-api` operating/bootstrap/catalog reads — deployed **v96**
-- `shows-history-api` — deployed **v7**
-- `shows-annual-plan-api` — deployed **v8**
+Current deployed API versions:
+- `shows-api` — **v98**
+- `shows-history-api` — **v8**
+- `shows-annual-plan-api` — **v9**
 
-Human users use the existing 12-hour company access-code session for reads and writes through the role-neutral app access screen. GitHub Actions does not store the company access code: approved workflows obtain short-lived GitHub OIDC identity, exchange it through `shows-api` `ciSession`, and receive a short-lived signed read-only `ci.*` token that cannot authorize write actions.
-
-The final production validation on repository SHA `02e48e528c04db9671de443fcf6216fcf6b6304e` passed:
-
-- annual-plan production scope — run `36521443936`
-- legacy annual compatibility — run `36521443940`
-- governed annual-read + native iOS build — run `36521443934`
-- full public live browser/deep-link smoke — run `36521443978`
-
-The legacy compatibility verifier also confirms unauthenticated reads to all three protected read APIs return **401 / App access required** before it authenticates and continues.
-
-App Review should receive its temporary reviewer access code only through App Store Connect Review Information. Private Custom App distribution limits who can discover/install the iOS binary; backend authorization remains independently enforced.
+This is an intentional product decision. Anyone who obtains the public web URL or directly reaches the public API endpoints can access the exposed app data and invoke supported write actions. Apple Business Manager Custom App distribution limits discovery/installation of the iOS binary but does not provide authentication for the public web application or its backend APIs.
 
 ## Review-access handling
 
-Before submission:
-- Create or designate a temporary App Review access code.
-- Enter it only in App Store Connect Review Information with concise login instructions.
-- Verify it opens the same read/write role-neutral app session used by authorized staff.
-- Rotate or retire the reviewer code after approval if operational policy requires it.
-- Never place the code in GitHub, app binaries, screenshots, support pages, or privacy-policy text.
+No App Review login or access code is required. In App Store Connect Review Information, state that the app opens directly and that reviewers can exercise the same role-neutral interface without credentials.
 
 ## Account-specific items still required
 
