@@ -251,8 +251,6 @@ def post_annual_plan():
         headers={
             'Origin': site,
             'Content-Type': 'application/json',
-            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_CI_SESSION_TOKEN']}
-               if os.environ.get('PARADISE_SHOWS_CI_SESSION_TOKEN') else {}),
         },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
@@ -432,7 +430,6 @@ def main():
             script = scope_aware_annual_api_script(script)
         if name == DEEP_LINK_STEP:
             script = scope_aware_deep_link_script(script)
-        script = auth_aware_shell_script(name, script, env)
         run_shell_block(script, env)
         if name == DEEP_LINK_STEP:
             verify_scope_contract()
