@@ -240,13 +240,41 @@ jobs:
             rm -f "$headers"
           done
 
+      - name: Validate web/native source before packaging
+        run: |
+          set -euo pipefail
+          node --check public/app-core.js
+          node --check public/app-annual-api.js
+          node --check public/app-shows.js
+          node --check public/app-annual-scope.js
+          node --check public/app-control.js
+          node --check public/app-bind.js
+          node --check public/app-modals.js
+          grep -q 'exact: "8.5.0"' ios/App/CapApp-SPM/Package.swift
+          ! grep -Eq '"url"[[:space:]]*:' ios/App/App/capacitor.config.json
+          ! grep -Eq 'server:[[:space:]]*\{[^}]*url' capacitor.config.ts
+
       - name: Build web bundle and native assets
         run: |
           set -euo pipefail
           npm ci
           npm run ios:prepare
           test -f ios/App/App/public/index.html
+          test -f ios/App/App/public/privacy/index.html
+          test -f ios/App/App/public/support/index.html
           test -f ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+          python3 - <<'PY'
+          import struct
+          from pathlib import Path
+          p=Path('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png')
+          data=p.read_bytes()
+          assert data[:8] == b'\x89PNG\r\n\x1a\n'
+          width,height,bit_depth,color_type,_,_,_=struct.unpack('>IIBBBBB', data[24:37])
+          assert (width,height)==(1024,1024), (width,height)
+          assert bit_depth==8, bit_depth
+          assert color_type==2, f'App icon must be RGB/no alpha, PNG color type={color_type}'
+          print({'app_icon':'PASS','size':(width,height),'color_type':color_type})
+          PY
 
       - name: Validate native metadata
         run: |
@@ -257,6 +285,9 @@ jobs:
           grep -q 'paradiseshows' ios/App/App/Info.plist
           grep -q 'PrivacyInfo.xcprivacy' ios/App/App.xcodeproj/project.pbxproj
           grep -q 'NativeBridgeViewController.swift' ios/App/App.xcodeproj/project.pbxproj
+          grep -q 'NSPrivacyCollectedDataTypeOtherUserContent' ios/App/App/PrivacyInfo.xcprivacy
+          grep -q 'NSPrivacyCollectedDataTypePurposeAppFunctionality' ios/App/App/PrivacyInfo.xcprivacy
+          grep -q 'ITSAppUsesNonExemptEncryption' ios/App/App/Info.plist
 
       - name: Resolve Swift packages
         run: |
