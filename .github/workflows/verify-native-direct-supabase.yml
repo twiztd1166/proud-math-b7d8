@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/native-direct-supabase-no-cloudflare-20260929
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
   workflow_dispatch:
 
 permissions:
