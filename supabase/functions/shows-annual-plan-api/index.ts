@@ -20,7 +20,7 @@ const cors = (r: Request) => {
   const origin = r.headers.get('origin') || '';
   return {
     ...(ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
-    'Access-Control-Allow-Headers': 'content-type, authorization',
+    'Access-Control-Allow-Headers': 'content-type',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Vary': 'Origin',
   };
@@ -53,60 +53,6 @@ async function rest(table: string, params: URLSearchParams) {
   });
   if (!response.ok) throw new Error(`POSTGREST_${response.status}`);
   return response.json();
-}
-
-
-async function sha256Hex(value: string) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-function bearer(r: Request) {
-  const value = String(r.headers.get('authorization') || '').trim();
-  const match = value.match(/^Bearer\s+(.+)$/i);
-  return match ? match[1].trim() : '';
-}
-async function activeAppSession(r: Request) {
-  const token = bearer(r);
-  if (!token) return null;
-  const tokenHash = await sha256Hex(token);
-  const params = new URLSearchParams({
-    select: 'id,expires_at',
-    token_hash: `eq.${tokenHash}`,
-    expires_at: `gt.${new Date().toISOString()}`,
-    limit: '1',
-  });
-  const sessions = await rest('shows_app_sessions', params) as any[];
-  return sessions?.[0] || null;
-}
-
-function base64UrlBytes(value:string){
-  let s=value.replace(/-/g,'+').replace(/_/g,'/');
-  while(s.length%4)s+='=';
-  const raw=atob(s),out=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
-  return out;
-}
-function base64UrlJson(value:string){
-  return JSON.parse(new TextDecoder().decode(base64UrlBytes(value)));
-}
-async function ciSigningKey(){
-  const material=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('paradise-shows-ci-read-v1|'+KEY));
-  return crypto.subtle.importKey('raw',material,{name:'HMAC',hash:'SHA-256'},false,['verify']);
-}
-async function validCiReadToken(token:string){
-  const parts=token.split('.');
-  if(parts.length!==3||parts[0]!=='ci')return false;
-  const input=parts[0]+'.'+parts[1];
-  const ok=await crypto.subtle.verify('HMAC',await ciSigningKey(),base64UrlBytes(parts[2]),new TextEncoder().encode(input));
-  if(!ok)return false;
-  let payload:any;try{payload=base64UrlJson(parts[1])}catch{return false}
-  return payload?.v===1&&payload?.scope==='shows:read'&&Number(payload.exp||0)>Math.floor(Date.now()/1000);
-}
-async function activeReadSession(r:Request){
-  const token=bearer(r);if(!token)return null;
-  if(token.startsWith('ci.'))return await validCiReadToken(token)?{kind:'ci'}:null;
-  const app=await activeAppSession(r);
-  return app?{kind:'user',...app}:null;
 }
 
 
