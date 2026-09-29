@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paradise Shows CI session</title>
+</head>
+<body>
+  <main>Opening authenticated test session…</main>
+  <script is:inline>
+    (() => {
+      const token = String(location.hash || '').replace(/^#/, '').trim();
+      const rawRoute = new URLSearchParams(location.search).get('route') || 'today';
+      const route = /^(?:today|calendar|shows|current|plan2027|payments|control|unlinked|show/(?:(?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})(?:/year/20\d{2})?)$/.test(rawRoute)
+        ? rawRoute
+        : 'today';
+      if (!token.startsWith('ci.')) {
+        document.querySelector('main').textContent = 'CI session unavailable.';
+        return;
+      }
+      try {
+        sessionStorage.setItem('paradise-shows-write-session-v1', token);
+        history.replaceState(null, '', '/ci-session');
+        location.replace('/#' + route);
+      } catch {
+        document.querySelector('main').textContent = 'Unable to start CI session.';
+      }
+    })();
+  </script>
+</body>
+</html>
