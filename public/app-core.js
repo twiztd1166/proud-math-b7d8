@@ -139,12 +139,59 @@ function saveWriteSession(token){
     else sessionStorage.removeItem(WRITE_SESSION_STORAGE);
   }catch{}
 }
+function appAuthHeaders(){
+  const headers={'Content-Type':'application/json'};
+  if(writeSessionToken)headers.Authorization='Bearer '+writeSessionToken;
+  return headers;
+}
+function showAccessGate(message=''){
+  clearWriteSession();
+  const bottom=document.querySelector('.bottom');
+  if(bottom)bottom.style.display='none';
+  const asOf=document.querySelector('#asOf');
+  if(asOf)asOf.textContent='Secure business access';
+  const content=document.querySelector('#content');
+  if(!content)return;
+  content.innerHTML=`<div class="accessGate"><div class="accessCard"><img src="/icon.svg" alt="" class="accessIcon"/><div class="accessEyebrow">Paradise Shows</div><h1>Enter access code</h1><p>Use the company access code to open current shows, payments, planning, and history.</p><form id="accessForm"><label for="accessCode">Access code</label><input id="accessCode" name="accessCode" type="password" inputmode="text" autocomplete="current-password" autocapitalize="none" spellcheck="false" required /><button class="btn primary accessSubmit" type="submit">Continue</button><div id="accessError" class="accessError" role="alert"></div></form><div class="accessMeta">Authorized business use only · session expires automatically</div></div></div>`;
+  const input=document.querySelector('#accessCode');
+  const error=document.querySelector('#accessError');
+  if(error&&message)error.textContent=message;
+  const form=document.querySelector('#accessForm');
+  if(form)form.onsubmit=async event=>{
+    event.preventDefault();
+    const code=String(input?.value||'').trim();
+    if(!code){if(error)error.textContent='Enter the access code.';return}
+    const button=form.querySelector('button[type="submit"]');
+    if(button){button.disabled=true;button.textContent='Checking…'}
+    if(error)error.textContent='';
+    try{
+      const session=await call('login',{accessCode:code});
+      saveWriteSession(session.token);
+      if(bottom)bottom.style.display='';
+      await bootstrap();
+    }catch(e){
+      if(error)error.textContent=e?.message||'Unable to sign in.';
+      if(input){input.value='';input.focus()}
+    }finally{
+      if(button){button.disabled=false;button.textContent='Continue'}
+    }
+  };
+  setTimeout(()=>input?.focus(),0);
+}
+async function startApp(){
+  if(writeSessionToken){
+    try{
+      const status=await call('authStatus');
+      if(status.authorized){const bottom=document.querySelector('.bottom');if(bottom)bottom.style.display='';await bootstrap();return}
+    }catch{}
+  }
+  showAccessGate();
+}
 async function call(action,payload={}){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try{
-    const headers={'Content-Type':'application/json'};
-    if(writeSessionToken)headers.Authorization='Bearer '+writeSessionToken;
+    const headers=appAuthHeaders();
     const r=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...payload}),signal:controller.signal});
     const j=await r.json().catch(()=>({ok:false,error:'Invalid response'}));
     if(!r.ok||!j.ok){
@@ -163,20 +210,9 @@ async function ensureWriteAuth(){
       const status=await call('authStatus');
       if(status.authorized)return true;
     }catch{}
-    clearWriteSession();
   }
-  const accessCode=window.prompt('Enter Paradise edit access code');
-  if(accessCode===null)return false;
-  if(!String(accessCode).trim()){toast('Edit access code required');return false}
-  try{
-    const session=await call('login',{accessCode:String(accessCode).trim()});
-    saveWriteSession(session.token);
-    toast('Editing unlocked for this browser session');
-    return true;
-  }catch(e){
-    toast(e.message||'Unable to unlock editing');
-    return false;
-  }
+  showAccessGate('Your session expired. Enter the access code again.');
+  return false;
 }
 async function callWrite(action,payload={}){
   try{return await call(action,payload)}
@@ -257,6 +293,9 @@ async function bootstrap(){
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
     if((state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
-  }catch(e){toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'}
+  }catch(e){
+    if(e&&e.status===401){showAccessGate('Enter the access code to continue.');return}
+    toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
+  }
 }
 
