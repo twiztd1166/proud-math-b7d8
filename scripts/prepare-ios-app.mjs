@@ -15,7 +15,7 @@ fs.rmSync(target, { recursive: true, force: true });
 fs.mkdirSync(target, { recursive: true });
 fs.cpSync(source, target, { recursive: true });
 
-const required = ['index.html', 'app.css', 'app-core.js', 'app-shows.js', 'app-control.js', 'app-bind.js', 'app-modals.js'];
+const required = ['index.html', 'app.css', 'app-core.js', 'app-shows.js', 'app-calendar.js', 'app-control.js', 'app-bind.js', 'app-modals.js'];
 for (const file of required) {
   if (!fs.existsSync(path.join(target, file))) {
     throw new Error(`Native bundle missing required asset: ${file}`);
