@@ -29,6 +29,26 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Authenticate CI app session
+        shell: bash
+        env:
+          PARADISE_SHOWS_CI_ACCESS_CODE: ${{ secrets.PARADISE_SHOWS_CI_ACCESS_CODE }}
+        run: |
+          set -euo pipefail
+          test -n "$PARADISE_SHOWS_CI_ACCESS_CODE" || {
+            echo "::error::Missing PARADISE_SHOWS_CI_ACCESS_CODE repository secret."
+            exit 1
+          }
+          response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -X POST "$API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            --data "$(jq -nc --arg code "$PARADISE_SHOWS_CI_ACCESS_CODE" '{action:"login",accessCode:$code}')")"
+          token="$(jq -er '.token' <<<"$response")"
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$token" >> "$GITHUB_ENV"
+
       - name: Validate current-publication mature-smoke adapter
         shell: bash
         run: |
