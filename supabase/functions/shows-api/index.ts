@@ -926,6 +926,33 @@ Deno.serve(async r => {
     return out(r,{ok:true,version:17,show:show.data,history:{changes:audit.data||[],reconciliation:reconciliation.data||null,baseline:baseline.data||null,sourceCaptures:snapshots.data||[],conflicts:conflicts.data||[],relatedPayments:payments.data||[],paymentChanges}});
   }
 
+  if(action==='listProfileNotes'){
+    const profileId=String(body.profileId||'').trim();
+    if(!profileId||profileId.length>120)return out(r,{ok:false,error:'Valid profile ID required'},400);
+    const notes=await db.from('shows_app_profile_notes')
+      .select('id,profile_id,note,created_at')
+      .eq('profile_id',profileId)
+      .order('created_at',{ascending:false})
+      .order('id',{ascending:false})
+      .limit(250);
+    if(notes.error)return out(r,{ok:false,error:'Unable to load profile notes'},500);
+    return out(r,{ok:true,notes:notes.data||[]});
+  }
+
+  if(action==='addProfileNote'){
+    const profileId=String(body.profileId||'').trim();
+    const note=String(body.note||'').trim();
+    if(!profileId||profileId.length>120)return out(r,{ok:false,error:'Valid profile ID required'},400);
+    if(!note)return out(r,{ok:false,error:'Enter a note'},400);
+    if(note.length>4000)return out(r,{ok:false,error:'Note must be 4,000 characters or less'},400);
+    const created=await db.from('shows_app_profile_notes')
+      .insert({profile_id:profileId,note})
+      .select('id,profile_id,note,created_at')
+      .single();
+    if(created.error)return out(r,{ok:false,error:'Unable to save note'},500);
+    return out(r,{ok:true,note:created.data});
+  }
+
   if(action==='listShowNotes'){
     const id=String(body.mfcId||'').trim();
     if(!/^MFC-\d{3}$/.test(id))return out(r,{ok:false,error:'Valid MFC ID required'},400);
