@@ -1,3 +1,4 @@
+import { verifyGithubActionsCiOidc } from '../_shared/github-ci-oidc.ts';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const deploymentId = Deno.env.get('DENO_DEPLOYMENT_ID') || '';
@@ -20,7 +21,7 @@ const cors = (r: Request) => {
   const origin = r.headers.get('origin') || '';
   return {
     ...(ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
-    'Access-Control-Allow-Headers': 'content-type, authorization',
+    'Access-Control-Allow-Headers': 'content-type, authorization, x-paradise-ci-oidc',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Vary': 'Origin',
   };
@@ -103,7 +104,8 @@ function canonicalSort(a: any, b: any, year: number) {
 Deno.serve(async (r: Request) => {
   if (r.method === 'OPTIONS') return new Response('ok', { headers: cors(r) });
   try {
-    if (!await activeAppSession(r)) return out(r, { ok: false, error: 'App access required' }, 401);
+    const appSession = await activeAppSession(r);
+    if (!appSession && !await verifyGithubActionsCiOidc(r)) return out(r, { ok: false, error: 'App access required' }, 401);
     let requestedYear: unknown = 2027;
     let requestedRunId = '';
     if (r.method === 'GET') {
