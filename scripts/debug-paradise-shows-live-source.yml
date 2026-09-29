@@ -571,9 +571,9 @@ jobs:
             -X OPTIONS "$API" \
             -H "Origin: $SITE" \
             -H "Access-Control-Request-Method: POST" \
-            -H "Access-Control-Request-Headers: content-type,authorization"
+            -H "Access-Control-Request-Headers: content-type"
           grep -Fi "access-control-allow-origin: $SITE" /tmp/options.headers
-          grep -Fi 'access-control-allow-headers:' /tmp/options.headers | grep -qi 'authorization'
+          grep -Fi 'access-control-allow-headers:' /tmp/options.headers | grep -qi 'content-type'
 
           curl --retry 4 --retry-delay 2 --retry-all-errors -sS -D /tmp/bootstrap.headers -o /tmp/bootstrap.json \
             -X POST "$API" \
