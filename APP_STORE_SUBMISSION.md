@@ -1,0 +1,145 @@
+# Paradise Shows — App Store submission packet
+
+## Recommended distribution
+
+**Primary recommendation: Private Custom App through Apple Business Manager.**
+
+Paradise Shows is an internal business-operations tool containing event planning, organizer, payment-status, task, and historical-performance information. Private distribution is a better fit than a publicly searchable App Store listing.
+
+If unmanaged employee-owned devices later require ordinary App Store installation, evaluate Apple's Unlisted App option. An unlisted link is not a security mechanism.
+
+## App identity
+
+- App name: **Paradise Shows**
+- Bundle ID: **com.paradiseexteriors.shows**
+- SKU: **PARADISE-SHOWS-IOS-001**
+- Version: **1.0**
+- Build: **1**
+- Primary language: **English (U.S.)**
+- Primary category: **Business**
+- Secondary category: **Productivity**
+- Copyright: **2026 Paradise Exteriors LLC**
+- iPhone deployment target: **iOS 15.0**
+- Device family for v1: **iPhone**
+- URL scheme: **paradiseshows://**
+
+## Product-page metadata
+
+### Subtitle
+Event planning & execution
+
+### Promotional text
+Turn show research into clear next steps, booking controls, payment visibility, calendar planning, and historical performance.
+
+### Description
+Paradise Shows is the event-planning and show-operations workspace for Paradise Exteriors.
+
+Use one operating view to see what needs attention, review upcoming events, manage booking and payment controls, compare historical show performance, and preserve the evidence behind each decision.
+
+Key capabilities include:
+- Action-first Next Steps organized by who or what must move next
+- Published annual show calendar and conflict visibility
+- Current, planned, and historical show records
+- Booking, organizer-response, and payment controls
+- Historical booth, cost, performance, and source evidence
+- Native iOS share sheet, haptic navigation feedback, and deep links
+- Mobile-first show detail and operational workflow
+
+Paradise Shows is designed for authorized business use.
+
+### Keywords
+events,shows,operations,calendar,booking,payments,history,planning,workflow
+
+### Support URL
+https://paradise-shows-public.proud-math-b7d8.pages.dev/support
+
+### Privacy Policy URL
+https://paradise-shows-public.proud-math-b7d8.pages.dev/privacy
+
+### Marketing URL
+https://paradise-shows-public.proud-math-b7d8.pages.dev/
+
+## App Review notes
+
+Paradise Shows is a proprietary business-operations application for Paradise Exteriors LLC. It is intended for private Custom App distribution through Apple Business Manager.
+
+The app helps authorized team members plan and operate trade shows and community events. The native iOS container packages the production web interface locally and adds native platform behavior including the iOS share sheet, haptic feedback, launch screen, and custom deep-link routing.
+
+The app does not sell digital goods, contain advertising, or use third-party advertising tracking.
+
+Suggested review paths:
+- Next: current operating actions
+- Calendar: published 2027 plan
+- Shows: current controls, annual plan, and historical evidence
+- Payments: payment-control records
+- More: system controls, support, and privacy
+
+No separate consumer account creation is required for review of the current build.
+
+## App Privacy / privacy-manifest gate
+
+Current source contains:
+- no advertising SDK
+- no App Tracking Transparency usage
+- no native request for location, camera, microphone, contacts, photos, Bluetooth, Health, or advertising identifier
+- an app privacy manifest declaring no app-level tracking or required-reason API use
+- Capacitor 8.5.2 as the native runtime; its SDK privacy manifest/signature requirements are handled by the upstream package
+
+**Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, authentication, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
+
+## Age rating
+
+The current product has no objectionable content, advertising, social media, chat, gambling, medical content, or unrestricted general-purpose web browser.
+
+Complete Apple’s current age-rating questionnaire using those facts. The expected rating is the lowest applicable rating, subject to the questionnaire and any future feature changes.
+
+## Export compliance
+
+The native target sets `ITSAppUsesNonExemptEncryption = false`. This assumes the app uses only standard/exempt platform HTTPS/TLS and contains no custom non-exempt cryptography. Reconfirm before upload if cryptography is added.
+
+## Screenshots
+
+For the first iPhone release, prepare 6.9-inch portrait screenshots at one Apple-accepted size, preferably:
+
+- **1320 × 2868**, or
+- **1290 × 2796**, or
+- **1260 × 2736**
+
+Recommended sequence:
+1. Next Steps
+2. 2027 Calendar
+3. Shows & history
+4. Show detail / next action
+5. Payments
+
+Screenshots must not contain alpha/transparency.
+
+## Account-specific items still required
+
+These cannot be safely hard-coded in source control:
+
+1. Apple Developer organization enrollment / Team ID
+2. App Store Connect app record
+3. Apple Business Manager Organization ID (for Private Custom App distribution)
+4. Distribution certificate / automatic signing authorization
+5. App Store Connect privacy questionnaire confirmation
+6. Age-rating questionnaire
+7. App screenshots captured from the signed/TestFlight build
+8. App Review contact information
+9. Final TestFlight internal-device acceptance
+10. Submission and release approval
+
+## Reproducible local build
+
+1. Install current supported Xcode 26.x on macOS 26.
+2. From repository root:
+   - `npm ci`
+   - `npm run ios:prepare`
+3. Open `ios/App/App.xcodeproj`.
+4. Select the Paradise Exteriors Apple Developer team.
+5. Confirm bundle ID `com.paradiseexteriors.shows`.
+6. Build on a physical iPhone.
+7. Archive and upload to App Store Connect.
+8. Test with TestFlight before App Review.
+
+CI independently compiles an unsigned iPhone Simulator build on a GitHub `macos-26` runner.
