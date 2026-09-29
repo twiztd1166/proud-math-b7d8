@@ -517,6 +517,56 @@ async function openCatalog(id,focusYear=null){
     $('#detailBody').innerHTML=`<h2>History unavailable</h2><div class="subtitle">${esc(e.message)}</div><div class="actions"><button class="btn secondary" id="catalogCloseBtn">Close</button></div>`;$('#catalogCloseBtn').onclick=()=>closeModal('detailModal');
   }
 }
+function showNoteTime(value){
+  try{
+    return new Intl.DateTimeFormat('en-US',{
+      timeZone:'America/New_York',
+      month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'
+    }).format(new Date(value))+' ET';
+  }catch{
+    return value?String(value):'Time unavailable';
+  }
+}
+function renderShowNotes(notes){
+  const list=$('#showNotesList'),count=$('#showNotesCount');
+  if(!list)return;
+  const rows=Array.isArray(notes)?notes:[];
+  if(count)count.textContent=rows.length===1?'1 note':rows.length+' notes';
+  if(!rows.length){
+    list.innerHTML='<div class="showNotesEmpty">No notes yet. Add the first update for this show.</div>';
+    return;
+  }
+  list.innerHTML=rows.map(n=>{
+    const text=esc(String(n.note||'')).replace(/\n/g,'<br>');
+    return `<div class="showNoteItem"><div class="showNoteMeta">${esc(showNoteTime(n.created_at))}</div><div class="showNoteText">${text}</div></div>`;
+  }).join('');
+}
+async function loadShowNotes(id){
+  const list=$('#showNotesList');
+  try{
+    const d=await call('listShowNotes',{mfcId:id});
+    renderShowNotes(d.notes||[]);
+  }catch(e){
+    if(list)list.innerHTML=`<div class="showNotesEmpty error">Unable to load notes · ${esc(e?.message||'Unknown error')}</div>`;
+  }
+}
+async function addShowNote(id){
+  const input=$('#showNoteInput'),button=$('#showNoteAddBtn');
+  const note=String(input?.value||'').trim();
+  if(!note){toast('Enter a note first.');input?.focus();return}
+  if(button){button.disabled=true;button.textContent='Saving…'}
+  try{
+    await callWrite('addShowNote',{mfcId:id,note});
+    if(input)input.value='';
+    toast('Note added');
+    await loadShowNotes(id);
+    input?.focus();
+  }catch(e){
+    toast(e?.message||'Unable to save note');
+  }finally{
+    if(button){button.disabled=false;button.textContent='Add note'}
+  }
+}
 function openDetail(id){
   const s=state.shows.find(x=>x.mfc_id===id);if(!s)return;
   const signal=typeof bookingSignal==='function'?bookingSignal(s):{label:'REVIEW',detail:'Review current control',cls:'review'};
@@ -524,8 +574,8 @@ function openDetail(id){
   const historySummary=profile?`${Number(profile.history_count||0)} preserved records · ${profile.history_year_count||0} history years${profile.lifetime_net_volume!=null?' · '+money(profile.lifetime_net_volume)+' lifetime net':''}`:'Linked historical profile not loaded';
   const bestBooth=profile?.best_observed_specific_booth?`${profile.best_observed_specific_booth}${profile.best_observed_specific_booth_year?' · '+profile.best_observed_specific_booth_year:''}`:(profile?.best_observed_booth?`${profile.best_observed_booth}${profile.best_observed_booth_year?' · '+profile.best_observed_booth_year:''}`:(profile?.latest_preserved_booth?`${profile.latest_preserved_booth}${profile.latest_preserved_booth_year?' · '+profile.latest_preserved_booth_year:''}`:'Not enough preserved booth evidence'));
   const historyAction=profile?`<button class="btn primary" id="currentHistoryBtn">Review history & booths</button>`:'';
-  $('#detailBody').innerHTML=`<h2>${esc(s.event)}</h2><div class="subtitle">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="detailGrid"><div class="detail"><div class="k">Status</div><div class="val"><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div></div><div class="detail"><div class="k">Decision</div><div class="val">${esc(s.decision||'—')}</div></div><div class="detail"><div class="k">Event</div><div class="val">${esc(typeof bookingEventRange==='function'?bookingEventRange(s):(date(s.event_start)+(s.event_end&&s.event_end!==s.event_start?' – '+date(s.event_end):'')))}</div></div><div class="detail"><div class="k">Max booking cost</div><div class="val">${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</div></div><div class="detail"><div class="k">Owner</div><div class="val">${esc(s.owner||'—')}</div></div><div class="detail"><div class="k">When to act</div><div class="val">${esc(typeof bookingTiming==='function'?bookingTiming(s):dueLabel(s.action_due))}</div></div><div class="detail"><div class="k">This year</div><div class="val">${esc(s.this_year||'IN PLAY')}</div></div><div class="detail"><div class="k">History</div><div class="val">${esc(historySummary)}</div></div><div class="detail"><div class="k">Best observed booth / placement</div><div class="val">${esc(bestBooth)}</div></div></div>${s.performance?`<div class="block"><div class="k">Historical performance signal</div><div class="val">${esc(s.performance)}</div></div>`:''}<div class="block"><div class="k">Booking status</div><div class="val">${esc(s.booking_status||'—')}</div></div><div class="block"><div class="k">Payment / terms</div><div class="val">${esc([s.payment_due_text,s.payment_terms].filter(x=>x&&x!=='—').join(' · ')||'No verified current payment terms')}</div></div>${s.source_detail?.follow_up_detail?`<div class="block"><div class="k">Why current status</div><div class="val">${esc(s.source_detail.follow_up_detail)}</div></div>`:''}<div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(s.follow_up||'—')}</div></div><div class="actions detailActions"><button class="btn secondary" id="detailCloseBtn">Close</button><button class="btn secondary" id="detailShareBtn">Share</button><a class="btn secondary" style="text-decoration:none;text-align:center" target="_blank" href="${SHEET}#gid=1286011977&range=B${s.source_sheet_row}:AH${s.source_sheet_row}">Source row</a>${historyAction}<button class="btn secondary" id="detailEditBtn">Edit show</button></div>`;
-  $('#detailCloseBtn').onclick=()=>closeModal('detailModal');$('#detailShareBtn').onclick=()=>shareShowSummary(s);$('#detailEditBtn').onclick=()=>openEdit(s.mfc_id);const hb=$('#currentHistoryBtn');if(hb&&profile)hb.onclick=()=>openCatalog(profile.profile_id);$('#detailModal').classList.add('show');
+  $('#detailBody').innerHTML=`<h2>${esc(s.event)}</h2><div class="subtitle">${esc(s.mfc_id)} · ${esc(s.restart_wave||'')}</div><div class="bookingSignal ${esc(signal.cls)}"><b>${esc(signal.label)}</b><span>${esc(signal.detail)}</span></div><div class="detailGrid"><div class="detail"><div class="k">Status</div><div class="val"><span class="badge ${badgeClass(s.show_status)}">${esc(s.show_status)}</span></div></div><div class="detail"><div class="k">Decision</div><div class="val">${esc(s.decision||'—')}</div></div><div class="detail"><div class="k">Event</div><div class="val">${esc(typeof bookingEventRange==='function'?bookingEventRange(s):(date(s.event_start)+(s.event_end&&s.event_end!==s.event_start?' – '+date(s.event_end):'')))}</div></div><div class="detail"><div class="k">Max booking cost</div><div class="val">${s.max_booking_cost!=null?money(s.max_booking_cost):'Not verified'}</div></div><div class="detail"><div class="k">Owner</div><div class="val">${esc(s.owner||'—')}</div></div><div class="detail"><div class="k">When to act</div><div class="val">${esc(typeof bookingTiming==='function'?bookingTiming(s):dueLabel(s.action_due))}</div></div><div class="detail"><div class="k">This year</div><div class="val">${esc(s.this_year||'IN PLAY')}</div></div><div class="detail"><div class="k">History</div><div class="val">${esc(historySummary)}</div></div><div class="detail"><div class="k">Best observed booth / placement</div><div class="val">${esc(bestBooth)}</div></div></div>${s.performance?`<div class="block"><div class="k">Historical performance signal</div><div class="val">${esc(s.performance)}</div></div>`:''}<div class="block"><div class="k">Booking status</div><div class="val">${esc(s.booking_status||'—')}</div></div><div class="block"><div class="k">Payment / terms</div><div class="val">${esc([s.payment_due_text,s.payment_terms].filter(x=>x&&x!=='—').join(' · ')||'No verified current payment terms')}</div></div>${s.source_detail?.follow_up_detail?`<div class="block"><div class="k">Why current status</div><div class="val">${esc(s.source_detail.follow_up_detail)}</div></div>`:''}<div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(s.follow_up||'—')}</div></div><div class="showNotesBlock"><div class="showNotesHead"><div><div class="k">Manager notes</div><div class="showNotesHint">Shared notes · newest first · timestamp added automatically</div></div><span id="showNotesCount" class="pill">—</span></div><div class="showNotesComposer"><textarea id="showNoteInput" maxlength="4000" placeholder="Add an update, call note, decision, follow-up, or issue…"></textarea><div class="showNotesComposerFoot"><span>Saved with automatic Eastern Time date/time.</span><button class="btn primary" id="showNoteAddBtn">Add note</button></div></div><div id="showNotesList" class="showNotesList"><div class="showNotesEmpty">Loading notes…</div></div></div><div class="actions detailActions"><button class="btn secondary" id="detailCloseBtn">Close</button><button class="btn secondary" id="detailShareBtn">Share</button><a class="btn secondary" style="text-decoration:none;text-align:center" target="_blank" href="${SHEET}#gid=1286011977&range=B${s.source_sheet_row}:AH${s.source_sheet_row}">Source row</a>${historyAction}<button class="btn secondary" id="detailEditBtn">Edit show</button></div>`;
+  $('#detailCloseBtn').onclick=()=>closeModal('detailModal');$('#detailShareBtn').onclick=()=>shareShowSummary(s);$('#detailEditBtn').onclick=()=>openEdit(s.mfc_id);const hb=$('#currentHistoryBtn');if(hb&&profile)hb.onclick=()=>openCatalog(profile.profile_id);const noteBtn=$('#showNoteAddBtn'),noteInput=$('#showNoteInput');if(noteBtn)noteBtn.onclick=()=>addShowNote(s.mfc_id);if(noteInput)noteInput.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addShowNote(s.mfc_id)}};$('#detailModal').classList.add('show');loadShowNotes(s.mfc_id);
 }
 async function openEdit(id){
   const s=state.shows.find(x=>x.mfc_id===id);if(!s)return;
