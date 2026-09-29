@@ -1,0 +1,10 @@
+project_id = "taxlrlfsobtnbasjcnuf"
+
+[functions.shows-api]
+verify_jwt = false
+
+[functions.shows-annual-plan-api]
+verify_jwt = false
+
+[functions.shows-history-api]
+verify_jwt = false
