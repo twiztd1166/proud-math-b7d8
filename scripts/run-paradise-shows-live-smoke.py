@@ -147,6 +147,40 @@ def scope_aware_annual_api_script(script: str) -> str:
 
 
 def scope_aware_deep_link_script(script: str) -> str:
+    calendar_replacements = [
+        (
+            'render_view calendar "$SITE/#calendar"',
+            'render_view calendar "$SITE/#calendar/2026"',
+        ),
+        (
+            "if ! grep -q '2027 Calendar' /tmp/calendar.html; then",
+            "if ! grep -q '2026 Calendar' /tmp/calendar.html; then",
+        ),
+        (
+            'echo "::error::Calendar deep link did not reach the loaded 2027 Calendar view."',
+            'echo "::error::Calendar deep link did not reach the loaded 2026 Calendar view."',
+        ),
+        (
+            "grep -q 'Open full plan' /tmp/calendar.html",
+            "grep -q 'Open current shows' /tmp/calendar.html",
+        ),
+        (
+            "grep -q 'PURSUE' /tmp/calendar.html",
+            """grep -q 'Dated events' /tmp/calendar.html
+render_view calendar_2027 "$SITE/#calendar/2027"
+grep -q '2027 Calendar' /tmp/calendar_2027.html
+grep -q 'Open full plan' /tmp/calendar_2027.html
+grep -q 'PURSUE' /tmp/calendar_2027.html""",
+        ),
+    ]
+    for stale, replacement in calendar_replacements:
+        count = script.count(stale)
+        if count != 1:
+            raise RuntimeError(
+                f'Expected exactly one stale calendar assertion, got {count}: {stale}'
+            )
+        script = script.replace(stale, replacement, 1)
+
     for stale in STALE_DEEP_LINK_LINES:
         count = script.count(stale)
         if count != 1:
