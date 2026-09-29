@@ -3239,7 +3239,20 @@ jobs:
           grep -q '0 records · 2 annual LP · 2 cumulative LP' /tmp/lponly_detail.html
 
           render_view unlinked "$SITE/#unlinked"
-          grep -q 'Data cleanup 17' /tmp/unlinked.html
+          if ! grep -q 'Data cleanup 17' /tmp/unlinked.html; then
+            echo "::error::Unlinked route did not render the expected governed cleanup count."
+            echo "--- unlinked rendered content excerpt ---"
+            python3 - <<'PY'
+          import re
+          from pathlib import Path
+          d=Path('/tmp/unlinked.html').read_text(encoding='utf-8',errors='replace')
+          m=re.search(r'<main id="content"[^>]*>(.*?)</main>',d,re.S)
+          print((m.group(1) if m else d[:9000])[:9000])
+          PY
+            echo "--- unlinked chrome console excerpt ---"
+            tail -120 /tmp/unlinked.log || true
+            exit 1
+          fi
           grep -q 'Administrative / aggregate 5' /tmp/unlinked.html
           grep -q 'Generic / locationless 8' /tmp/unlinked.html
           grep -q 'Competing identity 2' /tmp/unlinked.html
