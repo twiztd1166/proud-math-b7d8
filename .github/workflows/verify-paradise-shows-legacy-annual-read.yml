@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   verify-legacy-annual-compatibility:
@@ -25,6 +26,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: Acquire Paradise Shows CI read session
+        shell: bash
+        run: bash scripts/acquire-paradise-shows-ci-session.sh
 
       - name: Verify canonical browser annual endpoint
         shell: bash
@@ -47,13 +52,13 @@ jobs:
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/canonical.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" \
             --data '{"action":"annualPlan","year":2027}'
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history-compat.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" \
             --data '{"action":"annualPlan","year":2027}'
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/shows-compat.json \
-            -X POST "$SHOWS_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -X POST "$SHOWS_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" \
             --data '{"action":"annualPlan","year":2027}'
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
