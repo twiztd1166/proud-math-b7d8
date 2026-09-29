@@ -38,12 +38,13 @@ async function shareShowSummary(show){
   const text=[eventRange,next?('Next action: '+next):''].filter(Boolean).join('\n');
   const profile=typeof currentProfileForShow==='function'?currentProfileForShow(show):null;
   const route=profile?.profile_id?('#show/'+encodeURIComponent(profile.profile_id)):'#current';
-  const url='https://paradise-shows-public.proud-math-b7d8.pages.dev/'+route;
-  if(nativeBridgePost('share',{title:event,text,url}))return true;
+  const nativeUrl='paradiseshows://shows';
+  const webUrl='https://paradise-shows-public.proud-math-b7d8.pages.dev/'+route;
+  if(nativeBridgePost('share',{title:event,text,url:nativeUrl}))return true;
   if(navigator.share){
-    try{await navigator.share({title:event,text,url});return true}catch(error){if(error?.name==='AbortError')return false}
+    try{await navigator.share({title:event,text,url:webUrl});return true}catch(error){if(error?.name==='AbortError')return false}
   }
-  try{await navigator.clipboard.writeText([event,text,url].filter(Boolean).join('\n'));toast('Show summary copied');return true}catch(_){return false}
+  try{await navigator.clipboard.writeText([event,text,webUrl].filter(Boolean).join('\n'));toast('Show summary copied');return true}catch(_){return false}
 }
 function isLpSourceOnly(p){
   return Array.isArray(p?.source_rows)&&p.source_rows.some(r=>r&&r.source_kind==='LP_SOURCE_ONLY');
