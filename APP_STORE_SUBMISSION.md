@@ -82,7 +82,7 @@ Current source contains:
 - no advertising SDK
 - no App Tracking Transparency usage
 - no native request for location, camera, microphone, contacts, photos, Bluetooth, Health, or advertising identifier
-- an app privacy manifest declaring no app-level tracking or required-reason API use
+- an app privacy manifest declaring no tracking, no app-level required-reason API use, and user-entered operational content as Other User Content used for App Functionality
 - Capacitor 8.5.0 as the current native Swift Package Manager binary runtime; the main Capacitor toolchain is at 8.5.2, while the current SPM binary release is 8.5.0. Its SDK privacy manifest/signature requirements are handled by the upstream package
 
 **Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, authentication, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
