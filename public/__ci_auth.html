@@ -9,32 +9,36 @@
 <body>
 <script>
 (() => {
-  const deny = () => {
-    document.body.textContent = 'Unavailable';
+  const deny = reason => {
+    document.body.textContent = 'Unavailable: ' + reason;
     document.title = 'Unavailable';
   };
   if (navigator.webdriver !== true) {
-    deny();
+    deny('webdriver');
     return;
   }
   const raw = String(location.hash || '').slice(1);
   const split = raw.indexOf('|');
   if (split < 1) {
-    deny();
+    deny('fragment');
     return;
   }
   const token = raw.slice(0, split).trim();
   const route = raw.slice(split + 1).trim() || 'today';
   const allowed = /^(?:today|calendar|shows|current|plan2027|payments|control|show\/(?:LIFE|HIST|CURRENT)-\d{3}(?:\/year\/20\d{2})?|show\/LPONLY-\d{4}-\d{3}(?:\/year\/20\d{2})?)$/i;
-  if (!/^ci\.[A-Za-z0-9_-]{20,512}\.[A-Za-z0-9_-]{40,64}$/.test(token) || !allowed.test(route)) {
-    deny();
+  if (!/^ci\.[A-Za-z0-9_-]{20,512}\.[A-Za-z0-9_-]{40,64}$/.test(token)) {
+    deny('token');
+    return;
+  }
+  if (!allowed.test(route)) {
+    deny('route');
     return;
   }
   try {
     sessionStorage.setItem('paradise-shows-ci-read-v1', token);
     location.replace('/#' + route);
   } catch (_) {
-    deny();
+    deny('storage');
   }
 })();
 </script>
