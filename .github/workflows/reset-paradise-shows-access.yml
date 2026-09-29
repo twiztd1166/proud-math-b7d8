@@ -1,0 +1,32 @@
+name: Reset Paradise Shows access code
+
+on:
+  push:
+    branches:
+      - paradise-shows-access-reset
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Mint GitHub OIDC token and rotate access code
+        shell: bash
+        env:
+          ENDPOINT: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-access-reset
+          EXPECTED_HASH: f2e7d7d699f3de5a04b2ffed998a2a77b4195b8abbcc6c02cc8fbcea2d833d59
+        run: |
+          set -euo pipefail
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-access-reset"
+          oidc_response="$(curl --retry 3 --retry-delay 2 --retry-all-errors -fsS             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$oidc_url")"
+          token="$(jq -er '.value' <<<"$oidc_response")"
+          echo "::add-mask::$token"
+          response="$(curl --retry 3 --retry-delay 2 --retry-all-errors -fsS             -X POST "$ENDPOINT"             -H "Authorization: Bearer $token"             -H "Content-Type: application/json"             --data '{}')"
+          jq -e --arg h "$EXPECTED_HASH" '.ok == true and .value == $h and .sessions_cleared == true and .attempts_cleared == true' <<<"$response" >/dev/null
+          echo "Paradise Shows access code rotation: PASS"
