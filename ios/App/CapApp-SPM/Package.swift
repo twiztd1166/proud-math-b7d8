@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "CapApp-SPM", targets: ["CapApp-SPM"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.2")
+        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.0")
     ],
     targets: [
         .target(
