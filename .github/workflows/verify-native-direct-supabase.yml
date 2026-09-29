@@ -1,0 +1,57 @@
+name: Paradise Shows native direct-Supabase verifier
+
+on:
+  push:
+    branches:
+      - agent/native-direct-supabase-no-cloudflare-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-native-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Capacitor uses bundled local assets
+        shell: bash
+        run: |
+          grep -q "hostname: 'localhost'" capacitor.config.ts
+          grep -q "iosScheme: 'capacitor'" capacitor.config.ts
+          grep -q '"hostname": "localhost"' ios/App/App/capacitor.config.json
+          grep -q '"iosScheme": "capacitor"' ios/App/App/capacitor.config.json
+          ! grep -q 'server.*url' capacitor.config.ts
+          ! grep -q 'pages.dev' capacitor.config.ts
+          ! grep -q 'pages.dev' ios/App/App/capacitor.config.json
+
+      - name: Verify native app calls Supabase directly
+        shell: bash
+        run: |
+          grep -q "const API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api'" public/app-core.js
+          grep -q "const nativeUrl='paradiseshows://shows'" public/app-core.js
+          grep -q "nativeBridgePost('share',{title:event,text,url:nativeUrl})" public/app-core.js
+
+      - name: Verify native bundle preparation is local
+        shell: bash
+        run: |
+          grep -q 'dist/client' scripts/prepare-ios-app.mjs
+          grep -q 'ios/App/App/public' scripts/prepare-ios-app.mjs
+          ! grep -q 'pages.dev' scripts/prepare-ios-app.mjs
+
+      - name: Verify direct Supabase API is reachable without auth
+        shell: bash
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api' \
+            --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert isinstance(x.get('shows'), list), x.keys()
+          print('Native direct-Supabase bootstrap: PASS')
+          PY
