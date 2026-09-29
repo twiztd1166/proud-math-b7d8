@@ -31,7 +31,7 @@ const out = (r: Request, x: any, s = 200, extra: Record<string,string> = {}) => 
   headers: { ...cors(r), 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Paradise-Deployment-Version': deploymentVersion, ...extra },
 });
 
-const WRITE_SESSION_HOURS=24*90;
+const WRITE_SESSION_HOURS=24*365*50;
 const LOGIN_WINDOW_MS=15*60*1000;
 const LOGIN_BLOCK_MS=15*60*1000;
 const LOGIN_MAX_FAILURES=5;
