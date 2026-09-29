@@ -83,7 +83,7 @@ Current source contains:
 - no App Tracking Transparency usage
 - no native request for location, camera, microphone, contacts, photos, Bluetooth, Health, or advertising identifier
 - an app privacy manifest declaring no app-level tracking or required-reason API use
-- Capacitor 8.5.2 as the native runtime; its SDK privacy manifest/signature requirements are handled by the upstream package
+- Capacitor 8.5.0 as the current native Swift Package Manager binary runtime; the main Capacitor toolchain is at 8.5.2, while the current SPM binary release is 8.5.0. Its SDK privacy manifest/signature requirements are handled by the upstream package
 
 **Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, authentication, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
 
@@ -113,6 +113,20 @@ Recommended sequence:
 5. Payments
 
 Screenshots must not contain alpha/transparency.
+
+## Hard security gate before TestFlight / App Review
+
+The current production show APIs protect mutations with a 12-hour access-code session, but their read endpoints are still callable without an authenticated session. Origin/CORS restrictions are not an authorization control for direct HTTP clients.
+
+**Do not submit this app to TestFlight external testing or App Review until authenticated reads are enforced across:**
+
+- `shows-api` operating/bootstrap/catalog reads
+- `shows-history-api`
+- `shows-annual-plan-api`
+
+The lowest-risk transition is to reuse the existing 12-hour access-code session for reads and writes, add a role-neutral app login gate, and give CI/App Review a separately managed credential through secrets rather than source control.
+
+Private Custom App distribution limits who can discover/install the iOS binary. It does not by itself secure the backend or the existing web URL.
 
 ## Account-specific items still required
 
