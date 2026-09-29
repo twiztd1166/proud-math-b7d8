@@ -133,8 +133,6 @@ function canonicalSort(a: any, b: any, year: number) {
 Deno.serve(async (r: Request) => {
   if (r.method === 'OPTIONS') return new Response('ok', { headers: cors(r) });
   try {
-    const readSession = await activeReadSession(r);
-    if (!readSession) return out(r, { ok: false, error: 'App access required' }, 401);
     let requestedYear: unknown = 2027;
     let requestedRunId = '';
     if (r.method === 'GET') {
