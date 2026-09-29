@@ -1,0 +1,67 @@
+name: Verify Paradise Shows CDN host
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+
+permissions:
+  contents: read
+
+jobs:
+  verify-cdn:
+    if: contains(github.event.head_commit.message, 'Verify Paradise Shows CDN host')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Test CDN hosts
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const sha='85cf15146820801a52ceacc6777aba1f85ae5db0';
+          const urls=[
+            'https://raw.githack.com/twiztd1166/proud-math-b7d8/'+sha+'/public/index-standalone.html',
+            'https://cdn.jsdelivr.net/gh/twiztd1166/proud-math-b7d8@'+sha+'/public/index-standalone.html'
+          ];
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            let passed=[];
+            for(const url of urls){
+              const page=await browser.newPage({viewport:{width:390,height:844}});
+              const errors=[];
+              page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+              page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+              try{
+                const resp=await page.goto(url,{waitUntil:'networkidle',timeout:60000});
+                const title=await page.title();
+                const body=(await page.locator('body').innerText()).slice(0,1200);
+                console.log('\nHOST',url,'STATUS',resp?.status(),'TITLE',title,'BODY',body,'ERRORS',errors);
+                if(resp?.status()!==200||title!=='Paradise Shows') continue;
+                await page.waitForSelector('.card[data-id]',{timeout:30000});
+                await page.locator('.card[data-id]').first().click();
+                await page.waitForSelector('#detailModal.show',{timeout:10000});
+                const detail=await page.locator('#detailBody').innerText();
+                console.log('DETAIL',detail.slice(0,2500));
+                if(/Manager notes/i.test(detail) && await page.locator('#showNoteInput').count()){
+                  passed.push(url);
+                  await page.screenshot({path:'/tmp/cdn-pass.png',fullPage:true});
+                }
+              }catch(e){ console.log('FAIL',url,e.message); }
+              await page.close();
+            }
+            await browser.close();
+            console.log('PASSED',JSON.stringify(passed));
+            if(!passed.length) process.exit(1);
+          })();
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paradise-shows-cdn-render
+          path: /tmp/cdn-pass.png
