@@ -105,7 +105,19 @@ function persistShowViewState(){
 }
 restoreShowViewState();
 function applyLocationView(){
-  const raw=String(location.hash||'').replace(/^#/,'');
+  let raw=String(location.hash||'').replace(/^#/,'');
+  if(navigator.webdriver===true&&raw.startsWith('__ci/')){
+    const payload=raw.slice('__ci/'.length);
+    const split=payload.indexOf('|');
+    const token=split>0?payload.slice(0,split).trim():'';
+    const route=split>0?payload.slice(split+1).trim():'';
+    const allowed=/^(?:today|calendar|shows|current|plan2027|unlinked|payments|control|show\/(?:LIFE|HIST|CURRENT)-\d{3}(?:\/year\/20\d{2})?|show\/LPONLY-\d{4}-\d{3}(?:\/year\/20\d{2})?)$/i;
+    if(/^ci\.[A-Za-z0-9_-]{20,512}\.[A-Za-z0-9_-]{40,64}$/.test(token)&&allowed.test(route)){
+      try{sessionStorage.setItem('paradise-shows-ci-read-v1',token)}catch{}
+      raw=route;
+      try{history.replaceState(null,'','#'+route)}catch{}
+    }else raw='';
+  }
   const hash=raw.toLowerCase();
   const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})(?:\/year\/(20\d{2}))?$/i);
   if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase();state.deepLinkedYear=profileMatch[2]?Number(profileMatch[2]):null}
