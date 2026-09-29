@@ -28,7 +28,12 @@ def post_current_annual_plan():
         api,
         data=payload,
         method='POST',
-        headers={'Origin': site, 'Content-Type': 'application/json'},
+        headers={
+            'Origin': site,
+            'Content-Type': 'application/json',
+            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_CI_SESSION_TOKEN']}
+               if os.environ.get('PARADISE_SHOWS_CI_SESSION_TOKEN') else {}),
+        },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.loads(response.read().decode('utf-8'))
