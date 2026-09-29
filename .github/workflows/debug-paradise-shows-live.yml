@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: paradise-shows-public-live-smoke-${{ github.sha }}
@@ -43,25 +44,20 @@ jobs:
           fi
           echo 'Current-publication mature-smoke adapter source: PASS'
 
-      - name: Authenticate CI app session
+      - name: Mint short-lived GitHub OIDC identity
         shell: bash
-        env:
-          PARADISE_SHOWS_CI_ACCESS_CODE: ${{ secrets.PARADISE_SHOWS_CI_ACCESS_CODE }}
         run: |
           set -euo pipefail
-          test -n "$PARADISE_SHOWS_CI_ACCESS_CODE" || {
-            echo "::error::Missing PARADISE_SHOWS_CI_ACCESS_CODE repository secret."
-            exit 1
-          }
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-ci"
           response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
-            -X POST "$API" \
-            -H "Origin: $SITE" \
-            -H "Content-Type: application/json" \
-            --data "$(jq -nc --arg code "$PARADISE_SHOWS_CI_ACCESS_CODE" '{action:"login",accessCode:$code}')")"
-          token="$(jq -er '.token' <<<"$response")"
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$oidc_url")"
+          token="$(jq -er '.value' <<<"$response")"
           test -n "$token"
           echo "::add-mask::$token"
-          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "PARADISE_SHOWS_CI_OIDC=$token" >> "$GITHUB_ENV"
 
       - name: Execute preserved mature smoke suite
         shell: bash
