@@ -26,6 +26,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Verify revision-neutral release source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-annual-api.js
+          node --check public/app-annual-scope.js
+          grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
+          grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
+          grep -q 'estimated_start' public/app-annual-scope.js
+          grep -Eq 'paradise-shows-public-v[0-9]+' public/sw.js
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
+          echo 'Revision-neutral release source contract: PASS'
+
       - name: Require CI credential before private-read cutover
         shell: bash
         env:
@@ -54,19 +67,6 @@ jobs:
           test -n "$token"
           echo "::add-mask::$token"
           echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$token" >> "$GITHUB_ENV"
-
-      - name: Verify revision-neutral release source contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check public/app-annual-api.js
-          node --check public/app-annual-scope.js
-          grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
-          grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
-          grep -q 'estimated_start' public/app-annual-scope.js
-          grep -Eq 'paradise-shows-public-v[0-9]+' public/sw.js
-          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
-          echo 'Revision-neutral release source contract: PASS'
 
       - name: Wait for governed annual-read assets and wiring
         if: github.event_name != 'pull_request'
