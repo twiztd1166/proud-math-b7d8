@@ -1,0 +1,65 @@
+name: Diagnose Supabase Paradise Shows frontend
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: contains(github.event.head_commit.message, 'Diagnose Supabase-hosted app rendering')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/paradise-shows/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect raw assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS "$SITE" -o /tmp/index.html
+          curl -fsS "${SITE}app-core.js?v=20260929-notes-v2" -o /tmp/core.js
+          curl -fsS "${SITE}app-modals.js?v=20260929-notes-v2" -o /tmp/modals.js
+          echo INDEX_BYTES=$(wc -c </tmp/index.html)
+          echo CORE_BYTES=$(wc -c </tmp/core.js)
+          echo MODALS_BYTES=$(wc -c </tmp/modals.js)
+          grep -n "<base\|Content-Security-Policy\|app-core.js\|app-modals.js" /tmp/index.html | head -20
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Render app and inspect browser errors
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];
+            page.on('console',m=>{ if(m.type()==='error') errors.push('console: '+m.text()) });
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            const resp=await page.goto(process.env.SITE,{waitUntil:'networkidle',timeout:60000});
+            console.log('STATUS',resp?.status());
+            console.log('URL',page.url());
+            console.log('TITLE',await page.title());
+            console.log('BODY', (await page.locator('body').innerText()).slice(0,5000));
+            console.log('ERRORS',JSON.stringify(errors,null,2));
+            await page.screenshot({path:'/tmp/paradise-shows.png',fullPage:true});
+            if((resp?.status()||0)>=400) process.exitCode=1;
+            if(errors.length) process.exitCode=1;
+            const body=await page.locator('body').innerText();
+            if(!/Paradise Shows/i.test(body)) process.exitCode=1;
+            await browser.close();
+          })();
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: supabase-paradise-shows-diagnostic
+          path: /tmp/paradise-shows.png
