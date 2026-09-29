@@ -1,0 +1,42 @@
+name: Verify Supabase Paradise Shows live frontend
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/paradise-shows
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify live Notes frontend
+        shell: bash
+        run: |
+          curl --retry 6 --retry-delay 3 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
+          curl --retry 6 --retry-delay 3 --retry-all-errors -fsS "$SITE/app-modals.js?v=20260929-notes-v2" -o /tmp/app-modals.js
+          grep -q "Paradise Shows" /tmp/index.html
+          grep -q "20260929-notes-v2" /tmp/index.html
+          grep -q "Manager notes" /tmp/app-modals.js
+          grep -q "profileNoteAddBtn" /tmp/app-modals.js
+          grep -q "showNoteAddBtn" /tmp/app-modals.js
+      - name: Verify Notes APIs without auth
+        shell: bash
+        run: |
+          curl -fsS -H 'Content-Type: application/json' -X POST "$API" --data '{"action":"listShowNotes","mfcId":"MFC-004"}' -o /tmp/mfc.json
+          curl -fsS -H 'Content-Type: application/json' -X POST "$API" --data '{"action":"listProfileNotes","profileId":"CURRENT-001"}' -o /tmp/profile.json
+          python3 - <<'PY'
+          import json
+          for path in ['/tmp/mfc.json','/tmp/profile.json']:
+              x=json.load(open(path))
+              assert x.get('ok') is True, x
+              assert isinstance(x.get('notes'), list), x
+          print('Supabase-hosted Notes frontend/API: PASS')
+          PY
