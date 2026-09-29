@@ -126,8 +126,11 @@ function syncLocationView(){
 applyLocationView();
 
 const WRITE_SESSION_STORAGE='paradise-shows-write-session-v1';
+const CI_OIDC_STORAGE='paradise-shows-ci-oidc-v1';
 let writeSessionToken='';
+let ciOidcToken='';
 try{writeSessionToken=String(sessionStorage.getItem(WRITE_SESSION_STORAGE)||'').trim()}catch{}
+try{if(navigator.webdriver===true)ciOidcToken=String(sessionStorage.getItem(CI_OIDC_STORAGE)||'').trim()}catch{}
 function clearWriteSession(){
   writeSessionToken='';
   try{sessionStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
@@ -142,6 +145,7 @@ function saveWriteSession(token){
 function appAuthHeaders(){
   const headers={'Content-Type':'application/json'};
   if(writeSessionToken)headers.Authorization='Bearer '+writeSessionToken;
+  else if(navigator.webdriver===true&&ciOidcToken)headers['X-Paradise-CI-OIDC']=ciOidcToken;
   return headers;
 }
 function showAccessGate(message=''){
@@ -179,6 +183,10 @@ function showAccessGate(message=''){
   setTimeout(()=>input?.focus(),0);
 }
 async function startApp(){
+  if(navigator.webdriver===true&&ciOidcToken){
+    const bottom=document.querySelector('.bottom');if(bottom)bottom.style.display='';
+    await bootstrap();return;
+  }
   if(writeSessionToken){
     try{
       const status=await call('authStatus');
