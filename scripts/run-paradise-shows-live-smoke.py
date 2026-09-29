@@ -11,6 +11,7 @@ from pathlib import Path
 SOURCE = Path('scripts/debug-paradise-shows-live-source.yml')
 ANNUAL_API_STEP = 'Verify live CORS and operating population'
 DEEP_LINK_STEP = 'Execute show database deep links in fresh headless Chrome'
+LIVE_PAGE_STEP = 'Execute live page in fresh headless Chrome'
 
 STALE_ANNUAL_API_BLOCK = """assert run.get('id') == '0294bac9-5400-4f31-9a13-fc7897b4ddfd', run
 assert run.get('status') == 'READY', run
@@ -154,6 +155,57 @@ def scope_aware_deep_link_script(script: str) -> str:
     return script
 
 
+def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
+    token = str(env.get('PARADISE_SHOWS_CI_SESSION_TOKEN') or '').strip()
+    if not token:
+        return script
+
+    lines = script.splitlines()
+    exempt_actions = {'authStatus', 'updateShow'}
+    for i in range(len(lines) - 1, -1, -1):
+        line = lines[i]
+        if '--data ' not in line or '"action":"' not in line:
+            continue
+        match = re.search(r'"action":"([^"]+)"', line)
+        if not match or match.group(1) in exempt_actions:
+            continue
+        for j in range(i - 1, max(-1, i - 10), -1):
+            if 'Content-Type: application/json' not in lines[j]:
+                continue
+            if j + 1 < len(lines) and 'Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN' in lines[j + 1]:
+                break
+            indent = lines[j][:len(lines[j]) - len(lines[j].lstrip())]
+            lines.insert(j + 1, indent + '-H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \\')
+            break
+        else:
+            raise RuntimeError(f'Unable to add CI authorization header for action {match.group(1)}')
+
+    script = '\n'.join(lines) + '\n'
+
+    if name == LIVE_PAGE_STEP:
+        target = '--dump-dom "$SITE/"'
+        replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
+        if target not in script:
+            raise RuntimeError('Unable to locate live-page browser target for CI auth')
+        script = script.replace(target, replacement, 1)
+
+    if name == DEEP_LINK_STEP:
+        marker = '            url="$2"\n'
+        injection = r'''            url="$2"
+            if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
+              route="${url#"$SITE/"}"
+              route="${route#\#}"
+              route="${route:-today}"
+              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
+            fi
+'''
+        if marker not in script:
+            raise RuntimeError('Unable to locate deep-link render target for CI auth')
+        script = script.replace(marker, injection, 1)
+
+    return script
+
+
 def run_shell_block(script: str, env: dict):
     path = None
     try:
@@ -178,7 +230,12 @@ def post_annual_plan():
         api,
         data=payload,
         method='POST',
-        headers={'Origin': site, 'Content-Type': 'application/json'},
+        headers={
+            'Origin': site,
+            'Content-Type': 'application/json',
+            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_CI_SESSION_TOKEN']}
+               if os.environ.get('PARADISE_SHOWS_CI_SESSION_TOKEN') else {}),
+        },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.loads(response.read().decode('utf-8'))
@@ -357,6 +414,7 @@ def main():
             script = scope_aware_annual_api_script(script)
         if name == DEEP_LINK_STEP:
             script = scope_aware_deep_link_script(script)
+        script = auth_aware_shell_script(name, script, env)
         run_shell_block(script, env)
         if name == DEEP_LINK_STEP:
             verify_scope_contract()

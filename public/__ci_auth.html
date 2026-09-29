@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Paradise Shows CI</title>
+</head>
+<body>
+<script>
+(() => {
+  const deny = () => {
+    document.body.textContent = 'Unavailable';
+    document.title = 'Unavailable';
+  };
+  if (navigator.webdriver !== true) {
+    deny();
+    return;
+  }
+  const raw = String(location.hash || '').slice(1);
+  const split = raw.indexOf('|');
+  if (split < 1) {
+    deny();
+    return;
+  }
+  const token = raw.slice(0, split).trim();
+  const route = raw.slice(split + 1).trim() || 'today';
+  const allowed = /^(?:today|calendar|shows|current|plan2027|payments|control|show\/(?:LIFE|HIST|CURRENT)-\d{3}(?:\/year\/20\d{2})?|show\/LPONLY-\d{4}-\d{3}(?:\/year\/20\d{2})?)$/i;
+  if (!/^[A-Za-z0-9_-]{20,256}$/.test(token) || !allowed.test(route)) {
+    deny();
+    return;
+  }
+  try {
+    sessionStorage.setItem('paradise-shows-ci-read-v1', token);
+    location.replace('/#' + route);
+  } catch (_) {
+    deny();
+  }
+})();
+</script>
+</body>
+</html>

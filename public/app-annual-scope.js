@@ -185,7 +185,7 @@
     const controller=new AbortController();
     const timer=setTimeout(()=>controller.abort(),15000);
     try{
-      const response=await fetch(HISTORY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+      const response=await fetch(HISTORY_API,{method:'POST',headers:(typeof appAuthHeaders==='function'?appAuthHeaders():{'Content-Type':'application/json'}),body:JSON.stringify(payload),signal:controller.signal});
       const data=await response.json().catch(()=>({ok:false,error:'Invalid response'}));
       if(!response.ok||!data.ok)throw new Error(data.error||'Request failed');
       return data;

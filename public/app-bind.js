@@ -27,6 +27,7 @@ function bindDynamic(){
   const si=$('#searchInput');if(si)si.oninput=e=>{const pos=e.target.selectionStart??e.target.value.length;state.search=e.target.value;state.showQuickView='NONE';state.catalogLimit=60;render();const next=$('#searchInput');if(next){next.focus({preventScroll:true});try{next.setSelectionRange(pos,pos)}catch{}}};
   $$('.activityItem[data-recon]').forEach(x=>x.onclick=()=>openDetail(x.dataset.recon));
   $$('.conflictChoice').forEach(b=>b.onclick=()=>resolveConflict(b));
+  const so=$('#appSignOutBtn');if(so)so.onclick=async()=>{try{if(writeSessionToken)await call('logout')}catch{}clearWriteSession();showAccessGate('Signed out.');};
 }
 async function resolveConflict(btn){
   if(!await ensureWriteAuth())return;
