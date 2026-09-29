@@ -9,7 +9,6 @@ const ORIGINS = new Set([
   'https://paradise-shows-open.anthonybeckner.chatgpt.site',
   'https://taxlrlfsobtnbasjcnuf.supabase.co',
   'https://twiztd1166.github.io',
-  'https://cdn.jsdelivr.net',
   'https://paradise-shows-public.proud-math-b7d8.pages.dev',
   'capacitor://localhost',
   'https://paradise-shows-history-preview-pe12.vercel.app',
