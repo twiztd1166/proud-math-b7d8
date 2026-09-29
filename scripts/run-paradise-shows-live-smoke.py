@@ -184,7 +184,7 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
 
     if name == LIVE_PAGE_STEP:
         target = '--dump-dom "$SITE/"'
-        replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
+        replacement = '--dump-dom "$SITE/#__ci/$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
         if target not in script:
             raise RuntimeError('Unable to locate live-page browser target for CI auth')
         script = script.replace(target, replacement, 1)
@@ -196,7 +196,7 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
               route="${url#"$SITE/"}"
               route="${route#\#}"
               route="${route:-today}"
-              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
+              url="$SITE/#__ci/$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
             fi
 '''
         if marker not in script:
