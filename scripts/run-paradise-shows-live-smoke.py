@@ -183,6 +183,11 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
     script = '\n'.join(lines) + '\n'
 
     if name == LIVE_PAGE_STEP:
+        headless = '--headless=new \\'
+        automated = '--enable-automation \\\n            --headless=new \\'
+        if headless not in script:
+            raise RuntimeError('Unable to locate live-page headless Chrome flag')
+        script = script.replace(headless, automated, 1)
         target = '--dump-dom "$SITE/"'
         replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
         if target not in script:
@@ -198,6 +203,11 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         )
 
     if name == DEEP_LINK_STEP:
+        headless = '--headless=new \\'
+        automated = '--enable-automation \\\n              --headless=new \\'
+        if headless not in script:
+            raise RuntimeError('Unable to locate deep-link headless Chrome flag')
+        script = script.replace(headless, automated, 1)
         marker = '            url="$2"\n'
         injection = r'''            url="$2"
             if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
