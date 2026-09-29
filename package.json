@@ -31,7 +31,11 @@
     "deploy": "astro build && wrangler deploy",
     "dev": "astro dev",
     "preview": "astro build && wrangler dev",
-    "types": "wrangler types"
+    "types": "wrangler types",
+    "ios:assets": "python3 scripts/generate-ios-assets.py",
+    "ios:sync": "node scripts/prepare-ios-app.mjs",
+    "ios:prepare": "npm run build && npm run ios:assets && npm run ios:sync",
+    "ios:open": "open ios/App/App.xcodeproj"
   },
   "type": "module"
 }
