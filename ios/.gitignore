@@ -1,0 +1,10 @@
+App/build
+App/Pods
+App/output
+App/App/public/*
+!App/App/public/.gitkeep
+DerivedData
+xcuserdata
+
+# Cordova plugins for Capacitor
+capacitor-cordova-ios-plugins
