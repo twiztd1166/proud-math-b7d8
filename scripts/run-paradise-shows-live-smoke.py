@@ -208,18 +208,20 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         if headless not in script:
             raise RuntimeError('Unable to locate deep-link headless Chrome flag')
         script = script.replace(headless, automated, 1)
-        marker = '            url="$2"\n'
-        injection = r'''            url="$2"
-            if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
-              route="${url#"$SITE/"}"
-              route="${route#\#}"
-              route="${route:-today}"
-              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
-            fi
-'''
-        if marker not in script:
+        target_line = next((line for line in script.splitlines() if line.strip() == 'url="$2"'), None)
+        if target_line is None:
             raise RuntimeError('Unable to locate deep-link render target for CI auth')
-        script = script.replace(marker, injection, 1)
+        indent = target_line[:len(target_line) - len(target_line.lstrip())]
+        injection = '\n'.join([
+            indent + 'url="$2"',
+            indent + 'if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then',
+            indent + '  route="${url#"$SITE/"}"',
+            indent + '  route="${route#\#}"',
+            indent + '  route="${route:-today}"',
+            indent + '  url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"',
+            indent + 'fi',
+        ])
+        script = script.replace(target_line, injection, 1)
 
     return script
 
