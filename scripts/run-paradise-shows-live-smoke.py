@@ -155,9 +155,24 @@ def scope_aware_deep_link_script(script: str) -> str:
 
 
 def run_shell_block(script: str, env: dict):
+    prelude = r'''
+if [[ -n "${PARADISE_SHOWS_SESSION:-}" ]]; then
+  curl() { command curl -H "Authorization: Bearer ${PARADISE_SHOWS_SESSION}" "$@"; }
+  auth_site_url() {
+    local route="${1:-today}"
+    printf '%s/ci-session?route=%s#%s' "${SITE%/}" "$route" "${PARADISE_SHOWS_SESSION}"
+  }
+else
+  auth_site_url() {
+    local route="${1:-today}"
+    if [[ "$route" == "today" ]]; then printf '%s/' "${SITE%/}"; else printf '%s/#%s' "${SITE%/}" "$route"; fi
+  }
+fi
+'''
     path = None
     try:
         with tempfile.NamedTemporaryFile('w', encoding='utf-8', suffix='.sh', delete=False) as handle:
+            handle.write(prelude)
             handle.write(script)
             path = handle.name
         subprocess.run(
@@ -178,7 +193,11 @@ def post_annual_plan():
         api,
         data=payload,
         method='POST',
-        headers={'Origin': site, 'Content-Type': 'application/json'},
+        headers={
+            'Origin': site,
+            'Content-Type': 'application/json',
+            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_SESSION']} if os.environ.get('PARADISE_SHOWS_SESSION') else {}),
+        },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.loads(response.read().decode('utf-8'))
@@ -355,8 +374,20 @@ def main():
         print(f'\n=== Preserved mature smoke {index}/{len(steps)}: {name} ===', flush=True)
         if name == ANNUAL_API_STEP:
             script = scope_aware_annual_api_script(script)
+        if name == 'Execute live page in fresh headless Chrome':
+            script = script.replace('--dump-dom "$SITE/"', '--dump-dom "$(auth_site_url today)"', 1)
         if name == DEEP_LINK_STEP:
             script = scope_aware_deep_link_script(script)
+            route_anchor = '            url="$2"\n            window_size="${3:-1280,900}"'
+            route_replacement = '''            url="$2"
+            if [[ -n "${PARADISE_SHOWS_SESSION:-}" && "$url" == "$SITE/#"* ]]; then
+              route="${url#"$SITE/#"}"
+              url="$(auth_site_url "$route")"
+            fi
+            window_size="${3:-1280,900}"'''
+            if route_anchor not in script:
+                raise RuntimeError('Deep-link renderer URL anchor missing')
+            script = script.replace(route_anchor, route_replacement, 1)
         run_shell_block(script, env)
         if name == DEEP_LINK_STEP:
             verify_scope_contract()
