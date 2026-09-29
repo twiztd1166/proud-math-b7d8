@@ -125,67 +125,8 @@ function syncLocationView(){
 }
 applyLocationView();
 
-const WRITE_SESSION_STORAGE='paradise-shows-write-session-v1';
-const CI_READ_STORAGE='paradise-shows-ci-read-v1';
-let writeSessionToken='';
-let ciReadToken='';
-try{
-  writeSessionToken=String(localStorage.getItem(WRITE_SESSION_STORAGE)||sessionStorage.getItem(WRITE_SESSION_STORAGE)||'').trim();
-  if(writeSessionToken){
-    localStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
-    sessionStorage.removeItem(WRITE_SESSION_STORAGE);
-  }
-}catch{}
-try{if(navigator.webdriver===true)ciReadToken=String(sessionStorage.getItem(CI_READ_STORAGE)||'').trim()}catch{}
-function clearWriteSession(){
-  writeSessionToken='';
-  try{localStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
-  try{sessionStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
-}
-function saveWriteSession(token){
-  writeSessionToken=String(token||'').trim();
-  try{
-    if(writeSessionToken)localStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
-    else localStorage.removeItem(WRITE_SESSION_STORAGE);
-    sessionStorage.removeItem(WRITE_SESSION_STORAGE);
-  }catch{}
-}
-function appAuthHeaders(){
+function appRequestHeaders(){
   return {'Content-Type':'application/json'};
-}
-function showAccessGate(message=''){
-  clearWriteSession();
-  const bottom=document.querySelector('.bottom');
-  if(bottom)bottom.style.display='none';
-  const asOf=document.querySelector('#asOf');
-  if(asOf)asOf.textContent='Secure business access';
-  const content=document.querySelector('#content');
-  if(!content)return;
-  content.innerHTML=`<div class="accessGate"><div class="accessCard"><img src="/icon.svg" alt="" class="accessIcon"/><div class="accessEyebrow">Paradise Shows</div><h1>Enter access code</h1><p>Use the company access code to open current shows, payments, planning, and history.</p><form id="accessForm"><label for="accessCode">Access code</label><input id="accessCode" name="accessCode" type="password" inputmode="text" autocomplete="current-password" autocapitalize="none" spellcheck="false" required /><button class="btn primary accessSubmit" type="submit">Continue</button><div id="accessError" class="accessError" role="alert"></div></form><div class="accessMeta">Authorized business use only · this trusted device stays signed in</div></div></div>`;
-  const input=document.querySelector('#accessCode');
-  const error=document.querySelector('#accessError');
-  if(error&&message)error.textContent=message;
-  const form=document.querySelector('#accessForm');
-  if(form)form.onsubmit=async event=>{
-    event.preventDefault();
-    const code=String(input?.value||'').trim();
-    if(!code){if(error)error.textContent='Enter the access code.';return}
-    const button=form.querySelector('button[type="submit"]');
-    if(button){button.disabled=true;button.textContent='Checking…'}
-    if(error)error.textContent='';
-    try{
-      const session=await call('login',{accessCode:code});
-      saveWriteSession(session.token);
-      if(bottom)bottom.style.display='';
-      await bootstrap();
-    }catch(e){
-      if(error)error.textContent=e?.message||'Unable to sign in.';
-      if(input){input.value='';input.focus()}
-    }finally{
-      if(button){button.disabled=false;button.textContent='Continue'}
-    }
-  };
-  setTimeout(()=>input?.focus(),0);
 }
 async function startApp(){
   const bottom=document.querySelector('.bottom');
@@ -196,7 +137,7 @@ async function call(action,payload={}){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try{
-    const headers=appAuthHeaders();
+    const headers=appRequestHeaders();
     const r=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...payload}),signal:controller.signal});
     const j=await r.json().catch(()=>({ok:false,error:'Invalid response'}));
     if(!r.ok||!j.ok){
@@ -208,14 +149,8 @@ async function call(action,payload={}){
     throw e;
   }finally{clearTimeout(timer)}
 }
-async function ensureWriteAuth(){
-  return true;
-}
 async function callWrite(action,payload={}){
-  try{return await call(action,payload)}
-  catch(e){
-    throw e;
-  }
+  return call(action,payload);
 }
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function esc(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
@@ -290,7 +225,6 @@ async function bootstrap(){
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
     if((state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
   }catch(e){
-    if(e&&e.status===401){showAccessGate('Enter the access code to continue.');return}
     toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
   }
 }
