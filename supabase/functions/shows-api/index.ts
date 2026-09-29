@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { verifyGithubActionsCiOidc } from '../_shared/github-ci-oidc.ts';
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -22,7 +21,7 @@ const cors = (r: Request) => {
   const origin = r.headers.get('origin') || '';
   return {
     ...(ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
-    'Access-Control-Allow-Headers': 'content-type, authorization, x-paradise-ci-oidc',
+    'Access-Control-Allow-Headers': 'content-type, authorization',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Vary': 'Origin',
   };
@@ -67,6 +66,100 @@ async function loginClientHash(r:Request){
   const forwarded=String(r.headers.get('cf-connecting-ip')||r.headers.get('x-forwarded-for')||'').split(',')[0].trim();
   const ua=String(r.headers.get('user-agent')||'').slice(0,240);
   return sha256Hex('paradise-shows|'+forwarded+'|'+ua);
+}
+
+const CI_OIDC_ISSUER='https://token.actions.githubusercontent.com';
+const CI_OIDC_JWKS='https://token.actions.githubusercontent.com/.well-known/jwks';
+const CI_OIDC_AUDIENCE='paradise-shows-ci';
+const CI_REPOSITORY='twiztd1166/proud-math-b7d8';
+const CI_REPOSITORY_ID='950980051';
+const CI_OWNER_ID='200838923';
+const CI_ACTOR_ID='200838923';
+const CI_TOKEN_SECONDS=20*60;
+const CI_WORKFLOWS=new Set([
+  'debug-paradise-shows-live.yml',
+  'verify-paradise-shows-annual-read.yml',
+  'verify-paradise-shows-legacy-annual-read.yml',
+  'verify-paradise-shows-r6-production.yml',
+]);
+let ciJwksCache:any=null;
+let ciJwksCachedAt=0;
+function base64UrlBytes(value:string){
+  let s=value.replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  const raw=atob(s),out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+function base64UrlJson(value:string){
+  return JSON.parse(new TextDecoder().decode(base64UrlBytes(value)));
+}
+function base64UrlEncodeBytes(value:Uint8Array){
+  let raw='';for(const b of value)raw+=String.fromCharCode(b);
+  return btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+async function ciJwks(){
+  const now=Date.now();
+  if(ciJwksCache&&now-ciJwksCachedAt<10*60*1000)return ciJwksCache;
+  const response=await fetch(CI_OIDC_JWKS,{headers:{Accept:'application/json'}});
+  if(!response.ok)throw new Error('GitHub OIDC keys unavailable');
+  const data=await response.json();
+  if(!Array.isArray(data?.keys))throw new Error('GitHub OIDC keys invalid');
+  ciJwksCache=data;ciJwksCachedAt=now;return data;
+}
+async function verifyGithubOidcToken(token:string){
+  const parts=token.split('.');
+  if(parts.length!==3)throw new Error('Invalid GitHub OIDC token');
+  const header=base64UrlJson(parts[0]),claims=base64UrlJson(parts[1]);
+  if(header.alg!=='RS256'||!header.kid)throw new Error('Unsupported GitHub OIDC algorithm');
+  const keys=await ciJwks(),jwk=keys.keys.find((key:any)=>key.kid===header.kid);
+  if(!jwk)throw new Error('GitHub OIDC signing key not found');
+  const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+  const verified=await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,base64UrlBytes(parts[2]),new TextEncoder().encode(parts[0]+'.'+parts[1]));
+  if(!verified)throw new Error('GitHub OIDC signature invalid');
+  const now=Math.floor(Date.now()/1000);
+  if(Number(claims.exp||0)<=now||Number(claims.nbf||0)>now+30||Number(claims.iat||0)>now+60)throw new Error('GitHub OIDC token expired or not yet valid');
+  const audience=Array.isArray(claims.aud)?claims.aud:[claims.aud];
+  if(claims.iss!==CI_OIDC_ISSUER||!audience.includes(CI_OIDC_AUDIENCE))throw new Error('GitHub OIDC issuer or audience invalid');
+  if(String(claims.repository||'')!==CI_REPOSITORY||String(claims.repository_id||'')!==CI_REPOSITORY_ID||String(claims.repository_owner_id||'')!==CI_OWNER_ID)throw new Error('GitHub OIDC repository invalid');
+  if(String(claims.actor_id||'')!==CI_ACTOR_ID)throw new Error('GitHub OIDC actor invalid');
+  if(!new Set(['push','pull_request','workflow_dispatch']).has(String(claims.event_name||'')))throw new Error('GitHub OIDC event invalid');
+  if(claims.event_name==='pull_request'){
+    if(String(claims.base_ref||'')!=='paradise-shows-public')throw new Error('GitHub OIDC pull-request base invalid');
+  }else if(String(claims.ref||'')!=='refs/heads/paradise-shows-public'){
+    throw new Error('GitHub OIDC branch invalid');
+  }
+  const workflowRef=String(claims.workflow_ref||'');
+  const match=workflowRef.match(/^twiztd1166\/proud-math-b7d8\/\.github\/workflows\/([^@]+)@/);
+  if(!match||!CI_WORKFLOWS.has(match[1]))throw new Error('GitHub OIDC workflow invalid');
+  if(String(claims.runner_environment||'')!=='github-hosted')throw new Error('GitHub OIDC runner invalid');
+  return claims;
+}
+async function ciSigningKey(){
+  const material=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('paradise-shows-ci-read-v1|'+KEY));
+  return crypto.subtle.importKey('raw',material,{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);
+}
+async function issueCiReadToken(claims:any){
+  const exp=Math.floor(Date.now()/1000)+CI_TOKEN_SECONDS;
+  const payload=base64UrlEncodeBytes(new TextEncoder().encode(JSON.stringify({v:1,scope:'shows:read',exp,run_id:String(claims.run_id||''),workflow:String(claims.workflow||'')})));
+  const signingInput='ci.'+payload;
+  const signature=new Uint8Array(await crypto.subtle.sign('HMAC',await ciSigningKey(),new TextEncoder().encode(signingInput)));
+  return {token:signingInput+'.'+base64UrlEncodeBytes(signature),expires_at:new Date(exp*1000).toISOString()};
+}
+async function validCiReadToken(token:string){
+  const parts=token.split('.');
+  if(parts.length!==3||parts[0]!=='ci')return false;
+  const input=parts[0]+'.'+parts[1];
+  const ok=await crypto.subtle.verify('HMAC',await ciSigningKey(),base64UrlBytes(parts[2]),new TextEncoder().encode(input));
+  if(!ok)return false;
+  let payload:any;try{payload=base64UrlJson(parts[1])}catch{return false}
+  return payload?.v===1&&payload?.scope==='shows:read'&&Number(payload.exp||0)>Math.floor(Date.now()/1000);
+}
+async function activeReadSession(r:Request){
+  const token=writeBearer(r);if(!token)return null;
+  if(token.startsWith('ci.'))return await validCiReadToken(token)?{kind:'ci',expires_at:null}:null;
+  const user=await activeWriteSession(r);
+  return user?{kind:'user',...user}:null;
 }
 
 function plainObject(v: any) { return !!v && typeof v === 'object' && !Array.isArray(v); }
@@ -346,6 +439,19 @@ Deno.serve(async r => {
     return out(r,{ok:true,token,expires_at:created.data.expires_at});
   }
 
+  if(action==='ciSession'){
+    const oidc=writeBearer(r);
+    if(!oidc)return out(r,{ok:false,error:'GitHub OIDC token required'},401);
+    try{
+      const claims=await verifyGithubOidcToken(oidc);
+      const session=await issueCiReadToken(claims);
+      return out(r,{ok:true,token:session.token,expires_at:session.expires_at,scope:'read'});
+    }catch(error){
+      console.error('ciSession rejected',String(error));
+      return out(r,{ok:false,error:'CI authentication rejected'},401);
+    }
+  }
+
   if(action==='authStatus'){
     const session=await activeWriteSession(r);
     return out(r,{ok:true,authorized:!!session,expires_at:session?.expires_at||null});
@@ -357,11 +463,11 @@ Deno.serve(async r => {
     return out(r,{ok:true});
   }
 
-  const writeSession=await activeWriteSession(r);
-  const writeActions=new Set(['resolveConflict','updateShow','updatePayment']);
-  if(writeActions.has(action)&&!writeSession)return out(r,{ok:false,error:'Edit access required'},401);
-  const ciRead=!writeSession&&!writeActions.has(action)?await verifyGithubActionsCiOidc(r):false;
-  if(!writeSession&&!ciRead)return out(r,{ok:false,error:'App access required'},401);
+  let writeSession:any=null;
+  if(new Set(['resolveConflict','updateShow','updatePayment']).has(action)){
+    writeSession=await activeWriteSession(r);
+    if(!writeSession)return out(r,{ok:false,error:'Edit access required'},401);
+  }
 
   if(action==='bootstrap'){
     const [a,b,c,d,e,f,g,h,i,j,k]=await Promise.all([
