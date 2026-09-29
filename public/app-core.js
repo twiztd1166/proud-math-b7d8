@@ -129,17 +129,25 @@ const WRITE_SESSION_STORAGE='paradise-shows-write-session-v1';
 const CI_READ_STORAGE='paradise-shows-ci-read-v1';
 let writeSessionToken='';
 let ciReadToken='';
-try{writeSessionToken=String(sessionStorage.getItem(WRITE_SESSION_STORAGE)||'').trim()}catch{}
+try{
+  writeSessionToken=String(localStorage.getItem(WRITE_SESSION_STORAGE)||sessionStorage.getItem(WRITE_SESSION_STORAGE)||'').trim();
+  if(writeSessionToken){
+    localStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
+    sessionStorage.removeItem(WRITE_SESSION_STORAGE);
+  }
+}catch{}
 try{if(navigator.webdriver===true)ciReadToken=String(sessionStorage.getItem(CI_READ_STORAGE)||'').trim()}catch{}
 function clearWriteSession(){
   writeSessionToken='';
+  try{localStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
   try{sessionStorage.removeItem(WRITE_SESSION_STORAGE)}catch{}
 }
 function saveWriteSession(token){
   writeSessionToken=String(token||'').trim();
   try{
-    if(writeSessionToken)sessionStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
-    else sessionStorage.removeItem(WRITE_SESSION_STORAGE);
+    if(writeSessionToken)localStorage.setItem(WRITE_SESSION_STORAGE,writeSessionToken);
+    else localStorage.removeItem(WRITE_SESSION_STORAGE);
+    sessionStorage.removeItem(WRITE_SESSION_STORAGE);
   }catch{}
 }
 function appAuthHeaders(){
