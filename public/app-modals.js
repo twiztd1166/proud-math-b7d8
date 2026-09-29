@@ -529,8 +529,7 @@ function openDetail(id){
 }
 async function openEdit(id){
   const s=state.shows.find(x=>x.mfc_id===id);if(!s)return;
-  if(!await ensureWriteAuth())return;
-  closeModal('detailModal');
+closeModal('detailModal');
   $('#editBody').innerHTML=`<h2>Edit ${esc(s.event)}</h2><div class="subtitle">Only operating fields below can be changed.</div><div class="field"><label>SHOW STATUS</label><select id="eStatus">${['READY','RECONCILE','DATE ONLY','HOLD','OPEN'].map(v=>`<option ${s.show_status===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>NEXT ACTION</label><textarea id="eFollow">${esc(s.follow_up||'')}</textarea></div><div class="field"><label>OWNER</label><input id="eOwner" value="${esc(s.owner||'')}" /></div><div class="field"><label>ACTION DUE</label><input id="eDue" type="date" value="${esc(s.action_due||'')}" /></div><div class="field"><label>THIS YEAR</label><select id="eThisYear"><option ${s.this_year==='IN PLAY'?'selected':''}>IN PLAY</option><option ${s.this_year==='SKIP THIS YEAR'?'selected':''}>SKIP THIS YEAR</option></select></div><div class="field" id="skipField"><label>SKIP REASON</label><textarea id="eSkip">${esc(s.skip_reason||'')}</textarea></div><div class="editnote">Pricing, formulas, evidence, cap treatment and payment controls are not editable from the mobile app.</div><div class="actions"><button class="btn secondary" id="editCancelBtn">Cancel</button><button class="btn primary" id="saveBtn">Save changes</button></div>`;
   $('#editCancelBtn').onclick=()=>closeModal('editModal');$('#saveBtn').onclick=()=>saveEdit(s.mfc_id);const sync=()=>$('#skipField').style.display=$('#eThisYear').value==='SKIP THIS YEAR'?'block':'none';$('#eThisYear').onchange=sync;sync();$('#editModal').classList.add('show');
 }
@@ -547,8 +546,7 @@ function openPayment(id){
   $('#paymentCancelBtn').onclick=()=>closeModal('paymentModal');$('#paySaveBtn').onclick=()=>savePayment(p.payment_id);$('#paymentModal').classList.add('show');
 }
 async function savePayment(id){
-  if(!await ensureWriteAuth())return;
-  const patch={posted_amount:$('#pPosted').value,posted_date:$('#pDate').value||null,clearing:$('#pClearing').value||null,payment_owner:$('#pOwner').value,notes:$('#pNotes').value};
+const patch={posted_amount:$('#pPosted').value,posted_date:$('#pDate').value||null,clearing:$('#pClearing').value||null,payment_owner:$('#pOwner').value,notes:$('#pNotes').value};
   const b=$('#paySaveBtn');b.disabled=true;b.textContent='Saving…';
   try{const d=await callWrite('updatePayment',{paymentId:id,patch});state.payments=state.payments.map(p=>p.payment_id===id?d.payment:p);closeModal('paymentModal');toast('Payment updated');await bootstrap();}
   catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save payment'}
