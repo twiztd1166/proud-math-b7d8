@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   verify-governed-annual-read:
@@ -24,6 +25,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: Acquire Paradise Shows CI read session
+        shell: bash
+        run: bash scripts/acquire-paradise-shows-ci-session.sh
 
       - name: Verify revision-neutral release source contract
         shell: bash
@@ -76,15 +81,15 @@ jobs:
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" \
             --data '{"action":"annualPlan","year":2027}'
           CURRENT_RUN="$(jq -er '.run.id' /tmp/annual.json)"
           explicit_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
           history_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/explicit.json \
-            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$explicit_payload"
+            -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" --data "$explicit_payload"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' -H "Authorization: Bearer $PARADISE_SHOWS_SESSION" --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
