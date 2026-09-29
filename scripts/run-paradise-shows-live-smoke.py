@@ -182,6 +182,12 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
 
     script = '\n'.join(lines) + '\n'
 
+    if name in {LIVE_PAGE_STEP, DEEP_LINK_STEP} and '--enable-automation' not in script:
+        count = script.count('--headless=new')
+        if count < 1:
+            raise RuntimeError('Unable to locate authenticated Chrome headless flag')
+        script = script.replace('--headless=new', '--headless=new \\\n            --enable-automation', count)
+
     if name == LIVE_PAGE_STEP:
         target = '--dump-dom "$SITE/"'
         replacement = '--dump-dom "$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|today"'
