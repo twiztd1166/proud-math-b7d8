@@ -21,7 +21,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS "$SITE" -o /tmp/index.html
+          curl -fsS -D /tmp/index.headers "$SITE" -o /tmp/index.html
+          cat /tmp/index.headers
           curl -fsS "${SITE}app-core.js?v=20260929-notes-v2" -o /tmp/core.js
           curl -fsS "${SITE}app-modals.js?v=20260929-notes-v2" -o /tmp/modals.js
           echo INDEX_BYTES=$(wc -c </tmp/index.html)
