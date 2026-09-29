@@ -45,13 +45,22 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--disable-web-security']});
             const page=await browser.newPage({viewport:{width:390,height:844}});
-            const errors=[];
+            const errors=[],api=[];
             page.on('pageerror',e=>errors.push('pageerror: '+e.message));
             page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            page.on('response',r=>{if(r.url().includes('supabase.co/functions/v1/'))api.push({url:r.url(),status:r.status()})});
             const resp=await page.goto(process.env.SITE,{waitUntil:'networkidle',timeout:60000});
             if((resp?.status()||0)>=400)throw new Error('HTTP '+resp?.status());
             if((await page.title())!=='Paradise Shows')throw new Error('Wrong title: '+await page.title());
-            await page.waitForSelector('.card[data-id]',{timeout:45000});
+            await page.waitForTimeout(8000);
+            const body=(await page.locator('body').innerText()).slice(0,6000);
+            console.log('BODY',body);
+            console.log('API',JSON.stringify(api,null,2));
+            console.log('ERRORS',JSON.stringify(errors,null,2));
+            const cards=await page.locator('.card[data-id]').count();
+            console.log('CARD_COUNT',cards);
+            if(!cards)throw new Error('No show cards rendered');
             await page.locator('.card[data-id]').first().click();
             await page.waitForSelector('#detailModal.show',{timeout:15000});
             const detail=await page.locator('#detailBody').innerText();
