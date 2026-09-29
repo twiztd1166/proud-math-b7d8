@@ -114,19 +114,28 @@ Recommended sequence:
 
 Screenshots must not contain alpha/transparency.
 
-## Hard security gate before TestFlight / App Review
+## Private-read security gate — PASS
 
-The current production show APIs protect mutations with a 12-hour access-code session, but their read endpoints are still callable without an authenticated session. Origin/CORS restrictions are not an authorization control for direct HTTP clients.
+**Status: PASS as of September 29, 2026.**
 
-**Do not submit this app to TestFlight external testing or App Review until authenticated reads are enforced and production-validated across:**
+Authenticated reads are now enforced and production-validated across:
 
-- `shows-api` operating/bootstrap/catalog reads
-- `shows-history-api`
-- `shows-annual-plan-api`
+- `shows-api` operating/bootstrap/catalog reads — deployed **v96**
+- `shows-history-api` — deployed **v7**
+- `shows-annual-plan-api` — deployed **v8**
 
-The implemented transition reuses the existing 12-hour company access-code session for human reads and writes and adds a role-neutral app login gate. GitHub Actions does not store the company access code: the approved GitHub workflows obtain short-lived GitHub OIDC identity, exchange it through `shows-api` `ciSession`, and receive a short-lived read-only `ci.*` token that cannot authorize write actions. App Review should receive its temporary reviewer access code only through App Store Connect Review Information.
+Human users use the existing 12-hour company access-code session for reads and writes through the role-neutral app access screen. GitHub Actions does not store the company access code: approved workflows obtain short-lived GitHub OIDC identity, exchange it through `shows-api` `ciSession`, and receive a short-lived signed read-only `ci.*` token that cannot authorize write actions.
 
-Private Custom App distribution limits who can discover/install the iOS binary. It does not by itself secure the backend or the existing web URL.
+The final production validation on repository SHA `02e48e528c04db9671de443fcf6216fcf6b6304e` passed:
+
+- annual-plan production scope — run `36521443936`
+- legacy annual compatibility — run `36521443940`
+- governed annual-read + native iOS build — run `36521443934`
+- full public live browser/deep-link smoke — run `36521443978`
+
+The legacy compatibility verifier also confirms unauthenticated reads to all three protected read APIs return **401 / App access required** before it authenticates and continues.
+
+App Review should receive its temporary reviewer access code only through App Store Connect Review Information. Private Custom App distribution limits who can discover/install the iOS binary; backend authorization remains independently enforced.
 
 ## Review-access handling
 
