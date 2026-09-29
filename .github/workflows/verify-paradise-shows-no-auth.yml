@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - paradise-shows-public
+  pull_request:
+    branches:
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
