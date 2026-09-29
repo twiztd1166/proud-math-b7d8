@@ -512,7 +512,7 @@ async function openCatalog(id,focusYear=null){
     if(profileNoteBtn)profileNoteBtn.onclick=()=>addProfileNote(p.profile_id);
     if(profileNoteInput)profileNoteInput.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addProfileNote(p.profile_id)}};
     loadProfileNotes(p.profile_id);
-    $('.catalogMfcBtn').forEach(b=>b.onclick=()=>openDetail(b.dataset.mfc));
+    document.querySelectorAll('.catalogMfcBtn').forEach(b=>b.onclick=()=>openDetail(b.dataset.mfc));
     $$('.catalogSeriesBtn').forEach(b=>b.onclick=()=>{const profile=String(b.dataset.profile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;syncLocationView();openCatalog(profile)});
     $$('.currentMfcBtn').forEach(b=>b.onclick=()=>openDetail(b.dataset.mfc));
     $$('.cleanupQueueMove[data-profile]').forEach(b=>b.onclick=()=>{const profile=String(b.dataset.profile||'').trim(),year=Number(b.dataset.year||0);if(!profile||!Number.isFinite(year))return;state.deepLinkedProfile=profile;state.deepLinkedYear=year;syncLocationView();openCatalog(profile,year)});
