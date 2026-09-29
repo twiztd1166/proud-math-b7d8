@@ -238,7 +238,7 @@ jobs:
               "https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/$fn" \
               -H 'Origin: capacitor://localhost' \
               -H 'Access-Control-Request-Method: POST' \
-              -H 'Access-Control-Request-Headers: content-type,authorization'
+              -H 'Access-Control-Request-Headers: content-type'
             grep -iEq '^access-control-allow-origin: *capacitor://localhost\r?$' "$headers"
             rm -f "$headers"
           done
