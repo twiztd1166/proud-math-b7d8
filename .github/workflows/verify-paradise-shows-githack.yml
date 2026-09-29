@@ -1,4 +1,4 @@
-name: Verify Paradise Shows GitHub CDN
+name: Verify Paradise Shows jsDelivr CDN
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
 
 jobs:
   verify:
-    if: contains(github.event.head_commit.message, 'Verify Paradise Shows GitHub CDN')
+    if: contains(github.event.head_commit.message, 'Verify Paradise Shows jsDelivr CDN')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      SITE: https://raw.githack.com/twiztd1166/proud-math-b7d8/paradise-shows-public/public/index-standalone.html
+      SITE: https://cdn.jsdelivr.net/gh/twiztd1166/proud-math-b7d8@paradise-shows-public/public/index-standalone.html
     steps:
       - uses: actions/checkout@v4
       - name: Check static host response
@@ -53,12 +53,12 @@ jobs:
             if(await page.locator('#showNoteInput').count()!==1)throw new Error('Note composer missing');
             if(await page.locator('#showNoteAddBtn').count()!==1)throw new Error('Add note button missing');
             if(errors.length)throw new Error(errors.join('\n'));
-            await page.screenshot({path:'/tmp/githack-notes.png',fullPage:true});
+            await page.screenshot({path:'/tmp/jsdelivr-notes.png',fullPage:true});
             await browser.close();
           })();
           NODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: paradise-shows-githack-render
-          path: /tmp/githack-notes.png
+          name: paradise-shows-jsdelivr-render
+          path: /tmp/jsdelivr-notes.png
