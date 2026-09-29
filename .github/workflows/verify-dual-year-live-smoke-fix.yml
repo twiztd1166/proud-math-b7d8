@@ -1,0 +1,32 @@
+name: Verify dual-year live smoke fix
+
+on:
+  push:
+    branches:
+      - agent/dual-year-live-smoke-fix-20260929
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate smoke adapter source
+        run: |
+          python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
+          grep -q '2026 Calendar' scripts/debug-paradise-shows-live-source.yml
+          grep -q 'calendar/2027' scripts/debug-paradise-shows-live-source.yml
+          grep -q 'Open current shows' scripts/debug-paradise-shows-live-source.yml
+      - name: Execute corrected mature live smoke
+        run: python scripts/run-paradise-shows-live-smoke-current.py
