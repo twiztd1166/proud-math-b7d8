@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   verify-production-scope:
@@ -18,12 +19,30 @@ jobs:
     timeout-minutes: 10
     env:
       SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
       ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
       HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: Mint short-lived CI read session
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-ci"
+          response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$oidc_url")"
+          oidc_token="$(jq -er '.value' <<<"$response")"
+          test -n "$oidc_token"
+          echo "::add-mask::$oidc_token"
+          ci_response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS             -X POST "$API"             -H "Origin: $SITE"             -H "Content-Type: application/json"             -H "Authorization: Bearer $oidc_token"             --data '{"action":"ciSession"}')"
+          ci_token="$(jq -er '.token' <<<"$ci_response")"
+          case "$ci_token" in ci.*) ;; *) echo "::error::Unexpected CI read-token format."; exit 1;; esac
+          echo "::add-mask::$ci_token"
+          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$ci_token" >> "$GITHUB_ENV"
 
       - name: Verify scope controller syntax and revision-neutral semantics
         shell: bash
@@ -68,11 +87,13 @@ jobs:
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \
             --data '{"action":"annualPlan","year":2027}'
           CURRENT_RUN="$(jq -er '.run.id' /tmp/annual.json)"
           history_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
-            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' --data "$history_payload"
+            -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),vm=require('vm'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
