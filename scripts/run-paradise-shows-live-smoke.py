@@ -208,14 +208,14 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         if headless not in script:
             raise RuntimeError('Unable to locate deep-link headless Chrome flag')
         script = script.replace(headless, automated, 1)
-        marker = '            url="$2"\n'
-        injection = r'''            url="$2"
-            if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
-              route="${url#"$SITE/"}"
-              route="${route#\#}"
-              route="${route:-today}"
-              url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
-            fi
+        marker = '  url="$2"\n'
+        injection = r'''  url="$2"
+  if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then
+    route="${url#"$SITE/"}"
+    route="${route#\#}"
+    route="${route:-today}"
+    url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"
+  fi
 '''
         if marker not in script:
             raise RuntimeError('Unable to locate deep-link render target for CI auth')
