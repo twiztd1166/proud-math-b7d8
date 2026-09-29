@@ -1,0 +1,74 @@
+name: Publish and verify Paradise Shows Storage
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+
+permissions:
+  contents: read
+
+jobs:
+  publish-and-verify:
+    if: contains(github.event.head_commit.message, 'Publish Paradise Shows to Storage')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PUBLISH: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-static-publisher?token=PS-PUBLISH-20260929-A7F4
+      SITE: https://taxlrlfsobtnbasjcnuf.supabase.co/storage/v1/object/public/paradise-shows-app/index.html
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish static app
+        shell: bash
+        run: |
+          curl -fsS "$PUBLISH" -o /tmp/publish.json
+          cat /tmp/publish.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/publish.json'))
+          assert x.get('ok') is True, x
+          assert 'index.html' in x.get('uploaded',[]), x
+          PY
+      - name: Inspect Storage headers
+        shell: bash
+        run: |
+          curl -fsS -D /tmp/h "$SITE" -o /tmp/index.html
+          cat /tmp/h
+          grep -qi '^content-type: text/html' /tmp/h
+          grep -q '<title>Paradise Shows</title>' /tmp/index.html
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Render mobile app and open Notes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            const resp=await page.goto(process.env.SITE,{waitUntil:'networkidle',timeout:60000});
+            console.log('status',resp?.status(),'title',await page.title());
+            if((resp?.status()||0)>=400) throw new Error('Bad status '+resp?.status());
+            if((await page.title())!=='Paradise Shows') throw new Error('App did not render as HTML');
+            await page.waitForSelector('.card[data-id]',{timeout:30000});
+            await page.locator('.card[data-id]').first().click();
+            await page.waitForSelector('#detailModal.show',{timeout:10000});
+            const detail=await page.locator('#detailBody').innerText();
+            console.log(detail.slice(0,3000));
+            if(!/Manager notes/i.test(detail)) throw new Error('Manager notes not visible in show detail');
+            if(!(await page.locator('#showNoteInput').count())) throw new Error('Show note input missing');
+            if(errors.length) console.log('nonfatal browser issues',JSON.stringify(errors,null,2));
+            await page.screenshot({path:'/tmp/storage-app.png',fullPage:true});
+            await browser.close();
+          })();
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paradise-shows-storage-render
+          path: /tmp/storage-app.png
