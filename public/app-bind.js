@@ -26,7 +26,8 @@ async function openProfileShow(profile){
   if(state.catalogLoaded)openCatalog(profile);
 }
 function bindDynamic(){
-  $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
+  $('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
+  $('[data-calendar-show]').forEach(b=>b.onclick=()=>openDetail(b.dataset.calendarShow));
   document.querySelectorAll('.catalogCard[data-profile]').forEach(c=>c.onclick=e=>{if(e.target.closest('a,button,details'))return;const focusYear=Number(c.dataset.focusYear||0)||null;state.deepLinkedProfile=c.dataset.profile;state.deepLinkedYear=focusYear;syncLocationView();openCatalog(c.dataset.profile,focusYear)});
   document.querySelectorAll('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=async()=>{const profile=String(b.dataset.profile||'').trim();await openProfileShow(profile)});
   $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(['ALL','CURRENT'].includes(state.showMode)&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();if(state.showMode==='PLAN2027'&&!state.annualPlan.loaded)loadAnnualPlan();render()});
