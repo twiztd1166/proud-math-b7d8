@@ -356,11 +356,8 @@ Deno.serve(async r => {
     return out(r,{ok:true});
   }
 
-  let writeSession:any=null;
-  if(new Set(['resolveConflict','updateShow','updatePayment']).has(action)){
-    writeSession=await activeWriteSession(r);
-    if(!writeSession)return out(r,{ok:false,error:'Edit access required'},401);
-  }
+  const writeSession=await activeWriteSession(r);
+  if(!writeSession)return out(r,{ok:false,error:'App access required'},401);
 
   if(action==='bootstrap'){
     const [a,b,c,d,e,f,g,h,i,j,k]=await Promise.all([
