@@ -25,7 +25,7 @@
   }
   const token = raw.slice(0, split).trim();
   const route = raw.slice(split + 1).trim() || 'today';
-  const allowed = /^(?:today|calendar|shows|current|plan2027|payments|control|show\/(?:LIFE|HIST|CURRENT)-\d{3}(?:\/year\/20\d{2})?|show\/LPONLY-\d{4}-\d{3}(?:\/year\/20\d{2})?)$/i;
+  const allowed = /^(?:today|calendar|shows|current|plan2027|unlinked|payments|control|show\/(?:LIFE|HIST|CURRENT)-\d{3}(?:\/year\/20\d{2})?|show\/LPONLY-\d{4}-\d{3}(?:\/year\/20\d{2})?)$/i;
   if (!/^ci\.[A-Za-z0-9_-]{20,512}\.[A-Za-z0-9_-]{40,64}$/.test(token) || !allowed.test(route)) {
     deny();
     return;
