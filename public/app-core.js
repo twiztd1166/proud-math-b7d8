@@ -7,6 +7,7 @@ let state={
   catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,deepLinkedYear:null,
   unlinkedLp:{annual:[],cumulative:[],summary:null,category:'ALL',loaded:false,loading:false,error:null},
   annualPlan:{year:2027,rows:[],summary:null,run:null,filter:'ALL',loaded:false,loading:false,error:null},
+  calendarYear:2026,
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
   catalogFilters:{
@@ -38,12 +39,13 @@ async function shareShowSummary(show){
   const text=[eventRange,next?('Next action: '+next):''].filter(Boolean).join('\n');
   const profile=typeof currentProfileForShow==='function'?currentProfileForShow(show):null;
   const route=profile?.profile_id?('#show/'+encodeURIComponent(profile.profile_id)):'#current';
-  const url='https://paradise-shows-public.proud-math-b7d8.pages.dev/'+route;
-  if(nativeBridgePost('share',{title:event,text,url}))return true;
+  const nativeUrl='paradiseshows://shows';
+  const webUrl='https://paradise-shows-public.proud-math-b7d8.pages.dev/'+route;
+  if(nativeBridgePost('share',{title:event,text,url:nativeUrl}))return true;
   if(navigator.share){
-    try{await navigator.share({title:event,text,url});return true}catch(error){if(error?.name==='AbortError')return false}
+    try{await navigator.share({title:event,text,url:webUrl});return true}catch(error){if(error?.name==='AbortError')return false}
   }
-  try{await navigator.clipboard.writeText([event,text,url].filter(Boolean).join('\n'));toast('Show summary copied');return true}catch(_){return false}
+  try{await navigator.clipboard.writeText([event,text,webUrl].filter(Boolean).join('\n'));toast('Show summary copied');return true}catch(_){return false}
 }
 function isLpSourceOnly(p){
   return Array.isArray(p?.source_rows)&&p.source_rows.some(r=>r&&r.source_kind==='LP_SOURCE_ONLY');
@@ -64,6 +66,7 @@ function restoreShowViewState(){
     const saved=raw?JSON.parse(raw):null;
     if(saved&&saved.v===1){
       if(['ALL','CURRENT','UNLINKED','PLAN2027'].includes(saved.showMode))state.showMode=saved.showMode;
+      if([2026,2027].includes(Number(saved.calendarYear)))state.calendarYear=Number(saved.calendarYear);
       if(SHOW_QUICK_VIEWS.includes(saved.showQuickView))state.showQuickView=saved.showQuickView;
       if(state.showQuickView.startsWith('ALL_')&&state.showMode!=='ALL')state.showQuickView='NONE';
       if(state.showQuickView.startsWith('CURRENT_')&&state.showMode!=='CURRENT')state.showQuickView='NONE';
@@ -94,6 +97,7 @@ function persistShowViewState(){
     localStorage.setItem(SHOW_VIEW_STORAGE,JSON.stringify({
       v:1,
       showMode:state.showMode,
+      calendarYear:state.calendarYear,
       showQuickView:state.showQuickView,
       catalogSort:state.catalogSort,
       currentSort:state.currentSort,
@@ -108,7 +112,9 @@ function applyLocationView(){
   const raw=String(location.hash||'').replace(/^#/,'');
   const hash=raw.toLowerCase();
   const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})(?:\/year\/(20\d{2}))?$/i);
+  const calendarMatch=raw.match(/^calendar\/(2026|2027)$/i);
   if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase();state.deepLinkedYear=profileMatch[2]?Number(profileMatch[2]):null}
+  else if(calendarMatch){state.tab='calendar';state.calendarYear=Number(calendarMatch[1]);state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='shows'){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='current'){state.tab='shows';state.showMode='CURRENT';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='plan2027'){state.tab='shows';state.showMode='PLAN2027';state.deepLinkedProfile=null;state.deepLinkedYear=null}
@@ -120,7 +126,7 @@ function syncLocationView(){
     ?'show/'+state.deepLinkedProfile+(Number.isFinite(Number(state.deepLinkedYear))?'/year/'+Number(state.deepLinkedYear):'')
     :(state.tab==='shows'
       ?(state.showMode==='CURRENT'?'current':state.showMode==='PLAN2027'?'plan2027':state.showMode==='UNLINKED'?'unlinked':'shows')
-      :state.tab);
+      :state.tab==='calendar'?'calendar/'+state.calendarYear:state.tab);
   try{history.replaceState(null,'','#'+hash)}catch{}
 }
 applyLocationView();
@@ -223,7 +229,7 @@ async function bootstrap(){
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
-    if((state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
+    if(((state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
   }catch(e){
     toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
   }
