@@ -1,0 +1,69 @@
+name: Verify stable Paradise Shows Notes
+
+on:
+  push:
+    branches:
+      - verify-stable-notes-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify stable Notes assets
+        shell: bash
+        run: |
+          for i in {1..36}; do
+            if curl -fsS "$SITE" -o /tmp/index.html \
+              && grep -q '20260929-notes-v3' /tmp/index.html \
+              && curl -fsS "${SITE}app-modals.js?v=20260929-notes-v3" -o /tmp/app-modals.js \
+              && grep -q 'Manager notes' /tmp/app-modals.js \
+              && grep -q 'profileNoteAddBtn' /tmp/app-modals.js \
+              && grep -q 'showNoteAddBtn' /tmp/app-modals.js; then
+              echo 'Stable Notes assets are live.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Stable Cloudflare alias did not converge to notes-v3.'
+          exit 1
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Render stable app and open Notes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+            page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+            const resp=await page.goto(process.env.SITE,{waitUntil:'networkidle',timeout:60000});
+            if((resp?.status()||0)>=400)throw new Error('HTTP '+resp?.status());
+            if((await page.title())!=='Paradise Shows')throw new Error('Wrong title: '+await page.title());
+            const opens=page.getByRole('button',{name:'Open show'});
+            await opens.first().waitFor({state:'visible',timeout:45000});
+            await opens.first().click();
+            await page.waitForSelector('#detailModal.show',{timeout:15000});
+            const detail=await page.locator('#detailBody').innerText();
+            if(!/Manager notes/i.test(detail))throw new Error('Manager notes not visible');
+            const composers=(await page.locator('#showNoteInput').count())+(await page.locator('#profileNoteInput').count());
+            if(composers!==1)throw new Error('Expected exactly one Notes composer, got '+composers);
+            const buttons=(await page.locator('#showNoteAddBtn').count())+(await page.locator('#profileNoteAddBtn').count());
+            if(buttons!==1)throw new Error('Expected exactly one Add note button, got '+buttons);
+            if(errors.length)throw new Error(errors.join('\n'));
+            console.log('Stable rendered Notes path: PASS');
+            await browser.close();
+          })();
+          NODE
