@@ -8,7 +8,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        window?.rootViewController = NativeBridgeViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
@@ -16,6 +16,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         SceneDelegateProxy.shared.scene(scene, openURLContexts: URLContexts)
+        guard let url = URLContexts.first?.url, url.scheme == "paradiseshows" else { return }
+        let route = (url.host?.isEmpty == false ? url.host : url.path.replacingOccurrences(of: "/", with: "")) ?? "today"
+        (window?.rootViewController as? NativeBridgeViewController)?.openRoute(route)
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
