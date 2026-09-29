@@ -55,6 +55,31 @@ async function rest(table: string, params: URLSearchParams) {
   return response.json();
 }
 
+
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function bearer(r: Request) {
+  const value = String(r.headers.get('authorization') || '').trim();
+  const match = value.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : '';
+}
+async function activeAppSession(r: Request) {
+  const token = bearer(r);
+  if (!token) return null;
+  const tokenHash = await sha256Hex(token);
+  const params = new URLSearchParams({
+    select: 'id,expires_at',
+    token_hash: `eq.${tokenHash}`,
+    expires_at: `gt.${new Date().toISOString()}`,
+    limit: '1',
+  });
+  const sessions = await rest('shows_app_sessions', params) as any[];
+  return sessions?.[0] || null;
+}
+
+
 function planningDate(row: any, year: number) {
   if (row.event_start) return String(row.event_start);
   if (row.estimated_start) return String(row.estimated_start);
@@ -77,8 +102,8 @@ function canonicalSort(a: any, b: any, year: number) {
 
 Deno.serve(async (r: Request) => {
   if (r.method === 'OPTIONS') return new Response('ok', { headers: cors(r) });
-
   try {
+    if (!await activeAppSession(r)) return out(r, { ok: false, error: 'App access required' }, 401);
     let requestedYear: unknown = 2027;
     let requestedRunId = '';
     if (r.method === 'GET') {
