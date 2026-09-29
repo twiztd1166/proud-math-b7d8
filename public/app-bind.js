@@ -27,11 +27,10 @@ function bindDynamic(){
   const si=$('#searchInput');if(si)si.oninput=e=>{const pos=e.target.selectionStart??e.target.value.length;state.search=e.target.value;state.showQuickView='NONE';state.catalogLimit=60;render();const next=$('#searchInput');if(next){next.focus({preventScroll:true});try{next.setSelectionRange(pos,pos)}catch{}}};
   $$('.activityItem[data-recon]').forEach(x=>x.onclick=()=>openDetail(x.dataset.recon));
   $$('.conflictChoice').forEach(b=>b.onclick=()=>resolveConflict(b));
-  const so=$('#appSignOutBtn');if(so)so.onclick=async()=>{try{if(writeSessionToken)await call('logout')}catch{}clearWriteSession();showAccessGate('Signed out.');};
+
 }
 async function resolveConflict(btn){
-  if(!await ensureWriteAuth())return;
-  const resolution=btn.dataset.resolution,field=btn.dataset.field,mfc=btn.dataset.mfc,run=btn.dataset.run;
+const resolution=btn.dataset.resolution,field=btn.dataset.field,mfc=btn.dataset.mfc,run=btn.dataset.run;
   const verb=resolution==='KEEP APP'?'Keep the app value and accept the Sheet as the new baseline?':'Replace the app value with the current Sheet value?';
   if(!confirm(`${fieldLabel(field)} · ${mfc}\n\n${verb}`))return;
   const peers=$$('.conflictChoice').filter(x=>x.dataset.run===run&&x.dataset.mfc===mfc&&x.dataset.field===field);peers.forEach(x=>x.disabled=true);
