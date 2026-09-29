@@ -1,0 +1,71 @@
+name: Paradise Shows no-auth production verifier
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-no-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      HISTORY_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-history-api
+      ANNUAL_API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify frontend opens without access gate
+        shell: bash
+        run: |
+          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
+          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js" -o /tmp/app-core.js
+          grep -q "await bootstrap()" /tmp/app-core.js
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('/tmp/app-core.js').read_text()
+          block=s[s.index('async function startApp()'):s.index('async function call(')]
+          assert 'showAccessGate' not in block, block
+          print('Frontend no-auth startup: PASS')
+          PY
+
+      - name: Verify primary API without Authorization
+        shell: bash
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS             -H 'Content-Type: application/json'             -X POST "$API"             --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert isinstance(x.get('shows'), list), x.keys()
+          print('Primary API no-auth bootstrap: PASS')
+          PY
+
+      - name: Verify history API without Authorization
+        shell: bash
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS             -H 'Content-Type: application/json'             -X POST "$HISTORY_API"             --data '{"year":2027,"action":"historicalCoverage"}' -o /tmp/history.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/history.json'))
+          assert x.get('ok') is True, x
+          print('History API no-auth: PASS')
+          PY
+
+      - name: Verify annual plan API without Authorization
+        shell: bash
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS "$ANNUAL_API?year=2027" -o /tmp/annual.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/annual.json'))
+          assert x.get('ok') is True, x
+          assert x.get('published') is True, x
+          print('Annual API no-auth: PASS')
+          PY
