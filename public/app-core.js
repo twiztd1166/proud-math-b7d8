@@ -21,7 +21,7 @@ let state={
     confirmation:'ALL',owner:'ALL',evidence:'ALL',payment:'ALL',costBand:'ALL',followUp:'ANY',
   },
 };
-const $=s=>document.querySelector(s), $=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function nativeBridgeAvailable(){return Boolean(window.webkit?.messageHandlers?.paradiseNative)}
 function nativeBridgePost(action,payload={}){
   try{
