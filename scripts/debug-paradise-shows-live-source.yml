@@ -3239,7 +3239,10 @@ jobs:
           grep -q '0 records · 2 annual LP · 2 cumulative LP' /tmp/lponly_detail.html
 
           render_view unlinked "$SITE/#unlinked"
-          grep -q 'Data cleanup 17' /tmp/unlinked.html
+          grep -q 'Data cleanup' /tmp/unlinked.html
+          grep -q '<div class="v">16</div><div class="l">Annual rows</div>' /tmp/unlinked.html
+          grep -q '<div class="v">17</div><div class="l">Cumulative rows</div>' /tmp/unlinked.html
+          grep -q '<div class="v">17</div><div class="l">Source groups</div>' /tmp/unlinked.html
           grep -q 'Administrative / aggregate 5' /tmp/unlinked.html
           grep -q 'Generic / locationless 8' /tmp/unlinked.html
           grep -q 'Competing identity 2' /tmp/unlinked.html
