@@ -23,6 +23,12 @@ If unmanaged employee-owned devices later require ordinary App Store installatio
 - Device family for v1: **iPhone**
 - URL scheme: **paradiseshows://**
 
+## Native runtime architecture
+
+The submitted iOS build does **not** load its application shell from Cloudflare. The Capacitor container packages the production web assets inside the iOS bundle and starts them from the local `capacitor://localhost` origin. Runtime operating data is requested directly from the Supabase Edge APIs at `taxlrlfsobtnbasjcnuf.supabase.co`.
+
+Cloudflare remains a temporary legacy web host for the browser/PWA surface and for the current HTTPS support/privacy/marketing URLs. Its availability is not required for the native app to launch, navigate, read operating data, or perform supported writes. Do not reintroduce a remote `server.url` into Capacitor configuration unless a separately reviewed architecture change explicitly requires it.
+
 ## Product-page metadata
 
 ### Subtitle
@@ -85,7 +91,7 @@ Current source contains:
 - an app privacy manifest declaring no tracking, no app-level required-reason API use, and user-entered operational content as Other User Content used for App Functionality
 - Capacitor 8.5.0 as the current native Swift Package Manager binary runtime; the main Capacitor toolchain is at 8.5.2, while the current SPM binary release is 8.5.0. Its SDK privacy manifest/signature requirements are handled by the upstream package
 
-**Before App Store Connect privacy answers are published**, confirm the exact Cloudflare, Supabase, access-control, and server-log retention practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded web traffic as app data where applicable.
+**Before App Store Connect privacy answers are published**, confirm the exact Supabase, access-control, server-log retention, and any still-active legacy web-host logging practices. Do not select “Data Not Collected” solely from the client source; Apple treats data collected through embedded or API traffic as app data where applicable.
 
 ## Age rating
 
