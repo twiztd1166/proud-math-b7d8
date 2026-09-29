@@ -8,7 +8,7 @@
     try{
       const response=await fetch(ANNUAL_READ_API,{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers:(typeof appAuthHeaders==='function'?appAuthHeaders():{'Content-Type':'application/json'}),
         body:JSON.stringify({action:'annualPlan',year}),
         signal:controller.signal,
       });
