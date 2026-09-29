@@ -3,10 +3,32 @@ function render(){
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
   $('#content').innerHTML=state.tab==='today'?renderToday():state.tab==='calendar'?renderCalendar():state.tab==='shows'?renderShows():state.tab==='payments'?renderPayments():renderControl();bindDynamic();
 }
+function currentMfcForProfile(profileId){
+  const profile=state.catalog.find(p=>p.profile_id===profileId);
+  const ids=Array.isArray(profile?.matched_mfc_ids)?profile.matched_mfc_ids:[];
+  const today=new Date().toISOString().slice(0,10);
+  const candidates=ids.map(id=>state.shows.find(s=>s.mfc_id===id)).filter(Boolean);
+  candidates.sort((a,b)=>{
+    const aSkip=a.this_year==='SKIP THIS YEAR'?1:0,bSkip=b.this_year==='SKIP THIS YEAR'?1:0;
+    if(aSkip!==bSkip)return aSkip-bSkip;
+    const aFuture=a.event_start&&a.event_start>=today?0:1,bFuture=b.event_start&&b.event_start>=today?0:1;
+    if(aFuture!==bFuture)return aFuture-bFuture;
+    return String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.mfc_id).localeCompare(String(b.mfc_id));
+  });
+  return candidates[0]?.mfc_id||'';
+}
+async function openProfileShow(profile){
+  if(!profile)return;
+  if(!state.catalogLoaded)await loadCatalog();
+  const mfc=currentMfcForProfile(profile);
+  if(mfc){openDetail(mfc);return}
+  state.deepLinkedProfile=profile;state.deepLinkedYear=null;syncLocationView();
+  if(state.catalogLoaded)openCatalog(profile);
+}
 function bindDynamic(){
   $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   document.querySelectorAll('.catalogCard[data-profile]').forEach(c=>c.onclick=e=>{if(e.target.closest('a,button,details'))return;const focusYear=Number(c.dataset.focusYear||0)||null;state.deepLinkedProfile=c.dataset.profile;state.deepLinkedYear=focusYear;syncLocationView();openCatalog(c.dataset.profile,focusYear)});
-  $$('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=()=>{const profile=String(b.dataset.profile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;syncLocationView();openCatalog(profile)});
+  $('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=async()=>{const profile=String(b.dataset.profile||'').trim();await openProfileShow(profile)});
   $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(['ALL','CURRENT'].includes(state.showMode)&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();if(state.showMode==='PLAN2027'&&!state.annualPlan.loaded)loadAnnualPlan();render()});
   $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));
@@ -17,7 +39,7 @@ function bindDynamic(){
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
   $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
-  $$('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.deepLinkedProfile=profile;state.deepLinkedYear=null;state.showMode='ALL';syncLocationView();if(!state.catalogLoaded)await loadCatalog();if(state.catalogLoaded)openCatalog(profile)});
+  $('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
   const cp=$('#calendarOpenPlan');if(cp)cp.onclick=()=>{state.tab='shows';state.showMode='PLAN2027';state.search='';state.showQuickView='NONE';syncLocationView();if(!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();};
   $$('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
