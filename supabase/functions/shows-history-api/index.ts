@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { verifyGithubActionsCiOidc } from '../_shared/github-ci-oidc.ts';
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -20,7 +19,7 @@ function cors(r:Request){
   const origin=r.headers.get('origin')||'';
   return {
     ...(ORIGINS.has(origin)?{'Access-Control-Allow-Origin':origin}:{}),
-    'Access-Control-Allow-Headers':'content-type, authorization, x-paradise-ci-oidc',
+    'Access-Control-Allow-Headers':'content-type, authorization',
     'Access-Control-Allow-Methods':'POST,OPTIONS',
     'Vary':'Origin',
   };
@@ -104,11 +103,41 @@ async function activeAppSession(r:Request){
   return session.data;
 }
 
+function base64UrlBytes(value:string){
+  let s=value.replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  const raw=atob(s),out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+function base64UrlJson(value:string){
+  return JSON.parse(new TextDecoder().decode(base64UrlBytes(value)));
+}
+async function ciSigningKey(){
+  const material=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('paradise-shows-ci-read-v1|'+KEY));
+  return crypto.subtle.importKey('raw',material,{name:'HMAC',hash:'SHA-256'},false,['verify']);
+}
+async function validCiReadToken(token:string){
+  const parts=token.split('.');
+  if(parts.length!==3||parts[0]!=='ci')return false;
+  const input=parts[0]+'.'+parts[1];
+  const ok=await crypto.subtle.verify('HMAC',await ciSigningKey(),base64UrlBytes(parts[2]),new TextEncoder().encode(input));
+  if(!ok)return false;
+  let payload:any;try{payload=base64UrlJson(parts[1])}catch{return false}
+  return payload?.v===1&&payload?.scope==='shows:read'&&Number(payload.exp||0)>Math.floor(Date.now()/1000);
+}
+async function activeReadSession(r:Request){
+  const token=bearer(r);if(!token)return null;
+  if(token.startsWith('ci.'))return await validCiReadToken(token)?{kind:'ci'}:null;
+  const app=await activeAppSession(r);
+  return app?{kind:'user',...app}:null;
+}
+
 Deno.serve(async r=>{
   if(r.method==='OPTIONS')return new Response('ok',{headers:cors(r)});
   if(r.method!=='POST')return out(r,{ok:false,error:'POST required'},405);
-  const appSession=await activeAppSession(r);
-  if(!appSession&&!await verifyGithubActionsCiOidc(r))return out(r,{ok:false,error:'App access required'},401);
+  const readSession=await activeReadSession(r);
+  if(!readSession)return out(r,{ok:false,error:'App access required'},401);
   let body:any;try{body=await r.json()}catch{return out(r,{ok:false,error:'Invalid JSON'},400)}
   const year=Number(body.year||2027);
   if(!Number.isInteger(year)||year<2026||year>2035)return out(r,{ok:false,error:'Valid annual plan year required'},400);
