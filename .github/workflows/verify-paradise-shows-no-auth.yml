@@ -25,10 +25,11 @@ jobs:
         shell: bash
         run: |
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
-          grep -q "20260929-notes-v3" /tmp/index.html
+          grep -q "20260929-calendar-v1" /tmp/index.html
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js?sha=$GITHUB_SHA" -o /tmp/app-core.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-modals.js?sha=$GITHUB_SHA" -o /tmp/app-modals.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-bind.js?sha=$GITHUB_SHA" -o /tmp/app-bind.js
+          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-calendar.js?sha=$GITHUB_SHA" -o /tmp/app-calendar.js
           grep -q "await bootstrap()" /tmp/app-core.js
           grep -q "Manager notes" /tmp/app-modals.js
           grep -q "showNotesProminent" /tmp/app-modals.js
@@ -37,6 +38,10 @@ jobs:
           grep -q "addProfileNote" /tmp/app-modals.js
           grep -q "currentMfcForProfile" /tmp/app-bind.js
           grep -q "openProfileShow" /tmp/app-bind.js
+          grep -q "renderCalendarV2" /tmp/app-bind.js
+          grep -q "2026 Calendar" /tmp/app-calendar.js
+          grep -q "2027 Calendar" /tmp/app-calendar.js
+          grep -q "data-calendar-show" /tmp/app-calendar.js
           grep -q "listShowNotes" /tmp/app-modals.js
           grep -q "addShowNote" /tmp/app-modals.js
           python3 - <<'PY'
