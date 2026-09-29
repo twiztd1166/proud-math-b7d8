@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { verifyGithubActionsCiOidc } from '../_shared/github-ci-oidc.ts';
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -21,7 +22,7 @@ const cors = (r: Request) => {
   const origin = r.headers.get('origin') || '';
   return {
     ...(ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
-    'Access-Control-Allow-Headers': 'content-type, authorization',
+    'Access-Control-Allow-Headers': 'content-type, authorization, x-paradise-ci-oidc',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Vary': 'Origin',
   };
@@ -357,7 +358,10 @@ Deno.serve(async r => {
   }
 
   const writeSession=await activeWriteSession(r);
-  if(!writeSession)return out(r,{ok:false,error:'App access required'},401);
+  const writeActions=new Set(['resolveConflict','updateShow','updatePayment']);
+  if(writeActions.has(action)&&!writeSession)return out(r,{ok:false,error:'Edit access required'},401);
+  const ciRead=!writeSession&&!writeActions.has(action)?await verifyGithubActionsCiOidc(r):false;
+  if(!writeSession&&!ciRead)return out(r,{ok:false,error:'App access required'},401);
 
   if(action==='bootstrap'){
     const [a,b,c,d,e,f,g,h,i,j,k]=await Promise.all([
