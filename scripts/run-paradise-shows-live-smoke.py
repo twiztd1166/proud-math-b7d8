@@ -193,15 +193,7 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         script = script.replace(
             'set -euo pipefail',
             '''set -Eeuo pipefail
-          trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- rendered DOM excerpt ---" >&2; python3 - <<'"'"'PY'"'"' >&2
-import re
-from pathlib import Path
-p=Path("/tmp/dom.html")
-d=p.read_text(encoding="utf-8",errors="replace") if p.exists() else "<no /tmp/dom.html>"
-m=re.search(r'<main id="content"[^>]*>(.*?)</main>',d,re.S)
-print((m.group(1) if m else d[:7000])[:7000])
-PY
-          echo "--- chrome console excerpt ---" >&2; tail -120 /tmp/chrome.log >&2 2>/dev/null || true; exit $rc' ERR''',
+          trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- rendered DOM excerpt ---" >&2; if [[ -f /tmp/dom.html ]]; then head -c 7000 /tmp/dom.html >&2; else echo "<no /tmp/dom.html>" >&2; fi; echo >&2; echo "--- chrome console excerpt ---" >&2; tail -120 /tmp/chrome.log >&2 2>/dev/null || true; exit $rc' ERR''',
             1,
         )
 
