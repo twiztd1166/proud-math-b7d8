@@ -188,6 +188,22 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         if target not in script:
             raise RuntimeError('Unable to locate live-page browser target for CI auth')
         script = script.replace(target, replacement, 1)
+        if 'set -euo pipefail' not in script:
+            raise RuntimeError('Unable to locate live-page shell strict mode')
+        script = script.replace(
+            'set -euo pipefail',
+            '''set -Eeuo pipefail
+          trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- rendered DOM excerpt ---" >&2; python3 - <<'"'"'PY'"'"' >&2
+import re
+from pathlib import Path
+p=Path("/tmp/dom.html")
+d=p.read_text(encoding="utf-8",errors="replace") if p.exists() else "<no /tmp/dom.html>"
+m=re.search(r'<main id="content"[^>]*>(.*?)</main>',d,re.S)
+print((m.group(1) if m else d[:7000])[:7000])
+PY
+          echo "--- chrome console excerpt ---" >&2; tail -120 /tmp/chrome.log >&2 2>/dev/null || true; exit $rc' ERR''',
+            1,
+        )
 
     if name == DEEP_LINK_STEP:
         marker = '            url="$2"\n'
