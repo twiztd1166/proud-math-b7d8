@@ -27,8 +27,11 @@ jobs:
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js?sha=$GITHUB_SHA" -o /tmp/app-core.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-modals.js?sha=$GITHUB_SHA" -o /tmp/app-modals.js
+          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-bind.js?sha=$GITHUB_SHA" -o /tmp/app-bind.js
           grep -q "await bootstrap()" /tmp/app-core.js
           grep -q "Manager notes" /tmp/app-modals.js
+          grep -q "currentMfcForProfile" /tmp/app-bind.js
+          grep -q "openProfileShow" /tmp/app-bind.js
           grep -q "listShowNotes" /tmp/app-modals.js
           grep -q "addShowNote" /tmp/app-modals.js
           python3 - <<'PY'
