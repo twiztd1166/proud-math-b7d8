@@ -25,6 +25,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Require CI credential before private-read cutover
+        shell: bash
+        env:
+          PARADISE_SHOWS_CI_ACCESS_CODE: ${{ secrets.PARADISE_SHOWS_CI_ACCESS_CODE }}
+        run: |
+          set -euo pipefail
+          if grep -q "App access required" supabase/functions/shows-api/index.ts; then
+            test -n "$PARADISE_SHOWS_CI_ACCESS_CODE" || {
+              echo "::error::Private-read cutover is staged but PARADISE_SHOWS_CI_ACCESS_CODE is not configured."
+              exit 1
+            }
+          fi
+
       - name: Verify revision-neutral release source contract
         shell: bash
         run: |
