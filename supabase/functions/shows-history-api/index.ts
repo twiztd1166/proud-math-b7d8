@@ -136,8 +136,6 @@ async function activeReadSession(r:Request){
 Deno.serve(async r=>{
   if(r.method==='OPTIONS')return new Response('ok',{headers:cors(r)});
   if(r.method!=='POST')return out(r,{ok:false,error:'POST required'},405);
-  const readSession=await activeReadSession(r);
-  if(!readSession)return out(r,{ok:false,error:'App access required'},401);
   let body:any;try{body=await r.json()}catch{return out(r,{ok:false,error:'Invalid JSON'},400)}
   const year=Number(body.year||2027);
   if(!Number.isInteger(year)||year<2026||year>2035)return out(r,{ok:false,error:'Valid annual plan year required'},400);
