@@ -74,7 +74,7 @@ Suggested review paths:
 - Payments: payment-control records
 - More: system controls, support, and privacy
 
-No separate consumer account creation is required for review of the current build.
+No consumer account creation is required. The submitted build opens to a role-neutral access-code screen. Provide Apple a temporary reviewer access code only in App Store Connect Review Information; never commit that code to source control or place it in screenshots.
 
 ## App Privacy / privacy-manifest gate
 
@@ -118,15 +118,24 @@ Screenshots must not contain alpha/transparency.
 
 The current production show APIs protect mutations with a 12-hour access-code session, but their read endpoints are still callable without an authenticated session. Origin/CORS restrictions are not an authorization control for direct HTTP clients.
 
-**Do not submit this app to TestFlight external testing or App Review until authenticated reads are enforced across:**
+**Do not submit this app to TestFlight external testing or App Review until authenticated reads are enforced and production-validated across:**
 
 - `shows-api` operating/bootstrap/catalog reads
 - `shows-history-api`
 - `shows-annual-plan-api`
 
-The lowest-risk transition is to reuse the existing 12-hour access-code session for reads and writes, add a role-neutral app login gate, and give CI/App Review a separately managed credential through secrets rather than source control.
+The implemented transition reuses the existing 12-hour company access-code session for human reads and writes and adds a role-neutral app login gate. GitHub Actions does not store the company access code: the approved GitHub workflows obtain short-lived GitHub OIDC identity, exchange it through `shows-api` `ciSession`, and receive a short-lived read-only `ci.*` token that cannot authorize write actions. App Review should receive its temporary reviewer access code only through App Store Connect Review Information.
 
 Private Custom App distribution limits who can discover/install the iOS binary. It does not by itself secure the backend or the existing web URL.
+
+## Review-access handling
+
+Before submission:
+- Create or designate a temporary App Review access code.
+- Enter it only in App Store Connect Review Information with concise login instructions.
+- Verify it opens the same read/write role-neutral app session used by authorized staff.
+- Rotate or retire the reviewer code after approval if operational policy requires it.
+- Never place the code in GitHub, app binaries, screenshots, support pages, or privacy-policy text.
 
 ## Account-specific items still required
 
