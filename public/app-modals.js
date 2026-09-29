@@ -558,5 +558,4 @@ $$('.nav button').forEach(b=>b.onclick=()=>{nativeHaptic();state.deepLinkedProfi
 $('#refreshBtn').onclick=async()=>{toast('Reloading operating data…');await bootstrap();if(state.catalogLoaded)await loadCatalog(true);if(state.annualPlan.loaded)await loadAnnualPlan(true);if(state.unlinkedLp.loaded)await loadUnlinkedLp(true);toast('Current')};
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){m.classList.remove('show');if(m.id==='detailModal'){state.deepLinkedProfile=null;state.deepLinkedYear=null;syncLocationView()}}}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-bootstrap();
-
+startApp();
