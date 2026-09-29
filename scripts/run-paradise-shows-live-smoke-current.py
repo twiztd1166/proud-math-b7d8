@@ -31,8 +31,8 @@ def post_current_annual_plan():
         headers={
             'Origin': site,
             'Content-Type': 'application/json',
-            **({'X-Paradise-CI-OIDC': os.environ['PARADISE_SHOWS_CI_OIDC']}
-               if os.environ.get('PARADISE_SHOWS_CI_OIDC') else {}),
+            **({'Authorization': 'Bearer ' + os.environ['PARADISE_SHOWS_CI_SESSION_TOKEN']}
+               if os.environ.get('PARADISE_SHOWS_CI_SESSION_TOKEN') else {}),
         },
     )
     with urllib.request.urlopen(req, timeout=30) as response:
