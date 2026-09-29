@@ -191,7 +191,7 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
 
     if name == DEEP_LINK_STEP:
         marker = '            url="$2"\n'
-        injection = '''            url="$2"
+        injection = r'''            url="$2"
             if [[ -n "${PARADISE_SHOWS_CI_OIDC:-}" ]]; then
               route="${url#"$SITE/"}"
               route="${route#\#}"
