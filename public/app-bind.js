@@ -28,7 +28,7 @@ async function openProfileShow(profile){
 function bindDynamic(){
   $$('.card[data-id]').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   document.querySelectorAll('.catalogCard[data-profile]').forEach(c=>c.onclick=e=>{if(e.target.closest('a,button,details'))return;const focusYear=Number(c.dataset.focusYear||0)||null;state.deepLinkedProfile=c.dataset.profile;state.deepLinkedYear=focusYear;syncLocationView();openCatalog(c.dataset.profile,focusYear)});
-  $('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=async()=>{const profile=String(b.dataset.profile||'').trim();await openProfileShow(profile)});
+  document.querySelectorAll('.liveCompareOpen[data-profile]').forEach(b=>b.onclick=async()=>{const profile=String(b.dataset.profile||'').trim();await openProfileShow(profile)});
   $$('[data-show-mode]').forEach(b=>b.onclick=()=>{state.deepLinkedProfile=null;state.deepLinkedYear=null;state.showMode=b.dataset.showMode;state.search='';state.showQuickView='NONE';state.catalogLimit=60;syncLocationView();if(['ALL','CURRENT'].includes(state.showMode)&&!state.catalogLoaded)loadCatalog();if(state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded)loadUnlinkedLp();if(state.showMode==='PLAN2027'&&!state.annualPlan.loaded)loadAnnualPlan();render()});
   $$('[data-quick-view]').forEach(b=>b.onclick=()=>applyQuickView(b.dataset.quickView));
   $$('.activeFilterChip[data-active-filter-key]').forEach(b=>b.onclick=()=>removeActiveShowFilter(b.dataset.activeFilterKey));
@@ -39,7 +39,7 @@ function bindDynamic(){
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
   $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
-  $('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
+  document.querySelectorAll('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
   const cp=$('#calendarOpenPlan');if(cp)cp.onclick=()=>{state.tab='shows';state.showMode='PLAN2027';state.search='';state.showQuickView='NONE';syncLocationView();if(!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();};
   $$('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
