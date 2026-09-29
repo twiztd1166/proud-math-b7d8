@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   verify-governed-annual-read:
@@ -39,34 +40,20 @@ jobs:
           python -m py_compile scripts/run-paradise-shows-live-smoke.py scripts/run-paradise-shows-live-smoke-current.py
           echo 'Revision-neutral release source contract: PASS'
 
-      - name: Require CI credential before private-read cutover
+      - name: Mint short-lived GitHub OIDC identity
         shell: bash
-        env:
-          PARADISE_SHOWS_CI_ACCESS_CODE: ${{ secrets.PARADISE_SHOWS_CI_ACCESS_CODE }}
         run: |
           set -euo pipefail
-          if grep -q "App access required" supabase/functions/shows-api/index.ts; then
-            test -n "$PARADISE_SHOWS_CI_ACCESS_CODE" || {
-              echo "::error::Private-read cutover is staged but PARADISE_SHOWS_CI_ACCESS_CODE is not configured."
-              exit 1
-            }
-          fi
-
-      - name: Authenticate CI app session
-        shell: bash
-        env:
-          PARADISE_SHOWS_CI_ACCESS_CODE: ${{ secrets.PARADISE_SHOWS_CI_ACCESS_CODE }}
-        run: |
-          set -euo pipefail
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-ci"
           response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
-            -X POST "$API" \
-            -H "Origin: $SITE" \
-            -H "Content-Type: application/json" \
-            --data "$(jq -nc --arg code "$PARADISE_SHOWS_CI_ACCESS_CODE" '{action:"login",accessCode:$code}')")"
-          token="$(jq -er '.token' <<<"$response")"
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$oidc_url")"
+          token="$(jq -er '.value' <<<"$response")"
           test -n "$token"
           echo "::add-mask::$token"
-          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "PARADISE_SHOWS_CI_OIDC=$token" >> "$GITHUB_ENV"
 
       - name: Wait for governed annual-read assets and wiring
         if: github.event_name != 'pull_request'
@@ -107,17 +94,17 @@ jobs:
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/annual.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \
+            -H "X-Paradise-CI-OIDC: $PARADISE_SHOWS_CI_OIDC" \
             --data '{"action":"annualPlan","year":2027}'
           CURRENT_RUN="$(jq -er '.run.id' /tmp/annual.json)"
           explicit_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{action:"annualPlan",year:2027,runId:$runId}')"
           history_payload="$(jq -nc --arg runId "$CURRENT_RUN" '{year:2027,runId:$runId,allowLatestAuditPreview:true}')"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/explicit.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" --data "$explicit_payload"
+            -H "X-Paradise-CI-OIDC: $PARADISE_SHOWS_CI_OIDC" --data "$explicit_payload"
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
-            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" --data "$history_payload"
+            -H "X-Paradise-CI-OIDC: $PARADISE_SHOWS_CI_OIDC" --data "$history_payload"
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
           const annual=JSON.parse(fs.readFileSync('/tmp/annual.json','utf8'));
