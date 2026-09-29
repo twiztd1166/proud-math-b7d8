@@ -22,7 +22,7 @@ final class NativeBridgeViewController: CAPBridgeViewController, WKScriptMessage
             pendingRoute = target
             return
         }
-        webView.evaluateJavaScript("window.location.hash = '#(target)'")
+        webView.evaluateJavaScript("window.location.hash = '#\\(target)'")
     }
 
     override func viewDidAppear(_ animated: Bool) {
