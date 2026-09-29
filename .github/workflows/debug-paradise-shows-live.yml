@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: paradise-shows-public-live-smoke-${{ github.sha }}
@@ -43,48 +42,6 @@ jobs:
             exit 1
           fi
           echo 'Current-publication mature-smoke adapter source: PASS'
-
-      - name: Mint short-lived CI read session
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
-          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
-          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-ci"
-          response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$oidc_url")"
-          token="$(jq -er '.value' <<<"$response")"
-          test -n "$token"
-          echo "::add-mask::$token"
-          OIDC_TOKEN="$token" python3 - <<'PY'
-          import base64,json,os,re
-          token=os.environ['OIDC_TOKEN']
-          part=token.split('.')[1]
-          part += '='*((4-len(part)%4)%4)
-          claims=json.loads(base64.urlsafe_b64decode(part))
-          assert claims.get('iss')=='https://token.actions.githubusercontent.com', claims
-          aud=claims.get('aud')
-          assert aud=='paradise-shows-ci' or (isinstance(aud,list) and 'paradise-shows-ci' in aud), claims
-          assert claims.get('repository')=='twiztd1166/proud-math-b7d8', claims
-          assert str(claims.get('repository_id'))=='950980051', claims
-          assert claims.get('runner_environment')=='github-hosted', claims
-          assert claims.get('event_name') in {'push','pull_request','workflow_dispatch'}, claims
-          workflow_ref=str(claims.get('workflow_ref') or '')
-          assert re.match(r'^twiztd1166/proud-math-b7d8/\.github/workflows/(debug-paradise-shows-live|verify-paradise-shows-annual-read)\.yml@refs/',workflow_ref), workflow_ref
-          print({'github_oidc_claims':'PASS','repository_id':claims.get('repository_id'),'workflow_ref':workflow_ref,'event_name':claims.get('event_name')})
-          PY
-          ci_response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
-            -X POST "$API" \
-            -H "Origin: $SITE" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $token" \
-            --data '{"action":"ciSession"}')"
-          ci_token="$(jq -er '.token' <<<"$ci_response")"
-          test -n "$ci_token"
-          case "$ci_token" in ci.*) ;; *) echo "::error::Unexpected CI read-token format."; exit 1;; esac
-          echo "::add-mask::$ci_token"
-          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$ci_token" >> "$GITHUB_ENV"
 
       - name: Execute preserved mature smoke suite
         shell: bash
