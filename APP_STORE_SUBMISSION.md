@@ -127,9 +127,9 @@ Screenshots must not contain alpha/transparency.
 Paradise Shows currently has no app-level authentication requirement. The web/PWA and native iOS interface open directly, and the operating, historical, annual-plan, and write APIs do not require an access code, user account, bearer session, or reviewer credential.
 
 Current deployed API versions:
-- `shows-api` — **v98**
-- `shows-history-api` — **v8**
-- `shows-annual-plan-api` — **v9**
+- `shows-api` — **v103**
+- `shows-history-api` — **v11**
+- `shows-annual-plan-api` — **v12**
 
 This is an intentional product decision. Anyone who obtains the public web URL or directly reaches the public API endpoints can access the exposed app data and invoke supported write actions. Apple Business Manager Custom App distribution limits discovery/installation of the iOS binary but does not provide authentication for the public web application or its backend APIs.
 
