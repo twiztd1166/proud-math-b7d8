@@ -84,9 +84,29 @@ async function annualPlanPayload(year:number){
   return {ok:true,version:2,year,run,summary,rows};
 }
 
+
+async function sha256Hex(value:string){
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function bearer(r:Request){
+  const value=String(r.headers.get('authorization')||'').trim();
+  const match=value.match(/^Bearer\s+(.+)$/i);
+  return match?match[1].trim():'';
+}
+async function activeAppSession(r:Request){
+  const token=bearer(r);if(!token)return null;
+  const tokenHash=await sha256Hex(token);
+  const now=new Date().toISOString();
+  const session=await db.from('shows_app_sessions').select('id,expires_at').eq('token_hash',tokenHash).gt('expires_at',now).maybeSingle();
+  if(session.error||!session.data)return null;
+  return session.data;
+}
+
 Deno.serve(async r=>{
   if(r.method==='OPTIONS')return new Response('ok',{headers:cors(r)});
   if(r.method!=='POST')return out(r,{ok:false,error:'POST required'},405);
+  if(!await activeAppSession(r))return out(r,{ok:false,error:'App access required'},401);
   let body:any;try{body=await r.json()}catch{return out(r,{ok:false,error:'Invalid JSON'},400)}
   const year=Number(body.year||2027);
   if(!Number.isInteger(year)||year<2026||year>2035)return out(r,{ok:false,error:'Valid annual plan year required'},400);
