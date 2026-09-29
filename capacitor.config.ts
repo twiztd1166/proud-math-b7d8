@@ -1,7 +1,7 @@
 const config = {
   appId: 'com.paradiseexteriors.shows',
   appName: 'Paradise Shows',
-  webDir: 'dist',
+  webDir: 'dist/client',
   ios: {
     contentInset: 'automatic',
     backgroundColor: '#f4f6f8',
