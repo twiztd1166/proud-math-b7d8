@@ -477,16 +477,17 @@ jobs:
               grep -q 'grid-template-columns:92px minmax(0,1fr)' /tmp/app.css
               grep -q 'liveCompareOpen' /tmp/app-bind.js
               grep -q 'liveCompareBoard' /tmp/app.css
-              grep -q 'WRITE_SESSION_STORAGE' /tmp/app-core.js
-              grep -q 'ensureWriteAuth' /tmp/app-core.js
-              grep -q "headers.Authorization='Bearer '+writeSessionToken" /tmp/app-core.js
-              grep -q "call('login'" /tmp/app-core.js
-              grep -q "call('authStatus'" /tmp/app-core.js
+              grep -q 'function appRequestHeaders' /tmp/app-core.js
+              grep -Fq "return {'Content-Type':'application/json'};" /tmp/app-core.js
+              grep -q 'async function startApp()' /tmp/app-core.js
+              ! grep -q 'Enter access code' /tmp/app-core.js
+              ! grep -q "call('login'" /tmp/app-core.js
+              ! grep -q 'ensureWriteAuth' /tmp/app-core.js
               grep -q "callWrite('updateShow'" /tmp/app-modals.js
               grep -q "callWrite('updatePayment'" /tmp/app-modals.js
               grep -q 'function openPayment(id)' /tmp/app-modals.js
               grep -q 'async function savePayment(id)' /tmp/app-modals.js
-              python -c "src=open('/tmp/app-modals.js',encoding='utf-8').read(); open_block=src.split('function openPayment(id){',1)[1].split('async function savePayment(id){',1)[0]; save_block=src.split('async function savePayment(id){',1)[1].split('function closeModal(id)',1)[0]; assert 'ensureWriteAuth' not in open_block, open_block; assert 'if(!await ensureWriteAuth())return;' in save_block, save_block; assert \"callWrite('updatePayment'\" in save_block, save_block; print({'payment_read_auth_boundary':'PASS'})"
+              python -c "src=open('/tmp/app-modals.js',encoding='utf-8').read(); save_block=src.split('async function savePayment(id){',1)[1].split('function closeModal(id)',1)[0]; assert 'ensureWriteAuth' not in save_block, save_block; assert \"callWrite('updatePayment'\" in save_block, save_block; print({'public_payment_write_boundary':'PASS'})"
               grep -q "callWrite('resolveConflict'" /tmp/app-bind.js
               grep -q 'Historical outcome cells preserve the governed occurrence/lifetime/no-comparable distinction' /tmp/app-shows.js
               grep -q 'data-historical-outcome-profile' /tmp/app-shows.js
@@ -682,29 +683,18 @@ jobs:
           print('2027 annual plan API: PASS')
           PY
 
-          curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/auth-status.json \
+          public_write_code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/public-write.json -w '%{http_code}' \
             -X POST "$API" \
             -H "Origin: $SITE" \
             -H "Content-Type: application/json" \
-            --data '{"action":"authStatus"}'
+            --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"PUBLIC_ACCESS_PROBE"}}')"
+          test "$public_write_code" = "404"
           python - <<'PY'
           import json
-          x=json.load(open('/tmp/auth-status.json'))
-          assert x.get('ok') is True, x
-          assert x.get('authorized') is False, x
-          PY
-
-          unauth_code="$(curl --retry 4 --retry-delay 2 --retry-all-errors -sS -o /tmp/unauth-write.json -w '%{http_code}' \
-            -X POST "$API" \
-            -H "Origin: $SITE" \
-            -H "Content-Type: application/json" \
-            --data '{"action":"updateShow","mfcId":"MFC-000","patch":{"owner":"UNAUTH_TEST_MUST_NOT_WRITE"}}')"
-          test "$unauth_code" = "401"
-          python - <<'PY'
-          import json
-          x=json.load(open('/tmp/unauth-write.json'))
+          x=json.load(open('/tmp/public-write.json'))
           assert x.get('ok') is False, x
-          assert x.get('error') == 'Edit access required', x
+          assert x.get('error') == 'Show not found', x
+          print({'public_write_without_auth':'PASS'})
           PY
 
           python - <<'PY'
