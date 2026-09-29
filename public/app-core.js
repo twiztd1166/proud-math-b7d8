@@ -151,10 +151,7 @@ function saveWriteSession(token){
   }catch{}
 }
 function appAuthHeaders(){
-  const headers={'Content-Type':'application/json'};
-  if(writeSessionToken)headers.Authorization='Bearer '+writeSessionToken;
-  else if(navigator.webdriver===true&&ciReadToken)headers.Authorization='Bearer '+ciReadToken;
-  return headers;
+  return {'Content-Type':'application/json'};
 }
 function showAccessGate(message=''){
   clearWriteSession();
@@ -191,17 +188,9 @@ function showAccessGate(message=''){
   setTimeout(()=>input?.focus(),0);
 }
 async function startApp(){
-  if(navigator.webdriver===true&&ciReadToken){
-    const bottom=document.querySelector('.bottom');if(bottom)bottom.style.display='';
-    await bootstrap();return;
-  }
-  if(writeSessionToken){
-    try{
-      const status=await call('authStatus');
-      if(status.authorized){const bottom=document.querySelector('.bottom');if(bottom)bottom.style.display='';await bootstrap();return}
-    }catch{}
-  }
-  showAccessGate();
+  const bottom=document.querySelector('.bottom');
+  if(bottom)bottom.style.display='';
+  await bootstrap();
 }
 async function call(action,payload={}){
   const controller=new AbortController();
@@ -211,7 +200,6 @@ async function call(action,payload={}){
     const r=await fetch(API,{method:'POST',headers,body:JSON.stringify({action,...payload}),signal:controller.signal});
     const j=await r.json().catch(()=>({ok:false,error:'Invalid response'}));
     if(!r.ok||!j.ok){
-      if(r.status===401&&action!=='login')clearWriteSession();
       const error=new Error(j.error||'Request failed');error.status=r.status;throw error;
     }
     return j;
@@ -221,19 +209,11 @@ async function call(action,payload={}){
   }finally{clearTimeout(timer)}
 }
 async function ensureWriteAuth(){
-  if(writeSessionToken){
-    try{
-      const status=await call('authStatus');
-      if(status.authorized)return true;
-    }catch{}
-  }
-  showAccessGate('Your session expired. Enter the access code again.');
-  return false;
+  return true;
 }
 async function callWrite(action,payload={}){
   try{return await call(action,payload)}
   catch(e){
-    if(e&&e.status===401&&await ensureWriteAuth())return call(action,payload);
     throw e;
   }
 }
