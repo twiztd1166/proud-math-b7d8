@@ -204,7 +204,20 @@ def auth_aware_shell_script(name: str, script: str, env: dict) -> str:
         )
 
     if name == DEEP_LINK_STEP:
-        match = re.search(r'(?m)^([ \\t]*)url="\\$2"[ \\t]*
+        target_line = next((line for line in script.splitlines() if line.strip() == 'url="$2"'), None)
+        if target_line is None:
+            raise RuntimeError('Unable to locate deep-link render target for CI auth')
+        indent = target_line[:len(target_line) - len(target_line.lstrip())]
+        injection = '\n'.join([
+            indent + 'url="$2"',
+            indent + 'if [[ -n "${PARADISE_SHOWS_CI_SESSION_TOKEN:-}" ]]; then',
+            indent + '  route="${url#"$SITE/"}"',
+            indent + '  route="${route#\\#}"',
+            indent + '  route="${route:-today}"',
+            indent + '  url="$SITE/__ci_auth.html#$PARADISE_SHOWS_CI_SESSION_TOKEN|$route"',
+            indent + 'fi',
+        ])
+        script = script.replace(target_line, injection, 1)
     return script
 
 
