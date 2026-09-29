@@ -1,7 +1,7 @@
 function render(){
   persistShowViewState();
   $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));
-  $('#content').innerHTML=state.tab==='today'?renderToday():state.tab==='calendar'?renderCalendar():state.tab==='shows'?renderShows():state.tab==='payments'?renderPayments():renderControl();bindDynamic();
+  $('#content').innerHTML=state.tab==='today'?renderToday():state.tab==='calendar'?(typeof window.renderCalendarV2==='function'?window.renderCalendarV2():renderCalendar()):state.tab==='shows'?renderShows():state.tab==='payments'?renderPayments():renderControl();bindDynamic();
 }
 function currentMfcForProfile(profileId){
   const profile=state.catalog.find(p=>p.profile_id===profileId);
@@ -40,7 +40,10 @@ function bindDynamic(){
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
   $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
   document.querySelectorAll('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
+  document.querySelectorAll('[data-calendar-show]').forEach(b=>b.onclick=e=>{e.stopPropagation();const mfc=String(b.dataset.calendarShow||'').trim();if(mfc)openDetail(mfc)});
+  $$('[data-calendar-year]').forEach(b=>b.onclick=()=>{const year=Number(b.dataset.calendarYear);if(![2026,2027].includes(year))return;state.calendarYear=year;state.search='';syncLocationView();if(year===2027&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();});
   const cp=$('#calendarOpenPlan');if(cp)cp.onclick=()=>{state.tab='shows';state.showMode='PLAN2027';state.search='';state.showQuickView='NONE';syncLocationView();if(!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();};
+  const cc=$('#calendarOpenCurrent');if(cc)cc.onclick=()=>{state.tab='shows';state.showMode='CURRENT';state.search='';state.showQuickView='NONE';syncLocationView();render();};
   $$('[data-unlinked-category]').forEach(b=>b.onclick=()=>{state.unlinkedLp.category=b.dataset.unlinkedCategory||'ALL';state.search='';render()});
   const cm=$('#catalogMore');if(cm)cm.onclick=()=>{state.catalogLimit+=60;render()};
   $$('.paymentCard[data-payment]').forEach(c=>c.onclick=()=>openPayment(c.dataset.payment));

@@ -1,0 +1,69 @@
+name: Paradise Shows dual-year calendar verifier
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+      - deploy/calendar-2026-live-20260929
+  pull_request:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+
+      - name: Verify both calendar years are wired
+        run: |
+          grep -q 'calendarYear:2026' public/app-core.js
+          grep -q '2026 Calendar' public/app-calendar.js
+          grep -q '2027 Calendar' public/app-calendar.js
+          grep -q 'renderCalendarV2' public/app-bind.js
+          grep -Fq "\$\$('[data-calendar-year]').forEach" public/app-bind.js
+          grep -q 'app-calendar.js?v=20260929-calendar-v1' src/pages/index.astro
+          grep -q 'app-calendar.js?v=20260929-calendar-v1' public/index-standalone.html
+          grep -q "'/app-calendar.js'" public/sw.js
+          grep -q "'app-calendar.js'" scripts/prepare-ios-app.mjs
+
+      - name: Verify live 2026 governed rows exist
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api' \
+            --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          rows=[r for r in x.get('shows',[]) if str(r.get('event_start') or '').startswith('2026-')]
+          assert len(rows) >= 29, len(rows)
+          assert any(str(r.get('event_start') or '').startswith('2026-10-') for r in rows), 'missing October 2026 rows'
+          print(f'2026 governed dated rows: {len(rows)}')
+          PY
+
+      - name: Verify published 2027 plan remains available
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-annual-plan-api?year=2027' \
+            -o /tmp/annual.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/annual.json'))
+          assert x.get('ok') is True, x
+          assert x.get('published') is True, x
+          assert len(x.get('rows',[])) >= 300, len(x.get('rows',[]))
+          print(f"2027 published rows: {len(x.get('rows',[]))}")
+          PY
