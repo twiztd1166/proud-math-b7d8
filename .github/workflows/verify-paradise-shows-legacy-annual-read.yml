@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   verify-legacy-annual-compatibility:
@@ -42,18 +43,45 @@ jobs:
           fi
           echo 'Canonical annual browser endpoint: PASS'
 
+      - name: Mint short-lived CI read session
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          oidc_url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=paradise-shows-ci"
+          response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$oidc_url")"
+          token="$(jq -er '.value' <<<"$response")"
+          test -n "$token"
+          echo "::add-mask::$token"
+          ci_response="$(curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -X POST "$SHOWS_API" \
+            -H "Origin: $SITE" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $token" \
+            --data '{"action":"ciSession"}')"
+          ci_token="$(jq -er '.token' <<<"$ci_response")"
+          case "$ci_token" in ci.*) ;; *) echo "::error::Unexpected CI read-token format."; exit 1;; esac
+          echo "::add-mask::$ci_token"
+          echo "PARADISE_SHOWS_CI_SESSION_TOKEN=$ci_token" >> "$GITHUB_ENV"
+
       - name: Verify all annual read paths follow current publication
         shell: bash
         run: |
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/canonical.json \
             -X POST "$ANNUAL_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \
             --data '{"action":"annualPlan","year":2027}'
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/history-compat.json \
             -X POST "$HISTORY_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \
             --data '{"action":"annualPlan","year":2027}'
           curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /tmp/shows-compat.json \
             -X POST "$SHOWS_API" -H "Origin: $SITE" -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $PARADISE_SHOWS_CI_SESSION_TOKEN" \
             --data '{"action":"annualPlan","year":2027}'
           node <<'NODE'
           const fs=require('fs'),assert=require('assert');
