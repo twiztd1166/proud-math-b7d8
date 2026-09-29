@@ -12,6 +12,7 @@ const ORIGINS = new Set([
   'https://taxlrlfsobtnbasjcnuf.supabase.co',
   'https://twiztd1166.github.io',
   'https://paradise-shows-public.proud-math-b7d8.pages.dev',
+  'capacitor://localhost',
   'https://paradise-shows-history-preview-pe12.vercel.app',
   'https://paradise-shows-history-preview-mm1r2q63x-pe12.vercel.app',
 ]);
