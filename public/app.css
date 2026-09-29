@@ -371,3 +371,23 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   margin-top:12px;padding-top:14px;border-top:1px solid #eef1f3;
   font-size:10px;line-height:1.4;color:#8a949c;
 }
+
+
+/* Shared show notes */
+.showNotesBlock{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#fbfcfd;padding:12px}
+.showNotesHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
+.showNotesHead .k{font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:850;letter-spacing:.45px}
+.showNotesHint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:3px}
+.showNotesComposer{display:grid;gap:7px}
+.showNotesComposer textarea{width:100%;min-height:84px;resize:vertical;border:1px solid #ccd7de;border-radius:11px;padding:11px;background:#fff;outline:none;line-height:1.45}
+.showNotesComposer textarea:focus{border-color:#9ebed2;box-shadow:0 0 0 3px rgba(29,95,148,.08)}
+.showNotesComposerFoot{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.showNotesComposerFoot>span{font-size:9px;line-height:1.35;color:var(--muted)}
+.showNotesComposerFoot .btn{flex:0 0 auto;padding:10px 13px}
+.showNotesList{display:grid;gap:7px;margin-top:11px}
+.showNoteItem{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px}
+.showNoteMeta{font-size:9px;color:var(--muted);font-weight:800;margin-bottom:5px}
+.showNoteText{font-size:12px;line-height:1.5;color:var(--text);overflow-wrap:anywhere}
+.showNotesEmpty{padding:14px 10px;border:1px dashed #cbd6dd;border-radius:10px;text-align:center;color:var(--muted);font-size:11px;line-height:1.4}
+.showNotesEmpty.error{color:var(--red);border-color:#e7c8c5;background:#fff8f7}
+@media(max-width:430px){.showNotesComposerFoot{align-items:flex-start;flex-direction:column}.showNotesComposerFoot .btn{width:100%}}
