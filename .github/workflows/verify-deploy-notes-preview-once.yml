@@ -1,0 +1,65 @@
+name: Verify Paradise Shows Notes preview once
+
+on:
+  push:
+    branches:
+      - deploy-notes-live-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://deploy-notes-live-20260929.proud-math-b7d8.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify latest Notes assets are live
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            if curl -fsS "$SITE" -o /tmp/index.html \
+              && grep -q '20260929-notes-v3' /tmp/index.html \
+              && curl -fsS "${SITE}app-modals.js?v=20260929-notes-v3" -o /tmp/app-modals.js \
+              && grep -q 'Manager notes' /tmp/app-modals.js \
+              && grep -q 'profileNoteAddBtn' /tmp/app-modals.js \
+              && grep -q 'showNoteAddBtn' /tmp/app-modals.js; then
+              echo 'Latest Notes assets are live on Cloudflare preview.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Cloudflare preview did not converge to notes-v3.'
+          exit 1
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Render current show Notes UI
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--disable-web-security']});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+            const resp=await page.goto(process.env.SITE,{waitUntil:'networkidle',timeout:60000});
+            if((resp?.status()||0)>=400)throw new Error('HTTP '+resp?.status());
+            if((await page.title())!=='Paradise Shows')throw new Error('Wrong title: '+await page.title());
+            await page.waitForSelector('.card[data-id]',{timeout:45000});
+            await page.locator('.card[data-id]').first().click();
+            await page.waitForSelector('#detailModal.show',{timeout:15000});
+            const detail=await page.locator('#detailBody').innerText();
+            if(!/Manager notes/i.test(detail))throw new Error('Manager notes not visible');
+            if(await page.locator('#showNoteInput').count()!==1)throw new Error('Show note input missing');
+            if(await page.locator('#showNoteAddBtn').count()!==1)throw new Error('Add note button missing');
+            console.log(detail.slice(0,2500));
+            if(errors.length)console.log('browser console issues',JSON.stringify(errors,null,2));
+            await browser.close();
+          })();
+          NODE
