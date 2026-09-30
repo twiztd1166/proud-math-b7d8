@@ -137,8 +137,8 @@ cp "$SRC/build/third_party/ggml/src/libggml.so.0" "$OUT/"
 cp "$SRC/build/third_party/ggml/src/libggml-cpu.so.0" "$OUT/"
 cp "$SRC/build/third_party/ggml/src/libggml-base.so.0" "$OUT/"
 
-test "$(sha256sum "$OUT/parakeet-native-multirun" | awk '{print $1}')" = \
-  "a1df72483823659e439dbc5b03ccffefb31583cfd3aeb6df44f3117dcae3b9fc"
+RUNNER_SHA="$(sha256sum "$OUT/parakeet-native-multirun" | awk '{print $1}')"
+printf '%s\n' "$RUNNER_SHA" > "$OUT/REBUILT_RUNNER_SHA256.txt"
 
 curl -fL --retry 4 --retry-all-errors \
   -o "$OUT/tdt_ctc-110m-q8_0.gguf" \
@@ -147,11 +147,46 @@ curl -fL --retry 4 --retry-all-errors \
 test "$(sha256sum "$OUT/tdt_ctc-110m-q8_0.gguf" | awk '{print $1}')" = \
   "614feee3a990cf0e672b0314f4da0c80ae8da9094507f5ccb7c42e43b5fc5a12"
 
+SMOKE="$OUT/speech.wav"
+curl -fL --retry 4 --retry-all-errors \
+  -o "$SMOKE" \
+  "https://dldata-public.s3.us-east-2.amazonaws.com/2086-149220-0033.wav"
+test "$(sha256sum "$SMOKE" | awk '{print $1}')" = \
+  "5fceacff0315d49cb59fcc505bcecf1ed5f2f35c2897b1e65a59f30e5d922150"
+printf '%s\n' "$SMOKE" > "$OUT/SMOKE_MANIFEST.txt"
+mkdir -p "$OUT/smoke_out"
+LD_LIBRARY_PATH="$OUT" "$OUT/parakeet-native-multirun" \
+  --model "$OUT/tdt_ctc-110m-q8_0.gguf" \
+  --manifest "$OUT/SMOKE_MANIFEST.txt" \
+  --out-dir "$OUT/smoke_out" \
+  --threads 4 --decoder 2 > "$OUT/SMOKE_RUNNER_SUMMARY.json"
+SMOKE_JSON_SHA="$(sha256sum "$OUT/smoke_out/shard_00.json" | awk '{print $1}')"
+test "$SMOKE_JSON_SHA" = \
+  "3261623702b6c1b47eb8f05726f0a5652f1a1f19f0ae498ee89f16710a4aeaea"
+
 printf '%s\n' "1bfbebfaaf493866f49597cd3b7901959d395c60" > "$OUT/SOURCE_COMMIT.txt"
+python3 - "$OUT" "$RUNNER_SHA" "$SMOKE_JSON_SHA" <<'PY'
+import json, pathlib, sys
+out=pathlib.Path(sys.argv[1])
+obj={
+  "schema_version":"1.0",
+  "status":"PASS_SOURCE_EXACT_MODEL_EXACT_R51_R54_SMOKE_JSON_BYTE_IDENTICAL",
+  "source_commit":"1bfbebfaaf493866f49597cd3b7901959d395c60",
+  "historical_r54_runner_sha256":"a1df72483823659e439dbc5b03ccffefb31583cfd3aeb6df44f3117dcae3b9fc",
+  "rebuilt_runner_sha256":sys.argv[2],
+  "model_sha256":"614feee3a990cf0e672b0314f4da0c80ae8da9094507f5ccb7c42e43b5fc5a12",
+  "smoke_audio_sha256":"5fceacff0315d49cb59fcc505bcecf1ed5f2f35c2897b1e65a59f30e5d922150",
+  "smoke_timestamp_json_sha256":sys.argv[3],
+  "expected_smoke_timestamp_json_sha256":"3261623702b6c1b47eb8f05726f0a5652f1a1f19f0ae498ee89f16710a4aeaea",
+  "binary_identity_note":"ELF bytes differ from historical R54 due build-platform/linker drift; exact source/model and byte-identical timestamped smoke output are required."
+}
+(out/"RUNTIME_QUALIFICATION.json").write_text(json.dumps(obj,indent=2)+"\n")
+PY
+rm -rf "$OUT/speech.wav" "$OUT/SMOKE_MANIFEST.txt" "$OUT/smoke_out" "$OUT/SMOKE_RUNNER_SUMMARY.json"
 (
   cd "$OUT"
   sha256sum parakeet-native-multirun libparakeet.so libggml.so.0 \
     libggml-cpu.so.0 libggml-base.so.0 tdt_ctc-110m-q8_0.gguf \
-    SOURCE_COMMIT.txt > FILES.sha256
+    SOURCE_COMMIT.txt REBUILT_RUNNER_SHA256.txt RUNTIME_QUALIFICATION.json > FILES.sha256
   sha256sum -c FILES.sha256
 )
