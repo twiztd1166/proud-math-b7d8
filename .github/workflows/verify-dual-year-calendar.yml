@@ -3,11 +3,10 @@ name: Paradise Shows dual-year calendar verifier
 on:
   push:
     branches:
-      - paradise-shows-public
-      - deploy/calendar-2026-live-20260929
+      - agent/calendar-2026-2027-20260929
   pull_request:
     branches:
-      - paradise-shows-public
+      - verify-stable-notes-20260929
   workflow_dispatch:
 
 permissions:
@@ -33,8 +32,8 @@ jobs:
           grep -q '2027 Calendar' public/app-calendar.js
           grep -q 'renderCalendarV2' public/app-bind.js
           grep -Fq "\$\$('[data-calendar-year]').forEach" public/app-bind.js
-          grep -q 'app-calendar.js?v=20260930-q4-v1' src/pages/index.astro
-          grep -q 'app-calendar.js?v=20260930-q4-v1' public/index-standalone.html
+          grep -q 'app-calendar.js?v=20260930-research-v1' src/pages/index.astro
+          grep -q 'app-calendar.js?v=20260930-research-v1' public/index-standalone.html
           grep -q "'/app-calendar.js'" public/sw.js
           grep -q "'app-calendar.js'" scripts/prepare-ios-app.mjs
 
