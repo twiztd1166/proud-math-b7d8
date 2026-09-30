@@ -776,6 +776,9 @@ jobs:
           senior=controls['R2026-063-SENIOR-HARDROCK']
           senior_detail=senior.get('detail_data') or {}
           assert senior.get('deadline_date') == '2026-10-30', senior
+          assert senior.get('city') == 'Davie', senior
+          assert senior.get('date_confidence') == 'CURRENT_VERIFIED', senior
+          assert senior.get('research_status') == 'CURRENT_REVERIFIED', senior
           assert senior_detail.get('official_source_url') == 'https://seniorexpousa.com/expos/florida/fort-lauderdale-hollywood-fall-senior-expo-2026/', senior
           assert 'Evan@SeniorExpoUSA.com' in str(senior_detail.get('contact_text') or ''), senior
           assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
