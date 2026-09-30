@@ -1,0 +1,72 @@
+name: Verify recovered 2026 research calendar
+
+on:
+  push:
+    branches:
+      - agent/calendar-research-overlay-20260930
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      API: https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api
+      SITE: https://paradise-shows-public.proud-math-b7d8.pages.dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend syntax
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+
+      - name: Check research overlay source wiring
+        run: |
+          grep -q "researchCalendarControls" public/app-core.js
+          grep -q "calendar2026ResearchItem" public/app-calendar.js
+          grep -q "Recovered research" public/app-calendar.js
+          grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
+          grep -q "20260930-research-v1" src/pages/index.astro
+          grep -q "paradise-shows-public-v12" public/sw.js
+          grep -q "shows_app_research_calendar_controls" supabase/migrations/20260930080000_research_calendar_controls.sql
+
+      - name: Verify live API research overlay
+        run: |
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+            -H "Origin: $SITE" \
+            -H 'Content-Type: application/json' \
+            -X POST "$API" \
+            --data '{"action":"bootstrap"}' \
+            -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 19, x.get('version')
+          rows=x.get('researchCalendarControls') or []
+          assert len(rows) == 115, len(rows)
+          q4=[r for r in rows if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
+          assert len(q4) == 114, len(q4)
+          controls={r.get('control_id'):r for r in rows}
+          expected={
+            'R2026-016-MIAMI-CARNIVAL',
+            'R2026-039-SPACE-COAST-STATE-FAIR',
+            'R2026-066-STUART-AIR-SHOW',
+            'R2026-084-CHRISTMAS-LAS-OLAS',
+            'R2026-111-WINTERFEST-BOAT',
+          }
+          assert expected <= set(controls), expected-set(controls)
+          fair=controls['R2026-039-SPACE-COAST-STATE-FAIR']
+          assert fair.get('event_start') == '2026-10-29', fair
+          assert fair.get('event_end') == '2026-11-15', fair
+          assert controls['R2026-084-CHRISTMAS-LAS-OLAS'].get('disposition') == 'PURSUE'
+          print({'api_version':x.get('version'),'research_rows':len(rows),'q4_rows':len(q4)})
+          PY
