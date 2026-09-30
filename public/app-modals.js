@@ -685,7 +685,10 @@ function openResearchDetail(controlId){
   const start=r.event_start?date(r.event_start):(r.estimated_sort_date?'Date TBD · Estimated '+date(r.estimated_sort_date):'Date TBD');
   const end=r.event_start&&r.event_end&&r.event_end!==r.event_start?date(r.event_end):'';
   const eventRange=String(r.date_text||'').trim()||(end?start+' – '+end:start);
-  const deadline=r.deadline_date?date(r.deadline_date):researchDetailText(r.deadline_text||d.booking_window_text);
+  const recoveredDeadline=/\d/.test(String(d.recovered_deadline_text||''))?String(d.recovered_deadline_text):'';
+  const deadline=r.deadline_date?date(r.deadline_date):researchDetailText(r.deadline_text||recoveredDeadline||d.booking_window_text);
+  const costText=r.price_text||d.recovered_cost_text?(r.price_text||String(d.recovered_cost_text)+' (recovered research — reverify current rate)'):d.current_cost_status;
+  const attendanceText=d.recovered_attendance_text?String(d.recovered_attendance_text)+' (recovered research — reverify current audience)':d.attendance_text;
   const sourceButtons=researchSourceButtons(r);
   const linkedActions=[
     r.mfc_id?'<button class="btn primary" id="researchOpenMfc">Open current control</button>':'',
@@ -705,14 +708,14 @@ function openResearchDetail(controlId){
       '<div class="detail"><div class="k">Research status</div><div class="val">'+esc(researchHuman(r.research_status)||'Not set')+'</div></div>'+
       '<div class="detail"><div class="k">Participation route</div><div class="val">'+esc(researchHuman(r.route_type)||researchDetailText(d.eligibility_text))+'</div></div>'+
       '<div class="detail"><div class="k">Identity / lineage</div><div class="val">'+esc(researchHuman(r.lineage_type)||'Unresolved')+'</div></div>'+
-      '<div class="detail"><div class="k">Current cost</div><div class="val">'+esc(researchDetailText(r.price_text||d.current_cost_status))+'</div></div>'+
+      '<div class="detail"><div class="k">Current cost / recovered pricing</div><div class="val">'+esc(researchDetailText(costText))+'</div></div>'+
       '<div class="detail"><div class="k">Application / deadline</div><div class="val">'+esc(deadline)+'</div></div>'+
     '</div>'+
     '<div class="block"><div class="k">Venue / logistics</div><div class="val">'+esc(researchDetailText(d.venue_text||d.logistics_text))+'</div></div>'+
     '<div class="block"><div class="k">Organizer / contact</div><div class="val">'+esc(researchDetailText(d.contact_text||d.organizer_text))+'</div></div>'+
     '<div class="block"><div class="k">Eligibility / Paradise route</div><div class="val">'+esc(researchDetailText(d.eligibility_text||r.notes))+'</div></div>'+
     '<div class="block"><div class="k">Booth / placement</div><div class="val">'+esc(researchDetailText(d.placement_text))+'</div></div>'+
-    '<div class="block"><div class="k">Audience / attendance</div><div class="val">'+esc(researchDetailText(d.attendance_text))+'</div></div>'+
+    '<div class="block"><div class="k">Audience / attendance</div><div class="val">'+esc(researchDetailText(attendanceText))+'</div></div>'+
     '<div class="block"><div class="k">Application / booking window</div><div class="val">'+esc(researchDetailText(d.application_text||d.booking_window_text||r.deadline_text))+'</div></div>'+
     '<div class="block"><div class="k">Booking readiness</div><div class="val">'+esc(researchDetailText(d.booking_readiness))+'</div></div>'+
     '<div class="block"><div class="k">Current blockers / cautions</div><div class="val">'+esc(researchDetailText(d.blockers_text||r.notes))+'</div></div>'+
