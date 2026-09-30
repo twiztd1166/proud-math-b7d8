@@ -1,13 +1,14 @@
 const API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api';
 const SHEET='https://docs.google.com/spreadsheets/d/1Fyyypme7AYFEUwLbIPPNaixYR7Lwiwegs2hRTu02wYk/edit';
 let state={
-  shows:[],calendarOpportunities:[],payments:[],activity:[],settings:{},
+  shows:[],calendarOpportunities:[],researchCalendar:[],payments:[],activity:[],settings:{},
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
   catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,deepLinkedYear:null,
   unlinkedLp:{annual:[],cumulative:[],summary:null,category:'ALL',loaded:false,loading:false,error:null},
   annualPlan:{year:2027,rows:[],summary:null,run:null,filter:'ALL',loaded:false,loading:false,error:null},
   calendarYear:2026,
+  calendarScope:'ALL',
   showMode:'ALL',tab:'today',search:'',showQuickView:'NONE',
   catalogSort:'RECOMMENDED',
   catalogFilters:{
@@ -67,6 +68,7 @@ function restoreShowViewState(){
     if(saved&&saved.v===1){
       if(['ALL','CURRENT','UNLINKED','PLAN2027'].includes(saved.showMode))state.showMode=saved.showMode;
       if([2026,2027].includes(Number(saved.calendarYear)))state.calendarYear=Number(saved.calendarYear);
+      if(['ALL','OPERATING','RESEARCH'].includes(saved.calendarScope))state.calendarScope=saved.calendarScope;
       if(SHOW_QUICK_VIEWS.includes(saved.showQuickView))state.showQuickView=saved.showQuickView;
       if(state.showQuickView.startsWith('ALL_')&&state.showMode!=='ALL')state.showQuickView='NONE';
       if(state.showQuickView.startsWith('CURRENT_')&&state.showMode!=='CURRENT')state.showQuickView='NONE';
@@ -98,6 +100,7 @@ function persistShowViewState(){
       v:1,
       showMode:state.showMode,
       calendarYear:state.calendarYear,
+      calendarScope:state.calendarScope,
       showQuickView:state.showQuickView,
       catalogSort:state.catalogSort,
       currentSort:state.currentSort,
@@ -225,7 +228,7 @@ async function loadCatalog(force=false){
 
 async function bootstrap(){
   try{
-    const d=await call('bootstrap');state.shows=d.shows;state.calendarOpportunities=d.calendarOpportunities||[];state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
+    const d=await call('bootstrap');state.shows=d.shows;state.calendarOpportunities=d.calendarOpportunities||[];state.researchCalendar=d.researchCalendar||[];state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
