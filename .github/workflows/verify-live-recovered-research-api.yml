@@ -44,12 +44,19 @@ jobs:
           assert all((r.get('detail_data') or {}).get('contact_text') for r in research), 'contact_text missing'
           assert all(str((r.get('detail_data') or {}).get('contact_status') or '').upper() != 'NOT VERIFIED' for r in research), 'contact_status still NOT VERIFIED'
           assert all(str((r.get('detail_data') or {}).get('contact_text') or '').strip().lower() != 'not verified' for r in research), 'contact_text still placeholder'
+          def direct_channel(text):
+              text=str(text or '')
+              digits=''.join(ch for ch in text if ch.isdigit())
+              return '@' in text or len(digits) >= 7
+          assert all(direct_channel((r.get('detail_data') or {}).get('contact_text')) for r in research), 'research contact missing direct email/phone channel'
           contacts={r.get('event_label'):(r.get('detail_data') or {}).get('contact_text') for r in research}
           assert 'Vendors@BattleBrosEvents.com' in contacts.get('Florida Creatives Market — Port St. Lucie',''), contacts.get('Florida Creatives Market — Port St. Lucie')
           assert 'specialevents@cityofpsl.com' in contacts.get('Port St. Lucie Oktoberfest',''), contacts.get('Port St. Lucie Oktoberfest')
           assert 'sponsorships@cancommunityhealth.org' in contacts.get('World AIDS Day Concert',''), contacts.get('World AIDS Day Concert')
           assert 'jbrito@wellingtonfl.gov' in contacts.get('Wellington Holiday Parade',''), contacts.get('Wellington Holiday Parade')
           assert 'vendorfair@gpbsc.net' in contacts.get('Greater Palm Bay Senior Activity Center Vendor Fair',''), contacts.get('Greater Palm Bay Senior Activity Center Vendor Fair')
+          assert 'info.fl11@bluestarmothers.us' in contacts.get("Freedom Isn’t Free Run 5K",''), contacts.get("Freedom Isn’t Free Run 5K")
+          assert 'specialevents@cityofpsl.com' in contacts.get('Port St. Lucie International Fest',''), contacts.get('Port St. Lucie International Fest')
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
           wanted={
