@@ -35,6 +35,12 @@ function nativeHaptic(){nativeBridgePost('haptic')}
 function researchEmailAddresses(value){
   return [...new Set((String(value||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(email=>email.trim()))];
 }
+function researchPhoneNumbers(value){
+  return [...new Set((String(value||'').match(/(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]\d{3}[\s.-]\d{4}/g)||[]).map(phone=>phone.trim()))];
+}
+function researchPhoneHref(phone){
+  return 'tel:'+String(phone||'').replace(/[^\d+]/g,'');
+}
 function researchEmailParticipationLabel(row){
   const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
   const text=[row?.route_type,d.booking_status,d.eligibility_text,d.action_label].filter(Boolean).join(' ').toUpperCase();
