@@ -124,15 +124,92 @@ function nextStepSection(title,subtitle,rows,lane,limit){
 function researchNextStepKey(label,start){
   return String(start||'')+'|'+String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
 }
+function researchEasternTodayKey(){
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const values=Object.fromEntries(parts.filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+function researchDateOrdinal(value){
+  const match=String(value||'').slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match)return null;
+  return Math.floor(Date.UTC(Number(match[1]),Number(match[2])-1,Number(match[3]))/86400000);
+}
+function researchDaysUntil(value){
+  const target=researchDateOrdinal(value);
+  const today=researchDateOrdinal(researchEasternTodayKey());
+  return target===null||today===null?null:target-today;
+}
+function researchDueLabel(value){
+  const days=researchDaysUntil(value);
+  if(days===null)return 'No action date';
+  if(days<0)return `Overdue · ${Math.abs(days)}d`;
+  if(days===0)return 'Today';
+  if(days===1)return 'Tomorrow';
+  return date(value);
+}
 function researchNextActionDate(row){
   return String(row?.deadline_date||row?.event_start||row?.estimated_sort_date||'9999-12-31');
+}
+function researchAvailability(row){
+  const status=String(row?.detail_data?.booking_status||row?.research_status||'').trim();
+  const normalized=status.toUpperCase();
+  const verification=String(row?.research_status||'').toUpperCase();
+  if(verification.includes('NOT_REVERIFIED'))return {code:'REVERIFY',label:'REVERIFY FIRST',rank:5};
+  if(/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
+  if(/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized)){
+    if(/SPONSOR|PARTNER|INQUIRY|ALTERNATE/.test(normalized)&&/CURRENT|ACTIVE|OPEN|AVAILABLE/.test(normalized))return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
+    return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
+  }
+  if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
+  if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
+  if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
+  return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
+}
+function researchManagerMove(row){
+  const availability=researchAvailability(row);
+  const disposition=String(row?.disposition||'WATCH').toUpperCase();
+  const next=String(row?.detail_data?.next_action||row?.notes||'').toUpperCase();
+  if(availability.code==='LATE')return {code:'CONTACT',label:'CONTACT — LATE INVENTORY',rank:1};
+  if(availability.code==='ALTERNATE')return {code:'CONTACT',label:'CONTACT — ALTERNATE ROUTE',rank:1};
+  if(availability.code==='REVERIFY')return {code:'REVIEW',label:'REVERIFY / REVIEW',rank:2};
+  if(disposition==='SOLD_OUT'||disposition==='HOLD')return {code:'HOLD',label:'HOLD / REVIEW',rank:4};
+  const contact=/\b(CONTACT|EMAIL|CALL|ASK|REQUEST|INQUIRY|REACH OUT)\b/.test(next);
+  const apply=/\b(APPLY|SUBMIT|REGISTER|SIGN UP|APPLICATION)\b/.test(next);
+  if(contact&&apply)return {code:'CONTACT_APPLY',label:'CONTACT → APPLY',rank:0};
+  if(apply)return {code:'APPLY',label:'APPLY / SUBMIT',rank:0};
+  if(contact)return {code:'CONTACT',label:'CONTACT ORGANIZER',rank:1};
+  if(/\b(CONFIRM|VERIFY|REVIEW|COMPARE|OBTAIN|CHECK)\b/.test(next))return {code:'REVIEW',label:'CONFIRM / REVIEW',rank:2};
+  if(/\b(MONITOR|WAIT|WATCH)\b/.test(next))return {code:'MONITOR',label:'MONITOR',rank:3};
+  if(/\b(SKIP|DO NOT PURSUE|HOLD)\b/.test(next))return {code:'HOLD',label:'SKIP / HOLD',rank:4};
+  return {code:'REVIEW',label:'REVIEW / DECIDE',rank:2};
+}
+function researchValueSignal(row){
+  const priority=String(row?.priority||'').toUpperCase();
+  const label=({HIGH:'High',MED_HIGH:'Med-high',MEDIUM:'Medium',LOW_MED:'Low-med',LOW:'Low'})[priority]||'Not set';
+  const profileLinked=Boolean(row?.profile_id&&state.catalog.some(profile=>profile.profile_id===row.profile_id));
+  return `${label} · research-priority proxy${profileLinked?' · history linked':''}`;
+}
+function researchUrgency(row){
+  const availability=researchAvailability(row);
+  const deadlineDays=researchDaysUntil(row?.deadline_date);
+  const eventDays=researchDaysUntil(row?.event_start||row?.estimated_sort_date);
+  if(availability.code==='LATE'||(deadlineDays!==null&&deadlineDays<0))return {code:'LATE',label:'CALL NOW — LATE INVENTORY',rank:1};
+  const days=deadlineDays!==null?deadlineDays:eventDays;
+  if(days!==null&&days<=3)return {code:'DO_NOW',label:'DO NOW',rank:0};
+  if(days!==null&&days<=7)return {code:'NEXT_7',label:'NEXT 7 DAYS',rank:2};
+  if(days!==null&&days<=14)return {code:'NEXT_14',label:'NEXT 14 DAYS',rank:3};
+  return {code:'LATER',label:'LATER / MONITOR',rank:4};
+}
+function researchExecutionSortDate(row,urgency=researchUrgency(row)){
+  if(urgency.code==='LATE')return String(row?.event_start||row?.estimated_sort_date||row?.deadline_date||'9999-12-31');
+  return researchNextActionDate(row);
 }
 function researchNextStepRows(){
   const represented=new Set([
     ...state.shows.map(row=>researchNextStepKey(row.event,row.event_start)),
     ...(state.calendarOpportunities||[]).map(row=>researchNextStepKey(row.event_label,row.event_start)),
   ]);
-  const today=new Date().toISOString().slice(0,10);
+  const today=researchEasternTodayKey();
   return (state.researchCalendarControls||[])
     .filter(row=>Number(row.plan_year||2026)===2026)
     .filter(row=>['PURSUE','WATCH','SOLD_OUT','HOLD'].includes(String(row.disposition||'').toUpperCase()))
@@ -144,11 +221,18 @@ function researchNextStepRows(){
     })
     .slice()
     .sort((a,b)=>{
-      const ad=researchNextActionDate(a);
-      const bd=researchNextActionDate(b);
+      const au=researchUrgency(a),bu=researchUrgency(b);
+      const aa=researchAvailability(a),ba=researchAvailability(b);
+      const am=researchManagerMove(a),bm=researchManagerMove(b);
       const disp=x=>({PURSUE:0,WATCH:1,SOLD_OUT:2,HOLD:3})[String(x.disposition||'').toUpperCase()]??4;
       const pri=x=>({HIGH:0,MED_HIGH:1,MEDIUM:2,LOW_MED:3,LOW:4})[String(x.priority||'').toUpperCase()]??5;
-      return ad.localeCompare(bd)||disp(a)-disp(b)||pri(a)-pri(b)||String(a.event_label||'').localeCompare(String(b.event_label||''));
+      return au.rank-bu.rank||
+        researchExecutionSortDate(a,au).localeCompare(researchExecutionSortDate(b,bu))||
+        aa.rank-ba.rank||
+        disp(a)-disp(b)||
+        pri(a)-pri(b)||
+        am.rank-bm.rank||
+        String(a.event_label||'').localeCompare(String(b.event_label||''));
     });
 }
 function researchNextStepCard(row){
@@ -162,32 +246,39 @@ function researchNextStepCard(row){
   const cost=String(d.current_cost_text||row.price_text||'').trim()||'Not verified';
   const deadlineText=String(d.deadline_text||row.deadline_text||'').trim();
   const deadline=row.deadline_date
-    ?`${dueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
+    ?`${researchDueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
     :(deadlineText||'Not verified');
   const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
-  const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current facts':'Current research record';
+  const availability=researchAvailability(row);
+  const managerMove=researchManagerMove(row);
+  const urgency=researchUrgency(row);
+  const valueSignal=researchValueSignal(row);
+  const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current terms before commitment.':'Current-reverified research record';
   return `<article class="nextStepCard nextStep-review">
-    <div class="nextStepTop"><div><span class="nextStepLane">Research follow-up</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
+    <div class="nextStepTop"><div><span class="nextStepLane">${esc(urgency.label)}</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
+    <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove.label)}</b></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
-    <div class="nextStepFacts"><div><span>When</span><b>${esc(range)}</b></div><div><span>Priority</span><b>${esc(row.priority||'Not set')}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
+    <div class="nextStepFacts"><div><span>Availability</span><b>${esc(availability.label)}</b></div><div><span>Value signal</span><b>${esc(valueSignal)}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>When</span><b>${esc(range)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
     <button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button>
   </article>`;
 }
 function researchNextStepSection(){
   const rows=researchNextStepRows();
   if(!rows.length)return '';
-  const horizonDate=new Date();
-  horizonDate.setDate(horizonDate.getDate()+14);
-  const horizon=horizonDate.toISOString().slice(0,10);
-  const nearTerm=rows.filter(row=>researchNextActionDate(row)<=horizon);
-  const visible=(nearTerm.length?nearTerm:rows).slice(0,8);
-  const remainingNearTerm=Math.max(0,nearTerm.length-visible.length);
-  const later=Math.max(0,rows.length-nearTerm.length);
-  const moreText=remainingNearTerm||later
-    ?`<div class="nextStepMore">${remainingNearTerm?`+${remainingNearTerm} more need attention within 14 days`:''}${remainingNearTerm&&later?' · ':''}${later?`${later} later research follow-ups`:''} · Calendar → 2026</div>`
+  const urgencyByRow=rows.map(row=>({row,urgency:researchUrgency(row)}));
+  const doNow=urgencyByRow.filter(item=>item.urgency.code==='DO_NOW');
+  const late=urgencyByRow.filter(item=>item.urgency.code==='LATE');
+  const within14=urgencyByRow.filter(item=>['DO_NOW','NEXT_7','NEXT_14'].includes(item.urgency.code));
+  const actionable=urgencyByRow.filter(item=>item.urgency.rank<=3).map(item=>item.row);
+  const visible=(actionable.length?actionable:rows).slice(0,10);
+  const remainingActionable=Math.max(0,actionable.length-visible.length);
+  const later=Math.max(0,rows.length-actionable.length);
+  const moreText=remainingActionable||later
+    ?`<div class="nextStepMore">${remainingActionable?`+${remainingActionable} more execution follow-ups within 14 days / late-inventory lane`:''}${remainingActionable&&later?' · ':''}${later?`${later} later research follow-ups`:''} · Calendar → 2026</div>`
     :'';
-  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Near-term recovered opportunities first: ${nearTerm.length} need attention within 14 days; ${rows.length} current/future research controls remain. Reverify current terms before commitment.</p></div><span>${nearTerm.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: ${doNow.length} do now · ${late.length} late-inventory · ${within14.length} due/event within 14 days · ${rows.length} current/future controls. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>${actionable.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
 }
+
 function renderToday(){
   const pay=paymentAttention();
   const rs=state.reconciliation.summary||{};

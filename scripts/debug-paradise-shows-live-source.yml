@@ -2778,7 +2778,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- expected manager-lane markers present in rendered DOM ---" >&2; for marker in "Next Steps" "Team action" "Research follow-up" "Reverify current facts" "Decision / review needed" "Waiting on organizer" "Scheduled / monitoring"; do if grep -q "$marker" /tmp/dom.html 2>/dev/null; then echo "PRESENT: $marker" >&2; else echo "MISSING: $marker" >&2; fi; done; echo "--- rendered context ---" >&2; grep -nE "Next Steps|Team action|Research follow-up|Reverify current facts|Decision / review needed|Waiting on organizer|Scheduled / monitoring" /tmp/dom.html 2>/dev/null | head -80 >&2 || true; exit $rc' ERR
+          trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- expected manager-lane markers present in rendered DOM ---" >&2; for marker in "Next Steps" "Team action" "Research follow-up" "Manager move" "Availability" "Value signal" "Reverify current terms before commitment." "Decision / review needed" "Waiting on organizer" "Scheduled / monitoring"; do if grep -q "$marker" /tmp/dom.html 2>/dev/null; then echo "PRESENT: $marker" >&2; else echo "MISSING: $marker" >&2; fi; done; echo "--- rendered context ---" >&2; grep -nE "Next Steps|Team action|Research follow-up|Manager move|Availability|Value signal|Reverify current terms before commitment|Decision / review needed|Waiting on organizer|Scheduled / monitoring" /tmp/dom.html 2>/dev/null | head -80 >&2 || true; exit $rc' ERR
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
           profile="$(mktemp -d)"
@@ -2801,6 +2801,10 @@ jobs:
           grep -q 'Next Steps' /tmp/dom.html
           grep -q 'Team action' /tmp/dom.html
           grep -q 'Research follow-up' /tmp/dom.html
+          grep -q 'Manager move' /tmp/dom.html
+          grep -q 'Availability' /tmp/dom.html
+          grep -q 'Value signal' /tmp/dom.html
+          grep -q 'Value signal is a prioritization proxy, not a revenue forecast.' /tmp/dom.html
           grep -q 'data-calendar-research=' /tmp/dom.html
           grep -q 'Reverify current terms before commitment.' /tmp/dom.html
           grep -q 'Decision / review needed' /tmp/dom.html
