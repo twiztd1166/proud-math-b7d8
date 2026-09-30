@@ -154,15 +154,20 @@ function researchAvailability(row){
   const status=String(row?.detail_data?.booking_status||row?.research_status||'').trim();
   const normalized=status.toUpperCase();
   const verification=String(row?.research_status||'').toUpperCase();
+  const segments=normalized.split(/[·;]+/).map(part=>part.trim()).filter(Boolean);
   if(verification.includes('NOT_REVERIFIED'))return {code:'REVERIFY',label:'REVERIFY FIRST',rank:5};
-  if(/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
-  if(/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized)){
-    if(/SPONSOR|PARTNER|INQUIRY|ALTERNATE/.test(normalized)&&/CURRENT|ACTIVE|OPEN|AVAILABLE/.test(normalized))return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
+  const late=/LATE[- ]INVENTORY|LATE INQUIRY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(normalized);
+  if(late)return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
+  const closedSegments=segments.filter(part=>/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(part));
+  const routeClosed=closedSegments.some(part=>/APPLICATION|REGISTRATION|VENDOR|MERCHANT|BOOTH|SPACES?|ROUTE|INVENTORY/.test(part));
+  if(routeClosed){
+    const alternateOpen=segments.some(part=>/SPONSOR|PARTNER|BUSINESS|ALTERNATE/.test(part)&&/CURRENT|ACTIVE|OPEN|AVAILABLE|LIVE/.test(part));
+    if(alternateOpen)return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
     return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   }
   if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
   if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
-  if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
+  if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION|LIVE/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
 function researchStructuredAction(row){
