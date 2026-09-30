@@ -49,6 +49,7 @@ jobs:
           assert 'specialevents@cityofpsl.com' in contacts.get('Port St. Lucie Oktoberfest',''), contacts.get('Port St. Lucie Oktoberfest')
           assert 'sponsorships@cancommunityhealth.org' in contacts.get('World AIDS Day Concert',''), contacts.get('World AIDS Day Concert')
           assert 'jbrito@wellingtonfl.gov' in contacts.get('Wellington Holiday Parade',''), contacts.get('Wellington Holiday Parade')
+          assert 'vendorfair@gpbsc.net' in contacts.get('Greater Palm Bay Senior Activity Center Vendor Fair',''), contacts.get('Greater Palm Bay Senior Activity Center Vendor Fair')
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
           wanted={
