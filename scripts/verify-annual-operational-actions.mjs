@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('public/app-shows.js','utf8');
+if(!source.includes('Planning detail'))throw new Error('Annual card is missing preserved planning-detail disclosure');
+if(!source.includes("const legacyPlanningDetail=String(row.legacy_next_action||'').trim()"))throw new Error('Annual card does not read preserved legacy_next_action');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
 if(start<0||end<0)throw new Error('Annual operational helper block not found');
