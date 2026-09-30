@@ -135,7 +135,7 @@ Deno.serve(async (r: Request) => {
     }
 
     const planParams = new URLSearchParams({
-      select: 'plan_id,plan_year,profile_id,canonical_event,occurrence_label,coverage_class,plan_decision,priority,publication_status,date_confidence,event_start,event_end,expected_month,expected_window_text,action_start,action_due,action_window_text,cost_status,budget_min,budget_max,budget_basis,placement_reference,historical_signal,next_action,legacy_next_action,operational_action_code,operational_guard,operational_contact_email,operational_contact_phone,operational_action_source,operational_cleanup_version,operational_cleanup_at,source_basis,source_refs,mfc_ids,schedule_type,conflict_notes,geographic_region,planning_category,estimated_start,estimated_end,estimate_confidence,estimate_basis',
+      select: 'plan_id,plan_year,profile_id,canonical_event,occurrence_label,coverage_class,plan_decision,priority,publication_status,date_confidence,event_start,event_end,expected_month,expected_window_text,action_start,action_due,action_window_text,cost_status,budget_min,budget_max,budget_basis,placement_reference,historical_signal,next_action,legacy_next_action,operational_action_code,operational_guard,operational_contact_email,operational_contact_phone,operational_contact_cc,operational_action_source,operational_cleanup_version,operational_cleanup_at,source_basis,source_refs,mfc_ids,schedule_type,conflict_notes,geographic_region,planning_category,estimated_start,estimated_end,estimate_confidence,estimate_basis',
       run_id: `eq.${run.id}`,
       limit: '1000',
     });
