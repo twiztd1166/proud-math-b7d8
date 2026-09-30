@@ -293,7 +293,7 @@ Deno.serve(async r => {
       db.from('shows_app_checkpoint_health_current').select('created_at,reason,shows_count,payments_count,checkpoint_show_rows,checkpoint_payment_rows,row_counts_valid,hashes_valid,coverage_current,current_shows,current_payments,checkpoint_count,restore_count,integrity_status').limit(1),
       db.from('shows_app_rebook_opportunities').select('opportunity_id,profile_id,event_label,event_start,event_end,opportunity_status,price_text,venue_text,booking_cost_min,booking_cost_max,booking_cost_unit,current_cost_status,critical_deadline_date,critical_deadline_label,action_label,action_url,contact_name,contact_email,contact_phone').eq('active',true).eq('identity_status','VERIFIED'),
       db.from('shows_app_rebook_reviews').select('profile_id,disposition,booking_readiness,resolution_lane,action_timing,blockers_text,next_step').eq('active',true).eq('identity_status','VERIFIED'),
-      db.from('shows_app_research_calendar_controls').select('control_id,plan_year,series_key,event_label,city,event_start,event_end,estimated_sort_date,date_text,date_confidence,disposition,priority,route_type,lineage_type,profile_id,mfc_id,price_text,deadline_date,deadline_text,research_status,notes,audit_checked_at').eq('active',true).eq('calendar_visibility',true).eq('plan_year',2026).order('event_start',{ascending:true,nullsFirst:false}).order('event_label',{ascending:true}),
+      db.from('shows_app_research_calendar_controls').select('control_id,plan_year,series_key,event_label,city,event_start,event_end,estimated_sort_date,date_text,date_confidence,disposition,priority,route_type,lineage_type,profile_id,mfc_id,price_text,deadline_date,deadline_text,research_status,source_basis,source_refs,notes,audit_checked_at,details').eq('active',true).eq('calendar_visibility',true).eq('plan_year',2026).order('event_start',{ascending:true,nullsFirst:false}).order('event_label',{ascending:true}),
     ]);
     if(a.error||b.error||c.error||d.error||e.error||f.error||g.error||h.error||i.error||j.error||k.error||l.error){
       const failed_sources=[
@@ -321,7 +321,7 @@ Deno.serve(async r => {
       .filter((row:any)=>String(rebookReviewByProfile.get(row.profile_id)?.resolution_lane||'').toUpperCase()==='PARADISE_ACTION')
       .map((row:any)=>({...row,review:rebookReviewByProfile.get(row.profile_id)}))
       .sort((x:any,y:any)=>String(x.critical_deadline_date||x.event_start||'9999-12-31').localeCompare(String(y.critical_deadline_date||y.event_start||'9999-12-31'))||String(x.event_label||'').localeCompare(String(y.event_label||'')));
-    return out(r,{ok:true,version:20,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
+    return out(r,{ok:true,version:21,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
   }
 
   if(action==='annualPlan'){
@@ -927,6 +927,40 @@ Deno.serve(async r => {
       paymentChanges=history.data||[];
     }
     return out(r,{ok:true,version:17,show:show.data,history:{changes:audit.data||[],reconciliation:reconciliation.data||null,baseline:baseline.data||null,sourceCaptures:snapshots.data||[],conflicts:conflicts.data||[],relatedPayments:payments.data||[],paymentChanges}});
+  }
+
+  if(action==='listResearchNotes'){
+    const controlId=String(body.controlId||'').trim();
+    if(!/^R2026-[A-Z0-9-]{3,100}$/.test(controlId))return out(r,{ok:false,error:'Valid research control ID required'},400);
+    const notes=await db.from('shows_app_research_notes')
+      .select('id,control_id,note,created_at')
+      .eq('control_id',controlId)
+      .order('created_at',{ascending:false})
+      .order('id',{ascending:false})
+      .limit(250);
+    if(notes.error)return out(r,{ok:false,error:'Unable to load research notes'},500);
+    return out(r,{ok:true,notes:notes.data||[]});
+  }
+
+  if(action==='addResearchNote'){
+    const controlId=String(body.controlId||'').trim();
+    const note=String(body.note||'').trim();
+    if(!/^R2026-[A-Z0-9-]{3,100}$/.test(controlId))return out(r,{ok:false,error:'Valid research control ID required'},400);
+    if(!note)return out(r,{ok:false,error:'Enter a note'},400);
+    if(note.length>4000)return out(r,{ok:false,error:'Note must be 4,000 characters or less'},400);
+    const control=await db.from('shows_app_research_calendar_controls')
+      .select('control_id')
+      .eq('control_id',controlId)
+      .eq('active',true)
+      .maybeSingle();
+    if(control.error)return out(r,{ok:false,error:'Unable to verify research show'},500);
+    if(!control.data)return out(r,{ok:false,error:'Research show not found'},404);
+    const created=await db.from('shows_app_research_notes')
+      .insert({control_id:controlId,note})
+      .select('id,control_id,note,created_at')
+      .single();
+    if(created.error)return out(r,{ok:false,error:'Unable to save note'},500);
+    return out(r,{ok:true,note:created.data});
   }
 
   if(action==='listProfileNotes'){
