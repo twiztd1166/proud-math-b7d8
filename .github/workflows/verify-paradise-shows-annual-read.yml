@@ -288,6 +288,8 @@ jobs:
           grep -q 'function annualPlanEmailDraft' ios/App/App/public/app-shows.js
           grep -q 'function annualPlanCallScript' ios/App/App/public/app-shows.js
           grep -q 'function annualPlanOperationalLabel' ios/App/App/public/app-shows.js
+          grep -q 'Planning detail' ios/App/App/public/app-shows.js
+          grep -q 'legacy_next_action' ios/App/App/public/app-shows.js
           grep -q 'data-annual-call-script' ios/App/App/public/app-shows.js
           grep -q 'openAnnualPlanCallScript' ios/App/App/public/app-modals.js
           grep -q 'data-annual-call-script' ios/App/App/public/app-bind.js
