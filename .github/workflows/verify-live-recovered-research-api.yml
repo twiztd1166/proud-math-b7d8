@@ -43,9 +43,9 @@ jobs:
               if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
               and not (not r.get('event_start') and r.get('estimated_sort_date'))
           ]
-          assert len(research) == 117, len(research)
-          assert len(q4) == 117, len(q4)
-          assert len(exact) == 115, len(exact)
+          assert len(research) == 115, len(research)
+          assert len(q4) == 115, len(q4)
+          assert len(exact) == 113, len(exact)
           assert len(estimated) == 2, len(estimated)
           assert len(unsortable) == 0, unsortable
           assert not semantic_bad, semantic_bad
@@ -96,19 +96,70 @@ jobs:
           assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
           by_control={r.get('control_id'):r for r in research}
           expected_deadlines={
-            'R2026-012-PALM-BAY-FARMERS-OCT':'2026-10-10',
-            'R2026-013-PUMPKINS-PALMS':'2026-10-10',
+            'R2026-013-PUMPKINS-PALMS':'2026-10-01',
             'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
             'R2026-061-GRACE-JERK':'2026-10-09',
+            'R2026-063-SENIOR-HARDROCK':'2026-10-30',
+            'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
             'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
             'R2026-100-WESTON-RUN':'2026-11-15',
             'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
-            'R2026-113-PALM-BAY-FARMERS-DEC':'2026-12-03',
           }
           for cid,deadline in expected_deadlines.items():
               assert by_control[cid].get('deadline_date') == deadline, (cid,by_control[cid])
-          palm_oct=by_control['R2026-012-PALM-BAY-FARMERS-OCT']
-          assert 'Oct. 10, 2026' in str((palm_oct.get('detail_data') or {}).get('deadline_text') or ''), palm_oct
+          assert 'R2026-012-PALM-BAY-FARMERS-OCT' not in by_control, 'superseded Oct Palm Bay alias still visible'
+          assert 'R2026-113-PALM-BAY-FARMERS-DEC' not in by_control, 'superseded Dec Palm Bay alias still visible'
+          pumpkins=by_control['R2026-013-PUMPKINS-PALMS']
+          assert pumpkins.get('event_label') == 'Palm Bay Farmers Market - Pumpkins & Palms', pumpkins
+          assert pumpkins.get('series_key') == 'PALM-BAY-FARMERS-MARKET', pumpkins
+          deadline_text=str((pumpkins.get('detail_data') or {}).get('deadline_text') or '')
+          assert 'Oct. 1, 2026' in deadline_text and 'Oct. 10, 2026' in deadline_text, pumpkins
+          homegrown=by_control['R2026-073-PALM-BAY-FARMERS-NOV']
+          assert homegrown.get('event_label') == 'Palm Bay Farmers Market - Homegrown Harvest', homegrown
+          assert homegrown.get('series_key') == 'PALM-BAY-FARMERS-MARKET', homegrown
+          holiday=by_control['R2026-107-PALM-BAY-HOLIDAY-MARKET']
+          assert holiday.get('series_key') == 'PALM-BAY-FARMERS-MARKET', holiday
+          senior=by_control['R2026-063-SENIOR-HARDROCK']
+          senior_detail=senior.get('detail_data') or {}
+          assert senior.get('deadline_date') == '2026-10-30', senior
+          assert senior.get('city') == 'Davie', senior
+          assert senior.get('date_confidence') == 'CURRENT_VERIFIED', senior
+          assert senior.get('research_status') == 'CURRENT_REVERIFIED', senior
+          assert senior_detail.get('official_source_url') == 'https://seniorexpousa.com/expos/florida/fort-lauderdale-hollywood-fall-senior-expo-2026/', senior
+          assert 'Evan@SeniorExpoUSA.com' in str(senior_detail.get('contact_text') or ''), senior
+          assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
+          assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
+          assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
+          assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
+          missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
+          assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
+          carifest=by_control['R2026-054-CARIFEST']
+          carifest_detail=carifest.get('detail_data') or {}
+          assert carifest.get('research_status') == 'CURRENT_REVERIFIED', carifest
+          assert carifest.get('date_confidence') == 'CURRENT_VERIFIED', carifest
+          assert carifest_detail.get('official_source_url') == 'https://www.midfloridaeventcenter.com/Events/Caribbean-Food-Music-Festival', carifest
+          assert carifest_detail.get('schedule_status') == 'CURRENT VERIFIED', carifest
+          assert carifest_detail.get('venue_status') == 'CURRENT OFFICIAL', carifest
+          assert 'APPLICATION LIVE' not in str(carifest_detail.get('booking_status') or '').upper(), carifest
+          melbourne=by_control['R2026-098-MELBOURNE-HOLIDAY-ART']
+          melbourne_detail=melbourne.get('detail_data') or {}
+          assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
+          assert not str(melbourne_detail.get('official_source_url') or '').strip(), melbourne
+          assert str(melbourne_detail.get('schedule_status') or '').startswith('CURRENT SECONDARY VERIFIED'), melbourne
+          assert 'FIRST-PARTY COMMERCIAL APPLICATION TO CONFIRM' in str(melbourne_detail.get('booking_status') or ''), melbourne
+          assert melbourne_detail.get('current_source_checked_at') == '2026-09-30', melbourne
+          source_pairs={}
+          duplicate_pairs=[]
+          for row in research:
+              official=str((row.get('detail_data') or {}).get('official_source_url') or '').strip()
+              if not official:
+                  continue
+              key=(official,str(row.get('event_start') or ''))
+              if key in source_pairs:
+                  duplicate_pairs.append((key,source_pairs[key],row.get('control_id')))
+              else:
+                  source_pairs[key]=row.get('control_id')
+          assert not duplicate_pairs, duplicate_pairs
           wpb=by_control['R2026-092-WPB-BEER-WINE']
           assert wpb.get('deadline_date') is None, wpb
           assert (wpb.get('detail_data') or {}).get('deadline_text') == 'Not verified', wpb
