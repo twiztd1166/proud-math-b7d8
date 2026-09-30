@@ -141,6 +141,13 @@ jobs:
           assert carifest_detail.get('schedule_status') == 'CURRENT VERIFIED', carifest
           assert carifest_detail.get('venue_status') == 'CURRENT OFFICIAL', carifest
           assert 'APPLICATION LIVE' not in str(carifest_detail.get('booking_status') or '').upper(), carifest
+          melbourne=by_control['R2026-098-MELBOURNE-HOLIDAY-ART']
+          melbourne_detail=melbourne.get('detail_data') or {}
+          assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
+          assert not str(melbourne_detail.get('official_source_url') or '').strip(), melbourne
+          assert str(melbourne_detail.get('schedule_status') or '').startswith('CURRENT SECONDARY VERIFIED'), melbourne
+          assert 'FIRST-PARTY COMMERCIAL APPLICATION TO CONFIRM' in str(melbourne_detail.get('booking_status') or ''), melbourne
+          assert melbourne_detail.get('current_source_checked_at') == '2026-09-30', melbourne
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
