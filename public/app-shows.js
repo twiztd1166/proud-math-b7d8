@@ -181,8 +181,12 @@ function researchNextStepSection(){
   const horizon=horizonDate.toISOString().slice(0,10);
   const nearTerm=rows.filter(row=>researchNextActionDate(row)<=horizon);
   const visible=(nearTerm.length?nearTerm:rows).slice(0,8);
-  const remaining=Math.max(0,rows.length-visible.length);
-  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Near-term recovered opportunities first: ${nearTerm.length} need attention within 14 days; ${rows.length} current/future research controls remain. Reverify current terms before commitment.</p></div><span>${nearTerm.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${remaining?`<div class="nextStepMore">+${remaining} more recovered opportunities in Calendar → 2026</div>`:''}</section>`;
+  const remainingNearTerm=Math.max(0,nearTerm.length-visible.length);
+  const later=Math.max(0,rows.length-nearTerm.length);
+  const moreText=remainingNearTerm||later
+    ?`<div class="nextStepMore">${remainingNearTerm?`+${remainingNearTerm} more need attention within 14 days`:''}${remainingNearTerm&&later?' · ':''}${later?`${later} later research follow-ups`:''} · Calendar → 2026</div>`
+    :'';
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Near-term recovered opportunities first: ${nearTerm.length} need attention within 14 days; ${rows.length} current/future research controls remain. Reverify current terms before commitment.</p></div><span>${nearTerm.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
 }
 function renderToday(){
   const pay=paymentAttention();
