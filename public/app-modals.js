@@ -661,7 +661,7 @@ function openResearchCallScript(id){
   if(!callScript){toast('No verified phone-only call route for this show.');return}
   const scriptHtml=esc(callScript.script).replace(/\n/g,'<br>');
   $('#detailBody').innerHTML=`<h2>Call script · ${esc(row.event_label||row.control_id)}</h2>
-    <div class="subtitle">Team-ready phone outreach · verified number ${esc(callScript.phone)}</div>
+    <div class="subtitle">Customized from this show’s verified record · asks only unresolved items · verified number ${esc(callScript.phone)}</div>
     <div class="block primaryActionBlock"><div class="k">Call script</div><div class="val">${scriptHtml}</div></div>
     <div class="sourceWarn historyIntro"><b>Human review required.</b> Use this as a talking guide, record the outcome in Manager Notes, and reconfirm current pricing, availability, deadlines, and commitment terms before booking or payment.</div>
     <div class="actions detailActions">
