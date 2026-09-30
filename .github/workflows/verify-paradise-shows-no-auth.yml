@@ -37,8 +37,23 @@ jobs:
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
-          python3 scripts/verify-app-asset-contract.py --live-entry /tmp/index.html
+          converged=0
+          for attempt in $(seq 1 18); do
+            curl --retry 2 --retry-delay 2 --retry-all-errors -fsS "$SITE/?release=$GITHUB_SHA&attempt=$attempt" -o /tmp/index.html
+            if python3 scripts/verify-app-asset-contract.py --live-entry /tmp/index.html >/tmp/asset-contract.out 2>/tmp/asset-contract.err; then
+              converged=1
+              cat /tmp/asset-contract.out
+              echo "Stable frontend converged on attempt $attempt."
+              break
+            fi
+            echo "Stable frontend has not converged to this repository asset version yet (attempt $attempt/18)."
+            sleep 10
+          done
+          if [ "$converged" -ne 1 ]; then
+            echo "::error::Stable frontend did not converge to the repository asset version within the bounded window."
+            cat /tmp/asset-contract.err >&2 || true
+            exit 1
+          fi
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js?sha=$GITHUB_SHA" -o /tmp/app-core.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-modals.js?sha=$GITHUB_SHA" -o /tmp/app-modals.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-bind.js?sha=$GITHUB_SHA" -o /tmp/app-bind.js
