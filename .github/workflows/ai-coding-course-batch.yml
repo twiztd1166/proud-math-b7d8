@@ -1,0 +1,384 @@
+name: AI Coding Crash Course Batch Transcription
+
+on:
+  push:
+    branches:
+      - work/ai-coding-course-batch-20260930
+    paths:
+      - '.github/workflows/ai-coding-course-batch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  transcribe:
+    name: lessons ${{ matrix.start }}-${{ matrix.end }}
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - start: 1
+            end: 14
+          - start: 15
+            end: 28
+          - start: 29
+            end: 42
+          - start: 43
+            end: 56
+          - start: 57
+            end: 70
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated worker branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/ai-coding-course-batch-20260930
+
+      - name: Install media and transcription stack
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install faster-whisper cryptography requests numpy
+
+      - name: Transcribe and encrypt lesson range
+        shell: bash
+        env:
+          START: ${{ matrix.start }}
+          END: ${{ matrix.end }}
+        run: |
+          set -euo pipefail
+          mkdir -p batch_output
+
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          import shutil
+          import subprocess
+          import time
+          from pathlib import Path
+
+          import numpy as np
+          import requests
+          from cryptography.hazmat.primitives import hashes, serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+          from faster_whisper import WhisperModel
+
+          START = int(os.environ["START"])
+          END = int(os.environ["END"])
+          BVID = "BV1MGbZ6HEYT"
+
+          titles = {
+            1:"001 Where We're Going",
+            2:"002 Choosing Your Plan and Model",
+            3:"003 Setting Up the Project",
+            4:"004 Installing Claude Code",
+            5:"005 How To Run the Exercises",
+            6:"006 Database Migrations",
+            7:"007 Resetting to a Clean Slate",
+            8:"008 Installing The Request Logger",
+            9:"009 Navigating The Discord",
+            10:"010 Models, Harnesses, Agents, Environments",
+            11:"011 Non-Determinism",
+            12:"012 Turns And Model Provider Requests",
+            13:"013 Sessions And The Context",
+            14:"014 Smart Zone _ Dumb Zone",
+            15:"015 Statelessness",
+            16:"016 How Much Did It Cost",
+            17:"017 Hallucination",
+            18:"018 Effort",
+            19:"019 Choosing A Model",
+            20:"020 Subagents",
+            21:"021 Intro",
+            22:"022 Managing Your Claude Code Session",
+            23:"023 Prompting in the Terminal",
+            24:"024 Claude and Your IDE",
+            25:"025 Going Forwards and Backwards in Time",
+            26:"026 Running Bash Commands",
+            27:"027 Permissions",
+            28:"028 Your Starting Context",
+            29:"029 Killing Bloat - problem",
+            30:"030 Killing Bloat - solution",
+            31:"031 Showing Context in the Status Line",
+            32:"032 Codebase Exploration - problem",
+            33:"033 Codebase Exploration - solution",
+            34:"034 The _teach Skill - problem",
+            35:"035 The _teach Skill - solution",
+            36:"036 Build a Feature - problem",
+            37:"037 Build a Feature - solution",
+            38:"038 Why Plan Mode Sucks",
+            39:"039 The Grill-Execute-Clear Loop - problem",
+            40:"040 The Grill-Execute-Clear Loop - solution",
+            41:"041 Compaction",
+            42:"042 Handing Off",
+            43:"043 Clear, Compact, Handoff, Or Subagent",
+            44:"044 Auto-Compaction",
+            45:"045 The Steering Map",
+            46:"046 Steering With A Pointer - problem",
+            47:"047 Steering With A Pointer - solution",
+            48:"048 What Are Agent Skills_",
+            49:"049 Write A Skill - problem",
+            50:"050 Write A Skill - solution",
+            51:"051 User Vs Project Skills",
+            52:"052 Navigation Pointers",
+            53:"053 Pruning",
+            54:"054 Trying Out Pruning - problem",
+            55:"055 Trying Out Pruning - solution",
+            56:"056 Claude Code's Automatic Memory",
+            57:"057 How to Tackle Massive Tasks",
+            58:"058 Set Up Your Issue Tracker",
+            59:"059 Write Great Specs With This Skill - problem",
+            60:"060 Write Great Specs With This Skill - solution",
+            61:"061 Split Features Across Context Windows With Tickets - problem",
+            62:"062 Split Features Across Context Windows With Tickets - solution",
+            63:"063 Executing Your Tickets - problem",
+            64:"064 Executing Your Tickets - solution",
+            65:"065 Should You Keep Your Specs",
+            66:"066 Rerouting_ When The Destination Changes",
+            67:"067 The Goal Command",
+            68:"068 Enforcing Your Coding Standards",
+            69:"069 Ask Matt",
+            70:"070 Where You Go From Here",
+          }
+
+          pub_der_b64 = "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAu3hplYOPKR8FGvBh9rje9cUs4ODMFToXe+P1h199+oNzipNBWGt1tCA8qF3C8ByuGu9jTH1Xjsj/NNiozrmoQk3u79oH8BLPapLcIs3AFJe8uOukGn6NJh7Pd5bLczOnXt+Bo0muhfsKHjD8MdHtXEgdDl3Oo0QTylr4S32N1ZvHe8pxsoGwUGId3t+Iq+OSxMT1b/PwIRTydOqLdDavLKZKS147aisX5p6y8/G6dqNamOL+PJe/5K03f5J50gqFpqOrv4al3wSwwHIXQWSHTVEGfoNNq++Dgc8TXd8rbu9HJbQ5P/51OqYcPwgtO8T355VBYYk5+g3qv2a5MK4e0G3NQriw2LcgIzgDjIUaESHM+svR9EQ1xASZmcYRFqYBY1JjqdNln1ueAMLEbiudnUbnIQom6FAmxVro/CUUOi0ofVZQI3x25zjDTry+Q8nq9Me3zlbj0/l4tbXa6e1KEEnpQnwjVbXh0cLWjES43p4GBp9jYCS2j55yal4GhOIBAgMBAAE="
+          pub = serialization.load_der_public_key(base64.b64decode(pub_der_b64))
+
+          session = requests.Session()
+          session.headers.update({
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36",
+              "Referer": "https://www.bilibili.com/",
+          })
+
+          print(f"Loading Whisper model once for lessons {START}-{END}")
+          model = WhisperModel("base.en", device="cpu", compute_type="int8")
+
+          def parser_url(part):
+              last = None
+              for attempt in range(1, 7):
+                  try:
+                      r = session.get(
+                          "https://api.injahow.cn/bparse/",
+                          params={
+                              "bv": BVID,
+                              "p": part,
+                              "q": 16,
+                              "format": "mp4",
+                              "otype": "json",
+                          },
+                          timeout=60,
+                      )
+                      r.raise_for_status()
+                      data = r.json()
+                      if data.get("code") == 0 and data.get("url"):
+                          return data
+                      last = RuntimeError(f"parser response: {data}")
+                  except Exception as e:
+                      last = e
+                  time.sleep(min(20, 2 * attempt))
+              raise last or RuntimeError("parser failed")
+
+          for part in range(START, END + 1):
+              label = f"{part:03d}"
+              outdir = Path("batch_output") / label
+              outdir.mkdir(parents=True, exist_ok=True)
+              work = Path("work") / label
+              work.mkdir(parents=True, exist_ok=True)
+              media = work / "lesson.mp4"
+
+              meta = {
+                  "lesson": part,
+                  "title": titles[part],
+                  "bvid": BVID,
+                  "source_url": f"https://www.bilibili.com/video/{BVID}/?p={part}",
+                  "media_acquisition": "api.injahow.cn/bparse public parser",
+                  "transcription_model": "faster-whisper base.en int8",
+                  "raw_transcript_persisted_publicly": False,
+                  "status": "started",
+              }
+
+              try:
+                  print(f"[{label}] acquire")
+                  parsed = parser_url(part)
+                  meta["parser_quality"] = parsed.get("quality")
+                  meta["parser_times"] = parsed.get("times")
+
+                  with session.get(parsed["url"], stream=True, timeout=120) as r:
+                      r.raise_for_status()
+                      with media.open("wb") as fh:
+                          for chunk in r.iter_content(chunk_size=1024 * 1024):
+                              if chunk:
+                                  fh.write(chunk)
+
+                  probe = json.loads(subprocess.check_output([
+                      "ffprobe", "-v", "error",
+                      "-show_entries", "format=duration,size",
+                      "-of", "json", str(media),
+                  ], text=True))
+                  duration = float(probe["format"]["duration"])
+                  meta["media_duration_seconds"] = round(duration, 3)
+                  meta["media_size_bytes"] = int(probe["format"]["size"])
+
+                  pcm = subprocess.check_output([
+                      "ffmpeg", "-v", "error", "-i", str(media),
+                      "-f", "s16le", "-ac", "1", "-ar", "16000", "pipe:1"
+                  ])
+                  audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768.0
+                  del pcm
+
+                  print(f"[{label}] transcribe duration={duration:.1f}s")
+                  segments, info = model.transcribe(
+                      audio,
+                      beam_size=5,
+                      vad_filter=True,
+                      condition_on_previous_text=True,
+                  )
+                  rows = []
+                  lines = []
+                  for seg in segments:
+                      txt = seg.text.strip()
+                      if not txt:
+                          continue
+                      rows.append({
+                          "start": round(seg.start, 3),
+                          "end": round(seg.end, 3),
+                          "text": txt,
+                      })
+                      lines.append(f"[{seg.start:07.2f}-{seg.end:07.2f}] {txt}")
+
+                  transcript_text = "\n".join(lines) + "\n"
+                  transcript = transcript_text.encode("utf-8")
+                  if len(transcript) < 80:
+                      raise RuntimeError("transcript unexpectedly short")
+
+                  aad = f"AI_Coding_Crash_Course_{label}".encode()
+                  aes_key = os.urandom(32)
+                  nonce = os.urandom(12)
+                  ciphertext = AESGCM(aes_key).encrypt(nonce, transcript, aad)
+                  enc_key = pub.encrypt(
+                      aes_key,
+                      padding.OAEP(
+                          mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                          algorithm=hashes.SHA256(),
+                          label=None,
+                      ),
+                  )
+                  envelope = {
+                      "version": 1,
+                      "cipher": "AES-256-GCM",
+                      "key_wrap": "RSA-OAEP-SHA256",
+                      "aad": base64.b64encode(aad).decode(),
+                      "encrypted_key": base64.b64encode(enc_key).decode(),
+                      "nonce": base64.b64encode(nonce).decode(),
+                      "ciphertext": base64.b64encode(ciphertext).decode(),
+                  }
+                  (outdir / "transcript.encrypted.json").write_text(
+                      json.dumps(envelope, indent=2) + "\n"
+                  )
+
+                  transcript_end = rows[-1]["end"] if rows else 0
+                  coverage = transcript_end / duration if duration else 0
+                  meta.update({
+                      "status": "complete",
+                      "language": info.language,
+                      "language_probability": info.language_probability,
+                      "transcript_segments": len(rows),
+                      "transcript_chars": len(transcript_text),
+                      "transcript_start": rows[0]["start"] if rows else None,
+                      "transcript_end": transcript_end,
+                      "coverage_ratio": round(coverage, 4),
+                      "coverage_status": "pass" if coverage >= 0.90 else "review",
+                  })
+                  print(f"[{label}] complete chars={len(transcript_text)} coverage={coverage:.3f}")
+
+              except Exception as e:
+                  meta.update({
+                      "status": "error",
+                      "error_type": type(e).__name__,
+                      "error": str(e)[:1200],
+                  })
+                  print(f"[{label}] ERROR {type(e).__name__}: {e}")
+
+              finally:
+                  (outdir / "metadata.json").write_text(
+                      json.dumps(meta, indent=2, ensure_ascii=False) + "\n"
+                  )
+                  shutil.rmtree(work, ignore_errors=True)
+                  time.sleep(1)
+
+          PY
+
+      - name: Upload encrypted range
+        uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-lessons-${{ matrix.start }}-${{ matrix.end }}
+          path: batch_output/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 6
+
+  collect:
+    name: collect encrypted course
+    needs: transcribe
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated worker branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/ai-coding-course-batch-20260930
+
+      - name: Download all encrypted ranges
+        uses: actions/download-artifact@v4
+        with:
+          pattern: encrypted-lessons-*
+          path: course_secure
+          merge-multiple: true
+
+      - name: Build manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows=[]
+          for p in sorted(Path("course_secure").glob("*/metadata.json")):
+              try:
+                  rows.append(json.loads(p.read_text()))
+              except Exception as e:
+                  rows.append({"path":str(p),"status":"manifest_parse_error","error":repr(e)})
+          manifest={
+              "course":"AI Coding Crash Course: Build Production-Grade Software with AI",
+              "bvid":"BV1MGbZ6HEYT",
+              "lesson_count_expected":70,
+              "lesson_count_found":len(rows),
+              "complete":sum(r.get("status")=="complete" for r in rows),
+              "errors":sum(r.get("status")=="error" for r in rows),
+              "coverage_review":sum(r.get("coverage_status")=="review" for r in rows),
+              "raw_transcripts_publicly_persisted":False,
+              "lessons":rows,
+          }
+          Path("course_secure/manifest.json").write_text(
+              json.dumps(manifest,indent=2,ensure_ascii=False)+"\n"
+          )
+          print(json.dumps({
+              "found":manifest["lesson_count_found"],
+              "complete":manifest["complete"],
+              "errors":manifest["errors"],
+              "coverage_review":manifest["coverage_review"],
+          },indent=2))
+          PY
+
+      - name: Commit encrypted course and manifest
+        run: |
+          git config user.name "chatgpt-course-worker"
+          git config user.email "actions@users.noreply.github.com"
+          git add course_secure
+          git commit -m "data: add encrypted AI Coding Crash Course transcript batch" || exit 0
+          git push origin HEAD:work/ai-coding-course-batch-20260930
