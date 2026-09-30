@@ -100,6 +100,13 @@ const snowRow={
 const snowAvailability=sandbox.api.researchAvailability(snowRow);
 if(snowAvailability.code!=='ALTERNATE')throw new Error(`Filled nonprofit vendor lane with active business sponsorship did not stay alternate-only: ${JSON.stringify(snowAvailability)}`);
 
+const confirmOnlyRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT EXHIBITOR PRODUCT LISTED · AVAILABILITY / CATEGORY TO CONFIRM'},
+};
+const confirmOnlyAvailability=sandbox.api.researchAvailability(confirmOnlyRow);
+if(confirmOnlyAvailability.code!=='CONFIRM')throw new Error(`Unknown availability was mislabeled as limited/open: ${JSON.stringify(confirmOnlyAvailability)}`);
+
 const guardText='Reverify current terms before commitment.';
 if(!guardText)throw new Error('Guard fixture invalid');
 
@@ -111,4 +118,5 @@ console.log({
   active_with_one_tier_sold_out:reviewAvailability.label,
   partnership_open_with_hospitality_sold_out:nascarAvailability.label,
   closed_lane_with_active_alternate:hollywoodAvailability.label,
+  availability_to_confirm:confirmOnlyAvailability.label,
 });
