@@ -1,0 +1,72 @@
+name: Verify full 2026 Q4 research calendar
+
+on:
+  push:
+    branches:
+      - agent/restore-full-2026-q4-research-calendar-20260930
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend JavaScript syntax
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+
+      - name: Verify cache-busted research calendar assets
+        run: |
+          grep -q '20260930-q4-v2' src/pages/index.astro
+          grep -q '20260930-q4-v2' public/index-standalone.html
+          grep -q 'paradise-shows-public-v12' public/sw.js
+          grep -q 'researchCalendar2026' public/app-core.js
+          grep -q 'calendar2026ResearchItem' public/app-calendar.js
+          grep -q 'calendarTouchesMonth' public/app-calendar.js
+
+      - name: Verify live no-auth API returns reconciled research overlay
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api' \
+            --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 19, x.get('version')
+          rows=x.get('researchCalendar2026') or []
+          assert len(rows) == 93, len(rows)
+          labels={r.get('event_label') for r in rows}
+          required={
+            'Space Coast State Fair — Viera',
+            'Sun Sentinel PRIME Expo — Boca Raton',
+            'Stuart Air Show',
+            'Christmas on Las Olas',
+            'Miami-Broward One Carnival — Parade & Concert',
+            'Turkey Bash — Pembroke Pines',
+            'Tradition Neighborhood Market — Port St. Lucie',
+            'Senior Lifestyle & Healthcare Expo — West Boynton',
+            'Wellington Holiday Boat Parade',
+          }
+          missing=sorted(required-labels)
+          assert not missing, missing
+          assert any(r.get('date_confidence')=='RECURRING' for r in rows)
+          assert any(r.get('disposition')=='WAITLIST' for r in rows)
+          print('Research calendar rows:',len(rows))
+          PY
+
+      - name: Verify protected canonical tables remain separate
+        run: |
+          grep -q 'shows_app_2026_research_calendar' supabase/functions/shows-api/index.ts
+          grep -q 'Separate from canonical profile/history and rebook workflow tables' supabase/migrations/202609300001_restore_2026_q4_research_calendar.sql
