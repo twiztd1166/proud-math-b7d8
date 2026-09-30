@@ -785,6 +785,8 @@ jobs:
           assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
           assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
           assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
+          missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
+          assert missing_official == {'R2026-054-CARIFEST','R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
