@@ -8,7 +8,7 @@ on:
       - '.github/workflows/r104-ai-coding-real-engineers.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   transcribe:
@@ -24,6 +24,15 @@ jobs:
     steps:
       - name: Checkout isolated branch
         uses: actions/checkout@v4
+
+      - name: Install missing runner prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq ffmpeg
+          fi
 
       - name: Verify runner prerequisites
         shell: bash
@@ -57,9 +66,14 @@ jobs:
         run: |
           set -euo pipefail
           CLI="$(cat runtime/CLI_PATH.txt)"
-          python3 r104-ai-coding-real-engineers/r104_transcribe.py             --manifest r104-ai-coding-real-engineers/MANIFEST.json             --cli "$CLI"             --model model/tdt_ctc-110m-q8_0.gguf             --out-root work             --pages "${R104_PAGES}"
+          python3 r104-ai-coding-real-engineers/r104_transcribe.py \
+            --manifest r104-ai-coding-real-engineers/MANIFEST.json \
+            --cli "$CLI" \
+            --model model/tdt_ctc-110m-q8_0.gguf \
+            --out-root work \
+            --pages "${R104_PAGES}"
 
-      - name: Encrypt all durable transcript output before artifact persistence
+      - name: Encrypt all durable transcript output before persistence
         shell: bash
         run: |
           set -euo pipefail
@@ -68,25 +82,23 @@ jobs:
           tar -C work -czf plaintext-transcripts.tar.gz plaintext
           sha256sum plaintext-transcripts.tar.gz | awk '{print $1}' > artifact/PLAINTEXT_ARCHIVE_SHA256.txt
           openssl rand -hex 32 > envelope_key.txt
-          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -md sha256             -in plaintext-transcripts.tar.gz             -out artifact/transcripts.tar.gz.enc             -pass file:envelope_key.txt
-          openssl pkeyutl -encrypt -pubin             -inkey r104-ai-coding-real-engineers/envelope_public_key.pem             -in envelope_key.txt             -out artifact/envelope_key.rsa_oaep_sha256.enc             -pkeyopt rsa_padding_mode:oaep             -pkeyopt rsa_oaep_md:sha256
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -md sha256 \
+            -in plaintext-transcripts.tar.gz \
+            -out artifact/transcripts.tar.gz.enc \
+            -pass file:envelope_key.txt
+          openssl pkeyutl -encrypt -pubin \
+            -inkey r104-ai-coding-real-engineers/envelope_public_key.pem \
+            -in envelope_key.txt \
+            -out artifact/envelope_key.rsa_oaep_sha256.enc \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256
           KEYHEX="$(tr -d '\n\r' < envelope_key.txt)"
-          openssl dgst -sha256 -mac HMAC -macopt hexkey:"$KEYHEX"             artifact/transcripts.tar.gz.enc | awk '{print $2}' > artifact/transcripts.tar.gz.enc.hmac_sha256
+          openssl dgst -sha256 -mac HMAC -macopt hexkey:"$KEYHEX" \
+            artifact/transcripts.tar.gz.enc | awk '{print $2}' > artifact/transcripts.tar.gz.enc.hmac_sha256
           sha256sum artifact/transcripts.tar.gz.enc artifact/envelope_key.rsa_oaep_sha256.enc artifact/PUBLIC_METADATA.json > artifact/FILES.sha256
           rm -rf work/plaintext work/scratch plaintext-transcripts.tar.gz envelope_key.txt
           test ! -e envelope_key.txt
           test ! -d work/plaintext
-
-      - name: Upload encrypted short-lived artifact only
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: r104-ai-coding-real-engineers-encrypted
-          path: artifact/
-          if-no-files-found: error
-          include-hidden-files: false
-          overwrite: false
-          compression-level: 0
-          retention-days: 1
 
       - name: Qualification gate
         shell: bash
@@ -100,3 +112,20 @@ jobs:
           assert d["validation"] == "PASS", d
           print("PASS_R104_P1_QUALIFICATION")
           PY
+
+      - name: Persist encrypted qualification bundle without Actions artifact storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r104-p001
+          cp -a artifact/. /tmp/r104-p001/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan r104-output-p001
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p encrypted
+          cp -a /tmp/r104-p001/. encrypted/
+          printf '%s\n'             'R104 encrypted P1 qualification output.'             'No plaintext transcript is stored on this branch.'             'Decrypt only with the private key preserved in the private Drive project folder.' > README.md
+          git add README.md encrypted
+          git commit -m "R104: persist encrypted P1 qualification"
+          git push --force origin HEAD:refs/heads/r104-output-p001
