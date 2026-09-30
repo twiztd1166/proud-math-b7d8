@@ -705,9 +705,9 @@ jobs:
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           research=x.get('researchCalendarControls') or []
-          assert len(research) == 115, len(research)
+          assert len(research) == 117, len(research)
           visible_q4=[r for r in research if str(r.get('event_start') or '') >= '2026-10-01' and str(r.get('event_start') or '') < '2027-01-01']
-          assert len(visible_q4) == 114, len(visible_q4)
+          assert len(visible_q4) == 116, len(visible_q4)
           controls={r.get('control_id'):r for r in research}
           for cid in (
               'R2026-016-MIAMI-CARNIVAL',
@@ -715,11 +715,15 @@ jobs:
               'R2026-066-STUART-AIR-SHOW',
               'R2026-084-CHRISTMAS-LAS-OLAS',
               'R2026-111-WINTERFEST-BOAT',
+              'R2026-116-NASA-MAX-POWER',
+              'R2026-117-TRADITION-NEIGHBORHOOD',
           ):
               assert cid in controls, cid
           assert controls['R2026-039-SPACE-COAST-STATE-FAIR'].get('event_start') == '2026-10-29', controls['R2026-039-SPACE-COAST-STATE-FAIR']
           assert controls['R2026-039-SPACE-COAST-STATE-FAIR'].get('event_end') == '2026-11-15', controls['R2026-039-SPACE-COAST-STATE-FAIR']
           assert controls['R2026-084-CHRISTMAS-LAS-OLAS'].get('disposition') == 'PURSUE', controls['R2026-084-CHRISTMAS-LAS-OLAS']
+          assert controls['R2026-116-NASA-MAX-POWER'].get('priority') == 'HIGH', controls['R2026-116-NASA-MAX-POWER']
+          assert controls['R2026-117-TRADITION-NEIGHBORHOOD'].get('profile_id') == 'HIST-230', controls['R2026-117-TRADITION-NEIGHBORHOOD']
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
           acs=current['MFC-063']
           assert acs.get('show_status') == 'RECONCILE', acs
