@@ -32,6 +32,16 @@ const out = (r: Request, x: any, s = 200, extra: Record<string,string> = {}) => 
 });
 
 function plainObject(v: any) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+function normalizedJsonObject(v:any){
+  if(plainObject(v))return v;
+  if(typeof v==='string'){try{const parsed=JSON.parse(v);return plainObject(parsed)?parsed:{}}catch{}}
+  return {};
+}
+function normalizedJsonArray(v:any){
+  if(Array.isArray(v))return v;
+  if(typeof v==='string'){try{const parsed=JSON.parse(v);return Array.isArray(parsed)?parsed:[]}catch{}}
+  return [];
+}
 function same(a: any, b: any) { return String(a ?? '') === String(b ?? ''); }
 const sourcePlaceholders = new Set(['n/a','na','n.a.','none','unknown','tbd','tba','—','-','not available','not applicable']);
 function meaningfulSourceValue(v: any) {
@@ -316,7 +326,11 @@ Deno.serve(async r => {
       return acc;
     },{});
     const calendarOpportunities=(j.data||[]).map((row:any)=>({...row,review:rebookReviewByProfile.get(row.profile_id)||null}));
-    const researchCalendarControls=l.data||[];
+    const researchCalendarControls=(l.data||[]).map((row:any)=>({
+      ...row,
+      details:normalizedJsonObject(row.details),
+      source_refs:normalizedJsonArray(row.source_refs),
+    }));
     const liveBookingActions=(j.data||[])
       .filter((row:any)=>String(rebookReviewByProfile.get(row.profile_id)?.resolution_lane||'').toUpperCase()==='PARADISE_ACTION')
       .map((row:any)=>({...row,review:rebookReviewByProfile.get(row.profile_id)}))
