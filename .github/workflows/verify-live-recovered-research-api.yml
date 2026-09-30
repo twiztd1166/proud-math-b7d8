@@ -94,6 +94,23 @@ jobs:
           assert hallandale.get('event_start') is None, hallandale
           assert hallandale.get('estimated_sort_date') == '2026-12-04', hallandale
           assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
+          by_control={r.get('control_id'):r for r in research}
+          expected_deadlines={
+            'R2026-012-PALM-BAY-FARMERS-OCT':'2026-10-10',
+            'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
+            'R2026-061-GRACE-JERK':'2026-10-09',
+            'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
+            'R2026-100-WESTON-RUN':'2026-11-15',
+            'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
+            'R2026-113-PALM-BAY-FARMERS-DEC':'2026-12-03',
+          }
+          for cid,deadline in expected_deadlines.items():
+              assert by_control[cid].get('deadline_date') == deadline, (cid,by_control[cid])
+          palm_oct=by_control['R2026-012-PALM-BAY-FARMERS-OCT']
+          assert 'Oct. 10, 2026' in str((palm_oct.get('detail_data') or {}).get('deadline_text') or ''), palm_oct
+          wpb=by_control['R2026-092-WPB-BEER-WINE']
+          assert wpb.get('deadline_date') is None, wpb
+          assert (wpb.get('detail_data') or {}).get('deadline_text') == 'Not verified', wpb
           print({
             'version':x.get('version'),
             'research':len(research),
