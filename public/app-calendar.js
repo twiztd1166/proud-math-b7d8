@@ -50,6 +50,22 @@
       <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
     </article>`;
   }
+  function calendar2026ResearchItem(row){
+    const disposition=String(row.disposition||'WATCH').toUpperCase();
+    const badge=disposition==='PURSUE'?'ready':(disposition==='HOLD'||disposition==='SUPPRESS'||disposition==='SOLD_OUT'?'hold':'dateonly');
+    const start=row.event_start?date(row.event_start):String(row.date_text||'Date not recovered');
+    const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
+    const range=end?start+' \u2013 '+end:start;
+    const detail=[row.price_text,row.route_type?String(row.route_type).replaceAll('_',' '):'',row.city].filter(Boolean).join(' \u00b7 ');
+    const recovery=String(row.research_status||'RECOVERED_NOT_REVERIFIED')==='CURRENT_REVERIFIED'?'Current source reverified':'Recovered research \u00b7 not yet current-source reverified';
+    const profileButton=row.profile_id?'<button type="button" class="calendarOpen" data-annual-profile="'+esc(row.profile_id)+'">Open profile</button>':'';
+    return '<article class="calendarItem">'+
+      '<div class="calendarDate"><b>'+esc(range)+'</b><span>'+esc(row.priority||'RESEARCH')+' priority</span></div>'+
+      '<div class="calendarMain"><div><h3>'+esc(row.event_label||row.control_id)+'</h3><p>'+esc(detail||recovery)+'</p></div><span class="badge '+badge+'">'+esc(disposition)+'</span></div>'+
+      '<div class="calendarNext"><span>Research</span><b>'+esc(recovery)+'</b></div>'+
+      profileButton+
+    '</article>';
+  }
   function render2026Calendar(){
     const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
@@ -60,29 +76,38 @@
       .filter(row=>!showRows.some(show=>String(show.event_start||'')===String(row.event_start||'')&&String(show.event||'').trim().toLowerCase()===String(row.event_label||'').trim().toLowerCase()))
       .slice()
       .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+    const researchRows=(state.researchCalendarControls||[])
+      .filter(row=>Number(row.plan_year||2026)===2026)
+      .filter(row=>String(row.event_start||'').startsWith('2026-')||String(row.date_text||'').trim())
+      .slice()
+      .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const active=showRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
     const today=new Date().toISOString().slice(0,10);
     const upcomingShows=active.filter(row=>String(row.event_end||row.event_start||'')>=today);
     const upcomingOpportunities=opportunityRows.filter(row=>String(row.event_end||row.event_start||'')>=today&&String(row.review?.disposition||'WATCH').toUpperCase()!=='HOLD');
-    const upcoming=upcomingShows.length+upcomingOpportunities.length;
+    const upcomingResearch=researchRows.filter(row=>String(row.event_end||row.event_start||'')>=today&&['PURSUE','WATCH'].includes(String(row.disposition||'').toUpperCase()));
+    const upcoming=upcomingShows.length+upcomingOpportunities.length+upcomingResearch.length;
     const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     const monthHtml=months.map((name,index)=>{
       const month=index+1;
       const monthShows=showRows.filter(row=>calendarMonthNumber(row)===month);
       const monthOpportunities=opportunityRows.filter(row=>calendarMonthNumber(row)===month);
-      if(!monthShows.length&&!monthOpportunities.length)return '';
+      const monthResearch=researchRows.filter(row=>calendarMonthNumber(row)===month);
+      if(!monthShows.length&&!monthOpportunities.length&&!monthResearch.length)return '';
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
       return `<section class="calendarMonth">
-        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}</p></div></div>
+        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' verified opportunit'+(monthOpportunities.length===1?'y':'ies'):''}${monthResearch.length?' \u00b7 '+monthResearch.length+' recovered research':''}</p></div></div>
         ${monthShows.map(calendar2026Item).join('')}
         ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
+        ${monthResearch.map(calendar2026ResearchItem).join('')}
       </section>`;
     }).join('');
     return `${calendarYearBar(2026)}
-      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Governed 2026 operating controls plus verified live/rebook opportunities. Research controls not yet normalized into app data are kept out until reconciled.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
-      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length}</b><span>Governed dated entries</span></div><div><b>${showRows.length}</b><span>Operating controls</span></div><div><b>${opportunityRows.length}</b><span>Additional opportunities</span></div></div>
-      ${monthHtml||'<div class="empty">No governed 2026 dated show records are available.</div>'}`;
+      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Operating controls, verified live/rebook opportunities, and the recovered Sep.\u2013Dec. 2026 research universe. Recovered research is labeled separately and is not treated as current booking proof until reverified.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
+      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length+researchRows.length}</b><span>Calendar entries</span></div><div><b>${showRows.length+opportunityRows.length}</b><span>Governed / verified</span></div><div><b>${researchRows.length}</b><span>Recovered research</span></div></div>
+      <div class="calendarStats"><div><b>${researchRows.filter(row=>row.disposition==='PURSUE').length}</b><span>Research PURSUE</span></div><div><b>${researchRows.filter(row=>row.disposition==='WATCH').length}</b><span>Research WATCH</span></div><div><b>${upcoming}</b><span>Upcoming in play</span></div></div>
+      ${monthHtml||'<div class="empty">No 2026 calendar records are available.</div>'}`;
   }
 
   function calendar2027PursueItem(row){
