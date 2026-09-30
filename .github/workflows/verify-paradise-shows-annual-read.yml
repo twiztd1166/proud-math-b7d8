@@ -37,6 +37,7 @@ jobs:
           grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
           grep -q 'operational_action_code' supabase/functions/shows-annual-plan-api/index.ts
           grep -q 'operational_contact_email' supabase/functions/shows-annual-plan-api/index.ts
+          grep -q 'operational_contact_cc' supabase/functions/shows-annual-plan-api/index.ts
           grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
           grep -q 'estimated_start' public/app-annual-scope.js
           grep -Eq 'paradise-shows-public-v[0-9]+' public/sw.js
@@ -290,6 +291,8 @@ jobs:
           grep -q 'function annualPlanOperationalLabel' ios/App/App/public/app-shows.js
           grep -q 'Planning detail' ios/App/App/public/app-shows.js
           grep -q 'legacy_next_action' ios/App/App/public/app-shows.js
+          grep -q 'operational_contact_cc' ios/App/App/public/app-shows.js
+          grep -q 'GMAIL:' ios/App/App/public/app-shows.js
           grep -q 'data-annual-call-script' ios/App/App/public/app-shows.js
           grep -q 'openAnnualPlanCallScript' ios/App/App/public/app-modals.js
           grep -q 'data-annual-call-script' ios/App/App/public/app-bind.js
