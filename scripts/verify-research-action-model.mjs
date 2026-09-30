@@ -2,6 +2,17 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('public/app-shows.js','utf8');
+const genericCardStart=source.indexOf('function nextStepCard(p,lane)');
+const genericCardEnd=source.indexOf('function nextStepSection',genericCardStart);
+if(genericCardStart<0||genericCardEnd<0)throw new Error('Generic nextStepCard block not found');
+const genericCardSource=source.slice(genericCardStart,genericCardEnd);
+if(genericCardSource.includes('actionGuard'))throw new Error('Generic nextStepCard illegally references research-only actionGuard');
+
+const researchCardStart=source.indexOf('function researchNextStepCard(row)');
+const researchCardEnd=source.indexOf('function researchNextStepSection',researchCardStart);
+if(researchCardStart<0||researchCardEnd<0)throw new Error('Research next-step card block not found');
+const researchCardSource=source.slice(researchCardStart,researchCardEnd);
+if(!researchCardSource.includes("const actionGuard=String(d.operational_guard||'').trim()"))throw new Error('Research next-step card is missing local actionGuard definition');
 const start=source.indexOf('function researchAvailability');
 const end=source.indexOf('function researchValueSignal',start);
 if(start<0||end<0)throw new Error('Research action block not found');

@@ -112,7 +112,6 @@ function nextStepCard(p,lane){
   return `<article class="nextStepCard nextStep-${esc(lane.toLowerCase())}" data-next-step-profile="${esc(p.profile_id)}">
     <div class="nextStepTop"><div><span class="nextStepLane">${esc(laneLabel)}</span><h3>${esc(p.canonical_event)}</h3></div><span class="nextStepDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
-    ${actionGuard?`<div class="nextStepAction"><span>Guard</span><b>${esc(actionGuard)}</b></div>`:''}
     <div class="nextStepFacts"><div><span>When</span><b>${esc(timing)}</b></div><div><span>Event</span><b>${esc(when)}</b></div><div><span>Owner</span><b>${esc(owner)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div></div>
     <button type="button" class="btn secondary liveCompareOpen nextStepOpen" data-profile="${esc(p.profile_id)}">Open show</button>
   </article>`;
