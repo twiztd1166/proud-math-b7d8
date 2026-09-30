@@ -127,7 +127,7 @@ function researchNextStepKey(label,start){
 function researchEasternTodayKey(){
   const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const values=Object.fromEntries(parts.filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
-  return \`\${values.year}-\${values.month}-\${values.day}\`;
+  return `${values.year}-${values.month}-${values.day}`;
 }
 function researchDateOrdinal(value){
   const match=String(value||'').slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -179,7 +179,7 @@ function researchValueSignal(row){
   const priority=String(row?.priority||'').toUpperCase();
   const label=({HIGH:'High',MED_HIGH:'Med-high',MEDIUM:'Medium',LOW_MED:'Low-med',LOW:'Low'})[priority]||'Not set';
   const profileLinked=Boolean(row?.profile_id&&state.catalog.some(profile=>profile.profile_id===row.profile_id));
-  return \`\${label} · research-priority proxy\${profileLinked?' · history linked':''}\`;
+  return `${label} · research-priority proxy${profileLinked?' · history linked':''}`;
 }
 function researchUrgency(row){
   const availability=researchAvailability(row);
@@ -238,7 +238,7 @@ function researchNextStepCard(row){
   const cost=String(d.current_cost_text||row.price_text||'').trim()||'Not verified';
   const deadlineText=String(d.deadline_text||row.deadline_text||'').trim();
   const deadline=row.deadline_date
-    ?\`\${dueLabel(row.deadline_date)} · \${date(row.deadline_date)}\`
+    ?`${dueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
     :(deadlineText||'Not verified');
   const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
   const availability=researchAvailability(row);
@@ -246,13 +246,13 @@ function researchNextStepCard(row){
   const urgency=researchUrgency(row);
   const valueSignal=researchValueSignal(row);
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current terms before commitment.':'Current-reverified research record';
-  return \`<article class="nextStepCard nextStep-review">
-    <div class="nextStepTop"><div><span class="nextStepLane">\${esc(urgency.label)}</span><h3>\${esc(row.event_label)}</h3></div><span class="nextStepDecision \${decisionClass}">\${esc(disposition.replaceAll('_',' '))}</span></div>
-    <div class="nextStepAction"><span>Manager move</span><b>\${esc(managerMove.label)}</b></div>
-    <div class="nextStepAction"><span>Next step</span><b>\${esc(next)}</b></div>
-    <div class="nextStepFacts"><div><span>Availability</span><b>\${esc(availability.label)}</b></div><div><span>Value signal</span><b>\${esc(valueSignal)}</b></div><div><span>Deadline</span><b>\${esc(deadline)}</b></div><div><span>When</span><b>\${esc(range)}</b></div><div><span>Cost</span><b>\${esc(cost)}</b></div><div><span>Booking status</span><b>\${esc(status)}</b></div><div><span>Verification</span><b>\${esc(verification)}</b></div></div>
-    <button type="button" class="btn secondary nextStepOpen" data-calendar-research="\${esc(row.control_id)}">Open details</button>
-  </article>\`;
+  return `<article class="nextStepCard nextStep-review">
+    <div class="nextStepTop"><div><span class="nextStepLane">${esc(urgency.label)}</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
+    <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove.label)}</b></div>
+    <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
+    <div class="nextStepFacts"><div><span>Availability</span><b>${esc(availability.label)}</b></div><div><span>Value signal</span><b>${esc(valueSignal)}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>When</span><b>${esc(range)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
+    <button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button>
+  </article>`;
 }
 function researchNextStepSection(){
   const rows=researchNextStepRows();
@@ -266,9 +266,9 @@ function researchNextStepSection(){
   const remainingActionable=Math.max(0,actionable.length-visible.length);
   const later=Math.max(0,rows.length-actionable.length);
   const moreText=remainingActionable||later
-    ?\`<div class="nextStepMore">\${remainingActionable?\`+\${remainingActionable} more execution follow-ups within 14 days / late-inventory lane\`:''}\${remainingActionable&&later?' · ':''}\${later?\`\${later} later research follow-ups\`:''} · Calendar → 2026</div>\`
+    ?`<div class="nextStepMore">${remainingActionable?`+${remainingActionable} more execution follow-ups within 14 days / late-inventory lane`:''}${remainingActionable&&later?' · ':''}${later?`${later} later research follow-ups`:''} · Calendar → 2026</div>`
     :'';
-  return \`<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: \${doNow.length} do now · \${late.length} late-inventory · \${within14.length} due/event within 14 days · \${rows.length} current/future controls. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>\${actionable.length||rows.length}</span></div>\${visible.map(researchNextStepCard).join('')}\${moreText}</section>\`;
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: ${doNow.length} do now · ${late.length} late-inventory · ${within14.length} due/event within 14 days · ${rows.length} current/future controls. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>${actionable.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
 }
 
 function renderToday(){
