@@ -272,7 +272,7 @@ Deno.serve(async r => {
       db.from('shows_app_checkpoint_health_current').select('integrity_status,hashes_valid,row_counts_valid,coverage_current').limit(1),
     ]);
     const rows = rec.data || [];
-    return out(r,{ok:!a.error&&!b.error&&!c.error&&!d.error&&!rec.error&&!sync.error&&!review.error&&!recovery.error,service:'paradise-shows',version:19,shows:a.count,payments:b.count,auditChanges:(c.count||0)+(d.count||0),sourceAligned:rows.filter(x=>x.reconciliation_status==='ALIGNED').length,sourceDrift:rows.filter(x=>x.reconciliation_status!=='ALIGNED').length,refreshStatus:sync.data?.[0]?.status||null,sourceConflicts:(review.data||[]).length,recoveryStatus:recovery.data?.[0]?.integrity_status||null,recoveryCoverageCurrent:recovery.data?.[0]?.coverage_current??null});
+    return out(r,{ok:!a.error&&!b.error&&!c.error&&!d.error&&!rec.error&&!sync.error&&!review.error&&!recovery.error,service:'paradise-shows',version:20,shows:a.count,payments:b.count,auditChanges:(c.count||0)+(d.count||0),sourceAligned:rows.filter(x=>x.reconciliation_status==='ALIGNED').length,sourceDrift:rows.filter(x=>x.reconciliation_status!=='ALIGNED').length,refreshStatus:sync.data?.[0]?.status||null,sourceConflicts:(review.data||[]).length,recoveryStatus:recovery.data?.[0]?.integrity_status||null,recoveryCoverageCurrent:recovery.data?.[0]?.coverage_current??null});
   }
   if (r.method !== 'POST') return out(r,{ok:false,error:'POST required'},405);
   let body:any; try { body = await r.json(); } catch { return out(r,{ok:false,error:'Invalid JSON'},400); }
@@ -293,7 +293,7 @@ Deno.serve(async r => {
       db.from('shows_app_checkpoint_health_current').select('created_at,reason,shows_count,payments_count,checkpoint_show_rows,checkpoint_payment_rows,row_counts_valid,hashes_valid,coverage_current,current_shows,current_payments,checkpoint_count,restore_count,integrity_status').limit(1),
       db.from('shows_app_rebook_opportunities').select('opportunity_id,profile_id,event_label,event_start,event_end,opportunity_status,price_text,venue_text,booking_cost_min,booking_cost_max,booking_cost_unit,current_cost_status,critical_deadline_date,critical_deadline_label,action_label,action_url,contact_name,contact_email,contact_phone').eq('active',true).eq('identity_status','VERIFIED'),
       db.from('shows_app_rebook_reviews').select('profile_id,disposition,booking_readiness,resolution_lane,action_timing,blockers_text,next_step').eq('active',true).eq('identity_status','VERIFIED'),
-      db.from('shows_app_research_calendar_controls').select('control_id,plan_year,series_key,event_label,city,event_start,event_end,date_text,date_confidence,disposition,priority,route_type,lineage_type,profile_id,mfc_id,price_text,deadline_date,deadline_text,research_status,notes,audit_checked_at').eq('active',true).eq('calendar_visibility',true).eq('plan_year',2026).order('event_start',{ascending:true,nullsFirst:false}).order('event_label',{ascending:true}),
+      db.from('shows_app_research_calendar_controls').select('control_id,plan_year,series_key,event_label,city,event_start,event_end,estimated_sort_date,date_text,date_confidence,disposition,priority,route_type,lineage_type,profile_id,mfc_id,price_text,deadline_date,deadline_text,research_status,notes,audit_checked_at').eq('active',true).eq('calendar_visibility',true).eq('plan_year',2026).order('event_start',{ascending:true,nullsFirst:false}).order('event_label',{ascending:true}),
     ]);
     if(a.error||b.error||c.error||d.error||e.error||f.error||g.error||h.error||i.error||j.error||k.error||l.error){
       const failed_sources=[
@@ -321,7 +321,7 @@ Deno.serve(async r => {
       .filter((row:any)=>String(rebookReviewByProfile.get(row.profile_id)?.resolution_lane||'').toUpperCase()==='PARADISE_ACTION')
       .map((row:any)=>({...row,review:rebookReviewByProfile.get(row.profile_id)}))
       .sort((x:any,y:any)=>String(x.critical_deadline_date||x.event_start||'9999-12-31').localeCompare(String(y.critical_deadline_date||y.event_start||'9999-12-31'))||String(x.event_label||'').localeCompare(String(y.event_label||'')));
-    return out(r,{ok:true,version:19,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
+    return out(r,{ok:true,version:20,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
   }
 
   if(action==='annualPlan'){

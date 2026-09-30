@@ -53,9 +53,10 @@
   function calendar2026ResearchItem(row){
     const disposition=String(row.disposition||'WATCH').toUpperCase();
     const badge=disposition==='PURSUE'?'ready':(disposition==='SOLD_OUT'||disposition==='HOLD')?'hold':'dateonly';
-    const start=row.event_start?date(row.event_start):'Date TBD';
-    const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
-    const range=String(row.date_text||'').trim()||(end?start+' \u2013 '+end:start);
+    const estimated=!row.event_start&&row.estimated_sort_date;
+    const start=row.event_start?date(row.event_start):(estimated?'Date TBD · Estimated '+date(row.estimated_sort_date):'Date TBD');
+    const end=row.event_start&&row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
+    const range=estimated?start:(String(row.date_text||'').trim()||(end?start+' \u2013 '+end:start));
     const priority=String(row.priority||'').replaceAll('_','-');
     const lineage=String(row.lineage_type||'UNRESOLVED').replaceAll('_',' ');
     const route=String(row.route_type||'Research control').replaceAll('_',' ');
@@ -73,21 +74,21 @@
     '</article>';
   }
   function calendarTouchesMonth(row,year,month){
-    const start=String(row?.event_start||'');
+    const start=String(row?.event_start||row?.estimated_sort_date||'');
     if(!start)return false;
-    const end=String(row?.event_end||row?.event_start||'');
+    const end=String(row?.event_start?row?.event_end||row?.event_start:row?.estimated_sort_date||'');
     const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
     const nextMonth=month===12?(year+1)+'-01-01':year+'-'+String(month+1).padStart(2,'0')+'-01';
     return start<nextMonth&&end>=monthStart;
   }
   function calendarMonthSortDate(row,year,month){
-    const start=String(row?.event_start||'9999-12-31');
+    const start=String(row?.event_start||row?.estimated_sort_date||'9999-12-31');
     const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
     return start<monthStart?monthStart:start;
   }
   function calendarMonthEntry(kind,row,year,month){
     const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
-    const start=String(row?.event_start||'9999-12-31');
+    const start=String(row?.event_start||row?.estimated_sort_date||'9999-12-31');
     const labels={
       show:row?.event,
       opportunity:row?.event_label,
@@ -127,12 +128,15 @@
     ]);
     const researchRows=(state.researchCalendarControls||[])
       .filter(row=>Number(row.plan_year||2026)===2026)
-      .filter(row=>row.event_start&&String(row.event_start).startsWith('2026-'))
+      .filter(row=>{
+        const sortDate=row.event_start||row.estimated_sort_date;
+        return sortDate&&String(sortDate).startsWith('2026-');
+      })
       .filter(row=>!represented.has(occurrenceKey(row.event_label,row.event_start)))
       .slice()
       .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const tbdResearch=(state.researchCalendarControls||[])
-      .filter(row=>Number(row.plan_year||2026)===2026&&!row.event_start)
+      .filter(row=>Number(row.plan_year||2026)===2026&&!row.event_start&&!row.estimated_sort_date)
       .slice()
       .sort((a,b)=>String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const active=showRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
@@ -151,7 +155,7 @@
         ...monthResearch.map(row=>calendarMonthEntry('research',row,2026,month)),
       ].sort((a,b)=>
         a.sortDate.localeCompare(b.sortDate)||
-        String(a.row.event_start||'').localeCompare(String(b.row.event_start||''))||
+        String(a.row.event_start||a.row.estimated_sort_date||'').localeCompare(String(b.row.event_start||b.row.estimated_sort_date||''))||
         a.typeOrder-b.typeOrder||
         a.label.localeCompare(b.label)
       );

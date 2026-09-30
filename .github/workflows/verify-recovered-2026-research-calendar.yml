@@ -30,16 +30,18 @@ jobs:
         run: |
           grep -q "researchCalendarControls" supabase/functions/shows-api/index.ts
           grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
-          grep -q "version:19" supabase/functions/shows-api/index.ts
+          grep -q "version:20" supabase/functions/shows-api/index.ts
           grep -q "researchCalendarControls" public/app-core.js
           grep -q "calendar2026ResearchItem" public/app-calendar.js
           grep -q "Recovered research" public/app-calendar.js
           grep -q "Date TBD" public/app-calendar.js
           grep -q "calendarTouchesMonth" public/app-calendar.js
           grep -q "calendarMonthSortDate" public/app-calendar.js
+          grep -q "estimated_sort_date" public/app-calendar.js
+          grep -q "estimated_sort_date" supabase/functions/shows-api/index.ts
           grep -q "monthEntries.map(render2026MonthEntry)" public/app-calendar.js
-          grep -q "20260930-calendar-order-v1" src/pages/index.astro
-          grep -q "20260930-calendar-order-v1" public/index-standalone.html
+          grep -q "20260930-calendar-estimate-v1" src/pages/index.astro
+          grep -q "20260930-calendar-estimate-v1" public/index-standalone.html
 
       - name: Guard three-layer calendar semantics
         run: |
