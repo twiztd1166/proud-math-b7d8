@@ -752,6 +752,7 @@ jobs:
           assert music.get('date_confidence') == 'ESTIMATED', music
           expected_deadlines={
               'R2026-012-PALM-BAY-FARMERS-OCT':'2026-10-10',
+            'R2026-013-PUMPKINS-PALMS':'2026-10-10',
               'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
               'R2026-061-GRACE-JERK':'2026-10-09',
               'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
