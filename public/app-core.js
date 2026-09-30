@@ -32,6 +32,50 @@ function nativeBridgePost(action,payload={}){
   }catch(_){return false}
 }
 function nativeHaptic(){nativeBridgePost('haptic')}
+function researchEmailAddresses(value){
+  return [...new Set((String(value||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(email=>email.trim()))];
+}
+function researchEmailParticipationLabel(row){
+  const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
+  const text=[row?.route_type,d.booking_status,d.eligibility_text,d.action_label].filter(Boolean).join(' ').toUpperCase();
+  const sponsor=/SPONSOR|PARTNER/.test(text);
+  const vendor=/VENDOR/.test(text);
+  const exhibitor=/EXHIBITOR/.test(text);
+  if(sponsor&&vendor)return 'vendor/sponsorship opportunity';
+  if(sponsor&&exhibitor)return 'exhibitor/sponsorship opportunity';
+  if(sponsor)return 'sponsorship opportunity';
+  if(exhibitor)return 'exhibitor opportunity';
+  if(vendor)return 'vendor opportunity';
+  return 'participation opportunity';
+}
+function researchEmailDraft(row){
+  const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
+  const email=researchEmailAddresses(d.contact_text)[0]||'';
+  if(!email)return null;
+  const event=String(row?.event_label||'this event').trim();
+  const range=String(row?.date_text||'').trim()||
+    (row?.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):'');
+  const route=researchEmailParticipationLabel(row);
+  const status=String(d.booking_status||row?.research_status||'').toUpperCase();
+  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(status);
+  const subject=`Paradise Exteriors — ${event} ${late?'late availability':'participation'} inquiry`;
+  const opening=late
+    ?'We understand the standard deadline may have passed. Could you let us know whether any late inventory is still available for Paradise Exteriors as a home-improvement company?'
+    :`We are interested in the ${route}. Could you please confirm whether space is still available for Paradise Exteriors as a home-improvement company?`;
+  const body=[
+    'Hello,',
+    '',
+    `I’m reaching out on behalf of Paradise Exteriors regarding ${event}${range?` (${range})`:''}.`,
+    '',
+    opening,
+    '',
+    'Please also confirm the current price/package, application or commitment deadline, booth/activation footprint, setup requirements, insurance/COI requirements, and any category exclusivity or restrictions.',
+    '',
+    'Thank you,',
+    'Paradise Exteriors',
+  ].join('\n');
+  return {email,subject,body,href:`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};
+}
 async function shareShowSummary(show){
   const event=String(show?.event||'Paradise Shows');
   const eventRange=typeof bookingEventRange==='function'?bookingEventRange(show):[date(show?.event_start),show?.event_end&&show.event_end!==show.event_start?date(show.event_end):''].filter(Boolean).join(' – ');

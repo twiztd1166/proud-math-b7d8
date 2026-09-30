@@ -47,8 +47,8 @@ jobs:
           grep -q "openResearchDetail" public/app-modals.js
           grep -q "data-calendar-research" public/app-calendar.js
           grep -q "monthEntries.map(render2026MonthEntry)" public/app-calendar.js
-          grep -q "20260930-research-details-v1" src/pages/index.astro
-          grep -q "20260930-research-details-v1" public/index-standalone.html
+          grep -q "20260930-team-email-draft-v1" src/pages/index.astro
+          grep -q "20260930-team-email-draft-v1" public/index-standalone.html
 
       - name: Guard three-layer calendar semantics
         run: |
