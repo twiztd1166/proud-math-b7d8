@@ -72,6 +72,13 @@ function researchFact(value,status='',max=180){
   const confirm=/TO CONFIRM|MUST BE CONFIRM|RECONFIRM|REVERIFY|NEEDS? CONFIRM|CONFLICT|ESTIMATED|PARTIAL|RECOVERED|NOT SEPARATELY POSTED|NOT VERIFIED|CUSTOM QUOTE|GET QUOTE|TO QUOTE|PRICE TO CONFIRM|TERMS TO CONFIRM|PACKAGE TO QUOTE/.test(statusText+' '+valueText);
   return {text,confirm};
 }
+function researchExternalHistoryText(value){
+  let text=researchCompactText(value,220);
+  if(!text)return '';
+  text=text.split(/\b(?:Treat as|Do not treat|not net-new)\b/i)[0].trim();
+  text=text.replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'').replace(/\s*[·|/]\s*$/,'').replace(/\s{2,}/g,' ').trim();
+  return text.replace(/[;,.\s]+$/,'').trim();
+}
 function researchContactPerson(value){
   const text=String(value||'').trim();
   if(!text)return '';
@@ -123,7 +130,10 @@ function researchOutreachProfile(row){
   const attendance=researchFact(d.attendance_text,'',160);
 
   const historyLooksInternal=history&&/^(?:HIST|PROSPECT|LIFE|R\d{4})[-A-Z0-9_ ·/]+$/i.test(history.text);
-  const positiveHistory=history&&!historyLooksInternal&&!/NO LINKED|NO PRIOR|NONE FOUND|NOT VERIFIED|NO KNOWN/i.test(history.text)?history:null;
+  const externalHistory=history?researchExternalHistoryText(history.text):'';
+  const positiveHistory=history&&!historyLooksInternal&&externalHistory&&!/NO LINKED|NO PRIOR|NONE FOUND|NOT VERIFIED|NO KNOWN/i.test(history.text)
+    ?{text:externalHistory,confirm:Boolean(history.confirm)}
+    :null;
   const facts=[];
   const addFact=(label,fact)=>{if(fact&&fact.text)facts.push({label,text:fact.text,confirm:Boolean(fact.confirm)})};
   addFact('Eligibility / route',eligibility);
@@ -143,14 +153,13 @@ function researchOutreachProfile(row){
   if(!cost||cost.confirm)addQuestion('Please confirm the current price/package and any required deposit.');
   if(!deadline||deadline.confirm)addQuestion('Please confirm the current application or commitment deadline.');
   if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
-  const logisticsHasSetup=researchHasKnownTerm([logistics?.text],/\b(?:BOOTH|SPACE|FOOTPRINT|SETUP|LOAD[- ]?IN|TENT|TABLE|POWER|ACTIVATION)\b/);
+  const logisticsHasSetup=researchHasKnownTerm([logistics?.text,commitment?.text],/\b(?:BOOTH|SPACE|FOOTPRINT|SETUP|LOAD[- ]?IN|TENT|TABLE|POWER|ACTIVATION)\b/);
   if(!logistics||logistics.confirm||!logisticsHasSetup)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
   if(!commitment||commitment.confirm)addQuestion('Please confirm payment timing, cancellation/refund terms, and any non-refundable commitment.');
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
   if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
   const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|EXHIBIT|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
-  if(!hasApplicationPath)addQuestion('What is the best next step to apply, reserve, or secure the space?');
 
   const statusText=String(d.booking_status||row?.research_status||'').toUpperCase();
   const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(statusText);
@@ -158,7 +167,8 @@ function researchOutreachProfile(row){
   return {
     event,range,route,person,email,phone,boundedException,late,availabilityUncertain,
     facts:facts.slice(0,7),
-    questions:questions.slice(0,7),
+    questions:questions.slice(0,8),
+    hasApplicationPath,
   };
 }
 function researchEmailDraft(row){
@@ -171,7 +181,9 @@ function researchEmailDraft(row){
     :(profile.availabilityUncertain
       ?`We are interested in the ${profile.route} and want to confirm the current availability before moving forward.`
       :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`);
-  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}${f.confirm?' (needs confirmation)':''}`);
+  const factLines=profile.facts
+    .filter(f=>!f.confirm&&f.label!=='Current booking status')
+    .map(f=>`• ${f.label}: ${f.text}`);
   const questionLines=profile.questions.map(q=>`• ${q}`);
   const body=[
     greeting,
@@ -186,9 +198,11 @@ function researchEmailDraft(row){
     questionLines.length?'Rather than repeat items already established, could you please confirm only the remaining points below?':'',
     ...questionLines,
     questionLines.length?'':'',
-    profile.questions.length
-      ?'Once those items are confirmed, we can determine the appropriate next step.'
-      :'If the details above are still current, please let us know the best next step to proceed.',
+    profile.late
+      ?'If late participation is possible, please let us know the correct way to proceed.'
+      :(profile.hasApplicationPath
+        ?'If these details are still current, we can use the published application path.'
+        :'Once those items are confirmed, please let us know the correct application/reservation step.'),
     '',
     'Thank you,',
     'Paradise Exteriors',
@@ -224,9 +238,11 @@ function researchCallScript(row){
     questionLines.length?'ONLY ASK / CONFIRM THESE REMAINING ITEMS':'',
     ...questionLines,
     questionLines.length?'':'',
-    profile.questions.length
-      ?'CLOSE: Thank them, confirm the best next step, and record the outcome in Manager Notes.'
-      :'CLOSE: Confirm the best next step to proceed, thank them, and record the outcome in Manager Notes.',
+    profile.late
+      ?'CLOSE: If late participation is possible, confirm the correct way to proceed and record the outcome in Manager Notes.'
+      :(profile.hasApplicationPath
+        ?'CLOSE: Confirm the details, use the published application path if still valid, and record the outcome in Manager Notes.'
+        :'CLOSE: Confirm the correct application/reservation step and record the outcome in Manager Notes.'),
   ].filter((line,index,arr)=>line!==''||index===0||arr[index-1]!=='').join('\n').trim();
   return {
     phone:profile.phone,
