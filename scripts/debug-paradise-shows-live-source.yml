@@ -779,7 +779,8 @@ jobs:
           assert senior_detail.get('official_source_url') == 'https://seniorexpousa.com/expos/florida/fort-lauderdale-hollywood-fall-senior-expo-2026/', senior
           assert 'Evan@SeniorExpoUSA.com' in str(senior_detail.get('contact_text') or ''), senior
           assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
-          assert not any('retirement-times.com' in str(ref.get('url') or '') for ref in (senior.get('source_refs') or [])), senior
+          assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
+          assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
           assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
           source_pairs={}
           duplicate_pairs=[]
