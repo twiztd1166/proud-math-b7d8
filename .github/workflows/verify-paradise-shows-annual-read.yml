@@ -278,7 +278,9 @@ jobs:
           grep -q 'function researchOutreachProfile' ios/App/App/public/app-core.js
           grep -q 'function researchStructuredAction' ios/App/App/public/app-shows.js
           grep -q 'operational_action_code' ios/App/App/public/app-shows.js
+          grep -q 'Open application / apply' ios/App/App/public/app-shows.js
           grep -q 'operational_guard' ios/App/App/public/app-modals.js
+          grep -q 'Open application / apply' ios/App/App/public/app-modals.js
           grep -q 'Rather than repeat items already established' ios/App/App/public/app-core.js
           grep -q 'ONLY ASK / CONFIRM THESE REMAINING ITEMS' ios/App/App/public/app-core.js
           grep -q 'mailto:' ios/App/App/public/app-core.js

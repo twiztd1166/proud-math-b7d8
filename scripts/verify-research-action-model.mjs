@@ -13,6 +13,16 @@ const researchCardEnd=source.indexOf('function researchNextStepSection',research
 if(researchCardStart<0||researchCardEnd<0)throw new Error('Research next-step card block not found');
 const researchCardSource=source.slice(researchCardStart,researchCardEnd);
 if(!researchCardSource.includes("const actionGuard=String(d.operational_guard||'').trim()"))throw new Error('Research next-step card is missing local actionGuard definition');
+if(!researchCardSource.includes("const operationalCode=String(d.operational_action_code||'').trim().toUpperCase()"))throw new Error('Research card is missing structured action-code routing');
+if(!researchCardSource.includes("const applyButton=applyHref?"))throw new Error('Research card is missing action-aware apply button');
+
+const modalSource=fs.readFileSync('public/app-modals.js','utf8');
+const researchDetailStart=modalSource.indexOf('function openResearchDetail(id)');
+const researchDetailEnd=modalSource.indexOf('function openDetail(id)',researchDetailStart);
+if(researchDetailStart<0||researchDetailEnd<0)throw new Error('Research detail block not found');
+const researchDetailSource=modalSource.slice(researchDetailStart,researchDetailEnd);
+if(!researchDetailSource.includes("const operationalCode=String(d.operational_action_code||'').trim().toUpperCase()"))throw new Error('Research detail is missing structured action-code routing');
+if(!researchDetailSource.includes("const applyButton=applyHref?"))throw new Error('Research detail is missing action-aware apply button');
 const start=source.indexOf('function researchAvailability');
 const end=source.indexOf('function researchValueSignal',start);
 if(start<0||end<0)throw new Error('Research action block not found');
@@ -66,6 +76,37 @@ const applyRow={
 const applyMove=sandbox.api.researchManagerMove(applyRow);
 if(applyMove.label!=='OPEN APPLICATION / APPLY')throw new Error(`Structured APPLY was overridden: ${JSON.stringify(applyMove)}`);
 
+const reviewAvailability=sandbox.api.researchAvailability(reviewRow);
+if(reviewAvailability.code!=='OPEN')throw new Error(`Active vendor/sponsor options were misclassified by one sold-out tier: ${JSON.stringify(reviewAvailability)}`);
+
+const nascarRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT PARTNERSHIP/CORPORATE INQUIRY OPEN · SELECT FAN HOSPITALITY SOLD OUT/WAITLIST'},
+};
+const nascarAvailability=sandbox.api.researchAvailability(nascarRow);
+if(nascarAvailability.code!=='OPEN')throw new Error(`Open partnership route was misclassified by sold-out hospitality: ${JSON.stringify(nascarAvailability)}`);
+
+const hollywoodRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'MERCHANT/INFORMATIONAL APPLICATIONS CLOSED · SPONSORSHIP ROUTE CURRENT'},
+};
+const hollywoodAvailability=sandbox.api.researchAvailability(hollywoodRow);
+if(hollywoodAvailability.code!=='ALTERNATE')throw new Error(`Closed merchant lane with current sponsorship did not stay alternate-only: ${JSON.stringify(hollywoodAvailability)}`);
+
+const snowRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT 2026 BUSINESS SPONSORSHIP ROUTE ACTIVE · NONPROFIT VENDOR SPACES FILLED'},
+};
+const snowAvailability=sandbox.api.researchAvailability(snowRow);
+if(snowAvailability.code!=='ALTERNATE')throw new Error(`Filled nonprofit vendor lane with active business sponsorship did not stay alternate-only: ${JSON.stringify(snowAvailability)}`);
+
+const confirmOnlyRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT EXHIBITOR PRODUCT LISTED · AVAILABILITY / CATEGORY TO CONFIRM'},
+};
+const confirmOnlyAvailability=sandbox.api.researchAvailability(confirmOnlyRow);
+if(confirmOnlyAvailability.code!=='CONFIRM')throw new Error(`Unknown availability was mislabeled as limited/open: ${JSON.stringify(confirmOnlyAvailability)}`);
+
 const guardText='Reverify current terms before commitment.';
 if(!guardText)throw new Error('Guard fixture invalid');
 
@@ -74,4 +115,8 @@ console.log({
   structured_review:reviewMove.label,
   late_email:lateMove.label,
   structured_apply:applyMove.label,
+  active_with_one_tier_sold_out:reviewAvailability.label,
+  partnership_open_with_hospitality_sold_out:nascarAvailability.label,
+  closed_lane_with_active_alternate:hollywoodAvailability.label,
+  availability_to_confirm:confirmOnlyAvailability.label,
 });
