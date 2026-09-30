@@ -31,14 +31,15 @@ jobs:
           grep -q "if: github.event_name == 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
           grep -q "if: github.event_name != 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
           grep -q "Stable-production convergence is intentionally deferred until the production-branch push." .github/workflows/debug-paradise-shows-live.yml
+          bash -n scripts/wait-for-app-asset-convergence.sh
+          python3 scripts/verify-app-asset-contract.py --live-entry src/pages/index.astro
           echo 'PR vs stable-production smoke boundary: PASS'
 
       - name: Verify frontend opens without access gate
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/" -o /tmp/index.html
-          python3 scripts/verify-app-asset-contract.py --live-entry /tmp/index.html
+          bash scripts/wait-for-app-asset-convergence.sh "$SITE" "$GITHUB_SHA" /tmp/index.html
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js?sha=$GITHUB_SHA" -o /tmp/app-core.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-modals.js?sha=$GITHUB_SHA" -o /tmp/app-modals.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-bind.js?sha=$GITHUB_SHA" -o /tmp/app-bind.js
