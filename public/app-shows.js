@@ -121,6 +121,57 @@ function nextStepSection(title,subtitle,rows,lane,limit){
   if(!rows.length)return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><span>0</span></div><div class="nextStepEmpty">Nothing in this lane right now.</div></section>`;
   return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><span>${rows.length}</span></div>${visible.map(p=>nextStepCard(p,lane)).join('')}${rows.length>visible.length?`<div class="nextStepMore">+${rows.length-visible.length} more available in Shows → Live booking board</div>`:''}</section>`;
 }
+function researchNextStepKey(label,start){
+  return String(start||'')+'|'+String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+}
+function researchNextStepRows(){
+  const represented=new Set([
+    ...state.shows.map(row=>researchNextStepKey(row.event,row.event_start)),
+    ...(state.calendarOpportunities||[]).map(row=>researchNextStepKey(row.event_label,row.event_start)),
+  ]);
+  const today=new Date().toISOString().slice(0,10);
+  return (state.researchCalendarControls||[])
+    .filter(row=>Number(row.plan_year||2026)===2026)
+    .filter(row=>['PURSUE','WATCH'].includes(String(row.disposition||'').toUpperCase()))
+    .filter(row=>String(row?.detail_data?.next_action||row.notes||'').trim())
+    .filter(row=>!represented.has(researchNextStepKey(row.event_label,row.event_start)))
+    .filter(row=>{
+      const end=String(row.event_end||row.event_start||row.estimated_sort_date||'').slice(0,10);
+      return !end||end>=today;
+    })
+    .slice()
+    .sort((a,b)=>{
+      const ad=String(a.event_start||a.estimated_sort_date||'9999-12-31');
+      const bd=String(b.event_start||b.estimated_sort_date||'9999-12-31');
+      const disp=x=>String(x.disposition||'').toUpperCase()==='PURSUE'?0:1;
+      const pri=x=>({HIGH:0,MEDIUM:1,LOW:2})[String(x.priority||'').toUpperCase()]??3;
+      return disp(a)-disp(b)||ad.localeCompare(bd)||pri(a)-pri(b)||String(a.event_label||'').localeCompare(String(b.event_label||''));
+    });
+}
+function researchNextStepCard(row){
+  const d=row.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
+  const disposition=String(row.disposition||'WATCH').toUpperCase();
+  const next=String(d.next_action||row.notes||'Review this research control.').trim();
+  const range=String(row.date_text||'').trim()||
+    (row.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):
+      (row.estimated_sort_date?'Date TBD · est. '+date(row.estimated_sort_date):'Date TBD'));
+  const cost=String(d.current_cost_text||row.price_text||'').trim()||'Not verified';
+  const deadline=String(d.deadline_text||row.deadline_text||'').trim()||'Not verified';
+  const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
+  const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current facts':'Current research record';
+  return `<article class="nextStepCard nextStep-review">
+    <div class="nextStepTop"><div><span class="nextStepLane">Research follow-up</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${disposition==='PURSUE'?'pursue':'watch'}">${esc(disposition)}</span></div>
+    <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
+    <div class="nextStepFacts"><div><span>When</span><b>${esc(range)}</b></div><div><span>Priority</span><b>${esc(row.priority||'Not set')}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
+    <button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button>
+  </article>`;
+}
+function researchNextStepSection(){
+  const rows=researchNextStepRows();
+  const visible=rows.slice(0,8);
+  if(!rows.length)return '';
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Recovered 2026 opportunities with a current next action. Reverify availability, pricing, deadlines and terms before commitment.</p></div><span>${rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${rows.length>visible.length?`<div class="nextStepMore">+${rows.length-visible.length} more recovered opportunities in Calendar → 2026</div>`:''}</section>`;
+}
 function renderToday(){
   const pay=paymentAttention();
   const rs=state.reconciliation.summary||{};
@@ -140,6 +191,7 @@ function renderToday(){
   return `<div class="hero nextHero"><div class="nextHeroEyebrow">Paradise Shows</div><h1>Next Steps</h1><p>Start here. Work is grouped by who or what must move next; research depth stays inside each show.</p></div>
     <div class="nextStepStats"><div><b>${action.length}</b><span>Team action</span></div><div><b>${review.length}</b><span>Decision / review</span></div><div><b>${waiting.length}</b><span>Waiting</span></div><div><b>${pay.length}</b><span>Payment attention</span></div></div>
     ${nextStepSection('Team action','The company can move these now.',action,'ACTION',8)}
+    ${researchNextStepSection()}
     ${nextStepSection('Decision / review needed','A decision, approval, conflict check, or internal review is the next gate.',review,'REVIEW',6)}
     ${paymentHtml}
     ${nextStepSection('Waiting on organizer','Current-cycle contact is already in motion; the organizer or another external dependency is next.',waiting,'WAITING',5)}
