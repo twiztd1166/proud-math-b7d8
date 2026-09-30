@@ -124,6 +124,9 @@ function nextStepSection(title,subtitle,rows,lane,limit){
 function researchNextStepKey(label,start){
   return String(start||'')+'|'+String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
 }
+function researchNextActionDate(row){
+  return String(row?.deadline_date||row?.event_start||row?.estimated_sort_date||'9999-12-31');
+}
 function researchNextStepRows(){
   const represented=new Set([
     ...state.shows.map(row=>researchNextStepKey(row.event,row.event_start)),
@@ -141,8 +144,8 @@ function researchNextStepRows(){
     })
     .slice()
     .sort((a,b)=>{
-      const ad=String(a.deadline_date||a.event_start||a.estimated_sort_date||'9999-12-31');
-      const bd=String(b.deadline_date||b.event_start||b.estimated_sort_date||'9999-12-31');
+      const ad=researchNextActionDate(a);
+      const bd=researchNextActionDate(b);
       const disp=x=>({PURSUE:0,WATCH:1,SOLD_OUT:2,HOLD:3})[String(x.disposition||'').toUpperCase()]??4;
       const pri=x=>({HIGH:0,MED_HIGH:1,MEDIUM:2,LOW_MED:3,LOW:4})[String(x.priority||'').toUpperCase()]??5;
       return ad.localeCompare(bd)||disp(a)-disp(b)||pri(a)-pri(b)||String(a.event_label||'').localeCompare(String(b.event_label||''));
@@ -157,7 +160,10 @@ function researchNextStepCard(row){
     (row.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):
       (row.estimated_sort_date?'Date TBD · est. '+date(row.estimated_sort_date):'Date TBD'));
   const cost=String(d.current_cost_text||row.price_text||'').trim()||'Not verified';
-  const deadline=String(d.deadline_text||row.deadline_text||'').trim()||'Not verified';
+  const deadlineText=String(d.deadline_text||row.deadline_text||'').trim();
+  const deadline=row.deadline_date
+    ?`${dueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
+    :(deadlineText||'Not verified');
   const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current facts':'Current research record';
   return `<article class="nextStepCard nextStep-review">
@@ -169,9 +175,14 @@ function researchNextStepCard(row){
 }
 function researchNextStepSection(){
   const rows=researchNextStepRows();
-  const visible=rows.slice(0,8);
   if(!rows.length)return '';
-  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Recovered 2026 opportunities with a current next action. Reverify availability, pricing, deadlines and terms before commitment.</p></div><span>${rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${rows.length>visible.length?`<div class="nextStepMore">+${rows.length-visible.length} more recovered opportunities in Calendar → 2026</div>`:''}</section>`;
+  const horizonDate=new Date();
+  horizonDate.setDate(horizonDate.getDate()+14);
+  const horizon=horizonDate.toISOString().slice(0,10);
+  const nearTerm=rows.filter(row=>researchNextActionDate(row)<=horizon);
+  const visible=(nearTerm.length?nearTerm:rows).slice(0,8);
+  const remaining=Math.max(0,rows.length-visible.length);
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>Near-term recovered opportunities first: ${nearTerm.length} need attention within 14 days; ${rows.length} current/future research controls remain. Reverify current terms before commitment.</p></div><span>${nearTerm.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${remaining?`<div class="nextStepMore">+${remaining} more recovered opportunities in Calendar → 2026</div>`:''}</section>`;
 }
 function renderToday(){
   const pay=paymentAttention();
