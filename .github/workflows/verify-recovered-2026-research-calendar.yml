@@ -25,12 +25,13 @@ jobs:
           node --check public/app-core.js
           node --check public/app-calendar.js
           node --check public/app-bind.js
+          node --check public/app-modals.js
 
       - name: Verify recovered research wiring
         run: |
           grep -q "researchCalendarControls" supabase/functions/shows-api/index.ts
           grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
-          grep -q "version:20" supabase/functions/shows-api/index.ts
+          grep -q "version:21" supabase/functions/shows-api/index.ts
           grep -q "researchCalendarControls" public/app-core.js
           grep -q "calendar2026ResearchItem" public/app-calendar.js
           grep -q "Recovered research" public/app-calendar.js
@@ -39,9 +40,15 @@ jobs:
           grep -q "calendarMonthSortDate" public/app-calendar.js
           grep -q "estimated_sort_date" public/app-calendar.js
           grep -q "estimated_sort_date" supabase/functions/shows-api/index.ts
+          grep -q "detail_data" supabase/functions/shows-api/index.ts
+          grep -q "shows_app_research_notes" supabase/functions/shows-api/index.ts
+          grep -q "listResearchNotes" supabase/functions/shows-api/index.ts
+          grep -q "addResearchNote" supabase/functions/shows-api/index.ts
+          grep -q "openResearchDetail" public/app-modals.js
+          grep -q "data-calendar-research" public/app-calendar.js
           grep -q "monthEntries.map(render2026MonthEntry)" public/app-calendar.js
-          grep -q "20260930-calendar-estimate-v1" src/pages/index.astro
-          grep -q "20260930-calendar-estimate-v1" public/index-standalone.html
+          grep -q "20260930-research-details-v1" src/pages/index.astro
+          grep -q "20260930-research-details-v1" public/index-standalone.html
 
       - name: Guard three-layer calendar semantics
         run: |
