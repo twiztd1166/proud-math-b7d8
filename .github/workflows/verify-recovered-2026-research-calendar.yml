@@ -27,6 +27,11 @@ jobs:
           node --check public/app-bind.js
           node --check public/app-modals.js
 
+      - name: Verify bespoke outreach across current 2026 research controls
+        run: |
+          node --check scripts/verify-research-outreach.mjs
+          node scripts/verify-research-outreach.mjs
+
       - name: Verify recovered research wiring
         run: |
           grep -q "researchCalendarControls" supabase/functions/shows-api/index.ts
