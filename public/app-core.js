@@ -64,11 +64,12 @@ function researchFact(value,status='',max=180){
   if(!text)return null;
   const statusText=String(status||'').trim().toUpperCase();
   const valueText=text.toUpperCase();
-  const unavailable=/^(NOT VERIFIED|UNKNOWN|N\/A|NONE|NOT AVAILABLE)$/.test(valueText)||
+  const unavailable=/^(?:NOT VERIFIED|NOT REVERIFIED|UNKNOWN|N\/A|NONE|NOT AVAILABLE)\b/.test(valueText)||
+    /^NO (?:CURRENT )?.*\bVERIFIED\b/.test(valueText)||
     /^NOT VERIFIED\b/.test(statusText)||
     /PENDING CURRENT PUBLICATION/.test(statusText);
   if(unavailable)return null;
-  const confirm=/TO CONFIRM|RECONFIRM|REVERIFY|NEEDS CONFIRM|CONFLICT|ESTIMATED|PARTIAL|RECOVERED|NOT SEPARATELY POSTED|NOT VERIFIED|CUSTOM QUOTE|GET QUOTE|TO QUOTE|PRICE TO CONFIRM|TERMS TO CONFIRM|PACKAGE TO QUOTE/.test(statusText+' '+valueText);
+  const confirm=/TO CONFIRM|MUST BE CONFIRM|RECONFIRM|REVERIFY|NEEDS? CONFIRM|CONFLICT|ESTIMATED|PARTIAL|RECOVERED|NOT SEPARATELY POSTED|NOT VERIFIED|CUSTOM QUOTE|GET QUOTE|TO QUOTE|PRICE TO CONFIRM|TERMS TO CONFIRM|PACKAGE TO QUOTE/.test(statusText+' '+valueText);
   return {text,confirm};
 }
 function researchContactPerson(value){
@@ -121,12 +122,13 @@ function researchOutreachProfile(row){
   const history=researchFact(d.historical_signal,'',180);
   const attendance=researchFact(d.attendance_text,'',160);
 
-  const positiveHistory=history&&!/NO LINKED|NO PRIOR|NONE FOUND|NOT VERIFIED|NO KNOWN/i.test(history.text)?history:null;
+  const historyLooksInternal=history&&/^(?:HIST|PROSPECT|LIFE|R\d{4})[-A-Z0-9_ ·/]+$/i.test(history.text);
+  const positiveHistory=history&&!historyLooksInternal&&!/NO LINKED|NO PRIOR|NONE FOUND|NOT VERIFIED|NO KNOWN/i.test(history.text)?history:null;
   const facts=[];
   const addFact=(label,fact)=>{if(fact&&fact.text)facts.push({label,text:fact.text,confirm:Boolean(fact.confirm)})};
   addFact('Eligibility / route',eligibility);
   addFact('Current booking status',booking);
-  addFact('Prior Paradise history',positiveHistory);
+  addFact('Prior Paradise participation',positiveHistory);
   addFact('Current price / package',cost);
   addFact('Application / commitment timing',deadline);
   addFact('Venue / location',venue);
@@ -145,7 +147,7 @@ function researchOutreachProfile(row){
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
   if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
-  const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
+  const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|EXHIBIT|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
   if(!hasApplicationPath)addQuestion('What is the best next step to apply, reserve, or secure the space?');
 
   const statusText=String(d.booking_status||row?.research_status||'').toUpperCase();
