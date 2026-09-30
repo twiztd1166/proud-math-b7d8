@@ -32,11 +32,23 @@ jobs:
           assert x.get('ok') is True, x
           assert x.get('version') == 21, x.get('version')
           research=x.get('researchCalendarControls') or []
-          q4=[r for r in research if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
-          tbd=[r for r in research if not r.get('event_start')]
+          def sort_date(r):
+              return str(r.get('event_start') or r.get('estimated_sort_date') or '')
+          q4=[r for r in research if '2026-10-01' <= sort_date(r) < '2027-01-01']
+          exact=[r for r in research if r.get('event_start')]
+          estimated=[r for r in research if not r.get('event_start') and r.get('estimated_sort_date')]
+          unsortable=[r for r in research if not r.get('event_start') and not r.get('estimated_sort_date')]
+          semantic_bad=[
+              r for r in research
+              if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
+              and not (not r.get('event_start') and r.get('estimated_sort_date'))
+          ]
           assert len(research) == 117, len(research)
           assert len(q4) == 117, len(q4)
-          assert len(tbd) == 0, len(tbd)
+          assert len(exact) == 115, len(exact)
+          assert len(estimated) == 2, len(estimated)
+          assert len(unsortable) == 0, unsortable
+          assert not semantic_bad, semantic_bad
           assert all(isinstance(r.get('detail_data'),dict) for r in research), 'detail_data missing'
           assert all((r.get('detail_data') or {}).get('research_summary') for r in research), 'research_summary missing'
           assert all((r.get('detail_data') or {}).get('booking_status') for r in research), 'booking_status missing'
@@ -74,11 +86,21 @@ jobs:
           snow=next(r for r in research if r.get('event_label') == "There’s Snow Place Like Jupiter")
           assert snow.get('event_start') == '2026-12-12', snow
           assert snow.get('date_confidence') == 'CURRENT_VERIFIED', snow
+          music=next(r for r in research if r.get('control_id') == 'R2026-101-MUSIC-MANSION')
+          assert music.get('event_start') is None, music
+          assert music.get('estimated_sort_date') == '2026-12-06', music
+          assert music.get('date_confidence') == 'ESTIMATED', music
+          hallandale=next(r for r in research if r.get('control_id') == 'R2026-088-HALLANDALE-HOLIDAY')
+          assert hallandale.get('event_start') is None, hallandale
+          assert hallandale.get('estimated_sort_date') == '2026-12-04', hallandale
+          assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
           print({
             'version':x.get('version'),
             'research':len(research),
-            'q4_research':len(q4),
-            'tbd_research':len(tbd),
+            'q4_orderable_research':len(q4),
+            'exact_research':len(exact),
+            'estimated_research':len(estimated),
+            'unsortable_research':len(unsortable),
             'operating':len(x.get('shows') or []),
             'opportunities':len(x.get('calendarOpportunities') or []),
             'representative_controls':'PASS',
