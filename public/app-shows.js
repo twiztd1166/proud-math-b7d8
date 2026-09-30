@@ -169,15 +169,16 @@ function researchManagerMove(row){
   const availability=researchAvailability(row);
   const disposition=String(row?.disposition||'WATCH').toUpperCase();
   const next=String(row?.detail_data?.next_action||row?.notes||'').toUpperCase();
-  if(availability.code==='LATE')return {code:'CONTACT',label:'CONTACT — LATE INVENTORY',rank:1};
-  if(availability.code==='ALTERNATE')return {code:'CONTACT',label:'CONTACT — ALTERNATE ROUTE',rank:1};
+  const hasEmail=Boolean(typeof researchEmailDraft==='function'&&researchEmailDraft(row));
+  if(availability.code==='LATE')return {code:'CONTACT',label:hasEmail?'CREATE EMAIL DRAFT — LATE INVENTORY':'CONTACT — LATE INVENTORY',rank:1};
+  if(availability.code==='ALTERNATE')return {code:'CONTACT',label:hasEmail?'CREATE EMAIL DRAFT — ALTERNATE ROUTE':'CONTACT — ALTERNATE ROUTE',rank:1};
   if(availability.code==='REVERIFY')return {code:'REVIEW',label:'REVERIFY / REVIEW',rank:2};
   if(disposition==='SOLD_OUT'||disposition==='HOLD')return {code:'HOLD',label:'HOLD / REVIEW',rank:4};
   const contact=/\b(CONTACT|EMAIL|CALL|ASK|REQUEST|INQUIRY|REACH OUT)\b/.test(next);
   const apply=/\b(APPLY|SUBMIT|REGISTER|SIGN UP|APPLICATION)\b/.test(next);
-  if(contact&&apply)return {code:'CONTACT_APPLY',label:'CONTACT → APPLY',rank:0};
+  if(contact&&apply)return {code:'CONTACT_APPLY',label:hasEmail?'CREATE EMAIL DRAFT → APPLY':'CONTACT → APPLY',rank:0};
   if(apply)return {code:'APPLY',label:'APPLY / SUBMIT',rank:0};
-  if(contact)return {code:'CONTACT',label:'CONTACT ORGANIZER',rank:1};
+  if(contact)return {code:'CONTACT',label:hasEmail?'CREATE EMAIL DRAFT':'CONTACT ORGANIZER',rank:1};
   if(/\b(CONFIRM|VERIFY|REVIEW|COMPARE|OBTAIN|CHECK)\b/.test(next))return {code:'REVIEW',label:'CONFIRM / REVIEW',rank:2};
   if(/\b(MONITOR|WAIT|WATCH)\b/.test(next))return {code:'MONITOR',label:'MONITOR',rank:3};
   if(/\b(SKIP|DO NOT PURSUE|HOLD)\b/.test(next))return {code:'HOLD',label:'SKIP / HOLD',rank:4};
@@ -253,13 +254,15 @@ function researchNextStepCard(row){
   const managerMove=researchManagerMove(row);
   const urgency=researchUrgency(row);
   const valueSignal=researchValueSignal(row);
+  const emailDraft=typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
+  const emailDraftButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current terms before commitment.':'Current-reverified research record';
   return `<article class="nextStepCard nextStep-review">
     <div class="nextStepTop"><div><span class="nextStepLane">${esc(urgency.label)}</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
     <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove.label)}</b></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
     <div class="nextStepFacts"><div><span>Availability</span><b>${esc(availability.label)}</b></div><div><span>Value signal</span><b>${esc(valueSignal)}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>When</span><b>${esc(range)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
-    <button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button>
+    <div class="actions">${emailDraftButton}<button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button></div>
   </article>`;
 }
 function researchNextStepSection(){
