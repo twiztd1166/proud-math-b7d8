@@ -173,13 +173,19 @@ grep -q 'Open full plan' /tmp/calendar_2027.html
 grep -q 'PURSUE' /tmp/calendar_2027.html""",
         ),
     ]
-    for stale, replacement in calendar_replacements:
-        count = script.count(stale)
-        if count != 1:
-            raise RuntimeError(
-                f'Expected exactly one stale calendar assertion, got {count}: {stale}'
-            )
-        script = script.replace(stale, replacement, 1)
+    already_dual_year = (
+        'render_view calendar_2027 "$SITE/#calendar/2027"' in script
+        and "grep -q '2026 Calendar' /tmp/calendar.html" in script
+        and "grep -q '2027 Calendar' /tmp/calendar_2027.html" in script
+    )
+    if not already_dual_year:
+        for stale, replacement in calendar_replacements:
+            count = script.count(stale)
+            if count != 1:
+                raise RuntimeError(
+                    f'Expected exactly one stale calendar assertion, got {count}: {stale}'
+                )
+            script = script.replace(stale, replacement, 1)
 
     for stale in STALE_DEEP_LINK_LINES:
         count = script.count(stale)
