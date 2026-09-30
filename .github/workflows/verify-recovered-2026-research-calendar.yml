@@ -1,0 +1,45 @@
+name: Verify recovered 2026 research calendar
+
+on:
+  push:
+    branches:
+      - agent/recovered-2026-research-calendar-20260930
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend JavaScript syntax
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+
+      - name: Verify recovered research wiring
+        run: |
+          grep -q "researchCalendarControls" supabase/functions/shows-api/index.ts
+          grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
+          grep -q "version:19" supabase/functions/shows-api/index.ts
+          grep -q "researchCalendarControls" public/app-core.js
+          grep -q "calendar2026ResearchItem" public/app-calendar.js
+          grep -q "Recovered research" public/app-calendar.js
+          grep -q "Date TBD" public/app-calendar.js
+          grep -q "20260930-research-v1" src/pages/index.astro
+          grep -q "20260930-research-v1" public/index-standalone.html
+
+      - name: Guard three-layer calendar semantics
+        run: |
+          grep -q "Operating controls" public/app-calendar.js
+          grep -q "Governed opportunities" public/app-calendar.js
+          grep -q "Recovered research" public/app-calendar.js
+          grep -q "they are not represented as booked/current operating shows" public/app-calendar.js
