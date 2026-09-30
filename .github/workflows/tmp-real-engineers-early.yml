@@ -1,0 +1,51 @@
+name: Temporary AI Coding for Real Engineers early-tail analysis
+on:
+  push:
+    branches:
+      - tmp-real-engineers-20260930
+    paths:
+      - '.github/workflows/tmp-real-engineers-early.yml'
+permissions:
+  contents: read
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - { label: '020', start: 20, end: 20 }
+          - { label: '026', start: 26, end: 26 }
+          - { label: '027', start: 27, end: 27 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore Whisper model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: faster-whisper-small-en-v1
+      - name: Install runtime
+        run: python -m pip install --quiet faster-whisper requests
+      - name: Transcribe part
+        env:
+          BVID: BV16eKb6PEUo
+          START_PART: ${{ matrix.start }}
+          END_PART: ${{ matrix.end }}
+          BATCH_LABEL: ${{ matrix.label }}
+        run: python tools/real_engineers/transcribe_batch.py
+      - name: Upload encrypted analysis artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-engineers-${{ matrix.label }}
+          path: |
+            batch_${{ matrix.label }}.tar.gz.enc
+            batch_${{ matrix.label }}.key.enc
+            batch_manifest_${{ matrix.label }}.json
+          if-no-files-found: error
+          retention-days: 1
