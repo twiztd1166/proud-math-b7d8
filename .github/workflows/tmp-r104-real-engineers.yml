@@ -1,0 +1,133 @@
+name: TEMP R104 Real Engineers Transcription
+
+on:
+  push:
+    branches:
+      - tmp/r104-real-engineers-20260930-publiccompute
+    paths:
+      - ".github/workflows/tmp-r104-real-engineers.yml"
+      - ".tmp/r104-real-engineers/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build-engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Reconstruct exact R54/R51 engine
+        shell: bash
+        run: |
+          chmod +x .tmp/r104-real-engineers/build_engine.sh
+          .tmp/r104-real-engineers/build_engine.sh "$GITHUB_WORKSPACE/.tmp/r104-real-engineers/engine"
+
+      - name: Upload exact engine
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: r104-exact-parakeet-engine
+          path: .tmp/r104-real-engineers/engine/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  transcribe:
+    needs: build-engine
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { label: "001-022", start: 1, end: 22 }
+          - { label: "023-038", start: 23, end: 38 }
+          - { label: "039-047", start: 39, end: 47 }
+          - { label: "048-058", start: 48, end: 58 }
+          - { label: "059-082", start: 59, end: 82 }
+          - { label: "083-089", start: 83, end: 89 }
+          - { label: "090-090", start: 90, end: 90 }
+          - { label: "091-091", start: 91, end: 91 }
+          - { label: "092-092", start: 92, end: 92 }
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Download exact engine
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: r104-exact-parakeet-engine
+          path: .tmp/r104-real-engineers/engine
+
+      - name: Prepare runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          chmod +x .tmp/r104-real-engineers/engine/parakeet-native-multirun
+          (cd .tmp/r104-real-engineers/engine && sha256sum -c FILES.sha256)
+          mkdir -p ".tmp/r104-real-engineers/output/${{ matrix.label }}"
+          ffmpeg -version | head -n 4 > ".tmp/r104-real-engineers/output/${{ matrix.label }}/FFMPEG_VERSION.txt"
+          ffprobe -version | head -n 4 > ".tmp/r104-real-engineers/output/${{ matrix.label }}/FFPROBE_VERSION.txt"
+
+      - name: Transcribe governed chunk
+        id: transcribe
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 .tmp/r104-real-engineers/transcribe_chunk.py \
+            --start "${{ matrix.start }}" \
+            --end "${{ matrix.end }}" \
+            --out ".tmp/r104-real-engineers/output/${{ matrix.label }}" \
+            --runner "$GITHUB_WORKSPACE/.tmp/r104-real-engineers/engine/parakeet-native-multirun" \
+            --model "$GITHUB_WORKSPACE/.tmp/r104-real-engineers/engine/tdt_ctc-110m-q8_0.gguf"
+
+      - name: Encrypt transcript bundle
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LABEL="${{ matrix.label }}"
+          ENC_DIR=".tmp/r104-real-engineers/encrypted"
+          OUT_DIR=".tmp/r104-real-engineers/output/$LABEL"
+          mkdir -p "$ENC_DIR" "$OUT_DIR"
+          TAR="$ENC_DIR/r104-real-engineers-$LABEL.tar.gz"
+          ENC="$TAR.enc"
+          KEY="$ENC_DIR/r104-real-engineers-$LABEL.key.enc"
+          PASS="$ENC_DIR/.pass-$LABEL"
+
+          tar -C "$OUT_DIR" -czf "$TAR" .
+          openssl rand -base64 48 > "$PASS"
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -pass file:"$PASS" -in "$TAR" -out "$ENC"
+          openssl pkeyutl -encrypt -pubin \
+            -inkey .tmp/r104-real-engineers/transcript_public.pem \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256 \
+            -pkeyopt rsa_mgf1_md:sha256 \
+            -in "$PASS" -out "$KEY"
+
+          sha256sum "$ENC" "$KEY" > "$ENC_DIR/r104-real-engineers-$LABEL.sha256"
+          rm -f "$PASS" "$TAR"
+          rm -rf "$OUT_DIR" .tmp/r104-real-engineers/_work
+
+      - name: Upload encrypted transcript artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: r104-real-engineers-${{ matrix.label }}
+          path: |
+            .tmp/r104-real-engineers/encrypted/r104-real-engineers-${{ matrix.label }}.tar.gz.enc
+            .tmp/r104-real-engineers/encrypted/r104-real-engineers-${{ matrix.label }}.key.enc
+            .tmp/r104-real-engineers/encrypted/r104-real-engineers-${{ matrix.label }}.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Preserve failure status after encrypted artifact upload
+        if: steps.transcribe.outcome == 'failure'
+        run: exit 1
