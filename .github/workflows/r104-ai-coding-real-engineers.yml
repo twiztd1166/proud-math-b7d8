@@ -1,0 +1,102 @@
+name: R104 AI Coding for Real Engineers Qualification
+
+on:
+  push:
+    branches:
+      - r104-ai-coding-real-engineers-20260930
+    paths:
+      - '.github/workflows/r104-ai-coding-real-engineers.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      R104_PAGES: "1"
+      PARAKEET_RELEASE: "v0.5.0"
+      PARAKEET_RUNTIME_SHA256: "636a9fc48ac023096037790f9b77d7e5043b200dd6399ec0438bd648c35d79b9"
+      PARAKEET_CLI_SHA256: "308752b14ea654e172a3e46b269cd13987ae779da19bffc97a1b065dcea2a1f1"
+      PARAKEET_MODEL_REVISION: "bf0af9f425fa01809cadec671b3cb672709d13e9"
+      PARAKEET_MODEL_SHA256: "614feee3a990cf0e672b0314f4da0c80ae8da9094507f5ccb7c42e43b5fc5a12"
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+
+      - name: Verify runner prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          ffmpeg -version | head -n 1
+          openssl version
+          curl --version | head -n 1
+
+      - name: Recover exact pinned FAST_READABLE runtime and model
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p runtime model work artifact
+          RUNTIME_URL="https://github.com/mudler/parakeet.cpp/releases/download/${PARAKEET_RELEASE}/parakeet-v0.5.0-bin-linux-cpu-x64.tar.gz"
+          MODEL_URL="https://huggingface.co/mudler/parakeet-cpp-gguf/resolve/${PARAKEET_MODEL_REVISION}/tdt_ctc-110m-q8_0.gguf?download=true"
+          curl -L --fail --retry 5 --retry-all-errors -o runtime/parakeet.tar.gz "$RUNTIME_URL"
+          echo "${PARAKEET_RUNTIME_SHA256}  runtime/parakeet.tar.gz" | sha256sum -c -
+          tar -xzf runtime/parakeet.tar.gz -C runtime
+          CLI="$(find runtime -type f -name parakeet-cli -print -quit)"
+          test -n "$CLI"
+          chmod +x "$CLI"
+          test "$(sha256sum "$CLI" | awk '{print $1}')" = "${PARAKEET_CLI_SHA256}"
+          echo "$CLI" > runtime/CLI_PATH.txt
+          curl -L --fail --retry 5 --retry-all-errors -o model/tdt_ctc-110m-q8_0.gguf "$MODEL_URL"
+          echo "${PARAKEET_MODEL_SHA256}  model/tdt_ctc-110m-q8_0.gguf" | sha256sum -c -
+
+      - name: Run R104 deterministic transcription router
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLI="$(cat runtime/CLI_PATH.txt)"
+          python3 r104-ai-coding-real-engineers/r104_transcribe.py             --manifest r104-ai-coding-real-engineers/MANIFEST.json             --cli "$CLI"             --model model/tdt_ctc-110m-q8_0.gguf             --out-root work             --pages "${R104_PAGES}"
+
+      - name: Encrypt all durable transcript output before artifact persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f work/PUBLIC_METADATA.json
+          cp work/PUBLIC_METADATA.json artifact/PUBLIC_METADATA.json
+          tar -C work -czf plaintext-transcripts.tar.gz plaintext
+          sha256sum plaintext-transcripts.tar.gz | awk '{print $1}' > artifact/PLAINTEXT_ARCHIVE_SHA256.txt
+          openssl rand -hex 32 > envelope_key.txt
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -md sha256             -in plaintext-transcripts.tar.gz             -out artifact/transcripts.tar.gz.enc             -pass file:envelope_key.txt
+          openssl pkeyutl -encrypt -pubin             -inkey r104-ai-coding-real-engineers/envelope_public_key.pem             -in envelope_key.txt             -out artifact/envelope_key.rsa_oaep_sha256.enc             -pkeyopt rsa_padding_mode:oaep             -pkeyopt rsa_oaep_md:sha256
+          KEYHEX="$(tr -d '\n\r' < envelope_key.txt)"
+          openssl dgst -sha256 -mac HMAC -macopt hexkey:"$KEYHEX"             artifact/transcripts.tar.gz.enc | awk '{print $2}' > artifact/transcripts.tar.gz.enc.hmac_sha256
+          sha256sum artifact/transcripts.tar.gz.enc artifact/envelope_key.rsa_oaep_sha256.enc artifact/PUBLIC_METADATA.json > artifact/FILES.sha256
+          rm -rf work/plaintext work/scratch plaintext-transcripts.tar.gz envelope_key.txt
+          test ! -e envelope_key.txt
+          test ! -d work/plaintext
+
+      - name: Upload encrypted short-lived artifact only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: r104-ai-coding-real-engineers-encrypted
+          path: artifact/
+          if-no-files-found: error
+          include-hidden-files: false
+          overwrite: false
+          compression-level: 0
+          retention-days: 1
+
+      - name: Qualification gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          d=json.load(open("artifact/PUBLIC_METADATA.json"))
+          assert d["expected_selected"] == 1, d
+          assert d["completed"] == 1 and d["failed"] == 0, d
+          assert d["validation"] == "PASS", d
+          print("PASS_R104_P1_QUALIFICATION")
+          PY
