@@ -121,7 +121,7 @@
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
       .filter(row=>!showRows.some(show=>String(show.event_start||'')===String(row.event_start||'')&&String(show.event||'').trim().toLowerCase()===String(row.event_label||'').trim().toLowerCase()))
       .slice()
-      .sort((a,b)=>String(a.event_start||a.estimated_sort_date||'9999-12-31').localeCompare(String(b.event_start||b.estimated_sort_date||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+      .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const occurrenceKey=(label,start)=>String(start||'')+'|'+String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
     const represented=new Set([
       ...showRows.map(row=>occurrenceKey(row.event,row.event_start)),
