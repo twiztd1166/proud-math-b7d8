@@ -35,6 +35,12 @@ function nativeHaptic(){nativeBridgePost('haptic')}
 function researchEmailAddresses(value){
   return [...new Set((String(value||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(email=>email.trim()))];
 }
+function researchPhoneNumbers(value){
+  return [...new Set((String(value||'').match(/(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]\d{3}[\s.-]\d{4}/g)||[]).map(phone=>phone.trim()))];
+}
+function researchPhoneHref(phone){
+  return 'tel:'+String(phone||'').replace(/[^\d+]/g,'');
+}
 function researchEmailParticipationLabel(row){
   const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
   const text=[row?.route_type,d.booking_status,d.eligibility_text,d.action_label].filter(Boolean).join(' ').toUpperCase();
@@ -75,6 +81,37 @@ function researchEmailDraft(row){
     'Paradise Exteriors',
   ].join('\n');
   return {email,subject,body,href:`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};
+}
+function researchCallScript(row){
+  const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
+  if(researchEmailAddresses(d.contact_text).length)return null;
+  const phone=researchPhoneNumbers(d.contact_text)[0]||'';
+  if(!phone)return null;
+  const event=String(row?.event_label||'this event').trim();
+  const range=String(row?.date_text||'').trim()||
+    (row?.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):'');
+  const route=researchEmailParticipationLabel(row);
+  const status=String(d.booking_status||row?.research_status||'').toUpperCase();
+  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(status);
+  const opening=late
+    ?`Hi, I’m calling on behalf of Paradise Exteriors about ${event}${range?` (${range})`:''}. We understand the standard deadline may have passed. Is any late inventory still available for Paradise Exteriors as a home-improvement company?`
+    :`Hi, I’m calling on behalf of Paradise Exteriors about ${event}${range?` (${range})`:''}. We’re interested in the ${route}. Is space still available for Paradise Exteriors as a home-improvement company?`;
+  const script=[
+    opening,
+    '',
+    'If yes, please confirm:',
+    '• Current price or package',
+    '• Application or commitment deadline',
+    '• Booth or activation footprint',
+    '• Setup and load-in requirements',
+    '• Insurance / COI requirements',
+    '• Category exclusivity or restrictions',
+    '',
+    'What is the best next step to apply or reserve the space?',
+    '',
+    'Thank you.',
+  ].join('\n');
+  return {phone,href:researchPhoneHref(phone),script};
 }
 async function shareShowSummary(show){
   const event=String(show?.event||'Paradise Shows');

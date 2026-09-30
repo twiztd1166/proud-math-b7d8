@@ -271,8 +271,12 @@ jobs:
           grep -q 'Manager move' ios/App/App/public/app-shows.js
           grep -q 'Create email draft' ios/App/App/public/app-shows.js
           grep -q 'Create email draft' ios/App/App/public/app-modals.js
+          grep -q 'Create call script' ios/App/App/public/app-shows.js
+          grep -q 'Create call script' ios/App/App/public/app-modals.js
           grep -q 'function researchEmailDraft' ios/App/App/public/app-core.js
+          grep -q 'function researchCallScript' ios/App/App/public/app-core.js
           grep -q 'mailto:' ios/App/App/public/app-core.js
+          grep -q 'tel:' ios/App/App/public/app-core.js
           grep -q 'Availability' ios/App/App/public/app-shows.js
           grep -q 'Value signal' ios/App/App/public/app-shows.js
           grep -q 'Value signal is a prioritization proxy, not a revenue forecast.' ios/App/App/public/app-shows.js
