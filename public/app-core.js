@@ -75,9 +75,18 @@ function researchFact(value,status='',max=180){
 function researchExternalHistoryText(value){
   let text=researchCompactText(value,220);
   if(!text)return '';
+  const participation=text.match(/^Paradise\s+(?:definitively\s+)?paid and enrolled for\s+(.+?)\s+in\s+(\d{4})\b/i);
+  if(participation)return `Paradise participated in ${participation[1]} in ${participation[2]}`;
   text=text.split(/\b(?:Treat as|Do not treat|not net-new)\b/i)[0].trim();
   text=text.replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'').replace(/\s*[·|/]\s*$/,'').replace(/\s{2,}/g,' ').trim();
   return text.replace(/[;,.\s]+$/,'').trim();
+}
+function researchExternalFactText(value){
+  const text=String(value||'').trim();
+  if(!text)return '';
+  const letters=text.replace(/[^A-Za-z]/g,'');
+  if(letters&&letters===letters.toUpperCase())return text.charAt(0)+text.slice(1).toLowerCase();
+  return text;
 }
 function researchContactPerson(value){
   const text=String(value||'').trim();
@@ -183,7 +192,7 @@ function researchEmailDraft(row){
       :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`);
   const factLines=profile.facts
     .filter(f=>!f.confirm&&f.label!=='Current booking status')
-    .map(f=>`• ${f.label}: ${f.text}`);
+    .map(f=>`• ${f.label}: ${researchExternalFactText(f.text)}`);
   const questionLines=profile.questions.map(q=>`• ${q}`);
   const body=[
     greeting,
