@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/calendar-2026-2027-20260929
+      - fix/final-2026-research-calendar-gaps-20260930
   pull_request:
     branches:
       - verify-stable-notes-20260929
@@ -32,8 +33,8 @@ jobs:
           grep -q '2027 Calendar' public/app-calendar.js
           grep -q 'renderCalendarV2' public/app-bind.js
           grep -Fq "\$\$('[data-calendar-year]').forEach" public/app-bind.js
-          grep -q 'app-calendar.js?v=20260930-research-v1' src/pages/index.astro
-          grep -q 'app-calendar.js?v=20260930-research-v1' public/index-standalone.html
+          grep -q 'app-calendar.js?v=20260930-research-v2' src/pages/index.astro
+          grep -q 'app-calendar.js?v=20260930-research-v2' public/index-standalone.html
           grep -q "'/app-calendar.js'" public/sw.js
           grep -q "'app-calendar.js'" scripts/prepare-ios-app.mjs
 
@@ -50,7 +51,14 @@ jobs:
           rows=[r for r in x.get('shows',[]) if str(r.get('event_start') or '').startswith('2026-')]
           assert len(rows) >= 29, len(rows)
           assert any(str(r.get('event_start') or '').startswith('2026-10-') for r in rows), 'missing October 2026 rows'
-          print(f'2026 governed dated rows: {len(rows)}')
+          research=x.get('researchCalendarControls') or []
+          assert len(research) == 117, len(research)
+          q4=[r for r in research if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
+          assert len(q4) == 116, len(q4)
+          labels={r.get('event_label') for r in research}
+          assert 'NASA MAX POWER / Salute to America in Space' in labels
+          assert 'Tradition Neighborhood Market' in labels
+          print(f'2026 governed dated rows: {len(rows)}; recovered research: {len(research)}')
           PY
 
       - name: Verify published 2027 plan remains available
