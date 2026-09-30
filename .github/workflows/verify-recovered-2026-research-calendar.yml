@@ -60,3 +60,9 @@ jobs:
           grep -q "Governed opportunities" public/app-calendar.js
           grep -q "Recovered research" public/app-calendar.js
           grep -q "they are not represented as booked/current operating shows" public/app-calendar.js
+
+      - name: Guard pull-request vs production smoke boundary
+        run: |
+          grep -q "if: github.event_name == 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
+          grep -q "if: github.event_name != 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
+          grep -q "Stable-production convergence is intentionally deferred until the production-branch push." .github/workflows/debug-paradise-shows-live.yml
