@@ -192,8 +192,8 @@ function researchManagerMove(row){
   const contactAction=(emailLabel,callLabel,fallback)=>hasEmail?emailLabel:(hasCallScript?callLabel:fallback);
   if(availability.code==='REVERIFY'||structured?.label==='REVERIFY / REVIEW')return {code:'REVIEW',label:'REVERIFY / REVIEW',rank:2};
   if(disposition==='SOLD_OUT'||disposition==='HOLD'||structured?.code==='HOLD')return {code:'HOLD',label:'HOLD / REVIEW',rank:4};
-  if(availability.code==='LATE'&&structured?.code!=='APPLY')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — LATE INVENTORY','CREATE CALL SCRIPT — LATE INVENTORY','CONTACT — LATE INVENTORY'),rank:1};
-  if(availability.code==='ALTERNATE'&&structured?.code!=='APPLY')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — ALTERNATE ROUTE','CREATE CALL SCRIPT — ALTERNATE ROUTE','CONTACT — ALTERNATE ROUTE'),rank:1};
+  if(availability.code==='LATE'&&['CONTACT','CONTACT_APPLY'].includes(structured?.code))return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — LATE INVENTORY','CREATE CALL SCRIPT — LATE INVENTORY','CONTACT — LATE INVENTORY'),rank:1};
+  if(availability.code==='ALTERNATE'&&['CONTACT','CONTACT_APPLY'].includes(structured?.code))return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — ALTERNATE ROUTE','CREATE CALL SCRIPT — ALTERNATE ROUTE','CONTACT — ALTERNATE ROUTE'),rank:1};
   if(structured)return structured;
   const contact=/\b(CONTACT|EMAIL|CALL|ASK|REQUEST|INQUIRY|REACH OUT)\b/.test(next);
   const apply=/\b(APPLY|SUBMIT|REGISTER|SIGN UP|APPLICATION)\b/.test(next);
