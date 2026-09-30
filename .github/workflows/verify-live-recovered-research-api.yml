@@ -41,6 +41,14 @@ jobs:
           assert all((r.get('detail_data') or {}).get('research_summary') for r in research), 'research_summary missing'
           assert all((r.get('detail_data') or {}).get('booking_status') for r in research), 'booking_status missing'
           assert all((r.get('detail_data') or {}).get('next_action') for r in research), 'next_action missing'
+          assert all((r.get('detail_data') or {}).get('contact_text') for r in research), 'contact_text missing'
+          assert all(str((r.get('detail_data') or {}).get('contact_status') or '').upper() != 'NOT VERIFIED' for r in research), 'contact_status still NOT VERIFIED'
+          assert all(str((r.get('detail_data') or {}).get('contact_text') or '').strip().lower() != 'not verified' for r in research), 'contact_text still placeholder'
+          contacts={r.get('event_label'):(r.get('detail_data') or {}).get('contact_text') for r in research}
+          assert 'Vendors@BattleBrosEvents.com' in contacts.get('Florida Creatives Market — Port St. Lucie',''), contacts.get('Florida Creatives Market — Port St. Lucie')
+          assert 'specialevents@cityofpsl.com' in contacts.get('Port St. Lucie Oktoberfest',''), contacts.get('Port St. Lucie Oktoberfest')
+          assert 'sponsorships@cancommunityhealth.org' in contacts.get('World AIDS Day Concert',''), contacts.get('World AIDS Day Concert')
+          assert 'jbrito@wellingtonfl.gov' in contacts.get('Wellington Holiday Parade',''), contacts.get('Wellington Holiday Parade')
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
           wanted={
