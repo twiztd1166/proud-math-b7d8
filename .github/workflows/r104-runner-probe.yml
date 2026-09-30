@@ -1,0 +1,20 @@
+name: R104 Public Runner Probe
+
+on:
+  push:
+    branches:
+      - r104-ai-coding-real-engineers-20260930
+    paths:
+      - '.github/workflows/r104-runner-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          echo "R104_PUBLIC_RUNNER_PROBE_OK"
+          uname -a
