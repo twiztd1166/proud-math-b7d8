@@ -1,0 +1,56 @@
+name: Verify full 2026 research calendar
+
+on:
+  push:
+    branches:
+      - agent/full-2026-research-calendar-20260930
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend JavaScript syntax
+        shell: bash
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+          node --check public/app-shows.js
+
+      - name: Check research calendar API contract
+        shell: bash
+        run: |
+          grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
+          grep -q "researchCalendarControls:l.data||\\[\\]" supabase/functions/shows-api/index.ts
+          grep -q "ok:true,version:19" supabase/functions/shows-api/index.ts
+          grep -q "researchCalendarControls:\\[\\]" public/app-core.js
+          grep -q "d.researchCalendarControls||\\[\\]" public/app-core.js
+
+      - name: Check full 2026 calendar renderer
+        shell: bash
+        run: |
+          grep -q "function calendar2026ResearchItem" public/app-calendar.js
+          grep -q "researchCalendarControls" public/app-calendar.js
+          grep -q "Research controls" public/app-calendar.js
+          grep -q "Date TBD" public/app-calendar.js
+          grep -q "20260930-q4-full-v1" src/pages/index.astro
+          grep -q "20260930-q4-full-v1" public/index-standalone.html
+          grep -q "paradise-shows-public-v12" public/sw.js
+
+      - name: Preserve separate operating and research semantics
+        shell: bash
+        run: |
+          grep -q "Operating" public/app-calendar.js
+          grep -q "Verified opportunities" public/app-calendar.js
+          grep -q "researchStatus" public/app-calendar.js
+          grep -q "Research controls remain labeled separately" public/app-calendar.js
