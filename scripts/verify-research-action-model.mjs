@@ -27,6 +27,24 @@ vm.runInContext(`${block}
 this.api={researchAvailability,researchStructuredAction,researchManagerMove};
 `,sandbox);
 
+const jupiterAvailability=sandbox.api.researchAvailability({
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'BUSINESS EXHIBITOR REGISTRATION ROUTE LIVE · SPONSOR DEADLINE PASSED'},
+});
+if(jupiterAvailability.code!=='OPEN')throw new Error(`Jupiter live exhibitor route misclassified: ${JSON.stringify(jupiterAvailability)}`);
+
+const brewAvailability=sandbox.api.researchAvailability({
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT VENDOR AND SPONSOR OPTIONS ACTIVE · $5,000 CAPTAIN SOLD OUT'},
+});
+if(brewAvailability.code!=='OPEN')throw new Error(`Single sold-out sponsorship tier closed the whole event: ${JSON.stringify(brewAvailability)}`);
+
+const snowAvailability=sandbox.api.researchAvailability({
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'CURRENT 2026 BUSINESS SPONSORSHIP ROUTE ACTIVE · NONPROFIT VENDOR SPACES FILLED'},
+});
+if(snowAvailability.code!=='ALTERNATE')throw new Error(`Closed vendor lane with active sponsor route lost alternate classification: ${JSON.stringify(snowAvailability)}`);
+
 const reviewRow={
   disposition:'PURSUE',
   research_status:'CURRENT_REVERIFIED',
@@ -71,6 +89,9 @@ if(!guardText)throw new Error('Guard fixture invalid');
 
 console.log({
   research_action_model:'PASS',
+  jupiter_availability:jupiterAvailability.label,
+  brew_availability:brewAvailability.label,
+  snow_availability:snowAvailability.label,
   structured_review:reviewMove.label,
   late_email:lateMove.label,
   structured_apply:applyMove.label,
