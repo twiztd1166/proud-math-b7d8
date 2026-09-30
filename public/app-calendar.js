@@ -32,30 +32,56 @@
     </article>`;
   }
 
+  function calendar2026OpportunityItem(row){
+    const review=row.review||{};
+    const disposition=String(review.disposition||'WATCH').toUpperCase();
+    const badge=disposition==='PURSUE'?'ready':disposition==='HOLD'?'hold':'dateonly';
+    const start=date(row.event_start);
+    const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
+    const range=end?start+' \u2013 '+end:start;
+    const cost=Number.isFinite(Number(row.booking_cost_min))
+      ?(Number(row.booking_cost_min)===Number(row.booking_cost_max)?money(row.booking_cost_min):money(row.booking_cost_min)+' \u2013 '+money(row.booking_cost_max))
+      :String(row.current_cost_status||row.opportunity_status||'Live opportunity');
+    const next=String(review.next_step||row.action_label||'').trim();
+    return `<article class="calendarItem">
+      <div class="calendarDate"><b>${esc(range)}</b><span>${esc(row.profile_id||'')}</span></div>
+      <div class="calendarMain"><div><h3>${esc(row.event_label||row.profile_id)}</h3><p>${esc(cost)}</p></div><span class="badge ${badge}">${esc(disposition)}</span></div>
+      ${next?`<div class="calendarNext"><span>Next</span><b>${esc(next)}</b></div>`:''}
+      <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
+    </article>`;
+  }
   function render2026Calendar(){
-    const rows=(state.shows||[])
+    const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
       .slice()
       .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event||'').localeCompare(String(b.event||'')));
-    const active=rows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
-    const skipped=rows.filter(row=>!active.includes(row));
+    const opportunityRows=(state.calendarOpportunities||[])
+      .filter(row=>String(row.event_start||'').startsWith('2026-'))
+      .filter(row=>!showRows.some(show=>String(show.event_start||'')===String(row.event_start||'')&&String(show.event||'').trim().toLowerCase()===String(row.event_label||'').trim().toLowerCase()))
+      .slice()
+      .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+    const active=showRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
     const today=new Date().toISOString().slice(0,10);
-    const upcoming=active.filter(row=>String(row.event_end||row.event_start||'')>=today);
+    const upcomingShows=active.filter(row=>String(row.event_end||row.event_start||'')>=today);
+    const upcomingOpportunities=opportunityRows.filter(row=>String(row.event_end||row.event_start||'')>=today&&String(row.review?.disposition||'WATCH').toUpperCase()!=='HOLD');
+    const upcoming=upcomingShows.length+upcomingOpportunities.length;
     const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     const monthHtml=months.map((name,index)=>{
       const month=index+1;
-      const monthRows=rows.filter(row=>calendarMonthNumber(row)===month);
-      if(!monthRows.length)return '';
-      const activeCount=monthRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
-      const skipCount=monthRows.length-activeCount;
+      const monthShows=showRows.filter(row=>calendarMonthNumber(row)===month);
+      const monthOpportunities=opportunityRows.filter(row=>calendarMonthNumber(row)===month);
+      if(!monthShows.length&&!monthOpportunities.length)return '';
+      const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
+      const skipCount=monthShows.length-activeCount;
       return `<section class="calendarMonth">
-        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} in play${skipCount?' \u00b7 '+skipCount+' skip':''}</p></div></div>
-        ${monthRows.map(calendar2026Item).join('')}
+        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}</p></div></div>
+        ${monthShows.map(calendar2026Item).join('')}
+        ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
       </section>`;
     }).join('');
     return `${calendarYearBar(2026)}
-      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>The governed 2026 operating calendar from the current show controls, including completed, upcoming, and explicitly skipped events.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
-      <div class="calendarStats"><div><b>${rows.length}</b><span>Dated events</span></div><div><b>${active.length}</b><span>In play</span></div><div><b>${upcoming.length}</b><span>Upcoming</span></div></div>
+      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Governed 2026 operating controls plus verified live/rebook opportunities. Research controls not yet normalized into app data are kept out until reconciled.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
+      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length}</b><span>Governed dated entries</span></div><div><b>${showRows.length}</b><span>Operating controls</span></div><div><b>${opportunityRows.length}</b><span>Additional opportunities</span></div></div>
       ${monthHtml||'<div class="empty">No governed 2026 dated show records are available.</div>'}`;
   }
 
