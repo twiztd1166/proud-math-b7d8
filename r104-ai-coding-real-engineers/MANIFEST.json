@@ -1,0 +1,930 @@
+{
+  "schema_version": "1.0",
+  "project": "Matt Pocock — AI Coding for Real Engineers",
+  "user_source_bvid": "BV16eKb6PEUo",
+  "english_identity_mirror_bvid": "BV1Y6Ju6vEeN",
+  "expected_parts": 92,
+  "identity_validation": "PASS_92_OF_92_DURATION_ALIGNED",
+  "items": [
+    {
+      "page": 1,
+      "target_cid": 40156136036,
+      "target_title": "P1 开始前的方向",
+      "mirror_cid": 39124863652,
+      "english_title": "001 Where We're Going Before We Start",
+      "duration_sec": 235,
+      "mirror_duration_sec": 235,
+      "asr_language": "eng"
+    },
+    {
+      "page": 2,
+      "target_cid": 40156136321,
+      "target_title": "P2 开始前探索Discord",
+      "mirror_cid": 39124864118,
+      "english_title": "002 Navigating The Discord Before We Start",
+      "duration_sec": 183,
+      "mirror_duration_sec": 183,
+      "asr_language": "eng"
+    },
+    {
+      "page": 3,
+      "target_cid": 40156136539,
+      "target_title": "P3 开始前的仓库设置",
+      "mirror_cid": 39124864584,
+      "english_title": "003 Repo Setup Before We Start",
+      "duration_sec": 208,
+      "mirror_duration_sec": 208,
+      "asr_language": "eng"
+    },
+    {
+      "page": 4,
+      "target_cid": 40156136744,
+      "target_title": "P4 开始前的数据库迁移",
+      "mirror_cid": 39124926609,
+      "english_title": "004 Database Migrations Before We Start",
+      "duration_sec": 220,
+      "mirror_duration_sec": 220,
+      "asr_language": "eng"
+    },
+    {
+      "page": 5,
+      "target_cid": 40156137079,
+      "target_title": "P5 开始前为课程配置Claude",
+      "mirror_cid": 39124926735,
+      "english_title": "005 Setting Up Claude For The Course Before We Start",
+      "duration_sec": 176,
+      "mirror_duration_sec": 176,
+      "asr_language": "eng"
+    },
+    {
+      "page": 6,
+      "target_cid": 40156137338,
+      "target_title": "P6 开始前如何学习本课程",
+      "mirror_cid": 39124927034,
+      "english_title": "006 How To Take This Course Before We Start",
+      "duration_sec": 369,
+      "mirror_duration_sec": 369,
+      "asr_language": "eng"
+    },
+    {
+      "page": 7,
+      "target_cid": 40156137444,
+      "target_title": "P7 开始前的答疑时间",
+      "mirror_cid": 39124927495,
+      "english_title": "007 Office Hours Before We Start",
+      "duration_sec": 57,
+      "mirror_duration_sec": 57,
+      "asr_language": "eng"
+    },
+    {
+      "page": 8,
+      "target_cid": 40156137805,
+      "target_title": "P8 认识Claude Code简介",
+      "mirror_cid": 39124927625,
+      "english_title": "008 Intro Getting To Know Claude Code",
+      "duration_sec": 49,
+      "mirror_duration_sec": 49,
+      "asr_language": "eng"
+    },
+    {
+      "page": 9,
+      "target_cid": 40156138163,
+      "target_title": "P9 管理Claude Code会话",
+      "mirror_cid": 39124927989,
+      "english_title": "009 Managing Your Claude Code Session Getting To Know Claude Code",
+      "duration_sec": 247,
+      "mirror_duration_sec": 247,
+      "asr_language": "eng"
+    },
+    {
+      "page": 10,
+      "target_cid": 40156138378,
+      "target_title": "P10 终端中的提示",
+      "mirror_cid": 39124928185,
+      "english_title": "010 Prompting In The Terminal Getting To Know Claude Code",
+      "duration_sec": 146,
+      "mirror_duration_sec": 146,
+      "asr_language": "eng"
+    },
+    {
+      "page": 11,
+      "target_cid": 40156138541,
+      "target_title": "P11 Claude与你的IDE",
+      "mirror_cid": 39124928434,
+      "english_title": "011 Claude And Your IDE Getting To Know Claude Code",
+      "duration_sec": 118,
+      "mirror_duration_sec": 118,
+      "asr_language": "eng"
+    },
+    {
+      "page": 12,
+      "target_cid": 40156138961,
+      "target_title": "P12 时间的前进与回溯",
+      "mirror_cid": 39124928531,
+      "english_title": "012 Going Forwards And Backwards In Time Getting To Know Claude Code",
+      "duration_sec": 185,
+      "mirror_duration_sec": 185,
+      "asr_language": "eng"
+    },
+    {
+      "page": 13,
+      "target_cid": 40156139038,
+      "target_title": "P13 运行Bash命令",
+      "mirror_cid": 39124928859,
+      "english_title": "013 Running Bash Commands Getting To Know Claude Code",
+      "duration_sec": 227,
+      "mirror_duration_sec": 227,
+      "asr_language": "eng"
+    },
+    {
+      "page": 14,
+      "target_cid": 40156139511,
+      "target_title": "P14 权限",
+      "mirror_cid": 39124929262,
+      "english_title": "014 Permissions Getting To Know Claude Code",
+      "duration_sec": 256,
+      "mirror_duration_sec": 256,
+      "asr_language": "eng"
+    },
+    {
+      "page": 15,
+      "target_cid": 40156201075,
+      "target_title": "P15 LLM的局限性",
+      "mirror_cid": 39124929374,
+      "english_title": "015 The Constraints Of LLMs Day 1 Fundamentals",
+      "duration_sec": 492,
+      "mirror_duration_sec": 492,
+      "asr_language": "eng"
+    },
+    {
+      "page": 16,
+      "target_cid": 40156202049,
+      "target_title": "P16 什么是子代理",
+      "mirror_cid": 39124929903,
+      "english_title": "016 What Are Subagents Day 1 Fundamentals",
+      "duration_sec": 152,
+      "mirror_duration_sec": 152,
+      "asr_language": "eng"
+    },
+    {
+      "page": 17,
+      "target_cid": 40156202412,
+      "target_title": "P17 代码库探索",
+      "mirror_cid": 39124930275,
+      "english_title": "017 Codebase Exploration Day 1 Fundamentals",
+      "duration_sec": 92,
+      "mirror_duration_sec": 92,
+      "asr_language": "eng"
+    },
+    {
+      "page": 18,
+      "target_cid": 40156202266,
+      "target_title": "P18 代码库探索解决方案",
+      "mirror_cid": 39124930408,
+      "english_title": "018 Codebase Exploration Solution",
+      "duration_sec": 167,
+      "mirror_duration_sec": 167,
+      "asr_language": "eng"
+    },
+    {
+      "page": 19,
+      "target_cid": 40156202499,
+      "target_title": "P19 构建一个功能",
+      "mirror_cid": 39124930514,
+      "english_title": "019 Build A Feature Day 1 Fundamentals",
+      "duration_sec": 122,
+      "mirror_duration_sec": 122,
+      "asr_language": "eng"
+    },
+    {
+      "page": 20,
+      "target_cid": 40156202724,
+      "target_title": "P20 构建功能解决方案",
+      "mirror_cid": 39124992180,
+      "english_title": "020 Build A Feature Solution",
+      "duration_sec": 491,
+      "mirror_duration_sec": 491,
+      "asr_language": "eng"
+    },
+    {
+      "page": 21,
+      "target_cid": 40156202896,
+      "target_title": "P21 非确定性",
+      "mirror_cid": 39124992846,
+      "english_title": "021 Non Determinism Day 1 Fundamentals",
+      "duration_sec": 104,
+      "mirror_duration_sec": 104,
+      "asr_language": "eng"
+    },
+    {
+      "page": 22,
+      "target_cid": 40156203060,
+      "target_title": "P22 在状态行中显示上下文",
+      "mirror_cid": 39124993034,
+      "english_title": "022 Showing Context In The Status Line Day 1 Fundamentals",
+      "duration_sec": 216,
+      "mirror_duration_sec": 216,
+      "asr_language": "eng"
+    },
+    {
+      "page": 23,
+      "target_cid": 40156203187,
+      "target_title": "P23 为什么计划模式很糟糕",
+      "mirror_cid": 39124993189,
+      "english_title": "023 Why Plan Mode Sucks Day 1 Fundamentals",
+      "duration_sec": 304,
+      "mirror_duration_sec": 304,
+      "asr_language": "eng"
+    },
+    {
+      "page": 24,
+      "target_cid": 40156203475,
+      "target_title": "P24 Grill执行-清除循环",
+      "mirror_cid": 39124993596,
+      "english_title": "024 The Grill Execute Clear Loop Day 1 Fundamentals",
+      "duration_sec": 113,
+      "mirror_duration_sec": 113,
+      "asr_language": "eng"
+    },
+    {
+      "page": 25,
+      "target_cid": 40156203503,
+      "target_title": "P25 Grill执行-清除循环解决方案",
+      "mirror_cid": 39124993766,
+      "english_title": "025 The Grill Execute Clear Loop solution",
+      "duration_sec": 564,
+      "mirror_duration_sec": 564,
+      "asr_language": "eng"
+    },
+    {
+      "page": 26,
+      "target_cid": 40156204263,
+      "target_title": "P26 压缩",
+      "mirror_cid": 39124994996,
+      "english_title": "026 Compaction Day 1 Fundamentals",
+      "duration_sec": 477,
+      "mirror_duration_sec": 477,
+      "asr_language": "eng"
+    },
+    {
+      "page": 27,
+      "target_cid": 40156204605,
+      "target_title": "P27 交接",
+      "mirror_cid": 39124995584,
+      "english_title": "027 Handing Off Day 1 Fundamentals",
+      "duration_sec": 211,
+      "mirror_duration_sec": 211,
+      "asr_language": "eng"
+    },
+    {
+      "page": 28,
+      "target_cid": 40156204669,
+      "target_title": "P28 什么是代理的MD文件",
+      "mirror_cid": 39124995799,
+      "english_title": "028 What Is An Agents MD File Day 2 Steering",
+      "duration_sec": 383,
+      "mirror_duration_sec": 383,
+      "asr_language": "eng"
+    },
+    {
+      "page": 29,
+      "target_cid": 40156267335,
+      "target_title": "P29 使用代理MD文件引导代理",
+      "mirror_cid": 39125058154,
+      "english_title": "029 Steering An Agent With The Agents MD File Day 2 Steering",
+      "duration_sec": 140,
+      "mirror_duration_sec": 140,
+      "asr_language": "eng"
+    },
+    {
+      "page": 30,
+      "target_cid": 40156267394,
+      "target_title": "P30 使用代理MD文件引导代理解决方案",
+      "mirror_cid": 39125058314,
+      "english_title": "030 Steering An Agent With The Agents MD File Solution",
+      "duration_sec": 216,
+      "mirror_duration_sec": 216,
+      "asr_language": "eng"
+    },
+    {
+      "page": 31,
+      "target_cid": 40156267754,
+      "target_title": "P31 渐进式披露",
+      "mirror_cid": 39125058754,
+      "english_title": "031 Progressive Disclosure Day 2 Steering",
+      "duration_sec": 198,
+      "mirror_duration_sec": 198,
+      "asr_language": "eng"
+    },
+    {
+      "page": 32,
+      "target_cid": 40156267915,
+      "target_title": "P32 什么是代理技能",
+      "mirror_cid": 39125059081,
+      "english_title": "032 What Are Agent Skills Day 2 Steering",
+      "duration_sec": 418,
+      "mirror_duration_sec": 418,
+      "asr_language": "eng"
+    },
+    {
+      "page": 33,
+      "target_cid": 40156268345,
+      "target_title": "P33 使用技能进行引导",
+      "mirror_cid": 39125059434,
+      "english_title": "033 Using Skills For Steering Day 2 Steering",
+      "duration_sec": 106,
+      "mirror_duration_sec": 106,
+      "asr_language": "eng"
+    },
+    {
+      "page": 34,
+      "target_cid": 40156268326,
+      "target_title": "P34 使用技能进行引导解决方案",
+      "mirror_cid": 39125059852,
+      "english_title": "034 Using Skills For Steering Solutions",
+      "duration_sec": 260,
+      "mirror_duration_sec": 260,
+      "asr_language": "eng"
+    },
+    {
+      "page": 35,
+      "target_cid": 40156268433,
+      "target_title": "P35 自动记忆",
+      "mirror_cid": 39125060136,
+      "english_title": "035 Automatic Memory Day 2 Steering",
+      "duration_sec": 133,
+      "mirror_duration_sec": 133,
+      "asr_language": "eng"
+    },
+    {
+      "page": 36,
+      "target_cid": 40156268942,
+      "target_title": "P36 如何应对大规模任务",
+      "mirror_cid": 39125060592,
+      "english_title": "036 How To Tackle Massive Tasks Day 3 Planning",
+      "duration_sec": 199,
+      "mirror_duration_sec": 199,
+      "asr_language": "eng"
+    },
+    {
+      "page": 37,
+      "target_cid": 40156269095,
+      "target_title": "P37 用这个技能写出优秀的PRD",
+      "mirror_cid": 39125060692,
+      "english_title": "037 Write Great PRDs With This Skill Day 3 Planning",
+      "duration_sec": 162,
+      "mirror_duration_sec": 162,
+      "asr_language": "eng"
+    },
+    {
+      "page": 38,
+      "target_cid": 40156269664,
+      "target_title": "P38 用这个技能写出优秀PRD的解决方案",
+      "mirror_cid": 39125060897,
+      "english_title": "038 Write Great PRDs With This Skill Solution",
+      "duration_sec": 680,
+      "mirror_duration_sec": 680,
+      "asr_language": "eng"
+    },
+    {
+      "page": 39,
+      "target_cid": 40156270204,
+      "target_title": "P39 使用多阶段计划跨多个上下文窗口拆分功能",
+      "mirror_cid": 39125123711,
+      "english_title": "039 Split Features Across Multiple Context Windows With Multi Phase Plans Day 3",
+      "duration_sec": 59,
+      "mirror_duration_sec": 59,
+      "asr_language": "eng"
+    },
+    {
+      "page": 40,
+      "target_cid": 40156270377,
+      "target_title": "P40 使用多阶段计划跨多个上下文窗口拆分功能解决方案",
+      "mirror_cid": 39125123732,
+      "english_title": "040 Split Features Across Multiple Context Windows With Multi Phase Plans Soluti",
+      "duration_sec": 220,
+      "mirror_duration_sec": 220,
+      "asr_language": "eng"
+    },
+    {
+      "page": 41,
+      "target_cid": 40156270548,
+      "target_title": "P41 什么是追踪子弹",
+      "mirror_cid": 39125124404,
+      "english_title": "041 What Are Tracer Bullets Day 3 Planning",
+      "duration_sec": 190,
+      "mirror_duration_sec": 190,
+      "asr_language": "eng"
+    },
+    {
+      "page": 42,
+      "target_cid": 40156332222,
+      "target_title": "P42 在我们的多阶段计划中使用追踪子弹",
+      "mirror_cid": 39125124754,
+      "english_title": "042 Use Tracer Bullets In Our Multi Phase Plan Day 3 Planning",
+      "duration_sec": 70,
+      "mirror_duration_sec": 70,
+      "asr_language": "eng"
+    },
+    {
+      "page": 43,
+      "target_cid": 40156332304,
+      "target_title": "P43 在我们的多阶段计划中使用追踪子弹解决方案",
+      "mirror_cid": 39125124877,
+      "english_title": "043 Use Tracer Bullets In Our Multi Phase Plan Solution",
+      "duration_sec": 236,
+      "mirror_duration_sec": 236,
+      "asr_language": "eng"
+    },
+    {
+      "page": 44,
+      "target_cid": 40156332564,
+      "target_title": "P44 执行我们的多阶段计划",
+      "mirror_cid": 39125125437,
+      "english_title": "044 Executing Our Multi Phase Plan Day 3 Planning",
+      "duration_sec": 82,
+      "mirror_duration_sec": 82,
+      "asr_language": "eng"
+    },
+    {
+      "page": 45,
+      "target_cid": 40156333384,
+      "target_title": "P45 执行我们的多阶段计划解决方案",
+      "mirror_cid": 39125125788,
+      "english_title": "045 Executing Our Multi Phase Plan Solution",
+      "duration_sec": 396,
+      "mirror_duration_sec": 396,
+      "asr_language": "eng"
+    },
+    {
+      "page": 46,
+      "target_cid": 40156333778,
+      "target_title": "P46 向用户提问",
+      "mirror_cid": 39125126161,
+      "english_title": "046 Ask User Question Day 3 Planning",
+      "duration_sec": 107,
+      "mirror_duration_sec": 107,
+      "asr_language": "eng"
+    },
+    {
+      "page": 47,
+      "target_cid": 40156333986,
+      "target_title": "P47 面向真实工程师的AI编程答疑时间（第一天上午）",
+      "mirror_cid": 39125126340,
+      "english_title": "047 AI Coding for Real Engineers Office Hours (Day 1 Morning)",
+      "duration_sec": 2981,
+      "mirror_duration_sec": 2981,
+      "asr_language": "eng"
+    },
+    {
+      "page": 48,
+      "target_cid": 40156335793,
+      "target_title": "P48 面向真实工程师的AI编程答疑时间（第一天下午）",
+      "mirror_cid": 39125256642,
+      "english_title": "048 AI Coding for Real Engineers Office Hours (Day 1 Afternoon)",
+      "duration_sec": 2696,
+      "mirror_duration_sec": 2696,
+      "asr_language": "eng"
+    },
+    {
+      "page": 49,
+      "target_cid": 40156398518,
+      "target_title": "P49 代码廉价吗",
+      "mirror_cid": 39125320678,
+      "english_title": "049 Is Code Cheap Day 4 Feedback Loops",
+      "duration_sec": 365,
+      "mirror_duration_sec": 365,
+      "asr_language": "eng"
+    },
+    {
+      "page": 50,
+      "target_cid": 40156398789,
+      "target_title": "P50 引导代理使用技能实现反馈循环",
+      "mirror_cid": 39125321210,
+      "english_title": "050 Steering Agents To Use Feedback Loops With Skills Day 4 Feedback Loops",
+      "duration_sec": 201,
+      "mirror_duration_sec": 201,
+      "asr_language": "eng"
+    },
+    {
+      "page": 51,
+      "target_cid": 40156398953,
+      "target_title": "P51 构建一个执行工作技能 - 第4天反馈循环",
+      "mirror_cid": 39125321509,
+      "english_title": "051 Building A Do Work Skill Day 4 Feedback Loops",
+      "duration_sec": 46,
+      "mirror_duration_sec": 46,
+      "asr_language": "eng"
+    },
+    {
+      "page": 52,
+      "target_cid": 40156399160,
+      "target_title": "P52 构建一个执行工作技能 - 解决方案",
+      "mirror_cid": 39125321628,
+      "english_title": "052 Building A Do Work Skill Solution",
+      "duration_sec": 186,
+      "mirror_duration_sec": 186,
+      "asr_language": "eng"
+    },
+    {
+      "page": 53,
+      "target_cid": 40156399260,
+      "target_title": "P53 使用我们的执行工作技能 - 第4天反馈循环",
+      "mirror_cid": 39125321836,
+      "english_title": "053 Using Our Do Work Skill Day 4 Feedback Loops",
+      "duration_sec": 66,
+      "mirror_duration_sec": 66,
+      "asr_language": "eng"
+    },
+    {
+      "page": 54,
+      "target_cid": 40156399366,
+      "target_title": "P54 使用我们的执行工作技能 - 解决方案",
+      "mirror_cid": 39125322122,
+      "english_title": "054 Using Our Do Work Skill Solution",
+      "duration_sec": 183,
+      "mirror_duration_sec": 183,
+      "asr_language": "eng"
+    },
+    {
+      "page": 55,
+      "target_cid": 40156399619,
+      "target_title": "P55 使用预提交修复代理的格式错误 - 第4天反馈循环",
+      "mirror_cid": 39125322097,
+      "english_title": "055 Fixing Agents Broken Formatting With Pre Commit Day 4 Feedback Loops",
+      "duration_sec": 232,
+      "mirror_duration_sec": 232,
+      "asr_language": "eng"
+    },
+    {
+      "page": 56,
+      "target_cid": 40156399914,
+      "target_title": "P56 什么是红绿重构 - 第4天反馈循环",
+      "mirror_cid": 39125322566,
+      "english_title": "056 What Is Red Green Refactor Day 4 Feedback Loops",
+      "duration_sec": 223,
+      "mirror_duration_sec": 223,
+      "asr_language": "eng"
+    },
+    {
+      "page": 57,
+      "target_cid": 40156400169,
+      "target_title": "P57 红绿重构 - 第4天反馈循环",
+      "mirror_cid": 39125322763,
+      "english_title": "057 Red Green Refactor Day 4 Feedback Loops",
+      "duration_sec": 95,
+      "mirror_duration_sec": 95,
+      "asr_language": "eng"
+    },
+    {
+      "page": 58,
+      "target_cid": 40156400188,
+      "target_title": "P58 红绿重构 - 解决方案",
+      "mirror_cid": 39125322873,
+      "english_title": "058 Red Green Refactor Solution",
+      "duration_sec": 270,
+      "mirror_duration_sec": 270,
+      "asr_language": "eng"
+    },
+    {
+      "page": 59,
+      "target_cid": 40156400476,
+      "target_title": "P59 什么是AFK代理 - 第5天AFK代理",
+      "mirror_cid": 39125323543,
+      "english_title": "059 What Is An AFK Agent Day 5 AFK Agents",
+      "duration_sec": 145,
+      "mirror_duration_sec": 145,
+      "asr_language": "eng"
+    },
+    {
+      "page": 60,
+      "target_cid": 40156400577,
+      "target_title": "P60 沙堡 - 第5天AFK代理",
+      "mirror_cid": 39125323633,
+      "english_title": "060 Sandcastle Day 5 AFK Agents",
+      "duration_sec": 116,
+      "mirror_duration_sec": 116,
+      "asr_language": "eng"
+    },
+    {
+      "page": 61,
+      "target_cid": 40156400755,
+      "target_title": "P61 尝试HITL代理 - 第5天AFK代理",
+      "mirror_cid": 39125385268,
+      "english_title": "061 Trying HITL Agents Day 5 AFK Agents",
+      "duration_sec": 234,
+      "mirror_duration_sec": 234,
+      "asr_language": "eng"
+    },
+    {
+      "page": 62,
+      "target_cid": 40156400871,
+      "target_title": "P62 尝试HITL代理 - 解决方案",
+      "mirror_cid": 39125385432,
+      "english_title": "062 Trying HITL Agents Solution",
+      "duration_sec": 95,
+      "mirror_duration_sec": 95,
+      "asr_language": "eng"
+    },
+    {
+      "page": 63,
+      "target_cid": 40156400964,
+      "target_title": "P63 沙盒化 - 第5天AFK代理",
+      "mirror_cid": 39125385777,
+      "english_title": "063 Sandboxing Day 5 AFK Agents",
+      "duration_sec": 293,
+      "mirror_duration_sec": 293,
+      "asr_language": "eng"
+    },
+    {
+      "page": 64,
+      "target_cid": 40156401103,
+      "target_title": "P64 设置并尝试AFK代理 - 第5天AFK代理",
+      "mirror_cid": 39125386057,
+      "english_title": "064 Setting Up And Trying AFK Agents Day 5 AFK Agents",
+      "duration_sec": 150,
+      "mirror_duration_sec": 150,
+      "asr_language": "eng"
+    },
+    {
+      "page": 65,
+      "target_cid": 40156401297,
+      "target_title": "P65 设置并尝试AFK代理 - 解决方案",
+      "mirror_cid": 39125386255,
+      "english_title": "065 Setting Up And Trying AFK Agents Solution",
+      "duration_sec": 207,
+      "mirror_duration_sec": 207,
+      "asr_language": "eng"
+    },
+    {
+      "page": 66,
+      "target_cid": 40156401413,
+      "target_title": "P66 使用待办事项队列为AFK代理排队任务 - 第5天AFK代理",
+      "mirror_cid": 39125386510,
+      "english_title": "066 Using Backlogs To Queue Tasks For AFK Agents Day 5 AFK Agents",
+      "duration_sec": 204,
+      "mirror_duration_sec": 204,
+      "asr_language": "eng"
+    },
+    {
+      "page": 67,
+      "target_cid": 40156401507,
+      "target_title": "P67 为GitHub问题设置我们的仓库 - 第5天AFK代理",
+      "mirror_cid": 39125386702,
+      "english_title": "067 Setting Up Our Repo For GitHub Issues Day 5 AFK Agents",
+      "duration_sec": 79,
+      "mirror_duration_sec": 79,
+      "asr_language": "eng"
+    },
+    {
+      "page": 68,
+      "target_cid": 40156463192,
+      "target_title": "P68 将代理连接到您的待办事项 - 第5天AFK代理",
+      "mirror_cid": 39125386859,
+      "english_title": "068 Hooking Up Agents To Your Backlog Day 5 AFK Agents",
+      "duration_sec": 195,
+      "mirror_duration_sec": 195,
+      "asr_language": "eng"
+    },
+    {
+      "page": 69,
+      "target_cid": 40156463478,
+      "target_title": "P69 将代理连接到您的待办事项 - 解决方案",
+      "mirror_cid": 39125386992,
+      "english_title": "069 Hooking Up Agents To Your Backlog Solution",
+      "duration_sec": 149,
+      "mirror_duration_sec": 149,
+      "asr_language": "eng"
+    },
+    {
+      "page": 70,
+      "target_cid": 40156464107,
+      "target_title": "P70 更新我们的PRD和计划技能以使用GitHub - 第5天AFK代理",
+      "mirror_cid": 39125387100,
+      "english_title": "070 Updating Our PRD And Plan Skill To Use GitHub Day 5 AFK Agents",
+      "duration_sec": 92,
+      "mirror_duration_sec": 92,
+      "asr_language": "eng"
+    },
+    {
+      "page": 71,
+      "target_cid": 40156464927,
+      "target_title": "P71 HITL和AFK任务 - 第6天人机协同模式",
+      "mirror_cid": 39125387451,
+      "english_title": "071 HITL And AFK Tasks Day 6 Human In The Loop Patterns",
+      "duration_sec": 126,
+      "mirror_duration_sec": 126,
+      "asr_language": "eng"
+    },
+    {
+      "page": 72,
+      "target_cid": 40156465872,
+      "target_title": "P72 不要计划看板 - 第6天人机协同模式",
+      "mirror_cid": 39125387577,
+      "english_title": "072 Dont Plan Kanban Day 6 Human In The Loop Patterns",
+      "duration_sec": 278,
+      "mirror_duration_sec": 278,
+      "asr_language": "eng"
+    },
+    {
+      "page": 73,
+      "target_cid": 40156466225,
+      "target_title": "P73 使用看板技能 - 第6天人机协同模式",
+      "mirror_cid": 39125388089,
+      "english_title": "073 Using The Kanban Skill Day 6 Human In The Loop Patterns",
+      "duration_sec": 69,
+      "mirror_duration_sec": 69,
+      "asr_language": "eng"
+    },
+    {
+      "page": 74,
+      "target_cid": 40156466498,
+      "target_title": "P74 使用看板技能 - 解决方案",
+      "mirror_cid": 39125388129,
+      "english_title": "074 Using The Kanban Skill Solution",
+      "duration_sec": 324,
+      "mirror_duration_sec": 324,
+      "asr_language": "eng"
+    },
+    {
+      "page": 75,
+      "target_cid": 40156466999,
+      "target_title": "P75 研究 - 第6天人机协同模式",
+      "mirror_cid": 39125388745,
+      "english_title": "075 Research Day 6 Human In The Loop Patterns",
+      "duration_sec": 194,
+      "mirror_duration_sec": 194,
+      "asr_language": "eng"
+    },
+    {
+      "page": 76,
+      "target_cid": 40156857988,
+      "target_title": "P76 尝试研究 - 第6天人机协同模式",
+      "mirror_cid": 39125388902,
+      "english_title": "076 Trying Out Research Day 6 Human In The Loop Patterns",
+      "duration_sec": 106,
+      "mirror_duration_sec": 106,
+      "asr_language": "eng"
+    },
+    {
+      "page": 77,
+      "target_cid": 40156858480,
+      "target_title": "P77 尝试研究 - 解决方案",
+      "mirror_cid": 39125388817,
+      "english_title": "077 Trying Out Research Solution",
+      "duration_sec": 267,
+      "mirror_duration_sec": 267,
+      "asr_language": "eng"
+    },
+    {
+      "page": 78,
+      "target_cid": 40156858980,
+      "target_title": "P78 原型设计 - 第6天人机协同模式",
+      "mirror_cid": 39125389038,
+      "english_title": "078 Prototyping Day 6 Human In The Loop Patterns",
+      "duration_sec": 177,
+      "mirror_duration_sec": 177,
+      "asr_language": "eng"
+    },
+    {
+      "page": 79,
+      "target_cid": 40156859233,
+      "target_title": "P79 尝试UI原型设计 - 第6天人机协同模式",
+      "mirror_cid": 39125389084,
+      "english_title": "079 Trying Out UI Prototyping Day 6 Human In The Loop Patterns",
+      "duration_sec": 95,
+      "mirror_duration_sec": 95,
+      "asr_language": "eng"
+    },
+    {
+      "page": 80,
+      "target_cid": 40156859335,
+      "target_title": "P80 尝试UI原型设计 - 解决方案",
+      "mirror_cid": 39125389104,
+      "english_title": "080 Trying Out UI Prototyping Solution",
+      "duration_sec": 194,
+      "mirror_duration_sec": 194,
+      "asr_language": "eng"
+    },
+    {
+      "page": 81,
+      "target_cid": 40156859858,
+      "target_title": "P81 原型技能 - 第6天人机协同模式",
+      "mirror_cid": 39125450946,
+      "english_title": "081 The Prototype Skill Day 6 Human In The Loop Patterns",
+      "duration_sec": 135,
+      "mirror_duration_sec": 135,
+      "asr_language": "eng"
+    },
+    {
+      "page": 82,
+      "target_cid": 40156860210,
+      "target_title": "P82 设计AI喜爱的代码库 - 第6天人机协同模式",
+      "mirror_cid": 39125451083,
+      "english_title": "082 Designing Codebases Ai Loves Day 6 Human In The Loop Patterns",
+      "duration_sec": 451,
+      "mirror_duration_sec": 451,
+      "asr_language": "eng"
+    },
+    {
+      "page": 83,
+      "target_cid": 40156921864,
+      "target_title": "P83 改进代码库架构技能 - 第6天人机协同模式",
+      "mirror_cid": 39125451381,
+      "english_title": "083 The Improve Codebase Architecture Skill Day 6 Human In The Loop Patterns",
+      "duration_sec": 142,
+      "mirror_duration_sec": 142,
+      "asr_language": "eng"
+    },
+    {
+      "page": 84,
+      "target_cid": 40156922020,
+      "target_title": "P84 改进代码库架构技能 - 解决方案",
+      "mirror_cid": 39125451589,
+      "english_title": "084 The Improve Codebase Architecture Skill Solution",
+      "duration_sec": 297,
+      "mirror_duration_sec": 297,
+      "asr_language": "eng"
+    },
+    {
+      "page": 85,
+      "target_cid": 40156922458,
+      "target_title": "P85 为我们的PlanPRD技能添加模块意识 - 第6天人机协同模式",
+      "mirror_cid": 39125451576,
+      "english_title": "085 Adding Module Awareness To Our Planprd Skill Day 6 Human In The Loop Pattern",
+      "duration_sec": 113,
+      "mirror_duration_sec": 113,
+      "asr_language": "eng"
+    },
+    {
+      "page": 86,
+      "target_cid": 40156923069,
+      "target_title": "P86 最终工作流 - 第6天人机协同模式",
+      "mirror_cid": 39125451742,
+      "english_title": "086 The Final Workflow Day 6 Human In The Loop Patterns",
+      "duration_sec": 146,
+      "mirror_duration_sec": 146,
+      "asr_language": "eng"
+    },
+    {
+      "page": 87,
+      "target_cid": 40156923197,
+      "target_title": "P87 附录：绿地项目 - 第6天人机协同模式",
+      "mirror_cid": 39125451767,
+      "english_title": "087 Appendix Greenfield Projects Day 6 Human In The Loop Patterns",
+      "duration_sec": 283,
+      "mirror_duration_sec": 283,
+      "asr_language": "eng"
+    },
+    {
+      "page": 88,
+      "target_cid": 40156923675,
+      "target_title": "P88 附录：grill-with-docs - 第6天人机协同模式",
+      "mirror_cid": 39125452027,
+      "english_title": "088 Appendix grill-with-docs Day 6 Human In The Loop Patterns",
+      "duration_sec": 427,
+      "mirror_duration_sec": 427,
+      "asr_language": "eng"
+    },
+    {
+      "page": 89,
+      "target_cid": 40156924397,
+      "target_title": "P89 答疑时间 - 第6天上午",
+      "mirror_cid": 39125452210,
+      "english_title": "089 Office Hours - Day 6 Morning",
+      "duration_sec": 2969,
+      "mirror_duration_sec": 2969,
+      "asr_language": "eng"
+    },
+    {
+      "page": 90,
+      "target_cid": 40156989911,
+      "target_title": "P90 答疑时间 - 第6天下午",
+      "mirror_cid": 39125453712,
+      "english_title": "090 Office Hours - Day 6 Afternoon",
+      "duration_sec": 2901,
+      "mirror_duration_sec": 2901,
+      "asr_language": "eng"
+    },
+    {
+      "page": 91,
+      "target_cid": 40157053397,
+      "target_title": "P91 最终答疑时间 - 上午",
+      "mirror_cid": 39125516749,
+      "english_title": "091 Final Office Hours - Morning",
+      "duration_sec": 3226,
+      "mirror_duration_sec": 3226,
+      "asr_language": "eng"
+    },
+    {
+      "page": 92,
+      "target_cid": 40157055809,
+      "target_title": "P92 最终答疑时间 - 下午",
+      "mirror_cid": 39125518290,
+      "english_title": "092 Final Office Hours - Afternoon",
+      "duration_sec": 3146,
+      "mirror_duration_sec": 3146,
+      "asr_language": "eng"
+    }
+  ]
+}
