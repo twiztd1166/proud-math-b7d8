@@ -2782,6 +2782,9 @@ jobs:
           grep -q 'openResearchCallScript' public/app-modals.js
           grep -q 'function researchCallScript' public/app-core.js
           grep -q 'data-research-call-script' public/app-shows.js
+          grep -q 'Open application / apply' public/app-shows.js
+          grep -q 'const operationalCode=' public/app-shows.js
+          grep -q 'const operationalCode=' public/app-modals.js
           trap 'rc=$?; echo "LIVE_PAGE_FAILURE line=$LINENO command=$BASH_COMMAND rc=$rc" >&2; echo "--- expected manager-lane markers present in rendered DOM ---" >&2; for marker in "Next Steps" "Team action" "Research follow-up" "Manager move" "Availability" "Value signal" "Reverify current terms before commitment." "Decision / review needed" "Waiting on organizer" "Scheduled / monitoring"; do if grep -q "$marker" /tmp/dom.html 2>/dev/null; then echo "PRESENT: $marker" >&2; else echo "MISSING: $marker" >&2; fi; done; echo "--- rendered context ---" >&2; grep -nE "Next Steps|Team action|Research follow-up|Manager move|Create email draft|Availability|Value signal|Reverify current terms before commitment|Decision / review needed|Waiting on organizer|Scheduled / monitoring" /tmp/dom.html 2>/dev/null | head -80 >&2 || true; exit $rc' ERR
           chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$chrome" || { echo "Chrome not found"; exit 1; }
