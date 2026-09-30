@@ -104,7 +104,7 @@ updated as (
     and upper(coalesce(r.detail_data->>'contact_status',''))='NOT VERIFIED'
   returning r.control_id
 )
-select case when count(*)=49 then 1 else (1/0) end as updated_exactly_49
+select count(*) as updated_rows
 from updated;
 
 do $$
