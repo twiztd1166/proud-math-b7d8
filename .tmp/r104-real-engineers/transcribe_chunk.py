@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, json, math, os, pathlib, shutil, subprocess, sys, time, urllib.parse, urllib.request
+import argparse, hashlib, json, math, os, pathlib, shutil, subprocess, sys, time, urllib.parse, urllib.request
 
 BVID = "BV16eKb6PEUo"
 VIEW_URL = f"https://api.bilibili.com/x/web-interface/view?bvid={BVID}"
@@ -8,7 +8,6 @@ HEADERS = {"User-Agent": UA, "Referer": "https://www.bilibili.com/"}
 CORE_SEC = 54.0
 CONTEXT_SEC = 2.0
 MODEL_SHA256 = "614feee3a990cf0e672b0314f4da0c80ae8da9094507f5ccb7c42e43b5fc5a12"
-RUNNER_SHA256 = "a1df72483823659e439dbc5b03ccffefb31583cfd3aeb6df44f3117dcae3b9fc"
 SOURCE_COMMIT = "1bfbebfaaf493866f49597cd3b7901959d395c60"
 
 def fetch_json(url, retries=4):
@@ -260,6 +259,13 @@ def main():
         json.dumps(frozen, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
+    runner_path = pathlib.Path(a.runner)
+    runner_sha256 = hashlib.sha256(runner_path.read_bytes()).hexdigest()
+    qual_path = runner_path.parent / "RUNTIME_QUALIFICATION.json"
+    qualification = json.loads(qual_path.read_text(encoding="utf-8"))
+    if qualification.get("status") != "PASS_SOURCE_EXACT_MODEL_EXACT_R51_R54_SMOKE_JSON_BYTE_IDENTICAL":
+        raise SystemExit("engine qualification missing or failed")
+
     records = []
     failures = 0
     for part in range(a.start, a.end + 1):
@@ -301,7 +307,11 @@ def main():
                 "engine": {
                     "name": "parakeet.cpp native multirun",
                     "source_commit": SOURCE_COMMIT,
-                    "runner_sha256": RUNNER_SHA256,
+                    "runner_sha256": runner_sha256,
+                    "historical_r54_runner_sha256": qualification.get("historical_r54_runner_sha256"),
+                    "qualification_status": qualification.get("status"),
+                    "qualification_smoke_timestamp_json_sha256": qualification.get("smoke_timestamp_json_sha256"),
+                    "binary_identity_note": qualification.get("binary_identity_note"),
                     "model": "tdt_ctc-110m-q8_0.gguf",
                     "model_sha256": MODEL_SHA256,
                     "decoder": "TDT", "threads": 4,
