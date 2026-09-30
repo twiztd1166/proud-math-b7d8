@@ -23,6 +23,7 @@ jobs:
       - name: Check frontend JavaScript syntax
         run: |
           node --check public/app-core.js
+          node --check public/app-shows.js
           node --check public/app-calendar.js
           node --check public/app-bind.js
           node --check public/app-modals.js
@@ -33,6 +34,9 @@ jobs:
           grep -q "shows_app_research_calendar_controls" supabase/functions/shows-api/index.ts
           grep -q "version:21" supabase/functions/shows-api/index.ts
           grep -q "researchCalendarControls" public/app-core.js
+          grep -q "researchNextStepRows" public/app-shows.js
+          grep -q "Research follow-up" public/app-shows.js
+          grep -q "data-calendar-research" public/app-shows.js
           grep -q "calendar2026ResearchItem" public/app-calendar.js
           grep -q "Recovered research" public/app-calendar.js
           grep -q "Date TBD" public/app-calendar.js
@@ -47,8 +51,8 @@ jobs:
           grep -q "openResearchDetail" public/app-modals.js
           grep -q "data-calendar-research" public/app-calendar.js
           grep -q "monthEntries.map(render2026MonthEntry)" public/app-calendar.js
-          grep -q "20260930-research-details-v1" src/pages/index.astro
-          grep -q "20260930-research-details-v1" public/index-standalone.html
+          grep -q "20260930-research-next-v1" src/pages/index.astro
+          grep -q "20260930-research-next-v1" public/index-standalone.html
 
       - name: Guard three-layer calendar semantics
         run: |
