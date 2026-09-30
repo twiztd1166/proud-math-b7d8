@@ -1,0 +1,58 @@
+name: Verify 2026 governed opportunity calendar
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+      - deploy/q4-governed-calendar-20260930
+  pull_request:
+    branches:
+      - paradise-shows-public
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend JavaScript syntax
+        run: |
+          node --check public/app-core.js
+          node --check public/app-calendar.js
+          node --check public/app-bind.js
+
+      - name: Verify calendar opportunity wiring
+        run: |
+          grep -q 'calendarOpportunities' supabase/functions/shows-api/index.ts
+          grep -q 'calendarOpportunities' public/app-core.js
+          grep -q 'calendar2026OpportunityItem' public/app-calendar.js
+          grep -q 'Additional opportunities' public/app-calendar.js
+          grep -q '20260930-q4-v1' src/pages/index.astro
+          grep -q 'paradise-shows-public-v11' public/sw.js
+
+      - name: Verify governed 2026 source populations
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api' \
+            --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json, urllib.request
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          shows=[r for r in x.get('shows',[]) if str(r.get('event_start') or '').startswith('2026-')]
+          assert len(shows)==29, len(shows)
+          q4=[r for r in shows if str(r.get('event_start') or '') >= '2026-10-01']
+          assert len(q4)==4, len(q4)
+          print('Current operating 2026 rows:',len(shows),'Q4:',len(q4))
+          PY
+
+      - name: Verify repository API exposes full governed opportunity set
+        run: |
+          grep -q "select('opportunity_id,profile_id,event_label,event_start,event_end,opportunity_status,price_text" supabase/functions/shows-api/index.ts
+          grep -q "calendarOpportunities=(j.data||\\[\\]).map" supabase/functions/shows-api/index.ts
