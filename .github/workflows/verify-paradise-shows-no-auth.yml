@@ -24,6 +24,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Guard pull-request vs production smoke boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "if: github.event_name == 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
+          grep -q "if: github.event_name != 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
+          grep -q "Stable-production convergence is intentionally deferred until the production-branch push." .github/workflows/debug-paradise-shows-live.yml
+          echo 'PR vs stable-production smoke boundary: PASS'
+
       - name: Verify frontend opens without access gate
         if: github.event_name != 'pull_request'
         shell: bash
