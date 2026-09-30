@@ -22,7 +22,7 @@
       ?bookingEventRange(row)
       :[date(row.event_start),row.event_end&&row.event_end!==row.event_start?date(row.event_end):''].filter(Boolean).join(' \u2013 ');
     return `<article class="calendarItem">
-      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \\u00b7 '+range:range)}</b><span>${esc(['Operating',row.mfc_id||''].filter(Boolean).join(' \\u00b7 '))}</span></div>
+      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)}</b><span>${esc(['Operating',row.mfc_id||''].filter(Boolean).join(' \u00b7 '))}</span></div>
       <div class="calendarMain">
         <div><h3>${esc(row.event||row.mfc_id)}</h3><p>${esc(row.decision||'Decision not stated')}</p></div>
         <span class="badge ${skipped?'hold':badgeClass(row.show_status)}">${esc(skipped?'SKIP':row.show_status||'IN PLAY')}</span>
@@ -44,7 +44,7 @@
       :String(row.current_cost_status||row.opportunity_status||'Live opportunity');
     const next=String(review.next_step||row.action_label||'').trim();
     return `<article class="calendarItem">
-      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \\u00b7 '+range:range)}</b><span>${esc(['Governed',row.profile_id||''].filter(Boolean).join(' \\u00b7 '))}</span></div>
+      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)}</b><span>${esc(['Governed',row.profile_id||''].filter(Boolean).join(' \u00b7 '))}</span></div>
       <div class="calendarMain"><div><h3>${esc(row.event_label||row.profile_id)}</h3><p>${esc(cost)}</p></div><span class="badge ${badge}">${esc(disposition)}</span></div>
       ${next?`<div class="calendarNext"><span>Next</span><b>${esc(next)}</b></div>`:''}
       <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
@@ -66,7 +66,7 @@
       ?'<button type="button" class="calendarOpen" data-calendar-show="'+esc(row.mfc_id)+'">Open show</button>'
       :(row.profile_id?'<button type="button" class="calendarOpen" data-annual-profile="'+esc(row.profile_id)+'">Open profile</button>':'');
     return '<article class="calendarItem">'+
-      '<div class="calendarDate"><b>'+esc(row._calendarContinuation?'Ongoing \\u00b7 '+range:range)+'</b><span>'+esc(sourceTag)+'</span></div>'+
+      '<div class="calendarDate"><b>'+esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)+'</b><span>'+esc(sourceTag)+'</span></div>'+
       '<div class="calendarMain"><div><h3>'+esc(row.event_label||row.control_id)+'</h3><p>'+esc(detail)+'</p></div><span class="badge '+badge+'">'+esc(disposition)+'</span></div>'+
       (note?'<div class="calendarNext"><span>Recovered research</span><b>'+esc(note)+'</b></div>':'')+
       open+
