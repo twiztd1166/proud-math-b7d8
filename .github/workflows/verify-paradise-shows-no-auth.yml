@@ -31,29 +31,15 @@ jobs:
           grep -q "if: github.event_name == 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
           grep -q "if: github.event_name != 'pull_request'" .github/workflows/debug-paradise-shows-live.yml
           grep -q "Stable-production convergence is intentionally deferred until the production-branch push." .github/workflows/debug-paradise-shows-live.yml
+          bash -n scripts/wait-for-app-asset-convergence.sh
+          python3 scripts/verify-app-asset-contract.py --live-entry src/pages/index.astro
           echo 'PR vs stable-production smoke boundary: PASS'
 
       - name: Verify frontend opens without access gate
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          converged=0
-          for attempt in $(seq 1 18); do
-            curl --retry 2 --retry-delay 2 --retry-all-errors -fsS "$SITE/?release=$GITHUB_SHA&attempt=$attempt" -o /tmp/index.html
-            if python3 scripts/verify-app-asset-contract.py --live-entry /tmp/index.html >/tmp/asset-contract.out 2>/tmp/asset-contract.err; then
-              converged=1
-              cat /tmp/asset-contract.out
-              echo "Stable frontend converged on attempt $attempt."
-              break
-            fi
-            echo "Stable frontend has not converged to this repository asset version yet (attempt $attempt/18)."
-            sleep 10
-          done
-          if [ "$converged" -ne 1 ]; then
-            echo "::error::Stable frontend did not converge to the repository asset version within the bounded window."
-            cat /tmp/asset-contract.err >&2 || true
-            exit 1
-          fi
+          bash scripts/wait-for-app-asset-convergence.sh "$SITE" "$GITHUB_SHA" /tmp/index.html
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-core.js?sha=$GITHUB_SHA" -o /tmp/app-core.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-modals.js?sha=$GITHUB_SHA" -o /tmp/app-modals.js
           curl --retry 6 --retry-delay 5 --retry-all-errors -fsS "$SITE/app-bind.js?sha=$GITHUB_SHA" -o /tmp/app-bind.js
