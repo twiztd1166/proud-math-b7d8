@@ -112,6 +112,7 @@ function nextStepCard(p,lane){
   return `<article class="nextStepCard nextStep-${esc(lane.toLowerCase())}" data-next-step-profile="${esc(p.profile_id)}">
     <div class="nextStepTop"><div><span class="nextStepLane">${esc(laneLabel)}</span><h3>${esc(p.canonical_event)}</h3></div><span class="nextStepDecision ${esc(disposition.toLowerCase())}">${esc(disposition)}</span></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
+    ${actionGuard?`<div class="nextStepAction"><span>Guard</span><b>${esc(actionGuard)}</b></div>`:''}
     <div class="nextStepFacts"><div><span>When</span><b>${esc(timing)}</b></div><div><span>Event</span><b>${esc(when)}</b></div><div><span>Owner</span><b>${esc(owner)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div></div>
     <button type="button" class="btn secondary liveCompareOpen nextStepOpen" data-profile="${esc(p.profile_id)}">Open show</button>
   </article>`;
@@ -165,17 +166,35 @@ function researchAvailability(row){
   if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
+function researchStructuredAction(row){
+  const code=String(row?.detail_data?.operational_action_code||'').trim().toUpperCase();
+  if(!code)return null;
+  const map={
+    EMAIL_DRAFT:{code:'CONTACT',label:'CREATE EMAIL DRAFT',rank:1},
+    EMAIL_THEN_APPLY:{code:'CONTACT_APPLY',label:'CREATE EMAIL DRAFT → APPLY',rank:0},
+    CALL_SCRIPT:{code:'CONTACT',label:'CREATE CALL SCRIPT',rank:1},
+    CALL_THEN_APPLY:{code:'CONTACT_APPLY',label:'CREATE CALL SCRIPT → APPLY',rank:0},
+    APPLY:{code:'APPLY',label:'OPEN APPLICATION / APPLY',rank:0},
+    REVIEW:{code:'REVIEW',label:'REVIEW / DECIDE',rank:2},
+    MONITOR:{code:'MONITOR',label:'MONITOR',rank:3},
+    HOLD:{code:'HOLD',label:'HOLD / REVIEW',rank:4},
+    REVERIFY:{code:'REVIEW',label:'REVERIFY / REVIEW',rank:2},
+  };
+  return map[code]||null;
+}
 function researchManagerMove(row){
   const availability=researchAvailability(row);
   const disposition=String(row?.disposition||'WATCH').toUpperCase();
   const next=String(row?.detail_data?.next_action||row?.notes||'').toUpperCase();
+  const structured=researchStructuredAction(row);
   const hasEmail=Boolean(typeof researchEmailDraft==='function'&&researchEmailDraft(row));
   const hasCallScript=!hasEmail&&Boolean(typeof researchCallScript==='function'&&researchCallScript(row));
   const contactAction=(emailLabel,callLabel,fallback)=>hasEmail?emailLabel:(hasCallScript?callLabel:fallback);
-  if(availability.code==='LATE')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — LATE INVENTORY','CREATE CALL SCRIPT — LATE INVENTORY','CONTACT — LATE INVENTORY'),rank:1};
-  if(availability.code==='ALTERNATE')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — ALTERNATE ROUTE','CREATE CALL SCRIPT — ALTERNATE ROUTE','CONTACT — ALTERNATE ROUTE'),rank:1};
-  if(availability.code==='REVERIFY')return {code:'REVIEW',label:'REVERIFY / REVIEW',rank:2};
-  if(disposition==='SOLD_OUT'||disposition==='HOLD')return {code:'HOLD',label:'HOLD / REVIEW',rank:4};
+  if(availability.code==='REVERIFY'||structured?.label==='REVERIFY / REVIEW')return {code:'REVIEW',label:'REVERIFY / REVIEW',rank:2};
+  if(disposition==='SOLD_OUT'||disposition==='HOLD'||structured?.code==='HOLD')return {code:'HOLD',label:'HOLD / REVIEW',rank:4};
+  if(availability.code==='LATE'&&structured?.code!=='APPLY')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — LATE INVENTORY','CREATE CALL SCRIPT — LATE INVENTORY','CONTACT — LATE INVENTORY'),rank:1};
+  if(availability.code==='ALTERNATE'&&structured?.code!=='APPLY')return {code:'CONTACT',label:contactAction('CREATE EMAIL DRAFT — ALTERNATE ROUTE','CREATE CALL SCRIPT — ALTERNATE ROUTE','CONTACT — ALTERNATE ROUTE'),rank:1};
+  if(structured)return structured;
   const contact=/\b(CONTACT|EMAIL|CALL|ASK|REQUEST|INQUIRY|REACH OUT)\b/.test(next);
   const apply=/\b(APPLY|SUBMIT|REGISTER|SIGN UP|APPLICATION)\b/.test(next);
   if(contact&&apply)return {code:'CONTACT_APPLY',label:contactAction('CREATE EMAIL DRAFT → APPLY','CREATE CALL SCRIPT → APPLY','CONTACT → APPLY'),rank:0};
@@ -243,6 +262,7 @@ function researchNextStepCard(row){
   const disposition=String(row.disposition||'WATCH').toUpperCase();
   const decisionClass=disposition==='PURSUE'?'pursue':disposition==='WATCH'?'watch':'hold';
   const next=String(d.next_action||row.notes||'Review this research control.').trim();
+  const actionGuard=String(d.operational_guard||'').trim();
   const range=String(row.date_text||'').trim()||
     (row.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):
       (row.estimated_sort_date?'Date TBD · est. '+date(row.estimated_sort_date):'Date TBD'));
