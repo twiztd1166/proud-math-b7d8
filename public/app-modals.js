@@ -655,6 +655,29 @@ function researchDetailValue(value,fallback='Not verified'){
   const text=String(value??'').trim();
   return text||fallback;
 }
+function openResearchCallScript(id){
+  const row=(state.researchCalendarControls||[]).find(x=>x.control_id===id);if(!row)return;
+  const callScript=typeof researchCallScript==='function'?researchCallScript(row):null;
+  if(!callScript){toast('No verified phone-only call route for this show.');return}
+  const scriptHtml=esc(callScript.script).replace(/\n/g,'<br>');
+  $('#detailBody').innerHTML=`<h2>Call script · ${esc(row.event_label||row.control_id)}</h2>
+    <div class="subtitle">Team-ready phone outreach · verified number ${esc(callScript.phone)}</div>
+    <div class="block primaryActionBlock"><div class="k">Call script</div><div class="val">${scriptHtml}</div></div>
+    <div class="sourceWarn historyIntro"><b>Human review required.</b> Use this as a talking guide, record the outcome in Manager Notes, and reconfirm current pricing, availability, deadlines, and commitment terms before booking or payment.</div>
+    <div class="actions detailActions">
+      <button class="btn secondary" id="researchCallCloseBtn">Close</button>
+      <a class="btn primary" href="${esc(callScript.href)}">Call ${esc(callScript.phone)}</a>
+      <button class="btn secondary" id="researchCallCopyBtn">Copy script</button>
+      <button class="btn secondary" id="researchCallBackBtn">Back to show details</button>
+    </div>`;
+  $('#researchCallCloseBtn').onclick=()=>closeModal('detailModal');
+  $('#researchCallBackBtn').onclick=()=>openResearchDetail(row.control_id);
+  $('#researchCallCopyBtn').onclick=async()=>{
+    try{await navigator.clipboard.writeText(callScript.script);toast('Call script copied')}
+    catch(_){toast('Unable to copy call script')}
+  };
+  $('#detailModal').classList.add('show');
+}
 function openResearchDetail(id){
   const row=(state.researchCalendarControls||[]).find(x=>x.control_id===id);if(!row)return;
   const d=row.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
@@ -680,7 +703,9 @@ function openResearchDetail(id){
   const official=String(d.official_source_url||'').trim();
   const archive=String(d.recovered_source_url||'').trim();
   const emailDraft=typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
+  const callScript=!emailDraft&&typeof researchCallScript==='function'?researchCallScript(row):null;
   const emailDraftButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
+  const callScriptButton=callScript?`<button class="btn primary" id="researchCallScriptBtn">Create call script</button>`:'';
   const sourceButtons=[
     official?`<a class="btn primary sourceBtn" target="_blank" rel="noopener" href="${esc(official)}">Open official source</a>`:'',
     archive?`<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="${esc(archive)}">Open recovered research source</a>`:'',
@@ -719,8 +744,9 @@ function openResearchDetail(id){
     ${row.notes?`<div class="block"><div class="k">Research note</div><div class="val">${esc(row.notes)}</div></div>`:''}
     <div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(nextAction)}</div></div>
     <div class="sourceWarn historyIntro"><b>Source-first control.</b> “Not verified” means the prior research did not establish that field strongly enough to treat it as fact. Recovered prices, availability and terms must be reconfirmed before payment or commitment.</div>
-    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${emailDraftButton}${sourceButtons}${linkedButtons}</div>`;
+    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${emailDraftButton}${callScriptButton}${sourceButtons}${linkedButtons}</div>`;
   $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
+  const callScriptBtn=$('#researchCallScriptBtn');if(callScriptBtn)callScriptBtn.onclick=()=>openResearchCallScript(row.control_id);
   const addBtn=$('#researchNoteAddBtn'),input=$('#researchNoteInput');
   if(addBtn)addBtn.onclick=()=>addResearchNote(row.control_id);
   if(input)input.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addResearchNote(row.control_id)}};
