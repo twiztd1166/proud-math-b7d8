@@ -147,39 +147,35 @@ def scope_aware_annual_api_script(script: str) -> str:
 
 
 def scope_aware_deep_link_script(script: str) -> str:
-    calendar_replacements = [
-        (
-            'render_view calendar "$SITE/#calendar"',
-            'render_view calendar "$SITE/#calendar/2026"',
-        ),
-        (
-            "if ! grep -q '2027 Calendar' /tmp/calendar.html; then",
-            "if ! grep -q '2026 Calendar' /tmp/calendar.html; then",
-        ),
-        (
-            'echo "::error::Calendar deep link did not reach the loaded 2027 Calendar view."',
-            'echo "::error::Calendar deep link did not reach the loaded 2026 Calendar view."',
-        ),
-        (
-            "grep -q 'Open full plan' /tmp/calendar.html",
-            "grep -q 'Open current shows' /tmp/calendar.html",
-        ),
-        (
-            "grep -q 'PURSUE' /tmp/calendar.html",
-            """grep -q 'Dated events' /tmp/calendar.html
+    stale_calendar_marker = "if ! grep -q '2027 Calendar' /tmp/calendar.html; then"
+    current_calendar_marker = "if ! grep -q '2026 Calendar' /tmp/calendar.html; then"
+    if stale_calendar_marker in script:
+        calendar_replacements = [
+            (
+                'render_view calendar "$SITE/#calendar"',
+                'render_view calendar "$SITE/#calendar/2026"',
+            ),
+            (
+                stale_calendar_marker,
+                current_calendar_marker,
+            ),
+            (
+                'echo "::error::Calendar deep link did not reach the loaded 2027 Calendar view."',
+                'echo "::error::Calendar deep link did not reach the loaded 2026 Calendar view."',
+            ),
+            (
+                "grep -q 'Open full plan' /tmp/calendar.html",
+                "grep -q 'Open current shows' /tmp/calendar.html",
+            ),
+            (
+                "grep -q 'PURSUE' /tmp/calendar.html",
+                """grep -q 'Dated events' /tmp/calendar.html
 render_view calendar_2027 "$SITE/#calendar/2027"
 grep -q '2027 Calendar' /tmp/calendar_2027.html
 grep -q 'Open full plan' /tmp/calendar_2027.html
 grep -q 'PURSUE' /tmp/calendar_2027.html""",
-        ),
-    ]
-    modern_calendar = (
-        'render_view calendar "$SITE/#calendar"' in script
-        and "grep -q '2026 Calendar' /tmp/calendar.html" in script
-        and 'render_view calendar_2027 "$SITE/#calendar/2027"' in script
-        and "grep -q '2027 Calendar' /tmp/calendar_2027.html" in script
-    )
-    if not modern_calendar:
+            ),
+        ]
         for stale, replacement in calendar_replacements:
             count = script.count(stale)
             if count != 1:
@@ -187,12 +183,18 @@ grep -q 'PURSUE' /tmp/calendar_2027.html""",
                     f'Expected exactly one stale calendar assertion, got {count}: {stale}'
                 )
             script = script.replace(stale, replacement, 1)
+    elif current_calendar_marker not in script:
+        raise RuntimeError('Mature smoke contains neither the legacy nor current 2026 Calendar assertion.')
 
     for stale in STALE_DEEP_LINK_LINES:
+        replacement = f": # replaced by scope-aware verifier: {stale}"
         count = script.count(stale)
-        if count != 1:
-            raise RuntimeError(f'Expected exactly one stale mature-smoke assertion, got {count}: {stale}')
-        script = script.replace(stale, f": # replaced by scope-aware verifier: {stale}", 1)
+        if count == 1:
+            script = script.replace(stale, replacement, 1)
+        elif count == 0 and replacement in script:
+            continue
+        elif count != 0:
+            raise RuntimeError(f'Expected at most one stale mature-smoke assertion, got {count}: {stale}')
     return script
 
 
