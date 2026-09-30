@@ -50,6 +50,33 @@
       <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
     </article>`;
   }
+  function calendar2026ResearchItem(row){
+    const disposition=String(row.disposition||'WATCH').toUpperCase();
+    const badge=disposition==='PURSUE'?'ready':disposition==='SOLD_OUT'?'hold':'dateonly';
+    const start=row.event_start?date(row.event_start):'Date TBD';
+    const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
+    const range=end?start+' – '+end:start;
+    const route=String(row.route_type||'RESEARCH CONTROL').replaceAll('_',' ');
+    const price=String(row.price_text||'').trim();
+    const details=[route,price].filter(Boolean).join(' · ');
+    const researchStatus=String(row.research_status||'RECOVERED').replaceAll('_',' ');
+    const profile=String(row.profile_id||'').trim();
+    const mfc=String(row.mfc_id||'').trim();
+    const open=profile
+      ?`<button type="button" class="calendarOpen" data-annual-profile="${esc(profile)}">Open profile</button>`
+      :mfc
+        ?`<button type="button" class="calendarOpen" data-calendar-show="${esc(mfc)}">Open show</button>`
+        :'';
+    return `<article class="calendarItem">
+      <div class="calendarDate"><b>${esc(range)}</b><span>${esc(row.city||row.control_id||'Research')}</span></div>
+      <div class="calendarMain">
+        <div><h3>${esc(row.event_label||row.control_id)}</h3><p>${esc(details||row.lineage_type||'Recovered research control')}</p></div>
+        <span class="badge ${badge}">${esc(disposition)}</span>
+      </div>
+      <div class="calendarNext"><span>Research</span><b>${esc((row.priority||'MEDIUM')+' priority · '+researchStatus)}</b></div>
+      ${open}
+    </article>`;
+  }
   function render2026Calendar(){
     const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
@@ -60,6 +87,9 @@
       .filter(row=>!showRows.some(show=>String(show.event_start||'')===String(row.event_start||'')&&String(show.event||'').trim().toLowerCase()===String(row.event_label||'').trim().toLowerCase()))
       .slice()
       .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+    const researchAll=(state.researchCalendarControls||[]).filter(row=>Number(row.plan_year||2026)===2026);
+    const researchRows=researchAll.filter(row=>String(row.event_start||'').startsWith('2026-')).slice().sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+    const researchTbd=researchAll.filter(row=>!row.event_start).slice().sort((a,b)=>String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const active=showRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
     const today=new Date().toISOString().slice(0,10);
     const upcomingShows=active.filter(row=>String(row.event_end||row.event_start||'')>=today);
@@ -70,19 +100,23 @@
       const month=index+1;
       const monthShows=showRows.filter(row=>calendarMonthNumber(row)===month);
       const monthOpportunities=opportunityRows.filter(row=>calendarMonthNumber(row)===month);
-      if(!monthShows.length&&!monthOpportunities.length)return '';
+      const monthResearch=researchRows.filter(row=>calendarMonthNumber(row)===month);
+      if(!monthShows.length&&!monthOpportunities.length&&!monthResearch.length)return '';
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
       return `<section class="calendarMonth">
-        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}</p></div></div>
+        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' verified opportunit'+(monthOpportunities.length===1?'y':'ies'):''}${monthResearch.length?' \u00b7 '+monthResearch.length+' research control'+(monthResearch.length===1?'':'s'):''}</p></div></div>
         ${monthShows.map(calendar2026Item).join('')}
         ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
+        ${monthResearch.map(calendar2026ResearchItem).join('')}
       </section>`;
     }).join('');
+    const tbdHtml=researchTbd.length?`<section class="calendarMonth"><div class="calendarMonthHead"><div><h2>Date TBD</h2><p>${researchTbd.length} research control${researchTbd.length===1?'':'s'} awaiting an exact 2026 date</p></div></div>${researchTbd.map(calendar2026ResearchItem).join('')}</section>`:'';
+    const datedTotal=showRows.length+opportunityRows.length+researchRows.length;
     return `${calendarYearBar(2026)}
-      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Governed 2026 operating controls plus verified live/rebook opportunities. Research controls not yet normalized into app data are kept out until reconciled.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
-      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length}</b><span>Governed dated entries</span></div><div><b>${showRows.length}</b><span>Operating controls</span></div><div><b>${opportunityRows.length}</b><span>Additional opportunities</span></div></div>
-      ${monthHtml||'<div class="empty">No governed 2026 dated show records are available.</div>'}`;
+      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>The complete governed 2026 calendar: operating controls, verified live/rebook opportunities, and the recovered Sep.–Dec. research-planning layer. Research controls remain labeled separately from current operating commitments.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
+      <div class="calendarStats"><div><b>${datedTotal}</b><span>Dated controls</span></div><div><b>${showRows.length}</b><span>Operating</span></div><div><b>${opportunityRows.length}</b><span>Verified opportunities</span></div><div><b>${researchRows.length}</b><span>Research controls</span></div></div>
+      ${monthHtml||'<div class="empty">No governed 2026 dated show records are available.</div>'}${tbdHtml}`;
   }
 
   function calendar2027PursueItem(row){
