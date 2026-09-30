@@ -54,64 +54,183 @@ function researchEmailParticipationLabel(row){
   if(vendor)return 'vendor opportunity';
   return 'participation opportunity';
 }
-function researchEmailDraft(row){
+function researchCompactText(value,max=180){
+  const text=String(value??'').replace(/\s+/g,' ').trim();
+  if(!text)return '';
+  return text.length<=max?text:text.slice(0,Math.max(0,max-1)).trimEnd()+'…';
+}
+function researchFact(value,status='',max=180){
+  const text=researchCompactText(value,max);
+  if(!text)return null;
+  const statusText=String(status||'').trim().toUpperCase();
+  const valueText=text.toUpperCase();
+  const unavailable=/^(NOT VERIFIED|UNKNOWN|N\/A|NONE|NOT AVAILABLE)$/.test(valueText)||
+    /^NOT VERIFIED\b/.test(statusText)||
+    /PENDING CURRENT PUBLICATION/.test(statusText);
+  if(unavailable)return null;
+  const confirm=/TO CONFIRM|RECONFIRM|REVERIFY|NEEDS CONFIRM|CONFLICT|ESTIMATED|PARTIAL|RECOVERED|NOT SEPARATELY POSTED|NOT VERIFIED|CUSTOM QUOTE|GET QUOTE|TO QUOTE|PRICE TO CONFIRM|TERMS TO CONFIRM|PACKAGE TO QUOTE/.test(statusText+' '+valueText);
+  return {text,confirm};
+}
+function researchContactPerson(value){
+  const text=String(value||'').trim();
+  if(!text)return '';
+  const first=text.split(/[·•|;]/)[0].trim();
+  const clean=first.replace(/\b(?:email|phone|cell|office)\b.*$/i,'').trim();
+  if(!/^[A-Z][A-Za-z'’.-]+(?:\s+[A-Z][A-Za-z'’.-]+){1,2}$/.test(clean))return '';
+  if(/\b(?:CITY|COUNTY|TOWN|EVENTS?|OFFICE|PROGRAM|INQUIR(?:Y|IES)|SALES|SPONSORSHIP|VENDOR|PARTNERSHIP|CHAMBER|CENTER|CENTRE|PARKS?|RECREATION|SHOWS?|FAIR|SPEEDWAY|TEAM|MAIN STREET|DEPARTMENT)\b/i.test(clean))return '';
+  return clean;
+}
+function researchFirstName(name){
+  return String(name||'').trim().split(/\s+/)[0]||'';
+}
+function researchOutreachDateLabel(row){
+  const explicit=String(row?.date_text||'').trim();
+  if(explicit)return explicit;
+  if(row?.event_start){
+    const range=date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'');
+    return range;
+  }
+  if(row?.estimated_sort_date)return 'estimated '+date(row.estimated_sort_date);
+  return 'date TBD';
+}
+function researchHasKnownTerm(parts,pattern){
+  return parts.filter(Boolean).join(' ').toUpperCase().match(pattern)!==null;
+}
+function researchOutreachProfile(row){
   const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
-  const email=researchEmailAddresses(d.contact_text)[0]||'';
-  if(!email)return null;
   const event=String(row?.event_label||'this event').trim();
-  const range=String(row?.date_text||'').trim()||
-    (row?.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):'');
+  const range=researchOutreachDateLabel(row);
   const route=researchEmailParticipationLabel(row);
-  const status=String(d.booking_status||row?.research_status||'').toUpperCase();
-  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(status);
-  const subject=`Paradise Exteriors — ${event} ${late?'late availability':'participation'} inquiry`;
-  const opening=late
-    ?'We understand the standard deadline may have passed. Could you let us know whether any late inventory is still available for Paradise Exteriors as a home-improvement company?'
-    :`We are interested in the ${route}. Could you please confirm whether space is still available for Paradise Exteriors as a home-improvement company?`;
+  const person=researchContactPerson(d.contact_text);
+  const email=researchEmailAddresses(d.contact_text)[0]||'';
+  const phone=researchPhoneNumbers(d.contact_text)[0]||'';
+  const researchStatus=String(row?.research_status||'').toUpperCase();
+  const boundedException=researchStatus.includes('NOT_REVERIFIED');
+
+  const booking=researchFact(d.booking_status||row?.research_status,'',190);
+  const eligibility=researchFact(d.eligibility_text,row?.route_type,190);
+  const cost=researchFact(d.current_cost_text||row?.price_text,d.current_cost_status,180);
+  const deadline=researchFact(
+    d.deadline_text||row?.deadline_text||(row?.deadline_date?date(row.deadline_date):''),
+    '',
+    180
+  );
+  const venue=researchFact(d.venue_text||row?.city,d.venue_status,180);
+  const logistics=researchFact(d.logistics_text,d.logistics_status,190);
+  const commitment=researchFact(d.commitment_terms_text,d.commitment_status,180);
+  const history=researchFact(d.historical_signal,'',180);
+  const attendance=researchFact(d.attendance_text,'',160);
+
+  const positiveHistory=history&&!/NO LINKED|NO PRIOR|NONE FOUND|NOT VERIFIED|NO KNOWN/i.test(history.text)?history:null;
+  const facts=[];
+  const addFact=(label,fact)=>{if(fact&&fact.text)facts.push({label,text:fact.text,confirm:Boolean(fact.confirm)})};
+  addFact('Eligibility / route',eligibility);
+  addFact('Current booking status',booking);
+  addFact('Prior Paradise history',positiveHistory);
+  addFact('Current price / package',cost);
+  addFact('Application / commitment timing',deadline);
+  addFact('Venue / location',venue);
+  addFact('Booth / setup / logistics',logistics);
+  addFact('Payment / commitment terms',commitment);
+  addFact('Audience / attendance',attendance);
+
+  const questions=[];
+  const addQuestion=q=>{if(q&&!questions.includes(q))questions.push(q)};
+  if(boundedException)addQuestion('Please confirm the event date and current participation route before we rely on the recovered record.');
+  if(!cost||cost.confirm)addQuestion('Please confirm the current price/package and any required deposit.');
+  if(!deadline||deadline.confirm)addQuestion('Please confirm the current application or commitment deadline.');
+  if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
+  if(!logistics||logistics.confirm)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
+  if(!commitment||commitment.confirm)addQuestion('Please confirm payment timing, cancellation/refund terms, and any non-refundable commitment.');
+  const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
+  if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
+  if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
+  const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
+  if(!hasApplicationPath)addQuestion('What is the best next step to apply, reserve, or secure the space?');
+
+  const statusText=String(d.booking_status||row?.research_status||'').toUpperCase();
+  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(statusText);
+  const availabilityUncertain=boundedException||!booking||booking.confirm||/WAITLIST|SOLD OUT|CLOSED|TO CONFIRM|INQUIRY|LIMITED/.test(statusText);
+  return {
+    event,range,route,person,email,phone,boundedException,late,availabilityUncertain,
+    facts:facts.slice(0,7),
+    questions:questions.slice(0,7),
+  };
+}
+function researchEmailDraft(row){
+  const profile=researchOutreachProfile(row);
+  if(!profile.email)return null;
+  const greeting=profile.person?`Hello ${researchFirstName(profile.person)},`:'Hello,';
+  const subject=`Paradise Exteriors — ${profile.event} — ${profile.late?'late availability':profile.route.replace(/ opportunity$/,'')} inquiry`;
+  const availabilityLine=profile.late
+    ?'We understand the standard deadline may have passed. We are checking whether any late inventory or alternate participation option remains available.'
+    :(profile.availabilityUncertain
+      ?`We are interested in the ${profile.route} and want to confirm the current availability before moving forward.`
+      :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`);
+  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}`);
+  const questionLines=profile.questions.map(q=>`• ${q}`);
   const body=[
-    'Hello,',
+    greeting,
     '',
-    `I’m reaching out on behalf of Paradise Exteriors regarding ${event}${range?` (${range})`:''}.`,
+    `I’m reaching out on behalf of Paradise Exteriors regarding ${profile.event} (${profile.range}).`,
     '',
-    opening,
+    availabilityLine,
     '',
-    'Please also confirm the current price/package, application or commitment deadline, booth/activation footprint, setup requirements, insurance/COI requirements, and any category exclusivity or restrictions.',
+    factLines.length?'Our current research shows:':'',
+    ...factLines,
+    factLines.length?'':'',
+    questionLines.length?'Rather than repeat items already established, could you please confirm only the remaining points below?':'',
+    ...questionLines,
+    questionLines.length?'':'',
+    profile.questions.length
+      ?'Once those items are confirmed, we can determine the appropriate next step.'
+      :'If the details above are still current, please let us know the best next step to proceed.',
     '',
     'Thank you,',
     'Paradise Exteriors',
-  ].join('\n');
-  return {email,subject,body,href:`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};
+  ].filter((line,index,arr)=>line!==''||index===0||arr[index-1]!=='').join('\n').trim();
+  return {
+    email:profile.email,
+    subject,
+    body,
+    href:`mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+    factCount:profile.facts.length,
+    questionCount:profile.questions.length,
+  };
 }
 function researchCallScript(row){
-  const d=row?.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
-  if(researchEmailAddresses(d.contact_text).length)return null;
-  const phone=researchPhoneNumbers(d.contact_text)[0]||'';
-  if(!phone)return null;
-  const event=String(row?.event_label||'this event').trim();
-  const range=String(row?.date_text||'').trim()||
-    (row?.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):'');
-  const route=researchEmailParticipationLabel(row);
-  const status=String(d.booking_status||row?.research_status||'').toUpperCase();
-  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(status);
-  const opening=late
-    ?`Hi, I’m calling on behalf of Paradise Exteriors about ${event}${range?` (${range})`:''}. We understand the standard deadline may have passed. Is any late inventory still available for Paradise Exteriors as a home-improvement company?`
-    :`Hi, I’m calling on behalf of Paradise Exteriors about ${event}${range?` (${range})`:''}. We’re interested in the ${route}. Is space still available for Paradise Exteriors as a home-improvement company?`;
+  const profile=researchOutreachProfile(row);
+  if(profile.email||!profile.phone)return null;
+  const askFor=profile.person?`Ask for ${profile.person} if needed.\n\n`:'';
+  const opening=profile.late
+    ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We understand the standard deadline may have passed, and I’m checking whether any late inventory or alternate participation option is still available.`
+    :(profile.availabilityUncertain
+      ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}, and I’d like to confirm the current availability before we move forward.`
+      :`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}. Our notes show the opportunity is active, and I’d like to confirm the next step.`);
+  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}`);
+  const questionLines=profile.questions.map(q=>`• ${q}`);
   const script=[
+    askFor.trim(),
+    'CALL OPENING',
     opening,
     '',
-    'If yes, please confirm:',
-    '• Current price or package',
-    '• Application or commitment deadline',
-    '• Booth or activation footprint',
-    '• Setup and load-in requirements',
-    '• Insurance / COI requirements',
-    '• Category exclusivity or restrictions',
-    '',
-    'What is the best next step to apply or reserve the space?',
-    '',
-    'Thank you.',
-  ].join('\n');
-  return {phone,href:researchPhoneHref(phone),script};
+    factLines.length?'REFERENCE — ALREADY IN THE SHOW RECORD':'',
+    ...factLines,
+    factLines.length?'':'',
+    questionLines.length?'ONLY ASK / CONFIRM THESE REMAINING ITEMS':'',
+    ...questionLines,
+    questionLines.length?'':'',
+    profile.questions.length
+      ?'CLOSE: Thank them, confirm the best next step, and record the outcome in Manager Notes.'
+      :'CLOSE: Confirm the best next step to proceed, thank them, and record the outcome in Manager Notes.',
+  ].filter((line,index,arr)=>line!==''||index===0||arr[index-1]!=='').join('\n').trim();
+  return {
+    phone:profile.phone,
+    href:researchPhoneHref(profile.phone),
+    script,
+    factCount:profile.facts.length,
+    questionCount:profile.questions.length,
+  };
 }
 async function shareShowSummary(show){
   const event=String(show?.event||'Paradise Shows');
