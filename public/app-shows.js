@@ -132,7 +132,7 @@ function researchNextStepRows(){
   const today=new Date().toISOString().slice(0,10);
   return (state.researchCalendarControls||[])
     .filter(row=>Number(row.plan_year||2026)===2026)
-    .filter(row=>['PURSUE','WATCH'].includes(String(row.disposition||'').toUpperCase()))
+    .filter(row=>['PURSUE','WATCH','SOLD_OUT','HOLD'].includes(String(row.disposition||'').toUpperCase()))
     .filter(row=>String(row?.detail_data?.next_action||row.notes||'').trim())
     .filter(row=>!represented.has(researchNextStepKey(row.event_label,row.event_start)))
     .filter(row=>{
@@ -141,16 +141,17 @@ function researchNextStepRows(){
     })
     .slice()
     .sort((a,b)=>{
-      const ad=String(a.event_start||a.estimated_sort_date||'9999-12-31');
-      const bd=String(b.event_start||b.estimated_sort_date||'9999-12-31');
-      const disp=x=>String(x.disposition||'').toUpperCase()==='PURSUE'?0:1;
-      const pri=x=>({HIGH:0,MEDIUM:1,LOW:2})[String(x.priority||'').toUpperCase()]??3;
-      return disp(a)-disp(b)||ad.localeCompare(bd)||pri(a)-pri(b)||String(a.event_label||'').localeCompare(String(b.event_label||''));
+      const ad=String(a.deadline_date||a.event_start||a.estimated_sort_date||'9999-12-31');
+      const bd=String(b.deadline_date||b.event_start||b.estimated_sort_date||'9999-12-31');
+      const disp=x=>({PURSUE:0,WATCH:1,SOLD_OUT:2,HOLD:3})[String(x.disposition||'').toUpperCase()]??4;
+      const pri=x=>({HIGH:0,MED_HIGH:1,MEDIUM:2,LOW_MED:3,LOW:4})[String(x.priority||'').toUpperCase()]??5;
+      return ad.localeCompare(bd)||disp(a)-disp(b)||pri(a)-pri(b)||String(a.event_label||'').localeCompare(String(b.event_label||''));
     });
 }
 function researchNextStepCard(row){
   const d=row.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
   const disposition=String(row.disposition||'WATCH').toUpperCase();
+  const decisionClass=disposition==='PURSUE'?'pursue':disposition==='WATCH'?'watch':'hold';
   const next=String(d.next_action||row.notes||'Review this research control.').trim();
   const range=String(row.date_text||'').trim()||
     (row.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):
@@ -160,7 +161,7 @@ function researchNextStepCard(row){
   const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current facts':'Current research record';
   return `<article class="nextStepCard nextStep-review">
-    <div class="nextStepTop"><div><span class="nextStepLane">Research follow-up</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${disposition==='PURSUE'?'pursue':'watch'}">${esc(disposition)}</span></div>
+    <div class="nextStepTop"><div><span class="nextStepLane">Research follow-up</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
     <div class="nextStepFacts"><div><span>When</span><b>${esc(range)}</b></div><div><span>Priority</span><b>${esc(row.priority||'Not set')}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
     <button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button>
