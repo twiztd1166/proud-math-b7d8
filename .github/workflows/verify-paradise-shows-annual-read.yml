@@ -268,7 +268,11 @@ jobs:
           test -f ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           grep -q 'researchNextStepSection' ios/App/App/public/app-shows.js
           grep -q 'Research follow-up' ios/App/App/public/app-shows.js
-          grep -q 'Reverify current facts' ios/App/App/public/app-shows.js
+          grep -q 'Manager move' ios/App/App/public/app-shows.js
+          grep -q 'Availability' ios/App/App/public/app-shows.js
+          grep -q 'Value signal' ios/App/App/public/app-shows.js
+          grep -q 'Value signal is a prioritization proxy, not a revenue forecast.' ios/App/App/public/app-shows.js
+          grep -q 'Reverify current terms before commitment.' ios/App/App/public/app-shows.js
           grep -q "'SOLD_OUT'" ios/App/App/public/app-shows.js
           grep -q 'later research follow-ups' ios/App/App/public/app-shows.js
           grep -q 'data-calendar-research=' ios/App/App/public/app-shows.js
