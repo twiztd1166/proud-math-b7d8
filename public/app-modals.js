@@ -679,6 +679,8 @@ function openResearchDetail(id){
   const completeness=researchDetailValue(d.completeness_status,'BASE_RECOVERED').replaceAll('_',' ');
   const official=String(d.official_source_url||'').trim();
   const archive=String(d.recovered_source_url||'').trim();
+  const emailDraft=typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
+  const emailDraftButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
   const sourceButtons=[
     official?`<a class="btn primary sourceBtn" target="_blank" rel="noopener" href="${esc(official)}">Open official source</a>`:'',
     archive?`<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="${esc(archive)}">Open recovered research source</a>`:'',
@@ -717,7 +719,7 @@ function openResearchDetail(id){
     ${row.notes?`<div class="block"><div class="k">Research note</div><div class="val">${esc(row.notes)}</div></div>`:''}
     <div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(nextAction)}</div></div>
     <div class="sourceWarn historyIntro"><b>Source-first control.</b> “Not verified” means the prior research did not establish that field strongly enough to treat it as fact. Recovered prices, availability and terms must be reconfirmed before payment or commitment.</div>
-    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${sourceButtons}${linkedButtons}</div>`;
+    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${emailDraftButton}${sourceButtons}${linkedButtons}</div>`;
   $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
   const addBtn=$('#researchNoteAddBtn'),input=$('#researchNoteInput');
   if(addBtn)addBtn.onclick=()=>addResearchNote(row.control_id);
