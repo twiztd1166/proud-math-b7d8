@@ -275,6 +275,9 @@ jobs:
           grep -q 'Create call script' ios/App/App/public/app-modals.js
           grep -q 'function researchEmailDraft' ios/App/App/public/app-core.js
           grep -q 'function researchCallScript' ios/App/App/public/app-core.js
+          grep -q 'function researchOutreachProfile' ios/App/App/public/app-core.js
+          grep -q 'Rather than repeat items already established' ios/App/App/public/app-core.js
+          grep -q 'ONLY ASK / CONFIRM THESE REMAINING ITEMS' ios/App/App/public/app-core.js
           grep -q 'mailto:' ios/App/App/public/app-core.js
           grep -q 'tel:' ios/App/App/public/app-core.js
           grep -q 'Availability' ios/App/App/public/app-shows.js
