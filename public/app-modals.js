@@ -611,6 +611,126 @@ async function addShowNote(id){
     if(button){button.disabled=false;button.textContent='Add note'}
   }
 }
+
+function researchDetailText(value,fallback='Not yet reverified'){
+  const text=String(value??'').trim();
+  return text||fallback;
+}
+function researchHuman(value){
+  return String(value||'').replaceAll('_',' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+}
+function researchSourceButtons(row){
+  const d=row?.details&&typeof row.details==='object'?row.details:{};
+  const items=[];
+  const add=(url,label)=>{
+    const href=String(url||'').trim();
+    if(!/^https?:\/\//i.test(href))return;
+    if(items.some(x=>x.url===href))return;
+    items.push({url:href,label:label||'Open source'});
+  };
+  add(d.source_url,d.source_label||'Open official source');
+  add(d.archive_url,'Open recovered research archive');
+  const refs=Array.isArray(row?.source_refs)?row.source_refs:[];
+  refs.forEach(ref=>{
+    if(!ref||typeof ref!=='object')return;
+    if(ref.url)add(ref.url,ref.title||'Open source');
+    else if(ref.drive_file_id)add('https://drive.google.com/file/d/'+encodeURIComponent(ref.drive_file_id)+'/view',ref.title||'Open archive source');
+  });
+  return items.map(x=>'<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="'+esc(x.url)+'">'+esc(x.label)+'</a>').join('');
+}
+function renderResearchNotes(notes){
+  const list=$('#researchNotesList'),count=$('#researchNotesCount');
+  if(!list)return;
+  const rows=Array.isArray(notes)?notes:[];
+  if(count)count.textContent=rows.length===1?'1 note':rows.length+' notes';
+  if(!rows.length){
+    list.innerHTML='<div class="showNotesEmpty">No notes yet. Add the first update for this show.</div>';
+    return;
+  }
+  list.innerHTML=rows.map(n=>{
+    const text=esc(String(n.note||'')).replace(/\n/g,'<br>');
+    return '<div class="showNoteItem"><div class="showNoteMeta">'+esc(showNoteTime(n.created_at))+'</div><div class="showNoteText">'+text+'</div></div>';
+  }).join('');
+}
+async function loadResearchNotes(controlId){
+  const list=$('#researchNotesList');
+  try{
+    const d=await call('listResearchNotes',{controlId});
+    renderResearchNotes(d.notes||[]);
+  }catch(e){
+    if(list)list.innerHTML='<div class="showNotesEmpty error">Unable to load notes · '+esc(e?.message||'Unknown error')+'</div>';
+  }
+}
+async function addResearchNote(controlId){
+  const input=$('#researchNoteInput'),button=$('#researchNoteAddBtn');
+  const note=String(input?.value||'').trim();
+  if(!note){toast('Enter a note first.');input?.focus();return}
+  if(button){button.disabled=true;button.textContent='Saving…'}
+  try{
+    await callWrite('addResearchNote',{controlId,note});
+    if(input)input.value='';
+    toast('Note added');
+    await loadResearchNotes(controlId);
+    input?.focus();
+  }catch(e){
+    toast(e?.message||'Unable to save note');
+  }finally{
+    if(button){button.disabled=false;button.textContent='Add note'}
+  }
+}
+function openResearchDetail(controlId){
+  const r=(state.researchCalendarControls||[]).find(x=>String(x.control_id)===String(controlId));
+  if(!r)return;
+  const d=r.details&&typeof r.details==='object'?r.details:{};
+  const start=r.event_start?date(r.event_start):(r.estimated_sort_date?'Date TBD · Estimated '+date(r.estimated_sort_date):'Date TBD');
+  const end=r.event_start&&r.event_end&&r.event_end!==r.event_start?date(r.event_end):'';
+  const eventRange=String(r.date_text||'').trim()||(end?start+' – '+end:start);
+  const deadline=r.deadline_date?date(r.deadline_date):researchDetailText(r.deadline_text||d.booking_window_text);
+  const sourceButtons=researchSourceButtons(r);
+  const linkedActions=[
+    r.mfc_id?'<button class="btn primary" id="researchOpenMfc">Open current control</button>':'',
+    r.profile_id?'<button class="btn secondary" id="researchOpenProfile">Review history & booths</button>':'',
+  ].filter(Boolean).join('');
+  const statusClass=String(r.disposition||'WATCH').toUpperCase()==='PURSUE'?'ready':(['HOLD','SOLD_OUT','SUPPRESS'].includes(String(r.disposition||'').toUpperCase())?'hold':'dateonly');
+  $('#detailBody').innerHTML=
+    '<h2>'+esc(r.event_label||r.control_id)+'</h2>'+
+    '<div class="subtitle">'+esc(r.control_id)+' · Recovered 2026 research</div>'+
+    '<div class="showNotesBlock showNotesProminent"><div class="showNotesHead"><div><div class="k">Manager notes</div><div class="showNotesHint">Shared notes for this show · newest first · date/time added automatically</div></div><span id="researchNotesCount" class="pill">—</span></div><div class="showNotesComposer"><textarea id="researchNoteInput" maxlength="4000" placeholder="Add an update, call note, decision, follow-up, or issue…"></textarea><div class="showNotesComposerFoot"><span>Saved with automatic Eastern Time date/time.</span><button class="btn primary" id="researchNoteAddBtn">Add note</button></div></div><div id="researchNotesList" class="showNotesList"><div class="showNotesEmpty">Loading notes…</div></div></div>'+
+    '<div class="detailGrid">'+
+      '<div class="detail"><div class="k">Treatment</div><div class="val"><span class="badge '+esc(statusClass)+'">'+esc(r.disposition||'WATCH')+'</span></div></div>'+
+      '<div class="detail"><div class="k">Priority</div><div class="val">'+esc(researchHuman(r.priority)||'Not set')+'</div></div>'+
+      '<div class="detail"><div class="k">Event date</div><div class="val">'+esc(eventRange)+'</div></div>'+
+      '<div class="detail"><div class="k">Location</div><div class="val">'+esc(researchDetailText(r.city))+'</div></div>'+
+      '<div class="detail"><div class="k">Date confidence</div><div class="val">'+esc(researchHuman(r.date_confidence)||'Not set')+'</div></div>'+
+      '<div class="detail"><div class="k">Research status</div><div class="val">'+esc(researchHuman(r.research_status)||'Not set')+'</div></div>'+
+      '<div class="detail"><div class="k">Participation route</div><div class="val">'+esc(researchHuman(r.route_type)||researchDetailText(d.eligibility_text))+'</div></div>'+
+      '<div class="detail"><div class="k">Identity / lineage</div><div class="val">'+esc(researchHuman(r.lineage_type)||'Unresolved')+'</div></div>'+
+      '<div class="detail"><div class="k">Current cost</div><div class="val">'+esc(researchDetailText(r.price_text||d.current_cost_status))+'</div></div>'+
+      '<div class="detail"><div class="k">Application / deadline</div><div class="val">'+esc(deadline)+'</div></div>'+
+    '</div>'+
+    '<div class="block"><div class="k">Venue / logistics</div><div class="val">'+esc(researchDetailText(d.venue_text||d.logistics_text))+'</div></div>'+
+    '<div class="block"><div class="k">Organizer / contact</div><div class="val">'+esc(researchDetailText(d.contact_text||d.organizer_text))+'</div></div>'+
+    '<div class="block"><div class="k">Eligibility / Paradise route</div><div class="val">'+esc(researchDetailText(d.eligibility_text||r.notes))+'</div></div>'+
+    '<div class="block"><div class="k">Booth / placement</div><div class="val">'+esc(researchDetailText(d.placement_text))+'</div></div>'+
+    '<div class="block"><div class="k">Audience / attendance</div><div class="val">'+esc(researchDetailText(d.attendance_text))+'</div></div>'+
+    '<div class="block"><div class="k">Application / booking window</div><div class="val">'+esc(researchDetailText(d.application_text||d.booking_window_text||r.deadline_text))+'</div></div>'+
+    '<div class="block"><div class="k">Booking readiness</div><div class="val">'+esc(researchDetailText(d.booking_readiness))+'</div></div>'+
+    '<div class="block"><div class="k">Current blockers / cautions</div><div class="val">'+esc(researchDetailText(d.blockers_text||r.notes))+'</div></div>'+
+    '<div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">'+esc(researchDetailText(d.next_step))+'</div></div>'+
+    '<div class="block"><div class="k">Recovered research detail</div><div class="val">'+esc(researchDetailText(d.recovered_research_text||r.notes))+'</div></div>'+
+    '<div class="block"><div class="k">Paradise history link</div><div class="val">'+esc(researchDetailText(d.history_link_text))+'</div></div>'+
+    '<div class="block"><div class="k">Verification / provenance</div><div class="val">'+esc(researchDetailText(d.verification_note))+(r.source_basis?'<br><br>'+esc(r.source_basis):'')+'</div></div>'+
+    '<div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>'+linkedActions+sourceButtons+'</div>';
+  $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
+  const noteBtn=$('#researchNoteAddBtn'),noteInput=$('#researchNoteInput');
+  if(noteBtn)noteBtn.onclick=()=>addResearchNote(r.control_id);
+  if(noteInput)noteInput.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addResearchNote(r.control_id)}};
+  const mfcBtn=$('#researchOpenMfc');if(mfcBtn)mfcBtn.onclick=()=>openDetail(r.mfc_id);
+  const profileBtn=$('#researchOpenProfile');if(profileBtn)profileBtn.onclick=()=>openCatalog(r.profile_id);
+  $('#detailModal').classList.add('show');
+  loadResearchNotes(r.control_id);
+}
+
 function openDetail(id){
   const s=state.shows.find(x=>x.mfc_id===id);if(!s)return;
   const signal=typeof bookingSignal==='function'?bookingSignal(s):{label:'REVIEW',detail:'Review current control',cls:'review'};
