@@ -2702,6 +2702,9 @@ jobs:
           fi
           grep -q 'Next Steps' /tmp/dom.html
           grep -q 'Team action' /tmp/dom.html
+          grep -q 'Research follow-up' /tmp/dom.html
+          grep -q 'data-calendar-research=' /tmp/dom.html
+          grep -q 'Reverify current facts' /tmp/dom.html
           grep -q 'Decision / review needed' /tmp/dom.html
           grep -q 'Waiting on organizer' /tmp/dom.html
           grep -q 'Scheduled / monitoring' /tmp/dom.html
