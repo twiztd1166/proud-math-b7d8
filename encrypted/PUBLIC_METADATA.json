@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project": "Matt Pocock \u2014 AI Coding for Real Engineers",
+  "target_bvid": "BV16eKb6PEUo",
+  "identity_mirror_bvid": "BV1Y6Ju6vEeN",
+  "requested_pages": "1",
+  "expected_selected": 1,
+  "completed": 1,
+  "failed": 0,
+  "failed_pages": [],
+  "failures": [],
+  "elapsed_sec": 13.773,
+  "validation": "PASS"
+}
