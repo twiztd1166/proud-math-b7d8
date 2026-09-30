@@ -22,7 +22,7 @@
       ?bookingEventRange(row)
       :[date(row.event_start),row.event_end&&row.event_end!==row.event_start?date(row.event_end):''].filter(Boolean).join(' \u2013 ');
     return `<article class="calendarItem">
-      <div class="calendarDate"><b>${esc(range)}</b><span>${esc(row.mfc_id||'')}</span></div>
+      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)}</b><span>${esc(['Operating',row.mfc_id||''].filter(Boolean).join(' \u00b7 '))}</span></div>
       <div class="calendarMain">
         <div><h3>${esc(row.event||row.mfc_id)}</h3><p>${esc(row.decision||'Decision not stated')}</p></div>
         <span class="badge ${skipped?'hold':badgeClass(row.show_status)}">${esc(skipped?'SKIP':row.show_status||'IN PLAY')}</span>
@@ -44,7 +44,7 @@
       :String(row.current_cost_status||row.opportunity_status||'Live opportunity');
     const next=String(review.next_step||row.action_label||'').trim();
     return `<article class="calendarItem">
-      <div class="calendarDate"><b>${esc(range)}</b><span>${esc(row.profile_id||'')}</span></div>
+      <div class="calendarDate"><b>${esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)}</b><span>${esc(['Governed',row.profile_id||''].filter(Boolean).join(' \u00b7 '))}</span></div>
       <div class="calendarMain"><div><h3>${esc(row.event_label||row.profile_id)}</h3><p>${esc(cost)}</p></div><span class="badge ${badge}">${esc(disposition)}</span></div>
       ${next?`<div class="calendarNext"><span>Next</span><b>${esc(next)}</b></div>`:''}
       <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
@@ -66,7 +66,7 @@
       ?'<button type="button" class="calendarOpen" data-calendar-show="'+esc(row.mfc_id)+'">Open show</button>'
       :(row.profile_id?'<button type="button" class="calendarOpen" data-annual-profile="'+esc(row.profile_id)+'">Open profile</button>':'');
     return '<article class="calendarItem">'+
-      '<div class="calendarDate"><b>'+esc(range)+'</b><span>'+esc(sourceTag)+'</span></div>'+
+      '<div class="calendarDate"><b>'+esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)+'</b><span>'+esc(sourceTag)+'</span></div>'+
       '<div class="calendarMain"><div><h3>'+esc(row.event_label||row.control_id)+'</h3><p>'+esc(detail)+'</p></div><span class="badge '+badge+'">'+esc(disposition)+'</span></div>'+
       (note?'<div class="calendarNext"><span>Recovered research</span><b>'+esc(note)+'</b></div>':'')+
       open+
@@ -80,6 +80,36 @@
     const nextMonth=month===12?(year+1)+'-01-01':year+'-'+String(month+1).padStart(2,'0')+'-01';
     return start<nextMonth&&end>=monthStart;
   }
+  function calendarMonthSortDate(row,year,month){
+    const start=String(row?.event_start||'9999-12-31');
+    const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
+    return start<monthStart?monthStart:start;
+  }
+  function calendarMonthEntry(kind,row,year,month){
+    const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
+    const start=String(row?.event_start||'9999-12-31');
+    const labels={
+      show:row?.event,
+      opportunity:row?.event_label,
+      research:row?.event_label,
+    };
+    const typeOrder={show:0,opportunity:1,research:2};
+    return {
+      kind,
+      row,
+      sortDate:calendarMonthSortDate(row,year,month),
+      continuing:start<monthStart,
+      typeOrder:typeOrder[kind]??9,
+      label:String(labels[kind]||''),
+    };
+  }
+  function render2026MonthEntry(entry){
+    const row={...entry.row,_calendarContinuation:entry.continuing};
+    if(entry.kind==='show')return calendar2026Item(row);
+    if(entry.kind==='opportunity')return calendar2026OpportunityItem(row);
+    return calendar2026ResearchItem(row);
+  }
+
   function render2026Calendar(){
     const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
@@ -115,11 +145,19 @@
       if(!monthShows.length&&!monthOpportunities.length&&!monthResearch.length)return '';
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
+      const monthEntries=[
+        ...monthShows.map(row=>calendarMonthEntry('show',row,2026,month)),
+        ...monthOpportunities.map(row=>calendarMonthEntry('opportunity',row,2026,month)),
+        ...monthResearch.map(row=>calendarMonthEntry('research',row,2026,month)),
+      ].sort((a,b)=>
+        a.sortDate.localeCompare(b.sortDate)||
+        String(a.row.event_start||'').localeCompare(String(b.row.event_start||''))||
+        a.typeOrder-b.typeOrder||
+        a.label.localeCompare(b.label)
+      );
       return `<section class="calendarMonth">
         <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}${monthResearch.length?' \u00b7 '+monthResearch.length+' recovered research':''}</p></div></div>
-        ${monthShows.map(calendar2026Item).join('')}
-        ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
-        ${monthResearch.map(calendar2026ResearchItem).join('')}
+        ${monthEntries.map(render2026MonthEntry).join('')}
       </section>`;
     }).join('');
     const tbdHtml=tbdResearch.length?`<section class="calendarMonth"><div class="calendarMonthHead"><div><h2>Date TBD</h2><p>${tbdResearch.length} recovered research control${tbdResearch.length===1?'':'s'}</p></div></div>${tbdResearch.map(calendar2026ResearchItem).join('')}</section>`:'';
