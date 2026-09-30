@@ -154,15 +154,18 @@ function researchAvailability(row){
   const status=String(row?.detail_data?.booking_status||row?.research_status||'').trim();
   const normalized=status.toUpperCase();
   const verification=String(row?.research_status||'').toUpperCase();
+  const active=/CURRENT|ACTIVE|OPEN|AVAILABLE|PUBLISHED|REGISTRATION/.test(normalized);
+  const closure=/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized);
+  const closedParticipationLane=/(?:MERCHANT|INFORMATIONAL|VENDOR|EXHIBITOR)[^·]*(?:APPLICATIONS?|SPACES?)[^·]*(?:CLOSED|FILLED|SOLD OUT|WAITLIST)/.test(normalized);
+  const alternateActive=/SPONSOR|PARTNER|PARTNERSHIP|ALTERNATE/.test(normalized)&&active;
   if(verification.includes('NOT_REVERIFIED'))return {code:'REVERIFY',label:'REVERIFY FIRST',rank:5};
   if(/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
-  if(/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized)){
-    if(/SPONSOR|PARTNER|INQUIRY|ALTERNATE/.test(normalized)&&/CURRENT|ACTIVE|OPEN|AVAILABLE/.test(normalized))return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
-    return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
-  }
+  if(closure&&closedParticipationLane&&alternateActive)return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
+  if(closure&&!active)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
   if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
-  if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
+  if(active)return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
+  if(closure)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
 function researchStructuredAction(row){
@@ -275,17 +278,23 @@ function researchNextStepCard(row){
   const managerMove=researchManagerMove(row);
   const urgency=researchUrgency(row);
   const valueSignal=researchValueSignal(row);
-  const emailDraft=typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
-  const callScript=!emailDraft&&typeof researchCallScript==='function'?researchCallScript(row):null;
+  const operationalCode=String(d.operational_action_code||'').trim().toUpperCase();
+  const contactActionCodes=['EMAIL_DRAFT','EMAIL_THEN_APPLY','CALL_SCRIPT','CALL_THEN_APPLY'];
+  const contactPrimary=!operationalCode||contactActionCodes.includes(operationalCode);
+  const emailDraft=contactPrimary&&typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
+  const callScript=contactPrimary&&!emailDraft&&typeof researchCallScript==='function'?researchCallScript(row):null;
   const emailDraftButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
   const callScriptButton=callScript?`<button type="button" class="btn primary" data-research-call-script="${esc(row.control_id)}">Create call script</button>`:'';
+  const applyHref=operationalCode==='APPLY'?String(d.action_url||d.official_source_url||d.recovered_source_url||'').trim():'';
+  const applyLabel=d.action_url?'Open application / apply':(d.official_source_url?'Open official source to apply':'Open recovered source to apply');
+  const applyButton=applyHref?`<a class="btn primary" target="_blank" rel="noopener" href="${esc(applyHref)}">${esc(applyLabel)}</a>`:'';
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current terms before commitment.':'Current-reverified research record';
   return `<article class="nextStepCard nextStep-review">
     <div class="nextStepTop"><div><span class="nextStepLane">${esc(urgency.label)}</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
     <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove.label)}</b></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
     <div class="nextStepFacts"><div><span>Availability</span><b>${esc(availability.label)}</b></div><div><span>Value signal</span><b>${esc(valueSignal)}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>When</span><b>${esc(range)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
-    <div class="actions">${emailDraftButton}${callScriptButton}<button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button></div>
+    <div class="actions">${applyButton}${emailDraftButton}${callScriptButton}<button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button></div>
   </article>`;
 }
 function researchNextStepSection(){
