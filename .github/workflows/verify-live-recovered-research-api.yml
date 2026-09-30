@@ -99,6 +99,7 @@ jobs:
             'R2026-013-PUMPKINS-PALMS':'2026-10-01',
             'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
             'R2026-061-GRACE-JERK':'2026-10-09',
+            'R2026-063-SENIOR-HARDROCK':'2026-10-30',
             'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
             'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
             'R2026-100-WESTON-RUN':'2026-11-15',
@@ -118,6 +119,14 @@ jobs:
           assert homegrown.get('series_key') == 'PALM-BAY-FARMERS-MARKET', homegrown
           holiday=by_control['R2026-107-PALM-BAY-HOLIDAY-MARKET']
           assert holiday.get('series_key') == 'PALM-BAY-FARMERS-MARKET', holiday
+          senior=by_control['R2026-063-SENIOR-HARDROCK']
+          senior_detail=senior.get('detail_data') or {}
+          assert senior.get('deadline_date') == '2026-10-30', senior
+          assert senior_detail.get('official_source_url') == 'https://seniorexpousa.com/expos/florida/fort-lauderdale-hollywood-fall-senior-expo-2026/', senior
+          assert 'Evan@SeniorExpoUSA.com' in str(senior_detail.get('contact_text') or ''), senior
+          assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
+          assert not any('retirement-times.com' in str(ref.get('url') or '') for ref in (senior.get('source_refs') or [])), senior
+          assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
