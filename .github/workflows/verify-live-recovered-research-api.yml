@@ -34,8 +34,8 @@ jobs:
           research=x.get('researchCalendarControls') or []
           q4=[r for r in research if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
           tbd=[r for r in research if not r.get('event_start')]
-          assert len(research) == 115, len(research)
-          assert len(q4) == 114, len(q4)
+          assert len(research) == 117, len(research)
+          assert len(q4) == 116, len(q4)
           assert len(tbd) == 1, len(tbd)
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
@@ -45,6 +45,8 @@ jobs:
             'Turkey Bash',
             'Christmas on Las Olas',
             'Martin County Winter Fest',
+            'NASA MAX POWER / Salute to America in Space',
+            'Tradition Neighborhood Market',
           }
           names={r.get('event_label') for r in research}
           missing=wanted-names
