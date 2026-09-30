@@ -655,6 +655,28 @@ function researchDetailValue(value,fallback='Not verified'){
   const text=String(value??'').trim();
   return text||fallback;
 }
+function openAnnualPlanCallScript(id){
+  const row=(state.annualPlan?.rows||[]).find(x=>x.plan_id===id);if(!row)return;
+  const callScript=typeof annualPlanCallScript==='function'?annualPlanCallScript(row):null;
+  if(!callScript){toast('No verified phone call route for this 2027 plan row.');return}
+  const scriptHtml=esc(callScript.script).replace(/\n/g,'<br>');
+  $('#detailBody').innerHTML=`<h2>Call script · ${esc(row.occurrence_label||row.canonical_event||row.plan_id)}</h2>
+    <div class="subtitle">Customized from the governed 2027 plan · verified number ${esc(callScript.phone)}</div>
+    <div class="block primaryActionBlock"><div class="k">Call script</div><div class="val">${scriptHtml}</div></div>
+    <div class="sourceWarn historyIntro"><b>Human review required.</b> Use this as a talking guide. Do not book, pay, sign, or treat organizer responses as verified until the applicable current terms and authority gates are satisfied.</div>
+    <div class="actions detailActions">
+      <button class="btn secondary" id="annualCallCloseBtn">Close</button>
+      <a class="btn primary" href="${esc(callScript.href)}">Call ${esc(callScript.phone)}</a>
+      <button class="btn secondary" id="annualCallCopyBtn">Copy script</button>
+    </div>`;
+  $('#annualCallCloseBtn').onclick=()=>closeModal('detailModal');
+  $('#annualCallCopyBtn').onclick=async()=>{
+    try{await navigator.clipboard.writeText(callScript.script);toast('Call script copied')}
+    catch(_){toast('Unable to copy call script')}
+  };
+  $('#detailModal').classList.add('show');
+}
+
 function openResearchCallScript(id){
   const row=(state.researchCalendarControls||[]).find(x=>x.control_id===id);if(!row)return;
   const callScript=typeof researchCallScript==='function'?researchCallScript(row):null;
