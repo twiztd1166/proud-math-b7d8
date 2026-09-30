@@ -257,14 +257,16 @@ function researchNextStepCard(row){
   const urgency=researchUrgency(row);
   const valueSignal=researchValueSignal(row);
   const emailDraft=typeof researchEmailDraft==='function'?researchEmailDraft(row):null;
+  const callScript=!emailDraft&&typeof researchCallScript==='function'?researchCallScript(row):null;
   const emailDraftButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
+  const callScriptButton=callScript?`<button type="button" class="btn primary" data-research-call-script="${esc(row.control_id)}">Create call script</button>`:'';
   const verification=String(row.research_status||'').toUpperCase().includes('NOT_REVERIFIED')?'Reverify current terms before commitment.':'Current-reverified research record';
   return `<article class="nextStepCard nextStep-review">
     <div class="nextStepTop"><div><span class="nextStepLane">${esc(urgency.label)}</span><h3>${esc(row.event_label)}</h3></div><span class="nextStepDecision ${decisionClass}">${esc(disposition.replaceAll('_',' '))}</span></div>
     <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove.label)}</b></div>
     <div class="nextStepAction"><span>Next step</span><b>${esc(next)}</b></div>
     <div class="nextStepFacts"><div><span>Availability</span><b>${esc(availability.label)}</b></div><div><span>Value signal</span><b>${esc(valueSignal)}</b></div><div><span>Deadline</span><b>${esc(deadline)}</b></div><div><span>When</span><b>${esc(range)}</b></div><div><span>Cost</span><b>${esc(cost)}</b></div><div><span>Booking status</span><b>${esc(status)}</b></div><div><span>Verification</span><b>${esc(verification)}</b></div></div>
-    <div class="actions">${emailDraftButton}<button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button></div>
+    <div class="actions">${emailDraftButton}${callScriptButton}<button type="button" class="btn secondary nextStepOpen" data-calendar-research="${esc(row.control_id)}">Open details</button></div>
   </article>`;
 }
 function researchNextStepSection(){
