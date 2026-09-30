@@ -1,7 +1,7 @@
 const API='https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api';
 const SHEET='https://docs.google.com/spreadsheets/d/1Fyyypme7AYFEUwLbIPPNaixYR7Lwiwegs2hRTu02wYk/edit';
 let state={
-  shows:[],payments:[],activity:[],settings:{},
+  shows:[],calendarOpportunities:[],payments:[],activity:[],settings:{},
   reconciliation:{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]},
   sourceRefresh:{latest:null,conflicts:[]},recoveryHealth:null,
   catalog:[],catalogSummary:null,catalogLoaded:false,catalogLoading:false,catalogError:null,catalogLimit:60,deepLinkedProfile:null,deepLinkedYear:null,
@@ -225,7 +225,7 @@ async function loadCatalog(force=false){
 
 async function bootstrap(){
   try{
-    const d=await call('bootstrap');state.shows=d.shows;state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
+    const d=await call('bootstrap');state.shows=d.shows;state.calendarOpportunities=d.calendarOpportunities||[];state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
