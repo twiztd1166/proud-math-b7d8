@@ -1,0 +1,198 @@
+name: Temporary AI Coding for Real Engineers transcription
+
+on:
+  push:
+    branches:
+      - course-ai-coding-real-engineers-20260930
+    paths:
+      - '.github/workflows/course-ai-coding-real-engineers-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  transcribe:
+    name: Parts ${{ matrix.start }}-${{ matrix.end }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - start: 1
+            end: 29
+          - start: 30
+            end: 47
+          - start: 48
+            end: 71
+          - start: 72
+            end: 89
+          - start: 90
+            end: 91
+          - start: 92
+            end: 92
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg zip openssl
+          python -m pip install --upgrade pip
+          python -m pip install 'faster-whisper==1.2.0' 'requests>=2.32,<3'
+
+      - name: Transcribe assigned parts
+        env:
+          START_PART: ${{ matrix.start }}
+          END_PART: ${{ matrix.end }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p course-work/out
+          python <<'PY'
+          import json, os, pathlib, subprocess, time, traceback
+          import requests
+          from faster_whisper import WhisperModel
+
+          ROOT = pathlib.Path("course-work")
+          OUT = ROOT / "out"
+          inventory = json.loads(pathlib.Path("course-temp/ai-coding-real-engineers/inventory.json").read_text())
+          by_part = {int(x["part"]): x for x in inventory["items"]}
+          start = int(os.environ["START_PART"])
+          end = int(os.environ["END_PART"])
+          bvid = inventory["bvid"]
+          headers = {
+              "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+              "Referer": "https://www.bilibili.com/",
+          }
+
+          model = WhisperModel("small.en", device="cpu", compute_type="int8", cpu_threads=4, num_workers=1)
+          manifest = {
+              "course": inventory["course"],
+              "bvid": bvid,
+              "start": start,
+              "end": end,
+              "engine": "faster-whisper 1.2.0 / small.en / cpu int8",
+              "items": [],
+          }
+
+          for part in range(start, end + 1):
+              meta = by_part[part]
+              rec = {"part": part, "title": meta["title"], "source": meta["source"], "expected_duration": meta["duration"]}
+              mp4 = ROOT / f"P{part:03d}.mp4"
+              wav = ROOT / f"P{part:03d}.wav"
+              ok = False
+              last_err = None
+              for attempt in range(1, 5):
+                  try:
+                      parse_url = f"https://api.injahow.cn/bparse/?bv={bvid}&p={part}&q=32&format=mp4&otype=json"
+                      pr = requests.get(parse_url, timeout=60, headers=headers)
+                      pr.raise_for_status()
+                      pj = pr.json()
+                      if pj.get("code") != 0 or not pj.get("url"):
+                          raise RuntimeError(f"parser response: {pj}")
+                      media_url = pj["url"]
+                      rec["parser_quality"] = pj.get("quality")
+                      rec["cid_from_media_url"] = next((x for x in media_url.split("/") if x.isdigit() and len(x) >= 8), None)
+
+                      with requests.get(media_url, stream=True, timeout=(30, 240), headers=headers) as rr:
+                          rr.raise_for_status()
+                          with mp4.open("wb") as f:
+                              for chunk in rr.iter_content(chunk_size=1024 * 1024):
+                                  if chunk:
+                                      f.write(chunk)
+
+                      subprocess.run([
+                          "ffmpeg","-hide_banner","-loglevel","error","-y",
+                          "-i",str(mp4),"-vn","-ac","1","-ar","16000","-c:a","pcm_s16le",str(wav)
+                      ], check=True)
+
+                      segments, info = model.transcribe(
+                          str(wav),
+                          language="en",
+                          beam_size=3,
+                          vad_filter=True,
+                          condition_on_previous_text=False,
+                      )
+                      segs = []
+                      text_parts = []
+                      for s in segments:
+                          txt = s.text.strip()
+                          if txt:
+                              segs.append({"start": round(s.start, 3), "end": round(s.end, 3), "text": txt})
+                              text_parts.append(txt)
+                      rec.update({
+                          "status": "ok",
+                          "detected_language": info.language,
+                          "language_probability": info.language_probability,
+                          "transcribed_duration_seconds": info.duration,
+                          "segment_count": len(segs),
+                          "character_count": len(" ".join(text_parts)),
+                      })
+                      output = {
+                          "metadata": rec,
+                          "segments": segs,
+                          "text": " ".join(text_parts),
+                      }
+                      (OUT / f"P{part:03d}.json").write_text(json.dumps(output, ensure_ascii=False, indent=2))
+                      ok = True
+                      break
+                  except Exception as e:
+                      last_err = f"{type(e).__name__}: {e}"
+                      rec["attempt"] = attempt
+                      rec["last_error"] = last_err
+                      time.sleep(min(20, 3 * attempt))
+                  finally:
+                      for p in (mp4, wav):
+                          try:
+                              p.unlink()
+                          except FileNotFoundError:
+                              pass
+
+              if not ok:
+                  rec["status"] = "error"
+                  rec["error"] = last_err
+                  (OUT / f"P{part:03d}.error.json").write_text(json.dumps(rec, ensure_ascii=False, indent=2))
+              manifest["items"].append(rec)
+
+          manifest["ok"] = sum(1 for x in manifest["items"] if x.get("status") == "ok")
+          manifest["errors"] = sum(1 for x in manifest["items"] if x.get("status") == "error")
+          (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
+          print(json.dumps({"start": start, "end": end, "ok": manifest["ok"], "errors": manifest["errors"]}))
+          PY
+
+      - name: Encrypt transcript bundle
+        env:
+          START_PART: ${{ matrix.start }}
+          END_PART: ${{ matrix.end }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp course-temp/ai-coding-real-engineers/course-public.pem course-work/course-public.pem
+          (
+            cd course-work/out
+            zip -q -r ../chunk.zip .
+          )
+          cd course-work
+          openssl rand -hex 32 > aes.pass
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in chunk.zip -out chunk.zip.enc -pass file:aes.pass
+          openssl pkeyutl -encrypt -pubin -inkey course-public.pem -in aes.pass -out aes.pass.enc
+          mkdir artifact
+          mv chunk.zip.enc aes.pass.enc artifact/
+          printf '{"start":%s,"end":%s,"encrypted":true,"cipher":"AES-256-CBC-PBKDF2-200000","key_wrap":"RSA-2048"}\n' "$START_PART" "$END_PART" > artifact/metadata.json
+          rm -rf out chunk.zip aes.pass
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-coding-real-engineers-${{ matrix.start }}-${{ matrix.end }}
+          path: course-work/artifact/
+          retention-days: 1
+          if-no-files-found: error
