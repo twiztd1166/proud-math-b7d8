@@ -43,6 +43,18 @@ jobs:
           fi
           echo 'Current-publication mature-smoke adapter source: PASS'
 
+      - name: Validate pull-request candidate boundary
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/app-core.js
+          node --check public/app-shows.js
+          node --check public/app-calendar.js
+          echo 'Pull-request candidate source: PASS'
+          echo 'Stable-production convergence is intentionally deferred until the production-branch push.'
+
       - name: Execute preserved mature smoke suite
+        if: github.event_name != 'pull_request'
         shell: bash
         run: python scripts/run-paradise-shows-live-smoke-current.py
