@@ -154,17 +154,18 @@ function researchAvailability(row){
   const status=String(row?.detail_data?.booking_status||row?.research_status||'').trim();
   const normalized=status.toUpperCase();
   const verification=String(row?.research_status||'').toUpperCase();
-  const active=/CURRENT|ACTIVE|OPEN|AVAILABLE|PUBLISHED|REGISTRATION/.test(normalized);
+  const active=/ACTIVE|OPEN|AVAILABLE|PUBLISHED|REGISTRATION/.test(normalized);
+  const current=/CURRENT/.test(normalized);
   const closure=/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized);
   const closedParticipationLane=/(?:MERCHANT|INFORMATIONAL|VENDOR|EXHIBITOR)[^·]*(?:APPLICATIONS?|SPACES?)[^·]*(?:CLOSED|FILLED|SOLD OUT|WAITLIST)/.test(normalized);
-  const alternateActive=/SPONSOR|PARTNER|PARTNERSHIP|ALTERNATE/.test(normalized)&&active;
+  const alternateActive=/SPONSOR|PARTNER|PARTNERSHIP|ALTERNATE/.test(normalized)&&(active||current);
   if(verification.includes('NOT_REVERIFIED'))return {code:'REVERIFY',label:'REVERIFY FIRST',rank:5};
   if(/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
   if(closure&&closedParticipationLane&&alternateActive)return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
   if(closure&&!active)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
-  if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
   if(active)return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
+  if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
   if(closure)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
