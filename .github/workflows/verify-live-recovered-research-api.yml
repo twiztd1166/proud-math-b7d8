@@ -96,14 +96,24 @@ jobs:
           assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
           by_control={r.get('control_id'):r for r in research}
           expected_deadlines={
+            'R2026-068-FREEDOM-5K':'2026-09-15',
+            'R2026-004-FLORIDA-CREATIVES-PSL':'2026-09-30',
             'R2026-013-PUMPKINS-PALMS':'2026-10-01',
-            'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
+            'R2026-043-BOYNTON-PIRATE':'2026-10-01',
+            'R2026-006-GACTC-OKTOBERFEST':'2026-10-08',
+            'R2026-019-SFL-PICKLE':'2026-10-09',
             'R2026-061-GRACE-JERK':'2026-10-09',
+            'R2026-033-MOOSE-MELBOURNE':'2026-10-17',
+            'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
             'R2026-063-SENIOR-HARDROCK':'2026-10-30',
-            'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
             'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
+            'R2026-060-TEQUILA-FEST':'2026-10-31',
+            'R2026-083-WORLD-AIDS':'2026-11-01',
+            'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
             'R2026-100-WESTON-RUN':'2026-11-15',
+            'R2026-090-SPACE-COAST-HOLIDAY-FOOD':'2026-12-01',
             'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
+            'R2026-105-TC-HOLIDAY-FOOD':'2026-12-04',
           }
           for cid,deadline in expected_deadlines.items():
               assert by_control[cid].get('deadline_date') == deadline, (cid,by_control[cid])
@@ -130,7 +140,7 @@ jobs:
           assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
           assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
           assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
-          assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
+          assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
           assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
           carifest=by_control['R2026-054-CARIFEST']
