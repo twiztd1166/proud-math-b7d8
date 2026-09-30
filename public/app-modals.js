@@ -698,6 +698,7 @@ function openResearchDetail(id){
   const commitment=researchDetailValue(d.commitment_terms_text,'No current payment/commitment terms verified.');
   const history=researchDetailValue(d.historical_signal||row.profile_id||row.mfc_id,'No linked historical profile/control');
   const nextAction=researchDetailValue(d.next_action||row.notes,'Review this research control.');
+  const actionGuard=String(d.operational_guard||'').trim();
   const summary=researchDetailValue(d.research_summary||row.notes,'Recovered research control.');
   const completeness=researchDetailValue(d.completeness_status,'BASE_RECOVERED').replaceAll('_',' ');
   const official=String(d.official_source_url||'').trim();
@@ -743,6 +744,7 @@ function openResearchDetail(id){
     <div class="block"><div class="k">Recovered research evidence</div><div class="val">${esc(summary)}</div></div>
     ${row.notes?`<div class="block"><div class="k">Research note</div><div class="val">${esc(row.notes)}</div></div>`:''}
     <div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(nextAction)}</div></div>
+    ${actionGuard?`<div class="block"><div class="k">Action guard</div><div class="val">${esc(actionGuard)}</div></div>`:''}
     <div class="sourceWarn historyIntro"><b>Source-first control.</b> “Not verified” means the prior research did not establish that field strongly enough to treat it as fact. Recovered prices, availability and terms must be reconfirmed before payment or commitment.</div>
     <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${emailDraftButton}${callScriptButton}${sourceButtons}${linkedButtons}</div>`;
   $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
