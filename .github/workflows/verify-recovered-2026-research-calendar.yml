@@ -31,6 +31,8 @@ jobs:
         run: |
           node --check scripts/verify-research-outreach.mjs
           node scripts/verify-research-outreach.mjs
+          node --check scripts/verify-research-action-model.mjs
+          node scripts/verify-research-action-model.mjs
 
       - name: Verify recovered research wiring
         run: |
