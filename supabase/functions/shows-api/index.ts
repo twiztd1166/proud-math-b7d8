@@ -321,7 +321,7 @@ Deno.serve(async r => {
       .filter((row:any)=>String(rebookReviewByProfile.get(row.profile_id)?.resolution_lane||'').toUpperCase()==='PARADISE_ACTION')
       .map((row:any)=>({...row,review:rebookReviewByProfile.get(row.profile_id)}))
       .sort((x:any,y:any)=>String(x.critical_deadline_date||x.event_start||'9999-12-31').localeCompare(String(y.critical_deadline_date||y.event_start||'9999-12-31'))||String(x.event_label||'').localeCompare(String(y.event_label||'')));
-    return out(r,{ok:true,version:19,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
+    return out(r,{ok:true,version:20,shows:a.data||[],payments:b.data||[],settings,activity,reconciliation,sourceRefresh,recoveryHealth,calendarOpportunities,researchCalendarControls,liveBookingActions,liveResolutionCounts});
   }
 
   if(action==='annualPlan'){
