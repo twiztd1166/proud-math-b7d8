@@ -139,6 +139,14 @@ function researchDaysUntil(value){
   const today=researchDateOrdinal(researchEasternTodayKey());
   return target===null||today===null?null:target-today;
 }
+function researchDueLabel(value){
+  const days=researchDaysUntil(value);
+  if(days===null)return 'No action date';
+  if(days<0)return `Overdue · ${Math.abs(days)}d`;
+  if(days===0)return 'Today';
+  if(days===1)return 'Tomorrow';
+  return date(value);
+}
 function researchNextActionDate(row){
   return String(row?.deadline_date||row?.event_start||row?.estimated_sort_date||'9999-12-31');
 }
@@ -153,8 +161,8 @@ function researchAvailability(row){
     return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   }
   if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
+  if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
   if(/ACTIVE|OPEN|PUBLISHED|AVAILABLE|REGISTRATION/.test(normalized))return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
-  if(/TO CONFIRM|TO REQUEST|NOT PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
 function researchManagerMove(row){
@@ -238,7 +246,7 @@ function researchNextStepCard(row){
   const cost=String(d.current_cost_text||row.price_text||'').trim()||'Not verified';
   const deadlineText=String(d.deadline_text||row.deadline_text||'').trim();
   const deadline=row.deadline_date
-    ?`${dueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
+    ?`${researchDueLabel(row.deadline_date)} · ${date(row.deadline_date)}`
     :(deadlineText||'Not verified');
   const status=String(d.booking_status||row.research_status||'').trim()||'Not verified';
   const availability=researchAvailability(row);
