@@ -30,13 +30,18 @@ jobs:
           import json
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
-          assert x.get('version') == 20, x.get('version')
+          assert x.get('version') == 21, x.get('version')
           research=x.get('researchCalendarControls') or []
           q4=[r for r in research if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
           tbd=[r for r in research if not r.get('event_start')]
           assert len(research) == 117, len(research)
           assert len(q4) == 117, len(q4)
           assert len(tbd) == 0, len(tbd)
+          assert all(isinstance(r.get('details'),dict) for r in research), 'missing details payload'
+          assert all((r.get('details') or {}).get('recovered_research_text') for r in research), 'missing recovered research detail'
+          assert all((r.get('details') or {}).get('booking_readiness') for r in research), 'missing booking readiness'
+          assert all(r.get('source_basis') for r in research), 'missing source basis'
+          assert all(isinstance(r.get('source_refs'),list) for r in research), 'missing source refs'
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
           wanted={
