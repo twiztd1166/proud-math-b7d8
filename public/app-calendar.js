@@ -55,7 +55,7 @@
     const badge=disposition==='PURSUE'?'ready':(disposition==='SOLD_OUT'||disposition==='HOLD')?'hold':'dateonly';
     const start=row.event_start?date(row.event_start):'Date TBD';
     const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
-    const range=end?start+' \u2013 '+end:start;
+    const range=String(row.date_text||'').trim()||(end?start+' \u2013 '+end:start);
     const priority=String(row.priority||'').replaceAll('_','-');
     const lineage=String(row.lineage_type||'UNRESOLVED').replaceAll('_',' ');
     const route=String(row.route_type||'Research control').replaceAll('_',' ');
