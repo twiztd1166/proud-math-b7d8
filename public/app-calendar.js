@@ -50,6 +50,34 @@
       <button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>
     </article>`;
   }
+  function calendarTouchesMonth(row,year,month){
+    const start=String(row?.event_start||'');
+    if(!start)return false;
+    const end=String(row?.event_end||row?.event_start||'');
+    const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
+    const nextMonth=month===12?(year+1)+'-01-01':year+'-'+String(month+1).padStart(2,'0')+'-01';
+    return start<nextMonth&&end>=monthStart;
+  }
+
+  function calendarResearchKey(row){
+    return String(row?.event_label||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  }
+
+  function calendar2026ResearchItem(row){
+    const disposition=String(row.disposition||'WATCH').toUpperCase();
+    const badge=disposition==='PURSUE'?'ready':disposition==='WAITLIST'?'hold':'dateonly';
+    const start=date(row.event_start);
+    const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
+    const range=String(row.schedule_text||'').trim()||(end?start+' – '+end:start);
+    const classification=String(row.research_classification||disposition).trim();
+    const evidence=String(row.evidence_summary||'').trim();
+    return `<article class="calendarItem">
+      <div class="calendarDate"><b>${esc(range)}</b><span>${esc(row.profile_id||'RESEARCH')}</span></div>
+      <div class="calendarMain"><div><h3>${esc(row.event_label||row.control_id)}</h3><p>${esc(classification)}</p></div><span class="badge ${badge}">${esc(disposition)}</span></div>
+      ${evidence?`<div class="calendarNext"><span>Research</span><b>${esc(evidence)}</b></div>`:''}
+      ${row.profile_id?`<button type="button" class="calendarOpen" data-annual-profile="${esc(row.profile_id)}">Open profile</button>`:''}
+    </article>`;
+  }
   function render2026Calendar(){
     const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
@@ -60,6 +88,18 @@
       .filter(row=>!showRows.some(show=>String(show.event_start||'')===String(row.event_start||'')&&String(show.event||'').trim().toLowerCase()===String(row.event_label||'').trim().toLowerCase()))
       .slice()
       .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
+    const researchRows=(state.researchCalendar2026||[])
+      .filter(row=>String(row.event_start||'').startsWith('2026-'))
+      .filter(row=>{
+        const key=calendarResearchKey(row);
+        const start=String(row.event_start||'');
+        const profile=String(row.profile_id||'');
+        const duplicateShow=showRows.some(show=>String(show.event_start||'')===start&&calendarResearchKey({event_label:show.event})===key);
+        const duplicateOpportunity=opportunityRows.some(op=>String(op.event_start||'')===start&&((profile&&String(op.profile_id||'')===profile)||calendarResearchKey(op)===key));
+        return !duplicateShow&&!duplicateOpportunity;
+      })
+      .slice()
+      .sort((a,b)=>String(a.event_start||'9999-12-31').localeCompare(String(b.event_start||'9999-12-31'))||String(a.event_label||'').localeCompare(String(b.event_label||'')));
     const active=showRows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP'));
     const today=new Date().toISOString().slice(0,10);
     const upcomingShows=active.filter(row=>String(row.event_end||row.event_start||'')>=today);
@@ -68,20 +108,22 @@
     const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     const monthHtml=months.map((name,index)=>{
       const month=index+1;
-      const monthShows=showRows.filter(row=>calendarMonthNumber(row)===month);
-      const monthOpportunities=opportunityRows.filter(row=>calendarMonthNumber(row)===month);
-      if(!monthShows.length&&!monthOpportunities.length)return '';
+      const monthShows=showRows.filter(row=>calendarTouchesMonth(row,2026,month));
+      const monthOpportunities=opportunityRows.filter(row=>calendarTouchesMonth(row,2026,month));
+      const monthResearch=researchRows.filter(row=>calendarTouchesMonth(row,2026,month));
+      if(!monthShows.length&&!monthOpportunities.length&&!monthResearch.length)return '';
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
       return `<section class="calendarMonth">
         <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}</p></div></div>
         ${monthShows.map(calendar2026Item).join('')}
         ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
+        ${monthResearch.map(calendar2026ResearchItem).join('')}
       </section>`;
     }).join('');
     return `${calendarYearBar(2026)}
-      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Governed 2026 operating controls plus verified live/rebook opportunities. Research controls not yet normalized into app data are kept out until reconciled.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
-      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length}</b><span>Governed dated entries</span></div><div><b>${showRows.length}</b><span>Operating controls</span></div><div><b>${opportunityRows.length}</b><span>Additional opportunities</span></div></div>
+      <div class="hero calendarHero"><div><h1>2026 Calendar</h1><p>Operating controls, verified live/rebook opportunities, and the reconciled remainder-of-2026 research overlay recovered from the September audit.</p></div><button type="button" class="btn secondary" id="calendarOpenCurrent">Open current shows</button></div>
+      <div class="calendarStats"><div><b>${showRows.length+opportunityRows.length+researchRows.length}</b><span>2026 calendar controls</span></div><div><b>${showRows.length+opportunityRows.length}</b><span>Operating / governed</span></div><div><b>${researchRows.length}</b><span>Recovered research</span></div></div>
       ${monthHtml||'<div class="empty">No governed 2026 dated show records are available.</div>'}`;
   }
 
