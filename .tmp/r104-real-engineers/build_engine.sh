@@ -7,6 +7,12 @@ test -n "$OUT"
 rm -rf "$SRC" "$OUT"
 mkdir -p "$OUT"
 
+sudo apt-get update -qq
+sudo apt-get install -y -qq gcc-14 g++-14
+export CC=gcc-14
+export CXX=g++-14
+test "$($CXX --version | head -1 | grep -o '14\.[0-9.]*')" != ""
+
 git clone -q --recursive https://github.com/mudler/parakeet.cpp.git "$SRC"
 git -C "$SRC" checkout -q 1bfbebfaaf493866f49597cd3b7901959d395c60
 git -C "$SRC" submodule update --init --recursive -q
@@ -119,7 +125,7 @@ int main(int argc, char** argv) {
 }
 CPP
 
-g++ -O3 -std=c++17 \
+"$CXX" -O3 -std=c++17 \
   -I"$SRC/include" -I"$SRC/src" \
   "$SRC/native_multirun.cpp" \
   -L"$SRC/build" -lparakeet \
