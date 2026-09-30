@@ -1,0 +1,561 @@
+{
+  "course": "AI Coding for Real Engineers",
+  "instructor": "Matt Pocock / AI Hero",
+  "bvid": "BV16eKb6PEUo",
+  "source": "https://www.bilibili.com/video/BV16eKb6PEUo/",
+  "expected_parts": 92,
+  "items": [
+    {
+      "part": 1,
+      "title": "开始前的方向",
+      "duration": "03:55",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=1"
+    },
+    {
+      "part": 2,
+      "title": "开始前探索Discord",
+      "duration": "03:03",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=2"
+    },
+    {
+      "part": 3,
+      "title": "开始前的仓库设置",
+      "duration": "03:28",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=3"
+    },
+    {
+      "part": 4,
+      "title": "开始前的数据库迁移",
+      "duration": "03:40",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=4"
+    },
+    {
+      "part": 5,
+      "title": "开始前为课程配置Claude",
+      "duration": "02:56",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=5"
+    },
+    {
+      "part": 6,
+      "title": "开始前如何学习本课程",
+      "duration": "06:09",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=6"
+    },
+    {
+      "part": 7,
+      "title": "开始前的答疑时间",
+      "duration": "00:57",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=7"
+    },
+    {
+      "part": 8,
+      "title": "认识Claude Code简介",
+      "duration": "00:49",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=8"
+    },
+    {
+      "part": 9,
+      "title": "管理Claude Code会话",
+      "duration": "04:07",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=9"
+    },
+    {
+      "part": 10,
+      "title": "终端中的提示",
+      "duration": "02:26",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=10"
+    },
+    {
+      "part": 11,
+      "title": "Claude与你的IDE",
+      "duration": "01:58",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=11"
+    },
+    {
+      "part": 12,
+      "title": "时间的前进与回溯",
+      "duration": "03:05",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=12"
+    },
+    {
+      "part": 13,
+      "title": "运行Bash命令",
+      "duration": "03:47",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=13"
+    },
+    {
+      "part": 14,
+      "title": "权限",
+      "duration": "04:16",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=14"
+    },
+    {
+      "part": 15,
+      "title": "LLM的局限性",
+      "duration": "08:12",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=15"
+    },
+    {
+      "part": 16,
+      "title": "什么是子代理",
+      "duration": "02:32",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=16"
+    },
+    {
+      "part": 17,
+      "title": "代码库探索",
+      "duration": "01:32",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=17"
+    },
+    {
+      "part": 18,
+      "title": "代码库探索解决方案",
+      "duration": "02:47",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=18"
+    },
+    {
+      "part": 19,
+      "title": "构建一个功能",
+      "duration": "02:02",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=19"
+    },
+    {
+      "part": 20,
+      "title": "构建功能解决方案",
+      "duration": "08:11",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=20"
+    },
+    {
+      "part": 21,
+      "title": "非确定性",
+      "duration": "01:44",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=21"
+    },
+    {
+      "part": 22,
+      "title": "在状态行中显示上下文",
+      "duration": "03:36",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=22"
+    },
+    {
+      "part": 23,
+      "title": "为什么计划模式很糟糕",
+      "duration": "05:04",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=23"
+    },
+    {
+      "part": 24,
+      "title": "Grill执行-清除循环",
+      "duration": "01:53",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=24"
+    },
+    {
+      "part": 25,
+      "title": "Grill执行-清除循环解决方案",
+      "duration": "09:24",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=25"
+    },
+    {
+      "part": 26,
+      "title": "压缩",
+      "duration": "07:57",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=26"
+    },
+    {
+      "part": 27,
+      "title": "交接",
+      "duration": "03:31",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=27"
+    },
+    {
+      "part": 28,
+      "title": "什么是代理的MD文件",
+      "duration": "06:23",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=28"
+    },
+    {
+      "part": 29,
+      "title": "使用代理MD文件引导代理",
+      "duration": "02:20",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=29"
+    },
+    {
+      "part": 30,
+      "title": "使用代理MD文件引导代理解决方案",
+      "duration": "03:36",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=30"
+    },
+    {
+      "part": 31,
+      "title": "渐进式披露",
+      "duration": "03:18",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=31"
+    },
+    {
+      "part": 32,
+      "title": "什么是代理技能",
+      "duration": "06:58",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=32"
+    },
+    {
+      "part": 33,
+      "title": "使用技能进行引导",
+      "duration": "01:46",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=33"
+    },
+    {
+      "part": 34,
+      "title": "使用技能进行引导解决方案",
+      "duration": "04:20",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=34"
+    },
+    {
+      "part": 35,
+      "title": "自动记忆",
+      "duration": "02:13",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=35"
+    },
+    {
+      "part": 36,
+      "title": "如何应对大规模任务",
+      "duration": "03:19",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=36"
+    },
+    {
+      "part": 37,
+      "title": "用这个技能写出优秀的PRD",
+      "duration": "02:42",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=37"
+    },
+    {
+      "part": 38,
+      "title": "用这个技能写出优秀PRD的解决方案",
+      "duration": "11:20",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=38"
+    },
+    {
+      "part": 39,
+      "title": "使用多阶段计划跨多个上下文窗口拆分功能",
+      "duration": "00:59",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=39"
+    },
+    {
+      "part": 40,
+      "title": "使用多阶段计划跨多个上下文窗口拆分功能解决方案",
+      "duration": "03:40",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=40"
+    },
+    {
+      "part": 41,
+      "title": "什么是追踪子弹",
+      "duration": "03:10",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=41"
+    },
+    {
+      "part": 42,
+      "title": "在我们的多阶段计划中使用追踪子弹",
+      "duration": "01:10",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=42"
+    },
+    {
+      "part": 43,
+      "title": "在我们的多阶段计划中使用追踪子弹解决方案",
+      "duration": "03:56",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=43"
+    },
+    {
+      "part": 44,
+      "title": "执行我们的多阶段计划",
+      "duration": "01:22",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=44"
+    },
+    {
+      "part": 45,
+      "title": "执行我们的多阶段计划解决方案",
+      "duration": "06:36",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=45"
+    },
+    {
+      "part": 46,
+      "title": "向用户提问",
+      "duration": "01:47",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=46"
+    },
+    {
+      "part": 47,
+      "title": "面向真实工程师的AI编程答疑时间（第一天上午）",
+      "duration": "49:41",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=47"
+    },
+    {
+      "part": 48,
+      "title": "面向真实工程师的AI编程答疑时间（第一天下午）",
+      "duration": "44:56",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=48"
+    },
+    {
+      "part": 49,
+      "title": "代码廉价吗",
+      "duration": "06:05",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=49"
+    },
+    {
+      "part": 50,
+      "title": "引导代理使用技能实现反馈循环",
+      "duration": "03:21",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=50"
+    },
+    {
+      "part": 51,
+      "title": "构建一个执行工作技能 - 第4天反馈循环",
+      "duration": "00:46",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=51"
+    },
+    {
+      "part": 52,
+      "title": "构建一个执行工作技能 - 解决方案",
+      "duration": "03:06",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=52"
+    },
+    {
+      "part": 53,
+      "title": "使用我们的执行工作技能 - 第4天反馈循环",
+      "duration": "01:06",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=53"
+    },
+    {
+      "part": 54,
+      "title": "使用我们的执行工作技能 - 解决方案",
+      "duration": "03:03",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=54"
+    },
+    {
+      "part": 55,
+      "title": "使用预提交修复代理的格式错误 - 第4天反馈循环",
+      "duration": "03:52",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=55"
+    },
+    {
+      "part": 56,
+      "title": "什么是红绿重构 - 第4天反馈循环",
+      "duration": "03:43",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=56"
+    },
+    {
+      "part": 57,
+      "title": "红绿重构 - 第4天反馈循环",
+      "duration": "01:35",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=57"
+    },
+    {
+      "part": 58,
+      "title": "红绿重构 - 解决方案",
+      "duration": "04:30",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=58"
+    },
+    {
+      "part": 59,
+      "title": "什么是AFK代理 - 第5天AFK代理",
+      "duration": "02:25",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=59"
+    },
+    {
+      "part": 60,
+      "title": "沙堡 - 第5天AFK代理",
+      "duration": "01:56",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=60"
+    },
+    {
+      "part": 61,
+      "title": "尝试HITL代理 - 第5天AFK代理",
+      "duration": "03:54",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=61"
+    },
+    {
+      "part": 62,
+      "title": "尝试HITL代理 - 解决方案",
+      "duration": "01:35",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=62"
+    },
+    {
+      "part": 63,
+      "title": "沙盒化 - 第5天AFK代理",
+      "duration": "04:53",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=63"
+    },
+    {
+      "part": 64,
+      "title": "设置并尝试AFK代理 - 第5天AFK代理",
+      "duration": "02:30",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=64"
+    },
+    {
+      "part": 65,
+      "title": "设置并尝试AFK代理 - 解决方案",
+      "duration": "03:27",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=65"
+    },
+    {
+      "part": 66,
+      "title": "使用待办事项队列为AFK代理排队任务 - 第5天AFK代理",
+      "duration": "03:24",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=66"
+    },
+    {
+      "part": 67,
+      "title": "为GitHub问题设置我们的仓库 - 第5天AFK代理",
+      "duration": "01:19",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=67"
+    },
+    {
+      "part": 68,
+      "title": "将代理连接到您的待办事项 - 第5天AFK代理",
+      "duration": "03:15",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=68"
+    },
+    {
+      "part": 69,
+      "title": "将代理连接到您的待办事项 - 解决方案",
+      "duration": "02:29",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=69"
+    },
+    {
+      "part": 70,
+      "title": "更新我们的PRD和计划技能以使用GitHub - 第5天AFK代理",
+      "duration": "01:32",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=70"
+    },
+    {
+      "part": 71,
+      "title": "HITL和AFK任务 - 第6天人机协同模式",
+      "duration": "02:06",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=71"
+    },
+    {
+      "part": 72,
+      "title": "不要计划看板 - 第6天人机协同模式",
+      "duration": "04:38",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=72"
+    },
+    {
+      "part": 73,
+      "title": "使用看板技能 - 第6天人机协同模式",
+      "duration": "01:09",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=73"
+    },
+    {
+      "part": 74,
+      "title": "使用看板技能 - 解决方案",
+      "duration": "05:24",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=74"
+    },
+    {
+      "part": 75,
+      "title": "研究 - 第6天人机协同模式",
+      "duration": "03:14",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=75"
+    },
+    {
+      "part": 76,
+      "title": "尝试研究 - 第6天人机协同模式",
+      "duration": "01:46",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=76"
+    },
+    {
+      "part": 77,
+      "title": "尝试研究 - 解决方案",
+      "duration": "04:27",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=77"
+    },
+    {
+      "part": 78,
+      "title": "原型设计 - 第6天人机协同模式",
+      "duration": "02:57",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=78"
+    },
+    {
+      "part": 79,
+      "title": "尝试UI原型设计 - 第6天人机协同模式",
+      "duration": "01:35",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=79"
+    },
+    {
+      "part": 80,
+      "title": "尝试UI原型设计 - 解决方案",
+      "duration": "03:14",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=80"
+    },
+    {
+      "part": 81,
+      "title": "原型技能 - 第6天人机协同模式",
+      "duration": "02:15",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=81"
+    },
+    {
+      "part": 82,
+      "title": "设计AI喜爱的代码库 - 第6天人机协同模式",
+      "duration": "07:31",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=82"
+    },
+    {
+      "part": 83,
+      "title": "改进代码库架构技能 - 第6天人机协同模式",
+      "duration": "02:22",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=83"
+    },
+    {
+      "part": 84,
+      "title": "改进代码库架构技能 - 解决方案",
+      "duration": "04:57",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=84"
+    },
+    {
+      "part": 85,
+      "title": "为我们的PlanPRD技能添加模块意识 - 第6天人机协同模式",
+      "duration": "01:53",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=85"
+    },
+    {
+      "part": 86,
+      "title": "最终工作流 - 第6天人机协同模式",
+      "duration": "02:26",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=86"
+    },
+    {
+      "part": 87,
+      "title": "附录：绿地项目 - 第6天人机协同模式",
+      "duration": "04:43",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=87"
+    },
+    {
+      "part": 88,
+      "title": "附录：grill-with-docs - 第6天人机协同模式",
+      "duration": "07:07",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=88"
+    },
+    {
+      "part": 89,
+      "title": "答疑时间 - 第6天上午",
+      "duration": "49:29",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=89"
+    },
+    {
+      "part": 90,
+      "title": "答疑时间 - 第6天下午",
+      "duration": "48:21",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=90"
+    },
+    {
+      "part": 91,
+      "title": "最终答疑时间 - 上午",
+      "duration": "53:46",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=91"
+    },
+    {
+      "part": 92,
+      "title": "最终答疑时间 - 下午",
+      "duration": "52:26",
+      "source": "https://www.bilibili.com/video/BV16eKb6PEUo/?p=92"
+    }
+  ]
+}
