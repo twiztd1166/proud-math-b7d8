@@ -2369,6 +2369,10 @@ function annualPlanCard(row){
   const sourceLinks=sources.length
     ?`<div class="contactActions">${sources.slice(0,3).map((url,i)=>`<a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Source ${i+1}</a>`).join('')}</div>`:'';
   const actionDue=row.action_due?` · operating date ${date(row.action_due)}`:'';
+  const legacyPlanningDetail=String(row.legacy_next_action||'').trim();
+  const currentNext=String(row.next_action||'').trim();
+  const planningDetail=legacyPlanningDetail&&legacyPlanningDetail!==currentNext
+    ?`<details class="annualPlanningDetail"><summary>Planning detail</summary><div class="action">${esc(legacyPlanningDetail)}</div></details>`:'';
   const operationalLabel=annualPlanOperationalLabel(row);
   const actionGuard=String(row.operational_guard||'').trim();
   const emailDraft=String(row.operational_action_code||'').toUpperCase()==='CONTACT_ORGANIZER'?annualPlanEmailDraft(row):null;
@@ -2396,6 +2400,7 @@ function annualPlanCard(row){
     ${operationalLabel?`<div class="bookingStatusLine"><span>Manager move</span><b>${esc(operationalLabel)}</b></div>`:''}
     <div class="action"><b>Next action</b><br>${esc(row.next_action||'No action stated')}</div>
     ${actionGuard?`<div class="sourceWarn"><b>Action guard</b> ${esc(actionGuard)}</div>`:''}
+    ${planningDetail}
     <div class="bookingStatusLine"><span>Source basis</span><b>${esc(row.source_basis||'Governed annual-plan source')}</b></div>
     ${sourceLinks}
     <div class="actions">${emailButton}${callButton}${sourceAction}<button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">Open full show history</button></div>
