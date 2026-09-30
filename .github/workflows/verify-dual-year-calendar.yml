@@ -3,10 +3,11 @@ name: Paradise Shows dual-year calendar verifier
 on:
   push:
     branches:
-      - agent/calendar-2026-2027-20260929
+      - paradise-shows-public
+      - deploy/recovered-2026-research-calendar-20260930
   pull_request:
     branches:
-      - verify-stable-notes-20260929
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
