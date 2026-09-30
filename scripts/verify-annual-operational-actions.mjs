@@ -4,6 +4,7 @@ import vm from 'node:vm';
 const source=fs.readFileSync('public/app-shows.js','utf8');
 if(!source.includes('Planning detail'))throw new Error('Annual card is missing preserved planning-detail disclosure');
 if(!source.includes("const legacyPlanningDetail=String(row.legacy_next_action||'').trim()"))throw new Error('Annual card does not read preserved legacy_next_action');
+if(!source.includes("!/\\bGMAIL:[A-Za-z0-9_-]+\\b/i.test(legacyPlanningDetail)"))throw new Error('Annual card does not suppress account-specific Gmail draft tokens');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
 if(start<0||end<0)throw new Error('Annual operational helper block not found');
@@ -32,10 +33,12 @@ const emailRow={
   budget_min:6900,
   operational_action_code:'CONTACT_ORGANIZER',
   operational_contact_email:'adam@example.com',
+  operational_contact_cc:'team@example.com',
   legacy_next_action:'Email Adam now. Confirm category eligibility, current price, exact placement/floor plan, payment/cancellation, COI, electric/internet and lead rights. Internal PURSUE note GMAIL:abc123 historical $212,279.',
 };
 const email=sandbox.api.annualPlanEmailDraft(emailRow);
-if(!email||email.email!=='adam@example.com'||!email.href.startsWith('mailto:'))throw new Error('Annual email draft missing');
+if(!email||email.email!=='adam@example.com'||email.cc!=='team@example.com'||!email.href.startsWith('mailto:'))throw new Error('Annual email draft missing');
+if(!email.href.includes('cc=team%40example.com'))throw new Error('Annual email draft lost CC routing');
 for(const expected of ['Fort Lauderdale Home Design','eligibility/category','current all-in price/package','available footprint/placement','payment and cancellation/refund terms','insurance/COI requirements','lead-capture/category/exclusivity rights']){
   if(!email.body.includes(expected))throw new Error(`Annual email missing bespoke item: ${expected}`);
 }
