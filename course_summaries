@@ -1,0 +1,1 @@
+TEMPORARY CLEANUP GUARD — prevents a stale pre-cleanup workflow run from recreating public course summaries. Safe to remove/reset after that run ends.
