@@ -38,7 +38,7 @@
     const badge=disposition==='PURSUE'?'ready':disposition==='HOLD'?'hold':'dateonly';
     const start=date(row.event_start);
     const end=row.event_end&&row.event_end!==row.event_start?date(row.event_end):'';
-    const range=end?start+' \u2013 '+end:start;
+    const range=String(row.date_text||'').trim()||(end?start+' \u2013 '+end:start);
     const cost=Number.isFinite(Number(row.booking_cost_min))
       ?(Number(row.booking_cost_min)===Number(row.booking_cost_max)?money(row.booking_cost_min):money(row.booking_cost_min)+' \u2013 '+money(row.booking_cost_max))
       :String(row.current_cost_status||row.opportunity_status||'Live opportunity');
@@ -72,6 +72,14 @@
       open+
     '</article>';
   }
+  function calendarTouchesMonth(row,year,month){
+    const start=String(row?.event_start||'');
+    if(!start)return false;
+    const end=String(row?.event_end||row?.event_start||'');
+    const monthStart=year+'-'+String(month).padStart(2,'0')+'-01';
+    const nextMonth=month===12?(year+1)+'-01-01':year+'-'+String(month+1).padStart(2,'0')+'-01';
+    return start<nextMonth&&end>=monthStart;
+  }
   function render2026Calendar(){
     const showRows=(state.shows||[])
       .filter(row=>String(row.event_start||'').startsWith('2026-'))
@@ -101,9 +109,9 @@
     const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     const monthHtml=months.map((name,index)=>{
       const month=index+1;
-      const monthShows=showRows.filter(row=>calendarMonthNumber(row)===month);
-      const monthOpportunities=opportunityRows.filter(row=>calendarMonthNumber(row)===month);
-      const monthResearch=researchRows.filter(row=>calendarMonthNumber(row)===month);
+      const monthShows=showRows.filter(row=>calendarTouchesMonth(row,2026,month));
+      const monthOpportunities=opportunityRows.filter(row=>calendarTouchesMonth(row,2026,month));
+      const monthResearch=researchRows.filter(row=>calendarTouchesMonth(row,2026,month));
       if(!monthShows.length&&!monthOpportunities.length&&!monthResearch.length)return '';
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
