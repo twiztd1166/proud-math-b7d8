@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/calendar-2026-2027-20260929
+      - agent/restore-full-2026-q4-research-calendar-20260930
   pull_request:
     branches:
       - verify-stable-notes-20260929
@@ -32,8 +33,8 @@ jobs:
           grep -q '2027 Calendar' public/app-calendar.js
           grep -q 'renderCalendarV2' public/app-bind.js
           grep -Fq "\$\$('[data-calendar-year]').forEach" public/app-bind.js
-          grep -q 'app-calendar.js?v=20260930-q4-v1' src/pages/index.astro
-          grep -q 'app-calendar.js?v=20260930-q4-v1' public/index-standalone.html
+          grep -q 'app-calendar.js?v=20260930-q4-v2' src/pages/index.astro
+          grep -q 'app-calendar.js?v=20260930-q4-v2' public/index-standalone.html
           grep -q "'/app-calendar.js'" public/sw.js
           grep -q "'app-calendar.js'" scripts/prepare-ios-app.mjs
 
@@ -50,7 +51,13 @@ jobs:
           rows=[r for r in x.get('shows',[]) if str(r.get('event_start') or '').startswith('2026-')]
           assert len(rows) >= 29, len(rows)
           assert any(str(r.get('event_start') or '').startswith('2026-10-') for r in rows), 'missing October 2026 rows'
-          print(f'2026 governed dated rows: {len(rows)}')
+          research=x.get('researchCalendar2026') or []
+          assert x.get('version') == 19, x.get('version')
+          assert len(research) == 93, len(research)
+          labels={r.get('event_label') for r in research}
+          for required in ['Space Coast State Fair — Viera','Sun Sentinel PRIME Expo — Boca Raton','Stuart Air Show','Christmas on Las Olas','Turkey Bash — Pembroke Pines']:
+              assert required in labels, required
+          print(f'2026 governed dated rows: {len(rows)}; recovered research rows: {len(research)}')
           PY
 
       - name: Verify published 2027 plan remains available
