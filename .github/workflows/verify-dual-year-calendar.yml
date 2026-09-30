@@ -33,8 +33,7 @@ jobs:
           grep -q '2027 Calendar' public/app-calendar.js
           grep -q 'renderCalendarV2' public/app-bind.js
           grep -Fq "\$\$('[data-calendar-year]').forEach" public/app-bind.js
-          grep -q 'app-calendar.js?v=20260930-team-contact-actions-v2' src/pages/index.astro
-          grep -q 'app-calendar.js?v=20260930-team-contact-actions-v2' public/index-standalone.html
+          python3 scripts/verify-app-asset-contract.py
           grep -q "'/app-calendar.js'" public/sw.js
           grep -q "'app-calendar.js'" scripts/prepare-ios-app.mjs
           grep -q 'calendarMonthSortDate' public/app-calendar.js
