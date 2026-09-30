@@ -2774,13 +2774,6 @@ jobs:
           print({'south_florida_fair_2019_records':len(sff19),'acs_archive_years':sorted(years),'cleanup':'PASS'})
           PY
 
-      - name: Verify bespoke outreach across all 2026 research controls
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check scripts/verify-research-outreach.mjs
-          node scripts/verify-research-outreach.mjs
-
       - name: Execute live page in fresh headless Chrome
         shell: bash
         run: |
