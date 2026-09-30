@@ -139,10 +139,12 @@ function researchOutreachProfile(row){
   const questions=[];
   const addQuestion=q=>{if(q&&!questions.includes(q))questions.push(q)};
   if(boundedException)addQuestion('Please confirm the event date and current participation route before we rely on the recovered record.');
+  if(!eligibility||eligibility.confirm)addQuestion('Please confirm Paradise Exteriors is eligible for the stated vendor/sponsor/exhibitor route.');
   if(!cost||cost.confirm)addQuestion('Please confirm the current price/package and any required deposit.');
   if(!deadline||deadline.confirm)addQuestion('Please confirm the current application or commitment deadline.');
   if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
-  if(!logistics||logistics.confirm)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
+  const logisticsHasSetup=researchHasKnownTerm([logistics?.text],/\b(?:BOOTH|SPACE|FOOTPRINT|SETUP|LOAD[- ]?IN|TENT|TABLE|POWER|ACTIVATION)\b/);
+  if(!logistics||logistics.confirm||!logisticsHasSetup)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
   if(!commitment||commitment.confirm)addQuestion('Please confirm payment timing, cancellation/refund terms, and any non-refundable commitment.');
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
@@ -169,7 +171,7 @@ function researchEmailDraft(row){
     :(profile.availabilityUncertain
       ?`We are interested in the ${profile.route} and want to confirm the current availability before moving forward.`
       :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`);
-  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}`);
+  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}${f.confirm?' (needs confirmation)':''}`);
   const questionLines=profile.questions.map(q=>`• ${q}`);
   const body=[
     greeting,
@@ -209,7 +211,7 @@ function researchCallScript(row){
     :(profile.availabilityUncertain
       ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}, and I’d like to confirm the current availability before we move forward.`
       :`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}. Our notes show the opportunity is active, and I’d like to confirm the next step.`);
-  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}`);
+  const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}${f.confirm?' (needs confirmation)':''}`);
   const questionLines=profile.questions.map(q=>`• ${q}`);
   const script=[
     askFor.trim(),
