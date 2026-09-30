@@ -706,8 +706,22 @@ jobs:
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           research=x.get('researchCalendarControls') or []
           assert len(research) == 117, len(research)
-          visible_q4=[r for r in research if str(r.get('event_start') or '') >= '2026-10-01' and str(r.get('event_start') or '') < '2027-01-01']
+          def research_sort_date(r):
+              return str(r.get('event_start') or r.get('estimated_sort_date') or '')
+          visible_q4=[r for r in research if '2026-10-01' <= research_sort_date(r) < '2027-01-01']
+          exact_research=[r for r in research if r.get('event_start')]
+          estimated_research=[r for r in research if not r.get('event_start') and r.get('estimated_sort_date')]
+          unsortable_research=[r for r in research if not r.get('event_start') and not r.get('estimated_sort_date')]
+          semantic_bad=[
+              r for r in research
+              if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
+              and not (not r.get('event_start') and r.get('estimated_sort_date'))
+          ]
           assert len(visible_q4) == 117, len(visible_q4)
+          assert len(exact_research) == 115, len(exact_research)
+          assert len(estimated_research) == 2, len(estimated_research)
+          assert not unsortable_research, unsortable_research
+          assert not semantic_bad, semantic_bad
           assert all(isinstance(r.get('detail_data'),dict) for r in research), 'detail_data missing'
           assert all((r.get('detail_data') or {}).get('research_summary') for r in research), 'research_summary missing'
           assert all((r.get('detail_data') or {}).get('next_action') for r in research), 'next_action missing'
@@ -728,7 +742,27 @@ jobs:
           snow=controls['R2026-115-SNOW-PLACE-JUPITER']
           assert snow.get('event_start') == '2026-12-12', snow
           assert snow.get('date_confidence') == 'CURRENT_VERIFIED', snow
-          assert not any(r.get('event_start') is None for r in research), [r for r in research if r.get('event_start') is None]
+          hallandale=controls['R2026-088-HALLANDALE-HOLIDAY']
+          assert hallandale.get('event_start') is None, hallandale
+          assert hallandale.get('estimated_sort_date') == '2026-12-04', hallandale
+          assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
+          music=controls['R2026-101-MUSIC-MANSION']
+          assert music.get('event_start') is None, music
+          assert music.get('estimated_sort_date') == '2026-12-06', music
+          assert music.get('date_confidence') == 'ESTIMATED', music
+          expected_deadlines={
+              'R2026-012-PALM-BAY-FARMERS-OCT':'2026-10-10',
+              'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
+              'R2026-061-GRACE-JERK':'2026-10-09',
+              'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
+              'R2026-100-WESTON-RUN':'2026-11-15',
+              'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
+              'R2026-113-PALM-BAY-FARMERS-DEC':'2026-12-03',
+          }
+          for cid,deadline in expected_deadlines.items():
+              assert controls[cid].get('deadline_date') == deadline, controls[cid]
+          assert controls['R2026-092-WPB-BEER-WINE'].get('deadline_date') is None, controls['R2026-092-WPB-BEER-WINE']
+          assert (controls['R2026-092-WPB-BEER-WINE'].get('detail_data') or {}).get('deadline_text') == 'Not verified', controls['R2026-092-WPB-BEER-WINE']
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
           acs=current['MFC-063']
           assert acs.get('show_status') == 'RECONCILE', acs
