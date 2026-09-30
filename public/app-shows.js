@@ -163,9 +163,9 @@ function researchAvailability(row){
   if(/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
   if(closure&&closedParticipationLane&&alternateActive)return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
   if(closure&&!active)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
-  if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING|INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
+  if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
   if(active)return {code:'OPEN',label:'OPEN / ACTIVE',rank:0};
-  if(/TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
+  if(/INVENTORY.*CONFIRM|AVAILABILITY.*CONFIRM|TO CONFIRM|TO REQUEST|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INQUIRY/.test(normalized))return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
   if(closure)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   return {code:'CONFIRM',label:'CONFIRM AVAILABILITY',rank:2};
 }
