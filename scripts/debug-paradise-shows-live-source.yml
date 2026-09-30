@@ -701,7 +701,16 @@ jobs:
           import json
           x=json.load(open('/tmp/bootstrap.json'))
           assert x.get('ok') is True, x
-          assert x.get('version') == 18, x.get('version')
+          assert x.get('version') == 19, x.get('version')
+          research=x.get('researchCalendarControls') or []
+          assert len(research) == 115, len(research)
+          dated_q4=[r for r in research if str(r.get('event_start') or '') >= '2026-10-01' and str(r.get('event_start') or '') < '2027-01-01']
+          assert len(dated_q4) == 114, len(dated_q4)
+          dispositions={d:sum(1 for r in research if r.get('disposition')==d) for d in ('PURSUE','WATCH','SOLD_OUT')}
+          assert dispositions == {'PURSUE':61,'WATCH':53,'SOLD_OUT':1}, dispositions
+          labels={r.get('event_label') for r in research}
+          for expected in ('Florida Creatives Market — Port St. Lucie','GACTC Oktoberfest','Space Coast State Fair — Viera','Stuart Air Show','Christmas on Las Olas','Martin County Winter Fest'):
+              assert expected in labels, expected
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           current={row.get('mfc_id'):row for row in x.get('shows') or []}
