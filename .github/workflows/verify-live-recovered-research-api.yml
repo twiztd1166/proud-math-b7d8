@@ -1,0 +1,60 @@
+name: Verify live recovered research API
+
+on:
+  push:
+    branches:
+      - agent/verify-live-research-api-20260930
+  pull_request:
+    branches:
+      - verify-stable-notes-20260929
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify live bootstrap v19 research payload
+        shell: bash
+        run: |
+          curl --retry 4 --retry-delay 2 --retry-all-errors -fsS \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://taxlrlfsobtnbasjcnuf.supabase.co/functions/v1/shows-api' \
+            --data '{"action":"bootstrap"}' -o /tmp/bootstrap.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/bootstrap.json'))
+          assert x.get('ok') is True, x
+          assert x.get('version') == 19, x.get('version')
+          research=x.get('researchCalendarControls') or []
+          q4=[r for r in research if '2026-10-01' <= str(r.get('event_start') or '') < '2027-01-01']
+          tbd=[r for r in research if not r.get('event_start')]
+          assert len(research) == 115, len(research)
+          assert len(q4) == 114, len(q4)
+          assert len(tbd) == 1, len(tbd)
+          assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
+          assert len(x.get('calendarOpportunities') or []) >= 15, len(x.get('calendarOpportunities') or [])
+          wanted={
+            'Florida Creatives Market — Port St. Lucie',
+            'Space Coast State Fair',
+            'Turkey Bash',
+            'Christmas on Las Olas',
+            'Martin County Winter Fest',
+          }
+          names={r.get('event_label') for r in research}
+          missing=wanted-names
+          assert not missing, missing
+          print({
+            'version':x.get('version'),
+            'research':len(research),
+            'q4_research':len(q4),
+            'tbd_research':len(tbd),
+            'operating':len(x.get('shows') or []),
+            'opportunities':len(x.get('calendarOpportunities') or []),
+            'representative_controls':'PASS',
+          })
+          PY
