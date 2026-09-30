@@ -1,0 +1,66 @@
+name: Paradise Shows iOS native compile
+
+on:
+  push:
+    branches:
+      - paradise-shows-public
+    paths:
+      - 'public/**'
+      - 'src/**'
+      - 'ios/**'
+      - 'scripts/prepare-ios-app.mjs'
+      - 'scripts/generate-ios-assets.py'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'astro.config.mjs'
+      - 'capacitor.config.ts'
+      - '.github/workflows/verify-paradise-shows-ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paradise-shows-ios-native-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and sync native web assets
+        run: npm run ios:prepare
+
+      - name: Verify current Next-screen research controls are embedded
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ios/App/App/public/app-shows.js
+          grep -q 'researchNextStepSection' ios/App/App/public/app-shows.js
+          grep -q 'Research follow-up' ios/App/App/public/app-shows.js
+          grep -q 'Reverify current facts' ios/App/App/public/app-shows.js
+          grep -q "'SOLD_OUT'" ios/App/App/public/app-shows.js
+          grep -q 'data-calendar-research=' ios/App/App/public/app-shows.js
+
+      - name: Compile iOS app for simulator
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Debug
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build
