@@ -1,0 +1,22 @@
+{
+  "lesson": 56,
+  "title": "056 Claude Code's Automatic Memory",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=56",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 94,
+  "media_duration_seconds": 140.437,
+  "media_size_bytes": 5144851,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 25,
+  "transcript_chars": 2866,
+  "transcript_start": 0.0,
+  "transcript_end": 139.92,
+  "coverage_ratio": 0.9963,
+  "coverage_status": "pass"
+}

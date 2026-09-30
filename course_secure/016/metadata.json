@@ -1,0 +1,22 @@
+{
+  "lesson": 16,
+  "title": "016 How Much Did It Cost",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=16",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 106,
+  "media_duration_seconds": 332.139,
+  "media_size_bytes": 15369073,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 94,
+  "transcript_chars": 7416,
+  "transcript_start": 0.0,
+  "transcript_end": 331.92,
+  "coverage_ratio": 0.9993,
+  "coverage_status": "pass"
+}

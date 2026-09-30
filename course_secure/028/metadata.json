@@ -1,0 +1,22 @@
+{
+  "lesson": 28,
+  "title": "028 Your Starting Context",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=28",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 94,
+  "media_duration_seconds": 229.931,
+  "media_size_bytes": 11475638,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 66,
+  "transcript_chars": 5459,
+  "transcript_start": 0.0,
+  "transcript_end": 229.64,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

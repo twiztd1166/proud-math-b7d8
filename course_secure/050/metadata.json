@@ -1,0 +1,22 @@
+{
+  "lesson": 50,
+  "title": "050 Write A Skill - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=50",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 100,
+  "media_duration_seconds": 220.864,
+  "media_size_bytes": 12701140,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 41,
+  "transcript_chars": 4627,
+  "transcript_start": 0.0,
+  "transcript_end": 220.64,
+  "coverage_ratio": 0.999,
+  "coverage_status": "pass"
+}

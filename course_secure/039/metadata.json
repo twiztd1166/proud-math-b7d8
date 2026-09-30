@@ -1,0 +1,22 @@
+{
+  "lesson": 39,
+  "title": "039 The Grill-Execute-Clear Loop - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=39",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 97,
+  "media_duration_seconds": 153.301,
+  "media_size_bytes": 7187759,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 31,
+  "transcript_chars": 3483,
+  "transcript_start": 0.0,
+  "transcript_end": 159.84,
+  "coverage_ratio": 1.0427,
+  "coverage_status": "pass"
+}

@@ -1,0 +1,22 @@
+{
+  "lesson": 49,
+  "title": "049 Write A Skill - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=49",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 101,
+  "media_duration_seconds": 48.917,
+  "media_size_bytes": 1925948,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 11,
+  "transcript_chars": 1198,
+  "transcript_start": 0.0,
+  "transcript_end": 54.48,
+  "coverage_ratio": 1.1137,
+  "coverage_status": "pass"
+}

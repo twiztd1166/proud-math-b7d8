@@ -1,0 +1,22 @@
+{
+  "lesson": 68,
+  "title": "068 Enforcing Your Coding Standards",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=68",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 96,
+  "media_duration_seconds": 305.451,
+  "media_size_bytes": 13545965,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 44,
+  "transcript_chars": 6423,
+  "transcript_start": 0.0,
+  "transcript_end": 304.96,
+  "coverage_ratio": 0.9984,
+  "coverage_status": "pass"
+}

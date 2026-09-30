@@ -1,0 +1,22 @@
+{
+  "lesson": 62,
+  "title": "062 Split Features Across Context Windows With Tickets - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=62",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 102,
+  "media_duration_seconds": 200.469,
+  "media_size_bytes": 13910043,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 36,
+  "transcript_chars": 4027,
+  "transcript_start": 0.0,
+  "transcript_end": 200.08,
+  "coverage_ratio": 0.9981,
+  "coverage_status": "pass"
+}

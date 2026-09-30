@@ -1,0 +1,22 @@
+{
+  "lesson": 13,
+  "title": "013 Sessions And The Context",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=13",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 95,
+  "media_duration_seconds": 229.504,
+  "media_size_bytes": 11684912,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 47,
+  "transcript_chars": 5050,
+  "transcript_start": 0.0,
+  "transcript_end": 229.2,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

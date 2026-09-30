@@ -1,0 +1,22 @@
+{
+  "lesson": 1,
+  "title": "001 Where We're Going",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=1",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 107,
+  "media_duration_seconds": 218.603,
+  "media_size_bytes": 9488393,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 42,
+  "transcript_chars": 4773,
+  "transcript_start": 0.0,
+  "transcript_end": 220.32,
+  "coverage_ratio": 1.0079,
+  "coverage_status": "pass"
+}

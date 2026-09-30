@@ -1,0 +1,22 @@
+{
+  "lesson": 37,
+  "title": "037 Build a Feature - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=37",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 99,
+  "media_duration_seconds": 338.24,
+  "media_size_bytes": 19457884,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 64,
+  "transcript_chars": 7373,
+  "transcript_start": 0.0,
+  "transcript_end": 343.36,
+  "coverage_ratio": 1.0151,
+  "coverage_status": "pass"
+}

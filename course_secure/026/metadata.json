@@ -1,0 +1,22 @@
+{
+  "lesson": 26,
+  "title": "026 Running Bash Commands",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=26",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 96,
+  "media_duration_seconds": 226.624,
+  "media_size_bytes": 10122953,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 66,
+  "transcript_chars": 5556,
+  "transcript_start": 0.0,
+  "transcript_end": 226.2,
+  "coverage_ratio": 0.9981,
+  "coverage_status": "pass"
+}

@@ -1,0 +1,22 @@
+{
+  "lesson": 54,
+  "title": "054 Trying Out Pruning - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=54",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 96,
+  "media_duration_seconds": 122.432,
+  "media_size_bytes": 6732215,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 54,
+  "transcript_chars": 3112,
+  "transcript_start": 0.0,
+  "transcript_end": 122.36,
+  "coverage_ratio": 0.9994,
+  "coverage_status": "pass"
+}

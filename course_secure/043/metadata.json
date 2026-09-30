@@ -1,0 +1,14 @@
+{
+  "lesson": 43,
+  "title": "043 Clear, Compact, Handoff, Or Subagent",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=43",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "error",
+  "parser_quality": 64,
+  "parser_times": 107,
+  "error_type": "ConnectionError",
+  "error": "HTTPSConnectionPool(host='upos-sz-mirrorbd.bilivideo.com', port=443): Read timed out."
+}

@@ -1,0 +1,22 @@
+{
+  "lesson": 48,
+  "title": "048 What Are Agent Skills_",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=48",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 102,
+  "media_duration_seconds": 289.109,
+  "media_size_bytes": 12731877,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 52,
+  "transcript_chars": 5992,
+  "transcript_start": 0.0,
+  "transcript_end": 288.72,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

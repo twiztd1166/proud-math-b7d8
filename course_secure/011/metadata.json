@@ -1,0 +1,22 @@
+{
+  "lesson": 11,
+  "title": "011 Non-Determinism",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=11",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 97,
+  "media_duration_seconds": 277.056,
+  "media_size_bytes": 11719459,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 82,
+  "transcript_chars": 6417,
+  "transcript_start": 0.0,
+  "transcript_end": 276.7,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

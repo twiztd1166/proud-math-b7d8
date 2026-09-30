@@ -1,0 +1,22 @@
+{
+  "lesson": 9,
+  "title": "009 Navigating The Discord",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=9",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 99,
+  "media_duration_seconds": 155.648,
+  "media_size_bytes": 7327375,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 48,
+  "transcript_chars": 3930,
+  "transcript_start": 0.0,
+  "transcript_end": 155.44,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

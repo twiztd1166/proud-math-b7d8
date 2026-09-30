@@ -1,0 +1,22 @@
+{
+  "lesson": 17,
+  "title": "017 Hallucination",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=17",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 105,
+  "media_duration_seconds": 440.64,
+  "media_size_bytes": 18526300,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 147,
+  "transcript_chars": 10400,
+  "transcript_start": 0.0,
+  "transcript_end": 440.4,
+  "coverage_ratio": 0.9995,
+  "coverage_status": "pass"
+}

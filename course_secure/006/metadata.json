@@ -1,0 +1,22 @@
+{
+  "lesson": 6,
+  "title": "006 Database Migrations",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=6",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 102,
+  "media_duration_seconds": 316.139,
+  "media_size_bytes": 15282462,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 57,
+  "transcript_chars": 6515,
+  "transcript_start": 0.0,
+  "transcript_end": 321.12,
+  "coverage_ratio": 1.0158,
+  "coverage_status": "pass"
+}

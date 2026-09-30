@@ -1,0 +1,22 @@
+{
+  "lesson": 5,
+  "title": "005 How To Run the Exercises",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=5",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 103,
+  "media_duration_seconds": 337.472,
+  "media_size_bytes": 16753314,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 100,
+  "transcript_chars": 7648,
+  "transcript_start": 0.0,
+  "transcript_end": 337.08,
+  "coverage_ratio": 0.9988,
+  "coverage_status": "pass"
+}

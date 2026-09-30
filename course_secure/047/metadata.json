@@ -1,0 +1,22 @@
+{
+  "lesson": 47,
+  "title": "047 Steering With A Pointer - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=47",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 103,
+  "media_duration_seconds": 243.285,
+  "media_size_bytes": 12780957,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 48,
+  "transcript_chars": 5458,
+  "transcript_start": 0.0,
+  "transcript_end": 248.48,
+  "coverage_ratio": 1.0214,
+  "coverage_status": "pass"
+}

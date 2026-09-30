@@ -1,0 +1,22 @@
+{
+  "lesson": 33,
+  "title": "033 Codebase Exploration - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=33",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 103,
+  "media_duration_seconds": 419.264,
+  "media_size_bytes": 34051225,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 127,
+  "transcript_chars": 9623,
+  "transcript_start": 0.0,
+  "transcript_end": 419.28,
+  "coverage_ratio": 1.0,
+  "coverage_status": "pass"
+}

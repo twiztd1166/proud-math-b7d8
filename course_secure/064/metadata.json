@@ -1,0 +1,22 @@
+{
+  "lesson": 64,
+  "title": "064 Executing Your Tickets - solution",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=64",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 100,
+  "media_duration_seconds": 992.832,
+  "media_size_bytes": 50808117,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 184,
+  "transcript_chars": 21075,
+  "transcript_start": 0.0,
+  "transcript_end": 993.2,
+  "coverage_ratio": 1.0004,
+  "coverage_status": "pass"
+}

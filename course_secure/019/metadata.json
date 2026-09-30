@@ -1,0 +1,22 @@
+{
+  "lesson": 19,
+  "title": "019 Choosing A Model",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=19",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 103,
+  "media_duration_seconds": 345.237,
+  "media_size_bytes": 14804360,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 156,
+  "transcript_chars": 9172,
+  "transcript_start": 0.0,
+  "transcript_end": 345.28,
+  "coverage_ratio": 1.0001,
+  "coverage_status": "pass"
+}

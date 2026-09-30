@@ -1,0 +1,22 @@
+{
+  "lesson": 66,
+  "title": "066 Rerouting_ When The Destination Changes",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=66",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 98,
+  "media_duration_seconds": 123.541,
+  "media_size_bytes": 4089292,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 55,
+  "transcript_chars": 3397,
+  "transcript_start": 0.0,
+  "transcript_end": 123.48,
+  "coverage_ratio": 0.9995,
+  "coverage_status": "pass"
+}

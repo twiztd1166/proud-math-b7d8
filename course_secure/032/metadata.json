@@ -1,0 +1,22 @@
+{
+  "lesson": 32,
+  "title": "032 Codebase Exploration - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=32",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 104,
+  "media_duration_seconds": 169.685,
+  "media_size_bytes": 9363629,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 33,
+  "transcript_chars": 3754,
+  "transcript_start": 0.0,
+  "transcript_end": 174.8,
+  "coverage_ratio": 1.0301,
+  "coverage_status": "pass"
+}

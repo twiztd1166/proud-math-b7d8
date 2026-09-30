@@ -1,0 +1,22 @@
+{
+  "lesson": 23,
+  "title": "023 Prompting in the Terminal",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=23",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 99,
+  "media_duration_seconds": 156.757,
+  "media_size_bytes": 6345945,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 36,
+  "transcript_chars": 3618,
+  "transcript_start": 0.0,
+  "transcript_end": 156.2,
+  "coverage_ratio": 0.9964,
+  "coverage_status": "pass"
+}

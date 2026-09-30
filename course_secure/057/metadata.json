@@ -1,0 +1,22 @@
+{
+  "lesson": 57,
+  "title": "057 How to Tackle Massive Tasks",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=57",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 107,
+  "media_duration_seconds": 125.717,
+  "media_size_bytes": 4391585,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 41,
+  "transcript_chars": 3037,
+  "transcript_start": 0.0,
+  "transcript_end": 125.8,
+  "coverage_ratio": 1.0007,
+  "coverage_status": "pass"
+}

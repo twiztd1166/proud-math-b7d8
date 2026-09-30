@@ -1,0 +1,22 @@
+{
+  "lesson": 46,
+  "title": "046 Steering With A Pointer - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=46",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 104,
+  "media_duration_seconds": 331.541,
+  "media_size_bytes": 18994421,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 96,
+  "transcript_chars": 7719,
+  "transcript_start": 0.0,
+  "transcript_end": 331.1,
+  "coverage_ratio": 0.9987,
+  "coverage_status": "pass"
+}

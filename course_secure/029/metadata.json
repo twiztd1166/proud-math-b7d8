@@ -1,0 +1,22 @@
+{
+  "lesson": 29,
+  "title": "029 Killing Bloat - problem",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=29",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 107,
+  "media_duration_seconds": 129.429,
+  "media_size_bytes": 12137834,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 31,
+  "transcript_chars": 3158,
+  "transcript_start": 0.0,
+  "transcript_end": 129.04,
+  "coverage_ratio": 0.997,
+  "coverage_status": "pass"
+}

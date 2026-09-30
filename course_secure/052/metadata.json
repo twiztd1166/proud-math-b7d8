@@ -1,0 +1,22 @@
+{
+  "lesson": 52,
+  "title": "052 Navigation Pointers",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=52",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 98,
+  "media_duration_seconds": 292.736,
+  "media_size_bytes": 14417136,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 68,
+  "transcript_chars": 6690,
+  "transcript_start": 0.0,
+  "transcript_end": 295.36,
+  "coverage_ratio": 1.009,
+  "coverage_status": "pass"
+}

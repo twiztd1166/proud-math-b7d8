@@ -1,0 +1,22 @@
+{
+  "lesson": 51,
+  "title": "051 User Vs Project Skills",
+  "bvid": "BV1MGbZ6HEYT",
+  "source_url": "https://www.bilibili.com/video/BV1MGbZ6HEYT/?p=51",
+  "media_acquisition": "api.injahow.cn/bparse public parser",
+  "transcription_model": "faster-whisper base.en int8",
+  "raw_transcript_persisted_publicly": false,
+  "status": "complete",
+  "parser_quality": 64,
+  "parser_times": 99,
+  "media_duration_seconds": 102.912,
+  "media_size_bytes": 4574069,
+  "language": "en",
+  "language_probability": 1,
+  "transcript_segments": 28,
+  "transcript_chars": 2395,
+  "transcript_start": 0.0,
+  "transcript_end": 102.52,
+  "coverage_ratio": 0.9962,
+  "coverage_status": "pass"
+}
