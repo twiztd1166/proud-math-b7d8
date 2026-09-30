@@ -2295,12 +2295,15 @@ function annualPlanOutreachProfile(row){
 function annualPlanEmailDraft(row){
   const email=String(row?.operational_contact_email||'').trim();
   if(!email)return null;
+  const cc=String(row?.operational_contact_cc||'').trim();
   const p=annualPlanOutreachProfile(row);
   const subject=`Paradise Exteriors — ${p.event} participation inquiry`;
   const facts=p.facts.length?`\n\n${p.facts.join('\n')}`:'';
   const asks=p.questions.map(x=>`• ${x}`).join('\n');
   const body=`Hello,\n\nI’m reaching out on behalf of Paradise Exteriors regarding ${p.event} (${p.timing}). We are evaluating this opportunity for our 2027 event plan.${facts}\n\nCould you please confirm the following items that remain relevant to our planning:\n${asks}\n\nThank you,\nParadise Exteriors`;
-  return {email,subject,body,href:`mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};
+  const params=new URLSearchParams({subject,body});
+  if(cc)params.set('cc',cc);
+  return {email,cc,subject,body,href:`mailto:${encodeURIComponent(email)}?${params.toString()}`};
 }
 
 function annualPlanCallScript(row){
@@ -2371,7 +2374,7 @@ function annualPlanCard(row){
   const actionDue=row.action_due?` · operating date ${date(row.action_due)}`:'';
   const legacyPlanningDetail=String(row.legacy_next_action||'').trim();
   const currentNext=String(row.next_action||'').trim();
-  const planningDetail=legacyPlanningDetail&&legacyPlanningDetail!==currentNext
+  const planningDetail=legacyPlanningDetail&&legacyPlanningDetail!==currentNext&&!/\bGMAIL:[A-Za-z0-9_-]+\b/i.test(legacyPlanningDetail)
     ?`<details class="annualPlanningDetail"><summary>Planning detail</summary><div class="action">${esc(legacyPlanningDetail)}</div></details>`:'';
   const operationalLabel=annualPlanOperationalLabel(row);
   const actionGuard=String(row.operational_guard||'').trim();
