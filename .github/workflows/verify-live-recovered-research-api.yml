@@ -3,10 +3,11 @@ name: Verify live recovered research API
 on:
   push:
     branches:
-      - agent/verify-live-research-api-20260930
+      - paradise-shows-public
+      - deploy/recovered-2026-research-calendar-20260930
   pull_request:
     branches:
-      - verify-stable-notes-20260929
+      - paradise-shows-public
   workflow_dispatch:
 
 permissions:
