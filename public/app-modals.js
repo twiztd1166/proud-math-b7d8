@@ -611,6 +611,123 @@ async function addShowNote(id){
     if(button){button.disabled=false;button.textContent='Add note'}
   }
 }
+function renderResearchNotes(notes){
+  const list=$('#researchNotesList'),count=$('#researchNotesCount');
+  if(!list)return;
+  const rows=Array.isArray(notes)?notes:[];
+  if(count)count.textContent=rows.length===1?'1 note':rows.length+' notes';
+  if(!rows.length){
+    list.innerHTML='<div class="showNotesEmpty">No notes yet. Add the first update for this show.</div>';
+    return;
+  }
+  list.innerHTML=rows.map(n=>{
+    const text=esc(String(n.note||'')).replace(/\n/g,'<br>');
+    return `<div class="showNoteItem"><div class="showNoteMeta">${esc(showNoteTime(n.created_at))}</div><div class="showNoteText">${text}</div></div>`;
+  }).join('');
+}
+async function loadResearchNotes(id){
+  const list=$('#researchNotesList');
+  try{
+    const d=await call('listResearchNotes',{controlId:id});
+    renderResearchNotes(d.notes||[]);
+  }catch(e){
+    if(list)list.innerHTML=`<div class="showNotesEmpty error">Unable to load notes · ${esc(e?.message||'Unknown error')}</div>`;
+  }
+}
+async function addResearchNote(id){
+  const input=$('#researchNoteInput'),button=$('#researchNoteAddBtn');
+  const note=String(input?.value||'').trim();
+  if(!note){toast('Enter a note first.');input?.focus();return}
+  if(button){button.disabled=true;button.textContent='Saving…'}
+  try{
+    await callWrite('addResearchNote',{controlId:id,note});
+    if(input)input.value='';
+    toast('Note added');
+    await loadResearchNotes(id);
+    input?.focus();
+  }catch(e){
+    toast(e?.message||'Unable to save note');
+  }finally{
+    if(button){button.disabled=false;button.textContent='Add note'}
+  }
+}
+function researchDetailValue(value,fallback='Not verified'){
+  const text=String(value??'').trim();
+  return text||fallback;
+}
+function openResearchDetail(id){
+  const row=(state.researchCalendarControls||[]).find(x=>x.control_id===id);if(!row)return;
+  const d=row.detail_data&&typeof row.detail_data==='object'?row.detail_data:{};
+  const disposition=String(row.disposition||'WATCH').toUpperCase();
+  const badge=disposition==='PURSUE'?'ready':(disposition==='SOLD_OUT'||disposition==='HOLD')?'hold':'dateonly';
+  const range=String(row.date_text||'').trim()||
+    (row.event_start?(date(row.event_start)+(row.event_end&&row.event_end!==row.event_start?' – '+date(row.event_end):'')):
+      (row.estimated_sort_date?'Date TBD · Estimated '+date(row.estimated_sort_date):'Date TBD'));
+  const cost=researchDetailValue(d.current_cost_text||row.price_text);
+  const deadline=researchDetailValue(d.deadline_text||row.deadline_text);
+  const venue=researchDetailValue(d.venue_text||row.city);
+  const contact=researchDetailValue(d.contact_text);
+  const attendance=researchDetailValue(d.attendance_text);
+  const eligibility=researchDetailValue(d.eligibility_text||String(row.route_type||'').replaceAll('_',' '));
+  const bookingStatus=researchDetailValue(d.booking_status||row.research_status);
+  const scheduleStatus=researchDetailValue(d.schedule_status||row.date_confidence);
+  const logistics=researchDetailValue(d.logistics_text);
+  const commitment=researchDetailValue(d.commitment_terms_text,'No current payment/commitment terms verified.');
+  const history=researchDetailValue(d.historical_signal||row.profile_id||row.mfc_id,'No linked historical profile/control');
+  const nextAction=researchDetailValue(d.next_action||row.notes,'Review this research control.');
+  const summary=researchDetailValue(d.research_summary||row.notes,'Recovered research control.');
+  const completeness=researchDetailValue(d.completeness_status,'BASE_RECOVERED').replaceAll('_',' ');
+  const official=String(d.official_source_url||'').trim();
+  const archive=String(d.recovered_source_url||'').trim();
+  const sourceButtons=[
+    official?`<a class="btn primary sourceBtn" target="_blank" rel="noopener" href="${esc(official)}">Open official source</a>`:'',
+    archive?`<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="${esc(archive)}">Open recovered research source</a>`:'',
+  ].join('');
+  const linkedButtons=[
+    row.mfc_id?`<button class="btn secondary" id="researchLinkedMfcBtn">Open linked show</button>`:'',
+    row.profile_id?`<button class="btn secondary" id="researchLinkedProfileBtn">Open linked profile</button>`:'',
+  ].join('');
+  $('#detailBody').innerHTML=`<h2>${esc(row.event_label||row.control_id)}</h2>
+    <div class="subtitle">${esc(row.control_id)} · Recovered 2026 research</div>
+    <div class="showNotesBlock showNotesProminent">
+      <div class="showNotesHead"><div><div class="k">Manager notes</div><div class="showNotesHint">Shared notes for this show · newest first · date/time added automatically</div></div><span id="researchNotesCount" class="pill">—</span></div>
+      <div class="showNotesComposer"><textarea id="researchNoteInput" maxlength="4000" placeholder="Add an update, call note, decision, follow-up, or issue…"></textarea><div class="showNotesComposerFoot"><span>Saved with automatic Eastern Time date/time.</span><button class="btn primary" id="researchNoteAddBtn">Add note</button></div></div>
+      <div id="researchNotesList" class="showNotesList"><div class="showNotesEmpty">Loading notes…</div></div>
+    </div>
+    <div class="bookingSignal ${disposition==='PURSUE'?'ready':'review'}"><b>${esc(disposition)}</b><span>${esc(nextAction)}</span></div>
+    <div class="detailGrid">
+      <div class="detail"><div class="k">Research status</div><div class="val"><span class="badge ${badge}">${esc(row.research_status||'RESEARCH')}</span></div></div>
+      <div class="detail"><div class="k">Decision</div><div class="val">${esc(disposition)}</div></div>
+      <div class="detail"><div class="k">Event</div><div class="val">${esc(range)}</div></div>
+      <div class="detail"><div class="k">Current / recovered cost</div><div class="val">${esc(cost)}</div></div>
+      <div class="detail"><div class="k">When to act</div><div class="val">${esc(deadline)}</div></div>
+      <div class="detail"><div class="k">Priority</div><div class="val">${esc(String(row.priority||'—').replaceAll('_','-'))}</div></div>
+      <div class="detail"><div class="k">Eligibility / route</div><div class="val">${esc(eligibility)}</div></div>
+      <div class="detail"><div class="k">Booking status</div><div class="val">${esc(bookingStatus)}</div></div>
+      <div class="detail"><div class="k">Venue / location</div><div class="val">${esc(venue)}</div></div>
+      <div class="detail"><div class="k">Attendance / audience</div><div class="val">${esc(attendance)}</div></div>
+      <div class="detail"><div class="k">History / lineage</div><div class="val">${esc(history)}</div></div>
+      <div class="detail"><div class="k">Date confidence</div><div class="val">${esc(scheduleStatus)}</div></div>
+      <div class="detail"><div class="k">Data completeness</div><div class="val">${esc(completeness)}</div></div>
+    </div>
+    <div class="block"><div class="k">Contact</div><div class="val">${esc(contact)}${contact!=='Not verified'?contactActions(contact):''}</div></div>
+    <div class="block"><div class="k">Booth / setup / logistics</div><div class="val">${esc(logistics)}</div></div>
+    <div class="block"><div class="k">Payment / commitment terms</div><div class="val">${esc(commitment)}</div></div>
+    <div class="block"><div class="k">Recovered research evidence</div><div class="val">${esc(summary)}</div></div>
+    ${row.notes?`<div class="block"><div class="k">Research note</div><div class="val">${esc(row.notes)}</div></div>`:''}
+    <div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(nextAction)}</div></div>
+    <div class="sourceWarn historyIntro"><b>Source-first control.</b> “Not verified” means the prior research did not establish that field strongly enough to treat it as fact. Recovered prices, availability and terms must be reconfirmed before payment or commitment.</div>
+    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${sourceButtons}${linkedButtons}</div>`;
+  $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
+  const addBtn=$('#researchNoteAddBtn'),input=$('#researchNoteInput');
+  if(addBtn)addBtn.onclick=()=>addResearchNote(row.control_id);
+  if(input)input.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addResearchNote(row.control_id)}};
+  const mfcBtn=$('#researchLinkedMfcBtn');if(mfcBtn)mfcBtn.onclick=()=>openDetail(row.mfc_id);
+  const profileBtn=$('#researchLinkedProfileBtn');if(profileBtn)profileBtn.onclick=()=>openCatalog(row.profile_id);
+  $('#detailModal').classList.add('show');
+  loadResearchNotes(row.control_id);
+}
+
 function openDetail(id){
   const s=state.shows.find(x=>x.mfc_id===id);if(!s)return;
   const signal=typeof bookingSignal==='function'?bookingSignal(s):{label:'REVIEW',detail:'Review current control',cls:'review'};

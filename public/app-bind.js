@@ -41,6 +41,7 @@ function bindDynamic(){
   $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
   document.querySelectorAll('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
   document.querySelectorAll('[data-calendar-show]').forEach(b=>b.onclick=e=>{e.stopPropagation();const mfc=String(b.dataset.calendarShow||'').trim();if(mfc)openDetail(mfc)});
+  document.querySelectorAll('[data-calendar-research]').forEach(b=>b.onclick=e=>{e.stopPropagation();const control=String(b.dataset.calendarResearch||'').trim();if(control&&typeof openResearchDetail==='function')openResearchDetail(control)});
   $$('[data-calendar-year]').forEach(b=>b.onclick=()=>{const year=Number(b.dataset.calendarYear);if(![2026,2027].includes(year))return;state.calendarYear=year;state.search='';syncLocationView();if(year===2027&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();});
   const cp=$('#calendarOpenPlan');if(cp)cp.onclick=()=>{state.tab='shows';state.showMode='PLAN2027';state.search='';state.showQuickView='NONE';syncLocationView();if(!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();render();};
   const cc=$('#calendarOpenCurrent');if(cc)cc.onclick=()=>{state.tab='shows';state.showMode='CURRENT';state.search='';state.showQuickView='NONE';syncLocationView();render();};

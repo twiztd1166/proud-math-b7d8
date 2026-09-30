@@ -63,14 +63,15 @@
     const detail=String(row.price_text||route).trim();
     const note=String(row.notes||'').trim();
     const sourceTag=['Research',priority,lineage].filter(Boolean).join(' \u00b7 ');
-    const open=row.mfc_id
-      ?'<button type="button" class="calendarOpen" data-calendar-show="'+esc(row.mfc_id)+'">Open show</button>'
-      :(row.profile_id?'<button type="button" class="calendarOpen" data-annual-profile="'+esc(row.profile_id)+'">Open profile</button>':'');
+    const linked=row.mfc_id
+      ?'<button type="button" class="calendarOpen" data-calendar-show="'+esc(row.mfc_id)+'">Open linked show</button>'
+      :(row.profile_id?'<button type="button" class="calendarOpen" data-annual-profile="'+esc(row.profile_id)+'">Open linked profile</button>':'');
+    const details='<button type="button" class="calendarOpen" data-calendar-research="'+esc(row.control_id)+'">Open details</button>';
     return '<article class="calendarItem">'+
       '<div class="calendarDate"><b>'+esc(row._calendarContinuation?'Ongoing \u00b7 '+range:range)+'</b><span>'+esc(sourceTag)+'</span></div>'+
       '<div class="calendarMain"><div><h3>'+esc(row.event_label||row.control_id)+'</h3><p>'+esc(detail)+'</p></div><span class="badge '+badge+'">'+esc(disposition)+'</span></div>'+
       (note?'<div class="calendarNext"><span>Recovered research</span><b>'+esc(note)+'</b></div>':'')+
-      open+
+      '<div class="actions">'+details+linked+'</div>'+
     '</article>';
   }
   function calendarTouchesMonth(row,year,month){
