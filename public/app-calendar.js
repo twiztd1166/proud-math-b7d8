@@ -115,7 +115,7 @@
       const activeCount=monthShows.filter(row=>row.this_year!=='SKIP THIS YEAR'&&!String(row.decision||'').toUpperCase().startsWith('SKIP')).length;
       const skipCount=monthShows.length-activeCount;
       return `<section class="calendarMonth">
-        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}</p></div></div>
+        <div class="calendarMonthHead"><div><h2>${name}</h2><p>${activeCount} operating${skipCount?' \u00b7 '+skipCount+' skip':''}${monthOpportunities.length?' \u00b7 '+monthOpportunities.length+' governed opportunit'+(monthOpportunities.length===1?'y':'ies'):''}${monthResearch.length?' \u00b7 '+monthResearch.length+' research control'+(monthResearch.length===1?'':'s'):''}</p></div></div>
         ${monthShows.map(calendar2026Item).join('')}
         ${monthOpportunities.map(calendar2026OpportunityItem).join('')}
         ${monthResearch.map(calendar2026ResearchItem).join('')}
