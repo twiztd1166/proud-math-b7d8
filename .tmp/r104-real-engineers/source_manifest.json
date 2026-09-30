@@ -1,0 +1,653 @@
+{
+  "schema_version": "1.0",
+  "frozen_at_utc": "2026-09-30",
+  "bvid": "BV16eKb6PEUo",
+  "source_url": "https://www.bilibili.com/video/BV16eKb6PEUo/",
+  "page_count": 92,
+  "pages": [
+    {
+      "page": 1,
+      "cid": 40156136036,
+      "part": "开始前的方向",
+      "duration": 235,
+      "duration_label": "03:55"
+    },
+    {
+      "page": 2,
+      "cid": 40156136321,
+      "part": "开始前探索Discord",
+      "duration": 183,
+      "duration_label": "03:03"
+    },
+    {
+      "page": 3,
+      "cid": 40156136539,
+      "part": "开始前的仓库设置",
+      "duration": 208,
+      "duration_label": "03:28"
+    },
+    {
+      "page": 4,
+      "cid": 40156136744,
+      "part": "开始前的数据库迁移",
+      "duration": 220,
+      "duration_label": "03:40"
+    },
+    {
+      "page": 5,
+      "cid": 40156137079,
+      "part": "开始前为课程配置Claude",
+      "duration": 176,
+      "duration_label": "02:56"
+    },
+    {
+      "page": 6,
+      "cid": 40156137338,
+      "part": "开始前如何学习本课程",
+      "duration": 369,
+      "duration_label": "06:09"
+    },
+    {
+      "page": 7,
+      "cid": 40156137444,
+      "part": "开始前的答疑时间",
+      "duration": 57,
+      "duration_label": "00:57"
+    },
+    {
+      "page": 8,
+      "cid": 40156137805,
+      "part": "认识Claude Code简介",
+      "duration": 49,
+      "duration_label": "00:49"
+    },
+    {
+      "page": 9,
+      "cid": 40156138163,
+      "part": "管理Claude Code会话",
+      "duration": 247,
+      "duration_label": "04:07"
+    },
+    {
+      "page": 10,
+      "cid": 40156138378,
+      "part": "终端中的提示",
+      "duration": 146,
+      "duration_label": "02:26"
+    },
+    {
+      "page": 11,
+      "cid": 40156138541,
+      "part": "Claude与你的IDE",
+      "duration": 118,
+      "duration_label": "01:58"
+    },
+    {
+      "page": 12,
+      "cid": 40156138961,
+      "part": "时间的前进与回溯",
+      "duration": 185,
+      "duration_label": "03:05"
+    },
+    {
+      "page": 13,
+      "cid": 40156139038,
+      "part": "运行Bash命令",
+      "duration": 227,
+      "duration_label": "03:47"
+    },
+    {
+      "page": 14,
+      "cid": 40156139511,
+      "part": "权限",
+      "duration": 256,
+      "duration_label": "04:16"
+    },
+    {
+      "page": 15,
+      "cid": 40156201075,
+      "part": "LLM的局限性",
+      "duration": 492,
+      "duration_label": "08:12"
+    },
+    {
+      "page": 16,
+      "cid": 40156202049,
+      "part": "什么是子代理",
+      "duration": 152,
+      "duration_label": "02:32"
+    },
+    {
+      "page": 17,
+      "cid": 40156202412,
+      "part": "代码库探索",
+      "duration": 92,
+      "duration_label": "01:32"
+    },
+    {
+      "page": 18,
+      "cid": 40156202266,
+      "part": "代码库探索解决方案",
+      "duration": 167,
+      "duration_label": "02:47"
+    },
+    {
+      "page": 19,
+      "cid": 40156202499,
+      "part": "构建一个功能",
+      "duration": 122,
+      "duration_label": "02:02"
+    },
+    {
+      "page": 20,
+      "cid": 40156202724,
+      "part": "构建功能解决方案",
+      "duration": 491,
+      "duration_label": "08:11"
+    },
+    {
+      "page": 21,
+      "cid": 40156202896,
+      "part": "非确定性",
+      "duration": 104,
+      "duration_label": "01:44"
+    },
+    {
+      "page": 22,
+      "cid": 40156203060,
+      "part": "在状态行中显示上下文",
+      "duration": 216,
+      "duration_label": "03:36"
+    },
+    {
+      "page": 23,
+      "cid": 40156203187,
+      "part": "为什么计划模式很糟糕",
+      "duration": 304,
+      "duration_label": "05:04"
+    },
+    {
+      "page": 24,
+      "cid": 40156203475,
+      "part": "Grill执行-清除循环",
+      "duration": 113,
+      "duration_label": "01:53"
+    },
+    {
+      "page": 25,
+      "cid": 40156203503,
+      "part": "Grill执行-清除循环解决方案",
+      "duration": 564,
+      "duration_label": "09:24"
+    },
+    {
+      "page": 26,
+      "cid": 40156204263,
+      "part": "压缩",
+      "duration": 477,
+      "duration_label": "07:57"
+    },
+    {
+      "page": 27,
+      "cid": 40156204605,
+      "part": "交接",
+      "duration": 211,
+      "duration_label": "03:31"
+    },
+    {
+      "page": 28,
+      "cid": 40156204669,
+      "part": "什么是代理的MD文件",
+      "duration": 383,
+      "duration_label": "06:23"
+    },
+    {
+      "page": 29,
+      "cid": 40156267335,
+      "part": "使用代理MD文件引导代理",
+      "duration": 140,
+      "duration_label": "02:20"
+    },
+    {
+      "page": 30,
+      "cid": 40156267394,
+      "part": "使用代理MD文件引导代理解决方案",
+      "duration": 216,
+      "duration_label": "03:36"
+    },
+    {
+      "page": 31,
+      "cid": 40156267754,
+      "part": "渐进式披露",
+      "duration": 198,
+      "duration_label": "03:18"
+    },
+    {
+      "page": 32,
+      "cid": 40156267915,
+      "part": "什么是代理技能",
+      "duration": 418,
+      "duration_label": "06:58"
+    },
+    {
+      "page": 33,
+      "cid": 40156268345,
+      "part": "使用技能进行引导",
+      "duration": 106,
+      "duration_label": "01:46"
+    },
+    {
+      "page": 34,
+      "cid": 40156268326,
+      "part": "使用技能进行引导解决方案",
+      "duration": 260,
+      "duration_label": "04:20"
+    },
+    {
+      "page": 35,
+      "cid": 40156268433,
+      "part": "自动记忆",
+      "duration": 133,
+      "duration_label": "02:13"
+    },
+    {
+      "page": 36,
+      "cid": 40156268942,
+      "part": "如何应对大规模任务",
+      "duration": 199,
+      "duration_label": "03:19"
+    },
+    {
+      "page": 37,
+      "cid": 40156269095,
+      "part": "用这个技能写出优秀的PRD",
+      "duration": 162,
+      "duration_label": "02:42"
+    },
+    {
+      "page": 38,
+      "cid": 40156269664,
+      "part": "用这个技能写出优秀PRD的解决方案",
+      "duration": 680,
+      "duration_label": "11:20"
+    },
+    {
+      "page": 39,
+      "cid": 40156270204,
+      "part": "使用多阶段计划跨多个上下文窗口拆分功能",
+      "duration": 59,
+      "duration_label": "00:59"
+    },
+    {
+      "page": 40,
+      "cid": 40156270377,
+      "part": "使用多阶段计划跨多个上下文窗口拆分功能解决方案",
+      "duration": 220,
+      "duration_label": "03:40"
+    },
+    {
+      "page": 41,
+      "cid": 40156270548,
+      "part": "什么是追踪子弹",
+      "duration": 190,
+      "duration_label": "03:10"
+    },
+    {
+      "page": 42,
+      "cid": 40156332222,
+      "part": "在我们的多阶段计划中使用追踪子弹",
+      "duration": 70,
+      "duration_label": "01:10"
+    },
+    {
+      "page": 43,
+      "cid": 40156332304,
+      "part": "在我们的多阶段计划中使用追踪子弹解决方案",
+      "duration": 236,
+      "duration_label": "03:56"
+    },
+    {
+      "page": 44,
+      "cid": 40156332564,
+      "part": "执行我们的多阶段计划",
+      "duration": 82,
+      "duration_label": "01:22"
+    },
+    {
+      "page": 45,
+      "cid": 40156333384,
+      "part": "执行我们的多阶段计划解决方案",
+      "duration": 396,
+      "duration_label": "06:36"
+    },
+    {
+      "page": 46,
+      "cid": 40156333778,
+      "part": "向用户提问",
+      "duration": 107,
+      "duration_label": "01:47"
+    },
+    {
+      "page": 47,
+      "cid": 40156333986,
+      "part": "面向真实工程师的AI编程答疑时间（第一天上午）",
+      "duration": 2981,
+      "duration_label": "49:41"
+    },
+    {
+      "page": 48,
+      "cid": 40156335793,
+      "part": "面向真实工程师的AI编程答疑时间（第一天下午）",
+      "duration": 2696,
+      "duration_label": "44:56"
+    },
+    {
+      "page": 49,
+      "cid": 40156398518,
+      "part": "代码廉价吗",
+      "duration": 365,
+      "duration_label": "06:05"
+    },
+    {
+      "page": 50,
+      "cid": 40156398789,
+      "part": "引导代理使用技能实现反馈循环",
+      "duration": 201,
+      "duration_label": "03:21"
+    },
+    {
+      "page": 51,
+      "cid": 40156398953,
+      "part": "构建一个执行工作技能 - 第4天反馈循环",
+      "duration": 46,
+      "duration_label": "00:46"
+    },
+    {
+      "page": 52,
+      "cid": 40156399160,
+      "part": "构建一个执行工作技能 - 解决方案",
+      "duration": 186,
+      "duration_label": "03:06"
+    },
+    {
+      "page": 53,
+      "cid": 40156399260,
+      "part": "使用我们的执行工作技能 - 第4天反馈循环",
+      "duration": 66,
+      "duration_label": "01:06"
+    },
+    {
+      "page": 54,
+      "cid": 40156399366,
+      "part": "使用我们的执行工作技能 - 解决方案",
+      "duration": 183,
+      "duration_label": "03:03"
+    },
+    {
+      "page": 55,
+      "cid": 40156399619,
+      "part": "使用预提交修复代理的格式错误 - 第4天反馈循环",
+      "duration": 232,
+      "duration_label": "03:52"
+    },
+    {
+      "page": 56,
+      "cid": 40156399914,
+      "part": "什么是红绿重构 - 第4天反馈循环",
+      "duration": 223,
+      "duration_label": "03:43"
+    },
+    {
+      "page": 57,
+      "cid": 40156400169,
+      "part": "红绿重构 - 第4天反馈循环",
+      "duration": 95,
+      "duration_label": "01:35"
+    },
+    {
+      "page": 58,
+      "cid": 40156400188,
+      "part": "红绿重构 - 解决方案",
+      "duration": 270,
+      "duration_label": "04:30"
+    },
+    {
+      "page": 59,
+      "cid": 40156400476,
+      "part": "什么是AFK代理 - 第5天AFK代理",
+      "duration": 145,
+      "duration_label": "02:25"
+    },
+    {
+      "page": 60,
+      "cid": 40156400577,
+      "part": "沙堡 - 第5天AFK代理",
+      "duration": 116,
+      "duration_label": "01:56"
+    },
+    {
+      "page": 61,
+      "cid": 40156400755,
+      "part": "尝试HITL代理 - 第5天AFK代理",
+      "duration": 234,
+      "duration_label": "03:54"
+    },
+    {
+      "page": 62,
+      "cid": 40156400871,
+      "part": "尝试HITL代理 - 解决方案",
+      "duration": 95,
+      "duration_label": "01:35"
+    },
+    {
+      "page": 63,
+      "cid": 40156400964,
+      "part": "沙盒化 - 第5天AFK代理",
+      "duration": 293,
+      "duration_label": "04:53"
+    },
+    {
+      "page": 64,
+      "cid": 40156401103,
+      "part": "设置并尝试AFK代理 - 第5天AFK代理",
+      "duration": 150,
+      "duration_label": "02:30"
+    },
+    {
+      "page": 65,
+      "cid": 40156401297,
+      "part": "设置并尝试AFK代理 - 解决方案",
+      "duration": 207,
+      "duration_label": "03:27"
+    },
+    {
+      "page": 66,
+      "cid": 40156401413,
+      "part": "使用待办事项队列为AFK代理排队任务 - 第5天AFK代理",
+      "duration": 204,
+      "duration_label": "03:24"
+    },
+    {
+      "page": 67,
+      "cid": 40156401507,
+      "part": "为GitHub问题设置我们的仓库 - 第5天AFK代理",
+      "duration": 79,
+      "duration_label": "01:19"
+    },
+    {
+      "page": 68,
+      "cid": 40156463192,
+      "part": "将代理连接到您的待办事项 - 第5天AFK代理",
+      "duration": 195,
+      "duration_label": "03:15"
+    },
+    {
+      "page": 69,
+      "cid": 40156463478,
+      "part": "将代理连接到您的待办事项 - 解决方案",
+      "duration": 149,
+      "duration_label": "02:29"
+    },
+    {
+      "page": 70,
+      "cid": 40156464107,
+      "part": "更新我们的PRD和计划技能以使用GitHub - 第5天AFK代理",
+      "duration": 92,
+      "duration_label": "01:32"
+    },
+    {
+      "page": 71,
+      "cid": 40156464927,
+      "part": "HITL和AFK任务 - 第6天人机协同模式",
+      "duration": 126,
+      "duration_label": "02:06"
+    },
+    {
+      "page": 72,
+      "cid": 40156465872,
+      "part": "不要计划看板 - 第6天人机协同模式",
+      "duration": 278,
+      "duration_label": "04:38"
+    },
+    {
+      "page": 73,
+      "cid": 40156466225,
+      "part": "使用看板技能 - 第6天人机协同模式",
+      "duration": 69,
+      "duration_label": "01:09"
+    },
+    {
+      "page": 74,
+      "cid": 40156466498,
+      "part": "使用看板技能 - 解决方案",
+      "duration": 324,
+      "duration_label": "05:24"
+    },
+    {
+      "page": 75,
+      "cid": 40156466999,
+      "part": "研究 - 第6天人机协同模式",
+      "duration": 194,
+      "duration_label": "03:14"
+    },
+    {
+      "page": 76,
+      "cid": 40156857988,
+      "part": "尝试研究 - 第6天人机协同模式",
+      "duration": 106,
+      "duration_label": "01:46"
+    },
+    {
+      "page": 77,
+      "cid": 40156858480,
+      "part": "尝试研究 - 解决方案",
+      "duration": 267,
+      "duration_label": "04:27"
+    },
+    {
+      "page": 78,
+      "cid": 40156858980,
+      "part": "原型设计 - 第6天人机协同模式",
+      "duration": 177,
+      "duration_label": "02:57"
+    },
+    {
+      "page": 79,
+      "cid": 40156859233,
+      "part": "尝试UI原型设计 - 第6天人机协同模式",
+      "duration": 95,
+      "duration_label": "01:35"
+    },
+    {
+      "page": 80,
+      "cid": 40156859335,
+      "part": "尝试UI原型设计 - 解决方案",
+      "duration": 194,
+      "duration_label": "03:14"
+    },
+    {
+      "page": 81,
+      "cid": 40156859858,
+      "part": "原型技能 - 第6天人机协同模式",
+      "duration": 135,
+      "duration_label": "02:15"
+    },
+    {
+      "page": 82,
+      "cid": 40156860210,
+      "part": "设计AI喜爱的代码库 - 第6天人机协同模式",
+      "duration": 451,
+      "duration_label": "07:31"
+    },
+    {
+      "page": 83,
+      "cid": 40156921864,
+      "part": "改进代码库架构技能 - 第6天人机协同模式",
+      "duration": 142,
+      "duration_label": "02:22"
+    },
+    {
+      "page": 84,
+      "cid": 40156922020,
+      "part": "改进代码库架构技能 - 解决方案",
+      "duration": 297,
+      "duration_label": "04:57"
+    },
+    {
+      "page": 85,
+      "cid": 40156922458,
+      "part": "为我们的PlanPRD技能添加模块意识 - 第6天人机协同模式",
+      "duration": 113,
+      "duration_label": "01:53"
+    },
+    {
+      "page": 86,
+      "cid": 40156923069,
+      "part": "最终工作流 - 第6天人机协同模式",
+      "duration": 146,
+      "duration_label": "02:26"
+    },
+    {
+      "page": 87,
+      "cid": 40156923197,
+      "part": "附录：绿地项目 - 第6天人机协同模式",
+      "duration": 283,
+      "duration_label": "04:43"
+    },
+    {
+      "page": 88,
+      "cid": 40156923675,
+      "part": "附录：grill-with-docs - 第6天人机协同模式",
+      "duration": 427,
+      "duration_label": "07:07"
+    },
+    {
+      "page": 89,
+      "cid": 40156924397,
+      "part": "答疑时间 - 第6天上午",
+      "duration": 2969,
+      "duration_label": "49:29"
+    },
+    {
+      "page": 90,
+      "cid": 40156989911,
+      "part": "答疑时间 - 第6天下午",
+      "duration": 2901,
+      "duration_label": "48:21"
+    },
+    {
+      "page": 91,
+      "cid": 40157053397,
+      "part": "最终答疑时间 - 上午",
+      "duration": 3226,
+      "duration_label": "53:46"
+    },
+    {
+      "page": 92,
+      "cid": 40157055809,
+      "part": "最终答疑时间 - 下午",
+      "duration": 3146,
+      "duration_label": "52:26"
+    }
+  ]
+}

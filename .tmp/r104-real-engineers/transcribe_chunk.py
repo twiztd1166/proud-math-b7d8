@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, hashlib, json, math, os, pathlib, shutil, subprocess, sys, time, urllib.parse, urllib.request
+import argparse, hashlib, json, math, os, pathlib, shutil, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
 
 BVID = "BV16eKb6PEUo"
 VIEW_URL = f"https://api.bilibili.com/x/web-interface/view?bvid={BVID}"
@@ -21,6 +21,11 @@ def fetch_json(url, retries=4):
             if isinstance(data, dict) and data.get("code") not in (None, 0):
                 raise RuntimeError(f"API code={data.get('code')} message={data.get('message')}")
             return data
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code in (403, 412):
+                raise
+            time.sleep(2 * (attempt + 1))
         except Exception as e:
             last = e
             time.sleep(2 * (attempt + 1))
@@ -77,7 +82,7 @@ def parser_audio_candidates(part):
 
 def acquire_audio(part, cid, work):
     errors = []
-    for refresh in range(3):
+    for refresh in range(1):
         try:
             candidates = official_audio_candidates(cid)
         except Exception as e:
@@ -246,15 +251,11 @@ def main():
     work = out.parent / "_work"
     work.mkdir(parents=True, exist_ok=True)
 
-    view = fetch_json(VIEW_URL)["data"]
-    pages = {int(x["page"]): x for x in view.get("pages") or []}
+    source_manifest_path = pathlib.Path(__file__).with_name("source_manifest.json")
+    frozen = json.loads(source_manifest_path.read_text(encoding="utf-8"))
+    pages = {int(x["page"]): x for x in frozen.get("pages") or []}
     if len(pages) != 92:
-        raise SystemExit(f"source manifest changed: expected 92 pages, got {len(pages)}")
-    frozen = {
-        "bvid": BVID, "aid": view.get("aid"), "title": view.get("title"),
-        "owner": view.get("owner"), "page_count": len(pages),
-        "pages": [pages[i] for i in sorted(pages)]
-    }
+        raise SystemExit(f"frozen source manifest invalid: expected 92 pages, got {len(pages)}")
     (out / "SOURCE_MANIFEST.json").write_text(
         json.dumps(frozen, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
