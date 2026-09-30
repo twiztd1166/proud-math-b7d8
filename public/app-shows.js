@@ -2261,6 +2261,78 @@ function annualPlanPublicationText(row){
   return [status,confidence].filter(Boolean).join(' · ');
 }
 
+function annualPlanSourceUrl(ref){
+  if(typeof ref==='string')return /^https?:\/\//i.test(ref)?ref:'';
+  if(ref&&typeof ref==='object')return /^https?:\/\//i.test(String(ref.url||''))?String(ref.url):'';
+  return '';
+}
+
+function annualPlanOutreachProfile(row){
+  const legacy=String(row?.legacy_next_action||'').trim();
+  const event=String(row?.occurrence_label||row?.canonical_event||'2027 event').trim();
+  const timing=annualPlanDateText(row);
+  const lower=legacy.toLowerCase();
+  const questions=[];
+  const add=value=>{if(value&&!questions.includes(value))questions.push(value)};
+  if(!row?.event_start||/\b(date|dates|timing|calendar)\b/.test(lower))add('the confirmed 2027 date/timing');
+  if(/eligib|accepted|qualif|category/.test(lower))add('Paradise Exteriors’ eligibility/category');
+  if(/inventory|availab|space|opening|sold out|waitlist/.test(lower))add('current inventory/availability');
+  if(/price|pricing|rate|fee|quote|cost|all-in|package|economics/.test(lower))add('the current all-in price/package');
+  if(/placement|floor plan|map|location|footprint|booth|space number/.test(lower))add('the available footprint/placement');
+  if(/payment|deposit|balance|refund|cancel/.test(lower))add('payment and cancellation/refund terms');
+  if(/coi|insurance/.test(lower))add('insurance/COI requirements');
+  if(/power|electric|internet|load-in|load in|setup|parking|credential|furnish|material|teardown|move-in|move in/.test(lower))add('setup/load-in and operating requirements');
+  if(/lead|exclusiv|competitor|category rights|solicitation/.test(lower))add('lead-capture/category/exclusivity rights');
+  if(!questions.length)add('the current 2027 participation terms and any unresolved logistics');
+  const facts=[];
+  if(row?.event_start)facts.push(`Published timing in our planning record: ${timing}.`);
+  if(String(row?.cost_status||'').toUpperCase()==='KNOWN_VERIFIED'&&(row?.budget_min!=null||row?.budget_max!=null)){
+    facts.push(`Our planning record currently shows ${annualPlanBudgetText(row)}; please confirm it remains current.`);
+  }
+  return {event,timing,questions,facts};
+}
+
+function annualPlanEmailDraft(row){
+  const email=String(row?.operational_contact_email||'').trim();
+  if(!email)return null;
+  const p=annualPlanOutreachProfile(row);
+  const subject=`Paradise Exteriors — ${p.event} participation inquiry`;
+  const facts=p.facts.length?`\n\n${p.facts.join('\n')}`:'';
+  const asks=p.questions.map(x=>`• ${x}`).join('\n');
+  const body=`Hello,\n\nI’m reaching out on behalf of Paradise Exteriors regarding ${p.event} (${p.timing}). We are evaluating this opportunity for our 2027 event plan.${facts}\n\nCould you please confirm the following items that remain relevant to our planning:\n${asks}\n\nThank you,\nParadise Exteriors`;
+  return {email,subject,body,href:`mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};
+}
+
+function annualPlanCallScript(row){
+  const phone=String(row?.operational_contact_phone||'').trim();
+  if(!phone)return null;
+  const p=annualPlanOutreachProfile(row);
+  const known=p.facts.length?p.facts.map(x=>`- ${x}`).join('\n'):'- No additional current terms should be assumed beyond the governed 2027 planning record.';
+  const asks=p.questions.map(x=>`- ${x}`).join('\n');
+  const script=`Hi, I’m calling on behalf of Paradise Exteriors about ${p.event} (${p.timing}). We are evaluating it for our 2027 event plan.\n\nREFERENCE — ALREADY IN THE PLAN\n${known}\n\nONLY ASK / CONFIRM THESE REMAINING ITEMS\n${asks}\n\nPlease send any current application, agreement, floor plan, or written terms that support the answers. Thank you.`;
+  return {phone,script,href:`tel:${phone.replace(/[^0-9+]/g,'')}`};
+}
+
+function annualPlanOperationalLabel(row){
+  const code=String(row?.operational_action_code||'').trim().toUpperCase();
+  const map={
+    REVIEW_EXISTING_DRAFT:'REVIEW EXISTING EMAIL DRAFT',
+    VERIFY_PAYMENT:'VERIFY PAYMENT / RECEIPT',
+    SIGNER_REVIEW:'AUTHORIZED SIGNER REVIEW',
+    MONITOR_RELEASE:'MONITOR 2027 RELEASE',
+    CONTACT_ORGANIZER:'CONTACT ORGANIZER',
+    REVIEW_APPLICATION:'REVIEW APPLICATION / CONTRACT',
+    VERIFY_TERMS:'VERIFY CURRENT 2027 TERMS',
+    REVIEW_DECIDE:'REVIEW / DECIDE',
+  };
+  if(!code)return '';
+  if(code==='CONTACT_ORGANIZER'){
+    if(annualPlanEmailDraft(row))return 'CREATE EMAIL DRAFT';
+    if(annualPlanCallScript(row))return 'CREATE CALL SCRIPT';
+  }
+  return map[code]||code.replaceAll('_',' ');
+}
+
 function annualPlanMonthKey(row){
   if(row.event_start)return String(row.event_start);
   if(row.expected_month)return `2027-${String(row.expected_month).padStart(2,'0')}-15`;
@@ -2293,10 +2365,21 @@ function annualPlanCard(row){
     ?`<div class="sourceWarn"><b>Staffing / conflict</b> ${esc(row.conflict_notes)}</div>`:'';
   const placement=String(row.placement_reference||'').trim()
     ?`<div class="bookingStatusLine"><span>Placement reference</span><b>${esc(row.placement_reference)}</b></div>`:'';
-  const sources=Array.isArray(row.source_refs)?row.source_refs.filter(Boolean):[];
+  const sources=Array.isArray(row.source_refs)?row.source_refs.map(annualPlanSourceUrl).filter(Boolean):[];
   const sourceLinks=sources.length
     ?`<div class="contactActions">${sources.slice(0,3).map((url,i)=>`<a class="contactBtn" target="_blank" rel="noopener noreferrer" href="${esc(url)}">Source ${i+1}</a>`).join('')}</div>`:'';
   const actionDue=row.action_due?` · operating date ${date(row.action_due)}`:'';
+  const operationalLabel=annualPlanOperationalLabel(row);
+  const actionGuard=String(row.operational_guard||'').trim();
+  const emailDraft=String(row.operational_action_code||'').toUpperCase()==='CONTACT_ORGANIZER'?annualPlanEmailDraft(row):null;
+  const callScript=!emailDraft&&String(row.operational_action_code||'').toUpperCase()==='CONTACT_ORGANIZER'?annualPlanCallScript(row):null;
+  const firstSource=sources[0]||'';
+  const code=String(row.operational_action_code||'').toUpperCase();
+  const sourceActionLabel=code==='REVIEW_APPLICATION'?'Open source / application':code==='MONITOR_RELEASE'?'Open source to monitor':code==='VERIFY_TERMS'?'Open source / verify terms':code==='CONTACT_ORGANIZER'?'Open organizer source':'Open source';
+  const emailButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
+  const callButton=callScript?`<button type="button" class="btn primary" data-annual-call-script="${esc(row.plan_id)}">Create call script</button>`:'';
+  const sourceAction=(!emailDraft&&!callScript&&firstSource&&['CONTACT_ORGANIZER','REVIEW_APPLICATION','MONITOR_RELEASE','VERIFY_TERMS','SIGNER_REVIEW'].includes(code))
+    ?`<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(firstSource)}">${esc(sourceActionLabel)}</a>`:'';
   return `<article class="card bookingCard annualPlanCard" data-plan-id="${esc(row.plan_id)}">
     <div class="row"><div><div class="event">${esc(row.occurrence_label||row.canonical_event)}</div><div class="mfc">${esc(row.profile_id)} · ${esc(row.schedule_type||'PLAN')}</div></div><span class="badge ${decision==='PURSUE'?'ready':decision==='WATCH'?'date':'hold'}">${esc(label)}</span></div>
     <div class="bookingSignal ${esc(signalClass)}"><b>${esc(row.priority||'MEDIUM')} priority</b><span>${esc(annualPlanPublicationText(row))}</span></div>
@@ -2310,10 +2393,12 @@ function annualPlanCard(row){
     <div class="bookingPerformance"><span>Historical signal</span><b>${esc(row.historical_signal||'No comparable historical signal')}</b></div>
     ${placement}
     <div class="bookingStatusLine"><span>Budget basis</span><b>${esc(row.budget_basis||'No safe 2027 budget basis yet.')}</b></div>
+    ${operationalLabel?`<div class="bookingStatusLine"><span>Manager move</span><b>${esc(operationalLabel)}</b></div>`:''}
     <div class="action"><b>Next action</b><br>${esc(row.next_action||'No action stated')}</div>
+    ${actionGuard?`<div class="sourceWarn"><b>Action guard</b> ${esc(actionGuard)}</div>`:''}
     <div class="bookingStatusLine"><span>Source basis</span><b>${esc(row.source_basis||'Governed annual-plan source')}</b></div>
     ${sourceLinks}
-    <div class="actions"><button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">Open full show history</button></div>
+    <div class="actions">${emailButton}${callButton}${sourceAction}<button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">Open full show history</button></div>
   </article>`;
 }
 

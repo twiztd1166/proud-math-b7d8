@@ -32,7 +32,11 @@ jobs:
           set -euo pipefail
           node --check public/app-annual-api.js
           node --check public/app-annual-scope.js
+          node --check scripts/verify-annual-operational-actions.mjs
+          node scripts/verify-annual-operational-actions.mjs
           grep -q 'functions/v1/shows-annual-plan-api' public/app-annual-api.js
+          grep -q 'operational_action_code' supabase/functions/shows-annual-plan-api/index.ts
+          grep -q 'operational_contact_email' supabase/functions/shows-annual-plan-api/index.ts
           grep -q 'DIRECT_PLAN_PROFILE' public/app-annual-scope.js
           grep -q 'estimated_start' public/app-annual-scope.js
           grep -Eq 'paradise-shows-public-v[0-9]+' public/sw.js
@@ -281,6 +285,12 @@ jobs:
           grep -q 'Open application / apply' ios/App/App/public/app-shows.js
           grep -q 'operational_guard' ios/App/App/public/app-modals.js
           grep -q 'Open application / apply' ios/App/App/public/app-modals.js
+          grep -q 'function annualPlanEmailDraft' ios/App/App/public/app-shows.js
+          grep -q 'function annualPlanCallScript' ios/App/App/public/app-shows.js
+          grep -q 'function annualPlanOperationalLabel' ios/App/App/public/app-shows.js
+          grep -q 'data-annual-call-script' ios/App/App/public/app-shows.js
+          grep -q 'openAnnualPlanCallScript' ios/App/App/public/app-modals.js
+          grep -q 'data-annual-call-script' ios/App/App/public/app-bind.js
           grep -q 'Rather than repeat items already established' ios/App/App/public/app-core.js
           grep -q 'ONLY ASK / CONFIRM THESE REMAINING ITEMS' ios/App/App/public/app-core.js
           grep -q 'mailto:' ios/App/App/public/app-core.js
