@@ -786,7 +786,14 @@ jobs:
           assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
           assert sum(bool(r.get('deadline_date')) for r in research) == 16, [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
-          assert missing_official == {'R2026-054-CARIFEST','R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
+          assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
+          carifest=controls['R2026-054-CARIFEST']
+          carifest_detail=carifest.get('detail_data') or {}
+          assert carifest.get('research_status') == 'CURRENT_REVERIFIED', carifest
+          assert carifest_detail.get('official_source_url') == 'https://www.midfloridaeventcenter.com/Events/Caribbean-Food-Music-Festival', carifest
+          assert carifest_detail.get('schedule_status') == 'CURRENT VERIFIED', carifest
+          assert carifest_detail.get('venue_status') == 'CURRENT OFFICIAL', carifest
+          assert 'APPLICATION LIVE' not in str(carifest_detail.get('booking_status') or '').upper(), carifest
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
