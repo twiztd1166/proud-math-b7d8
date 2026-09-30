@@ -136,6 +136,7 @@ jobs:
           carifest=by_control['R2026-054-CARIFEST']
           carifest_detail=carifest.get('detail_data') or {}
           assert carifest.get('research_status') == 'CURRENT_REVERIFIED', carifest
+          assert carifest.get('date_confidence') == 'CURRENT_VERIFIED', carifest
           assert carifest_detail.get('official_source_url') == 'https://www.midfloridaeventcenter.com/Events/Caribbean-Food-Music-Festival', carifest
           assert carifest_detail.get('schedule_status') == 'CURRENT VERIFIED', carifest
           assert carifest_detail.get('venue_status') == 'CURRENT OFFICIAL', carifest
