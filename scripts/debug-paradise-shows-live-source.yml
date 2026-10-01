@@ -777,8 +777,12 @@ jobs:
           pumpkins=controls['R2026-013-PUMPKINS-PALMS']
           assert pumpkins.get('event_label') == 'Palm Bay Farmers Market - Pumpkins & Palms', pumpkins
           assert pumpkins.get('series_key') == 'PALM-BAY-FARMERS-MARKET', pumpkins
-          pumpkins_deadline=str((pumpkins.get('detail_data') or {}).get('deadline_text') or '')
-          assert 'Oct. 1, 2026' in pumpkins_deadline and 'Oct. 10, 2026' in pumpkins_deadline, pumpkins
+          pumpkins_detail=pumpkins.get('detail_data') or {}
+          pumpkins_deadline=str(pumpkins_detail.get('deadline_text') or '')
+          assert 'Oct. 1, 2026' in pumpkins_deadline and 'passed' in pumpkins_deadline.lower(), pumpkins
+          assert pumpkins_detail.get('operational_action_code') == 'EMAIL_DRAFT', pumpkins
+          assert 'APPLICATION DEADLINE PASSED' in str(pumpkins_detail.get('booking_status') or '').upper(), pumpkins
+          assert 'late availability' in str(pumpkins_detail.get('next_action') or '').lower(), pumpkins
           homegrown=controls['R2026-073-PALM-BAY-FARMERS-NOV']
           assert homegrown.get('event_label') == 'Palm Bay Farmers Market - Homegrown Harvest', homegrown
           assert homegrown.get('series_key') == 'PALM-BAY-FARMERS-MARKET', homegrown
