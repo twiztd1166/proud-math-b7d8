@@ -743,9 +743,9 @@ jobs:
           assert snow.get('event_start') == '2026-12-12', snow
           assert snow.get('date_confidence') == 'CURRENT_VERIFIED', snow
           hallandale=controls['R2026-088-HALLANDALE-HOLIDAY']
-          assert hallandale.get('event_start') is None, hallandale
-          assert hallandale.get('estimated_sort_date') == '2026-12-04', hallandale
-          assert hallandale.get('date_confidence') == 'RECURRING_HIGH_CONFIDENCE', hallandale
+          assert hallandale.get('event_start') == '2026-12-04', hallandale
+          assert hallandale.get('estimated_sort_date') is None, hallandale
+          assert hallandale.get('date_confidence') == 'CURRENT_VERIFIED', hallandale
           music=controls['R2026-101-MUSIC-MANSION']
           assert music.get('event_start') is None, music
           assert music.get('estimated_sort_date') == '2026-12-06', music
@@ -767,6 +767,7 @@ jobs:
               'R2026-083-WORLD-AIDS':'2026-11-01',
               'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
               'R2026-100-WESTON-RUN':'2026-11-15',
+              'R2026-088-HALLANDALE-HOLIDAY':'2026-11-19',
               'R2026-090-SPACE-COAST-HOLIDAY-FOOD':'2026-12-01',
               'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
               'R2026-105-TC-HOLIDAY-FOOD':'2026-12-04',
@@ -795,12 +796,32 @@ jobs:
               if (r.get('detail_data') or {}).get('operational_action_code') == 'OPEN_INQUIRY'
               and not str((r.get('detail_data') or {}).get('action_url') or '').strip()
           ]
+          compound_codes={'EMAIL_THEN_APPLY','CALL_THEN_APPLY'}
+          q4_compound=[
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') in compound_codes
+          ]
+          q4_compound_missing_url=[
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') in compound_codes
+              and not str((r.get('detail_data') or {}).get('action_url') or '').strip()
+          ]
           assert not q4_apply_missing_url, q4_apply_missing_url
           assert not q4_inquiry_missing_url, q4_inquiry_missing_url
+          assert not q4_compound_missing_url, q4_compound_missing_url
+          assert set(q4_compound) == {
+              'R2026-037-WEST-BOYNTON-SENIOR',
+              'R2026-040-VERO-DOWNTOWN-FRIDAY',
+              'R2026-057-NORTH-MIAMI-HEALTH',
+              'R2026-062-SENIOR-DELRAY',
+              'R2026-077-SENIOR-POMPANO',
+          }, q4_compound
           inquiry_expectations={
+              'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
+              'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
           }
           assert sum(
               1 for r in visible_q4
@@ -815,10 +836,13 @@ jobs:
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
           email_route_ids={
+              'R2026-025-BOYNTON-FALL',
               'R2026-042-LAGOONFEST',
               'R2026-049-CARS-COFFEE-NOV',
               'R2026-053-DREAM-ASIA',
+              'R2026-054-CARIFEST',
               'R2026-056-BARK-TITUSVILLE',
+              'R2026-095-HOWARD-ALAN-DELRAY',
               'R2026-099-CARS-COFFEE-DEC',
           }
           for cid in email_route_ids:
@@ -829,7 +853,7 @@ jobs:
               r.get('control_id') for r in visible_q4
               if (r.get('detail_data') or {}).get('route_verified_at') == '2026-10-01'
           }
-          assert len(route_verified) == 20, route_verified
+          assert len(route_verified) == 31, route_verified
           hallandale_halloween=controls['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
           assert hallandale_halloween.get('deadline_date') == '2026-10-22', hallandale_halloween
@@ -843,6 +867,32 @@ jobs:
           assert controls['R2026-064-PSL-RIVER-NIGHTS-NOV'].get('detail_data',{}).get('action_url') == 'https://form.jotform.com/pslcommunications/special-events-vendor-application'
           assert controls['R2026-079-TURKEY-BASH'].get('detail_data',{}).get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=htpjbnnv-25752'
           assert controls['R2026-082-RUM-FUZION'].get('detail_data',{}).get('action_url') == 'https://rumfuzion.com/#vendors'
+          direct_apply_expectations={
+              'R2026-030-DELRAY-KIDSFEST':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
+              'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform',
+              'R2026-088-HALLANDALE-HOLIDAY':'https://hallandalebeachfl.gov/DocumentCenter/View/38253/2026-Holiday-Sponsor-Application-Fillable',
+              'R2026-109-DELRAY-HOLIDAY-PARADE':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
+          }
+          for cid,url in direct_apply_expectations.items():
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
+              assert detail.get('action_url') == url, (cid,detail)
+              assert detail.get('route_verification_source') == '2026_Q4_COMPOUND_ACTION_REVERIFICATION', (cid,detail)
+          mjd_detail=controls['R2026-057-NORTH-MIAMI-HEALTH'].get('detail_data') or {}
+          assert mjd_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', mjd_detail
+          assert mjd_detail.get('action_url') == 'https://mjdhealthfair.com/#/vendors', mjd_detail
+          assert 'CATEGORY FIT TO CONFIRM' in str(mjd_detail.get('booking_status') or '').upper(), mjd_detail
+          vero_halloween_detail=controls['R2026-048-VERO-HALLOWEEN'].get('detail_data') or {}
+          assert vero_halloween_detail.get('operational_action_code') == 'CALL_SCRIPT', vero_halloween_detail
+          hallandale_holiday=controls['R2026-088-HALLANDALE-HOLIDAY']
+          hallandale_holiday_detail=hallandale_holiday.get('detail_data') or {}
+          assert hallandale_holiday.get('event_start') == '2026-12-04', hallandale_holiday
+          assert hallandale_holiday.get('estimated_sort_date') is None, hallandale_holiday
+          assert hallandale_holiday.get('deadline_date') == '2026-11-19', hallandale_holiday
+          assert 'conflicting invoice due year' in str(hallandale_holiday_detail.get('operational_guard') or '').lower(), hallandale_holiday
+          howard_detail=controls['R2026-095-HOWARD-ALAN-DELRAY'].get('detail_data') or {}
+          assert howard_detail.get('operational_action_code') == 'EMAIL_DRAFT', howard_detail
+          assert 'SPONSORSHIP PROGRAM ACTIVE' in str(howard_detail.get('booking_status') or '').upper(), howard_detail
 
           homegrown=controls['R2026-073-PALM-BAY-FARMERS-NOV']
           assert homegrown.get('event_label') == 'Palm Bay Farmers Market - Homegrown Harvest', homegrown
