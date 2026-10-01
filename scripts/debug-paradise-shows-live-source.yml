@@ -759,6 +759,7 @@ jobs:
               'R2026-019-SFL-PICKLE':'2026-10-09',
               'R2026-061-GRACE-JERK':'2026-10-09',
               'R2026-033-MOOSE-MELBOURNE':'2026-10-17',
+              'R2026-045-HALLANDALE-HALLOWEEN':'2026-10-22',
               'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
               'R2026-063-SENIOR-HARDROCK':'2026-10-30',
               'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
@@ -783,6 +784,66 @@ jobs:
           assert pumpkins_detail.get('operational_action_code') == 'EMAIL_DRAFT', pumpkins
           assert 'APPLICATION DEADLINE PASSED' in str(pumpkins_detail.get('booking_status') or '').upper(), pumpkins
           assert 'late availability' in str(pumpkins_detail.get('next_action') or '').lower(), pumpkins
+
+          q4_apply_missing_url=[
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') == 'APPLY'
+              and not str((r.get('detail_data') or {}).get('action_url') or '').strip()
+          ]
+          q4_inquiry_missing_url=[
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') == 'OPEN_INQUIRY'
+              and not str((r.get('detail_data') or {}).get('action_url') or '').strip()
+          ]
+          assert not q4_apply_missing_url, q4_apply_missing_url
+          assert not q4_inquiry_missing_url, q4_inquiry_missing_url
+          inquiry_expectations={
+              'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
+              'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
+              'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
+          }
+          assert sum(
+              1 for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') == 'OPEN_INQUIRY'
+          ) == len(inquiry_expectations), [
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('operational_action_code') == 'OPEN_INQUIRY'
+          ]
+          for cid,url in inquiry_expectations.items():
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
+              assert detail.get('action_url') == url, (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
+          email_route_ids={
+              'R2026-042-LAGOONFEST',
+              'R2026-049-CARS-COFFEE-NOV',
+              'R2026-053-DREAM-ASIA',
+              'R2026-056-BARK-TITUSVILLE',
+              'R2026-099-CARS-COFFEE-DEC',
+          }
+          for cid in email_route_ids:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
+          route_verified={
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('route_verified_at') == '2026-10-01'
+          }
+          assert len(route_verified) == 20, route_verified
+          hallandale_halloween=controls['R2026-045-HALLANDALE-HALLOWEEN']
+          hallandale_detail=hallandale_halloween.get('detail_data') or {}
+          assert hallandale_halloween.get('deadline_date') == '2026-10-22', hallandale_halloween
+          assert hallandale_detail.get('action_url') == 'https://hallandalebeachfl.gov/DocumentCenter/View/38248/2026-Halloween-Sponsor-Application-blank-Fillable', hallandale_halloween
+          bark=controls['R2026-056-BARK-TITUSVILLE']
+          bark_detail=bark.get('detail_data') or {}
+          assert 'VENDOR APPLICATION CLOSED' in str(bark_detail.get('booking_status') or '').upper(), bark
+          assert 'SPONSORSHIP ROUTE CURRENT' in str(bark_detail.get('booking_status') or '').upper(), bark
+          assert 'ALTERNATE ROUTE ONLY' in str(bark_detail.get('booking_status') or '').upper(), bark
+          assert 'spcasunni@gmail.com' in str(bark_detail.get('contact_text') or '').lower(), bark
+          assert controls['R2026-064-PSL-RIVER-NIGHTS-NOV'].get('detail_data',{}).get('action_url') == 'https://form.jotform.com/pslcommunications/special-events-vendor-application'
+          assert controls['R2026-079-TURKEY-BASH'].get('detail_data',{}).get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=htpjbnnv-25752'
+          assert controls['R2026-082-RUM-FUZION'].get('detail_data',{}).get('action_url') == 'https://rumfuzion.com/#vendors'
+
           homegrown=controls['R2026-073-PALM-BAY-FARMERS-NOV']
           assert homegrown.get('event_label') == 'Palm Bay Farmers Market - Homegrown Harvest', homegrown
           assert homegrown.get('series_key') == 'PALM-BAY-FARMERS-MARKET', homegrown
