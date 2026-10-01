@@ -45,8 +45,8 @@ jobs:
           ]
           assert len(research) == 115, len(research)
           assert len(q4) == 115, len(q4)
-          assert len(exact) == 113, len(exact)
-          assert len(estimated) == 2, len(estimated)
+          assert len(exact) == 114, len(exact)
+          assert len(estimated) == 1, len(estimated)
           assert len(unsortable) == 0, unsortable
           assert not semantic_bad, semantic_bad
           assert all(isinstance(r.get('detail_data'),dict) for r in research), 'detail_data missing'
