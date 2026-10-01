@@ -151,9 +151,15 @@ jobs:
               if (r.get('detail_data') or {}).get('operational_action_code') in compound_codes
               and not str((r.get('detail_data') or {}).get('action_url') or '').strip()
           ]
+          stale_generic_direct_labels=[
+              r.get('control_id') for r in q4
+              if (r.get('detail_data') or {}).get('operational_action_code') in {'APPLY','OPEN_INQUIRY'}
+              and str((r.get('detail_data') or {}).get('action_label') or '').strip() in {'Open recovered research source','Open official source'}
+          ]
           assert not q4_apply_missing_url, q4_apply_missing_url
           assert not q4_inquiry_missing_url, q4_inquiry_missing_url
           assert not q4_compound_missing_url, q4_compound_missing_url
+          assert not stale_generic_direct_labels, stale_generic_direct_labels
           assert set(q4_compound) == {
               'R2026-037-WEST-BOYNTON-SENIOR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
@@ -166,7 +172,9 @@ jobs:
               'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
+              'R2026-058-MIAMI-FOOD-WINE':'https://miamidadefoodwine.com/sponsors',
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
+              'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
           }
           assert sum(
               1 for r in q4
@@ -185,6 +193,7 @@ jobs:
               'R2026-042-LAGOONFEST',
               'R2026-049-CARS-COFFEE-NOV',
               'R2026-053-DREAM-ASIA',
+              'R2026-052-NASCAR-HOMESTEAD',
               'R2026-054-CARIFEST',
               'R2026-056-BARK-TITUSVILLE',
               'R2026-095-HOWARD-ALAN-DELRAY',
@@ -198,7 +207,12 @@ jobs:
               r.get('control_id') for r in q4
               if (r.get('detail_data') or {}).get('route_verified_at') == '2026-10-01'
           }
+          direct_action_cleanup={
+              r.get('control_id') for r in q4
+              if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
+          }
           assert len(route_verified) == 31, route_verified
+          assert len(direct_action_cleanup) == 16, direct_action_cleanup
           hallandale_halloween=by_control['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
           assert hallandale_halloween.get('deadline_date') == '2026-10-22', hallandale_halloween
@@ -212,6 +226,38 @@ jobs:
           assert by_control['R2026-064-PSL-RIVER-NIGHTS-NOV'].get('detail_data',{}).get('action_url') == 'https://form.jotform.com/pslcommunications/special-events-vendor-application'
           assert by_control['R2026-079-TURKEY-BASH'].get('detail_data',{}).get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=htpjbnnv-25752'
           assert by_control['R2026-082-RUM-FUZION'].get('detail_data',{}).get('action_url') == 'https://rumfuzion.com/#vendors'
+          direct_label_expectations={
+              'R2026-005-GIPA-OKTOBERFEST':('https://www.gipa.org/form/m/386539','Open vendor application'),
+              'R2026-006-GACTC-OKTOBERFEST':('https://www.eventeny.com/events/vendor/?id=53541','Open business-services application'),
+              'R2026-009-SABOR-FEST':('https://www.miamilakes-fl.gov/sabor-fest-2026-vendor-registration-form/','Open vendor registration form'),
+              'R2026-022-JUPITER-SPOOKTACULAR':('https://www.jupiter.fl.us/FormCenter/Town-Manager-7/Town-of-Jupiter-Sponsorship-Agreement-20-570','Open 2026 sponsorship agreement'),
+              'R2026-026-PLANTATION-FALL':('https://www.plantation.org/home/showpublisheddocument/8294/639223202279400000','Open Family Fall Festival application'),
+              'R2026-029-RPB-ROCK-N-FALL':('https://pci.jotform.com/form/261183235018148','Open vendor application'),
+              'R2026-031-MALABAR-FALLFEST':('https://www.townofmalabar.org/DocumentCenter/View/3591/Vendor-Participant-Sign-Up-Form-2026','Open vendor participant sign-up'),
+              'R2026-084-CHRISTMAS-LAS-OLAS':('https://www.lasolasboulevard.com/christmas-on-las-olas-application','Open business booth application'),
+              'R2026-090-SPACE-COAST-HOLIDAY-FOOD':('https://www.eventeny.com/events/vendor/?id=51168','Open sponsor application'),
+              'R2026-100-WESTON-RUN':('https://form.jotform.com/241377280948163','Open sponsorship / booth application'),
+              'R2026-105-TC-HOLIDAY-FOOD':('https://www.eventeny.com/events/vendor/?id=51173','Open sponsor application'),
+              'R2026-110-COCOA-ROCKLEDGE-PARADE':('https://flbrevardweb.myvscloud.com/webtrac/web/search.html?display=detail&module=global&type=SPEVT','Open commercial parade registration'),
+              'R2026-115-SNOW-PLACE-JUPITER':('https://www.jupiter.fl.us/FormCenter/Town-Manager-7/Town-of-Jupiter-Sponsorship-Agreement-20-570','Open 2026 sponsorship agreement'),
+          }
+          for cid,(url,label) in direct_label_expectations.items():
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
+              assert detail.get('action_url') == url, (cid,detail)
+              assert detail.get('action_label') == label, (cid,detail)
+              assert detail.get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP', (cid,detail)
+          nascar_detail=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
+          assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
+          assert 'JILER@NASCAR.COM' in str(nascar_detail.get('contact_text') or ''), nascar_detail
+          assert 'aravech@nascar.com' in str(nascar_detail.get('contact_text') or ''), nascar_detail
+          assert nascar_detail.get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP', nascar_detail
+          miami_food_detail=by_control['R2026-058-MIAMI-FOOD-WINE'].get('detail_data') or {}
+          assert miami_food_detail.get('operational_action_code') == 'OPEN_INQUIRY', miami_food_detail
+          assert miami_food_detail.get('action_label') == 'Open sponsorship enquiry', miami_food_detail
+          wellington_boat_detail=by_control['R2026-106-WELLINGTON-BOAT'].get('detail_data') or {}
+          assert wellington_boat_detail.get('operational_action_code') == 'OPEN_INQUIRY', wellington_boat_detail
+          assert wellington_boat_detail.get('action_label') == 'Open sponsor-vendor request form', wellington_boat_detail
           direct_apply_expectations={
               'R2026-030-DELRAY-KIDSFEST':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
               'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform',
