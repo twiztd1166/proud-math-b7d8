@@ -37,6 +37,13 @@ vm.runInContext(`${block}
 this.api={researchAvailability,researchStructuredAction,researchManagerMove};
 `,sandbox);
 
+const jupiterRow={
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{booking_status:'BUSINESS EXHIBITOR REGISTRATION ROUTE LIVE · SPONSOR DEADLINE PASSED'},
+};
+const jupiterAvailability=sandbox.api.researchAvailability(jupiterRow);
+if(jupiterAvailability.code!=='OPEN')throw new Error(`Live exhibitor route was misclassified by unrelated sponsor deadline: ${JSON.stringify(jupiterAvailability)}`);
+
 const reviewRow={
   disposition:'PURSUE',
   research_status:'CURRENT_REVERIFIED',
@@ -112,6 +119,7 @@ if(!guardText)throw new Error('Guard fixture invalid');
 
 console.log({
   research_action_model:'PASS',
+  jupiter_live_route_with_sponsor_deadline:jupiterAvailability.label,
   structured_review:reviewMove.label,
   late_email:lateMove.label,
   structured_apply:applyMove.label,
