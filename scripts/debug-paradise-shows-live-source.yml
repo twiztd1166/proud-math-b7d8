@@ -718,8 +718,8 @@ jobs:
               and not (not r.get('event_start') and r.get('estimated_sort_date'))
           ]
           assert len(visible_q4) == 115, len(visible_q4)
-          assert len(exact_research) == 113, len(exact_research)
-          assert len(estimated_research) == 2, len(estimated_research)
+          assert len(exact_research) == 114, len(exact_research)
+          assert len(estimated_research) == 1, len(estimated_research)
           assert not unsortable_research, unsortable_research
           assert not semantic_bad, semantic_bad
           assert all(isinstance(r.get('detail_data'),dict) for r in research), 'detail_data missing'
