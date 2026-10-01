@@ -15,6 +15,7 @@ const researchCardSource=source.slice(researchCardStart,researchCardEnd);
 if(!researchCardSource.includes("const actionGuard=String(d.operational_guard||'').trim()"))throw new Error('Research next-step card is missing local actionGuard definition');
 if(!researchCardSource.includes("const operationalCode=String(d.operational_action_code||'').trim().toUpperCase()"))throw new Error('Research card is missing structured action-code routing');
 if(!researchCardSource.includes("const applyButton=applyHref?"))throw new Error('Research card is missing action-aware apply button');
+if(!researchCardSource.includes("const inquiryButton=inquiryHref?"))throw new Error('Research card is missing action-aware inquiry button');
 
 const modalSource=fs.readFileSync('public/app-modals.js','utf8');
 const researchDetailStart=modalSource.indexOf('function openResearchDetail(id)');
@@ -23,6 +24,7 @@ if(researchDetailStart<0||researchDetailEnd<0)throw new Error('Research detail b
 const researchDetailSource=modalSource.slice(researchDetailStart,researchDetailEnd);
 if(!researchDetailSource.includes("const operationalCode=String(d.operational_action_code||'').trim().toUpperCase()"))throw new Error('Research detail is missing structured action-code routing');
 if(!researchDetailSource.includes("const applyButton=applyHref?"))throw new Error('Research detail is missing action-aware apply button');
+if(!researchDetailSource.includes("const inquiryButton=inquiryHref?"))throw new Error('Research detail is missing action-aware inquiry button');
 const start=source.indexOf('function researchAvailability');
 const end=source.indexOf('function researchValueSignal',start);
 if(start<0||end<0)throw new Error('Research action block not found');
@@ -83,6 +85,20 @@ const applyRow={
 const applyMove=sandbox.api.researchManagerMove(applyRow);
 if(applyMove.label!=='OPEN APPLICATION / APPLY')throw new Error(`Structured APPLY was overridden: ${JSON.stringify(applyMove)}`);
 
+const inquiryRow={
+  disposition:'WATCH',
+  research_status:'CURRENT_REVERIFIED',
+  detail_data:{
+    operational_action_code:'OPEN_INQUIRY',
+    next_action:'Open exhibitor inquiry form.',
+    action_url:'https://example.com/inquiry',
+    booking_status:'CURRENT EXHIBITOR SPACE INQUIRY ACTIVE',
+    contact_text:'organizer@example.com',
+  },
+};
+const inquiryMove=sandbox.api.researchManagerMove(inquiryRow);
+if(inquiryMove.label!=='OPEN INQUIRY / REQUEST FORM')throw new Error(`Structured OPEN_INQUIRY was overridden: ${JSON.stringify(inquiryMove)}`);
+
 const reviewAvailability=sandbox.api.researchAvailability(reviewRow);
 if(reviewAvailability.code!=='OPEN')throw new Error(`Active vendor/sponsor options were misclassified by one sold-out tier: ${JSON.stringify(reviewAvailability)}`);
 
@@ -123,6 +139,7 @@ console.log({
   structured_review:reviewMove.label,
   late_email:lateMove.label,
   structured_apply:applyMove.label,
+  structured_inquiry:inquiryMove.label,
   active_with_one_tier_sold_out:reviewAvailability.label,
   partnership_open_with_hospitality_sold_out:nascarAvailability.label,
   closed_lane_with_active_alternate:hollywoodAvailability.label,
