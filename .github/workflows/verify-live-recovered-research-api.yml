@@ -122,6 +122,7 @@ jobs:
             'R2026-090-SPACE-COAST-HOLIDAY-FOOD':'2026-12-01',
             'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
             'R2026-105-TC-HOLIDAY-FOOD':'2026-12-04',
+            'R2026-098-MELBOURNE-HOLIDAY-ART':'2026-12-05',
           }
           for cid,deadline in expected_deadlines.items():
               assert by_control[cid].get('deadline_date') == deadline, (cid,by_control[cid])
@@ -1136,7 +1137,12 @@ jobs:
           for cid in december_tail_b1:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B1', (cid,detail)
+              expected_followup_source=(
+                  '2026_DECEMBER_TAIL_EVENTENY_ROUTE_RECOVERY'
+                  if cid == 'R2026-098-MELBOURNE-HOLIDAY-ART'
+                  else '2026_DECEMBER_TAIL_REVERIFICATION_B1'
+              )
+              assert detail.get('followup_reverification_source') == expected_followup_source, (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
           delray_tree=by_control['R2026-085-DELRAY-TREE']
