@@ -1617,7 +1617,7 @@ jobs:
           assert wellington_parade_detail.get('operational_action_code') == 'EMAIL_DRAFT', wellington_parade_detail
           assert 'Info@CPBChamber.com' in str(wellington_parade_detail.get('contact_text') or ''), wellington_parade_detail
           assert 'parade-entry application' in str(wellington_parade_detail.get('operational_guard') or ''), wellington_parade_detail
-          assert wellington_parade_detail.get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP', wellington_parade_detail
+          assert wellington_parade_detail.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', wellington_parade_detail
           direct_apply_expectations={
               'R2026-030-DELRAY-KIDSFEST':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
               'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLScGo0oNQnO3-hOb_A1T4GAHMM5NRjKFrksxPrOCR5XkExVatg/viewform',
