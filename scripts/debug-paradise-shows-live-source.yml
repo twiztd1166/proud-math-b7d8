@@ -1608,11 +1608,16 @@ jobs:
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           melbourne=controls['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
-          assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
-          assert melbourne_detail.get('operational_action_code') == 'REVERIFY', melbourne_detail
-          assert melbourne_detail.get('action_url') == 'https://melbournemoose.com/about/', melbourne_detail
-          assert melbourne_detail.get('action_label') == 'Open organizer site to reverify', melbourne_detail
-          assert not melbourne_detail.get('route_verified_at'), melbourne_detail
+          assert melbourne.get('research_status') == 'CURRENT_REVERIFIED', melbourne
+          assert melbourne.get('date_confidence') == 'CURRENT_VERIFIED', melbourne
+          assert melbourne.get('route_type') == 'SPONSOR_VENDOR', melbourne
+          assert melbourne.get('price_text') == '$60 10×10 Sponsor Vendor booth (+ tax and fees)', melbourne
+          assert melbourne.get('deadline_date') == '2026-12-05', melbourne
+          assert melbourne_detail.get('operational_action_code') == 'APPLY', melbourne_detail
+          assert melbourne_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=53261', melbourne_detail
+          assert melbourne_detail.get('action_label') == 'Open Sponsor Vendor application', melbourne_detail
+          assert melbourne_detail.get('route_verified_at') == '2026-10-02', melbourne_detail
+          assert melbourne_detail.get('route_verification_source') == '2026_DECEMBER_TAIL_EVENTENY_ROUTE_RECOVERY', melbourne_detail
           wellington_parade_detail=controls['R2026-114-WELLINGTON-HOLIDAY-PARADE'].get('detail_data') or {}
           assert wellington_parade_detail.get('operational_action_code') == 'EMAIL_DRAFT', wellington_parade_detail
           assert 'Info@CPBChamber.com' in str(wellington_parade_detail.get('contact_text') or ''), wellington_parade_detail
@@ -1964,14 +1969,24 @@ jobs:
           assert 'APPLICATION LIVE' not in str(carifest_detail.get('booking_status') or '').upper(), carifest
           melbourne=controls['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
-          assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
-          assert melbourne_detail.get('official_source_url') == 'https://melbournemoose.com/about/', melbourne
-          assert str(melbourne_detail.get('schedule_status') or '').startswith('CURRENT SECONDARY VERIFIED'), melbourne
-          assert 'CURRENT MOOSE LODGE ORGANIZER SITE DOES NOT PUBLISH' in str(melbourne_detail.get('booking_status') or '').upper(), melbourne
+          assert melbourne.get('research_status') == 'CURRENT_REVERIFIED', melbourne
+          assert melbourne.get('date_confidence') == 'CURRENT_VERIFIED', melbourne
+          assert melbourne.get('event_start') == '2026-12-05', melbourne
+          assert melbourne.get('event_end') == '2026-12-05', melbourne
+          assert melbourne.get('route_type') == 'SPONSOR_VENDOR', melbourne
+          assert melbourne.get('price_text') == '$60 10×10 Sponsor Vendor booth (+ tax and fees)', melbourne
+          assert melbourne.get('deadline_date') == '2026-12-05', melbourne
+          assert melbourne_detail.get('official_source_url') == 'https://www.eventeny.com/events/holiday-art-craft-fair-32794/', melbourne
+          assert melbourne_detail.get('schedule_status') == 'CURRENT VERIFIED', melbourne
+          assert 'SPONSOR VENDOR APPLICATION ACTIVE' in str(melbourne_detail.get('booking_status') or '').upper(), melbourne
+          assert melbourne_detail.get('current_cost_status') == 'CURRENT OFFICIAL', melbourne
+          assert melbourne_detail.get('current_cost_text') == '$60 10×10 Sponsor Vendor booth (+ tax and fees)', melbourne
           assert melbourne_detail.get('current_source_checked_at') == '2026-10-02', melbourne
           assert melbourne_detail.get('followup_reverified_at') == '2026-10-02', melbourne
-          assert melbourne_detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B1', melbourne
-          assert 'FIRST-PARTY' in str(melbourne_detail.get('operational_guard') or '').upper(), melbourne
+          assert melbourne_detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_EVENTENY_ROUTE_RECOVERY', melbourne
+          assert melbourne_detail.get('route_verified_at') == '2026-10-02', melbourne
+          assert melbourne_detail.get('route_verification_source') == '2026_DECEMBER_TAIL_EVENTENY_ROUTE_RECOVERY', melbourne
+          assert 'DEC. 5 SPONSOR VENDOR APPLICATION' in str(melbourne_detail.get('operational_guard') or '').upper(), melbourne
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
