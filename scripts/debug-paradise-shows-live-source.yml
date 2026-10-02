@@ -898,7 +898,7 @@ jobs:
           for cid in email_route_ids:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-042-LAGOONFEST','R2026-053-DREAM-ASIA'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-042-LAGOONFEST','R2026-053-DREAM-ASIA','R2026-095-HOWARD-ALAN-DELRAY'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           route_verified={
               r.get('control_id') for r in visible_q4
