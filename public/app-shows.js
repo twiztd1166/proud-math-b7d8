@@ -154,13 +154,13 @@ function researchAvailability(row){
   const status=String(row?.detail_data?.booking_status||row?.research_status||'').trim();
   const normalized=status.toUpperCase();
   const verification=String(row?.research_status||'').toUpperCase();
-  const active=/ACTIVE|OPEN|AVAILABLE|PUBLISHED|REGISTRATION/.test(normalized);
-  const current=/CURRENT/.test(normalized);
-  const closure=/CLOSED|FILLED|SOLD OUT|WAITLIST/.test(normalized);
+  const active=/\b(?:ACTIVE|OPEN|AVAILABLE|PUBLISHED)\b|\b(?:APPLICATION|REGISTRATION|ROUTE|FORM|CONTRACT)\s+(?:IS\s+)?(?:ACTIVE|OPEN|AVAILABLE|LIVE|PUBLISHED)\b/.test(normalized);
+  const current=/\bCURRENT\b/.test(normalized);
+  const closure=/\b(?:CLOSED|FILLED|SOLD OUT|WAITLIST|INACTIVE)\b/.test(normalized);
   const closedParticipationLane=/(?:MERCHANT|INFORMATIONAL|VENDOR|EXHIBITOR)[^·]*(?:APPLICATIONS?|SPACES?)[^·]*(?:CLOSED|FILLED|SOLD OUT|WAITLIST)/.test(normalized);
   const alternateActive=/SPONSOR|PARTNER|PARTNERSHIP|ALTERNATE/.test(normalized)&&(active||current);
   if(verification.includes('NOT_REVERIFIED'))return {code:'REVERIFY',label:'REVERIFY FIRST',rank:5};
-  if(/LATE[- ]INVENTORY|LATE INQUIRY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
+  if(/LATE[- ]INVENTORY|LATE INQUIRY|LATE AVAILABILITY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(normalized))return {code:'LATE',label:'LATE-INVENTORY INQUIRY',rank:3};
   if(closure&&closedParticipationLane&&alternateActive)return {code:'ALTERNATE',label:'ALTERNATE ROUTE ONLY',rank:2};
   if(closure&&!active)return {code:'CLOSED',label:'CLOSED / EXCEPTION ONLY',rank:4};
   if(/FIRST[- ]COME|SPACE LIMITED|LIMITED|REMAINING/.test(normalized))return {code:'LIMITED',label:'LIMITED / CONFIRM NOW',rank:1};
