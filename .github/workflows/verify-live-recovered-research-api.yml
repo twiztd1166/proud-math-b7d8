@@ -179,6 +179,7 @@ jobs:
               'R2026-058-MIAMI-FOOD-WINE':'https://miamidadefoodwine.com/sponsors',
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
+              'R2026-068-FREEDOM-5K':'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs',
           }
           assert sum(
               1 for r in q4
@@ -191,7 +192,8 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
+              expected_route_date='2026-10-02' if cid == 'R2026-068-FREEDOM-5K' else '2026-10-01'
+              assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
               'R2026-042-LAGOONFEST',
@@ -295,6 +297,56 @@ jobs:
           assert tradition_detail.get('operational_action_code') == 'EMAIL_DRAFT', tradition_detail
           assert tradition_detail.get('schedule_status') == 'CURRENT VERIFIED', tradition_detail
           assert 'traditionmarket@hotmail.com' in str(tradition_detail.get('contact_text') or '').lower(), tradition_detail
+
+          late_inventory_reverified={
+              'R2026-004-FLORIDA-CREATIVES-PSL',
+              'R2026-010-FALL-DOWNTOWN-MELBOURNE',
+              'R2026-013-PUMPKINS-PALMS',
+              'R2026-043-BOYNTON-PIRATE',
+              'R2026-065-NATIVE-RHYTHMS',
+              'R2026-068-FREEDOM-5K',
+          }
+          for cid in late_inventory_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_LATE_INVENTORY_REVERIFICATION', (cid,detail)
+
+          florida_creatives=by_control['R2026-004-FLORIDA-CREATIVES-PSL'].get('detail_data') or {}
+          assert florida_creatives.get('operational_action_code') == 'EMAIL_DRAFT', florida_creatives
+          assert 'DEADLINE PASSED' in str(florida_creatives.get('booking_status') or '').upper(), florida_creatives
+          assert 'Vendors@BattleBrosEvents.com'.lower() in str(florida_creatives.get('contact_text') or '').lower(), florida_creatives
+
+          pumpkins_detail=by_control['R2026-013-PUMPKINS-PALMS'].get('detail_data') or {}
+          assert pumpkins_detail.get('operational_action_code') == 'EMAIL_DRAFT', pumpkins_detail
+          assert '$60' in str(pumpkins_detail.get('current_cost_text') or ''), pumpkins_detail
+          assert '$25' in str(pumpkins_detail.get('current_cost_text') or ''), pumpkins_detail
+          assert 'palmbayfarmersmarket@gmail.com' in str(pumpkins_detail.get('contact_text') or '').lower(), pumpkins_detail
+
+          downtown_fall=by_control['R2026-010-FALL-DOWNTOWN-MELBOURNE'].get('detail_data') or {}
+          assert downtown_fall.get('operational_action_code') == 'EMAIL_DRAFT', downtown_fall
+          assert 'INTEREST FORM CLOSED' in str(downtown_fall.get('booking_status') or '').upper(), downtown_fall
+          assert 'events@downtownmelbourne.com' in str(downtown_fall.get('contact_text') or '').lower(), downtown_fall
+
+          boynton_pirate=by_control['R2026-043-BOYNTON-PIRATE'].get('detail_data') or {}
+          assert boynton_pirate.get('operational_action_code') == 'EMAIL_DRAFT', boynton_pirate
+          assert not boynton_pirate.get('action_url'), boynton_pirate
+          assert 'events@bbfl.us' in str(boynton_pirate.get('contact_text') or '').lower(), boynton_pirate
+          assert '561-742-6024' in str(boynton_pirate.get('contact_text') or ''), boynton_pirate
+
+          native_rhythms=by_control['R2026-065-NATIVE-RHYTHMS'].get('detail_data') or {}
+          assert native_rhythms.get('operational_action_code') == 'EMAIL_DRAFT', native_rhythms
+          assert 'SPONSORSHIP DRIVE CURRENTLY UNDERWAY' in str(native_rhythms.get('booking_status') or '').upper(), native_rhythms
+          assert 'BOOTH RESERVATION DEADLINE PASSED' in str(native_rhythms.get('booking_status') or '').upper(), native_rhythms
+          assert 'claire@turtlemoundflutes.com' in str(native_rhythms.get('contact_text') or '').lower(), native_rhythms
+
+          freedom=by_control['R2026-068-FREEDOM-5K'].get('detail_data') or {}
+          assert freedom.get('operational_action_code') == 'OPEN_INQUIRY', freedom
+          assert freedom.get('action_url') == 'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs', freedom
+          assert freedom.get('action_label') == 'Open sponsor contact form', freedom
+          assert freedom.get('route_verified_at') == '2026-10-02', freedom
+          assert freedom.get('route_verification_source') == '2026_LATE_INVENTORY_REVERIFICATION', freedom
+          assert 'ONLINE SPONSORSHIP REGISTRATION CLOSED FOR ALL SIX TIERS' in str(freedom.get('booking_status') or '').upper(), freedom
 
           nascar_detail=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
