@@ -146,10 +146,14 @@ if(/\$53\.50|Treat as a historical repeat|not net-new/i.test(pslDraft.body))thro
 
 const buckler=byId.get('R2026-094-BUCKLER-WPB-DEC');
 if(!buckler)throw new Error('Buckler December regression fixture missing');
-const bucklerCall=sandbox.outreach.researchCallScript(buckler);
-if(!bucklerCall)throw new Error('Buckler December should use phone-only call script');
-if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerCall.script))throw new Error('Buckler call script lost eligibility gap');
-if(!/Please confirm the current price\/package/i.test(bucklerCall.script))throw new Error('Buckler call script lost price gap');
+if(String(buckler?.detail_data?.operational_action_code||'')!=='EMAIL_THEN_APPLY')throw new Error('Buckler December should be email-then-apply');
+if(String(buckler?.detail_data?.action_url||'')!=='https://buckler.wufoo.com/forms/z15560u80epu88x/')throw new Error('Buckler December lost exact craft-fair application');
+const bucklerDraft=sandbox.outreach.researchEmailDraft(buckler);
+if(!bucklerDraft)throw new Error('Buckler December should use verified email');
+if(sandbox.outreach.researchCallScript(buckler))throw new Error('Buckler December should not fall back to a call script when verified email exists');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerDraft.body))throw new Error('Buckler December lost required Paradise eligibility confirmation');
+if(/Please confirm the current price\/package/i.test(bucklerDraft.body))throw new Error('Buckler December repeats verified current price');
+if(!/published application path/i.test(bucklerDraft.body))throw new Error('Buckler December lost email-then-apply closeout');
 
 console.log({
   outreach_contract:'PASS',
