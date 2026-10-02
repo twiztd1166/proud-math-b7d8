@@ -1,3 +1,5 @@
+[Reading 4464 lines from start (total: 4464 lines, 0 remaining)]
+
 name: Paradise Shows public live smoke
 
 on:
@@ -869,6 +871,7 @@ jobs:
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
               'R2026-058-MIAMI-FOOD-WINE':'https://miamidadefoodwine.com/sponsors',
+              'R2026-101-MUSIC-MANSION':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-068-FREEDOM-5K':'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs',
@@ -885,7 +888,7 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K','R2026-093-PB-HOLIDAY-BOAT'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K','R2026-093-PB-HOLIDAY-BOAT','R2026-101-MUSIC-MANSION','R2026-103-MARTIN-WINTER-FEST'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -946,6 +949,8 @@ jobs:
                   expected_route_source='2026_OCT17_REVERIFICATION'
               elif cid in {'R2026-029-RPB-ROCK-N-FALL','R2026-031-MALABAR-FALLFEST'}:
                   expected_route_source='2026_OCT22_24_REVERIFICATION'
+              elif cid == 'R2026-100-WESTON-RUN':
+                  expected_route_source='2026_DECEMBER_TAIL_REVERIFICATION_B2'
               else:
                   expected_route_source='2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
@@ -1781,10 +1786,90 @@ jobs:
           assert 'marketing@evanbermanproductions.com' in str(wpb_beer_detail.get('contact_text') or '').lower(), wpb_beer_detail
           assert 'NOT PUBLICLY POSTED' in str(wpb_beer_detail.get('booking_status') or '').upper(), wpb_beer_detail
 
+          december_tail_b2={
+              'R2026-100-WESTON-RUN',
+              'R2026-101-MUSIC-MANSION',
+              'R2026-102-PSL-RIVER-NIGHTS-DEC',
+              'R2026-103-MARTIN-WINTER-FEST',
+              'R2026-104-COCOA-TREE',
+          }
+          for cid in december_tail_b2:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B2', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          weston=controls['R2026-100-WESTON-RUN']
+          weston_detail=weston.get('detail_data') or {}
+          assert weston.get('event_start') == '2026-12-06', weston
+          assert weston.get('deadline_date') == '2026-11-15', weston
+          assert weston_detail.get('current_source_checked_at') == '2026-10-01', weston_detail
+          assert weston_detail.get('operational_action_code') == 'APPLY', weston_detail
+          assert weston_detail.get('action_url') == 'https://form.jotform.com/241377280948163', weston_detail
+          assert weston_detail.get('action_label') == 'Open sponsorship / booth application', weston_detail
+          assert weston_detail.get('route_verified_at') == '2026-10-02', weston_detail
+          assert weston_detail.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B2', weston_detail
+          assert '$500' in str(weston_detail.get('current_cost_text') or ''), weston_detail
+          assert 'COI' in str(weston_detail.get('commitment_terms_text') or '').upper() or 'INSURANCE' in str(weston_detail.get('commitment_terms_text') or '').upper(), weston_detail
+
+          music=controls['R2026-101-MUSIC-MANSION']
+          music_detail=music.get('detail_data') or {}
+          assert music.get('event_start') is None, music
+          assert music.get('estimated_sort_date') == '2026-12-06', music
+          assert music.get('date_confidence') == 'ESTIMATED', music
+          assert music_detail.get('current_source_checked_at') == '2026-10-02', music_detail
+          assert music_detail.get('operational_action_code') == 'OPEN_INQUIRY', music_detail
+          assert music_detail.get('action_url') == 'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages', music_detail
+          assert '$250' in str(music_detail.get('current_cost_text') or ''), music_detail
+          assert 'EXACT DECEMBER OCCURRENCE DATE NOT POSTED' in str(music_detail.get('booking_status') or '').upper(), music_detail
+
+          psl_dec=controls['R2026-102-PSL-RIVER-NIGHTS-DEC']
+          psl_dec_detail=psl_dec.get('detail_data') or {}
+          assert psl_dec.get('event_start') == '2026-12-10', psl_dec
+          assert psl_dec_detail.get('current_source_checked_at') == '2026-10-01', psl_dec_detail
+          assert psl_dec_detail.get('operational_action_code') == 'APPLY', psl_dec_detail
+          assert psl_dec_detail.get('action_url') == 'https://form.jotform.com/pslcommunications/special-events-vendor-application', psl_dec_detail
+          assert psl_dec_detail.get('route_verified_at') == '2026-10-02', psl_dec_detail
+          assert psl_dec_detail.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B2', psl_dec_detail
+          assert 'BUSINESS-COMMERCIAL' in str(psl_dec_detail.get('booking_status') or '').upper(), psl_dec_detail
+
+          martin_winter=controls['R2026-103-MARTIN-WINTER-FEST']
+          martin_winter_detail=martin_winter.get('detail_data') or {}
+          assert martin_winter.get('event_start') == '2026-12-11', martin_winter
+          assert martin_winter_detail.get('current_source_checked_at') == '2026-10-02', martin_winter_detail
+          assert martin_winter_detail.get('operational_action_code') == 'OPEN_INQUIRY', martin_winter_detail
+          assert martin_winter_detail.get('action_url') == 'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages', martin_winter_detail
+          assert '$250' in str(martin_winter_detail.get('current_cost_text') or ''), martin_winter_detail
+          assert 'DEC. 11' in str(martin_winter_detail.get('booking_status') or '').upper(), martin_winter_detail
+
+          cocoa_tree=controls['R2026-104-COCOA-TREE']
+          cocoa_tree_detail=cocoa_tree.get('detail_data') or {}
+          assert cocoa_tree.get('event_start') == '2026-12-11', cocoa_tree
+          assert cocoa_tree_detail.get('current_source_checked_at') == '2026-10-02', cocoa_tree_detail
+          assert cocoa_tree_detail.get('operational_action_code') == 'EMAIL_DRAFT', cocoa_tree_detail
+          assert not cocoa_tree_detail.get('action_url'), cocoa_tree_detail
+          assert 'nharris@cocoafl.gov' in str(cocoa_tree_detail.get('contact_text') or '').lower(), cocoa_tree_detail
+          assert 'NOT PUBLISHED' in str(cocoa_tree_detail.get('booking_status') or '').upper(), cocoa_tree_detail
+
           assert sum(
               1 for r in research
               if (r.get('detail_data') or {}).get('followup_reverified_at') == '2026-10-02'
-          ) >= 102
+          ) >= 107
+          pending_followup={
+              r.get('control_id') for r in research
+              if (r.get('detail_data') or {}).get('followup_reverified_at') != '2026-10-02'
+          }
+          assert pending_followup == {
+              'R2026-105-TC-HOLIDAY-FOOD',
+              'R2026-106-WELLINGTON-BOAT',
+              'R2026-108-VERO-OUTLETS',
+              'R2026-109-DELRAY-HOLIDAY-PARADE',
+              'R2026-110-COCOA-ROCKLEDGE-PARADE',
+              'R2026-111-WINTERFEST-BOAT',
+              'R2026-112-SUPERCAR-SAT-DEC',
+              'R2026-114-WELLINGTON-HOLIDAY-PARADE',
+              'R2026-115-SNOW-PLACE-JUPITER',
+          }, pending_followup
 
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
@@ -4379,3 +4464,5 @@ jobs:
           grep -q 'Why unresolved:' /tmp/unlinked.html
 
           echo "Live browser rendered #shows, #current, #unlinked, #show/LIFE-009, and LP-source-only year evidence with governed semantics and no uncaught JavaScript errors."
+
+[executed on device: Anthonys-Mac-Pro-53629872.local (d221c9a0-90c4-4f1d-9341-6c63b56cadac)]
