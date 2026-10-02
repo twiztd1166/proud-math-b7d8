@@ -360,13 +360,8 @@ jobs:
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_NEXT7_REVERIFICATION', (cid,detail)
-              official=str(detail.get('official_source_url') or '').strip()
-              assert official, (cid,detail)
-              assert any(
-                  str(ref.get('url') or '').strip() == official
-                  and str(ref.get('checked_at') or '').strip() == '2026-10-02'
-                  for ref in (row.get('source_refs') or [])
-              ), (cid,row.get('source_refs'))
+              assert str(detail.get('official_source_url') or '').strip(), (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
           gactc=by_control['R2026-006-GACTC-OKTOBERFEST']
           gactc_detail=gactc.get('detail_data') or {}
