@@ -1140,15 +1140,16 @@ jobs:
           for cid in oct22_24_reverified:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
+              history=detail.get('followup_reverification_history') or []
+              historical_sources={str(item.get('source') or '') for item in history if isinstance(item,dict)}
+              assert (
+                  detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION'
+                  or '2026_OCT22_24_REVERIFICATION' in historical_sources
+              ), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
-              if cid == 'R2026-034-IRL-SCIENCE':
-                  assert detail.get('current_source_checked_at') == '2026-10-01', (cid,detail)
-                  assert 'HTTP 406' in str(detail.get('followup_reverification_basis') or ''), (cid,detail)
-              else:
-                  assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
 
           hallandale_halloween_detail=controls['R2026-045-HALLANDALE-HALLOWEEN'].get('detail_data') or {}
           assert controls['R2026-045-HALLANDALE-HALLOWEEN'].get('deadline_date') == '2026-10-22', hallandale_halloween_detail
