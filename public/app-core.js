@@ -78,7 +78,13 @@ function researchExternalHistoryText(value){
   const participation=text.match(/^Paradise\s+(?:definitively\s+)?paid and enrolled for\s+(.+?)\s+in\s+(\d{4})\b/i);
   if(participation)return `Paradise participated in ${participation[1]} in ${participation[2]}`;
   text=text.split(/\b(?:Treat as|Do not treat|not net-new)\b/i)[0].trim();
-  text=text.replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'').replace(/\s*[·|/]\s*$/,'').replace(/\s{2,}/g,' ').trim();
+  text=text
+    .replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'')
+    .replace(/\b(?:in|via|under)\s*,\s*/gi,', ')
+    .replace(/\s+,/g,',')
+    .replace(/\s*[·|/]\s*$/,'')
+    .replace(/\s{2,}/g,' ')
+    .trim();
   return text.replace(/[;,.\s]+$/,'').trim();
 }
 function researchExternalFactText(value){
