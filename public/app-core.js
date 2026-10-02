@@ -171,8 +171,16 @@ function researchOutreachProfile(row){
   const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|EXHIBIT|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
 
   const statusText=String(d.booking_status||row?.research_status||'').toUpperCase();
-  const late=/DEADLINE PASSED|LATE[- ]INVENTORY|LATE INQUIRY|APPLICATIONS? CLOSED|REGISTRATION DEADLINE PASSED/.test(statusText);
-  const availabilityUncertain=boundedException||!booking||booking.confirm||/WAITLIST|SOLD OUT|CLOSED|TO CONFIRM|INQUIRY|LIMITED/.test(statusText);
+  const actionCode=String(d.operational_action_code||'').trim().toUpperCase();
+  const availability=typeof researchAvailability==='function'?researchAvailability(row):null;
+  const availabilityCode=String(availability?.code||'').toUpperCase();
+  const contactThenApply=['EMAIL_THEN_APPLY','CALL_THEN_APPLY'].includes(actionCode);
+  const late=availabilityCode
+    ?availabilityCode==='LATE'
+    :/LATE[- ]INVENTORY|LATE INQUIRY|LATE AVAILABILITY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(statusText);
+  const availabilityUncertain=boundedException||contactThenApply||!booking||booking.confirm||
+    ['LATE','CONFIRM','LIMITED','ALTERNATE','CLOSED','REVERIFY'].includes(availabilityCode)||
+    /WAITLIST|SOLD OUT|CLOSED|TO CONFIRM|MUST BE CONFIRMED|INQUIRY|LIMITED|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INACTIVE/.test(statusText);
   return {
     event,range,route,person,email,phone,boundedException,late,availabilityUncertain,
     facts:facts.slice(0,7),
