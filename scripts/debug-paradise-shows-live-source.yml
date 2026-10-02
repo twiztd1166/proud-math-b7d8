@@ -835,6 +835,7 @@ jobs:
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-068-FREEDOM-5K':'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs',
+              'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
           }
           assert sum(
               1 for r in visible_q4
@@ -847,7 +848,7 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid == 'R2026-068-FREEDOM-5K' else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-068-FREEDOM-5K','R2026-017-CARS-COFFEE-OCT'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -1045,6 +1046,90 @@ jobs:
           assert 'GOOGLE SIGN-IN REQUIRED' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
           assert 'google sign-in' in str(grace_detail.get('operational_guard') or '').lower(), grace_detail
           assert 'google sign-in' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+
+          next14_reverified={
+              'R2026-008-HOLLYWOOD-HISPANIC',
+              'R2026-009-SABOR-FEST',
+              'R2026-011-DEERFIELD-FALL',
+              'R2026-014-WAG-O-WEEN',
+              'R2026-015-BUCKLER-WPB-OCT',
+              'R2026-016-MIAMI-CARNIVAL',
+              'R2026-017-CARS-COFFEE-OCT',
+              'R2026-018-JUPITER-HARBOURFEST',
+          }
+          for cid in next14_reverified:
+              row=controls[cid]
+              detail=row.get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              assert str(detail.get('official_source_url') or '').strip(), (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          wag=controls['R2026-014-WAG-O-WEEN']
+          wag_detail=wag.get('detail_data') or {}
+          assert wag_detail.get('operational_action_code') == 'APPLY', wag_detail
+          assert wag_detail.get('action_url') == 'https://tinyurl.com/WoW26Signup', wag_detail
+          assert wag_detail.get('action_label') == 'Open business booth sign-up', wag_detail
+          assert '$45' in str(wag_detail.get('current_cost_text') or ''), wag_detail
+
+          sabor=controls['R2026-009-SABOR-FEST']
+          sabor_detail=sabor.get('detail_data') or {}
+          assert sabor_detail.get('operational_action_code') == 'APPLY', sabor_detail
+          assert sabor_detail.get('action_url') == 'https://www.miamilakes-fl.gov/sabor-fest-2026-vendor-registration-form/', sabor_detail
+          assert sabor_detail.get('action_label') == 'Open vendor registration form', sabor_detail
+          assert '$100' in str(sabor_detail.get('current_cost_text') or ''), sabor_detail
+
+          deerfield=controls['R2026-011-DEERFIELD-FALL']
+          deerfield_detail=deerfield.get('detail_data') or {}
+          assert deerfield_detail.get('operational_action_code') == 'EMAIL_DRAFT', deerfield_detail
+          assert 'dfbspecialevents@dfb.city' in str(deerfield_detail.get('contact_text') or '').lower(), deerfield_detail
+          assert deerfield_detail.get('operational_guard'), deerfield_detail
+
+          buckler=controls['R2026-015-BUCKLER-WPB-OCT']
+          buckler_detail=buckler.get('detail_data') or {}
+          assert buckler_detail.get('operational_action_code') == 'EMAIL_DRAFT', buckler_detail
+          assert 'bucklershows@yahoo.com' in str(buckler_detail.get('contact_text') or '').lower(), buckler_detail
+          assert '$400' in str(buckler_detail.get('current_cost_text') or ''), buckler_detail
+          assert '$45' in str(buckler_detail.get('current_cost_text') or ''), buckler_detail
+          assert 'CALL OR EMAIL FOR APPLICATION' in str(buckler_detail.get('booking_status') or '').upper(), buckler_detail
+
+          hollywood=controls['R2026-008-HOLLYWOOD-HISPANIC']
+          hollywood_detail=hollywood.get('detail_data') or {}
+          assert hollywood_detail.get('operational_action_code') == 'EMAIL_DRAFT', hollywood_detail
+          assert 'MERCHANT/INFORMATIONAL APPLICATIONS CLOSED' in str(hollywood_detail.get('booking_status') or '').upper(), hollywood_detail
+          assert '$500' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+          assert '$1,000' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+          assert '$2,500' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+          assert '2:00 PM' in str(hollywood_detail.get('schedule_text') or ''), hollywood_detail
+          assert '3:00 PM' in str(hollywood_detail.get('schedule_text') or ''), hollywood_detail
+
+          cars=controls['R2026-017-CARS-COFFEE-OCT']
+          cars_detail=cars.get('detail_data') or {}
+          assert cars_detail.get('operational_action_code') == 'OPEN_INQUIRY', cars_detail
+          assert cars_detail.get('action_url') == 'https://www.carsandcoffeepb.com/sponsors', cars_detail
+          assert cars_detail.get('action_label') == 'Open sponsor/vendor inquiry form', cars_detail
+          assert '48 HOURS' in str(cars_detail.get('booking_status') or '').upper(), cars_detail
+
+          miami=controls['R2026-016-MIAMI-CARNIVAL']
+          miami_detail=miami.get('detail_data') or {}
+          assert miami_detail.get('operational_action_code') == 'EMAIL_DRAFT', miami_detail
+          assert 'CENTRAL BROWARD PARK' in str(miami_detail.get('venue_text') or '').upper(), miami_detail
+          assert 'MIAMI DADE FAIR' in str(miami_detail.get('operational_guard') or '').upper(), miami_detail
+          assert '$4,500' in str(miami_detail.get('current_cost_text') or ''), miami_detail
+          assert '$5,500' in str(miami_detail.get('current_cost_text') or ''), miami_detail
+          assert 'VERIFY BEFORE COMMITMENT' in str(miami_detail.get('current_cost_status') or '').upper(), miami_detail
+
+          jupiter=controls['R2026-018-JUPITER-HARBOURFEST']
+          jupiter_detail=jupiter.get('detail_data') or {}
+          assert jupiter_detail.get('operational_action_code') == 'APPLY', jupiter_detail
+          assert jupiter_detail.get('action_url') == 'https://eventhub.net/events/2026-Jupiter-HarbourFest--presented-by-Jupiter-Medical-Center_7453', jupiter_detail
+          assert jupiter_detail.get('action_label') == 'Open exhibitor registration', jupiter_detail
+          assert '$850' in str(jupiter_detail.get('current_cost_text') or ''), jupiter_detail
+          assert 'REGISTRATION ACTIVE' in str(jupiter_detail.get('booking_status') or '').upper(), jupiter_detail
+          assert 'NON-REFUNDABLE' in str(jupiter_detail.get('commitment_status') or '').upper(), jupiter_detail
 
           nascar_detail=controls['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
