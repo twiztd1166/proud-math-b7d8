@@ -856,8 +856,11 @@ jobs:
           assert miami_carnival_row.get('deadline_date') == '2026-09-30', miami_carnival_row
           assert miami_carnival.get('operational_action_code') == 'EMAIL_DRAFT', miami_carnival
           assert not miami_carnival.get('action_url'), miami_carnival
-          assert '$5,500' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
-          assert '$4,500' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
+          assert '$2,500' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
+          assert '$4,000' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
+          assert miami_carnival.get('corporate_vendor_form_url') == 'https://miamicarnival.org/wp-content/uploads/2026/05/2026-Carnival-Corporate-Vendor-Application.pdf', miami_carnival
+          assert miami_carnival.get('corrective_reverification_source') == '2026_CURRENT_CONTRACT_PRICE_CORRECTION_CORRECTED', miami_carnival
+          assert 'SUPERSEDED MARCH FORM' in str(miami_carnival.get('corrective_reverification_basis') or '').upper(), miami_carnival
           assert 'SEP. 30 BOOTH-SALE CUTOFF PASSED' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
           assert 'LATE-INVENTORY EMAIL INQUIRY ONLY' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
           assert 'ACTIVATION VENUE REQUIRES WRITTEN CONFIRMATION' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
