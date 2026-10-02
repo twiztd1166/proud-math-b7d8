@@ -313,7 +313,6 @@ function researchNextStepSection(){
   const actionable=urgencyByRow.filter(item=>item.urgency.rank<=3).map(item=>item.row);
   const queue=actionable.length?actionable:rows;
   const visible=researchNextStepsExpanded?queue:queue.slice(0,10);
-  const hiddenActionable=Math.max(0,actionable.length-visible.length);
   const later=Math.max(0,rows.length-actionable.length);
   const toggle=actionable.length>10
     ?`<button type="button" class="btn secondary" id="researchNextStepsToggle">${researchNextStepsExpanded?'Show top 10':`Show all ${actionable.length} actionable`}</button>`
