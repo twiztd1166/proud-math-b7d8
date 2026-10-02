@@ -175,6 +175,8 @@ function researchOutreachProfile(row){
   const availability=typeof researchAvailability==='function'?researchAvailability(row):null;
   const availabilityCode=String(availability?.code||'').toUpperCase();
   const contactThenApply=['EMAIL_THEN_APPLY','CALL_THEN_APPLY'].includes(actionCode);
+  const alternate=availabilityCode==='ALTERNATE';
+  const outreachRoute=alternate&&/SPONSOR|PARTNER/.test(statusText)?'sponsorship opportunity':route;
   const late=availabilityCode
     ?availabilityCode==='LATE'
     :/LATE[- ]INVENTORY|LATE INQUIRY|LATE AVAILABILITY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(statusText);
@@ -182,7 +184,7 @@ function researchOutreachProfile(row){
     ['LATE','CONFIRM','LIMITED','ALTERNATE','CLOSED','REVERIFY'].includes(availabilityCode)||
     /WAITLIST|SOLD OUT|CLOSED|TO CONFIRM|MUST BE CONFIRMED|INQUIRY|LIMITED|NOT (YET )?PUBLISHED|NOT ESTABLISHED|INACTIVE/.test(statusText);
   return {
-    event,range,route,person,email,phone,boundedException,late,availabilityUncertain,
+    event,range,route:outreachRoute,person,email,phone,boundedException,late,alternate,availabilityUncertain,
     facts:facts.slice(0,7),
     questions:questions.slice(0,8),
     hasApplicationPath,
@@ -195,9 +197,11 @@ function researchEmailDraft(row){
   const subject=`Paradise Exteriors — ${profile.event} — ${profile.late?'late availability':profile.route.replace(/ opportunity$/,'')} inquiry`;
   const availabilityLine=profile.late
     ?'We understand the standard deadline may have passed. We are checking whether any late inventory or alternate participation option remains available.'
-    :(profile.availabilityUncertain
-      ?`We are interested in the ${profile.route} and want to confirm the current availability before moving forward.`
-      :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`);
+    :(profile.alternate
+      ?`We understand the standard participation lane is closed. We are interested in the currently active ${profile.route} and want to confirm that alternate route before moving forward.`
+      :(profile.availabilityUncertain
+        ?`We are interested in the ${profile.route} and want to confirm the current availability before moving forward.`
+        :`We are interested in the ${profile.route}. Our current research indicates the opportunity is active, and we would like to move toward the correct next step.`));
   const factLines=profile.facts
     .filter(f=>!f.confirm&&f.label!=='Current booking status')
     .map(f=>`• ${f.label}: ${researchExternalFactText(f.text)}`);
@@ -239,9 +243,11 @@ function researchCallScript(row){
   const askFor=profile.person?`Ask for ${profile.person} if needed.\n\n`:'';
   const opening=profile.late
     ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We understand the standard deadline may have passed, and I’m checking whether any late inventory or alternate participation option is still available.`
-    :(profile.availabilityUncertain
-      ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}, and I’d like to confirm the current availability before we move forward.`
-      :`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}. Our notes show the opportunity is active, and I’d like to confirm the next step.`);
+    :(profile.alternate
+      ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We understand the standard participation lane is closed. We’re interested in the currently active ${profile.route}, and I’d like to confirm that alternate route before we move forward.`
+      :(profile.availabilityUncertain
+        ?`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}, and I’d like to confirm the current availability before we move forward.`
+        :`Hi, I’m calling on behalf of Paradise Exteriors about ${profile.event} (${profile.range}). We’re interested in the ${profile.route}. Our notes show the opportunity is active, and I’d like to confirm the next step.`));
   const factLines=profile.facts.map(f=>`• ${f.label}: ${f.text}${f.confirm?' (needs confirmation)':''}`);
   const questionLines=profile.questions.map(q=>`• ${q}`);
   const script=[
