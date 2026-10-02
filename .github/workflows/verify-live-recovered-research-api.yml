@@ -167,6 +167,7 @@ jobs:
               'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
               'R2026-003-PSL-OKTOBERFEST',
               'R2026-037-WEST-BOYNTON-SENIOR',
+              'R2026-039-SPACE-COAST-STATE-FAIR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
               'R2026-062-SENIOR-DELRAY',
@@ -194,7 +195,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-068-FREEDOM-5K'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -210,7 +211,8 @@ jobs:
           for cid in email_route_ids:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
-              assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
+              expected_route_date='2026-10-02' if cid == 'R2026-042-LAGOONFEST' else '2026-10-01'
+              assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           route_verified={
               r.get('control_id') for r in q4
               if str((r.get('detail_data') or {}).get('route_verified_at') or '').strip()
@@ -618,6 +620,101 @@ jobs:
           assert '$450' in str(west_boynton.get('current_cost_text') or ''), west_boynton
           assert '$1,195' in str(west_boynton.get('current_cost_text') or ''), west_boynton
           assert 'APPLY AFTER CONFIRMATION' in str(west_boynton.get('next_action') or '').upper(), west_boynton
+
+          oct28_nov1_reverified={
+              'R2026-038-FLIBS',
+              'R2026-039-SPACE-COAST-STATE-FAIR',
+              'R2026-040-VERO-DOWNTOWN-FRIDAY',
+              'R2026-041-PSL-FALL-FUN',
+              'R2026-042-LAGOONFEST',
+              'R2026-044-WICKED-MANORS',
+              'R2026-047-COCOA-FALL',
+              'R2026-048-VERO-HALLOWEEN',
+          }
+          for cid in oct28_nov1_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_OCT28_NOV1_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          oct28_nov1_direct={
+              'R2026-038-FLIBS',
+              'R2026-039-SPACE-COAST-STATE-FAIR',
+              'R2026-040-VERO-DOWNTOWN-FRIDAY',
+              'R2026-042-LAGOONFEST',
+              'R2026-044-WICKED-MANORS',
+              'R2026-048-VERO-HALLOWEEN',
+          }
+          for cid in oct28_nov1_direct:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_OCT28_NOV1_REVERIFICATION', (cid,detail)
+
+          flibs=by_control['R2026-038-FLIBS'].get('detail_data') or {}
+          assert flibs.get('operational_action_code') == 'OPEN_INQUIRY', flibs
+          assert flibs.get('action_url') == 'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e', flibs
+          assert flibs.get('action_label') == 'Open exhibitor-space inquiry', flibs
+          assert 'WAITLIST / SPACE AS AVAILABLE' in str(flibs.get('booking_status') or '').upper(), flibs
+
+          space_coast=by_control['R2026-039-SPACE-COAST-STATE-FAIR'].get('detail_data') or {}
+          assert space_coast.get('operational_action_code') == 'EMAIL_THEN_APPLY', space_coast
+          assert space_coast.get('action_url') == 'https://spacecoaststatefair.com/wp-content/uploads/2018/09/Fair-Vendor-Applications-2-Fair-Vendor-Form.pdf', space_coast
+          assert space_coast.get('action_label') == 'Open vendor application', space_coast
+          assert 'APPLY AFTER CONFIRMATION' in str(space_coast.get('next_action') or '').upper(), space_coast
+          assert 'RATE/SPACE TO CONFIRM' in str(space_coast.get('booking_status') or '').upper(), space_coast
+          assert 'RATE' in str(space_coast.get('operational_guard') or '').upper(), space_coast
+          assert 'REMAINING SPACE' in str(space_coast.get('operational_guard') or '').upper(), space_coast
+
+          vero_friday=by_control['R2026-040-VERO-DOWNTOWN-FRIDAY'].get('detail_data') or {}
+          assert vero_friday.get('operational_action_code') == 'CALL_THEN_APPLY', vero_friday
+          assert '$100' in str(vero_friday.get('current_cost_text') or ''), vero_friday
+          assert '$65' in str(vero_friday.get('current_cost_text') or ''), vero_friday
+          assert 'DEADLINE LANGUAGE CONFLICT' in str(vero_friday.get('booking_status') or '').upper(), vero_friday
+          assert 'OCT. 6' in str(vero_friday.get('followup_reverification_basis') or '').upper(), vero_friday
+          assert '7TH' in str(vero_friday.get('followup_reverification_basis') or '').upper(), vero_friday
+
+          psl_fall=by_control['R2026-041-PSL-FALL-FUN'].get('detail_data') or {}
+          assert psl_fall.get('operational_action_code') == 'EMAIL_DRAFT', psl_fall
+          assert not psl_fall.get('action_url'), psl_fall
+          assert 'specialevents@cityofpsl.com' in str(psl_fall.get('contact_text') or '').lower(), psl_fall
+          assert not str(psl_fall.get('route_verified_at') or '').strip(), psl_fall
+
+          lagoon=by_control['R2026-042-LAGOONFEST']
+          lagoon_detail=lagoon.get('detail_data') or {}
+          assert lagoon_detail.get('operational_action_code') == 'EMAIL_DRAFT', lagoon_detail
+          assert lagoon_detail.get('action_url') == 'https://www.thepalmbeaches.com/wp-content/uploads/2026-LagoonFest-Sponsorship-Deck.pdf', lagoon_detail
+          assert lagoon_detail.get('action_label') == 'Open 2026 sponsor deck', lagoon_detail
+          assert '$1,500' in str(lagoon_detail.get('current_cost_text') or ''), lagoon_detail
+          assert '$5,000' in str(lagoon_detail.get('current_cost_text') or ''), lagoon_detail
+          assert 'FLORIDA WINDOW & DOOR' in str(lagoon_detail.get('booking_status') or '').upper(), lagoon_detail
+          assert 'CATEGORY AVAILABILITY/EXCLUSIVITY' in str(lagoon_detail.get('operational_guard') or '').upper(), lagoon_detail
+          assert '7,500+' in str(lagoon_detail.get('attendance_text') or ''), lagoon_detail
+          assert '2026 sponsor tiers' in str(lagoon.get('price_text') or ''), lagoon
+
+          wicked=by_control['R2026-044-WICKED-MANORS']
+          wicked_detail=wicked.get('detail_data') or {}
+          assert wicked_detail.get('operational_action_code') == 'EMAIL_DRAFT', wicked_detail
+          assert wicked_detail.get('action_url') == 'https://wickedmanors.org/wp-content/uploads/2026/08/WM-2026-Brand-Partnership-Deck.pdf', wicked_detail
+          assert wicked_detail.get('action_label') == 'Open 2026 partnership deck', wicked_detail
+          assert wicked_detail.get('schedule_text') == 'Oct. 31, 2026 · 5:00 PM–11:00 PM', wicked_detail
+          assert '$25,000' in str(wicked_detail.get('current_cost_text') or ''), wicked_detail
+          assert '$1,500' in str(wicked_detail.get('current_cost_text') or ''), wicked_detail
+          assert 'STALE 2025' in str(wicked_detail.get('operational_guard') or '').upper(), wicked_detail
+          assert wicked.get('price_text') == '2026 corporate partnerships: $1,500–$25,000', wicked
+
+          cocoa_fall=by_control['R2026-047-COCOA-FALL'].get('detail_data') or {}
+          assert cocoa_fall.get('operational_action_code') == 'EMAIL_DRAFT', cocoa_fall
+          assert not cocoa_fall.get('action_url'), cocoa_fall
+          assert 'PARADISE BUSINESS/VENDOR/SPONSOR ROUTE NOT PUBLISHED' in str(cocoa_fall.get('booking_status') or '').upper(), cocoa_fall
+          assert not str(cocoa_fall.get('route_verified_at') or '').strip(), cocoa_fall
+
+          vero_halloween=by_control['R2026-048-VERO-HALLOWEEN'].get('detail_data') or {}
+          assert vero_halloween.get('operational_action_code') == 'CALL_SCRIPT', vero_halloween
+          assert not vero_halloween.get('action_url'), vero_halloween
+          assert 'NO ENTRY FEE' in str(vero_halloween.get('current_cost_text') or '').upper(), vero_halloween
+          assert 'FREE BUSINESS PARADE PARTICIPATION' in str(vero_halloween.get('booking_status') or '').upper(), vero_halloween
+          assert 'FREE ADVERTISING' in str(vero_halloween.get('followup_reverification_basis') or '').upper(), vero_halloween
 
           wag=by_control['R2026-014-WAG-O-WEEN'].get('detail_data') or {}
           assert wag.get('operational_action_code') == 'EMAIL_DRAFT', wag
