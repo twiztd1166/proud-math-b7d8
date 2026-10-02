@@ -78,7 +78,13 @@ function researchExternalHistoryText(value){
   const participation=text.match(/^Paradise\s+(?:definitively\s+)?paid and enrolled for\s+(.+?)\s+in\s+(\d{4})\b/i);
   if(participation)return `Paradise participated in ${participation[1]} in ${participation[2]}`;
   text=text.split(/\b(?:Treat as|Do not treat|not net-new)\b/i)[0].trim();
-  text=text.replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'').replace(/\s*[·|/]\s*$/,'').replace(/\s{2,}/g,' ').trim();
+  text=text
+    .replace(/\b(?:HIST|PROSPECT|LIFE)-[A-Z0-9_-]+\b/gi,'')
+    .replace(/\b(?:in|via|under)\s*,\s*/gi,', ')
+    .replace(/\s+,/g,',')
+    .replace(/\s*[·|/]\s*$/,'')
+    .replace(/\s{2,}/g,' ')
+    .trim();
   return text.replace(/[;,.\s]+$/,'').trim();
 }
 function researchExternalFactText(value){
@@ -157,8 +163,13 @@ function researchOutreachProfile(row){
 
   const questions=[];
   const addQuestion=q=>{if(q&&!questions.includes(q))questions.push(q)};
+  const eligibilityContext=[eligibility?.text,booking?.text,d.operational_guard,d.next_action].filter(Boolean);
+  const eligibilityNeedsConfirm=researchHasKnownTerm(
+    eligibilityContext,
+    /\b(?:SUBJECT TO (?:CITY |ORGANIZER )?(?:ACCEPTANCE|APPROVAL)|SELECTION\s*\/\s*APPROVAL REQUIRED|(?:PARADISE(?: EXTERIORS)?|HOME[- ]?IMPROVEMENT|HOME[- ]?SERVICES?)\b.{0,80}\b(?:ELIGIBIL(?:ITY|E)|FIT|ACCEPTANCE|APPROVAL)\b.{0,80}\b(?:CONFIRM|RECONFIRM|VERIFY)|CONFIRM\b.{0,80}\b(?:PARADISE(?: EXTERIORS)?|HOME[- ]?IMPROVEMENT|HOME[- ]?SERVICES?)\b.{0,80}\b(?:ELIGIBIL(?:ITY|E)|FIT|ACCEPTANCE|APPROVAL)|CURATED\b.{0,80}\b(?:FIT|ACCEPTANCE|APPROVAL))\b/
+  );
   if(boundedException)addQuestion('Please confirm the event date and current participation route before we rely on the recovered record.');
-  if(!eligibility||eligibility.confirm)addQuestion('Please confirm Paradise Exteriors is eligible for the stated vendor/sponsor/exhibitor route.');
+  if(!eligibility||eligibility.confirm||eligibilityNeedsConfirm)addQuestion('Please confirm Paradise Exteriors is eligible for the stated vendor/sponsor/exhibitor route.');
   if(!cost||cost.confirm)addQuestion('Please confirm the current price/package and any required deposit.');
   if(!deadline||deadline.confirm)addQuestion('Please confirm the current application or commitment deadline.');
   if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
