@@ -223,8 +223,8 @@ jobs:
               r.get('control_id') for r in q4
               if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
           }
-          assert len(route_verified) == 53, route_verified
-          assert len(direct_action_cleanup) == 16, direct_action_cleanup
+          assert len(route_verified) == 52, route_verified
+          assert len(direct_action_cleanup) == 15, direct_action_cleanup
           assert len(review_guard_cleanup) == 6, review_guard_cleanup
           hallandale_halloween=by_control['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
