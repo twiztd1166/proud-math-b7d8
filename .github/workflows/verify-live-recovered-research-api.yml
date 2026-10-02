@@ -1131,7 +1131,6 @@ jobs:
               'R2026-092-WPB-BEER-WINE',
               'R2026-093-PB-HOLIDAY-BOAT',
               'R2026-097-PEMBROKE-SNOWFEST',
-              'R2026-098-MELBOURNE-HOLIDAY-ART',
           }
           for cid in december_tail_b1:
               detail=by_control[cid].get('detail_data') or {}
