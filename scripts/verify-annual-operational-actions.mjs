@@ -5,6 +5,12 @@ const source=fs.readFileSync('public/app-shows.js','utf8');
 if(!source.includes('Planning detail'))throw new Error('Annual card is missing preserved planning-detail disclosure');
 if(!source.includes("const legacyPlanningDetail=String(row.legacy_next_action||'').trim()"))throw new Error('Annual card does not read preserved legacy_next_action');
 if(!source.includes("!/\\bGMAIL:[A-Za-z0-9_-]+\\b/i.test(legacyPlanningDetail)"))throw new Error('Annual card does not suppress account-specific Gmail draft tokens');
+if(!source.includes('function annualPlanIsAuditDuplicate(row)'))throw new Error('Annual plan duplicate-suppression helper missing');
+if(!source.includes("if(filter==='AUDIT_DUPLICATES')"))throw new Error('Annual plan audit-duplicates filter missing');
+if(!source.includes('if(auditDuplicate)return false'))throw new Error('Normal annual-plan views do not suppress duplicate controls');
+if(!source.includes("['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length]"))throw new Error('Audit duplicate filter chip missing');
+if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('2027 calendar still counts duplicate-suppressed rows');
+if(!source.includes('Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views'))throw new Error('Annual duplicate-suppression explanation missing');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
 if(start<0||end<0)throw new Error('Annual operational helper block not found');
@@ -18,12 +24,15 @@ const sandbox={
 };
 vm.createContext(sandbox);
 vm.runInContext(`${block}
-this.api={annualPlanSourceUrl,annualPlanOutreachProfile,annualPlanEmailDraft,annualPlanCallScript,annualPlanOperationalLabel};
+this.api={annualPlanSourceUrl,annualPlanIsAuditDuplicate,annualPlanOutreachProfile,annualPlanEmailDraft,annualPlanCallScript,annualPlanOperationalLabel};
 `,sandbox);
 
 const sourceObject=sandbox.api.annualPlanSourceUrl({url:'https://example.com/app',type:'OFFICIAL'});
 if(sourceObject!=='https://example.com/app')throw new Error('Object source URL was not normalized');
 if(sandbox.api.annualPlanSourceUrl({type:'HISTORY'})!=='')throw new Error('Non-URL evidence object became a link');
+
+if(!sandbox.api.annualPlanIsAuditDuplicate({publication_status:'DUPLICATE_SUPPRESSED_TO_CANONICAL'}))throw new Error('Duplicate-suppressed annual row not recognized');
+if(sandbox.api.annualPlanIsAuditDuplicate({publication_status:'OFFICIAL_2027_DATE_VERIFIED'}))throw new Error('Canonical annual row misclassified as audit duplicate');
 
 const emailRow={
   plan_id:'2027-LIFE-011-PRIMARY',
@@ -74,4 +83,5 @@ console.log({
   email_draft:'PASS',
   call_script:'PASS',
   object_source_url:'PASS',
+  duplicate_suppression:'PASS',
 });
