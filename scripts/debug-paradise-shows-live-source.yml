@@ -94,6 +94,9 @@ jobs:
               grep -q 'sourceLabeledPerformanceValue' /tmp/app-modals.js
               grep -q 'historyComStateValue' /tmp/app-modals.js
               grep -q 'historyCostStateValue' /tmp/app-modals.js
+              grep -Fq "const referenceActionCodes=['REVIEW','HOLD','MONITOR','REVERIFY'];" /tmp/app-shows.js
+              grep -Fq '<b>Action guard</b>' /tmp/app-shows.js
+              grep -Fq '${referenceButton}' /tmp/app-shows.js
               grep -q 'bookingSignal' /tmp/app-shows.js
               grep -q 'CONTRACT SIGNED' /tmp/app-shows.js
               grep -q 'rebookCandidate' /tmp/app-shows.js
@@ -866,8 +869,13 @@ jobs:
               r.get('control_id') for r in visible_q4
               if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
           }
-          assert len(route_verified) == 47, route_verified
+          review_guard_cleanup={
+              r.get('control_id') for r in visible_q4
+              if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+          }
+          assert len(route_verified) == 53, route_verified
           assert len(direct_action_cleanup) == 16, direct_action_cleanup
+          assert len(review_guard_cleanup) == 6, review_guard_cleanup
           hallandale_halloween=controls['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
           assert hallandale_halloween.get('deadline_date') == '2026-10-22', hallandale_halloween
@@ -913,6 +921,32 @@ jobs:
           wellington_boat_detail=controls['R2026-106-WELLINGTON-BOAT'].get('detail_data') or {}
           assert wellington_boat_detail.get('operational_action_code') == 'OPEN_INQUIRY', wellington_boat_detail
           assert wellington_boat_detail.get('action_label') == 'Open sponsor-vendor request form', wellington_boat_detail
+          review_reference_expectations={
+              'R2026-034-IRL-SCIENCE':('REVIEW','https://forms.gle/SdpaafV3aKW2sAxA6','Review exhibitor registration'),
+              'R2026-050-BEN-WINTER':('REVIEW','https://www.thebenwestpalm.com/partner-with-the-bens-winter-wonderland-ice-rink/','Review sponsorship options'),
+              'R2026-059-TC-BREW-FEST':('REVIEW','https://www.tcbrewfest.com/sponsor','Compare vendor vs sponsor options'),
+              'R2026-063-SENIOR-HARDROCK':('HOLD','https://seniorexpousa.com/brand/florida/','Review Florida exhibitor options'),
+              'R2026-085-DELRAY-TREE':('REVIEW','https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000','Review Tree Lighting sponsorship package'),
+          }
+          for cid,(code,url,label) in review_reference_expectations.items():
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == code, (cid,detail)
+              assert detail.get('action_url') == url, (cid,detail)
+              assert detail.get('action_label') == label, (cid,detail)
+              assert detail.get('operational_guard'), (cid,detail)
+              assert detail.get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP', (cid,detail)
+          melbourne=controls['R2026-098-MELBOURNE-HOLIDAY-ART']
+          melbourne_detail=melbourne.get('detail_data') or {}
+          assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
+          assert melbourne_detail.get('operational_action_code') == 'REVERIFY', melbourne_detail
+          assert melbourne_detail.get('action_url') == 'https://melbournemoose.com/about/', melbourne_detail
+          assert melbourne_detail.get('action_label') == 'Open organizer site to reverify', melbourne_detail
+          assert not melbourne_detail.get('route_verified_at'), melbourne_detail
+          wellington_parade_detail=controls['R2026-114-WELLINGTON-HOLIDAY-PARADE'].get('detail_data') or {}
+          assert wellington_parade_detail.get('operational_action_code') == 'EMAIL_DRAFT', wellington_parade_detail
+          assert 'Info@CPBChamber.com' in str(wellington_parade_detail.get('contact_text') or ''), wellington_parade_detail
+          assert 'parade-entry application' in str(wellington_parade_detail.get('operational_guard') or ''), wellington_parade_detail
+          assert wellington_parade_detail.get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP', wellington_parade_detail
           direct_apply_expectations={
               'R2026-030-DELRAY-KIDSFEST':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
               'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform',
