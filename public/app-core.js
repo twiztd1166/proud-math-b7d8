@@ -180,11 +180,19 @@ function researchOutreachProfile(row){
       ?'Please confirm which published package remains available and any required deposit.'
       :'Please confirm the current price/package and any required deposit.');
   }
+  const questionAvailability=typeof researchAvailability==='function'?researchAvailability(row):null;
+  const questionAvailabilityCode=String(questionAvailability?.code||'').toUpperCase();
+  const questionStatusText=String(d.booking_status||row?.research_status||'').toUpperCase();
+  const lateForQuestions=questionAvailabilityCode
+    ?questionAvailabilityCode==='LATE'
+    :/LATE[- ]INVENTORY|LATE INQUIRY|LATE AVAILABILITY|APPLICATION DEADLINE PASSED|REGISTRATION DEADLINE PASSED|SPONSORSHIP REGISTRATION DEADLINE PASSED/.test(questionStatusText);
   if(!deadline){
-    addQuestion('Please confirm the current application or commitment deadline.');
+    addQuestion(lateForQuestions
+      ?'If late participation is possible, please confirm any new cutoff or response deadline.'
+      :'Please confirm the current application or commitment deadline.');
   }else if(deadline.confirm){
     const deadlineText=String(deadline.text||'').toUpperCase();
-    addQuestion(/\bPASSED\b/.test(deadlineText)
+    addQuestion(lateForQuestions||/\bPASSED\b/.test(deadlineText)
       ?'If late participation is possible, please confirm any new cutoff or response deadline.'
       :'Please confirm the current application or commitment deadline.');
   }
