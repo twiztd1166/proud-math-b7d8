@@ -1043,6 +1043,29 @@ jobs:
           assert 'NON-REFUNDABLE' in str(homegrown_detail.get('commitment_terms_text') or '').upper(), homegrown_detail
           assert '$25' in str(homegrown_detail.get('commitment_terms_text') or ''), homegrown_detail
 
+          boca_b2b=by_control['R2026-900-BOCA-B2B']
+          boca_b2b_detail=boca_b2b.get('detail_data') or {}
+          assert boca_b2b.get('event_start') == '2026-10-27', boca_b2b
+          assert boca_b2b.get('date_confidence') == 'CURRENT_VERIFIED', boca_b2b
+          assert boca_b2b.get('research_status') == 'CURRENT_REVERIFIED', boca_b2b
+          assert boca_b2b.get('disposition') == 'WATCH', boca_b2b
+          assert boca_b2b.get('route_type') == 'B2B_EXPO', boca_b2b
+          assert boca_b2b_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', boca_b2b_detail
+          assert boca_b2b_detail.get('action_url') == 'https://na1.documents.adobe.com/public/esignWidget?wid=CBFCIBAA3AAABLblqZhB5F0PZI-TE5i8NzutSD4iikljcU8CNeDMf6KXvkIS8mP-4GhQxDQlJvzHvgKtkyME*', boca_b2b_detail
+          assert 'svielot@bocachamber.com' in str(boca_b2b_detail.get('contact_text') or '').lower(), boca_b2b_detail
+          assert 'EXHIBITOR TABLES ON SALE' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert 'ACTIVE CHAMBER MEMBERS ONLY' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert 'MEMBERSHIP NOT VERIFIED' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert 'WYNDHAM BOCA RATON' in str(boca_b2b_detail.get('venue_text') or '').upper(), boca_b2b_detail
+          assert '200+' in str(boca_b2b_detail.get('attendance_text') or ''), boca_b2b_detail
+          assert boca_b2b_detail.get('current_cost_status') == 'NOT VERIFIED', boca_b2b_detail
+          assert boca_b2b_detail.get('current_source_checked_at') == '2026-10-02', boca_b2b_detail
+          assert boca_b2b_detail.get('followup_reverified_at') == '2026-10-02', boca_b2b_detail
+          assert boca_b2b_detail.get('followup_reverification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+          assert boca_b2b_detail.get('route_verified_at') == '2026-10-02', boca_b2b_detail
+          assert boca_b2b_detail.get('route_verification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+          assert 'ACTIVE BOCA REGIONAL CHAMBER MEMBER' in str(boca_b2b_detail.get('operational_guard') or '').upper(), boca_b2b_detail
+
           world_aids=by_control['R2026-083-WORLD-AIDS'].get('detail_data') or {}
           assert world_aids.get('action_label') == 'Open regular-business application', world_aids
           assert world_aids.get('current_source_checked_at') == '2026-10-02', world_aids
