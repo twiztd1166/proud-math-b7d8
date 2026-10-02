@@ -835,6 +835,7 @@ jobs:
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-068-FREEDOM-5K':'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs',
+              'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
           }
           assert sum(
               1 for r in visible_q4
@@ -847,7 +848,7 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid == 'R2026-068-FREEDOM-5K' else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-068-FREEDOM-5K','R2026-017-CARS-COFFEE-OCT'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -864,20 +865,55 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-01', (cid,detail)
-          route_verified={
+          route_verified_current={
               r.get('control_id') for r in visible_q4
-              if (r.get('detail_data') or {}).get('route_verified_at') == '2026-10-01'
+              if str((r.get('detail_data') or {}).get('route_verified_at') or '') >= '2026-10-01'
+              and str((r.get('detail_data') or {}).get('route_verification_source') or '').strip()
           }
-          direct_action_cleanup={
+          oct2_route_verified={
               r.get('control_id') for r in visible_q4
-              if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
+              if (r.get('detail_data') or {}).get('route_verified_at') == '2026-10-02'
+          }
+          direct_action_cleanup_cohort={
+              'R2026-005-GIPA-OKTOBERFEST',
+              'R2026-006-GACTC-OKTOBERFEST',
+              'R2026-009-SABOR-FEST',
+              'R2026-022-JUPITER-SPOOKTACULAR',
+              'R2026-026-PLANTATION-FALL',
+              'R2026-029-RPB-ROCK-N-FALL',
+              'R2026-031-MALABAR-FALLFEST',
+              'R2026-052-NASCAR-HOMESTEAD',
+              'R2026-058-MIAMI-FOOD-WINE',
+              'R2026-084-CHRISTMAS-LAS-OLAS',
+              'R2026-090-SPACE-COAST-HOLIDAY-FOOD',
+              'R2026-100-WESTON-RUN',
+              'R2026-105-TC-HOLIDAY-FOOD',
+              'R2026-106-WELLINGTON-BOAT',
+              'R2026-110-COCOA-ROCKLEDGE-PARADE',
+              'R2026-115-SNOW-PLACE-JUPITER',
+          }
+          for cid in direct_action_cleanup_cohort:
+              detail=controls[cid].get('detail_data') or {}
+              assert str(detail.get('route_verified_at') or '') >= '2026-10-01', (cid,detail)
+              assert str(detail.get('route_verification_source') or '').strip(), (cid,detail)
+          expected_oct2_route_ids={
+              'R2026-003-PSL-OKTOBERFEST',
+              'R2026-008-HOLLYWOOD-HISPANIC',
+              'R2026-009-SABOR-FEST',
+              'R2026-011-DEERFIELD-FALL',
+              'R2026-014-WAG-O-WEEN',
+              'R2026-015-BUCKLER-WPB-OCT',
+              'R2026-016-MIAMI-CARNIVAL',
+              'R2026-017-CARS-COFFEE-OCT',
+              'R2026-018-JUPITER-HARBOURFEST',
+              'R2026-068-FREEDOM-5K',
           }
           review_guard_cleanup={
               r.get('control_id') for r in visible_q4
               if (r.get('detail_data') or {}).get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
           }
-          assert len(route_verified) == 53, route_verified
-          assert len(direct_action_cleanup) == 16, direct_action_cleanup
+          assert len(route_verified_current) >= 62, route_verified_current
+          assert expected_oct2_route_ids.issubset(oct2_route_verified), (expected_oct2_route_ids-oct2_route_verified)
           assert len(review_guard_cleanup) == 6, review_guard_cleanup
           hallandale_halloween=controls['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
@@ -911,7 +947,8 @@ jobs:
               assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
-              assert detail.get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP', (cid,detail)
+              expected_route_source='2026_NEXT14_REVERIFICATION' if cid == 'R2026-009-SABOR-FEST' else '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
+              assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           do_now_reverified={
               'R2026-001-NMB-CENTENNIAL',
               'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
@@ -1045,6 +1082,93 @@ jobs:
           assert 'GOOGLE SIGN-IN REQUIRED' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
           assert 'google sign-in' in str(grace_detail.get('operational_guard') or '').lower(), grace_detail
           assert 'google sign-in' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+
+          next14_reverified={
+              'R2026-008-HOLLYWOOD-HISPANIC',
+              'R2026-009-SABOR-FEST',
+              'R2026-011-DEERFIELD-FALL',
+              'R2026-014-WAG-O-WEEN',
+              'R2026-015-BUCKLER-WPB-OCT',
+              'R2026-016-MIAMI-CARNIVAL',
+              'R2026-017-CARS-COFFEE-OCT',
+              'R2026-018-JUPITER-HARBOURFEST',
+          }
+          for cid in next14_reverified:
+              row=controls[cid]
+              detail=row.get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              official=str(detail.get('official_source_url') or '').strip()
+              assert official, (cid,detail)
+              assert any(
+                  str(ref.get('url') or '').strip() == official
+                  and str(ref.get('checked_at') or '').strip() == '2026-10-02'
+                  for ref in (row.get('source_refs') or [])
+              ), (cid,row.get('source_refs'))
+
+          wag=controls['R2026-014-WAG-O-WEEN']
+          wag_detail=wag.get('detail_data') or {}
+          assert wag_detail.get('operational_action_code') == 'EMAIL_DRAFT', wag_detail
+          assert not wag_detail.get('action_url'), wag_detail
+          assert 'SIGN-UP FORM CLOSED' in str(wag_detail.get('booking_status') or '').upper(), wag_detail
+          assert '$45' in str(wag_detail.get('current_cost_text') or ''), wag_detail
+          assert 'livein321@kw.com' in str(wag_detail.get('contact_text') or '').lower(), wag_detail
+          assert wag_detail.get('corrective_reverification_source') == '2026_NEXT14_CORRECTIVE_REVIEW', wag_detail
+
+          sabor=controls['R2026-009-SABOR-FEST']
+          sabor_detail=sabor.get('detail_data') or {}
+          assert sabor_detail.get('operational_action_code') == 'APPLY', sabor_detail
+          assert sabor_detail.get('action_url') == 'https://www.miamilakes-fl.gov/sabor-fest-2026-vendor-registration-form/', sabor_detail
+          assert '$100' in str(sabor_detail.get('current_cost_text') or ''), sabor_detail
+          assert sabor_detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', sabor_detail
+
+          deerfield=controls['R2026-011-DEERFIELD-FALL']
+          deerfield_detail=deerfield.get('detail_data') or {}
+          assert deerfield_detail.get('operational_action_code') == 'EMAIL_DRAFT', deerfield_detail
+          assert 'dfbspecialevents@deerfieldbeachfl.gov' in str(deerfield_detail.get('contact_text') or '').lower(), deerfield_detail
+          assert deerfield_detail.get('corrective_reverification_source') == '2026_NEXT14_CORRECTIVE_REVIEW', deerfield_detail
+
+          buckler=controls['R2026-015-BUCKLER-WPB-OCT']
+          buckler_detail=buckler.get('detail_data') or {}
+          assert buckler_detail.get('operational_action_code') == 'EMAIL_DRAFT', buckler_detail
+          assert 'bucklershows@yahoo.com' in str(buckler_detail.get('contact_text') or '').lower(), buckler_detail
+          assert '$400' in str(buckler_detail.get('current_cost_text') or ''), buckler_detail
+          assert buckler_detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', buckler_detail
+
+          hollywood=controls['R2026-008-HOLLYWOOD-HISPANIC']
+          hollywood_detail=hollywood.get('detail_data') or {}
+          assert hollywood_detail.get('operational_action_code') == 'EMAIL_DRAFT', hollywood_detail
+          assert 'APPLICATIONS CLOSED' in str(hollywood_detail.get('booking_status') or '').upper(), hollywood_detail
+          assert '$500' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+          assert '$1,000' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+          assert '$2,500' in str(hollywood_detail.get('current_cost_text') or ''), hollywood_detail
+
+          cars=controls['R2026-017-CARS-COFFEE-OCT']
+          cars_detail=cars.get('detail_data') or {}
+          assert cars_detail.get('operational_action_code') == 'OPEN_INQUIRY', cars_detail
+          assert cars_detail.get('action_url') == 'https://www.carsandcoffeepb.com/sponsors', cars_detail
+          assert cars_detail.get('action_label') == 'Open sponsor/vendor inquiry form', cars_detail
+          assert '48 HOURS' in str(cars_detail.get('booking_status') or '').upper(), cars_detail
+          assert cars_detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', cars_detail
+
+          miami_carnival=controls['R2026-016-MIAMI-CARNIVAL']
+          miami_carnival_detail=miami_carnival.get('detail_data') or {}
+          assert miami_carnival_detail.get('operational_action_code') == 'EMAIL_DRAFT', miami_carnival_detail
+          assert '$2,500' in str(miami_carnival_detail.get('current_cost_text') or ''), miami_carnival_detail
+          assert '$4,000' in str(miami_carnival_detail.get('current_cost_text') or ''), miami_carnival_detail
+          assert '2026/05/2026-Carnival-Corporate-Vendor-Application.pdf' in str(miami_carnival_detail.get('corporate_vendor_form_url') or ''), miami_carnival_detail
+          assert 'Central Broward Park' in str(miami_carnival_detail.get('venue_text') or ''), miami_carnival_detail
+          assert 'Miami-Dade Fair & Expo' in str(miami_carnival_detail.get('vendor_activation_venue_text') or ''), miami_carnival_detail
+          assert miami_carnival_detail.get('corrective_reverification_source') == '2026_NEXT14_CORRECTIVE_REVIEW', miami_carnival_detail
+
+          jupiter=controls['R2026-018-JUPITER-HARBOURFEST']
+          jupiter_detail=jupiter.get('detail_data') or {}
+          assert jupiter_detail.get('operational_action_code') == 'APPLY', jupiter_detail
+          assert jupiter_detail.get('action_url') == 'https://eventhub.net/events/2026-Jupiter-HarbourFest--presented-by-Jupiter-Medical-Center_7453', jupiter_detail
+          assert jupiter_detail.get('action_label') == 'Open exhibitor registration', jupiter_detail
+          assert '$850' in str(jupiter_detail.get('current_cost_text') or ''), jupiter_detail
+          assert jupiter_detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', jupiter_detail
 
           nascar_detail=controls['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
