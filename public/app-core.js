@@ -222,7 +222,8 @@ function researchOutreachProfile(row){
   }
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text,rawCommitmentText].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
-  if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
+  const restrictionText=[...knownText,cost?.text].filter(Boolean);
+  if(!researchHasKnownTerm(restrictionText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
   const actionCode=String(d.operational_action_code||'').trim().toUpperCase();
   const applicationActionCodes=['EMAIL_THEN_APPLY','CALL_THEN_APPLY'];
   const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&(
