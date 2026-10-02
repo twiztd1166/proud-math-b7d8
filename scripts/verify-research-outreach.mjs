@@ -97,10 +97,35 @@ if(/\$53\.50|Treat as a historical repeat|not net-new/i.test(pslDraft.body))thro
 
 const buckler=byId.get('R2026-015-BUCKLER-WPB-OCT');
 if(!buckler)throw new Error('Buckler regression fixture missing');
-const bucklerCall=sandbox.outreach.researchCallScript(buckler);
-if(!bucklerCall)throw new Error('Buckler should use phone-only call script');
-if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerCall.script))throw new Error('Buckler call script lost eligibility gap');
-if(!/Please confirm the current price\/package/i.test(bucklerCall.script))throw new Error('Buckler call script lost price gap');
+const bucklerDraft=sandbox.outreach.researchEmailDraft(buckler);
+if(!bucklerDraft)throw new Error('Buckler should use current organizer email');
+if(String(bucklerDraft.email||'').toLowerCase()!=='bucklershows@yahoo.com')throw new Error('Buckler email route drifted');
+if(!/\$400 Commercial Business 10x10/i.test(bucklerDraft.body))throw new Error('Buckler draft lost verified commercial price');
+if(/Please confirm the current price\/package/i.test(bucklerDraft.body))throw new Error('Buckler draft repeats already verified price');
+if(!/current application or commitment deadline/i.test(bucklerDraft.body))throw new Error('Buckler draft lost remaining deadline gap');
+
+const wag=byId.get('R2026-014-WAG-O-WEEN');
+if(!wag)throw new Error('Wag-O-Ween regression fixture missing');
+const wagDraft=sandbox.outreach.researchEmailDraft(wag);
+if(!wagDraft)throw new Error('Wag-O-Ween should use late-inventory email');
+if(String(wagDraft.email||'').toLowerCase()!=='livein321@kw.com')throw new Error('Wag-O-Ween email route drifted');
+if(!/late availability|late inventory|late participation/i.test(wagDraft.subject+' '+wagDraft.body))throw new Error('Wag-O-Ween lost late-inventory customization');
+if(!/\$45 business booth/i.test(wagDraft.body))throw new Error('Wag-O-Ween lost verified booth price');
+
+const deerfield=byId.get('R2026-011-DEERFIELD-FALL');
+if(!deerfield)throw new Error('Deerfield Fall regression fixture missing');
+const deerfieldDraft=sandbox.outreach.researchEmailDraft(deerfield);
+if(!deerfieldDraft)throw new Error('Deerfield Fall should use City email');
+if(String(deerfieldDraft.email||'').toLowerCase()!=='dfbspecialevents@deerfieldbeachfl.gov')throw new Error('Deerfield Fall current City email drifted');
+
+const miamiCarnival=byId.get('R2026-016-MIAMI-CARNIVAL');
+if(!miamiCarnival)throw new Error('Miami Carnival regression fixture missing');
+const miamiCarnivalDraft=sandbox.outreach.researchEmailDraft(miamiCarnival);
+if(!miamiCarnivalDraft)throw new Error('Miami Carnival should use organizer email');
+if(!/\$2,500 Corporate Vendor 10×10/i.test(miamiCarnivalDraft.body))throw new Error('Miami Carnival lost latest 10x10 price');
+if(!/\$4,000 Corporate Vendor 10×20/i.test(miamiCarnivalDraft.body))throw new Error('Miami Carnival lost latest 10x20 price');
+if(/Please confirm the current price\/package/i.test(miamiCarnivalDraft.body))throw new Error('Miami Carnival repeats already verified latest pricing');
+if(!/exact event\/booth location or placement/i.test(miamiCarnivalDraft.body))throw new Error('Miami Carnival lost unresolved venue conflict');
 
 console.log({
   outreach_contract:'PASS',
