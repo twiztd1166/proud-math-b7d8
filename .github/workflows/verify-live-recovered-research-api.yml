@@ -46,9 +46,9 @@ jobs:
               if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
               and not (not r.get('event_start') and r.get('estimated_sort_date'))
           ]
-          assert len(research) == 115, len(research)
-          assert len(q4) == 115, len(q4)
-          assert len(exact) == 114, len(exact)
+          assert len(research) == 116, len(research)
+          assert len(q4) == 116, len(q4)
+          assert len(exact) == 115, len(exact)
           assert len(estimated) == 1, len(estimated)
           assert len(unsortable) == 0, unsortable
           assert not semantic_bad, semantic_bad
@@ -101,6 +101,7 @@ jobs:
           expected_deadlines={
             'R2026-068-FREEDOM-5K':'2026-09-15',
             'R2026-004-FLORIDA-CREATIVES-PSL':'2026-09-30',
+            'R2026-016-MIAMI-CARNIVAL':'2026-09-30',
             'R2026-013-PUMPKINS-PALMS':'2026-10-01',
             'R2026-043-BOYNTON-PIRATE':'2026-10-01',
             'R2026-006-GACTC-OKTOBERFEST':'2026-10-08',
@@ -173,7 +174,22 @@ jobs:
               'R2026-062-SENIOR-DELRAY',
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
+              'R2026-900-BOCA-B2B',
           }, q4_compound
+          boca_b2b=by_control['R2026-900-BOCA-B2B']
+          boca_b2b_detail=boca_b2b.get('detail_data') or {}
+          assert boca_b2b.get('event_start') == '2026-10-27', boca_b2b
+          assert boca_b2b.get('research_status') == 'CURRENT_REVERIFIED', boca_b2b
+          assert boca_b2b_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', boca_b2b_detail
+          assert boca_b2b_detail.get('action_label') == 'Open Fall Business Expo exhibitor application', boca_b2b_detail
+          assert str(boca_b2b_detail.get('action_url') or '').startswith('https://na1.documents.adobe.com/public/esignWidget'), boca_b2b_detail
+          assert 'svielot@bocachamber.com' in str(boca_b2b_detail.get('contact_text') or '').lower(), boca_b2b_detail
+          assert 'ACTIVE CHAMBER MEMBERS ONLY' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert 'PARADISE MEMBERSHIP NOT VERIFIED' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert boca_b2b_detail.get('route_verified_at') == '2026-10-02', boca_b2b_detail
+          assert boca_b2b_detail.get('route_verification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+          assert boca_b2b_detail.get('followup_reverification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
