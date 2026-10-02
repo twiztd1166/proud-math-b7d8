@@ -39,7 +39,7 @@ function bindDynamic(){
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
   const rn=$('#researchNextStepsToggle');if(rn)rn.onclick=()=>{researchNextStepsExpanded=!researchNextStepsExpanded;render()};
-  $('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
+  $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
   document.querySelectorAll('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
   document.querySelectorAll('[data-annual-call-script]').forEach(b=>b.onclick=e=>{e.stopPropagation();const plan=String(b.dataset.annualCallScript||'').trim();if(plan&&typeof openAnnualPlanCallScript==='function')openAnnualPlanCallScript(plan)});
   document.querySelectorAll('[data-annual-payment]').forEach(b=>b.onclick=e=>{e.stopPropagation();const payment=String(b.dataset.annualPayment||'').trim();if(payment)openPayment(payment)});
