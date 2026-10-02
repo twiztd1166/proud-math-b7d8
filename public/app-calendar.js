@@ -189,7 +189,7 @@
     if(p.loading&&!p.loaded)return `${calendarYearBar(2027)}<div class="hero"><h1>2027 Calendar</h1><p>Loading the published 2027 plan\u2026</p></div><div class="loading">Loading calendar\u2026</div>`;
     if(p.error&&!p.loaded)return `${calendarYearBar(2027)}<div class="hero"><h1>2027 Calendar</h1><p>Published annual-plan schedule and conflicts.</p></div><div class="alert"><div class="event">Calendar unavailable</div><div class="action">${esc(p.error)}</div><div class="actions"><button class="btn primary" id="annualPlanRetry">Try again</button></div></div>`;
     if(!p.loaded)return `${calendarYearBar(2027)}<div class="loading">Opening 2027 calendar\u2026</div>`;
-    const rows=p.rows||[];
+    const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));
     const pursue=rows.filter(row=>row.plan_decision==='PURSUE');
     const watch=rows.filter(row=>row.plan_decision==='WATCH');
     const conflicts=pursue.filter(row=>String(row.conflict_notes||'').trim());

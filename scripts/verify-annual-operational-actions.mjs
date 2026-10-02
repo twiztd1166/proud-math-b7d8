@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('public/app-shows.js','utf8');
+const calendarSource=fs.readFileSync('public/app-calendar.js','utf8');
 const coreSource=fs.readFileSync('public/app-core.js','utf8');
 const modalSource=fs.readFileSync('public/app-modals.js','utf8');
 const bindSource=fs.readFileSync('public/app-bind.js','utf8');
@@ -20,7 +21,8 @@ if(!source.includes('function annualPlanIsAuditDuplicate(row)'))throw new Error(
 if(!source.includes("if(filter==='AUDIT_DUPLICATES')"))throw new Error('Annual plan audit-duplicates filter missing');
 if(!source.includes('if(auditDuplicate)return false'))throw new Error('Normal annual-plan views do not suppress duplicate controls');
 if(!source.includes("['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length]"))throw new Error('Audit duplicate filter chip missing');
-if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('2027 calendar still counts duplicate-suppressed rows');
+if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Legacy 2027 calendar helper still counts duplicate-suppressed rows');
+if(!calendarSource.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Active 2027 calendar renderer still counts duplicate-suppressed rows');
 if(!source.includes('Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views'))throw new Error('Annual duplicate-suppression explanation missing');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
