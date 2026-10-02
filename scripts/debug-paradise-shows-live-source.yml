@@ -870,7 +870,7 @@ jobs:
               r.get('control_id') for r in visible_q4
               if str((r.get('detail_data') or {}).get('route_verified_at') or '').strip()
           }
-          assert len(route_verified) >= 62, route_verified
+          assert len(route_verified) >= 69, route_verified
           hallandale_halloween=controls['R2026-045-HALLANDALE-HALLOWEEN']
           hallandale_detail=hallandale_halloween.get('detail_data') or {}
           assert hallandale_halloween.get('deadline_date') == '2026-10-22', hallandale_halloween
@@ -967,6 +967,8 @@ jobs:
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_LATE_INVENTORY_REVERIFICATION', (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_LATE_INVENTORY_REVERIFICATION', (cid,detail)
 
           florida_creatives=controls['R2026-004-FLORIDA-CREATIVES-PSL'].get('detail_data') or {}
           assert florida_creatives.get('operational_action_code') == 'EMAIL_DRAFT', florida_creatives
