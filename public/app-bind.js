@@ -38,7 +38,8 @@ function bindDynamic(){
   const cr=$('#catalogRetry');if(cr)cr.onclick=()=>loadCatalog(true);
   const ur=$('#unlinkedRetry');if(ur)ur.onclick=()=>loadUnlinkedLp(true);
   const ar=$('#annualPlanRetry');if(ar)ar.onclick=()=>loadAnnualPlan(true);
-  $$('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
+  const rn=$('#researchNextStepsToggle');if(rn)rn.onclick=()=>{researchNextStepsExpanded=!researchNextStepsExpanded;render()};
+  $('[data-annual-filter]').forEach(b=>b.onclick=()=>{state.annualPlan.filter=b.dataset.annualFilter||'ALL';state.search='';render()});
   document.querySelectorAll('[data-annual-profile]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const profile=String(b.dataset.annualProfile||'').trim();if(!profile)return;state.showMode='ALL';await openProfileShow(profile)});
   document.querySelectorAll('[data-annual-call-script]').forEach(b=>b.onclick=e=>{e.stopPropagation();const plan=String(b.dataset.annualCallScript||'').trim();if(plan&&typeof openAnnualPlanCallScript==='function')openAnnualPlanCallScript(plan)});
   document.querySelectorAll('[data-calendar-show]').forEach(b=>b.onclick=e=>{e.stopPropagation();const mfc=String(b.dataset.calendarShow||'').trim();if(mfc)openDetail(mfc)});
