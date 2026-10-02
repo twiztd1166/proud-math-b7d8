@@ -82,6 +82,21 @@ for(const row of rows){
 }
 
 const byId=new Map(rows.map(row=>[row.control_id,row]));
+const modalSource=fs.readFileSync('public/app-modals.js','utf8');
+if(!modalSource.includes("const referenceActionCodes=['REVIEW','HOLD','MONITOR','REVERIFY']"))throw new Error('Research detail modal lost governed reference-action support');
+if(!modalSource.includes('${referenceButton}${sourceButtons}'))throw new Error('Research detail modal does not render governed reference actions');
+
+const festival=byId.get('R2026-067-FESTIVAL-GIVING');
+if(!festival)throw new Error('Festival of Giving regression fixture missing');
+const festivalDraft=sandbox.outreach.researchEmailDraft(festival);
+if(!festivalDraft)throw new Error('Festival of Giving should use email');
+if(/published application path|application\/reservation step/i.test(festivalDraft.body))throw new Error('Festival of Giving incorrectly implies an application path');
+if(!/correct next step/i.test(festivalDraft.body))throw new Error('Festival of Giving lost neutral contact-only close');
+const sponsorReferenceFixture=JSON.parse(JSON.stringify(festival));
+sponsorReferenceFixture.detail_data={...(sponsorReferenceFixture.detail_data||{}),operational_action_code:'EMAIL_DRAFT',action_url:'https://example.test/sponsor-info',action_label:'Open sponsorship information'};
+const sponsorReferenceProfile=sandbox.outreach.researchOutreachProfile(sponsorReferenceFixture);
+if(sponsorReferenceProfile.hasApplicationPath)throw new Error('Pure email sponsorship reference incorrectly classified as an application path');
+
 const coral=byId.get('R2026-002-CORAL-SPRINGS-OKTOBERFEST');
 if(!coral)throw new Error('Coral Springs regression fixture missing');
 const coralDraft=sandbox.outreach.researchEmailDraft(coral);
@@ -104,7 +119,7 @@ const bucklerOct=byId.get('R2026-015-BUCKLER-WPB-OCT');
 if(!bucklerOct)throw new Error('Buckler October regression fixture missing');
 const bucklerOctDraft=sandbox.outreach.researchEmailDraft(bucklerOct);
 if(!bucklerOctDraft)throw new Error('Buckler October should use email');
-if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerOctDraft.body))throw new Error('Buckler October lost Paradise eligibility confirmation');
+if(!/Commercial Business 10x10/i.test(bucklerOctDraft.body))throw new Error('Buckler October lost the verified Commercial Business route');
 if(/history exists in\s*,/i.test(bucklerOctDraft.body))throw new Error('Buckler October retained malformed stripped-history prose');
 
 const florida=byId.get('R2026-004-FLORIDA-CREATIVES-PSL');
@@ -131,10 +146,14 @@ if(/\$53\.50|Treat as a historical repeat|not net-new/i.test(pslDraft.body))thro
 
 const buckler=byId.get('R2026-094-BUCKLER-WPB-DEC');
 if(!buckler)throw new Error('Buckler December regression fixture missing');
-const bucklerCall=sandbox.outreach.researchCallScript(buckler);
-if(!bucklerCall)throw new Error('Buckler December should use phone-only call script');
-if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerCall.script))throw new Error('Buckler call script lost eligibility gap');
-if(!/Please confirm the current price\/package/i.test(bucklerCall.script))throw new Error('Buckler call script lost price gap');
+if(String(buckler?.detail_data?.operational_action_code||'')!=='EMAIL_THEN_APPLY')throw new Error('Buckler December should be email-then-apply');
+if(String(buckler?.detail_data?.action_url||'')!=='https://buckler.wufoo.com/forms/z15560u80epu88x/')throw new Error('Buckler December lost exact craft-fair application');
+const bucklerDraft=sandbox.outreach.researchEmailDraft(buckler);
+if(!bucklerDraft)throw new Error('Buckler December should use verified email');
+if(sandbox.outreach.researchCallScript(buckler))throw new Error('Buckler December should not fall back to a call script when verified email exists');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerDraft.body))throw new Error('Buckler December lost required Paradise eligibility confirmation');
+if(/Please confirm the current price\/package/i.test(bucklerDraft.body))throw new Error('Buckler December repeats verified current price');
+if(!/published application path/i.test(bucklerDraft.body))throw new Error('Buckler December lost email-then-apply closeout');
 
 console.log({
   outreach_contract:'PASS',

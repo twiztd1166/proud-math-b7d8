@@ -167,6 +167,7 @@ jobs:
           assert set(q4_compound) == {
               'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
               'R2026-003-PSL-OKTOBERFEST',
+              'R2026-015-BUCKLER-WPB-OCT',
               'R2026-037-WEST-BOYNTON-SENIOR',
               'R2026-039-SPACE-COAST-STATE-FAIR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
@@ -174,8 +175,21 @@ jobs:
               'R2026-062-SENIOR-DELRAY',
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
+              'R2026-094-BUCKLER-WPB-DEC',
               'R2026-900-BOCA-B2B',
           }, q4_compound
+          buckler_dec=by_control['R2026-094-BUCKLER-WPB-DEC']
+          buckler_dec_detail=buckler_dec.get('detail_data') or {}
+          assert buckler_dec_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', buckler_dec_detail
+          assert buckler_dec_detail.get('action_url') == 'https://buckler.wufoo.com/forms/z15560u80epu88x/', buckler_dec_detail
+          assert buckler_dec_detail.get('action_label') == 'Open craft-fair application', buckler_dec_detail
+          assert 'bucklershows@yahoo.com' in str(buckler_dec_detail.get('contact_text') or '').lower(), buckler_dec_detail
+          assert '$400' in str(buckler_dec_detail.get('current_cost_text') or ''), buckler_dec_detail
+          assert 'PARADISE ACCEPTANCE' in str(buckler_dec_detail.get('booking_status') or '').upper(), buckler_dec_detail
+          assert buckler_dec_detail.get('route_verified_at') == '2026-10-02', buckler_dec_detail
+          assert buckler_dec_detail.get('route_verification_source') == '2026_BUCKLER_DEC_EMAIL_ROUTE_CORRECTION', buckler_dec_detail
+          assert buckler_dec_detail.get('followup_reverification_source') == '2026_BUCKLER_DEC_EMAIL_ROUTE_CORRECTION', buckler_dec_detail
+
           boca_b2b=by_control['R2026-900-BOCA-B2B']
           boca_b2b_detail=boca_b2b.get('detail_data') or {}
           assert boca_b2b.get('event_start') == '2026-10-27', boca_b2b
@@ -228,7 +242,7 @@ jobs:
           for cid in email_route_ids:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-042-LAGOONFEST','R2026-053-DREAM-ASIA'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-042-LAGOONFEST','R2026-053-DREAM-ASIA','R2026-095-HOWARD-ALAN-DELRAY'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           route_verified={
               r.get('control_id') for r in q4
@@ -449,8 +463,16 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              expected_followup_source='2026_NEXT14_CURRENT_SOURCE_EXHAUST' if cid == 'R2026-016-MIAMI-CARNIVAL' else '2026_NEXT14_REVERIFICATION'
-              expected_route_source='2026_NEXT14_MIAMI_CARNIVAL_2026_CONTRACT_CORRECTION' if cid == 'R2026-016-MIAMI-CARNIVAL' else '2026_NEXT14_REVERIFICATION'
+              expected_followup_source=(
+                  '2026_NEXT14_CURRENT_SOURCE_EXHAUST' if cid == 'R2026-016-MIAMI-CARNIVAL'
+                  else '2026_NEXT14_BUCKLER_CRAFT_FORM_CORRECTION' if cid == 'R2026-015-BUCKLER-WPB-OCT'
+                  else '2026_NEXT14_REVERIFICATION'
+              )
+              expected_route_source=(
+                  '2026_NEXT14_MIAMI_CARNIVAL_2026_CONTRACT_CORRECTION' if cid == 'R2026-016-MIAMI-CARNIVAL'
+                  else '2026_NEXT14_BUCKLER_CRAFT_FORM_CORRECTION' if cid == 'R2026-015-BUCKLER-WPB-OCT'
+                  else '2026_NEXT14_REVERIFICATION'
+              )
               assert detail.get('followup_reverification_source') == expected_followup_source, (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
@@ -848,11 +870,14 @@ jobs:
           assert 'dfbspecialevents@deerfieldbeachfl.gov' in str(deerfield.get('contact_text') or '').lower(), deerfield
 
           buckler_oct=by_control['R2026-015-BUCKLER-WPB-OCT'].get('detail_data') or {}
-          assert buckler_oct.get('operational_action_code') == 'EMAIL_DRAFT', buckler_oct
-          assert buckler_oct.get('action_url') == 'https://bucklershows.com/Vendor-Information.php', buckler_oct
+          assert buckler_oct.get('operational_action_code') == 'EMAIL_THEN_APPLY', buckler_oct
+          assert buckler_oct.get('action_url') == 'https://buckler.wufoo.com/forms/z15560u80epu88x/', buckler_oct
+          assert buckler_oct.get('action_label') == 'Open craft-fair application', buckler_oct
           assert 'bucklershows@yahoo.com' in str(buckler_oct.get('contact_text') or '').lower(), buckler_oct
           assert '$400' in str(buckler_oct.get('current_cost_text') or ''), buckler_oct
           assert '$45' in str(buckler_oct.get('current_cost_text') or ''), buckler_oct
+          assert buckler_oct.get('route_verification_source') == '2026_NEXT14_BUCKLER_CRAFT_FORM_CORRECTION', buckler_oct
+          assert buckler_oct.get('followup_reverification_source') == '2026_NEXT14_BUCKLER_CRAFT_FORM_CORRECTION', buckler_oct
 
           hollywood=by_control['R2026-008-HOLLYWOOD-HISPANIC'].get('detail_data') or {}
           assert hollywood.get('operational_action_code') == 'EMAIL_DRAFT', hollywood
