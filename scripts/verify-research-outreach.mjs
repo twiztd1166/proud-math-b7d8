@@ -95,10 +95,10 @@ if(!pslDraft)throw new Error('PSL Fall Fun Fest should use email');
 if(!/Paradise participated in PSL Fall Fun Fest in 2024/i.test(pslDraft.body))throw new Error('PSL Fall Fun Fest lost useful historical customization');
 if(/\$53\.50|Treat as a historical repeat|not net-new/i.test(pslDraft.body))throw new Error('PSL Fall Fun Fest exposes internal/obsolete historical details');
 
-const buckler=byId.get('R2026-015-BUCKLER-WPB-OCT');
-if(!buckler)throw new Error('Buckler regression fixture missing');
+const buckler=byId.get('R2026-094-BUCKLER-WPB-DEC');
+if(!buckler)throw new Error('Buckler December regression fixture missing');
 const bucklerCall=sandbox.outreach.researchCallScript(buckler);
-if(!bucklerCall)throw new Error('Buckler should use phone-only call script');
+if(!bucklerCall)throw new Error('Buckler December should use phone-only call script');
 if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerCall.script))throw new Error('Buckler call script lost eligibility gap');
 if(!/Please confirm the current price\/package/i.test(bucklerCall.script))throw new Error('Buckler call script lost price gap');
 
