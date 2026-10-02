@@ -122,6 +122,7 @@ jobs:
             'R2026-090-SPACE-COAST-HOLIDAY-FOOD':'2026-12-01',
             'R2026-107-PALM-BAY-HOLIDAY-MARKET':'2026-12-03',
             'R2026-105-TC-HOLIDAY-FOOD':'2026-12-04',
+            'R2026-098-MELBOURNE-HOLIDAY-ART':'2026-12-05',
           }
           for cid,deadline in expected_deadlines.items():
               assert by_control[cid].get('deadline_date') == deadline, (cid,by_control[cid])
