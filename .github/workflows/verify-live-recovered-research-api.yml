@@ -194,7 +194,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-068-FREEDOM-5K'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-068-FREEDOM-5K'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -232,10 +232,12 @@ jobs:
           direct_label_expectations={
               'R2026-006-GACTC-OKTOBERFEST':('https://www.eventeny.com/events/vendor/?id=53541','Open business-services application'),
               'R2026-009-SABOR-FEST':('https://www.miamilakes-fl.gov/sabor-fest-2026-vendor-registration-form/','Open vendor registration form'),
+              'R2026-020-BRAZILIAN-FESTIVAL':('https://brazilianfestival.org/2026-exhibitorapplication-bf/','Open 2026 vendor application'),
               'R2026-022-JUPITER-SPOOKTACULAR':('https://www.jupiter.fl.us/FormCenter/Town-Manager-7/Town-of-Jupiter-Sponsorship-Agreement-20-570','Open 2026 sponsorship agreement'),
               'R2026-026-PLANTATION-FALL':('https://www.plantation.org/home/showpublisheddocument/8294/639223202279400000','Open Family Fall Festival application'),
               'R2026-029-RPB-ROCK-N-FALL':('https://pci.jotform.com/form/261183235018148','Open vendor application'),
               'R2026-031-MALABAR-FALLFEST':('https://www.townofmalabar.org/DocumentCenter/View/3591/Vendor-Participant-Sign-Up-Form-2026','Open vendor participant sign-up'),
+              'R2026-033-MOOSE-MELBOURNE':('https://www.eventeny.com/events/vendor/?id=53135','Open Sponsor Vendor application'),
               'R2026-084-CHRISTMAS-LAS-OLAS':('https://www.lasolasboulevard.com/christmas-on-las-olas-application','Open business booth application'),
               'R2026-090-SPACE-COAST-HOLIDAY-FOOD':('https://www.eventeny.com/events/vendor/?id=51168','Open sponsor application'),
               'R2026-100-WESTON-RUN':('https://form.jotform.com/241377280948163','Open sponsorship / booth application'),
@@ -248,7 +250,12 @@ jobs:
               assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
-              expected_route_source='2026_NEXT14_REVERIFICATION' if cid == 'R2026-009-SABOR-FEST' else '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
+              if cid == 'R2026-009-SABOR-FEST':
+                  expected_route_source='2026_NEXT14_REVERIFICATION'
+              elif cid in {'R2026-020-BRAZILIAN-FESTIVAL','R2026-022-JUPITER-SPOOKTACULAR','R2026-026-PLANTATION-FALL','R2026-033-MOOSE-MELBOURNE'}:
+                  expected_route_source='2026_OCT17_REVERIFICATION'
+              else:
+                  expected_route_source='2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           do_now_reverified={
               'R2026-001-NMB-CENTENNIAL',
@@ -409,6 +416,61 @@ jobs:
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+
+          oct17_reverified={
+              'R2026-020-BRAZILIAN-FESTIVAL',
+              'R2026-021-RIVERWALK-FALL',
+              'R2026-022-JUPITER-SPOOKTACULAR',
+              'R2026-023-WELLINGTON-FALL',
+              'R2026-024-POMPANO-CARIBBEAN',
+              'R2026-025-BOYNTON-FALL',
+              'R2026-026-PLANTATION-FALL',
+              'R2026-033-MOOSE-MELBOURNE',
+          }
+          for cid in oct17_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_OCT17_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          oct17_direct_reverified={
+              'R2026-020-BRAZILIAN-FESTIVAL',
+              'R2026-022-JUPITER-SPOOKTACULAR',
+              'R2026-023-WELLINGTON-FALL',
+              'R2026-024-POMPANO-CARIBBEAN',
+              'R2026-026-PLANTATION-FALL',
+              'R2026-033-MOOSE-MELBOURNE',
+          }
+          for cid in oct17_direct_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_OCT17_REVERIFICATION', (cid,detail)
+
+          brazilian=by_control['R2026-020-BRAZILIAN-FESTIVAL'].get('detail_data') or {}
+          assert brazilian.get('operational_action_code') == 'APPLY', brazilian
+          assert brazilian.get('action_url') == 'https://brazilianfestival.org/2026-exhibitorapplication-bf/', brazilian
+          assert brazilian.get('action_label') == 'Open 2026 vendor application', brazilian
+          assert '$500' in str(brazilian.get('current_cost_text') or ''), brazilian
+
+          riverwalk=by_control['R2026-021-RIVERWALK-FALL'].get('detail_data') or {}
+          assert riverwalk.get('operational_action_code') == 'EMAIL_DRAFT', riverwalk
+          assert not riverwalk.get('action_url'), riverwalk
+          assert 'events@GoRiverwalk.com' in str(riverwalk.get('contact_text') or ''), riverwalk
+          assert '$150' in str(riverwalk.get('current_cost_text') or ''), riverwalk
+          assert '$10,000' in str(riverwalk.get('current_cost_text') or ''), riverwalk
+
+          pompano_caribbean=by_control['R2026-024-POMPANO-CARIBBEAN'].get('detail_data') or {}
+          assert pompano_caribbean.get('operational_action_code') == 'OPEN_INQUIRY', pompano_caribbean
+          assert pompano_caribbean.get('action_url') == 'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form', pompano_caribbean
+          assert 'NO WORKING VENDOR-APPLICATION LINK' in str(pompano_caribbean.get('followup_reverification_basis') or '').upper(), pompano_caribbean
+
+          moose=by_control['R2026-033-MOOSE-MELBOURNE']
+          moose_detail=moose.get('detail_data') or {}
+          assert moose.get('deadline_date') == '2026-10-17', moose
+          assert moose_detail.get('operational_action_code') == 'APPLY', moose_detail
+          assert moose_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=53135', moose_detail
+          assert '$60' in str(moose_detail.get('current_cost_text') or ''), moose_detail
 
           wag=by_control['R2026-014-WAG-O-WEEN'].get('detail_data') or {}
           assert wag.get('operational_action_code') == 'EMAIL_DRAFT', wag
