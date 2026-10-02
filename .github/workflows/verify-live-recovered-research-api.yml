@@ -652,6 +652,72 @@ jobs:
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_OCT28_NOV1_REVERIFICATION', (cid,detail)
 
+          nov6_7_reverified={
+              'R2026-052-NASCAR-HOMESTEAD',
+              'R2026-054-CARIFEST',
+              'R2026-055-DAY-DEAD',
+              'R2026-056-BARK-TITUSVILLE',
+              'R2026-057-NORTH-MIAMI-HEALTH',
+              'R2026-058-MIAMI-FOOD-WINE',
+              'R2026-059-TC-BREW-FEST',
+              'R2026-116-NASA-MAX-POWER',
+          }
+          for cid in nov6_7_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_NOV6_7_REVERIFICATION', (cid,detail)
+
+          assert sum(
+              1 for r in q4
+              if str((r.get('detail_data') or {}).get('followup_reverified_at') or '').strip()
+          ) >= 69
+
+          bark_nov=by_control['R2026-056-BARK-TITUSVILLE'].get('detail_data') or {}
+          assert bark_nov.get('operational_action_code') == 'EMAIL_DRAFT', bark_nov
+          assert not bark_nov.get('action_url'), bark_nov
+          assert '$40' in str(bark_nov.get('current_cost_text') or ''), bark_nov
+          assert 'VENDOR APPLICATION CLOSED' in str(bark_nov.get('booking_status') or '').upper(), bark_nov
+          assert 'SPONSORSHIP ROUTE CURRENT' in str(bark_nov.get('booking_status') or '').upper(), bark_nov
+
+          nasa=by_control['R2026-116-NASA-MAX-POWER'].get('detail_data') or {}
+          assert nasa.get('operational_action_code') == 'EMAIL_DRAFT', nasa
+          assert 'sales@air.show' in str(nasa.get('contact_text') or '').lower(), nasa
+          assert '813-447-0151' in str(nasa.get('contact_text') or ''), nasa
+          assert nasa.get('action_url') == 'https://blilleyproductionsllc.quickbase.com/db/bga728dji?a=dbpage&pageID=74', nasa
+          assert nasa.get('action_label') == 'Open partnership inquiry form', nasa
+          assert nasa.get('route_verified_at') == '2026-10-02', nasa
+          assert nasa.get('route_verification_source') == '2026_NOV6_7_REVERIFICATION', nasa
+          assert 'LIVE PARTNERSHIP INQUIRY FORM' in str(nasa.get('booking_status') or '').upper(), nasa
+
+          carifest_nov=by_control['R2026-054-CARIFEST'].get('detail_data') or {}
+          assert carifest_nov.get('operational_action_code') == 'EMAIL_DRAFT', carifest_nov
+          assert 'CURRENT COMMERCIAL APPLICATION NOT PUBLISHED' in str(carifest_nov.get('booking_status') or '').upper(), carifest_nov
+
+          day_dead=by_control['R2026-055-DAY-DEAD'].get('detail_data') or {}
+          assert day_dead.get('operational_action_code') == 'EMAIL_DRAFT', day_dead
+          assert '$150' in str(day_dead.get('current_cost_text') or ''), day_dead
+          assert '$400' in str(day_dead.get('current_cost_text') or ''), day_dead
+          assert 'events@goriverwalk.com' in str(day_dead.get('contact_text') or '').lower(), day_dead
+
+          miami_food_nov=by_control['R2026-058-MIAMI-FOOD-WINE'].get('detail_data') or {}
+          assert miami_food_nov.get('operational_action_code') == 'OPEN_INQUIRY', miami_food_nov
+          assert miami_food_nov.get('action_url') == 'https://miamidadefoodwine.com/sponsors', miami_food_nov
+          assert 'PARTNER SLOTS OPEN' in str(miami_food_nov.get('booking_status') or '').upper(), miami_food_nov
+
+          north_miami_health=by_control['R2026-057-NORTH-MIAMI-HEALTH'].get('detail_data') or {}
+          assert north_miami_health.get('operational_action_code') == 'EMAIL_THEN_APPLY', north_miami_health
+          assert north_miami_health.get('action_url') == 'https://mjdhealthfair.com/#/vendors', north_miami_health
+          assert '$300' in str(north_miami_health.get('current_cost_text') or ''), north_miami_health
+          assert 'CATEGORY FIT TO CONFIRM' in str(north_miami_health.get('booking_status') or '').upper(), north_miami_health
+
+          tc_brew_nov=by_control['R2026-059-TC-BREW-FEST'].get('detail_data') or {}
+          assert tc_brew_nov.get('operational_action_code') == 'REVIEW', tc_brew_nov
+          assert tc_brew_nov.get('action_url') == 'https://www.tcbrewfest.com/sponsor', tc_brew_nov
+          assert '$275' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+          assert '$600' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+          assert '$5,000' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+
           flibs=by_control['R2026-038-FLIBS'].get('detail_data') or {}
           assert flibs.get('operational_action_code') == 'OPEN_INQUIRY', flibs
           assert flibs.get('action_url') == 'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e', flibs
