@@ -830,8 +830,21 @@ jobs:
               'R2026-062-SENIOR-DELRAY',
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
+              'R2026-094-BUCKLER-WPB-DEC',
               'R2026-900-BOCA-B2B',
           }, q4_compound
+          buckler_dec=controls['R2026-094-BUCKLER-WPB-DEC']
+          buckler_dec_detail=buckler_dec.get('detail_data') or {}
+          assert buckler_dec_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', buckler_dec_detail
+          assert buckler_dec_detail.get('action_url') == 'https://buckler.wufoo.com/forms/z15560u80epu88x/', buckler_dec_detail
+          assert buckler_dec_detail.get('action_label') == 'Open craft-fair application', buckler_dec_detail
+          assert 'bucklershows@yahoo.com' in str(buckler_dec_detail.get('contact_text') or '').lower(), buckler_dec_detail
+          assert '$400' in str(buckler_dec_detail.get('current_cost_text') or ''), buckler_dec_detail
+          assert 'PARADISE ACCEPTANCE' in str(buckler_dec_detail.get('booking_status') or '').upper(), buckler_dec_detail
+          assert buckler_dec_detail.get('route_verified_at') == '2026-10-02', buckler_dec_detail
+          assert buckler_dec_detail.get('route_verification_source') == '2026_BUCKLER_DEC_EMAIL_ROUTE_CORRECTION', buckler_dec_detail
+          assert buckler_dec_detail.get('followup_reverification_source') == '2026_BUCKLER_DEC_EMAIL_ROUTE_CORRECTION', buckler_dec_detail
+
           boca_b2b=controls['R2026-900-BOCA-B2B']
           boca_b2b_detail=boca_b2b.get('detail_data') or {}
           assert boca_b2b.get('event_start') == '2026-10-27', boca_b2b
