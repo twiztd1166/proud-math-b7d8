@@ -826,6 +826,7 @@ jobs:
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
               'R2026-062-SENIOR-DELRAY',
+              'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
           }, q4_compound
           inquiry_expectations={
