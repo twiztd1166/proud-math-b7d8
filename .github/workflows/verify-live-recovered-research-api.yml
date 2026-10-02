@@ -389,7 +389,8 @@ jobs:
               detail=row.get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_NEXT7_REVERIFICATION', (cid,detail)
+              expected_followup_source='2026_NEXT7_GRACE_SMALL_BUSINESS_ROUTE_CORRECTION' if cid == 'R2026-061-GRACE-JERK' else '2026_NEXT7_REVERIFICATION'
+              assert detail.get('followup_reverification_source') == expected_followup_source, (cid,detail)
               assert str(detail.get('official_source_url') or '').strip(), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
@@ -430,6 +431,9 @@ jobs:
           assert 'publicly readable' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
           assert 'optional' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
           assert grace_detail.get('route_verification_source') == '2026_NEXT7_GRACE_SMALL_BUSINESS_ROUTE_CORRECTION', grace_detail
+          assert 'SMALL BUSINESS' in str(grace_detail.get('followup_reverification_basis') or '').upper(), grace_detail
+          assert 'PUBLICLY READABLE' in str(grace_detail.get('followup_reverification_basis') or '').upper(), grace_detail
+          assert 'same Google Form' not in str(grace_detail.get('followup_reverification_basis') or ''), grace_detail
 
           next14_reverified={
               'R2026-008-HOLLYWOOD-HISPANIC',
