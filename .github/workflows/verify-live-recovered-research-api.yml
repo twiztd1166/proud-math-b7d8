@@ -674,7 +674,7 @@ jobs:
           assert not palm_bay_senior.get('action_url'), palm_bay_senior
           assert 'vendorfair@gpbsc.net' in str(palm_bay_senior.get('contact_text') or '').lower(), palm_bay_senior
           assert '321-724-1338' in str(palm_bay_senior.get('contact_text') or ''), palm_bay_senior
-          assert 'ROOT DOMAIN CURRENTLY REDIRECTS TO UNRELATED CONTENT' in str(palm_bay_senior.get('followup_reverification_basis') or '').upper(), palm_bay_senior
+          assert 'NEWSLETTER PDF NOW RETURNS 404' in str(palm_bay_senior.get('followup_reverification_basis') or '').upper(), palm_bay_senior
           assert not str(palm_bay_senior.get('route_verified_at') or '').strip(), palm_bay_senior
 
           west_boynton=by_control['R2026-037-WEST-BOYNTON-SENIOR'].get('detail_data') or {}
