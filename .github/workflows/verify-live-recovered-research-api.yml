@@ -696,6 +696,7 @@ jobs:
           wicked_detail=wicked.get('detail_data') or {}
           assert wicked_detail.get('operational_action_code') == 'EMAIL_DRAFT', wicked_detail
           assert wicked_detail.get('action_url') == 'https://wickedmanors.org/wp-content/uploads/2026/08/WM-2026-Brand-Partnership-Deck.pdf', wicked_detail
+          assert wicked_detail.get('official_source_url') == 'https://wickedmanors.org/wp-content/uploads/2026/08/WM-2026-Brand-Partnership-Deck.pdf', wicked_detail
           assert wicked_detail.get('action_label') == 'Open 2026 partnership deck', wicked_detail
           assert wicked_detail.get('schedule_text') == 'Oct. 31, 2026 · 5:00 PM–11:00 PM', wicked_detail
           assert '$25,000' in str(wicked_detail.get('current_cost_text') or ''), wicked_detail
