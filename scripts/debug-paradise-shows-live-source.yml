@@ -708,7 +708,7 @@ jobs:
           assert len(x.get('shows') or []) == 37, len(x.get('shows') or [])
           assert len(x.get('payments') or []) == 4, len(x.get('payments') or [])
           research=x.get('researchCalendarControls') or []
-          assert len(research) == 115, len(research)
+          assert len(research) == 116, len(research)
           def research_sort_date(r):
               return str(r.get('event_start') or r.get('estimated_sort_date') or '')
           visible_q4=[r for r in research if '2026-10-01' <= research_sort_date(r) < '2027-01-01']
@@ -720,8 +720,8 @@ jobs:
               if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
               and not (not r.get('event_start') and r.get('estimated_sort_date'))
           ]
-          assert len(visible_q4) == 115, len(visible_q4)
-          assert len(exact_research) == 114, len(exact_research)
+          assert len(visible_q4) == 116, len(visible_q4)
+          assert len(exact_research) == 115, len(exact_research)
           assert len(estimated_research) == 1, len(estimated_research)
           assert not unsortable_research, unsortable_research
           assert not semantic_bad, semantic_bad
@@ -828,6 +828,7 @@ jobs:
               'R2026-062-SENIOR-DELRAY',
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
+              'R2026-900-BOCA-B2B',
           }, q4_compound
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
