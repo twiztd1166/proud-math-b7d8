@@ -46,9 +46,9 @@ jobs:
               if str(r.get('date_confidence') or '').upper() in {'ESTIMATED','RECURRING_HIGH_CONFIDENCE'}
               and not (not r.get('event_start') and r.get('estimated_sort_date'))
           ]
-          assert len(research) == 115, len(research)
-          assert len(q4) == 115, len(q4)
-          assert len(exact) == 114, len(exact)
+          assert len(research) == 116, len(research)
+          assert len(q4) == 116, len(q4)
+          assert len(exact) == 115, len(exact)
           assert len(estimated) == 1, len(estimated)
           assert len(unsortable) == 0, unsortable
           assert not semantic_bad, semantic_bad
@@ -101,6 +101,7 @@ jobs:
           expected_deadlines={
             'R2026-068-FREEDOM-5K':'2026-09-15',
             'R2026-004-FLORIDA-CREATIVES-PSL':'2026-09-30',
+            'R2026-016-MIAMI-CARNIVAL':'2026-09-30',
             'R2026-013-PUMPKINS-PALMS':'2026-10-01',
             'R2026-043-BOYNTON-PIRATE':'2026-10-01',
             'R2026-006-GACTC-OKTOBERFEST':'2026-10-08',
@@ -173,7 +174,22 @@ jobs:
               'R2026-062-SENIOR-DELRAY',
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
+              'R2026-900-BOCA-B2B',
           }, q4_compound
+          boca_b2b=by_control['R2026-900-BOCA-B2B']
+          boca_b2b_detail=boca_b2b.get('detail_data') or {}
+          assert boca_b2b.get('event_start') == '2026-10-27', boca_b2b
+          assert boca_b2b.get('research_status') == 'CURRENT_REVERIFIED', boca_b2b
+          assert boca_b2b_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', boca_b2b_detail
+          assert boca_b2b_detail.get('action_label') == 'Open Fall Business Expo exhibitor application', boca_b2b_detail
+          assert str(boca_b2b_detail.get('action_url') or '').startswith('https://na1.documents.adobe.com/public/esignWidget'), boca_b2b_detail
+          assert 'svielot@bocachamber.com' in str(boca_b2b_detail.get('contact_text') or '').lower(), boca_b2b_detail
+          assert 'ACTIVE CHAMBER MEMBERS ONLY' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert 'PARADISE MEMBERSHIP NOT VERIFIED' in str(boca_b2b_detail.get('booking_status') or '').upper(), boca_b2b_detail
+          assert boca_b2b_detail.get('route_verified_at') == '2026-10-02', boca_b2b_detail
+          assert boca_b2b_detail.get('route_verification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+          assert boca_b2b_detail.get('followup_reverification_source') == '2026_BOCA_B2B_REVERIFICATION', boca_b2b_detail
+
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
@@ -285,8 +301,12 @@ jobs:
           assert coral_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', coral_detail
           assert coral_detail.get('action_url') == 'https://forms.coralsprings.gov/241194820975968', coral_detail
           assert coral_detail.get('action_label') == 'Open Oktoberfest vendor application', coral_detail
-          assert 'OKTOBERFEST' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
+          assert '$100 BUSINESS BOOTH VENDOR' in str(coral_detail.get('current_cost_text') or '').upper(), coral_detail
+          assert 'AVAILABLE' in str(coral_detail.get('current_cost_text') or '').upper(), coral_detail
+          assert coral_detail.get('current_cost_status') == 'CURRENT EXACT FEE / AVAILABILITY VERIFIED', coral_detail
+          assert 'OKTOBERFEST BUSINESS BOOTH VENDOR AVAILABLE' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
           assert 'SERVICE-BUSINESS FIT' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
+          assert coral_detail.get('route_verification_source') == '2026_DO_NOW_CORAL_SPRINGS_WEBTRAC_REVERIFICATION', coral_detail
 
           psl_detail=by_control['R2026-003-PSL-OKTOBERFEST'].get('detail_data') or {}
           assert psl_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', psl_detail
@@ -419,10 +439,12 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              expected_followup_source='2026_NEXT14_CURRENT_SOURCE_EXHAUST' if cid == 'R2026-016-MIAMI-CARNIVAL' else '2026_NEXT14_REVERIFICATION'
+              expected_route_source='2026_NEXT14_MIAMI_CARNIVAL_2026_CONTRACT_CORRECTION' if cid == 'R2026-016-MIAMI-CARNIVAL' else '2026_NEXT14_REVERIFICATION'
+              assert detail.get('followup_reverification_source') == expected_followup_source, (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
 
           oct17_reverified={
               'R2026-020-BRAZILIAN-FESTIVAL',
@@ -829,12 +851,21 @@ jobs:
           assert '$500' in str(hollywood.get('current_cost_text') or ''), hollywood
           assert '$2,500' in str(hollywood.get('current_cost_text') or ''), hollywood
 
-          miami_carnival=by_control['R2026-016-MIAMI-CARNIVAL'].get('detail_data') or {}
+          miami_carnival_row=by_control['R2026-016-MIAMI-CARNIVAL']
+          miami_carnival=miami_carnival_row.get('detail_data') or {}
+          assert miami_carnival_row.get('deadline_date') == '2026-09-30', miami_carnival_row
           assert miami_carnival.get('operational_action_code') == 'EMAIL_DRAFT', miami_carnival
           assert not miami_carnival.get('action_url'), miami_carnival
           assert '$2,500' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
           assert '$4,000' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
-          assert 'VENUE CONFLICT' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
+          assert miami_carnival.get('corporate_vendor_form_url') == 'https://miamicarnival.org/wp-content/uploads/2026/05/2026-Carnival-Corporate-Vendor-Application.pdf', miami_carnival
+          assert miami_carnival.get('corrective_reverification_source') == '2026_CURRENT_CONTRACT_PRICE_CORRECTION_CORRECTED', miami_carnival
+          assert 'SUPERSEDED MARCH FORM' in str(miami_carnival.get('corrective_reverification_basis') or '').upper(), miami_carnival
+          assert 'SEP. 30 BOOTH-SALE CUTOFF PASSED' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
+          assert 'LATE-INVENTORY EMAIL INQUIRY ONLY' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
+          assert 'ACTIVATION VENUE REQUIRES WRITTEN CONFIRMATION' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
+          assert 'NO SALE OF BOOTHS AFTER SEP. 30' in str(miami_carnival.get('deadline_text') or '').upper(), miami_carnival
+          assert miami_carnival.get('route_verification_source') == '2026_NEXT14_MIAMI_CARNIVAL_2026_CONTRACT_CORRECTION', miami_carnival
 
           cars_oct=by_control['R2026-017-CARS-COFFEE-OCT'].get('detail_data') or {}
           assert cars_oct.get('operational_action_code') == 'OPEN_INQUIRY', cars_oct
