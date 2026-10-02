@@ -219,7 +219,11 @@ function researchUrgency(row){
   const availability=researchAvailability(row);
   const deadlineDays=researchDaysUntil(row?.deadline_date);
   const eventDays=researchDaysUntil(row?.event_start||row?.estimated_sort_date);
-  if(availability.code==='LATE'||(deadlineDays!==null&&deadlineDays<0))return {code:'LATE',label:'CALL NOW — LATE INVENTORY',rank:1};
+  if(availability.code==='LATE'||(deadlineDays!==null&&deadlineDays<0)){
+    const actionCode=String(row?.detail_data?.operational_action_code||'').trim().toUpperCase();
+    const phoneFirst=['CALL_SCRIPT','CALL_THEN_APPLY'].includes(actionCode);
+    return {code:'LATE',label:phoneFirst?'CALL NOW — LATE INVENTORY':'ACT NOW — LATE INVENTORY',rank:1};
+  }
   const days=deadlineDays!==null?deadlineDays:eventDays;
   if(days!==null&&days<=3)return {code:'DO_NOW',label:'DO NOW',rank:0};
   if(days!==null&&days<=7)return {code:'NEXT_7',label:'NEXT 7 DAYS',rank:2};
