@@ -738,9 +738,14 @@ function openResearchDetail(id){
   const inquiryHref=operationalCode==='OPEN_INQUIRY'?String(d.action_url||official||archive||'').trim():'';
   const inquiryLabel=String(d.action_label||'Open inquiry / request form');
   const inquiryButton=inquiryHref?`<a class="btn primary" target="_blank" rel="noopener" href="${esc(inquiryHref)}">${esc(inquiryLabel)}</a>`:'';
+  const referenceActionCodes=['REVIEW','HOLD','MONITOR','REVERIFY'];
+  const referenceHref=referenceActionCodes.includes(operationalCode)?String(d.action_url||official||archive||'').trim():'';
+  const referenceDefaultLabel=({REVIEW:'Open review source',HOLD:'Open hold reference',MONITOR:'Open current source',REVERIFY:'Open verification source'})[operationalCode]||'Open reference';
+  const referenceLabel=String(d.action_label||referenceDefaultLabel);
+  const referenceButton=referenceHref?`<a class="btn ${['REVIEW','REVERIFY'].includes(operationalCode)?'primary':'secondary'}" target="_blank" rel="noopener" href="${esc(referenceHref)}">${esc(referenceLabel)}</a>`:'';
   const sourceButtons=[
-    official&&official!==applyHref?`<a class="btn primary sourceBtn" target="_blank" rel="noopener" href="${esc(official)}">Open official source</a>`:'',
-    archive&&archive!==applyHref?`<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="${esc(archive)}">Open recovered research source</a>`:'',
+    official&&![applyHref,inquiryHref,referenceHref].includes(official)?`<a class="btn primary sourceBtn" target="_blank" rel="noopener" href="${esc(official)}">Open official source</a>`:'',
+    archive&&![applyHref,inquiryHref,referenceHref].includes(archive)?`<a class="btn secondary sourceBtn" target="_blank" rel="noopener" href="${esc(archive)}">Open recovered research source</a>`:'',
   ].join('');
   const linkedButtons=[
     row.mfc_id?`<button class="btn secondary" id="researchLinkedMfcBtn">Open linked show</button>`:'',
@@ -777,7 +782,7 @@ function openResearchDetail(id){
     <div class="block primaryActionBlock"><div class="k">Next action</div><div class="val">${esc(nextAction)}</div></div>
     ${actionGuard?`<div class="block"><div class="k">Action guard</div><div class="val">${esc(actionGuard)}</div></div>`:''}
     <div class="sourceWarn historyIntro"><b>Source-first control.</b> “Not verified” means the prior research did not establish that field strongly enough to treat it as fact. Recovered prices, availability and terms must be reconfirmed before payment or commitment.</div>
-    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${applyButton}${inquiryButton}${emailDraftButton}${callScriptButton}${sourceButtons}${linkedButtons}</div>`;
+    <div class="actions detailActions"><button class="btn secondary" id="researchDetailCloseBtn">Close</button>${applyButton}${inquiryButton}${emailDraftButton}${callScriptButton}${referenceButton}${sourceButtons}${linkedButtons}</div>`;
   $('#researchDetailCloseBtn').onclick=()=>closeModal('detailModal');
   const callScriptBtn=$('#researchCallScriptBtn');if(callScriptBtn)callScriptBtn.onclick=()=>openResearchCallScript(row.control_id);
   const addBtn=$('#researchNoteAddBtn'),input=$('#researchNoteInput');
