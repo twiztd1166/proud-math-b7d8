@@ -420,10 +420,16 @@ jobs:
           grace_detail=grace.get('detail_data') or {}
           assert grace.get('deadline_date') == '2026-10-09', grace
           assert grace_detail.get('operational_action_code') == 'APPLY', grace_detail
-          assert grace_detail.get('action_url') == 'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform', grace_detail
-          assert 'GOOGLE SIGN-IN REQUIRED' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
-          assert 'google sign-in' in str(grace_detail.get('operational_guard') or '').lower(), grace_detail
-          assert 'google sign-in' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+          assert grace_detail.get('action_url') == 'https://docs.google.com/forms/d/e/1FAIpQLScGo0oNQnO3-hOb_A1T4GAHMM5NRjKFrksxPrOCR5XkExVatg/viewform', grace_detail
+          assert grace_detail.get('action_label') == 'Open small-business application', grace_detail
+          assert grace_detail.get('official_source_url') == 'https://jerkfestival.com/vendors/', grace_detail
+          assert '$1,500' in str(grace_detail.get('current_cost_text') or ''), grace_detail
+          assert 'BUSINESS PROMOTION NON-SELLING' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
+          assert 'OCT. 9' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
+          assert 'Vendors@jerkfestival.com' in str(grace_detail.get('contact_text') or ''), grace_detail
+          assert 'publicly readable' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+          assert 'optional' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+          assert grace_detail.get('route_verification_source') == '2026_NEXT7_GRACE_SMALL_BUSINESS_ROUTE_CORRECTION', grace_detail
 
           next14_reverified={
               'R2026-008-HOLLYWOOD-HISPANIC',
@@ -925,7 +931,7 @@ jobs:
           assert wellington_parade_detail.get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP', wellington_parade_detail
           direct_apply_expectations={
               'R2026-030-DELRAY-KIDSFEST':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
-              'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform',
+              'R2026-061-GRACE-JERK':'https://docs.google.com/forms/d/e/1FAIpQLScGo0oNQnO3-hOb_A1T4GAHMM5NRjKFrksxPrOCR5XkExVatg/viewform',
               'R2026-088-HALLANDALE-HOLIDAY':'https://hallandalebeachfl.gov/DocumentCenter/View/38253/2026-Holiday-Sponsor-Application-Fillable',
               'R2026-109-DELRAY-HOLIDAY-PARADE':'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000',
           }
@@ -933,7 +939,11 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_source='2026_OCT22_24_REVERIFICATION' if cid == 'R2026-030-DELRAY-KIDSFEST' else '2026_Q4_COMPOUND_ACTION_REVERIFICATION'
+              expected_route_source=(
+                  '2026_OCT22_24_REVERIFICATION' if cid == 'R2026-030-DELRAY-KIDSFEST'
+                  else '2026_NEXT7_GRACE_SMALL_BUSINESS_ROUTE_CORRECTION' if cid == 'R2026-061-GRACE-JERK'
+                  else '2026_Q4_COMPOUND_ACTION_REVERIFICATION'
+              )
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           mjd_detail=by_control['R2026-057-NORTH-MIAMI-HEALTH'].get('detail_data') or {}
           assert mjd_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', mjd_detail
