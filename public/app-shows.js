@@ -366,7 +366,7 @@ function renderCalendar(){
   if(p.loading&&!p.loaded)return '<div class="hero"><h1>Calendar</h1><p>Loading the published 2027 plan…</p></div><div class="loading">Loading calendar…</div>';
   if(p.error&&!p.loaded)return `<div class="hero"><h1>Calendar</h1><p>Published annual-plan schedule and conflicts.</p></div><div class="alert"><div class="event">Calendar unavailable</div><div class="action">${esc(p.error)}</div><div class="actions"><button class="btn primary" id="annualPlanRetry">Try again</button></div></div>`;
   if(!p.loaded)return '<div class="loading">Opening calendar…</div>';
-  const rows=p.rows||[];
+  const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));
   const pursue=rows.filter(r=>r.plan_decision==='PURSUE');
   const watch=rows.filter(r=>r.plan_decision==='WATCH');
   const conflicts=pursue.filter(r=>String(r.conflict_notes||'').trim());
@@ -2271,6 +2271,20 @@ function annualPlanSourceUrl(ref){
   return '';
 }
 
+function annualPlanIsAuditDuplicate(row){
+  return String(row?.publication_status||'').toUpperCase().includes('DUPLICATE_SUPPRESSED');
+}
+
+function annualPlanSearchMatches(row){
+  const q=String(state.search||'').trim().toLowerCase();
+  if(!q)return true;
+  return [
+    row.profile_id,row.canonical_event,row.occurrence_label,row.plan_decision,row.priority,row.publication_status,row.date_confidence,
+    row.expected_window_text,row.action_window_text,row.cost_status,row.budget_basis,row.placement_reference,row.historical_signal,
+    row.next_action,row.source_basis,row.conflict_notes
+  ].some(v=>String(v||'').toLowerCase().includes(q));
+}
+
 function annualPlanOutreachProfile(row){
   const legacy=String(row?.legacy_next_action||'').trim();
   const event=String(row?.occurrence_label||row?.canonical_event||'2027 event').trim();
@@ -2349,19 +2363,19 @@ function annualPlanMonthKey(row){
 
 function annualPlanMatches(row){
   const filter=String(state.annualPlan?.filter||'ALL');
+  const auditDuplicate=annualPlanIsAuditDuplicate(row);
+  if(filter==='AUDIT_DUPLICATES'){
+    if(!auditDuplicate)return false;
+    return annualPlanSearchMatches(row);
+  }
+  if(auditDuplicate)return false;
   if(filter==='PURSUE'&&row.plan_decision!=='PURSUE')return false;
   if(filter==='WATCH'&&row.plan_decision!=='WATCH')return false;
   if(filter==='RESEARCH'&&row.plan_decision!=='RESEARCH_IDENTITY')return false;
   if(filter==='EXACT'&&!row.event_start)return false;
   if(filter==='EXPECTED'&&!(row.schedule_type==='EXPECTED_WINDOW'||row.schedule_type==='UNSCHEDULED_WATCH'))return false;
   if(filter==='CONFLICTS'&&!String(row.conflict_notes||'').trim())return false;
-  const q=String(state.search||'').trim().toLowerCase();
-  if(!q)return true;
-  return [
-    row.profile_id,row.canonical_event,row.occurrence_label,row.plan_decision,row.priority,row.publication_status,row.date_confidence,
-    row.expected_window_text,row.action_window_text,row.cost_status,row.budget_basis,row.placement_reference,row.historical_signal,
-    row.next_action,row.source_basis,row.conflict_notes
-  ].some(v=>String(v||'').toLowerCase().includes(q));
+  return annualPlanSearchMatches(row);
 }
 
 function annualPlanCard(row){
@@ -2420,38 +2434,50 @@ function renderAnnualPlan(){
   if(p.error&&!p.loaded)return `<div class="alert"><div class="event">2027 plan unavailable</div><div class="action">${esc(p.error)}</div><div class="actions"><button class="btn primary" id="annualPlanRetry">Try again</button></div></div>`;
   if(!p.loaded)return '<div class="loading">Opening 2027 annual plan…</div>';
   if(!p.run)return '<div class="empty">No READY 2027 annual plan is published.</div>';
-  const summary=p.summary||{};
+  const allRows=p.rows||[];
+  const planningRows=allRows.filter(row=>!annualPlanIsAuditDuplicate(row));
+  const auditRows=allRows.filter(annualPlanIsAuditDuplicate);
+  const planningProfiles=new Set(planningRows.map(row=>String(row.profile_id||'').trim()).filter(Boolean)).size;
+  const planningPursue=planningRows.filter(row=>row.plan_decision==='PURSUE').length;
+  const planningWatch=planningRows.filter(row=>row.plan_decision==='WATCH').length;
+  const planningResearch=planningRows.filter(row=>row.plan_decision==='RESEARCH_IDENTITY').length;
+  const planningExact=planningRows.filter(row=>Boolean(row.event_start)).length;
+  const planningExpected=planningRows.filter(row=>row.schedule_type==='EXPECTED_WINDOW'||row.schedule_type==='UNSCHEDULED_WATCH').length;
+  const planningConflicts=planningRows.filter(row=>String(row.conflict_notes||'').trim()).length;
   const weights={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
-  const rows=(p.rows||[]).filter(annualPlanMatches).slice().sort((a,b)=>
+  const rows=allRows.filter(annualPlanMatches).slice().sort((a,b)=>
     annualPlanMonthKey(a).localeCompare(annualPlanMonthKey(b))||
     (weights[a.plan_decision]??9)-(weights[b.plan_decision]??9)||
     String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))
   );
   const filters=[
-    ['ALL','All '+Number(summary.rows||0)],
-    ['PURSUE','Pursue '+Number(summary.pursue||0)],
-    ['WATCH','Watch '+Number(summary.watch||0)],
-    ['RESEARCH','Research '+Number(summary.research||0)],
-    ['EXACT','Exact/current '+Number(summary.exact||0)],
-    ['EXPECTED','Expected / unpublished '+Number(summary.expected||0)],
-    ['CONFLICTS','Conflicts '+Number(summary.conflicts||0)],
+    ['ALL','All '+planningRows.length],
+    ['PURSUE','Pursue '+planningPursue],
+    ['WATCH','Watch '+planningWatch],
+    ['RESEARCH','Research '+planningResearch],
+    ['EXACT','Exact/current '+planningExact],
+    ['EXPECTED','Expected / unpublished '+planningExpected],
+    ['CONFLICTS','Conflicts '+planningConflicts],
+    ['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length],
   ];
   const controls=`<div class="filterbar">${filters.map(([key,label])=>`<button class="chip ${p.filter===key?'active':''}" data-annual-filter="${key}">${esc(label)}</button>`).join('')}</div>`;
   const metrics=`<div class="bookingBoardMetrics">
-    <div><span>Plan rows</span><b>${Number(summary.rows||0)}</b></div>
-    <div><span>Profiles covered</span><b>${Number(summary.profiles||0)}</b></div>
-    <div><span>Pursue</span><b>${Number(summary.pursue||0)}</b></div>
-    <div><span>Watch</span><b>${Number(summary.watch||0)}</b></div>
-    <div><span>Identity research</span><b>${Number(summary.research||0)}</b></div>
-    <div><span>Exact/current dates</span><b>${Number(summary.exact||0)}</b></div>
+    <div><span>Planning rows</span><b>${planningRows.length}</b></div>
+    <div><span>Planning profiles</span><b>${planningProfiles}</b></div>
+    <div><span>Pursue</span><b>${planningPursue}</b></div>
+    <div><span>Watch</span><b>${planningWatch}</b></div>
+    <div><span>Audit duplicates</span><b>${auditRows.length}</b></div>
+    <div><span>Exact/current dates</span><b>${planningExact}</b></div>
   </div>`;
-  const intro=`<div class="sourceWarn"><b>2027 planning semantics.</b> Exact/current dates are governed from a current opportunity, contract, official schedule or governed annual rule. Expected windows preserve recurrence only and are not booking dates. Prior-cycle prices are guides only unless the card explicitly says current/known verified. Identity-research rows cannot be booked until the legacy name is reconciled to a current series.</div>`;
-  return `<div class="annualPlanHead"><div class="hero compactHero"><h2>2027 booking plan</h2><p>${Number(summary.rows||0)} plan rows · ${Number(summary.profiles||0)} profiles · READY run ${esc(String(p.run.id||'').slice(0,8))}</p></div>${metrics}${intro}${controls}<div class="filterbar"><label class="searchbox"><span>Search 2027 plan</span><input id="searchInput" value="${esc(state.search)}" placeholder="Event, month, action, conflict, placement…"></label></div></div>${rows.map(annualPlanCard).join('')||'<div class="empty">No 2027 plan rows match this view.</div>'}`;
+  const intro=`<div class="sourceWarn"><b>2027 planning semantics.</b> Exact/current dates are governed from a current opportunity, contract, official schedule or governed annual rule. Expected windows preserve recurrence only and are not booking dates. Prior-cycle prices are guides only unless the card explicitly says current/known verified. Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views; use Audit duplicates to inspect them.</div>`;
+  return `<div class="annualPlanHead"><div class="hero compactHero"><h2>2027 booking plan</h2><p>${planningRows.length} planning rows · ${auditRows.length} audit-only duplicates preserved · ${planningProfiles} planning profiles · READY run ${esc(String(p.run.id||'').slice(0,8))}</p></div>${metrics}${intro}${controls}<div class="filterbar"><label class="searchbox"><span>Search 2027 plan</span><input id="searchInput" value="${esc(state.search)}" placeholder="Event, month, action, conflict, placement…"></label></div></div>${rows.map(annualPlanCard).join('')||'<div class="empty">No 2027 plan rows match this view.</div>'}`;
 }
 
 function renderShows(){
   const profileCount=Number(state.catalogSummary?.profile_count||state.catalog.length||0),occCount=Number(state.catalogSummary?.occurrence_count||0);
-  const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0),annualCount=Number(state.annualPlan?.summary?.rows||0);
+  const unlinkedCount=Number(state.unlinkedLp.summary?.cumulative_rows||0),annualCount=state.annualPlan?.loaded
+    ?(state.annualPlan.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row)).length
+    :Number(state.annualPlan?.summary?.rows||0);
   const top=`<div class="hero"><h1>Shows & history</h1><p>Search current controls, the published annual plan, and preserved historical evidence.</p></div><div class="filterbar modebar"><button class="chip ${state.showMode==='CURRENT'?'active':''}" data-show-mode="CURRENT">Current ${state.shows.length}</button><button class="chip ${state.showMode==='PLAN2027'?'active':''}" data-show-mode="PLAN2027">2027 Plan${annualCount?' '+annualCount:''}</button><button class="chip ${state.showMode==='ALL'?'active':''}" data-show-mode="ALL">All history ${profileCount||''}</button><button class="chip ${state.showMode==='UNLINKED'?'active':''}" data-show-mode="UNLINKED">Data cleanup${unlinkedCount?' '+unlinkedCount:''}</button></div>`;
   if(state.showMode==='CURRENT')return top+renderCurrentShows();
   if(state.showMode==='PLAN2027')return top+(typeof window.renderAnnualPlanScoped==='function'?window.renderAnnualPlanScoped():renderAnnualPlan());
