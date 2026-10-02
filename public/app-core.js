@@ -423,7 +423,7 @@ async function loadAnnualPlan(force=false){
   const p=state.annualPlan;
   if(p.loading||(!force&&p.loaded))return;
   p.loading=true;p.error=null;
-  if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
+  if(state.tab==='today'||state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
   try{
     const d=await call('annualPlan',{year:p.year});
     p.rows=d.rows||[];p.summary=d.summary||null;p.run=d.run||null;p.loaded=true;
@@ -432,7 +432,7 @@ async function loadAnnualPlan(force=false){
     toast('2027 annual plan unavailable');
   }finally{
     p.loading=false;
-    if(state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
+    if(state.tab==='today'||state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
   }
 }
 async function loadCatalog(force=false){
@@ -458,7 +458,7 @@ async function bootstrap(){
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
     if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
     if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
-    if(((state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
+    if((state.tab==='today'||(state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
   }catch(e){
     toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
   }
