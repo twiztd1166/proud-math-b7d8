@@ -2,6 +2,17 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('public/app-shows.js','utf8');
+const coreSource=fs.readFileSync('public/app-core.js','utf8');
+const modalSource=fs.readFileSync('public/app-modals.js','utf8');
+const bindSource=fs.readFileSync('public/app-bind.js','utf8');
+if(!source.includes('function annualPlanDeadlineRows(horizonDays=45)'))throw new Error('Next Steps 2027 deadline selector missing');
+if(!source.includes('function annualPlanDeadlineSection()'))throw new Error('Next Steps 2027 deadline section missing');
+if(!source.includes("${annualPlanDeadlineSection()}"))throw new Error('Next Steps does not render 2027 deadline section');
+if(!source.includes("No-deadline planning rows stay in Calendar → 2027."))throw new Error('2027 deadline lane does not preserve no-deadline rows in Calendar');
+if(!coreSource.includes("state.tab==='today'||state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027')"))throw new Error('Annual plan load completion does not rerender Next Steps');
+if(!coreSource.includes("state.tab==='today'||(state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027')"))throw new Error('Bootstrap does not load annual plan for Next Steps');
+if(!modalSource.includes("state.tab==='today'||state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027')"))throw new Error('Primary nav does not load annual plan when opening Next Steps');
+if(!bindSource.includes("[data-annual-deadline-plan]"))throw new Error('2027 deadline cards cannot open the matching annual-plan row');
 if(!source.includes('Planning detail'))throw new Error('Annual card is missing preserved planning-detail disclosure');
 if(!source.includes("const legacyPlanningDetail=String(row.legacy_next_action||'').trim()"))throw new Error('Annual card does not read preserved legacy_next_action');
 if(!source.includes("!/\\bGMAIL:[A-Za-z0-9_-]+\\b/i.test(legacyPlanningDetail)"))throw new Error('Annual card does not suppress account-specific Gmail draft tokens');
@@ -78,10 +89,36 @@ const sourceOnly={
 };
 if(sandbox.api.annualPlanOperationalLabel(sourceOnly)!=='CONTACT ORGANIZER')throw new Error('Source-only contact label mismatch');
 
+const deadlineStart=source.indexOf('function annualPlanDeadlineRows');
+const deadlineEnd=source.indexOf('function renderToday',deadlineStart);
+if(deadlineStart<0||deadlineEnd<0)throw new Error('Annual Next Steps deadline helper block not found');
+const deadlineBlock=source.slice(deadlineStart,deadlineEnd);
+const deadlineSandbox={
+  state:{annualPlan:{loaded:true,rows:[
+    {plan_id:'overdue',plan_year:2027,action_due:'2026-09-01',canonical_event:'Overdue Show',priority:'HIGH',publication_status:'OFFICIAL'},
+    {plan_id:'near',plan_year:2027,action_due:'2026-11-02',canonical_event:'Near Show',priority:'HIGH',publication_status:'OFFICIAL'},
+    {plan_id:'later',plan_year:2027,action_due:'2027-01-08',canonical_event:'Later Show',priority:'HIGH',publication_status:'OFFICIAL'},
+    {plan_id:'nodue',plan_year:2027,action_due:null,canonical_event:'No Due Show',priority:'HIGH',publication_status:'OFFICIAL'},
+    {plan_id:'audit',plan_year:2027,action_due:'2026-10-15',canonical_event:'Audit Duplicate',priority:'HIGH',publication_status:'DUPLICATE_SUPPRESSED_TO_CANONICAL'},
+  ]}},
+  researchEasternTodayKey:()=> '2026-10-01',
+  researchDateOrdinal:value=>{
+    const m=String(value||'').slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m?Math.floor(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3]))/86400000):null;
+  },
+  annualPlanIsAuditDuplicate:row=>String(row?.publication_status||'').toUpperCase().includes('DUPLICATE_SUPPRESSED'),
+};
+vm.createContext(deadlineSandbox);
+vm.runInContext(`${deadlineBlock}\nthis.deadlineApi={annualPlanDeadlineRows};\n`,deadlineSandbox);
+const deadlineRows=deadlineSandbox.deadlineApi.annualPlanDeadlineRows();
+if(deadlineRows.map(row=>row.plan_id).join(',')!=='overdue,near')throw new Error('2027 deadline lane must include overdue + next-45-day rows only');
+if(deadlineSandbox.deadlineApi.annualPlanDeadlineRows(0).map(row=>row.plan_id).join(',')!=='overdue')throw new Error('2027 deadline horizon does not preserve overdue actions');
+
 console.log({
   annual_operational_actions:'PASS',
   email_draft:'PASS',
   call_script:'PASS',
   object_source_url:'PASS',
   duplicate_suppression:'PASS',
+  next_steps_2027_deadlines:'PASS',
 });

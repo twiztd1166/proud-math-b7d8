@@ -330,6 +330,68 @@ function researchNextStepSection(){
   return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: ${doNow.length} do now · ${late.length} late-inventory · ${within14.length} due/event within 14 days · ${rows.length} current/future controls. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>${actionable.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
 }
 
+function annualPlanDeadlineRows(horizonDays=45){
+  const p=state.annualPlan;
+  if(!p?.loaded)return [];
+  const today=researchDateOrdinal(researchEasternTodayKey());
+  if(today===null)return [];
+  const priorityRank=row=>({HIGH:0,MED_HIGH:1,MEDIUM:2,LOW_MED:3,LOW:4})[String(row?.priority||'').toUpperCase()]??5;
+  return (p.rows||[])
+    .filter(row=>!annualPlanIsAuditDuplicate(row))
+    .filter(row=>Number(row?.plan_year||2027)===2027)
+    .filter(row=>String(row?.action_due||'').trim())
+    .filter(row=>{
+      const due=researchDateOrdinal(row.action_due);
+      return due!==null&&(due-today)<=horizonDays;
+    })
+    .slice()
+    .sort((a,b)=>String(a.action_due||'9999-12-31').localeCompare(String(b.action_due||'9999-12-31'))||
+      priorityRank(a)-priorityRank(b)||
+      String(a.canonical_event||'').localeCompare(String(b.canonical_event||'')));
+}
+function annualPlanDeadlineCard(row){
+  const code=String(row?.operational_action_code||'').trim().toUpperCase();
+  const managerMove=annualPlanOperationalLabel(row)||String(row?.next_action||'Review 2027 plan').trim();
+  const emailDraft=code==='CONTACT_ORGANIZER'?annualPlanEmailDraft(row):null;
+  const callScript=!emailDraft&&code==='CONTACT_ORGANIZER'?annualPlanCallScript(row):null;
+  const sources=Array.isArray(row?.source_refs)?row.source_refs.map(annualPlanSourceUrl).filter(Boolean):[];
+  const firstSource=sources[0]||'';
+  const sourceActionLabel=({
+    REVIEW_APPLICATION:'Open source / application',
+    MONITOR_RELEASE:'Open source to monitor',
+    VERIFY_TERMS:'Open source / verify terms',
+    SIGNER_REVIEW:'Open source for signer review',
+    CONTACT_ORGANIZER:'Open organizer source',
+  })[code]||'';
+  const emailButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
+  const callButton=callScript?`<button type="button" class="btn primary" data-annual-call-script="${esc(row.plan_id)}">Create call script</button>`:'';
+  const sourceButton=!emailDraft&&!callScript&&firstSource&&sourceActionLabel
+    ?`<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(firstSource)}">${esc(sourceActionLabel)}</a>`:'';
+  const guard=String(row?.operational_guard||'').trim();
+  const due=`${researchDueLabel(row.action_due)} · ${date(row.action_due)}`;
+  const timing=annualPlanDateText(row);
+  return `<article class="nextStepCard nextStep-review annualDeadlineCard" data-annual-deadline="${esc(row.plan_id)}">
+    <div class="nextStepTop"><div><span class="nextStepLane">2027 PLAN DEADLINE</span><h3>${esc(row.canonical_event)}</h3></div><span class="nextStepDecision ${String(row.plan_decision||'WATCH').toLowerCase()==='pursue'?'pursue':'watch'}">${esc(row.plan_decision||'WATCH')}</span></div>
+    <div class="nextStepAction"><span>Manager move</span><b>${esc(managerMove)}</b></div>
+    <div class="nextStepAction"><span>Next step</span><b>${esc(row.next_action||'Review the governed 2027 plan action.')}</b></div>
+    ${guard?`<div class="sourceWarn"><b>Action guard</b> ${esc(guard)}</div>`:''}
+    <div class="nextStepFacts"><div><span>Due</span><b>${esc(due)}</b></div><div><span>2027 event</span><b>${esc(timing)}</b></div><div><span>Priority</span><b>${esc(row.priority||'MEDIUM')}</b></div><div><span>Budget</span><b>${esc(annualPlanBudgetText(row))}</b></div></div>
+    <div class="actions">${emailButton}${callButton}${sourceButton}<button type="button" class="btn secondary" data-annual-deadline-plan="${esc(row.canonical_event)}">Open 2027 plan</button></div>
+  </article>`;
+}
+function annualPlanDeadlineSection(){
+  const p=state.annualPlan;
+  if(p?.loading&&!p.loaded)return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>2027 plan deadlines</h2><p>Loading explicit 2027 operating dates…</p></div></div></section>`;
+  if(p?.error&&!p.loaded)return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>2027 plan deadlines</h2><p>Annual-plan deadlines are temporarily unavailable.</p></div></div><div class="actions"><button type="button" class="btn secondary" id="annualPlanRetry">Try again</button></div></section>`;
+  const rows=annualPlanDeadlineRows(45);
+  if(!rows.length)return '';
+  const today=researchDateOrdinal(researchEasternTodayKey());
+  const overdue=rows.filter(row=>{const due=researchDateOrdinal(row.action_due);return due!==null&&today!==null&&due<today}).length;
+  const upcoming=rows.length-overdue;
+  const visible=rows.slice(0,6);
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>2027 plan deadlines</h2><p>${overdue} overdue · ${upcoming} due within 45 days · explicit governed action dates only. No-deadline planning rows stay in Calendar → 2027.</p></div><span>${rows.length}</span></div>${visible.map(annualPlanDeadlineCard).join('')}${rows.length>visible.length?`<div class="nextStepMore">+${rows.length-visible.length} more dated 2027 actions · Calendar → 2027</div>`:''}</section>`;
+}
+
 function renderToday(){
   const pay=paymentAttention();
   const rs=state.reconciliation.summary||{};
@@ -349,6 +411,7 @@ function renderToday(){
   return `<div class="hero nextHero"><div class="nextHeroEyebrow">Paradise Shows</div><h1>Next Steps</h1><p>Start here. Work is grouped by who or what must move next; research depth stays inside each show.</p></div>
     <div class="nextStepStats"><div><b>${action.length}</b><span>Team action</span></div><div><b>${review.length}</b><span>Decision / review</span></div><div><b>${waiting.length}</b><span>Waiting</span></div><div><b>${pay.length}</b><span>Payment attention</span></div></div>
     ${nextStepSection('Team action','The company can move these now.',action,'ACTION',8)}
+    ${annualPlanDeadlineSection()}
     ${researchNextStepSection()}
     ${nextStepSection('Decision / review needed','A decision, approval, conflict check, or internal review is the next gate.',review,'REVIEW',6)}
     ${paymentHtml}
