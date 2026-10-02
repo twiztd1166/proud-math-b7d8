@@ -111,7 +111,7 @@ jobs:
             'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
             'R2026-063-SENIOR-HARDROCK':'2026-10-30',
             'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
-            'R2026-060-TEQUILA-FEST':'2026-10-31',
+            'R2026-060-TEQUILA-FEST':'2026-11-07',
             'R2026-083-WORLD-AIDS':'2026-11-01',
             'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
             'R2026-100-WESTON-RUN':'2026-11-15',
@@ -786,6 +786,7 @@ jobs:
               'R2026-034-IRL-SCIENCE':('REVIEW','https://forms.gle/SdpaafV3aKW2sAxA6','Review exhibitor registration'),
               'R2026-050-BEN-WINTER':('REVIEW','https://www.thebenwestpalm.com/partner-with-the-bens-winter-wonderland-ice-rink/','Review sponsorship options'),
               'R2026-059-TC-BREW-FEST':('REVIEW','https://www.tcbrewfest.com/sponsor','Compare vendor vs sponsor options'),
+              'R2026-060-TEQUILA-FEST':('REVIEW','https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785','Review exhibitor / sponsor application'),
               'R2026-085-DELRAY-TREE':('REVIEW','https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000','Review Tree Lighting sponsorship package'),
           }
           for cid,(code,url,label) in review_reference_expectations.items():
@@ -797,6 +798,7 @@ jobs:
               expected_route_source=(
                   '2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE'
                   else '2026_LATER_QUEUE_REVERIFICATION_B1' if cid == 'R2026-050-BEN-WINTER'
+                  else '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1' if cid == 'R2026-060-TEQUILA-FEST'
                   else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
               )
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
@@ -871,7 +873,6 @@ jobs:
               'R2026-050-BEN-WINTER',
               'R2026-051-FP-FRIDAY-FEST-NOV',
               'R2026-053-DREAM-ASIA',
-              'R2026-060-TEQUILA-FEST',
               'R2026-073-PALM-BAY-FARMERS-NOV',
               'R2026-075-LIGHT-UP-DANIA',
               'R2026-083-WORLD-AIDS',
@@ -880,6 +881,19 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
+
+          tequila=by_control['R2026-060-TEQUILA-FEST']
+          tequila_detail=tequila.get('detail_data') or {}
+          assert tequila.get('deadline_date') == '2026-11-07', tequila
+          assert tequila.get('disposition') == 'WATCH', tequila
+          assert tequila_detail.get('operational_action_code') == 'REVIEW', tequila_detail
+          assert tequila_detail.get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785', tequila_detail
+          assert tequila_detail.get('action_label') == 'Review exhibitor / sponsor application', tequila_detail
+          assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
+          assert 'PARADISE-COMPATIBLE BUSINESS ROUTE' in str(tequila_detail.get('booking_status') or '').upper(), tequila_detail
+          assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
 
           for cid in {'R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC'}:
               detail=by_control[cid].get('detail_data') or {}
