@@ -119,7 +119,7 @@ const bucklerOct=byId.get('R2026-015-BUCKLER-WPB-OCT');
 if(!bucklerOct)throw new Error('Buckler October regression fixture missing');
 const bucklerOctDraft=sandbox.outreach.researchEmailDraft(bucklerOct);
 if(!bucklerOctDraft)throw new Error('Buckler October should use email');
-if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerOctDraft.body))throw new Error('Buckler October lost Paradise eligibility confirmation');
+if(!/Commercial Business 10x10/i.test(bucklerOctDraft.body))throw new Error('Buckler October lost the verified Commercial Business route');
 if(/history exists in\s*,/i.test(bucklerOctDraft.body))throw new Error('Buckler October retained malformed stripped-history prose');
 
 const florida=byId.get('R2026-004-FLORIDA-CREATIVES-PSL');
