@@ -766,7 +766,7 @@ jobs:
               'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
               'R2026-063-SENIOR-HARDROCK':'2026-10-30',
               'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
-              'R2026-060-TEQUILA-FEST':'2026-10-31',
+              'R2026-060-TEQUILA-FEST':'2026-11-07',
               'R2026-083-WORLD-AIDS':'2026-11-01',
               'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
               'R2026-100-WESTON-RUN':'2026-11-15',
@@ -826,11 +826,14 @@ jobs:
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
               'R2026-062-SENIOR-DELRAY',
+              'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
           }, q4_compound
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
+              'R2026-049-CARS-COFFEE-NOV':'https://www.carsandcoffeepb.com/sponsors',
+              'R2026-099-CARS-COFFEE-DEC':'https://www.carsandcoffeepb.com/sponsors',
               'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
@@ -850,18 +853,16 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
               'R2026-042-LAGOONFEST',
-              'R2026-049-CARS-COFFEE-NOV',
               'R2026-053-DREAM-ASIA',
               'R2026-052-NASCAR-HOMESTEAD',
               'R2026-054-CARIFEST',
               'R2026-056-BARK-TITUSVILLE',
               'R2026-095-HOWARD-ALAN-DELRAY',
-              'R2026-099-CARS-COFFEE-DEC',
           }
           for cid in email_route_ids:
               detail=controls[cid].get('detail_data') or {}
@@ -1436,7 +1437,7 @@ jobs:
               'R2026-034-IRL-SCIENCE':('REVIEW','https://forms.gle/SdpaafV3aKW2sAxA6','Review exhibitor registration'),
               'R2026-050-BEN-WINTER':('REVIEW','https://www.thebenwestpalm.com/partner-with-the-bens-winter-wonderland-ice-rink/','Review sponsorship options'),
               'R2026-059-TC-BREW-FEST':('REVIEW','https://www.tcbrewfest.com/sponsor','Compare vendor vs sponsor options'),
-              'R2026-063-SENIOR-HARDROCK':('HOLD','https://seniorexpousa.com/brand/florida/','Review Florida exhibitor options'),
+              'R2026-060-TEQUILA-FEST':('REVIEW','https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785','Review exhibitor / sponsor application'),
               'R2026-085-DELRAY-TREE':('REVIEW','https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000','Review Tree Lighting sponsorship package'),
           }
           for cid,(code,url,label) in review_reference_expectations.items():
@@ -1445,7 +1446,12 @@ jobs:
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
               assert detail.get('operational_guard'), (cid,detail)
-              expected_route_source='2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE' else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+              expected_route_source=(
+                  '2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE'
+                  else '2026_LATER_QUEUE_REVERIFICATION_B1' if cid == 'R2026-050-BEN-WINTER'
+                  else '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1' if cid == 'R2026-060-TEQUILA-FEST'
+                  else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+              )
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           melbourne=controls['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
@@ -1502,6 +1508,53 @@ jobs:
           assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
           assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
           assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
+          assert senior.get('disposition') == 'WATCH', senior
+          assert senior_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', senior_detail
+          assert senior_detail.get('action_url') == 'https://seniorexpousa.com/brand/florida/', senior_detail
+          assert senior_detail.get('action_label') == 'Open Florida exhibitor options', senior_detail
+          assert 'IN STOCK / PURCHASABLE' in str(senior_detail.get('booking_status') or '').upper(), senior_detail
+          assert 'CATEGORY AVAILABILITY' in str(senior_detail.get('operational_guard') or '').upper(), senior_detail
+          assert senior_detail.get('followup_reverified_at') == '2026-10-02', senior_detail
+          assert senior_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
+          assert senior_detail.get('route_verified_at') == '2026-10-02', senior_detail
+          assert senior_detail.get('route_verification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
+
+          later_b1_reverified={
+              'R2026-050-BEN-WINTER',
+              'R2026-051-FP-FRIDAY-FEST-NOV',
+              'R2026-053-DREAM-ASIA',
+              'R2026-073-PALM-BAY-FARMERS-NOV',
+              'R2026-075-LIGHT-UP-DANIA',
+              'R2026-083-WORLD-AIDS',
+          }
+          for cid in later_b1_reverified:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
+
+          tequila=controls['R2026-060-TEQUILA-FEST']
+          tequila_detail=tequila.get('detail_data') or {}
+          assert tequila.get('deadline_date') == '2026-11-07', tequila
+          assert tequila.get('disposition') == 'WATCH', tequila
+          assert tequila_detail.get('operational_action_code') == 'REVIEW', tequila_detail
+          assert tequila_detail.get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785', tequila_detail
+          assert tequila_detail.get('action_label') == 'Review exhibitor / sponsor application', tequila_detail
+          assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
+          assert 'PARADISE-COMPATIBLE BUSINESS ROUTE' in str(tequila_detail.get('booking_status') or '').upper(), tequila_detail
+          assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+
+          for cid in {'R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC'}:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
+              assert detail.get('action_url') == 'https://www.carsandcoffeepb.com/sponsors', (cid,detail)
+              assert detail.get('action_label') == 'Open sponsor/vendor inquiry form', (cid,detail)
+              assert '48 HOURS' in str(detail.get('booking_status') or '').upper(), (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
           assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
