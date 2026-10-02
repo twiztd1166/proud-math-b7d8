@@ -834,6 +834,7 @@ jobs:
               'R2026-063-SENIOR-HARDROCK',
               'R2026-077-SENIOR-POMPANO',
               'R2026-094-BUCKLER-WPB-DEC',
+              'R2026-108-VERO-OUTLETS',
               'R2026-900-BOCA-B2B',
           }, q4_compound
           buckler_dec=controls['R2026-094-BUCKLER-WPB-DEC']
@@ -888,7 +889,7 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K','R2026-093-PB-HOLIDAY-BOAT','R2026-101-MUSIC-MANSION','R2026-103-MARTIN-WINTER-FEST'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K','R2026-093-PB-HOLIDAY-BOAT','R2026-101-MUSIC-MANSION','R2026-103-MARTIN-WINTER-FEST','R2026-106-WELLINGTON-BOAT'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -951,6 +952,8 @@ jobs:
                   expected_route_source='2026_OCT22_24_REVERIFICATION'
               elif cid == 'R2026-100-WESTON-RUN':
                   expected_route_source='2026_DECEMBER_TAIL_REVERIFICATION_B2'
+              elif cid in {'R2026-105-TC-HOLIDAY-FOOD','R2026-115-SNOW-PLACE-JUPITER'}:
+                  expected_route_source='2026_DECEMBER_TAIL_REVERIFICATION_B3'
               else:
                   expected_route_source='2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
@@ -1851,15 +1854,7 @@ jobs:
           assert 'nharris@cocoafl.gov' in str(cocoa_tree_detail.get('contact_text') or '').lower(), cocoa_tree_detail
           assert 'NOT PUBLISHED' in str(cocoa_tree_detail.get('booking_status') or '').upper(), cocoa_tree_detail
 
-          assert sum(
-              1 for r in research
-              if (r.get('detail_data') or {}).get('followup_reverified_at') == '2026-10-02'
-          ) >= 107
-          pending_followup={
-              r.get('control_id') for r in research
-              if (r.get('detail_data') or {}).get('followup_reverified_at') != '2026-10-02'
-          }
-          assert pending_followup == {
+          december_tail_b3={
               'R2026-105-TC-HOLIDAY-FOOD',
               'R2026-106-WELLINGTON-BOAT',
               'R2026-108-VERO-OUTLETS',
@@ -1869,7 +1864,92 @@ jobs:
               'R2026-112-SUPERCAR-SAT-DEC',
               'R2026-114-WELLINGTON-HOLIDAY-PARADE',
               'R2026-115-SNOW-PLACE-JUPITER',
-          }, pending_followup
+          }
+          for cid in december_tail_b3:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          tc_holiday=controls['R2026-105-TC-HOLIDAY-FOOD'].get('detail_data') or {}
+          assert tc_holiday.get('current_source_checked_at') == '2026-10-02', tc_holiday
+          assert tc_holiday.get('route_verified_at') == '2026-10-02', tc_holiday
+          assert tc_holiday.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', tc_holiday
+          assert tc_holiday.get('operational_action_code') == 'APPLY', tc_holiday
+          assert '$500' in str(tc_holiday.get('current_cost_text') or '') and '$5,000' in str(tc_holiday.get('current_cost_text') or ''), tc_holiday
+          assert 'LEAD-GEN' in str(tc_holiday.get('eligibility_text') or '').upper(), tc_holiday
+
+          wellington_boat=controls['R2026-106-WELLINGTON-BOAT'].get('detail_data') or {}
+          assert wellington_boat.get('current_source_checked_at') == '2026-10-01', wellington_boat
+          assert wellington_boat.get('route_verified_at') == '2026-10-02', wellington_boat
+          assert wellington_boat.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', wellington_boat
+          assert wellington_boat.get('operational_action_code') == 'OPEN_INQUIRY', wellington_boat
+          assert 'NOT GUARANTEED' in str(wellington_boat.get('commitment_terms_text') or '').upper(), wellington_boat
+
+          vero_outlets=controls['R2026-108-VERO-OUTLETS'].get('detail_data') or {}
+          assert vero_outlets.get('current_source_checked_at') == '2026-10-02', vero_outlets
+          assert vero_outlets.get('route_verified_at') == '2026-10-02', vero_outlets
+          assert vero_outlets.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', vero_outlets
+          assert vero_outlets.get('operational_action_code') == 'EMAIL_THEN_APPLY', vero_outlets
+          assert vero_outlets.get('action_url') == 'https://my.boothcentral.com/v/event/2631/event-vendor/instructions', vero_outlets
+          assert vero_outlets.get('action_label') == 'Open waitlist application', vero_outlets
+          assert 'SOLD OUT' in str(vero_outlets.get('booking_status') or '').upper(), vero_outlets
+          assert 'FREE WAITLIST' in str(vero_outlets.get('booking_status') or '').upper(), vero_outlets
+          assert 'COMMERCIAL/SERVICE ELIGIBILITY TO CONFIRM' in str(vero_outlets.get('booking_status') or '').upper(), vero_outlets
+
+          delray_holiday=controls['R2026-109-DELRAY-HOLIDAY-PARADE'].get('detail_data') or {}
+          assert delray_holiday.get('current_source_checked_at') == '2026-10-01', delray_holiday
+          assert delray_holiday.get('route_verified_at') == '2026-10-01', delray_holiday
+          assert delray_holiday.get('operational_action_code') == 'APPLY', delray_holiday
+          assert '$500' in str(delray_holiday.get('current_cost_text') or '') and '$1,000' in str(delray_holiday.get('current_cost_text') or ''), delray_holiday
+
+          cocoa_parade=controls['R2026-110-COCOA-ROCKLEDGE-PARADE'].get('detail_data') or {}
+          assert cocoa_parade.get('current_source_checked_at') == '2026-10-02', cocoa_parade
+          assert cocoa_parade.get('route_verified_at') == '2026-10-01', cocoa_parade
+          assert cocoa_parade.get('operational_action_code') == 'APPLY', cocoa_parade
+          assert '$25' in str(cocoa_parade.get('current_cost_text') or ''), cocoa_parade
+
+          winterfest=controls['R2026-111-WINTERFEST-BOAT'].get('detail_data') or {}
+          assert winterfest.get('current_source_checked_at') == '2026-10-02', winterfest
+          assert winterfest.get('route_verified_at') == '2026-10-02', winterfest
+          assert winterfest.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', winterfest
+          assert winterfest.get('operational_action_code') == 'EMAIL_DRAFT', winterfest
+          assert '$5,000' in str(winterfest.get('current_cost_text') or ''), winterfest
+          assert 'SAMPLING/ACTIVATION/DISPLAY' in str(winterfest.get('current_cost_text') or '').upper(), winterfest
+          assert 'lisa@winterfestparade.com' in str(winterfest.get('contact_text') or '').lower(), winterfest
+
+          supercar=controls['R2026-112-SUPERCAR-SAT-DEC'].get('detail_data') or {}
+          assert supercar.get('current_source_checked_at') == '2026-10-02', supercar
+          assert supercar.get('route_verified_at') == '2026-10-02', supercar
+          assert supercar.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', supercar
+          assert supercar.get('operational_action_code') == 'EMAIL_DRAFT', supercar
+          assert 'supercarsaturdaysflorida@gmail.com' in str(supercar.get('contact_text') or '').lower(), supercar
+
+          wellington_holiday=controls['R2026-114-WELLINGTON-HOLIDAY-PARADE'].get('detail_data') or {}
+          assert wellington_holiday.get('current_source_checked_at') == '2026-10-02', wellington_holiday
+          assert wellington_holiday.get('route_verified_at') == '2026-10-02', wellington_holiday
+          assert wellington_holiday.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', wellington_holiday
+          assert wellington_holiday.get('operational_action_code') == 'EMAIL_DRAFT', wellington_holiday
+          assert not wellington_holiday.get('action_url'), wellington_holiday
+          assert 'PARADE-ENTRY FORM IS A SEPARATE ROUTE' in str(wellington_holiday.get('booking_status') or '').upper(), wellington_holiday
+
+          snow_place=controls['R2026-115-SNOW-PLACE-JUPITER'].get('detail_data') or {}
+          assert snow_place.get('current_source_checked_at') == '2026-10-02', snow_place
+          assert snow_place.get('route_verified_at') == '2026-10-02', snow_place
+          assert snow_place.get('route_verification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B3', snow_place
+          assert snow_place.get('operational_action_code') == 'APPLY', snow_place
+          assert '$750' in str(snow_place.get('current_cost_text') or '') and '$3,500' in str(snow_place.get('current_cost_text') or ''), snow_place
+          assert 'DEC. 12, 2026' in str(snow_place.get('research_summary') or '').upper(), snow_place
+
+          assert sum(
+              1 for r in research
+              if (r.get('detail_data') or {}).get('followup_reverified_at') == '2026-10-02'
+          ) == len(research) == 116
+          pending_followup={
+              r.get('control_id') for r in research
+              if (r.get('detail_data') or {}).get('followup_reverified_at') != '2026-10-02'
+          }
+          assert not pending_followup, pending_followup
 
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
