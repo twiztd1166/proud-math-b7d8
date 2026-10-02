@@ -706,7 +706,7 @@ jobs:
           assert sum(
               1 for r in q4
               if str((r.get('detail_data') or {}).get('followup_reverified_at') or '').strip()
-          ) >= 69
+          ) >= 97
 
           nascar_nov=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_nov.get('operational_action_code') == 'EMAIL_DRAFT', nascar_nov
@@ -1007,6 +1007,59 @@ jobs:
               assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          december_b1_reverified={
+              'R2026-086-WPB-HOLIDAY-PARADISE',
+              'R2026-094-BUCKLER-WPB-DEC',
+              'R2026-095-HOWARD-ALAN-DELRAY',
+              'R2026-096-GREENACRES-CENTENNIAL',
+          }
+          for cid in december_b1_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_DEC1_5_REVERIFICATION_B1', (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_DEC1_5_REVERIFICATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          wpb_holiday=by_control['R2026-086-WPB-HOLIDAY-PARADISE'].get('detail_data') or {}
+          assert wpb_holiday.get('operational_action_code') == 'EMAIL_DRAFT', wpb_holiday
+          assert 'events@wpb.org' in str(wpb_holiday.get('contact_text') or '').lower(), wpb_holiday
+          assert '561-822-1515' in str(wpb_holiday.get('contact_text') or ''), wpb_holiday
+          assert 'cindemartin' not in str(wpb_holiday.get('contact_text') or '').lower(), wpb_holiday
+          assert 'EVENT-SPECIFIC SPONSOR / ACTIVATION PACKAGE NOT PUBLICLY POSTED' in str(wpb_holiday.get('booking_status') or '').upper(), wpb_holiday
+
+          buckler_dec=by_control['R2026-094-BUCKLER-WPB-DEC']
+          buckler_dec_detail=buckler_dec.get('detail_data') or {}
+          assert buckler_dec_detail.get('operational_action_code') == 'CALL_SCRIPT', buckler_dec_detail
+          assert '$400' in str(buckler_dec.get('price_text') or ''), buckler_dec
+          assert '$400' in str(buckler_dec_detail.get('current_cost_text') or ''), buckler_dec_detail
+          assert '$45' in str(buckler_dec_detail.get('current_cost_text') or ''), buckler_dec_detail
+          assert buckler_dec_detail.get('current_cost_status') == 'CURRENT OFFICIAL', buckler_dec_detail
+          assert 'bucklershows@yahoo.com' in str(buckler_dec_detail.get('contact_text') or '').lower(), buckler_dec_detail
+          assert '386-860-0092' in str(buckler_dec_detail.get('contact_text') or ''), buckler_dec_detail
+          assert 'NO REFUNDS' in str(buckler_dec_detail.get('commitment_terms_text') or '').upper(), buckler_dec_detail
+          assert 'COMMERCIAL BUSINESS 10×10 $400 VERIFIED' in str(buckler_dec_detail.get('booking_status') or '').upper(), buckler_dec_detail
+
+          howard_dec=by_control['R2026-095-HOWARD-ALAN-DELRAY'].get('detail_data') or {}
+          assert howard_dec.get('operational_action_code') == 'EMAIL_DRAFT', howard_dec
+          assert 'info@artfestival.com' in str(howard_dec.get('contact_text') or '').lower(), howard_dec
+          assert '561-746-6615' in str(howard_dec.get('contact_text') or ''), howard_dec
+          assert 'SPONSORSHIP ROUTE ONLY' in str(howard_dec.get('eligibility_text') or '').upper(), howard_dec
+          assert 'SPONSORSHIP PROGRAM ACTIVE' in str(howard_dec.get('booking_status') or '').upper(), howard_dec
+
+          greenacres_dec=by_control['R2026-096-GREENACRES-CENTENNIAL'].get('detail_data') or {}
+          assert greenacres_dec.get('operational_action_code') == 'EMAIL_DRAFT', greenacres_dec
+          assert 'nking@greenacresfl.gov' in str(greenacres_dec.get('contact_text') or '').lower(), greenacres_dec
+          assert 'bmolano@greenacresfl.gov' in str(greenacres_dec.get('contact_text') or '').lower(), greenacres_dec
+          assert 'BUSINESS SPONSOR / VENDOR ROUTE VERIFIED' in str(greenacres_dec.get('booking_status') or '').upper(), greenacres_dec
+          assert 'PROMOTE PRODUCTS, SERVICES OR ORGANIZATIONS' in str(greenacres_dec.get('eligibility_text') or '').upper(), greenacres_dec
+
+          delray_tree=by_control['R2026-085-DELRAY-TREE'].get('detail_data') or {}
+          assert delray_tree.get('current_source_checked_at') == '2026-10-01', delray_tree
+          assert not str(delray_tree.get('followup_reverified_at') or '').strip(), delray_tree
 
           world_aids=by_control['R2026-083-WORLD-AIDS']
           world_aids_detail=world_aids.get('detail_data') or {}
