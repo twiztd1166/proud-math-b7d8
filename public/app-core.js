@@ -171,8 +171,23 @@ function researchOutreachProfile(row){
   );
   if(boundedException)addQuestion('Please confirm the event date and current participation route before we rely on the recovered record.');
   if(!eligibility||eligibility.confirm||eligibilityNeedsConfirm)addQuestion('Please confirm Paradise Exteriors is eligible for the stated vendor/sponsor/exhibitor route.');
-  if(!cost||cost.confirm)addQuestion('Please confirm the current price/package and any required deposit.');
-  if(!deadline||deadline.confirm)addQuestion('Please confirm the current application or commitment deadline.');
+  if(!cost){
+    addQuestion('Please confirm the current price/package and any required deposit.');
+  }else if(cost.confirm){
+    const costText=String(cost.text||'').toUpperCase();
+    const publishedPriceKnown=/\$\s*\d/.test(cost.text)&&!/RECOVERED|NOT CURRENT|NOT VERIFIED|TO CONFIRM|PRICE TO CONFIRM|PACKAGE TO QUOTE|CUSTOM QUOTE|GET QUOTE|TO QUOTE/.test(costText);
+    addQuestion(publishedPriceKnown
+      ?'Please confirm which published package remains available and any required deposit.'
+      :'Please confirm the current price/package and any required deposit.');
+  }
+  if(!deadline){
+    addQuestion('Please confirm the current application or commitment deadline.');
+  }else if(deadline.confirm){
+    const deadlineText=String(deadline.text||'').toUpperCase();
+    addQuestion(/\bPASSED\b/.test(deadlineText)
+      ?'If late participation is possible, please confirm any new cutoff or response deadline.'
+      :'Please confirm the current application or commitment deadline.');
+  }
   if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
   const logisticsHasSetup=researchHasKnownTerm([logistics?.text,commitment?.text],/\b(?:BOOTH|SPACE|FOOTPRINT|SETUP|LOAD[- ]?IN|TENT|TABLE|POWER|ACTIVATION)\b/);
   if(!logistics||logistics.confirm||!logisticsHasSetup)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
