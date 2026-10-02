@@ -820,6 +820,7 @@ jobs:
           assert not stale_generic_direct_labels, stale_generic_direct_labels
           assert set(q4_compound) == {
               'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
+              'R2026-003-PSL-OKTOBERFEST',
               'R2026-037-WEST-BOYNTON-SENIOR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
@@ -938,8 +939,11 @@ jobs:
           assert 'SERVICE-BUSINESS FIT' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
 
           psl_detail=controls['R2026-003-PSL-OKTOBERFEST'].get('detail_data') or {}
-          assert psl_detail.get('operational_action_code') == 'EMAIL_DRAFT', psl_detail
-          assert not psl_detail.get('action_url'), psl_detail
+          assert psl_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', psl_detail
+          assert psl_detail.get('action_url') == 'https://form.jotform.com/pslcommunications/special-events-vendor-application', psl_detail
+          assert psl_detail.get('action_label') == 'Open City craft/vendor application', psl_detail
+          assert psl_detail.get('route_verified_at') == '2026-10-02', psl_detail
+          assert psl_detail.get('route_verification_source') == '2026_DO_NOW_PSL_VENDOR_ROUTE_REVERIFICATION', psl_detail
           assert 'GENERAL BUSINESS & COMMERCIAL VENDOR FORM ACTIVE' in str(psl_detail.get('booking_status') or '').upper(), psl_detail
 
           nmb_detail=controls['R2026-001-NMB-CENTENNIAL'].get('detail_data') or {}
