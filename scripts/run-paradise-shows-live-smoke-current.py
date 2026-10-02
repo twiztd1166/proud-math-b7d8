@@ -137,6 +137,74 @@ assert len(historical_2013)==64, len(historical_2013)"""
 base.scope_aware_annual_api_script = scope_aware_annual_api_script_current
 base.post_annual_plan = post_current_annual_plan
 
+_original_deep_link = base.scope_aware_deep_link_script
+
+
+def scope_aware_deep_link_script_current(script: str) -> str:
+    script = _original_deep_link(script)
+    stale_lines = (
+        "grep -q 'Identity research' /tmp/annual_plan.html",
+        'grep -q \'data-plan-id="2027-LIFE-050-LEGACY-RESEARCH"\' /tmp/annual_plan.html',
+    )
+    for stale in stale_lines:
+        count = script.count(stale)
+        if count != 1:
+            raise RuntimeError(f'Expected exactly one pre-audit-suppression DOM assertion, got {count}: {stale}')
+        script = script.replace(stale, f": # replaced by audit-duplicate-aware verifier: {stale}", 1)
+
+    marker = "grep -q 'Research 0' /tmp/annual_plan.html"
+    count = script.count(marker)
+    if count != 1:
+        raise RuntimeError(f'Expected exactly one annual-plan research filter assertion, got {count}')
+    script = script.replace(
+        marker,
+        marker + "\n"
+        + "grep -q 'Audit duplicates' /tmp/annual_plan.html\n"
+        + "grep -q 'audit-only duplicates preserved' /tmp/annual_plan.html",
+        1,
+    )
+    return script
+
+
+base.scope_aware_deep_link_script = scope_aware_deep_link_script_current
+
+ANNUAL_SCOPE_KEYS = (
+    'EAST_COAST_FLORIDA',
+    'WEST_COAST_FLORIDA',
+    'CENTRAL_FLORIDA',
+    'NORTHERN_FLORIDA',
+    'PANHANDLE_FLORIDA',
+    'B2B',
+)
+ANNUAL_SCOPE_WEST_FALLBACK = {
+    'LIFE-017','LIFE-025','LIFE-032','LIFE-044','LIFE-062',
+    'LIFE-071','LIFE-099','LIFE-109','LIFE-124','LIFE-172',
+}
+ANNUAL_SCOPE_B2B_FALLBACK = {
+    'HIST-108','PROSPECT-COCOA-ECONOMIC-SHOWCASE','PROSPECT-COOPERATOR-SOFL',
+    'PROSPECT-FORTEM-DISASTER-RESILIENCE-EXPO','PROSPECT-LONGEVITY-SPRINGFEST',
+    'PROSPECT-PB-CONDO-HOA-EXPO',
+}
+
+
+def annual_scope_key_current(row):
+    category = str(row.get('planning_category') or '').strip().upper()
+    region = str(row.get('geographic_region') or '').strip().upper()
+    if category == 'B2B':
+        return 'B2B'
+    if region in ANNUAL_SCOPE_KEYS and region != 'B2B':
+        return region
+    profile = str(row.get('profile_id') or '').strip().upper()
+    if profile in ANNUAL_SCOPE_B2B_FALLBACK:
+        return 'B2B'
+    if profile in ANNUAL_SCOPE_WEST_FALLBACK:
+        return 'WEST_COAST_FLORIDA'
+    return 'EAST_COAST_FLORIDA'
+
+
+def annual_is_audit_duplicate(row):
+    return 'DUPLICATE_SUPPRESSED' in str(row.get('publication_status') or '').upper()
+
 
 def verify_scope_contract_current():
     path = Path('/tmp/annual_plan.html')
@@ -147,58 +215,126 @@ def verify_scope_contract_current():
     run_id, expected = annual_metrics(annual)
     rows = annual.get('rows') or []
 
-    keys = (
-        'EAST_COAST_FLORIDA',
-        'WEST_COAST_FLORIDA',
-        'CENTRAL_FLORIDA',
-        'NORTHERN_FLORIDA',
-        'PANHANDLE_FLORIDA',
-        'B2B',
+    expected_counts = {
+        key: sum(annual_scope_key_current(row) == key for row in rows)
+        for key in ANNUAL_SCOPE_KEYS
+    }
+    pairs = re.findall(
+        r'data-annual-scope="([A-Z0-9_]+)"[^>]*>[^<]*?([0-9]+)</button>',
+        dom,
     )
-    def scope(row):
-        return 'B2B' if row.get('planning_category') == 'B2B' else row.get('geographic_region')
-
-    expected_counts = {key: sum(scope(row) == key for row in rows) for key in keys}
-    pairs = re.findall(r'data-annual-scope="([A-Z0-9_]+)"[^>]*>[^<]*?([0-9]+)</button>', dom)
     counts = {key: int(value) for key, value in pairs}
     assert counts == expected_counts, (counts, expected_counts)
     assert sum(counts.values()) == len(rows), (counts, len(rows))
     assert counts.get('EAST_COAST_FLORIDA', 0) > 0, counts
-    assert re.search(r'class="chip active" data-annual-scope="EAST_COAST_FLORIDA"', dom), 'East Coast scope is not active by default'
+    assert re.search(
+        r'class="chip active" data-annual-scope="EAST_COAST_FLORIDA"',
+        dom,
+    ), 'East Coast scope is not active by default'
 
-    east_rows = [row for row in rows if scope(row) == 'EAST_COAST_FLORIDA']
-    east_profiles = len({row.get('profile_id') for row in east_rows})
-    east_pursue = sum(row.get('plan_decision') == 'PURSUE' for row in east_rows)
-    east_watch = sum(row.get('plan_decision') == 'WATCH' for row in east_rows)
-    east_research = sum(row.get('plan_decision') == 'RESEARCH_IDENTITY' for row in east_rows)
+    east_all_rows = [
+        row for row in rows
+        if annual_scope_key_current(row) == 'EAST_COAST_FLORIDA'
+    ]
+    east_planning_rows = [
+        row for row in east_all_rows
+        if not annual_is_audit_duplicate(row)
+    ]
+    east_audit_rows = [
+        row for row in east_all_rows
+        if annual_is_audit_duplicate(row)
+    ]
+    statewide_planning_rows = [
+        row for row in rows
+        if not annual_is_audit_duplicate(row)
+    ]
+    statewide_audit_rows = [
+        row for row in rows
+        if annual_is_audit_duplicate(row)
+    ]
 
-    header = re.search(r'<h2>2027 booking plan</h2><p>([0-9]+) plan rows · ([0-9]+) profiles', dom)
-    assert header, dom[:2500]
-    assert int(header.group(1)) == len(east_rows), header.groups()
-    assert int(header.group(2)) == east_profiles, header.groups()
+    east_profiles = len({
+        row.get('profile_id')
+        for row in east_planning_rows
+        if row.get('profile_id')
+    })
+    east_pursue = sum(
+        row.get('plan_decision') == 'PURSUE'
+        for row in east_planning_rows
+    )
+    east_watch = sum(
+        row.get('plan_decision') == 'WATCH'
+        for row in east_planning_rows
+    )
+    east_research = sum(
+        row.get('plan_decision') == 'RESEARCH_IDENTITY'
+        for row in east_planning_rows
+    )
+
+    header = re.search(
+        r'<h2>2027 booking plan</h2><p>([0-9]+) planning rows · ([0-9]+) audit-only duplicates preserved · ([0-9]+) planning profiles',
+        dom,
+    )
+    assert header, dom[:3000]
+    visible_rows = int(header.group(1))
+    visible_audit_rows = int(header.group(2))
+    visible_profiles = int(header.group(3))
+    assert visible_rows == len(east_planning_rows), (visible_rows, len(east_planning_rows))
+    assert visible_audit_rows == len(east_audit_rows), (visible_audit_rows, len(east_audit_rows))
+    assert visible_profiles == east_profiles, (visible_profiles, east_profiles)
+
+    assert 'Planning rows' in dom
+    assert 'Planning profiles' in dom
     assert f'Pursue {east_pursue}' in dom
     assert f'Watch {east_watch}' in dom
     assert f'Research {east_research}' in dom
+    assert f'Audit duplicates {len(east_audit_rows)}' in dom
+    assert 'Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views' in dom
 
-    top = re.search(r'data-show-mode="PLAN2027"[^>]*>2027 Plan ([0-9]+)</button>', dom)
-    assert top, dom[:2500]
-    assert int(top.group(1)) == len(rows), top.group(1)
+    top = re.search(
+        r'data-show-mode="PLAN2027"[^>]*>2027 Plan ([0-9]+)</button>',
+        dom,
+    )
+    assert top, dom[:3000]
+    assert int(top.group(1)) == len(statewide_planning_rows), (
+        top.group(1),
+        len(statewide_planning_rows),
+    )
 
-    for row in east_rows:
-        assert f'data-plan-id="{row.get("plan_id")}"' in dom, ('East row missing from default DOM', row.get('plan_id'))
+    for row in east_planning_rows:
+        plan_id = row.get('plan_id')
+        assert f'data-plan-id="{plan_id}"' in dom, (
+            'East planning row missing from default DOM',
+            plan_id,
+        )
+    for row in east_audit_rows:
+        plan_id = row.get('plan_id')
+        assert f'data-plan-id="{plan_id}"' not in dom, (
+            'Audit-only duplicate leaked into default DOM',
+            plan_id,
+        )
     for row in rows:
-        if scope(row) != 'EAST_COAST_FLORIDA':
-            assert f'data-plan-id="{row.get("plan_id")}"' not in dom, ('Non-East row leaked into default DOM', row.get('plan_id'), scope(row))
+        if annual_scope_key_current(row) != 'EAST_COAST_FLORIDA':
+            plan_id = row.get('plan_id')
+            assert f'data-plan-id="{plan_id}"' not in dom, (
+                'Non-East row leaked into default DOM',
+                plan_id,
+                annual_scope_key_current(row),
+            )
 
     print({
         'annual_default_scope': 'PASS',
         'run_id': run_id,
         'scope_counts': counts,
-        'visible_rows': len(east_rows),
-        'visible_profiles': east_profiles,
-        'statewide_rows': len(rows),
+        'visible_planning_rows': len(east_planning_rows),
+        'visible_audit_rows': len(east_audit_rows),
+        'visible_planning_profiles': east_profiles,
+        'statewide_planning_rows': len(statewide_planning_rows),
+        'statewide_audit_rows': len(statewide_audit_rows),
+        'published_rows': len(rows),
         'structured_estimates': expected['estimated'],
         'broad_estimates': expected['broad_estimated'],
+        'duplicate_suppression': 'PASS',
     })
 
 
