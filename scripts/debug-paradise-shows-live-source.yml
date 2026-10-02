@@ -819,6 +819,7 @@ jobs:
           assert not q4_compound_missing_url, q4_compound_missing_url
           assert not stale_generic_direct_labels, stale_generic_direct_labels
           assert set(q4_compound) == {
+              'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
               'R2026-037-WEST-BOYNTON-SENIOR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
