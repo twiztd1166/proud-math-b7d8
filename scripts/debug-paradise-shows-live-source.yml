@@ -766,7 +766,7 @@ jobs:
               'R2026-046-PALM-BAY-FALL-FEST':'2026-10-23',
               'R2026-063-SENIOR-HARDROCK':'2026-10-30',
               'R2026-075-LIGHT-UP-DANIA':'2026-10-30',
-              'R2026-060-TEQUILA-FEST':'2026-10-31',
+              'R2026-060-TEQUILA-FEST':'2026-11-07',
               'R2026-083-WORLD-AIDS':'2026-11-01',
               'R2026-073-PALM-BAY-FARMERS-NOV':'2026-11-05',
               'R2026-100-WESTON-RUN':'2026-11-15',
@@ -831,6 +831,8 @@ jobs:
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
+              'R2026-049-CARS-COFFEE-NOV':'https://www.carsandcoffeepb.com/sponsors',
+              'R2026-099-CARS-COFFEE-DEC':'https://www.carsandcoffeepb.com/sponsors',
               'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
@@ -850,23 +852,21 @@ jobs:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
               'R2026-042-LAGOONFEST',
-              'R2026-049-CARS-COFFEE-NOV',
               'R2026-053-DREAM-ASIA',
               'R2026-052-NASCAR-HOMESTEAD',
               'R2026-054-CARIFEST',
               'R2026-056-BARK-TITUSVILLE',
               'R2026-095-HOWARD-ALAN-DELRAY',
-              'R2026-099-CARS-COFFEE-DEC',
           }
           for cid in email_route_ids:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'EMAIL_DRAFT', (cid,detail)
-              expected_route_date='2026-10-02' if cid == 'R2026-042-LAGOONFEST' else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-042-LAGOONFEST','R2026-053-DREAM-ASIA'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           route_verified={
               r.get('control_id') for r in visible_q4
@@ -1140,15 +1140,16 @@ jobs:
           for cid in oct22_24_reverified:
               detail=controls[cid].get('detail_data') or {}
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
+              history=detail.get('followup_reverification_history') or []
+              historical_sources={str(item.get('source') or '') for item in history if isinstance(item,dict)}
+              assert (
+                  detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION'
+                  or '2026_OCT22_24_REVERIFICATION' in historical_sources
+              ), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
-              if cid == 'R2026-034-IRL-SCIENCE':
-                  assert detail.get('current_source_checked_at') == '2026-10-01', (cid,detail)
-                  assert 'HTTP 406' in str(detail.get('followup_reverification_basis') or ''), (cid,detail)
-              else:
-                  assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
 
           hallandale_halloween_detail=controls['R2026-045-HALLANDALE-HALLOWEEN'].get('detail_data') or {}
           assert controls['R2026-045-HALLANDALE-HALLOWEEN'].get('deadline_date') == '2026-10-22', hallandale_halloween_detail
@@ -1302,6 +1303,83 @@ jobs:
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_OCT28_NOV1_REVERIFICATION', (cid,detail)
 
+          nov6_7_reverified={
+              'R2026-052-NASCAR-HOMESTEAD',
+              'R2026-054-CARIFEST',
+              'R2026-055-DAY-DEAD',
+              'R2026-056-BARK-TITUSVILLE',
+              'R2026-057-NORTH-MIAMI-HEALTH',
+              'R2026-058-MIAMI-FOOD-WINE',
+              'R2026-059-TC-BREW-FEST',
+              'R2026-116-NASA-MAX-POWER',
+          }
+          for cid in nov6_7_reverified:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_NOV6_7_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          assert sum(
+              1 for r in visible_q4
+              if str((r.get('detail_data') or {}).get('followup_reverified_at') or '').strip()
+          ) >= 69
+
+          nascar_nov=controls['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
+          assert nascar_nov.get('operational_action_code') == 'EMAIL_DRAFT', nascar_nov
+          assert not nascar_nov.get('action_url'), nascar_nov
+          assert 'JILER@NASCAR.COM' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert 'aravech@nascar.com' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert '386-562-5348' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert '786-570-8409' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert 'PARTNERSHIP SALES ROUTE ACTIVE' in str(nascar_nov.get('booking_status') or '').upper(), nascar_nov
+
+          bark_nov=controls['R2026-056-BARK-TITUSVILLE'].get('detail_data') or {}
+          assert bark_nov.get('operational_action_code') == 'EMAIL_DRAFT', bark_nov
+          assert not bark_nov.get('action_url'), bark_nov
+          assert '$40' in str(bark_nov.get('current_cost_text') or ''), bark_nov
+          assert 'VENDOR APPLICATION CLOSED' in str(bark_nov.get('booking_status') or '').upper(), bark_nov
+          assert 'SPONSORSHIP ROUTE CURRENT' in str(bark_nov.get('booking_status') or '').upper(), bark_nov
+
+          nasa=controls['R2026-116-NASA-MAX-POWER'].get('detail_data') or {}
+          assert nasa.get('operational_action_code') == 'EMAIL_DRAFT', nasa
+          assert 'sales@air.show' in str(nasa.get('contact_text') or '').lower(), nasa
+          assert '813-447-0151' in str(nasa.get('contact_text') or ''), nasa
+          assert nasa.get('action_url') == 'https://blilleyproductionsllc.quickbase.com/db/bga728dji?a=dbpage&pageID=74', nasa
+          assert nasa.get('action_label') == 'Open partnership inquiry form', nasa
+          assert nasa.get('route_verified_at') == '2026-10-02', nasa
+          assert nasa.get('route_verification_source') == '2026_NOV6_7_REVERIFICATION', nasa
+          assert 'LIVE PARTNERSHIP INQUIRY FORM' in str(nasa.get('booking_status') or '').upper(), nasa
+
+          carifest_nov=controls['R2026-054-CARIFEST'].get('detail_data') or {}
+          assert carifest_nov.get('operational_action_code') == 'EMAIL_DRAFT', carifest_nov
+          assert 'CURRENT COMMERCIAL APPLICATION NOT PUBLISHED' in str(carifest_nov.get('booking_status') or '').upper(), carifest_nov
+
+          day_dead=controls['R2026-055-DAY-DEAD'].get('detail_data') or {}
+          assert day_dead.get('operational_action_code') == 'EMAIL_DRAFT', day_dead
+          assert '$150' in str(day_dead.get('current_cost_text') or ''), day_dead
+          assert '$400' in str(day_dead.get('current_cost_text') or ''), day_dead
+          assert 'events@goriverwalk.com' in str(day_dead.get('contact_text') or '').lower(), day_dead
+
+          miami_food_nov=controls['R2026-058-MIAMI-FOOD-WINE'].get('detail_data') or {}
+          assert miami_food_nov.get('operational_action_code') == 'OPEN_INQUIRY', miami_food_nov
+          assert miami_food_nov.get('action_url') == 'https://miamidadefoodwine.com/sponsors', miami_food_nov
+          assert 'PARTNER SLOTS OPEN' in str(miami_food_nov.get('booking_status') or '').upper(), miami_food_nov
+
+          north_miami_health=controls['R2026-057-NORTH-MIAMI-HEALTH'].get('detail_data') or {}
+          assert north_miami_health.get('operational_action_code') == 'EMAIL_THEN_APPLY', north_miami_health
+          assert north_miami_health.get('action_url') == 'https://mjdhealthfair.com/#/vendors', north_miami_health
+          assert '$300' in str(north_miami_health.get('current_cost_text') or ''), north_miami_health
+          assert 'CATEGORY FIT TO CONFIRM' in str(north_miami_health.get('booking_status') or '').upper(), north_miami_health
+
+          tc_brew_nov=controls['R2026-059-TC-BREW-FEST'].get('detail_data') or {}
+          assert tc_brew_nov.get('operational_action_code') == 'REVIEW', tc_brew_nov
+          assert tc_brew_nov.get('action_url') == 'https://www.tcbrewfest.com/sponsor', tc_brew_nov
+          assert '$275' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+          assert '$600' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+          assert '$5,000' in str(tc_brew_nov.get('current_cost_text') or ''), tc_brew_nov
+
           flibs=controls['R2026-038-FLIBS'].get('detail_data') or {}
           assert flibs.get('operational_action_code') == 'OPEN_INQUIRY', flibs
           assert flibs.get('action_url') == 'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e', flibs
@@ -1436,7 +1514,6 @@ jobs:
               'R2026-034-IRL-SCIENCE':('REVIEW','https://forms.gle/SdpaafV3aKW2sAxA6','Review exhibitor registration'),
               'R2026-050-BEN-WINTER':('REVIEW','https://www.thebenwestpalm.com/partner-with-the-bens-winter-wonderland-ice-rink/','Review sponsorship options'),
               'R2026-059-TC-BREW-FEST':('REVIEW','https://www.tcbrewfest.com/sponsor','Compare vendor vs sponsor options'),
-              'R2026-063-SENIOR-HARDROCK':('HOLD','https://seniorexpousa.com/brand/florida/','Review Florida exhibitor options'),
               'R2026-085-DELRAY-TREE':('REVIEW','https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000','Review Tree Lighting sponsorship package'),
           }
           for cid,(code,url,label) in review_reference_expectations.items():
@@ -1445,7 +1522,11 @@ jobs:
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
               assert detail.get('operational_guard'), (cid,detail)
-              expected_route_source='2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE' else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+              expected_route_source=(
+                  '2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE'
+                  else '2026_LATER_QUEUE_REVERIFICATION_B1' if cid == 'R2026-050-BEN-WINTER'
+                  else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+              )
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           melbourne=controls['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
@@ -1502,6 +1583,90 @@ jobs:
           assert 'SOLD OUT' not in str(senior_detail.get('booking_status') or '').upper(), senior
           assert 'RETIREMENT' not in str(senior_detail.get('source_label') or '').upper(), senior
           assert 'DREW' not in str(senior_detail.get('contact_text') or '').upper(), senior
+          assert senior.get('disposition') == 'WATCH', senior
+          assert senior_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', senior_detail
+          assert senior_detail.get('action_url') == 'https://seniorexpousa.com/brand/florida/', senior_detail
+          assert senior_detail.get('action_label') == 'Open Florida exhibitor options', senior_detail
+          assert 'IN STOCK / PURCHASABLE' in str(senior_detail.get('booking_status') or '').upper(), senior_detail
+          assert 'CATEGORY AVAILABILITY' in str(senior_detail.get('operational_guard') or '').upper(), senior_detail
+          assert senior_detail.get('current_source_checked_at') == '2026-10-02', senior_detail
+          assert senior_detail.get('followup_reverified_at') == '2026-10-02', senior_detail
+          assert senior_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
+          assert senior_detail.get('route_verified_at') == '2026-10-02', senior_detail
+          assert senior_detail.get('route_verification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
+          assert str(senior_detail.get('followup_reverification_basis') or '').strip(), senior_detail
+
+          later_b1_reverified={
+              'R2026-050-BEN-WINTER',
+              'R2026-051-FP-FRIDAY-FEST-NOV',
+              'R2026-053-DREAM-ASIA',
+              'R2026-073-PALM-BAY-FARMERS-NOV',
+              'R2026-075-LIGHT-UP-DANIA',
+              'R2026-083-WORLD-AIDS',
+          }
+          for cid in later_b1_reverified:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          world_aids_row=controls['R2026-083-WORLD-AIDS']
+          world_aids=world_aids_row.get('detail_data') or {}
+          assert world_aids_row.get('event_start') == '2026-11-29', world_aids_row
+          assert world_aids_row.get('deadline_date') == '2026-11-01', world_aids_row
+          assert world_aids.get('operational_action_code') == 'APPLY', world_aids
+          assert world_aids.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=54339', world_aids
+          assert world_aids.get('action_label') == 'Open regular-business application', world_aids
+          assert 'COI' in str(world_aids.get('operational_guard') or '').upper(), world_aids
+          assert 'NOV. 1' in str(world_aids.get('operational_guard') or '').upper(), world_aids
+          assert 'NON-REFUNDABLE' in str(world_aids.get('operational_guard') or '').upper(), world_aids
+
+          tequila=controls['R2026-060-TEQUILA-FEST']
+          tequila_detail=tequila.get('detail_data') or {}
+          assert tequila.get('deadline_date') == '2026-11-07', tequila
+          assert tequila.get('disposition') == 'WATCH', tequila
+          assert tequila_detail.get('operational_action_code') == 'REVIEW', tequila_detail
+          assert tequila_detail.get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785', tequila_detail
+          assert tequila_detail.get('action_label') == 'Review exhibitor / sponsor application', tequila_detail
+          assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
+          assert tequila_detail.get('current_source_checked_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert tequila_detail.get('route_verified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert str(tequila_detail.get('followup_reverification_basis') or '').strip(), tequila_detail
+          assert str(tequila_detail.get('operational_guard') or '').strip(), tequila_detail
+
+          dream=controls['R2026-053-DREAM-ASIA'].get('detail_data') or {}
+          assert dream.get('route_verified_at') == '2026-10-02', dream
+          assert dream.get('route_verification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', dream
+          assert 'bizdev@festiveplanet.us' in str(dream.get('contact_text') or '').lower(), dream
+
+          ben=controls['R2026-050-BEN-WINTER'].get('detail_data') or {}
+          assert 'inquiries@thebenwestpalm.com' in str(ben.get('contact_text') or '').lower(), ben
+          assert 'RECOVERED PRICING' not in str(ben.get('commitment_terms_text') or '').upper(), ben
+          assert '$150,000' in str(ben.get('current_cost_text') or ''), ben
+
+          homegrown_detail=controls['R2026-073-PALM-BAY-FARMERS-NOV'].get('detail_data') or {}
+          assert homegrown_detail.get('current_source_checked_at') == '2026-10-02', homegrown_detail
+          assert 'RECOVERED PRICING' not in str(homegrown_detail.get('commitment_terms_text') or '').upper(), homegrown_detail
+          assert '$25' in str(homegrown_detail.get('commitment_terms_text') or ''), homegrown_detail
+
+          for cid in {'R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC'}:
+              detail=controls[cid].get('detail_data') or {}
+              assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
+              assert detail.get('action_url') == 'https://www.carsandcoffeepb.com/sponsors', (cid,detail)
+              assert detail.get('action_label') == 'Open sponsor/vendor inquiry form', (cid,detail)
+              assert '48 HOURS' in str(detail.get('booking_status') or '').upper(), (cid,detail)
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
           assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
