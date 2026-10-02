@@ -879,8 +879,38 @@ jobs:
           }
           for cid in later_b1_reverified:
               detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          world_aids=by_control['R2026-083-WORLD-AIDS']
+          world_aids_detail=world_aids.get('detail_data') or {}
+          assert world_aids.get('event_start') == '2026-11-29', world_aids
+          assert world_aids.get('deadline_date') == '2026-11-01', world_aids
+          assert world_aids_detail.get('operational_action_code') == 'APPLY', world_aids_detail
+          assert world_aids_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=54339', world_aids_detail
+          assert world_aids_detail.get('action_label') == 'Open regular-business application', world_aids_detail
+          assert 'COI' in str(world_aids_detail.get('operational_guard') or '').upper(), world_aids_detail
+          assert 'NOV. 1' in str(world_aids_detail.get('operational_guard') or '').upper(), world_aids_detail
+          assert 'NON-REFUNDABLE' in str(world_aids_detail.get('operational_guard') or '').upper(), world_aids_detail
+
+          tequila=by_control['R2026-060-TEQUILA-FEST']
+          tequila_detail=tequila.get('detail_data') or {}
+          assert tequila.get('deadline_date') == '2026-11-07', tequila
+          assert tequila.get('disposition') == 'WATCH', tequila
+          assert tequila_detail.get('operational_action_code') == 'REVIEW', tequila_detail
+          assert tequila_detail.get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=slbyyqrg-18785', tequila_detail
+          assert tequila_detail.get('action_label') == 'Review exhibitor / sponsor application', tequila_detail
+          assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
+          assert tequila_detail.get('current_source_checked_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert tequila_detail.get('route_verified_at') == '2026-10-02', tequila_detail
+          assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert str(tequila_detail.get('followup_reverification_basis') or '').strip(), tequila_detail
+          assert str(tequila_detail.get('operational_guard') or '').strip(), tequila_detail
 
           tequila=by_control['R2026-060-TEQUILA-FEST']
           tequila_detail=tequila.get('detail_data') or {}
@@ -924,9 +954,15 @@ jobs:
               assert detail.get('action_url') == 'https://www.carsandcoffeepb.com/sponsors', (cid,detail)
               assert detail.get('action_label') == 'Open sponsor/vendor inquiry form', (cid,detail)
               assert '48 HOURS' in str(detail.get('booking_status') or '').upper(), (cid,detail)
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
               assert detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
+
+          assert senior_detail.get('current_source_checked_at') == '2026-10-02', senior_detail
+          assert str(senior_detail.get('followup_reverification_basis') or '').strip(), senior_detail
 
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
