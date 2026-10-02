@@ -547,6 +547,78 @@ jobs:
           assert 'NO APPLICATION DEADLINE' in str(irl_detail.get('deadline_text') or '').upper(), irl_detail
           assert 'HANDS-ON' in str(irl_detail.get('operational_guard') or '').upper(), irl_detail
 
+          oct17_24_existing_reverified={
+              'R2026-027-SPOOKYVILLE',
+              'R2026-028-WELLINGTON-NNO',
+              'R2026-032-NORTH-MIAMI-CARIBBEAN',
+          }
+          for cid in oct17_24_existing_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_OCT17_24_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert not str(detail.get('route_verified_at') or '').strip(), (cid,detail)
+              assert not str(detail.get('route_verification_source') or '').strip(), (cid,detail)
+
+          spooky=by_control['R2026-027-SPOOKYVILLE'].get('detail_data') or {}
+          assert spooky.get('operational_action_code') == 'EMAIL_DRAFT', spooky
+          assert not spooky.get('action_url'), spooky
+          assert 'lorie@southfloridafair.com' in str(spooky.get('contact_text') or '').lower(), spooky
+          assert 'ONSITE VENDORS CURRENT-VERIFIED' in str(spooky.get('booking_status') or '').upper(), spooky
+          assert 'PACKAGE TO REQUEST' in str(spooky.get('booking_status') or '').upper(), spooky
+
+          wellington_nno=by_control['R2026-028-WELLINGTON-NNO'].get('detail_data') or {}
+          assert wellington_nno.get('operational_action_code') == 'EMAIL_DRAFT', wellington_nno
+          assert not wellington_nno.get('action_url'), wellington_nno
+          assert 'jbrito@wellingtonfl.gov' in str(wellington_nno.get('contact_text') or '').lower(), wellington_nno
+          assert 'DOES NOT LIST NATIONAL NIGHT OUT BY NAME' in str(wellington_nno.get('followup_reverification_basis') or '').upper(), wellington_nno
+
+          north_miami_caribbean=by_control['R2026-032-NORTH-MIAMI-CARIBBEAN'].get('detail_data') or {}
+          assert north_miami_caribbean.get('operational_action_code') == 'CALL_SCRIPT', north_miami_caribbean
+          assert north_miami_caribbean.get('action_url') == 'https://caribbeanculturefest.com/', north_miami_caribbean
+          assert '305-244-8508' in str(north_miami_caribbean.get('contact_text') or ''), north_miami_caribbean
+          assert north_miami_caribbean.get('current_cost_text') == 'Custom quote required', north_miami_caribbean
+          assert 'CUSTOM ACTIVATION PACKAGES' in str(north_miami_caribbean.get('booking_status') or '').upper(), north_miami_caribbean
+
+          oct25_26_existing_reverified={
+              'R2026-035-PRIME-BOCA',
+              'R2026-036-PALM-BAY-SENIOR',
+              'R2026-037-WEST-BOYNTON-SENIOR',
+          }
+          for cid in oct25_26_existing_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_OCT25_26_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          prime_boca=by_control['R2026-035-PRIME-BOCA'].get('detail_data') or {}
+          assert prime_boca.get('operational_action_code') == 'EMAIL_DRAFT', prime_boca
+          assert prime_boca.get('action_url') == 'https://www.primeexposf.com/b2b/', prime_boca
+          assert 'sflevents@sunsentinel.com' in str(prime_boca.get('contact_text') or '').lower(), prime_boca
+          assert 'HOME IMPROVEMENT' in str(prime_boca.get('eligibility_text') or '').upper(), prime_boca
+          assert 'LIMITED EXHIBITOR BOOTHS' in str(prime_boca.get('booking_status') or '').upper(), prime_boca
+          assert not str(prime_boca.get('route_verified_at') or '').strip(), prime_boca
+
+          palm_bay_senior=by_control['R2026-036-PALM-BAY-SENIOR'].get('detail_data') or {}
+          assert palm_bay_senior.get('operational_action_code') == 'EMAIL_DRAFT', palm_bay_senior
+          assert not palm_bay_senior.get('action_url'), palm_bay_senior
+          assert 'vendorfair@gpbsc.net' in str(palm_bay_senior.get('contact_text') or '').lower(), palm_bay_senior
+          assert '321-724-1338' in str(palm_bay_senior.get('contact_text') or ''), palm_bay_senior
+          assert 'ROOT DOMAIN CURRENTLY REDIRECTS TO UNRELATED CONTENT' in str(palm_bay_senior.get('followup_reverification_basis') or '').upper(), palm_bay_senior
+          assert not str(palm_bay_senior.get('route_verified_at') or '').strip(), palm_bay_senior
+
+          west_boynton=by_control['R2026-037-WEST-BOYNTON-SENIOR'].get('detail_data') or {}
+          assert west_boynton.get('operational_action_code') == 'EMAIL_THEN_APPLY', west_boynton
+          assert west_boynton.get('action_url') == 'https://retirement-times.com/wp-content/uploads/2026/01/SEContracts-2026-HealthFairs-FILLABLE.pdf', west_boynton
+          assert west_boynton.get('route_verified_at') == '2026-10-02', west_boynton
+          assert west_boynton.get('route_verification_source') == '2026_OCT25_26_REVERIFICATION', west_boynton
+          assert '$395' in str(west_boynton.get('current_cost_text') or ''), west_boynton
+          assert '$450' in str(west_boynton.get('current_cost_text') or ''), west_boynton
+          assert '$1,195' in str(west_boynton.get('current_cost_text') or ''), west_boynton
+          assert 'APPLY AFTER CONFIRMATION' in str(west_boynton.get('next_action') or '').upper(), west_boynton
+
           wag=by_control['R2026-014-WAG-O-WEEN'].get('detail_data') or {}
           assert wag.get('operational_action_code') == 'EMAIL_DRAFT', wag
           assert not wag.get('action_url'), wag
