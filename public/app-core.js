@@ -178,8 +178,8 @@ function researchOutreachProfile(row){
   if(!logistics||logistics.confirm||!logisticsHasSetup)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
   const commitmentKnowledge=[commitment?.text,rawCommitmentText].filter(Boolean);
   const paymentTimingKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:FULL PAYMENT|PAYMENT\s+(?:IS\s+)?(?:DUE|REQUIRED)|DUE\s+(?:UPON|BY)|DEPOSIT|CASHIER(?:'S)? CHECK|MONEY ORDER|ACH|CREDIT CARD|CHECK REQUIRED)\b/);
-  const refundTermsKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|REFUND\w*|CANCELLATION\w*|ALL SALES (?:ARE )?FINAL)\b/);
   const nonRefundKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|ALL SALES (?:ARE )?FINAL)\b/);
+  const refundTermsKnown=nonRefundKnown||researchHasKnownTerm(commitmentKnowledge,/\b(?:REFUNDS?\s+(?:ONLY|IF|UNLESS|WHEN|WITHIN|AVAILABLE|ISSUED)|CANCELLATION\s+(?:FEE|POLICY|WINDOW|DEADLINE|BY|BEFORE|AFTER))\b/);
   if(!commitment||commitment.confirm){
     const hasKnownCommitmentTerm=paymentTimingKnown||refundTermsKnown||nonRefundKnown;
     if(!hasKnownCommitmentTerm){
