@@ -164,6 +164,7 @@ jobs:
           assert not q4_compound_missing_url, q4_compound_missing_url
           assert not stale_generic_direct_labels, stale_generic_direct_labels
           assert set(q4_compound) == {
+              'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
               'R2026-037-WEST-BOYNTON-SENIOR',
               'R2026-040-VERO-DOWNTOWN-FRIDAY',
               'R2026-057-NORTH-MIAMI-HEALTH',
@@ -235,7 +236,6 @@ jobs:
           assert by_control['R2026-079-TURKEY-BASH'].get('detail_data',{}).get('action_url') == 'https://www.eventeny.com/events/sponsor/application/?a=htpjbnnv-25752'
           assert by_control['R2026-082-RUM-FUZION'].get('detail_data',{}).get('action_url') == 'https://rumfuzion.com/#vendors'
           direct_label_expectations={
-              'R2026-005-GIPA-OKTOBERFEST':('https://www.gipa.org/form/m/386539','Open vendor application'),
               'R2026-006-GACTC-OKTOBERFEST':('https://www.eventeny.com/events/vendor/?id=53541','Open business-services application'),
               'R2026-009-SABOR-FEST':('https://www.miamilakes-fl.gov/sabor-fest-2026-vendor-registration-form/','Open vendor registration form'),
               'R2026-022-JUPITER-SPOOKTACULAR':('https://www.jupiter.fl.us/FormCenter/Town-Manager-7/Town-of-Jupiter-Sponsorship-Agreement-20-570','Open 2026 sponsorship agreement'),
@@ -255,6 +255,47 @@ jobs:
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
               assert detail.get('route_verification_source') == '2026_Q4_DIRECT_ACTION_LABEL_CLEANUP', (cid,detail)
+          do_now_reverified={
+              'R2026-001-NMB-CENTENNIAL',
+              'R2026-002-CORAL-SPRINGS-OKTOBERFEST',
+              'R2026-003-PSL-OKTOBERFEST',
+              'R2026-005-GIPA-OKTOBERFEST',
+              'R2026-117-TRADITION-NEIGHBORHOOD',
+          }
+          for cid in do_now_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_DO_NOW_REVERIFICATION', (cid,detail)
+
+          gipa_detail=by_control['R2026-005-GIPA-OKTOBERFEST'].get('detail_data') or {}
+          assert gipa_detail.get('operational_action_code') == 'EMAIL_DRAFT', gipa_detail
+          assert not gipa_detail.get('action_url'), gipa_detail
+          assert 'FORM INACTIVE' in str(gipa_detail.get('booking_status') or '').upper(), gipa_detail
+          assert 'info@gipa.org' in str(gipa_detail.get('contact_text') or '').lower(), gipa_detail
+
+          coral_detail=by_control['R2026-002-CORAL-SPRINGS-OKTOBERFEST'].get('detail_data') or {}
+          assert coral_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', coral_detail
+          assert coral_detail.get('action_url') == 'https://forms.coralsprings.gov/241194820975968', coral_detail
+          assert coral_detail.get('action_label') == 'Open Oktoberfest vendor application', coral_detail
+          assert 'OKTOBERFEST' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
+          assert 'SERVICE-BUSINESS FIT' in str(coral_detail.get('booking_status') or '').upper(), coral_detail
+
+          psl_detail=by_control['R2026-003-PSL-OKTOBERFEST'].get('detail_data') or {}
+          assert psl_detail.get('operational_action_code') == 'EMAIL_DRAFT', psl_detail
+          assert not psl_detail.get('action_url'), psl_detail
+          assert 'GENERAL BUSINESS & COMMERCIAL VENDOR FORM ACTIVE' in str(psl_detail.get('booking_status') or '').upper(), psl_detail
+          assert 'OKTOBERFEST-SPECIFIC AVAILABILITY NOT PUBLISHED' in str(psl_detail.get('booking_status') or '').upper(), psl_detail
+
+          nmb_detail=by_control['R2026-001-NMB-CENTENNIAL'].get('detail_data') or {}
+          assert nmb_detail.get('operational_action_code') == 'EMAIL_DRAFT', nmb_detail
+          assert 'communications@citynmb.com' in str(nmb_detail.get('contact_text') or '').lower(), nmb_detail
+
+          tradition_detail=by_control['R2026-117-TRADITION-NEIGHBORHOOD'].get('detail_data') or {}
+          assert tradition_detail.get('operational_action_code') == 'EMAIL_DRAFT', tradition_detail
+          assert tradition_detail.get('schedule_status') == 'CURRENT VERIFIED', tradition_detail
+          assert 'traditionmarket@hotmail.com' in str(tradition_detail.get('contact_text') or '').lower(), tradition_detail
+
           nascar_detail=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
           assert 'JILER@NASCAR.COM' in str(nascar_detail.get('contact_text') or ''), nascar_detail
