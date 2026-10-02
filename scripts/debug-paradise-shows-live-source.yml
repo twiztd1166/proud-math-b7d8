@@ -954,7 +954,9 @@ jobs:
           assert nmb_detail.get('operational_action_code') == 'EMAIL_DRAFT', nmb_detail
           assert 'communications@citynmb.com' in str(nmb_detail.get('contact_text') or '').lower(), nmb_detail
 
-          tradition_detail=controls['R2026-117-TRADITION-NEIGHBORHOOD'].get('detail_data') or {}
+          tradition=controls['R2026-117-TRADITION-NEIGHBORHOOD']
+          tradition_detail=tradition.get('detail_data') or {}
+          assert tradition.get('date_confidence') == 'CURRENT_VERIFIED', tradition
           assert tradition_detail.get('operational_action_code') == 'EMAIL_DRAFT', tradition_detail
           assert tradition_detail.get('schedule_status') == 'CURRENT VERIFIED', tradition_detail
           assert 'traditionmarket@hotmail.com' in str(tradition_detail.get('contact_text') or '').lower(), tradition_detail
@@ -980,7 +982,10 @@ jobs:
           assert 'DEADLINE PASSED' in str(florida_creatives.get('booking_status') or '').upper(), florida_creatives
           assert 'vendors@battlebrosevents.com' in str(florida_creatives.get('contact_text') or '').lower(), florida_creatives
 
-          pumpkins_detail=controls['R2026-013-PUMPKINS-PALMS'].get('detail_data') or {}
+          pumpkins=controls['R2026-013-PUMPKINS-PALMS']
+          pumpkins_detail=pumpkins.get('detail_data') or {}
+          assert pumpkins.get('date_confidence') == 'CURRENT_VERIFIED', pumpkins
+          assert pumpkins.get('event_start') == '2026-10-10', pumpkins
           assert pumpkins_detail.get('operational_action_code') == 'EMAIL_DRAFT', pumpkins_detail
           assert '$60' in str(pumpkins_detail.get('current_cost_text') or ''), pumpkins_detail
           assert '$25' in str(pumpkins_detail.get('current_cost_text') or ''), pumpkins_detail
@@ -1572,7 +1577,22 @@ jobs:
           homegrown=controls['R2026-073-PALM-BAY-FARMERS-NOV']
           assert homegrown.get('event_label') == 'Palm Bay Farmers Market - Homegrown Harvest', homegrown
           assert homegrown.get('series_key') == 'PALM-BAY-FARMERS-MARKET', homegrown
-          assert controls['R2026-107-PALM-BAY-HOLIDAY-MARKET'].get('series_key') == 'PALM-BAY-FARMERS-MARKET', controls['R2026-107-PALM-BAY-HOLIDAY-MARKET']
+          assert homegrown.get('date_confidence') == 'CURRENT_VERIFIED', homegrown
+          assert homegrown.get('deadline_date') == '2026-11-05', homegrown
+          assert '$60' in str(homegrown.get('price_text') or '') and '$1,000' in str(homegrown.get('price_text') or ''), homegrown
+          holiday=controls['R2026-107-PALM-BAY-HOLIDAY-MARKET']
+          holiday_detail=holiday.get('detail_data') or {}
+          assert holiday.get('series_key') == 'PALM-BAY-FARMERS-MARKET', holiday
+          assert holiday.get('date_confidence') == 'CURRENT_VERIFIED', holiday
+          assert holiday.get('deadline_date') == '2026-12-03', holiday
+          assert '$60' in str(holiday.get('price_text') or '') and '$1,000' in str(holiday.get('price_text') or ''), holiday
+          assert holiday_detail.get('operational_action_code') == 'APPLY', holiday_detail
+          assert holiday_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=54950', holiday_detail
+          assert holiday_detail.get('route_verified_at') == '2026-10-02', holiday_detail
+          assert holiday_detail.get('route_verification_source') == '2026_PALM_BAY_CURRENT_ROUTE_REVERIFICATION', holiday_detail
+          assert holiday_detail.get('schedule_status') == 'CURRENT VERIFIED', holiday_detail
+          assert 'LYNBROOK PARK' in str(holiday_detail.get('venue_text') or '').upper(), holiday_detail
+          assert 'NON-REFUNDABLE' in str(holiday_detail.get('commitment_terms_text') or '').upper(), holiday_detail
           senior=controls['R2026-063-SENIOR-HARDROCK']
           senior_detail=senior.get('detail_data') or {}
           assert senior.get('deadline_date') == '2026-10-30', senior
@@ -1652,7 +1672,11 @@ jobs:
 
           homegrown_detail=controls['R2026-073-PALM-BAY-FARMERS-NOV'].get('detail_data') or {}
           assert homegrown_detail.get('current_source_checked_at') == '2026-10-02', homegrown_detail
+          assert homegrown_detail.get('schedule_status') == 'CURRENT VERIFIED', homegrown_detail
+          assert 'LYNBROOK PARK' in str(homegrown_detail.get('venue_text') or '').upper(), homegrown_detail
+          assert '500' in str(homegrown_detail.get('attendance_text') or ''), homegrown_detail
           assert 'RECOVERED PRICING' not in str(homegrown_detail.get('commitment_terms_text') or '').upper(), homegrown_detail
+          assert 'NON-REFUNDABLE' in str(homegrown_detail.get('commitment_terms_text') or '').upper(), homegrown_detail
           assert '$25' in str(homegrown_detail.get('commitment_terms_text') or ''), homegrown_detail
 
           for cid in {'R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC'}:
