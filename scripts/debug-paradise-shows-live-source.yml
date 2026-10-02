@@ -730,7 +730,6 @@ jobs:
           assert all((r.get('detail_data') or {}).get('next_action') for r in research), 'next_action missing'
           controls={r.get('control_id'):r for r in research}
           for cid in (
-              'R2026-016-MIAMI-CARNIVAL',
               'R2026-039-SPACE-COAST-STATE-FAIR',
               'R2026-066-STUART-AIR-SHOW',
               'R2026-084-CHRISTMAS-LAS-OLAS',
@@ -1486,12 +1485,27 @@ jobs:
           assert '$500' in str(hollywood.get('current_cost_text') or ''), hollywood
           assert '$2,500' in str(hollywood.get('current_cost_text') or ''), hollywood
 
-          miami_carnival=controls['R2026-016-MIAMI-CARNIVAL'].get('detail_data') or {}
+          miami_carnival_row=controls['R2026-016-MIAMI-CARNIVAL']
+          miami_carnival=miami_carnival_row.get('detail_data') or {}
           assert miami_carnival.get('operational_action_code') == 'EMAIL_DRAFT', miami_carnival
           assert not miami_carnival.get('action_url'), miami_carnival
           assert '$2,500' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
           assert '$4,000' in str(miami_carnival.get('current_cost_text') or ''), miami_carnival
+          assert '$2,500' in str(miami_carnival_row.get('price_text') or ''), miami_carnival_row
+          assert '$4,000' in str(miami_carnival_row.get('price_text') or ''), miami_carnival_row
           assert 'VENUE CONFLICT' in str(miami_carnival.get('booking_status') or '').upper(), miami_carnival
+          assert miami_carnival.get('current_source_checked_at') == '2026-10-02', miami_carnival
+          assert miami_carnival.get('followup_reverified_at') == '2026-10-02', miami_carnival
+          assert miami_carnival.get('followup_reverification_source') == '2026_NEXT14_CURRENT_SOURCE_EXHAUST', miami_carnival
+          assert miami_carnival.get('route_verified_at') == '2026-10-02', miami_carnival
+          assert miami_carnival.get('route_verification_source') == '2026_NEXT14_MIAMI_CARNIVAL_2026_CONTRACT_CORRECTION', miami_carnival
+          assert miami_carnival.get('corrective_reverification_source') == '2026_CURRENT_CONTRACT_PRICE_CORRECTION_CORRECTED', miami_carnival
+          assert miami_carnival.get('corporate_vendor_form_url') == 'https://miamicarnival.org/wp-content/uploads/2026/05/2026-Carnival-Corporate-Vendor-Application.pdf', miami_carnival
+          assert miami_carnival.get('vendor_rules_url') == 'https://miamicarnival.org/wp-content/uploads/2026/09/2026-Carnival-Vendors-Rules-Broward-updated.pdf', miami_carnival
+          assert miami_carnival.get('vendor_rules_status') == 'CURRENT SEPTEMBER 2026 UPDATED RULES', miami_carnival
+          assert 'NON-REFUNDABLE' in str(miami_carnival.get('commitment_terms_text') or '').upper(), miami_carnival
+          assert 'SEP. 30, 2026' in str(miami_carnival.get('commitment_terms_text') or ''), miami_carnival
+          assert '$200' in str(miami_carnival.get('commitment_terms_text') or ''), miami_carnival
 
           cars_oct=controls['R2026-017-CARS-COFFEE-OCT'].get('detail_data') or {}
           assert cars_oct.get('operational_action_code') == 'OPEN_INQUIRY', cars_oct
