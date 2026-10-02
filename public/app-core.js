@@ -179,10 +179,14 @@ function researchOutreachProfile(row){
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
   if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
-  const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|EXHIBIT|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
+  const actionCode=String(d.operational_action_code||'').trim().toUpperCase();
+  const applicationActionCodes=['EMAIL_THEN_APPLY','CALL_THEN_APPLY'];
+  const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&(
+    applicationActionCodes.includes(actionCode)||
+    /APPL|REGISTER|SIGN.?UP/i.test(String(d.action_label||''))
+  );
 
   const statusText=String(d.booking_status||row?.research_status||'').toUpperCase();
-  const actionCode=String(d.operational_action_code||'').trim().toUpperCase();
   const availability=typeof researchAvailability==='function'?researchAvailability(row):null;
   const availabilityCode=String(availability?.code||'').toUpperCase();
   const contactThenApply=['EMAIL_THEN_APPLY','CALL_THEN_APPLY'].includes(actionCode);
@@ -234,7 +238,7 @@ function researchEmailDraft(row){
       ?'If late participation is possible, please let us know the correct way to proceed.'
       :(profile.hasApplicationPath
         ?'If these details are still current, we can use the published application path.'
-        :'Once those items are confirmed, please let us know the correct application/reservation step.'),
+        :'Once those items are confirmed, please let us know the correct next step.'),
     '',
     'Thank you,',
     'Paradise Exteriors',
@@ -276,7 +280,7 @@ function researchCallScript(row){
       ?'CLOSE: If late participation is possible, confirm the correct way to proceed and record the outcome in Manager Notes.'
       :(profile.hasApplicationPath
         ?'CLOSE: Confirm the details, use the published application path if still valid, and record the outcome in Manager Notes.'
-        :'CLOSE: Confirm the correct application/reservation step and record the outcome in Manager Notes.'),
+        :'CLOSE: Confirm the correct next step and record the outcome in Manager Notes.'),
   ].filter((line,index,arr)=>line!==''||index===0||arr[index-1]!=='').join('\n').trim();
   return {
     phone:profile.phone,
