@@ -82,6 +82,21 @@ for(const row of rows){
 }
 
 const byId=new Map(rows.map(row=>[row.control_id,row]));
+const modalSource=fs.readFileSync('public/app-modals.js','utf8');
+if(!modalSource.includes("const referenceActionCodes=['REVIEW','HOLD','MONITOR','REVERIFY']"))throw new Error('Research detail modal lost governed reference-action support');
+if(!modalSource.includes('${referenceButton}${sourceButtons}'))throw new Error('Research detail modal does not render governed reference actions');
+
+const festival=byId.get('R2026-067-FESTIVAL-GIVING');
+if(!festival)throw new Error('Festival of Giving regression fixture missing');
+const festivalDraft=sandbox.outreach.researchEmailDraft(festival);
+if(!festivalDraft)throw new Error('Festival of Giving should use email');
+if(/published application path|application\/reservation step/i.test(festivalDraft.body))throw new Error('Festival of Giving incorrectly implies an application path');
+if(!/correct next step/i.test(festivalDraft.body))throw new Error('Festival of Giving lost neutral contact-only close');
+const sponsorReferenceFixture=JSON.parse(JSON.stringify(festival));
+sponsorReferenceFixture.detail_data={...(sponsorReferenceFixture.detail_data||{}),operational_action_code:'EMAIL_DRAFT',action_url:'https://example.test/sponsor-info',action_label:'Open sponsorship information'};
+const sponsorReferenceProfile=sandbox.outreach.researchOutreachProfile(sponsorReferenceFixture);
+if(sponsorReferenceProfile.hasApplicationPath)throw new Error('Pure email sponsorship reference incorrectly classified as an application path');
+
 const coral=byId.get('R2026-002-CORAL-SPRINGS-OKTOBERFEST');
 if(!coral)throw new Error('Coral Springs regression fixture missing');
 const coralDraft=sandbox.outreach.researchEmailDraft(coral);
