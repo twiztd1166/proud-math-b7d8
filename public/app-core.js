@@ -135,6 +135,7 @@ function researchOutreachProfile(row){
   const venue=researchFact(d.venue_text||row?.city,d.venue_status,180);
   const logistics=researchFact(d.logistics_text,d.logistics_status,190);
   const commitment=researchFact(d.commitment_terms_text,d.commitment_status,180);
+  const rawCommitmentText=String(d.commitment_terms_text||'').trim();
   const history=researchFact(d.historical_signal,'',180);
   const attendance=researchFact(d.attendance_text,'',160);
 
@@ -164,8 +165,23 @@ function researchOutreachProfile(row){
   if(!venue||venue.confirm)addQuestion('Please confirm the exact event/booth location or placement.');
   const logisticsHasSetup=researchHasKnownTerm([logistics?.text,commitment?.text],/\b(?:BOOTH|SPACE|FOOTPRINT|SETUP|LOAD[- ]?IN|TENT|TABLE|POWER|ACTIVATION)\b/);
   if(!logistics||logistics.confirm||!logisticsHasSetup)addQuestion('Please confirm the booth/activation footprint plus setup and load-in requirements.');
-  if(!commitment||commitment.confirm)addQuestion('Please confirm payment timing, cancellation/refund terms, and any non-refundable commitment.');
-  const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text].filter(Boolean);
+  const commitmentKnowledge=[commitment?.text,rawCommitmentText].filter(Boolean);
+  const paymentTimingKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:FULL PAYMENT|PAYMENT\s+(?:IS\s+)?(?:DUE|REQUIRED)|DUE\s+(?:UPON|BY)|DEPOSIT|CASHIER(?:'S)? CHECK|MONEY ORDER|ACH|CREDIT CARD|CHECK REQUIRED)\b/);
+  const refundTermsKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|REFUND\w*|CANCELLATION\w*|ALL SALES (?:ARE )?FINAL)\b/);
+  const nonRefundKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|ALL SALES (?:ARE )?FINAL)\b/);
+  if(!commitment||commitment.confirm){
+    const unresolvedCommitment=[];
+    if(!paymentTimingKnown)unresolvedCommitment.push('payment timing and any required deposit');
+    if(!refundTermsKnown)unresolvedCommitment.push('cancellation/refund terms');
+    if(!nonRefundKnown)unresolvedCommitment.push('whether any payment or commitment is non-refundable');
+    if(unresolvedCommitment.length){
+      const tail=unresolvedCommitment.length===1
+        ?unresolvedCommitment[0]
+        :unresolvedCommitment.slice(0,-1).join(', ')+' and '+unresolvedCommitment.at(-1);
+      addQuestion('Please confirm '+tail+'.');
+    }
+  }
+  const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text,rawCommitmentText].filter(Boolean);
   if(!researchHasKnownTerm(knownText,/\b(?:COI|INSURANCE|CERTIFICATE OF INSURANCE)\b/))addQuestion('Are there insurance or COI requirements?');
   if(!researchHasKnownTerm(knownText,/\b(?:EXCLUSIV|RESTRICT|CATEGORY)\w*/))addQuestion('Are there category exclusivity rules or home-improvement/vendor restrictions?');
   const hasApplicationPath=Boolean(String(d.action_url||'').trim())&&/APPL|REGISTER|VENDOR|SPONSOR|EXHIBIT|OFFICIAL|SIGN.?UP/i.test(String(d.action_label||'')+' '+String(d.action_url||''));
