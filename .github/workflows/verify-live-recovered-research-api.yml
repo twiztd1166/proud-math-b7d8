@@ -216,6 +216,7 @@ jobs:
               'R2026-103-MARTIN-WINTER-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
               'R2026-106-WELLINGTON-BOAT':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-068-FREEDOM-5K':'https://runsignup.com/Race/FreedomIsnTFreeRun5KSPONSORSHIP/Page/ContactUs',
+              'R2026-093-PB-HOLIDAY-BOAT':'https://www.cognitoforms.com/MIAPBC/_2026BoatParadeSponsorshipForm',
           }
           assert sum(
               1 for r in q4
@@ -228,7 +229,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'OPEN_INQUIRY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K'} else '2026-10-01'
+              expected_route_date='2026-10-02' if cid in {'R2026-017-CARS-COFFEE-OCT','R2026-049-CARS-COFFEE-NOV','R2026-099-CARS-COFFEE-DEC','R2026-023-WELLINGTON-FALL','R2026-024-POMPANO-CARIBBEAN','R2026-038-FLIBS','R2026-068-FREEDOM-5K','R2026-093-PB-HOLIDAY-BOAT'} else '2026-10-01'
               assert detail.get('route_verified_at') == expected_route_date, (cid,detail)
           email_route_ids={
               'R2026-025-BOYNTON-FALL',
@@ -1112,9 +1113,54 @@ jobs:
           assert senior_detail.get('current_source_checked_at') == '2026-10-02', senior_detail
           assert str(senior_detail.get('followup_reverification_basis') or '').strip(), senior_detail
 
+          december_tail_b1={
+              'R2026-085-DELRAY-TREE',
+              'R2026-092-WPB-BEER-WINE',
+              'R2026-093-PB-HOLIDAY-BOAT',
+              'R2026-097-PEMBROKE-SNOWFEST',
+              'R2026-098-MELBOURNE-HOLIDAY-ART',
+          }
+          for cid in december_tail_b1:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B1', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+
+          delray_tree=by_control['R2026-085-DELRAY-TREE']
+          delray_tree_detail=delray_tree.get('detail_data') or {}
+          assert delray_tree_detail.get('current_source_checked_at') == '2026-10-01', delray_tree_detail
+          assert delray_tree_detail.get('operational_action_code') == 'REVIEW', delray_tree_detail
+
+          pb_boat=by_control['R2026-093-PB-HOLIDAY-BOAT']
+          pb_boat_detail=pb_boat.get('detail_data') or {}
+          assert pb_boat_detail.get('current_source_checked_at') == '2026-10-02', pb_boat_detail
+          assert pb_boat_detail.get('operational_action_code') == 'OPEN_INQUIRY', pb_boat_detail
+          assert pb_boat_detail.get('action_url') == 'https://www.cognitoforms.com/MIAPBC/_2026BoatParadeSponsorshipForm', pb_boat_detail
+          assert pb_boat_detail.get('action_label') == 'Open 2026 sponsorship form', pb_boat_detail
+          assert pb_boat_detail.get('route_verified_at') == '2026-10-02', pb_boat_detail
+
+          snowfest=by_control['R2026-097-PEMBROKE-SNOWFEST']
+          snowfest_detail=snowfest.get('detail_data') or {}
+          assert snowfest_detail.get('current_source_checked_at') == '2026-10-02', snowfest_detail
+          assert snowfest_detail.get('official_source_url') == 'https://www.ppines.com/1686/SnowFest', snowfest_detail
+          assert 'RESIDENT-ONLY' in str(snowfest_detail.get('booking_status') or '').upper(), snowfest_detail
+          assert 'fnovo@ppines.com' in str(snowfest_detail.get('contact_text') or '').lower(), snowfest_detail
+
+          wpb_beer=by_control['R2026-092-WPB-BEER-WINE']
+          wpb_beer_detail=wpb_beer.get('detail_data') or {}
+          assert wpb_beer_detail.get('current_source_checked_at') == '2026-10-02', wpb_beer_detail
+          assert wpb_beer_detail.get('operational_action_code') == 'EMAIL_DRAFT', wpb_beer_detail
+          assert 'marketing@evanbermanproductions.com' in str(wpb_beer_detail.get('contact_text') or '').lower(), wpb_beer_detail
+          assert 'NOT PUBLICLY POSTED' in str(wpb_beer_detail.get('booking_status') or '').upper(), wpb_beer_detail
+
+          assert sum(
+              1 for r in research
+              if (r.get('detail_data') or {}).get('followup_reverified_at') == '2026-10-02'
+          ) >= 102
+
           assert sum(bool(r.get('deadline_date')) for r in research) == len(expected_deadlines), [r.get('control_id') for r in research if r.get('deadline_date')]
           missing_official={r.get('control_id') for r in research if not str((r.get('detail_data') or {}).get('official_source_url') or '').strip()}
-          assert missing_official == {'R2026-098-MELBOURNE-HOLIDAY-ART'}, missing_official
+          assert not missing_official, missing_official
           carifest=by_control['R2026-054-CARIFEST']
           carifest_detail=carifest.get('detail_data') or {}
           assert carifest.get('research_status') == 'CURRENT_REVERIFIED', carifest
@@ -1126,10 +1172,13 @@ jobs:
           melbourne=by_control['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
           assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
-          assert not str(melbourne_detail.get('official_source_url') or '').strip(), melbourne
+          assert melbourne_detail.get('official_source_url') == 'https://melbournemoose.com/about/', melbourne
           assert str(melbourne_detail.get('schedule_status') or '').startswith('CURRENT SECONDARY VERIFIED'), melbourne
-          assert 'FIRST-PARTY COMMERCIAL APPLICATION TO CONFIRM' in str(melbourne_detail.get('booking_status') or ''), melbourne
-          assert melbourne_detail.get('current_source_checked_at') == '2026-09-30', melbourne
+          assert 'CURRENT MOOSE LODGE ORGANIZER SITE DOES NOT PUBLISH' in str(melbourne_detail.get('booking_status') or '').upper(), melbourne
+          assert melbourne_detail.get('current_source_checked_at') == '2026-10-02', melbourne
+          assert melbourne_detail.get('followup_reverified_at') == '2026-10-02', melbourne
+          assert melbourne_detail.get('followup_reverification_source') == '2026_DECEMBER_TAIL_REVERIFICATION_B1', melbourne
+          assert 'FIRST-PARTY' in str(melbourne_detail.get('operational_guard') or '').upper(), melbourne
           source_pairs={}
           duplicate_pairs=[]
           for row in research:
