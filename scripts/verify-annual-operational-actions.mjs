@@ -94,13 +94,19 @@ const deadlineEnd=source.indexOf('function renderToday',deadlineStart);
 if(deadlineStart<0||deadlineEnd<0)throw new Error('Annual Next Steps deadline helper block not found');
 const deadlineBlock=source.slice(deadlineStart,deadlineEnd);
 const deadlineSandbox={
-  state:{annualPlan:{loaded:true,rows:[
-    {plan_id:'overdue',plan_year:2027,action_due:'2026-09-01',canonical_event:'Overdue Show',priority:'HIGH',publication_status:'OFFICIAL'},
-    {plan_id:'near',plan_year:2027,action_due:'2026-11-02',canonical_event:'Near Show',priority:'HIGH',publication_status:'OFFICIAL'},
-    {plan_id:'later',plan_year:2027,action_due:'2027-01-08',canonical_event:'Later Show',priority:'HIGH',publication_status:'OFFICIAL'},
-    {plan_id:'nodue',plan_year:2027,action_due:null,canonical_event:'No Due Show',priority:'HIGH',publication_status:'OFFICIAL'},
-    {plan_id:'audit',plan_year:2027,action_due:'2026-10-15',canonical_event:'Audit Duplicate',priority:'HIGH',publication_status:'DUPLICATE_SUPPRESSED_TO_CANONICAL'},
-  ]}},
+  state:{
+    annualPlan:{loaded:true,rows:[
+      {plan_id:'overdue',plan_year:2027,action_due:'2026-09-01',canonical_event:'Overdue Show',priority:'HIGH',publication_status:'OFFICIAL'},
+      {plan_id:'near',plan_year:2027,action_due:'2026-11-02',canonical_event:'Near Show',priority:'HIGH',publication_status:'OFFICIAL'},
+      {plan_id:'later',plan_year:2027,action_due:'2027-01-08',canonical_event:'Later Show',priority:'HIGH',publication_status:'OFFICIAL'},
+      {plan_id:'nodue',plan_year:2027,action_due:null,canonical_event:'No Due Show',priority:'HIGH',publication_status:'OFFICIAL'},
+      {plan_id:'audit',plan_year:2027,action_due:'2026-10-15',canonical_event:'Audit Duplicate',priority:'HIGH',publication_status:'DUPLICATE_SUPPRESSED_TO_CANONICAL'},
+    ]},
+    payments:[
+      {payment_id:'MFC-006|2027|Installment 1|2026-09-01|13000.00',source_instance_id:'MFC-006',due:'2026-09-01'},
+      {payment_id:'MFC-006|2028|Installment 2|2027-09-01|13500.00',source_instance_id:'MFC-006',due:'2027-09-01'},
+    ],
+  },
   researchEasternTodayKey:()=> '2026-10-01',
   researchDateOrdinal:value=>{
     const m=String(value||'').slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -109,10 +115,19 @@ const deadlineSandbox={
   annualPlanIsAuditDuplicate:row=>String(row?.publication_status||'').toUpperCase().includes('DUPLICATE_SUPPRESSED'),
 };
 vm.createContext(deadlineSandbox);
-vm.runInContext(`${deadlineBlock}\nthis.deadlineApi={annualPlanDeadlineRows};\n`,deadlineSandbox);
+vm.runInContext(`${deadlineBlock}\nthis.deadlineApi={annualPlanDeadlineRows,annualPlanPaymentMatch};\n`,deadlineSandbox);
 const deadlineRows=deadlineSandbox.deadlineApi.annualPlanDeadlineRows();
 if(deadlineRows.map(row=>row.plan_id).join(',')!=='overdue,near')throw new Error('2027 deadline lane must include overdue + next-45-day rows only');
 if(deadlineSandbox.deadlineApi.annualPlanDeadlineRows(0).map(row=>row.plan_id).join(',')!=='overdue')throw new Error('2027 deadline horizon does not preserve overdue actions');
+const matchedPayment=deadlineSandbox.deadlineApi.annualPlanPaymentMatch({
+  operational_action_code:'VERIFY_PAYMENT',
+  mfc_ids:['MFC-006'],
+  action_due:'2026-09-01',
+});
+if(!matchedPayment||matchedPayment.payment_id!=='MFC-006|2027|Installment 1|2026-09-01|13000.00')throw new Error('2027 payment action did not match exact MFC + due-date control');
+if(deadlineSandbox.deadlineApi.annualPlanPaymentMatch({operational_action_code:'REVIEW_DECIDE',mfc_ids:['MFC-006'],action_due:'2026-09-01'})!==null)throw new Error('Non-payment annual action incorrectly matched a payment');
+if(!source.includes('data-annual-payment'))throw new Error('2027 payment deadline card is missing direct payment action');
+if(!bindSource.includes('[data-annual-payment]'))throw new Error('2027 payment deadline button is not bound to payment modal');
 
 console.log({
   annual_operational_actions:'PASS',
@@ -121,4 +136,5 @@ console.log({
   object_source_url:'PASS',
   duplicate_suppression:'PASS',
   next_steps_2027_deadlines:'PASS',
+  next_steps_2027_payment_link:'PASS',
 });
