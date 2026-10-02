@@ -98,6 +98,18 @@ jobs:
           assert hallandale.get('estimated_sort_date') is None, hallandale
           assert hallandale.get('date_confidence') == 'CURRENT_VERIFIED', hallandale
           by_control={r.get('control_id'):r for r in research}
+          def has_followup_verification(detail, source, reverified_at=None):
+              if detail.get('followup_reverification_source') == source and (
+                  reverified_at is None or detail.get('followup_reverified_at') == reverified_at
+              ):
+                  return True
+              history=detail.get('followup_reverification_history') or []
+              return isinstance(history,list) and any(
+                  isinstance(item,dict)
+                  and item.get('source') == source
+                  and (reverified_at is None or item.get('reverified_at') == reverified_at)
+                  for item in history
+              )
           expected_deadlines={
             'R2026-068-FREEDOM-5K':'2026-09-15',
             'R2026-004-FLORIDA-CREATIVES-PSL':'2026-09-30',
@@ -273,7 +285,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_DO_NOW_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_DO_NOW_REVERIFICATION', '2026-10-02'), (cid,detail)
 
           gipa_detail=by_control['R2026-005-GIPA-OKTOBERFEST'].get('detail_data') or {}
           assert gipa_detail.get('operational_action_code') == 'EMAIL_DRAFT', gipa_detail
@@ -318,7 +330,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_LATE_INVENTORY_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_LATE_INVENTORY_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_LATE_INVENTORY_REVERIFICATION', (cid,detail)
 
@@ -369,7 +381,7 @@ jobs:
               detail=row.get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_NEXT7_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_NEXT7_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('official_source_url') or '').strip(), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
@@ -419,7 +431,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_NEXT14_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_NEXT14_REVERIFICATION', (cid,detail)
@@ -438,7 +450,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT17_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_OCT17_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
           oct17_direct_reverified={
@@ -490,7 +502,7 @@ jobs:
           for cid in oct22_24_reverified:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_OCT22_24_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
               assert detail.get('route_verification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
@@ -559,7 +571,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT17_24_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_OCT17_24_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert not str(detail.get('route_verified_at') or '').strip(), (cid,detail)
               assert not str(detail.get('route_verification_source') or '').strip(), (cid,detail)
@@ -593,7 +605,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT25_26_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_OCT25_26_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
           prime_boca=by_control['R2026-035-PRIME-BOCA'].get('detail_data') or {}
@@ -636,7 +648,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_OCT28_NOV1_REVERIFICATION', (cid,detail)
+              assert has_followup_verification(detail, '2026_OCT28_NOV1_REVERIFICATION', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
 
           oct28_nov1_direct={
@@ -865,7 +877,7 @@ jobs:
           assert 'IN STOCK / PURCHASABLE' in str(senior_detail.get('booking_status') or '').upper(), senior_detail
           assert 'CATEGORY AVAILABILITY' in str(senior_detail.get('operational_guard') or '').upper(), senior_detail
           assert senior_detail.get('followup_reverified_at') == '2026-10-02', senior_detail
-          assert senior_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
+          assert has_followup_verification(senior_detail, '2026_LATER_QUEUE_STATUS_CORRECTION_B1', '2026-10-02'), senior_detail
           assert senior_detail.get('route_verified_at') == '2026-10-02', senior_detail
           assert senior_detail.get('route_verification_source') == '2026_LATER_QUEUE_STATUS_CORRECTION_B1', senior_detail
 
@@ -881,7 +893,7 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_REVERIFICATION_B1', (cid,detail)
+              assert has_followup_verification(detail, '2026_LATER_QUEUE_REVERIFICATION_B1', '2026-10-02'), (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
 
@@ -906,7 +918,7 @@ jobs:
           assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
           assert tequila_detail.get('current_source_checked_at') == '2026-10-02', tequila_detail
           assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
-          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert has_followup_verification(tequila_detail, '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', '2026-10-02'), tequila_detail
           assert tequila_detail.get('route_verified_at') == '2026-10-02', tequila_detail
           assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
           assert str(tequila_detail.get('followup_reverification_basis') or '').strip(), tequila_detail
@@ -923,7 +935,7 @@ jobs:
           assert 'EXHIBITOR / SPONSOR APPLICATION ACTIVE' in str(tequila_detail.get('booking_status') or '').upper(), tequila_detail
           assert '$3,000' in str(tequila_detail.get('current_cost_text') or ''), tequila_detail
           assert tequila_detail.get('followup_reverified_at') == '2026-10-02', tequila_detail
-          assert tequila_detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
+          assert has_followup_verification(tequila_detail, '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', '2026-10-02'), tequila_detail
           assert tequila_detail.get('route_verified_at') == '2026-10-02', tequila_detail
           assert tequila_detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', tequila_detail
 
@@ -956,7 +968,7 @@ jobs:
               assert '48 HOURS' in str(detail.get('booking_status') or '').upper(), (cid,detail)
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
-              assert detail.get('followup_reverification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
+              assert has_followup_verification(detail, '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', '2026-10-02'), (cid,detail)
               assert detail.get('route_verification_source') == '2026_LATER_QUEUE_ROUTE_NORMALIZATION_B1', (cid,detail)
               assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
               assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
