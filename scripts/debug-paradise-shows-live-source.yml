@@ -829,6 +829,7 @@ jobs:
           }, q4_compound
           inquiry_expectations={
               'R2026-007-MARTIN-FALL-FEST':'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages',
+              'R2026-017-CARS-COFFEE-OCT':'https://www.carsandcoffeepb.com/sponsors',
               'R2026-024-POMPANO-CARIBBEAN':'https://parks.pompanobeachfl.gov/form/parks-rec-event-sponsorship-interest-form',
               'R2026-023-WELLINGTON-FALL':'https://www.wellingtonfl.gov/FormCenter/Parks-Recreation-7/Sponsor-Vendor-Interest-Form-74',
               'R2026-038-FLIBS':'https://app.smartsheet.com/b/form/0197132e30c374e8980a0fcea4e2200e',
