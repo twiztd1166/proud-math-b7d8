@@ -254,6 +254,8 @@ jobs:
                   expected_route_source='2026_NEXT14_REVERIFICATION'
               elif cid in {'R2026-020-BRAZILIAN-FESTIVAL','R2026-022-JUPITER-SPOOKTACULAR','R2026-026-PLANTATION-FALL','R2026-033-MOOSE-MELBOURNE'}:
                   expected_route_source='2026_OCT17_REVERIFICATION'
+              elif cid in {'R2026-029-RPB-ROCK-N-FALL','R2026-031-MALABAR-FALLFEST'}:
+                  expected_route_source='2026_OCT22_24_REVERIFICATION'
               else:
                   expected_route_source='2026_Q4_DIRECT_ACTION_LABEL_CLEANUP'
               assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
@@ -474,6 +476,77 @@ jobs:
           assert moose_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=53135', moose_detail
           assert '$60' in str(moose_detail.get('current_cost_text') or ''), moose_detail
 
+          oct22_24_reverified={
+              'R2026-029-RPB-ROCK-N-FALL',
+              'R2026-030-DELRAY-KIDSFEST',
+              'R2026-031-MALABAR-FALLFEST',
+              'R2026-034-IRL-SCIENCE',
+              'R2026-045-HALLANDALE-HALLOWEEN',
+              'R2026-046-PALM-BAY-FALL-FEST',
+          }
+          for cid in oct22_24_reverified:
+              detail=by_control[cid].get('detail_data') or {}
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert detail.get('route_verified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('route_verification_source') == '2026_OCT22_24_REVERIFICATION', (cid,detail)
+              if cid == 'R2026-034-IRL-SCIENCE':
+                  assert detail.get('current_source_checked_at') == '2026-10-01', (cid,detail)
+                  assert 'HTTP 406' in str(detail.get('followup_reverification_basis') or ''), (cid,detail)
+              else:
+                  assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+
+          hallandale_halloween_detail=by_control['R2026-045-HALLANDALE-HALLOWEEN'].get('detail_data') or {}
+          assert by_control['R2026-045-HALLANDALE-HALLOWEEN'].get('deadline_date') == '2026-10-22', hallandale_halloween_detail
+          assert hallandale_halloween_detail.get('operational_action_code') == 'APPLY', hallandale_halloween_detail
+          assert hallandale_halloween_detail.get('action_url') == 'https://hallandalebeachfl.gov/DocumentCenter/View/38248/2026-Halloween-Sponsor-Application-blank-Fillable', hallandale_halloween_detail
+          assert '$100 non-food vendor' in str(hallandale_halloween_detail.get('current_cost_text') or ''), hallandale_halloween_detail
+          assert '$300' in str(hallandale_halloween_detail.get('current_cost_text') or ''), hallandale_halloween_detail
+          assert '$500' in str(hallandale_halloween_detail.get('current_cost_text') or ''), hallandale_halloween_detail
+          assert 'OCT. 26' in str(hallandale_halloween_detail.get('deadline_text') or '').upper(), hallandale_halloween_detail
+
+          palm_fall_detail=by_control['R2026-046-PALM-BAY-FALL-FEST'].get('detail_data') or {}
+          assert by_control['R2026-046-PALM-BAY-FALL-FEST'].get('deadline_date') == '2026-10-23', palm_fall_detail
+          assert palm_fall_detail.get('operational_action_code') == 'APPLY', palm_fall_detail
+          assert palm_fall_detail.get('action_url') == 'https://www.palmbayfl.gov/home/showpublisheddocument/29092/639232468594230000', palm_fall_detail
+          assert palm_fall_detail.get('current_cost_text') == '$20 business/group Trunk-or-Treat registration', palm_fall_detail
+          assert '5:00 PM' in str(palm_fall_detail.get('deadline_text') or ''), palm_fall_detail
+
+          rpb_detail=by_control['R2026-029-RPB-ROCK-N-FALL'].get('detail_data') or {}
+          assert rpb_detail.get('operational_action_code') == 'APPLY', rpb_detail
+          assert rpb_detail.get('action_url') == 'https://pci.jotform.com/form/261183235018148', rpb_detail
+          assert '$10' in str(rpb_detail.get('current_cost_text') or ''), rpb_detail
+          assert '$200' in str(rpb_detail.get('current_cost_text') or ''), rpb_detail
+          assert '$300' in str(rpb_detail.get('current_cost_text') or ''), rpb_detail
+          assert '$400' in str(rpb_detail.get('current_cost_text') or ''), rpb_detail
+
+          delray_kids_detail=by_control['R2026-030-DELRAY-KIDSFEST'].get('detail_data') or {}
+          assert delray_kids_detail.get('operational_action_code') == 'APPLY', delray_kids_detail
+          assert delray_kids_detail.get('action_url') == 'https://www.delraybeachfl.gov/home/showpublisheddocument/15539/639154759300870000', delray_kids_detail
+          assert '$500' in str(delray_kids_detail.get('current_cost_text') or ''), delray_kids_detail
+          assert '$750' in str(delray_kids_detail.get('current_cost_text') or ''), delray_kids_detail
+          assert '$1,000' in str(delray_kids_detail.get('current_cost_text') or ''), delray_kids_detail
+          assert '5 business days' in str(delray_kids_detail.get('commitment_terms_text') or ''), delray_kids_detail
+
+          malabar_detail=by_control['R2026-031-MALABAR-FALLFEST'].get('detail_data') or {}
+          assert malabar_detail.get('operational_action_code') == 'APPLY', malabar_detail
+          assert malabar_detail.get('action_url') == 'https://www.townofmalabar.org/DocumentCenter/View/3591/Vendor-Participant-Sign-Up-Form-2026', malabar_detail
+          assert '$25' in str(malabar_detail.get('current_cost_text') or ''), malabar_detail
+          assert 'NO FIXED DEADLINE' in str(malabar_detail.get('deadline_text') or '').upper(), malabar_detail
+          assert '1,000+' in str(malabar_detail.get('followup_reverification_basis') or ''), malabar_detail
+
+          irl_science=by_control['R2026-034-IRL-SCIENCE']
+          irl_detail=irl_science.get('detail_data') or {}
+          assert irl_detail.get('operational_action_code') == 'REVIEW', irl_detail
+          assert irl_detail.get('action_url') == 'https://forms.gle/SdpaafV3aKW2sAxA6', irl_detail
+          assert irl_science.get('price_text') == '$75 commercial business exhibitor fee', irl_science
+          assert irl_detail.get('current_cost_text') == '$75 commercial business exhibitor fee', irl_detail
+          assert 'OCT. 13' not in str(irl_detail.get('current_cost_text') or '').upper(), irl_detail
+          assert '$25' not in str(irl_detail.get('current_cost_text') or ''), irl_detail
+          assert 'NO APPLICATION DEADLINE' in str(irl_detail.get('deadline_text') or '').upper(), irl_detail
+          assert 'HANDS-ON' in str(irl_detail.get('operational_guard') or '').upper(), irl_detail
+
           wag=by_control['R2026-014-WAG-O-WEEN'].get('detail_data') or {}
           assert wag.get('operational_action_code') == 'EMAIL_DRAFT', wag
           assert not wag.get('action_url'), wag
@@ -551,7 +624,8 @@ jobs:
               assert detail.get('action_url') == url, (cid,detail)
               assert detail.get('action_label') == label, (cid,detail)
               assert detail.get('operational_guard'), (cid,detail)
-              assert detail.get('route_verification_source') == '2026_Q4_REVIEW_GUARD_UX_CLEANUP', (cid,detail)
+              expected_route_source='2026_OCT22_24_REVERIFICATION' if cid == 'R2026-034-IRL-SCIENCE' else '2026_Q4_REVIEW_GUARD_UX_CLEANUP'
+              assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           melbourne=by_control['R2026-098-MELBOURNE-HOLIDAY-ART']
           melbourne_detail=melbourne.get('detail_data') or {}
           assert melbourne.get('research_status') == 'RECOVERED_NOT_REVERIFIED', melbourne
@@ -574,7 +648,8 @@ jobs:
               detail=by_control[cid].get('detail_data') or {}
               assert detail.get('operational_action_code') == 'APPLY', (cid,detail)
               assert detail.get('action_url') == url, (cid,detail)
-              assert detail.get('route_verification_source') == '2026_Q4_COMPOUND_ACTION_REVERIFICATION', (cid,detail)
+              expected_route_source='2026_OCT22_24_REVERIFICATION' if cid == 'R2026-030-DELRAY-KIDSFEST' else '2026_Q4_COMPOUND_ACTION_REVERIFICATION'
+              assert detail.get('route_verification_source') == expected_route_source, (cid,detail)
           mjd_detail=by_control['R2026-057-NORTH-MIAMI-HEALTH'].get('detail_data') or {}
           assert mjd_detail.get('operational_action_code') == 'EMAIL_THEN_APPLY', mjd_detail
           assert mjd_detail.get('action_url') == 'https://mjdhealthfair.com/#/vendors', mjd_detail
