@@ -181,15 +181,20 @@ function researchOutreachProfile(row){
   const refundTermsKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|REFUND\w*|CANCELLATION\w*|ALL SALES (?:ARE )?FINAL)\b/);
   const nonRefundKnown=researchHasKnownTerm(commitmentKnowledge,/\b(?:NON[- ]?REFUND\w*|NO REFUND|ALL SALES (?:ARE )?FINAL)\b/);
   if(!commitment||commitment.confirm){
-    const unresolvedCommitment=[];
-    if(!paymentTimingKnown)unresolvedCommitment.push('payment timing and any required deposit');
-    if(!refundTermsKnown)unresolvedCommitment.push('cancellation/refund terms');
-    if(!nonRefundKnown)unresolvedCommitment.push('whether any payment or commitment is non-refundable');
-    if(unresolvedCommitment.length){
-      const tail=unresolvedCommitment.length===1
-        ?unresolvedCommitment[0]
-        :unresolvedCommitment.slice(0,-1).join(', ')+' and '+unresolvedCommitment.at(-1);
-      addQuestion('Please confirm '+tail+'.');
+    const hasKnownCommitmentTerm=paymentTimingKnown||refundTermsKnown||nonRefundKnown;
+    if(!hasKnownCommitmentTerm){
+      addQuestion('Please confirm payment timing, cancellation/refund terms, and any non-refundable commitment.');
+    }else{
+      const unresolvedCommitment=[];
+      if(!paymentTimingKnown)unresolvedCommitment.push('payment timing and any required deposit');
+      if(!refundTermsKnown)unresolvedCommitment.push('cancellation/refund terms');
+      if(!nonRefundKnown)unresolvedCommitment.push('whether any payment or commitment is non-refundable');
+      if(unresolvedCommitment.length){
+        const tail=unresolvedCommitment.length===1
+          ?unresolvedCommitment[0]
+          :unresolvedCommitment.slice(0,-1).join(', ')+' and '+unresolvedCommitment.at(-1);
+        addQuestion('Please confirm '+tail+'.');
+      }
     }
   }
   const knownText=[eligibility?.text,booking?.text,logistics?.text,commitment?.text,rawCommitmentText].filter(Boolean);
