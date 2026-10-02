@@ -333,9 +333,9 @@ function researchNextStepSection(){
     ?`<div class="nextStepMore researchNextStepMore">${toggle}${laterText}</div>`
     :'';
   const actionSummary=actionable.length
-    ?`${actionable.length} actionable now / within 14 days, including ${doNow.length} do now and ${late.length} late-inventory`
+    ?`${actionable.length} active follow-ups — ${late.length} late-inventory + ${within14.length} due/event within 14 days (${doNow.length} do now)`
     :`${rows.length} current/future controls`;
-  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: ${actionSummary}. ${within14.length} are due/event within 14 days; ${later} are later. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>${actionable.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
+  return `<section class="nextStepSection"><div class="nextStepSectionHead"><div><h2>Research follow-up</h2><p>2026 execution queue: ${actionSummary} · ${later} later · ${rows.length} current/future controls. Sorted by timing, availability, research-value signal, and manager move. Value signal is a prioritization proxy, not a revenue forecast. Reverify current terms before commitment.</p></div><span>${actionable.length||rows.length}</span></div>${visible.map(researchNextStepCard).join('')}${moreText}</section>`;
 }
 
 function annualPlanDeadlineRows(horizonDays=45){
