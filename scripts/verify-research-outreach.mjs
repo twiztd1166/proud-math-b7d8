@@ -58,6 +58,9 @@ for(const row of rows){
     if(/Current booking status:|\bHIST-\d|\bPROSPECT-|Treat as a historical repeat|not net-new/i.test(email.body)){
       throw new Error(`${row.control_id}: internal control jargon leaked into organizer-facing email`);
     }
+    if(/\b(?:in|via|under)\s*,|\s+,|·\s*·/i.test(email.body)){
+      throw new Error(`${row.control_id}: malformed organizer-facing email after internal-data cleanup`);
+    }
     if(email.body.includes('Please also confirm the current price/package, application or commitment deadline')){
       throw new Error(`${row.control_id}: legacy generic all-fields question survived`);
     }
@@ -68,11 +71,42 @@ for(const row of rows){
     if(!call.href.startsWith('tel:'))throw new Error(`${row.control_id}: missing tel route`);
     if(!call.script.includes(String(row.event_label||'')))throw new Error(`${row.control_id}: call script is not event-specific`);
     if(!call.script.includes('Paradise Exteriors'))throw new Error(`${row.control_id}: call script company identity missing`);
+    if(/\bHIST-\d|\bPROSPECT-|Treat as a historical repeat|not net-new/i.test(call.script)){
+      throw new Error(`${row.control_id}: internal control jargon leaked into organizer-facing call script`);
+    }
+    if(/\b(?:in|via|under)\s*,|\s+,|·\s*·/i.test(call.script)){
+      throw new Error(`${row.control_id}: malformed organizer-facing call script after internal-data cleanup`);
+    }
     if(!call.script.includes('Manager Notes'))throw new Error(`${row.control_id}: call closeout does not preserve note workflow`);
   }
 }
 
 const byId=new Map(rows.map(row=>[row.control_id,row]));
+const coral=byId.get('R2026-002-CORAL-SPRINGS-OKTOBERFEST');
+if(!coral)throw new Error('Coral Springs regression fixture missing');
+const coralDraft=sandbox.outreach.researchEmailDraft(coral);
+if(!coralDraft)throw new Error('Coral Springs should use email');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(coralDraft.body))throw new Error('Coral Springs lost required Paradise eligibility confirmation');
+
+const sabor=byId.get('R2026-009-SABOR-FEST');
+if(!sabor)throw new Error('Sabor Fest regression fixture missing');
+const saborDraft=sandbox.outreach.researchEmailDraft(sabor);
+if(!saborDraft)throw new Error('Sabor Fest should have an organizer-facing email route');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(saborDraft.body))throw new Error('Sabor Fest lost selection/approval eligibility confirmation');
+
+const jupiter=byId.get('R2026-018-JUPITER-HARBOURFEST');
+if(!jupiter)throw new Error('Jupiter HarbourFest regression fixture missing');
+const jupiterDraft=sandbox.outreach.researchEmailDraft(jupiter);
+if(!jupiterDraft)throw new Error('Jupiter HarbourFest should have an organizer-facing email route');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(jupiterDraft.body))throw new Error('Jupiter HarbourFest lost curated-fit eligibility confirmation');
+
+const bucklerOct=byId.get('R2026-015-BUCKLER-WPB-OCT');
+if(!bucklerOct)throw new Error('Buckler October regression fixture missing');
+const bucklerOctDraft=sandbox.outreach.researchEmailDraft(bucklerOct);
+if(!bucklerOctDraft)throw new Error('Buckler October should use email');
+if(!/Please confirm Paradise Exteriors is eligible/i.test(bucklerOctDraft.body))throw new Error('Buckler October lost Paradise eligibility confirmation');
+if(/history exists in\s*,/i.test(bucklerOctDraft.body))throw new Error('Buckler October retained malformed stripped-history prose');
+
 const florida=byId.get('R2026-004-FLORIDA-CREATIVES-PSL');
 if(!florida)throw new Error('Florida Creatives regression fixture missing');
 const floridaDraft=sandbox.outreach.researchEmailDraft(florida);
