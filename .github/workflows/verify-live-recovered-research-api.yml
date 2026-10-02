@@ -348,6 +348,58 @@ jobs:
           assert freedom.get('route_verification_source') == '2026_LATE_INVENTORY_REVERIFICATION', freedom
           assert 'ONLINE SPONSORSHIP REGISTRATION CLOSED FOR ALL SIX TIERS' in str(freedom.get('booking_status') or '').upper(), freedom
 
+          next7_reverified={
+              'R2026-006-GACTC-OKTOBERFEST',
+              'R2026-007-MARTIN-FALL-FEST',
+              'R2026-019-SFL-PICKLE',
+              'R2026-061-GRACE-JERK',
+          }
+          for cid in next7_reverified:
+              row=by_control[cid]
+              detail=row.get('detail_data') or {}
+              assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
+              assert detail.get('followup_reverification_source') == '2026_NEXT7_REVERIFICATION', (cid,detail)
+              official=str(detail.get('official_source_url') or '').strip()
+              assert official, (cid,detail)
+              assert any(
+                  str(ref.get('url') or '').strip() == official
+                  and str(ref.get('checked_at') or '').strip() == '2026-10-02'
+                  for ref in (row.get('source_refs') or [])
+              ), (cid,row.get('source_refs'))
+
+          gactc=by_control['R2026-006-GACTC-OKTOBERFEST']
+          gactc_detail=gactc.get('detail_data') or {}
+          assert gactc.get('deadline_date') == '2026-10-08', gactc
+          assert gactc_detail.get('operational_action_code') == 'APPLY', gactc_detail
+          assert gactc_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=53541', gactc_detail
+          assert 'APPLICATION ACTIVE' in str(gactc_detail.get('booking_status') or '').upper(), gactc_detail
+          assert '$275' in str(gactc_detail.get('current_cost_text') or ''), gactc_detail
+
+          pickle=by_control['R2026-019-SFL-PICKLE']
+          pickle_detail=pickle.get('detail_data') or {}
+          assert pickle.get('deadline_date') == '2026-10-09', pickle
+          assert pickle_detail.get('operational_action_code') == 'APPLY', pickle_detail
+          assert pickle_detail.get('action_url') == 'https://www.eventeny.com/events/vendor/?id=49712', pickle_detail
+          assert 'SPONSOR VENDOR APPLICATION ACTIVE' in str(pickle_detail.get('booking_status') or '').upper(), pickle_detail
+          assert '$500' in str(pickle_detail.get('current_cost_text') or ''), pickle_detail
+          assert '$5,000' in str(pickle_detail.get('current_cost_text') or ''), pickle_detail
+
+          martin_fall=by_control['R2026-007-MARTIN-FALL-FEST']
+          martin_fall_detail=martin_fall.get('detail_data') or {}
+          assert martin_fall_detail.get('operational_action_code') == 'OPEN_INQUIRY', martin_fall_detail
+          assert martin_fall_detail.get('action_url') == 'https://www.cognitoforms.com/MartinCountyBoardOfCountyCommissioners/SpecialEventSponsorshipPackages', martin_fall_detail
+          assert 'REQUEST FORM ACTIVE' in str(martin_fall_detail.get('booking_status') or '').upper(), martin_fall_detail
+
+          grace=by_control['R2026-061-GRACE-JERK']
+          grace_detail=grace.get('detail_data') or {}
+          assert grace.get('deadline_date') == '2026-10-09', grace
+          assert grace_detail.get('operational_action_code') == 'APPLY', grace_detail
+          assert grace_detail.get('action_url') == 'https://docs.google.com/forms/d/e/1FAIpQLSefjWlbaBR9xeXC1ADikPvfzLFvPtsxiO-Ws94wvXjl5LxaYg/viewform', grace_detail
+          assert 'GOOGLE SIGN-IN REQUIRED' in str(grace_detail.get('booking_status') or '').upper(), grace_detail
+          assert 'google sign-in' in str(grace_detail.get('operational_guard') or '').lower(), grace_detail
+          assert 'google sign-in' in str(grace_detail.get('application_access_note') or '').lower(), grace_detail
+
           nascar_detail=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
           assert nascar_detail.get('operational_action_code') == 'EMAIL_DRAFT', nascar_detail
           assert 'JILER@NASCAR.COM' in str(nascar_detail.get('contact_text') or ''), nascar_detail
