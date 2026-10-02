@@ -667,11 +667,22 @@ jobs:
               assert detail.get('current_source_checked_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverified_at') == '2026-10-02', (cid,detail)
               assert detail.get('followup_reverification_source') == '2026_NOV6_7_REVERIFICATION', (cid,detail)
+              assert str(detail.get('followup_reverification_basis') or '').strip(), (cid,detail)
+              assert str(detail.get('operational_guard') or '').strip(), (cid,detail)
 
           assert sum(
               1 for r in q4
               if str((r.get('detail_data') or {}).get('followup_reverified_at') or '').strip()
           ) >= 69
+
+          nascar_nov=by_control['R2026-052-NASCAR-HOMESTEAD'].get('detail_data') or {}
+          assert nascar_nov.get('operational_action_code') == 'EMAIL_DRAFT', nascar_nov
+          assert not nascar_nov.get('action_url'), nascar_nov
+          assert 'JILER@NASCAR.COM' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert 'aravech@nascar.com' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert '386-562-5348' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert '786-570-8409' in str(nascar_nov.get('contact_text') or ''), nascar_nov
+          assert 'PARTNERSHIP SALES ROUTE ACTIVE' in str(nascar_nov.get('booking_status') or '').upper(), nascar_nov
 
           bark_nov=by_control['R2026-056-BARK-TITUSVILLE'].get('detail_data') or {}
           assert bark_nov.get('operational_action_code') == 'EMAIL_DRAFT', bark_nov
