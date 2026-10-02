@@ -349,9 +349,20 @@ function annualPlanDeadlineRows(horizonDays=45){
       priorityRank(a)-priorityRank(b)||
       String(a.canonical_event||'').localeCompare(String(b.canonical_event||'')));
 }
+function annualPlanPaymentMatch(row){
+  const code=String(row?.operational_action_code||'').trim().toUpperCase();
+  if(code!=='VERIFY_PAYMENT')return null;
+  const ids=new Set((Array.isArray(row?.mfc_ids)?row.mfc_ids:[]).map(value=>String(value||'').trim()).filter(Boolean));
+  if(!ids.size)return null;
+  const due=String(row?.action_due||'').slice(0,10);
+  const candidates=(state.payments||[]).filter(payment=>ids.has(String(payment?.source_instance_id||'').trim()));
+  const exact=candidates.filter(payment=>!due||String(payment?.due||'').slice(0,10)===due);
+  return (exact.length?exact:candidates).slice().sort((a,b)=>String(a?.due||'9999-12-31').localeCompare(String(b?.due||'9999-12-31'))||String(a?.payment_id||'').localeCompare(String(b?.payment_id||'')))[0]||null;
+}
 function annualPlanDeadlineCard(row){
   const code=String(row?.operational_action_code||'').trim().toUpperCase();
   const managerMove=annualPlanOperationalLabel(row)||String(row?.next_action||'Review 2027 plan').trim();
+  const payment=annualPlanPaymentMatch(row);
   const emailDraft=code==='CONTACT_ORGANIZER'?annualPlanEmailDraft(row):null;
   const callScript=!emailDraft&&code==='CONTACT_ORGANIZER'?annualPlanCallScript(row):null;
   const sources=Array.isArray(row?.source_refs)?row.source_refs.map(annualPlanSourceUrl).filter(Boolean):[];
@@ -363,6 +374,7 @@ function annualPlanDeadlineCard(row){
     SIGNER_REVIEW:'Open source for signer review',
     CONTACT_ORGANIZER:'Open organizer source',
   })[code]||'';
+  const paymentButton=payment?`<button type="button" class="btn primary" data-annual-payment="${esc(payment.payment_id)}">Open payment</button>`:'';
   const emailButton=emailDraft?`<a class="btn primary" href="${esc(emailDraft.href)}">Create email draft</a>`:'';
   const callButton=callScript?`<button type="button" class="btn primary" data-annual-call-script="${esc(row.plan_id)}">Create call script</button>`:'';
   const sourceButton=!emailDraft&&!callScript&&firstSource&&sourceActionLabel
@@ -376,7 +388,7 @@ function annualPlanDeadlineCard(row){
     <div class="nextStepAction"><span>Next step</span><b>${esc(row.next_action||'Review the governed 2027 plan action.')}</b></div>
     ${guard?`<div class="sourceWarn"><b>Action guard</b> ${esc(guard)}</div>`:''}
     <div class="nextStepFacts"><div><span>Due</span><b>${esc(due)}</b></div><div><span>2027 event</span><b>${esc(timing)}</b></div><div><span>Priority</span><b>${esc(row.priority||'MEDIUM')}</b></div><div><span>Budget</span><b>${esc(annualPlanBudgetText(row))}</b></div></div>
-    <div class="actions">${emailButton}${callButton}${sourceButton}<button type="button" class="btn secondary" data-annual-deadline-plan="${esc(row.canonical_event)}">Open 2027 plan</button></div>
+    <div class="actions">${paymentButton}${emailButton}${callButton}${sourceButton}<button type="button" class="btn secondary" data-annual-deadline-plan="${esc(row.canonical_event)}">Open 2027 plan</button></div>
   </article>`;
 }
 function annualPlanDeadlineSection(){
