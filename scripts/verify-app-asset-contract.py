@@ -20,6 +20,7 @@ SERVICE_WORKER = Path("public/sw.js")
 CONTROL_SOURCE = Path("public/app-control.js")
 WORKFLOW_DIR = Path(".github/workflows")
 TOOL_OUTPUT_MARKER = b"[executed " + b"on device:"
+TOOL_READ_PREFIX = b"[Reading "
 GITHUB_RUN_COMMAND_LIMIT = 21_000
 
 ASSET_RE = re.compile(r'(?:/|\./)(app(?:-[a-z0-9-]+)?\.js|app\.css)\?v=([A-Za-z0-9._-]+)', re.I)
@@ -71,7 +72,7 @@ def validate_repository_hygiene():
             data = path.read_bytes()
         except OSError:
             continue
-        if TOOL_OUTPUT_MARKER in data:
+        if TOOL_OUTPUT_MARKER in data or data.startswith(TOOL_READ_PREFIX):
             contaminated.append(raw)
     assert not contaminated, f"Committed Remote Desktop/tool-output markers found: {contaminated}"
 
