@@ -23,6 +23,8 @@ if(!source.includes('if(auditDuplicate)return false'))throw new Error('Normal an
 if(!source.includes("['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length]"))throw new Error('Audit duplicate filter chip missing');
 if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Legacy 2027 calendar helper still counts duplicate-suppressed rows');
 if(!calendarSource.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Active 2027 calendar renderer still counts duplicate-suppressed rows');
+if(!calendarSource.includes("const unscheduledPursue=pursue.filter(row=>calendarMonthNumber(row)===null);"))throw new Error('Active 2027 calendar drops PURSUE rows without a fixed month');
+if(!calendarSource.includes('Date TBD / On-demand'))throw new Error('Active 2027 calendar is missing the unscheduled PURSUE section');
 if(!source.includes('Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views'))throw new Error('Annual duplicate-suppression explanation missing');
 if(!source.includes("const prospectProfile=String(row.profile_id||'').trim().startsWith('PROSPECT-');"))throw new Error('Annual plan does not use governed prospect identity for detail routing');
 if(!source.includes("const profileActionLabel=prospectProfile?'Open prospect details':'Open full show history';"))throw new Error('Annual plan does not distinguish prospect details from catalog history');
