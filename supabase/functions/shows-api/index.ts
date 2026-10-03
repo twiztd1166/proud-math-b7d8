@@ -233,10 +233,10 @@ const publicShowColumns = [
 
 function derive(old: any, u: any) {
   const amt = Number(old.amount || 0);
-  const raw = u.posted_amount ?? old.posted_amount;
+  const raw = Object.prototype.hasOwnProperty.call(u,'posted_amount') ? u.posted_amount : old.posted_amount;
   const posted = raw === null || raw === '' || raw === undefined ? 0 : Number(raw);
-  const date = u.posted_date ?? old.posted_date ?? null;
-  const clear = u.clearing ?? old.clearing ?? null;
+  const date = Object.prototype.hasOwnProperty.call(u,'posted_date') ? u.posted_date : (old.posted_date ?? null);
+  const clear = Object.prototype.hasOwnProperty.call(u,'clearing') ? u.clearing : (old.clearing ?? null);
   if (!Number.isFinite(posted) || posted < 0 || posted > amt) throw Error('Posted amount must be between $0 and the contract amount.');
   if (posted > 0 && !date) throw Error('Posted date is required when a payment amount is entered.');
   if (date && !/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw Error('Posted date must be YYYY-MM-DD.');
@@ -1051,7 +1051,7 @@ Deno.serve(async r => {
     if(!p)return out(r,{ok:false,error:'A valid payment patch is required'},400);
     const unknown=Object.keys(p).filter(k=>!payFields.has(k));if(unknown.length)return out(r,{ok:false,error:`Protected or unknown payment field: ${unknown[0]}`},400);
     const u:any={};for(const[k,v]of Object.entries(p))u[k]=k==='posted_amount'?(v===''||v==null?null:Number(v)):(typeof v==='string'?(v.trim()||null):v);
-    if(!Object.keys(u).length)return out(r,{ok:false,error:'No writable payment changes'},400);if(String(u.payment_owner||'').length>120||String(u.notes||'').length>1000)return out(r,{ok:false,error:'Payment owner or operating note is too long'},400);
+    if(!Object.keys(u).length)return out(r,{ok:false,error:'No writable payment changes'},400);if(String(u.payment_owner||'').length>120||String(u.notes||'').length>4000)return out(r,{ok:false,error:'Payment owner must be 120 characters or less and operating note must be 4,000 characters or less'},400);
     const {data:old}=await db.from('shows_app_payments').select('*').eq('payment_id',id).maybeSingle();if(!old)return out(r,{ok:false,error:'Payment not found'},404);
     let calc:any;try{calc=derive(old,u)}catch(e){return out(r,{ok:false,error:e instanceof Error?e.message:'Invalid payment update'},400)}
     const candidate:any={...u,...calc};const changed=Object.entries(candidate).filter(([k,v])=>!same(old[k],v));if(!changed.length)return out(r,{ok:true,payment:old,noChange:true});
