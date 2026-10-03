@@ -2503,6 +2503,8 @@ function annualPlanCard(row){
   const callButton=callScript?`<button type="button" class="btn primary" data-annual-call-script="${esc(row.plan_id)}">Create call script</button>`:'';
   const sourceAction=(!emailDraft&&!callScript&&firstSource&&['CONTACT_ORGANIZER','REVIEW_APPLICATION','MONITOR_RELEASE','VERIFY_TERMS','SIGNER_REVIEW'].includes(code))
     ?`<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(firstSource)}">${esc(sourceActionLabel)}</a>`:'';
+  const prospectProfile=String(row.profile_id||'').trim().startsWith('PROSPECT-');
+  const profileActionLabel=prospectProfile?'Open prospect details':'Open full show history';
   return `<article class="card bookingCard annualPlanCard" data-plan-id="${esc(row.plan_id)}">
     <div class="row"><div><div class="event">${esc(row.occurrence_label||row.canonical_event)}</div><div class="mfc">${esc(row.profile_id)} · ${esc(row.schedule_type||'PLAN')}</div></div><span class="badge ${decision==='PURSUE'?'ready':decision==='WATCH'?'date':'hold'}">${esc(label)}</span></div>
     <div class="bookingSignal ${esc(signalClass)}"><b>${esc(row.priority||'MEDIUM')} priority</b><span>${esc(annualPlanPublicationText(row))}</span></div>
@@ -2522,7 +2524,7 @@ function annualPlanCard(row){
     ${planningDetail}
     <div class="bookingStatusLine"><span>Source basis</span><b>${esc(row.source_basis||'Governed annual-plan source')}</b></div>
     ${sourceLinks}
-    <div class="actions">${emailButton}${callButton}${sourceAction}<button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">Open full show history</button></div>
+    <div class="actions">${emailButton}${callButton}${sourceAction}<button type="button" class="btn secondary" data-annual-profile="${esc(row.profile_id)}">${esc(profileActionLabel)}</button></div>
   </article>`;
 }
 
