@@ -71,6 +71,12 @@ def validate_control_refresh_state():
     assert "'36/3 matched'" not in text, (
         f"{CONTROL_SOURCE}: stale hard-coded recovery coverage count remains"
     )
+    assert "Preserved source snapshot:" in text, (
+        f"{CONTROL_SOURCE}: preserved source baseline label is missing"
+    )
+    assert "Source freshness:" not in text, (
+        f"{CONTROL_SOURCE}: preserved source snapshot is mislabeled as current freshness"
+    )
 
 
 def validate_repository_hygiene():
