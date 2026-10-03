@@ -18,6 +18,7 @@ REQUIRED_ASSETS = [
 ]
 SERVICE_WORKER = Path("public/sw.js")
 CONTROL_SOURCE = Path("public/app-control.js")
+CORE_SOURCE = Path("public/app-core.js")
 WORKFLOW_DIR = Path(".github/workflows")
 TOOL_OUTPUT_MARKER = b"[executed " + b"on device:"
 TOOL_READ_PREFIX = b"[Reading "
@@ -76,6 +77,25 @@ def validate_control_refresh_state():
     )
     assert "Source freshness:" not in text, (
         f"{CONTROL_SOURCE}: preserved source snapshot is mislabeled as current freshness"
+    )
+
+
+def validate_route_contract():
+    text = CORE_SOURCE.read_text(encoding="utf-8")
+    assert "window.addEventListener('hashchange',activateLocationView);" in text, (
+        f"{CORE_SOURCE}: in-session hash navigation is not synchronized back into app state"
+    )
+    assert "PROSPECT-[A-Z0-9-]+" in text, (
+        f"{CORE_SOURCE}: prospect-only annual-plan profile routes are not accepted by the deep-link parser"
+    )
+    assert "function ensureActiveRouteData()" in text and "function openDeepLinkedProfileIfReady()" in text, (
+        f"{CORE_SOURCE}: route activation does not centralize lazy data loading/deep-link opening"
+    )
+    assert "||prospectRoute" in text, (
+        f"{CORE_SOURCE}: direct PROSPECT deep links do not force annual-plan loading"
+    )
+    assert "Number(state.deepLinkedYear)>=2000" in text, (
+        f"{CORE_SOURCE}: deep-link serializer can emit an invalid /year/0 route for null years"
     )
 
 
@@ -146,6 +166,7 @@ def main():
     version = repo_versions[0]
     cache = validate_service_worker()
     validate_control_refresh_state()
+    validate_route_contract()
     validate_repository_hygiene()
 
     if args.live_entry:
