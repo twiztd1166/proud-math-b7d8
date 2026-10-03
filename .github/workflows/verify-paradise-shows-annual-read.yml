@@ -144,6 +144,9 @@ jobs:
           assert.equal(actionCount('CONTACT_ORGANIZER'),58,'visible contact-organizer count');
           assert.equal(actionCount('MONITOR_RELEASE'),130,'visible monitor-release count');
           assert.equal(actionCount('VERIFY_TERMS'),47,'visible verify-terms count');
+          assert.equal(actionCount('REVIEW_DECIDE'),87,'visible review-decide count');
+          assert.equal(actionCount('SIGNER_REVIEW'),2,'visible signer-review count');
+          assert.equal(actionCount('VERIFY_PAYMENT'),1,'visible verify-payment count');
           const contactRows=planningRows.filter(row=>row.operational_action_code==='CONTACT_ORGANIZER');
           assert.equal(
             contactRows.filter(row=>!String(row.operational_contact_email||'').trim()&&!String(row.operational_contact_phone||'').trim()).length,
@@ -169,6 +172,22 @@ jobs:
           const auditedContactRows=maxConfidenceActionLinkAudit.filter(row=>row.operational_action_code==='CONTACT_ORGANIZER');
           assert.equal(auditedContactRows.length,4,'action-link audit contact-row count');
           assert.equal(auditedContactRows.filter(row=>!String(row.operational_contact_email||'').trim()&&!String(row.operational_contact_phone||'').trim()).length,0,'action-link audit contact row missing direct channel');
+          const auditedContactEmails=Object.fromEntries(auditedContactRows.map(row=>[row.plan_id,String(row.operational_contact_email||'')]));
+          assert.deepEqual(auditedContactEmails,{
+            '2027-PROSPECT-POMPANO-NAUTICAL-FLEA':'info@nauticalfleamarket.com',
+            '2027-PROSPECT-MELBOURNE-ART-FEST-PUBWATCH':'sponsors@melbournearts.org',
+            '2027-PROSPECT-RARE-PLANT-MIAMI-PUBWATCH':'info@rareplantfestival.com',
+            '2027-PROSPECT-VERO-PATRIOT-GUN-SHOW':'Vendors@PatriotShows.com',
+          });
+          const rarePlant=byPlanId['2027-PROSPECT-RARE-PLANT-MIAMI-PUBWATCH'];
+          assert.equal(rarePlant?.event_start,null,rarePlant);
+          assert.equal(rarePlant?.event_end,null,rarePlant);
+          assert.equal(rarePlant?.estimated_start,null,rarePlant);
+          assert.equal(rarePlant?.estimated_end,null,rarePlant);
+          assert.equal(rarePlant?.expected_month,5,rarePlant);
+          assert.match(String(rarePlant?.expected_window_text||''),/May 2027/i);
+          assert.match(String(rarePlant?.expected_window_text||''),/exact dates: TBD/i);
+          assert.match(String(rarePlant?.operational_guard||''),/Do not use the former Apr\. 30–May 2 dates/i);
 
           const applicationRouteCleanup=rows.filter(row=>row.operational_action_source==='2027_APPLICATION_ROUTE_CLEANUP_V2');
           assert.equal(applicationRouteCleanup.length,6,'application route cleanup row count');
