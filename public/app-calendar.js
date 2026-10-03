@@ -194,6 +194,7 @@
     const watch=rows.filter(row=>row.plan_decision==='WATCH');
     const conflicts=pursue.filter(row=>String(row.conflict_notes||'').trim());
     const unscheduledPursue=pursue.filter(row=>calendarMonthNumber(row)===null);
+    const unscheduledWatch=watch.filter(row=>calendarMonthNumber(row)===null);
     const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
     const monthHtml=months.map((name,index)=>{
       const month=index+1;
@@ -208,9 +209,10 @@
         ${!pursueRows.length&&watchCount?`<div class="calendarWatchOnly">${watchCount} WATCH opportunit${watchCount===1?'y':'ies'} \u00b7 no PURSUE rows scheduled for this month.</div>`:''}
       </section>`;
     }).join('');
-    const unscheduledHtml=unscheduledPursue.length?`<section class="calendarMonth calendarUnscheduled">
-      <div class="calendarMonthHead"><div><h2>Date TBD / On-demand</h2><p>${unscheduledPursue.length} pursue row${unscheduledPursue.length===1?'':'s'} without a fixed month</p></div></div>
+    const unscheduledHtml=(unscheduledPursue.length||unscheduledWatch.length)?`<section class="calendarMonth calendarUnscheduled">
+      <div class="calendarMonthHead"><div><h2>Date TBD / On-demand</h2><p>${unscheduledPursue.length} pursue · ${unscheduledWatch.length} watch without a fixed month</p></div></div>
       ${unscheduledPursue.slice().sort((a,b)=>String(a.canonical_event||'').localeCompare(String(b.canonical_event||''))).map(calendar2027PursueItem).join('')}
+      ${unscheduledWatch.length?`<div class="calendarWatchOnly">${unscheduledWatch.length} WATCH opportunit${unscheduledWatch.length===1?'y has':'ies have'} broad or TBD timing with no defensible event month. Open the full annual plan for details.</div>`:''}
     </section>`:'';
     return `${calendarYearBar(2027)}
       <div class="hero calendarHero"><div><h1>2027 Calendar</h1><p>The published annual plan, simplified to the events the team intends to pursue. WATCH opportunities remain counted for awareness.</p></div><button type="button" class="btn secondary" id="calendarOpenPlan">Open full plan</button></div>
