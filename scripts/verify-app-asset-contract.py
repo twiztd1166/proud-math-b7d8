@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import re
+import subprocess
 from pathlib import Path
 
 REPO_ENTRIES = [Path("src/pages/index.astro"), Path("public/index-standalone.html")]
@@ -17,6 +18,9 @@ REQUIRED_ASSETS = [
 ]
 SERVICE_WORKER = Path("public/sw.js")
 CONTROL_SOURCE = Path("public/app-control.js")
+WORKFLOW_DIR = Path(".github/workflows")
+TOOL_OUTPUT_MARKER = b"[executed " + b"on device:"
+GITHUB_RUN_COMMAND_LIMIT = 21_000
 
 ASSET_RE = re.compile(r'(?:/|\./)(app(?:-[a-z0-9-]+)?\.js|app\.css)\?v=([A-Za-z0-9._-]+)', re.I)
 CACHE_RE = re.compile(r"const C=['\"](paradise-shows-public-v\d+)['\"]")
@@ -56,6 +60,52 @@ def validate_control_refresh_state():
     )
 
 
+def validate_repository_hygiene():
+    tracked = subprocess.check_output(["git", "ls-files"], text=True).splitlines()
+    contaminated = []
+    for raw in tracked:
+        path = Path(raw)
+        if not path.is_file():
+            continue
+        try:
+            data = path.read_bytes()
+        except OSError:
+            continue
+        if TOOL_OUTPUT_MARKER in data:
+            contaminated.append(raw)
+    assert not contaminated, f"Committed Remote Desktop/tool-output markers found: {contaminated}"
+
+    oversized = []
+    for path in sorted(list(WORKFLOW_DIR.glob("*.yml")) + list(WORKFLOW_DIR.glob("*.yaml"))):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        i = 0
+        while i < len(lines):
+            match = re.match(r"^(\\s*)run:\\s*[|>][+-]?\\s*$", lines[i])
+            if not match:
+                i += 1
+                continue
+            indent = len(match.group(1))
+            i += 1
+            block = []
+            while i < len(lines):
+                raw = lines[i]
+                if not raw:
+                    block.append("")
+                    i += 1
+                    continue
+                current_indent = len(raw) - len(raw.lstrip())
+                if current_indent <= indent:
+                    break
+                block.append(raw)
+                i += 1
+            command_chars = len("\n".join(block))
+            if command_chars > GITHUB_RUN_COMMAND_LIMIT:
+                oversized.append((str(path), command_chars))
+    assert not oversized, (
+        f"GitHub Actions run blocks exceed {GITHUB_RUN_COMMAND_LIMIT} characters: {oversized}"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--live-entry", type=Path)
@@ -77,6 +127,7 @@ def main():
     version = repo_versions[0]
     cache = validate_service_worker()
     validate_control_refresh_state()
+    validate_repository_hygiene()
 
     if args.live_entry:
         _, live_version = asset_map(args.live_entry)
