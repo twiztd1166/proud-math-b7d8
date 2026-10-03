@@ -59,6 +59,18 @@ def validate_control_refresh_state():
     assert "${unresolvedConflicts}" in text, (
         f"{CONTROL_SOURCE}: Control screen conflict counter is not bound to unresolved conflict count"
     )
+    assert "const recoveryCurrentShows=Number(rh?.current_shows??rh?.shows_count??0)" in text, (
+        f"{CONTROL_SOURCE}: recovery-health show coverage is not sourced from the live payload"
+    )
+    assert "recoveryCurrentPayments=Number(rh?.current_payments??rh?.payments_count??0)" in text, (
+        f"{CONTROL_SOURCE}: recovery-health payment coverage is not sourced from the live payload"
+    )
+    assert "${recoveryCoverageText}" in text, (
+        f"{CONTROL_SOURCE}: recovery-health coverage text is not rendered dynamically"
+    )
+    assert "'36/3 matched'" not in text, (
+        f"{CONTROL_SOURCE}: stale hard-coded recovery coverage count remains"
+    )
 
 
 def validate_repository_hygiene():
