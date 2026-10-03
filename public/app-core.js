@@ -414,7 +414,7 @@ restoreShowViewState();
 function applyLocationView(){
   const raw=String(location.hash||'').replace(/^#/,'');
   const hash=raw.toLowerCase();
-  const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3})(?:\/year\/(20\d{2}))?$/i);
+  const profileMatch=raw.match(/^show\/((?:LIFE|HIST|CURRENT)-\d{3}|LPONLY-\d{4}-\d{3}|PROSPECT-[A-Z0-9-]+)(?:\/year\/(20\d{2}))?$/i);
   const calendarMatch=raw.match(/^calendar\/(2026|2027)$/i);
   if(profileMatch){state.tab='shows';state.showMode='ALL';state.deepLinkedProfile=profileMatch[1].toUpperCase();state.deepLinkedYear=profileMatch[2]?Number(profileMatch[2]):null}
   else if(calendarMatch){state.tab='calendar';state.calendarYear=Number(calendarMatch[1]);state.deepLinkedProfile=null;state.deepLinkedYear=null}
@@ -426,12 +426,38 @@ function applyLocationView(){
 }
 function syncLocationView(){
   const hash=state.deepLinkedProfile
-    ?'show/'+state.deepLinkedProfile+(Number.isFinite(Number(state.deepLinkedYear))?'/year/'+Number(state.deepLinkedYear):'')
+    ?'show/'+state.deepLinkedProfile+(Number.isFinite(Number(state.deepLinkedYear))&&Number(state.deepLinkedYear)>=2000?'/year/'+Number(state.deepLinkedYear):'')
     :(state.tab==='shows'
       ?(state.showMode==='CURRENT'?'current':state.showMode==='PLAN2027'?'plan2027':state.showMode==='UNLINKED'?'unlinked':'shows')
       :state.tab==='calendar'?'calendar/'+state.calendarYear:state.tab);
   try{history.replaceState(null,'','#'+hash)}catch{}
 }
+function ensureActiveRouteData(){
+  const prospectRoute=String(state.deepLinkedProfile||'').startsWith('PROSPECT-');
+  if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
+  if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
+  if((state.tab==='today'||(state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027')||prospectRoute)&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
+}
+function openDeepLinkedProfileIfReady(){
+  const id=String(state.deepLinkedProfile||'').trim();
+  if(!id||typeof openCatalog!=='function')return;
+  const prospect=id.startsWith('PROSPECT-');
+  if(prospect&&!state.annualPlan.loaded)return;
+  if(!prospect&&!state.catalogLoaded)return;
+  const modalOpen=document.querySelector('#detailModal')?.classList.contains('show');
+  if(modalOpen&&state.deepLinkRenderedProfile===id)return;
+  state.deepLinkRenderedProfile=id;
+  openCatalog(id,state.deepLinkedYear);
+}
+function activateLocationView(){
+  applyLocationView();
+  state.deepLinkRenderedProfile=null;
+  if(typeof render==='function')render();
+  ensureActiveRouteData();
+  openDeepLinkedProfileIfReady();
+  try{window.scrollTo(0,0)}catch{}
+}
+window.addEventListener('hashchange',activateLocationView);
 applyLocationView();
 
 function appRequestHeaders(){
@@ -507,6 +533,7 @@ async function loadAnnualPlan(force=false){
   }finally{
     p.loading=false;
     if(state.tab==='today'||state.tab==='calendar'||(state.tab==='shows'&&state.showMode==='PLAN2027'))render();
+    openDeepLinkedProfileIfReady();
   }
 }
 async function loadCatalog(force=false){
@@ -522,7 +549,7 @@ async function loadCatalog(force=false){
   }finally{
     state.catalogLoading=false;
     if(state.tab==='today'||state.tab==='shows')render();
-    if(state.catalogLoaded&&state.deepLinkedProfile&&typeof openCatalog==='function')openCatalog(state.deepLinkedProfile);
+    openDeepLinkedProfileIfReady();
   }
 }
 
@@ -530,9 +557,7 @@ async function bootstrap(){
   try{
     const d=await call('bootstrap');state.shows=d.shows;state.calendarOpportunities=d.calendarOpportunities||[];state.researchCalendarControls=d.researchCalendarControls||[];state.payments=d.payments;state.activity=d.activity||[];state.settings=d.settings||{};state.reconciliation=d.reconciliation||{summary:{rows:0,aligned:0,changed:0,changed_fields:0},rows:[]};state.sourceRefresh=d.sourceRefresh||{latest:null,conflicts:[]};state.recoveryHealth=d.recoveryHealth||null;
     const sr=state.sourceRefresh.latest;$('#asOf').textContent=sr?`Operating DB · Sheet checked ${sr.source_as_of}`:`Operating DB · source snapshot ${state.settings.snapshot_as_of||'not set'}`;render();
-    if((state.tab==='today'||(state.tab==='shows'&&['ALL','CURRENT'].includes(state.showMode)))&&!state.catalogLoaded&&!state.catalogLoading)loadCatalog();
-    if(state.tab==='shows'&&state.showMode==='UNLINKED'&&!state.unlinkedLp.loaded&&!state.unlinkedLp.loading)loadUnlinkedLp();
-    if((state.tab==='today'||(state.tab==='calendar'&&state.calendarYear===2027)||(state.tab==='shows'&&state.showMode==='PLAN2027'))&&!state.annualPlan.loaded&&!state.annualPlan.loading)loadAnnualPlan();
+    ensureActiveRouteData();
   }catch(e){
     toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
   }
