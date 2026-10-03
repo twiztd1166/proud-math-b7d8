@@ -73,9 +73,13 @@ const emailRow={
 const email=sandbox.api.annualPlanEmailDraft(emailRow);
 if(!email||email.email!=='adam@example.com'||email.cc!=='team@example.com'||!email.href.startsWith('mailto:'))throw new Error('Annual email draft missing');
 if(!email.href.includes('cc=team%40example.com'))throw new Error('Annual email draft lost CC routing');
-for(const expected of ['Fort Lauderdale Home Design','eligibility/category','current all-in price/package','available footprint/placement','payment and cancellation/refund terms','insurance/COI requirements','lead-capture/category/exclusivity rights']){
+for(const expected of ['Fort Lauderdale Home Design','eligibility/category','available footprint/placement','payment and cancellation/refund terms','insurance/COI requirements','lead-capture/category/exclusivity rights']){
   if(!email.body.includes(expected))throw new Error(`Annual email missing bespoke item: ${expected}`);
 }
+const emailProfile=sandbox.api.annualPlanOutreachProfile(emailRow);
+if(emailProfile.questions.includes('the confirmed 2027 date/timing'))throw new Error('Known governed date was re-asked in annual outreach');
+if(emailProfile.questions.includes('the current all-in price/package'))throw new Error('Known verified price was re-asked in annual outreach');
+if(!emailProfile.facts.some(value=>value.includes('$6,900')))throw new Error('Known verified price was not preserved as an outreach fact');
 for(const forbidden of ['PURSUE','LIFE-011','GMAIL:abc123','$212,279']){
   if(email.body.includes(forbidden)||email.subject.includes(forbidden))throw new Error(`Internal annual planning text leaked externally: ${forbidden}`);
 }
@@ -93,7 +97,19 @@ const callRow={
 const call=sandbox.api.annualPlanCallScript(callRow);
 if(!call||call.phone!=='561-427-0500'||call.href!=='tel:5614270500')throw new Error('Annual call script missing');
 if(!call.script.includes('ONLY ASK / CONFIRM THESE REMAINING ITEMS'))throw new Error('Annual call script lacks focused ask section');
+const callProfile=sandbox.api.annualPlanOutreachProfile(callRow);
+if(callProfile.questions.includes('the confirmed 2027 date/timing'))throw new Error('Exact call-script date was re-asked');
+if(!callProfile.questions.includes('the current all-in price/package'))throw new Error('Unresolved quote was incorrectly suppressed from call script');
 if(sandbox.api.annualPlanOperationalLabel(callRow)!=='CREATE CALL SCRIPT')throw new Error('Call manager move mismatch');
+
+const undatedProfile=sandbox.api.annualPlanOutreachProfile({
+  occurrence_label:'Undated 2027 Event',
+  event_start:null,
+  cost_status:'UNKNOWN_2027',
+  legacy_next_action:'Confirm the current date and package price.',
+});
+if(!undatedProfile.questions.includes('the confirmed 2027 date/timing'))throw new Error('Undated annual outreach lost date verification');
+if(!undatedProfile.questions.includes('the current all-in price/package'))throw new Error('Unknown annual price was incorrectly suppressed');
 
 const sourceOnly={
   operational_action_code:'CONTACT_ORGANIZER',
