@@ -16,6 +16,7 @@ REQUIRED_ASSETS = [
     "app-modals.js",
 ]
 SERVICE_WORKER = Path("public/sw.js")
+CONTROL_SOURCE = Path("public/app-control.js")
 
 ASSET_RE = re.compile(r'(?:/|\./)(app(?:-[a-z0-9-]+)?\.js|app\.css)\?v=([A-Za-z0-9._-]+)', re.I)
 CACHE_RE = re.compile(r"const C=['\"](paradise-shows-public-v\d+)['\"]")
@@ -45,6 +46,16 @@ def validate_service_worker():
     return match.group(1)
 
 
+def validate_control_refresh_state():
+    text = CONTROL_SOURCE.read_text(encoding="utf-8")
+    assert "sum.remaining_conflicts??sum.conflict_rows??conflicts.length??0" in text, (
+        f"{CONTROL_SOURCE}: Control screen does not prefer current unresolved conflict count"
+    )
+    assert "${unresolvedConflicts}" in text, (
+        f"{CONTROL_SOURCE}: Control screen conflict counter is not bound to unresolved conflict count"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--live-entry", type=Path)
@@ -65,6 +76,7 @@ def main():
 
     version = repo_versions[0]
     cache = validate_service_worker()
+    validate_control_refresh_state()
 
     if args.live_entry:
         _, live_version = asset_map(args.live_entry)
