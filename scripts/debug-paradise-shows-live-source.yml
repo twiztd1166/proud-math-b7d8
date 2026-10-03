@@ -4567,5 +4567,3 @@ jobs:
           grep -q 'Why unresolved:' /tmp/unlinked.html
 
           echo "Live browser rendered #shows, #current, #unlinked, #show/LIFE-009, and LP-source-only year evidence with governed semantics and no uncaught JavaScript errors."
-
-[executed on device: Anthonys-Mac-Pro-53629872.local (d221c9a0-90c4-4f1d-9341-6c63b56cadac)]
