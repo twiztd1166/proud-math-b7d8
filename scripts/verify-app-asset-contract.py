@@ -97,6 +97,7 @@ def validate_route_contract():
     assert "Number(state.deepLinkedYear)>=2000" in text, (
         f"{CORE_SOURCE}: deep-link serializer can emit an invalid /year/0 route for null years"
     )
+    subprocess.run(["node", "scripts/verify-route-contract.mjs"], check=True)
 
 
 def validate_repository_hygiene():
