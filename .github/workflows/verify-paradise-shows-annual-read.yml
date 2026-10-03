@@ -141,14 +141,35 @@ jobs:
           const byPlanId=Object.fromEntries(rows.map(row=>[row.plan_id,row]));
           const actionCount=code=>planningRows.filter(row=>row.operational_action_code===code).length;
           assert.equal(actionCount('REVIEW_APPLICATION'),5,'visible review-application count');
-          assert.equal(actionCount('CONTACT_ORGANIZER'),54,'visible contact-organizer count');
-          assert.equal(actionCount('MONITOR_RELEASE'),131,'visible monitor-release count');
+          assert.equal(actionCount('CONTACT_ORGANIZER'),58,'visible contact-organizer count');
+          assert.equal(actionCount('MONITOR_RELEASE'),130,'visible monitor-release count');
+          assert.equal(actionCount('VERIFY_TERMS'),47,'visible verify-terms count');
           const contactRows=planningRows.filter(row=>row.operational_action_code==='CONTACT_ORGANIZER');
           assert.equal(
             contactRows.filter(row=>!String(row.operational_contact_email||'').trim()&&!String(row.operational_contact_phone||'').trim()).length,
             0,
             'contact-organizer row missing direct channel'
           );
+          const maxConfidenceActionLinkAudit=rows.filter(row=>row.operational_action_source==='2027_MAX_CONFIDENCE_ACTION_LINK_AUDIT_2026_10_02');
+          assert.equal(maxConfidenceActionLinkAudit.length,8,'max-confidence action-link audit row count');
+          const maxConfidenceActionCodes=Object.fromEntries(maxConfidenceActionLinkAudit.map(row=>[row.plan_id,row.operational_action_code]));
+          assert.deepEqual(maxConfidenceActionCodes,{
+            '2027-PROSPECT-POMPANO-NAUTICAL-FLEA':'CONTACT_ORGANIZER',
+            '2027-LIFE-112-PRIMARY':'SIGNER_REVIEW',
+            '2027-PROSPECT-MELBOURNE-ART-FEST-PUBWATCH':'CONTACT_ORGANIZER',
+            '2027-PROSPECT-THUNDER-COCOA-PUBWATCH':'MONITOR_RELEASE',
+            '2027-PROSPECT-RARE-PLANT-MIAMI-PUBWATCH':'CONTACT_ORGANIZER',
+            '2027-LIFE-186-PRIMARY':'MONITOR_RELEASE',
+            '2027-PROSPECT-TITUSVILLE-JULY4-PUBWATCH':'VERIFY_TERMS',
+            '2027-PROSPECT-VERO-PATRIOT-GUN-SHOW':'CONTACT_ORGANIZER',
+          });
+          assert.equal(maxConfidenceActionLinkAudit.filter(row=>row.operational_cleanup_version!=='2027_ACTION_LINK_AUDIT_V1').length,0,'action-link audit cleanup version drift');
+          assert.equal(maxConfidenceActionLinkAudit.filter(row=>!String(row.operational_guard||'').trim()).length,0,'action-link audit guard missing');
+          assert.equal(maxConfidenceActionLinkAudit.filter(row=>!Array.isArray(row.source_refs)||row.source_refs.length===0).length,0,'action-link audit source missing');
+          const auditedContactRows=maxConfidenceActionLinkAudit.filter(row=>row.operational_action_code==='CONTACT_ORGANIZER');
+          assert.equal(auditedContactRows.length,4,'action-link audit contact-row count');
+          assert.equal(auditedContactRows.filter(row=>!String(row.operational_contact_email||'').trim()&&!String(row.operational_contact_phone||'').trim()).length,0,'action-link audit contact row missing direct channel');
+
           const applicationRouteCleanup=rows.filter(row=>row.operational_action_source==='2027_APPLICATION_ROUTE_CLEANUP_V2');
           assert.equal(applicationRouteCleanup.length,6,'application route cleanup row count');
 
@@ -410,4 +431,3 @@ jobs:
             -derivedDataPath ios/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
-
