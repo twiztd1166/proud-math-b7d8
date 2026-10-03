@@ -443,7 +443,49 @@ function currentOperatingScorecard(show){
     </div>
   </div>`;
 }
+function annualProspectCardHtml(row){
+  const wrap=document.createElement('div');
+  wrap.innerHTML=annualPlanCard(row);
+  wrap.querySelectorAll('[data-annual-profile]').forEach(button=>button.remove());
+  return wrap.innerHTML;
+}
+function openAnnualProspectProfile(id){
+  const annualRows=(state.annualPlan?.rows||[]).filter(row=>String(row?.profile_id||'').trim()===String(id||'').trim());
+  if(!annualRows.length)return false;
+  const planningRows=annualRows.filter(row=>!annualPlanIsAuditDuplicate(row));
+  const visibleRows=(planningRows.length?planningRows:annualRows).slice().sort((a,b)=>annualPlanMonthKey(a).localeCompare(annualPlanMonthKey(b))||String(a.occurrence_label||a.canonical_event||'').localeCompare(String(b.occurrence_label||b.canonical_event||'')));
+  const first=visibleRows[0]||annualRows[0];
+  const title=String(first?.canonical_event||first?.occurrence_label||id).trim()||id;
+  const auditCount=annualRows.length-planningRows.length;
+  $('#detailBody').innerHTML=`<h2>${esc(title)}</h2><div class="subtitle">${esc(id)} · 2027 prospect planning profile</div>
+    <div class="showNotesBlock showNotesProminent">
+      <div class="showNotesHead"><div><div class="k">Manager notes</div><div class="showNotesHint">Shared notes for this prospect · newest first · date/time added automatically</div></div><span id="profileNotesCount" class="pill">—</span></div>
+      <div class="showNotesComposer"><textarea id="profileNoteInput" maxlength="4000" placeholder="Add an update, call note, decision, follow-up, or issue…"></textarea><div class="showNotesComposerFoot"><span>Saved with automatic Eastern Time date/time.</span><button class="btn primary" id="profileNoteAddBtn">Add note</button></div></div>
+      <div id="profileNotesList" class="showNotesList"><div class="showNotesEmpty">Loading notes…</div></div>
+    </div>
+    <div class="sourceWarn historyIntro"><b>Prospect-only planning profile.</b> This 2027 opportunity does not have a preserved Paradise historical catalog profile. The planning rows below are source-backed prospect controls; they do not assert prior attendance, booking, payment, or performance.</div>
+    <div class="sectionTitle"><span>2027 planning rows</span><span>${visibleRows.length} control${visibleRows.length===1?'':'s'}${auditCount?' · '+auditCount+' audit duplicate'+(auditCount===1?'':'s')+' preserved':''}</span></div>
+    <div class="historyList">${visibleRows.map(annualProspectCardHtml).join('')}</div>
+    <div class="actions"><button class="btn secondary" id="catalogCloseBtn">Close</button></div>`;
+  $('#catalogCloseBtn').onclick=()=>closeModal('detailModal');
+  const profileNoteBtn=$('#profileNoteAddBtn'),profileNoteInput=$('#profileNoteInput');
+  if(profileNoteBtn)profileNoteBtn.onclick=()=>addProfileNote(id);
+  if(profileNoteInput)profileNoteInput.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addProfileNote(id)}};
+  document.querySelectorAll('[data-annual-call-script]').forEach(button=>button.onclick=e=>{e.stopPropagation();const plan=String(button.dataset.annualCallScript||'').trim();if(plan)openAnnualPlanCallScript(plan)});
+  $('#detailModal').classList.add('show');
+  loadProfileNotes(id);
+  return true;
+}
 async function openCatalog(id,focusYear=null){
+  const annualRows=(state.annualPlan?.rows||[]).filter(row=>String(row?.profile_id||'').trim()===String(id||'').trim());
+  const prospectProfile=String(id||'').trim().startsWith('PROSPECT-');
+  if(prospectProfile&&annualRows.length){
+    state.deepLinkedProfile=id;
+    state.deepLinkedYear=null;
+    syncLocationView();
+    openAnnualProspectProfile(id);
+    return;
+  }
   const incomingFocusYear=Number(focusYear||state.deepLinkedYear||0);
   state.deepLinkedProfile=id;
   state.deepLinkedYear=Number.isFinite(incomingFocusYear)&&incomingFocusYear>=2000?incomingFocusYear:null;
