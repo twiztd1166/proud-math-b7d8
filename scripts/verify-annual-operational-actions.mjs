@@ -24,7 +24,9 @@ if(!source.includes("['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length]")
 if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Legacy 2027 calendar helper still counts duplicate-suppressed rows');
 if(!calendarSource.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Active 2027 calendar renderer still counts duplicate-suppressed rows');
 if(!calendarSource.includes("const unscheduledPursue=pursue.filter(row=>calendarMonthNumber(row)===null);"))throw new Error('Active 2027 calendar drops PURSUE rows without a fixed month');
-if(!calendarSource.includes('Date TBD / On-demand'))throw new Error('Active 2027 calendar is missing the unscheduled PURSUE section');
+if(!calendarSource.includes("const unscheduledWatch=watch.filter(row=>calendarMonthNumber(row)===null);"))throw new Error('Active 2027 calendar does not account for WATCH rows without a fixed month');
+if(!calendarSource.includes('Date TBD / On-demand'))throw new Error('Active 2027 calendar is missing the unscheduled planning section');
+if(!calendarSource.includes('broad or TBD timing with no defensible event month'))throw new Error('Active 2027 calendar does not explain monthless WATCH rows');
 if(!source.includes('Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views'))throw new Error('Annual duplicate-suppression explanation missing');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
