@@ -133,6 +133,7 @@ function invoke(h,expr){return vm.runInContext(expr,h.sandbox)}
   h.location.hash='#not-a-real-route';
   h.listeners.hashchange();
   assert.equal(h.state.tab,'today','unknown hashes must fall back to Today');
+  assert.equal(h.location.hash,'#today','unknown hash fallback must canonicalize the URL');
   assert.equal(h.state.deepLinkedProfile,null,'unknown hashes must clear stale deep-linked profile state');
   assert.equal(h.modalOpen(),false,'unknown hashes must also clear stale modal overlays');
 }
