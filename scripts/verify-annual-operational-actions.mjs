@@ -24,6 +24,13 @@ if(!source.includes("['AUDIT_DUPLICATES','Audit duplicates '+auditRows.length]")
 if(!source.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Legacy 2027 calendar helper still counts duplicate-suppressed rows');
 if(!calendarSource.includes("const rows=(p.rows||[]).filter(row=>!annualPlanIsAuditDuplicate(row));"))throw new Error('Active 2027 calendar renderer still counts duplicate-suppressed rows');
 if(!source.includes('Duplicate-suppressed legacy controls are preserved for audit/history but hidden from normal planning views'))throw new Error('Annual duplicate-suppression explanation missing');
+if(!source.includes("const prospectProfile=String(row.profile_id||'').trim().startsWith('PROSPECT-');"))throw new Error('Annual plan does not use governed prospect identity for detail routing');
+if(!source.includes("const profileActionLabel=prospectProfile?'Open prospect details':'Open full show history';"))throw new Error('Annual plan does not distinguish prospect details from catalog history');
+if(!modalSource.includes('function openAnnualProspectProfile(id)'))throw new Error('Prospect-only annual-plan detail modal missing');
+if(!modalSource.includes("const prospectProfile=String(id||'').trim().startsWith('PROSPECT-');"))throw new Error('Catalog open path does not use governed prospect identity');
+if(!modalSource.includes('if(prospectProfile&&annualRows.length)'))throw new Error('Catalog open path does not fall back to prospect-only annual-plan detail');
+if(!modalSource.includes("wrap.querySelectorAll('[data-annual-profile]').forEach(button=>button.remove())"))throw new Error('Prospect detail cards can recurse into missing catalog history');
+if(!modalSource.includes('loadProfileNotes(id)'))throw new Error('Prospect-only annual detail does not expose shared Manager Notes');
 const start=source.indexOf('function annualPlanSourceUrl');
 const end=source.indexOf('function annualPlanMonthKey',start);
 if(start<0||end<0)throw new Error('Annual operational helper block not found');
