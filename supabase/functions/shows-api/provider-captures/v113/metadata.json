@@ -1,0 +1,11 @@
+{
+  "function": "shows-api",
+  "provider_version": 113,
+  "verify_jwt": false,
+  "provider_ezbr_sha256": "4a7627e472df9bce4b0712dd42f50197ef48c9828f9e6d8d19d6225b21965c52",
+  "index_sha256": "e9deb2bee427638cc88dff7df24af22dbf28604ed2e0e02f3c10583db7cf37a2",
+  "deno_sha256": "0c2d75aef2c35675ab4d1ed0e77139a364bb1f5e610fe3d73d9bdb842c56aa90",
+  "captured_from": "Supabase get_edge_function",
+  "captured_at": "2026-10-03",
+  "rollback": "Redeploy index.ts and deno.json from this directory with verify_jwt=false."
+}
