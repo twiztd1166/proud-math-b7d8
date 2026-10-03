@@ -174,6 +174,7 @@ def main():
     cache = validate_service_worker()
     validate_control_refresh_state()
     validate_route_contract()
+    subprocess.run(["node", "scripts/verify-payment-edit-contract.mjs"], check=True)
     validate_repository_hygiene()
 
     if args.live_entry:
