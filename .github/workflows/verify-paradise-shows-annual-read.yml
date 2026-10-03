@@ -141,8 +141,12 @@ jobs:
           const byPlanId=Object.fromEntries(rows.map(row=>[row.plan_id,row]));
           const actionCount=code=>planningRows.filter(row=>row.operational_action_code===code).length;
           assert.equal(actionCount('REVIEW_APPLICATION'),5,'visible review-application count');
-          assert.equal(actionCount('CONTACT_ORGANIZER'),54,'visible contact-organizer count');
-          assert.equal(actionCount('MONITOR_RELEASE'),131,'visible monitor-release count');
+          assert.equal(actionCount('CONTACT_ORGANIZER'),58,'visible contact-organizer count');
+          assert.equal(actionCount('MONITOR_RELEASE'),130,'visible monitor-release count');
+          assert.equal(actionCount('VERIFY_TERMS'),47,'visible verify-terms count');
+          assert.equal(actionCount('REVIEW_DECIDE'),87,'visible review-decide count');
+          assert.equal(actionCount('SIGNER_REVIEW'),2,'visible signer-review count');
+          assert.equal(actionCount('VERIFY_PAYMENT'),1,'visible verify-payment count');
           const contactRows=planningRows.filter(row=>row.operational_action_code==='CONTACT_ORGANIZER');
           assert.equal(
             contactRows.filter(row=>!String(row.operational_contact_email||'').trim()&&!String(row.operational_contact_phone||'').trim()).length,
@@ -195,6 +199,45 @@ jobs:
           assert.equal((npb?.source_refs||[])[0],'https://www.village-npb.org/240/Heritage-Festival',npb);
           assert.match(String(npb?.next_action||''),/Monitor 2027 Business Expo application release/i);
           assert.match(String(npb?.operational_guard||''),/application is not yet open/i);
+
+          const maxConfidenceAudit=rows.filter(row=>row.operational_action_source==='2027_MAX_CONFIDENCE_ACTION_LINK_AUDIT_2026_10_02');
+          assert.equal(maxConfidenceAudit.length,8,'max-confidence action-link audit row count');
+          const auditedActions={
+            '2027-PROSPECT-MELBOURNE-ART-FEST-PUBWATCH':'CONTACT_ORGANIZER',
+            '2027-PROSPECT-POMPANO-NAUTICAL-FLEA':'CONTACT_ORGANIZER',
+            '2027-PROSPECT-RARE-PLANT-MIAMI-PUBWATCH':'CONTACT_ORGANIZER',
+            '2027-PROSPECT-VERO-PATRIOT-GUN-SHOW':'CONTACT_ORGANIZER',
+            '2027-LIFE-186-PRIMARY':'MONITOR_RELEASE',
+            '2027-PROSPECT-THUNDER-COCOA-PUBWATCH':'MONITOR_RELEASE',
+            '2027-LIFE-112-PRIMARY':'SIGNER_REVIEW',
+            '2027-PROSPECT-TITUSVILLE-JULY4-PUBWATCH':'VERIFY_TERMS',
+          };
+          assert.deepEqual(
+            maxConfidenceAudit.map(row=>row.plan_id).sort(),
+            Object.keys(auditedActions).sort(),
+            'max-confidence audit identity set'
+          );
+          for(const [planId,code] of Object.entries(auditedActions)){
+            const row=byPlanId[planId];
+            assert.ok(row,{missing_max_confidence_plan_id:planId});
+            assert.equal(row.operational_action_code,code,row);
+            assert.equal(row.operational_action_source,'2027_MAX_CONFIDENCE_ACTION_LINK_AUDIT_2026_10_02',row);
+            assert.ok((row.source_refs||[]).length>0,{planId,source_refs:row.source_refs});
+            assert.ok(String(row.operational_guard||'').trim(),{planId,operational_guard:row.operational_guard});
+          }
+          const melbourneArt=byPlanId['2027-PROSPECT-MELBOURNE-ART-FEST-PUBWATCH'];
+          assert.equal(melbourneArt?.operational_contact_email,'sponsors@melbournearts.org',melbourneArt);
+          const nautical=byPlanId['2027-PROSPECT-POMPANO-NAUTICAL-FLEA'];
+          assert.equal(nautical?.operational_contact_email,'info@nauticalfleamarket.com',nautical);
+          const rarePlant=byPlanId['2027-PROSPECT-RARE-PLANT-MIAMI-PUBWATCH'];
+          assert.equal(rarePlant?.operational_contact_email,'info@rareplantfestival.com',rarePlant);
+          assert.equal(rarePlant?.event_start,null,rarePlant);
+          assert.equal(rarePlant?.estimated_start,null,rarePlant);
+          assert.equal(rarePlant?.expected_month,5,rarePlant);
+          assert.match(String(rarePlant?.expected_window_text||''),/May 2027/i);
+          assert.match(String(rarePlant?.expected_window_text||''),/exact dates: TBD/i);
+          const veroGun=byPlanId['2027-PROSPECT-VERO-PATRIOT-GUN-SHOW'];
+          assert.equal(veroGun?.operational_contact_email,'Vendors@PatriotShows.com',veroGun);
 
           const decisionRank={PURSUE:0,WATCH:1,RESEARCH_IDENTITY:2};
           const priorityRank={HIGH:0,MEDIUM:1,LOW:2};
