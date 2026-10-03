@@ -423,7 +423,7 @@ function renderToday(){
   const sourceReview=(state.sourceRefresh.conflicts||[]).length;
   const rh=state.recoveryHealth;
   const recoveryReview=!rh||rh.integrity_status!=='HEALTHY'||rh.hashes_valid!==true||rh.row_counts_valid!==true||rh.coverage_current!==true;
-  if(state.catalogLoading&&!state.catalogLoaded)return '<div class="hero nextHero"><h1>Next Steps</h1><p>Loading the current action lanes and linked show history…</p></div><div class="loading">Loading operating priorities…</div>';
+  if(!state.catalogLoaded&&!state.catalogError)return '<div class="hero nextHero"><h1>Next Steps</h1><p>Loading the current action lanes and linked show history…</p></div><div class="loading">Loading operating priorities…</div>';
   if(state.catalogError&&!state.catalogLoaded)return `<div class="hero nextHero"><h1>Next Steps</h1><p>What the team should do next, separated from research and system controls.</p></div><div class="alert"><div class="event">Action lanes unavailable</div><div class="action">${esc(state.catalogError)}</div><div class="actions"><button class="btn primary" id="catalogRetry">Try again</button></div></div>`;
   const action=nextStepProfiles('ACTION');
   const review=nextStepProfiles('REVIEW');

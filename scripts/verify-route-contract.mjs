@@ -8,6 +8,12 @@ const end=source.indexOf('function appRequestHeaders(){',start);
 assert.ok(start>=0&&end>start,'router block not found in public/app-core.js');
 const routerSource=source.slice(start,end);
 
+const showsSource=fs.readFileSync('public/app-shows.js','utf8');
+const todayStart=showsSource.indexOf('function renderToday(){');
+const todayEnd=showsSource.indexOf('function calendarMonthNumber',todayStart);
+assert.ok(todayStart>=0&&todayEnd>todayStart,'Today renderer block not found in public/app-shows.js');
+const todaySource=showsSource.slice(todayStart,todayEnd);
+
 function harness(hash='#today'){
   const listeners={};
   const calls={render:0,catalog:0,annual:0,unlinked:0,open:[],scroll:0,replace:[]};
@@ -138,6 +144,36 @@ function invoke(h,expr){return vm.runInContext(expr,h.sandbox)}
   assert.equal(h.modalOpen(),false,'unknown hashes must also clear stale modal overlays');
 }
 
+{
+  let dependentCalls=0;
+  const state={
+    catalogLoaded:false,
+    catalogLoading:false,
+    catalogError:null,
+    reconciliation:{summary:{}},
+    sourceRefresh:{conflicts:[]},
+    recoveryHealth:{integrity_status:'HEALTHY',hashes_valid:true,row_counts_valid:true,coverage_current:true},
+  };
+  const sandbox={
+    state,
+    paymentAttention(){dependentCalls++;return[]},
+    nextStepProfiles(){dependentCalls++;return[]},
+    nextStepSection(){dependentCalls++;return''},
+    annualPlanDeadlineSection(){dependentCalls++;return''},
+    researchNextStepSection(){dependentCalls++;return''},
+    paymentPill(){dependentCalls++;return''},
+    esc(value){return String(value??'')},
+    date(value){return String(value??'')},
+    money(value){return String(value??'')},
+    console,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(todaySource,sandbox,{filename:'app-shows-today.js'});
+  const html=vm.runInContext('renderToday()',sandbox);
+  assert.match(html,/Loading operating priorities/,'Today must show a loading state before catalog readiness');
+  assert.equal(dependentCalls,1,'Only paymentAttention may run before the catalog readiness guard; history-dependent lanes must not execute');
+}
+
 console.log(JSON.stringify({
   route_contract:'PASS',
   cold_prospect:'PASS',
@@ -146,4 +182,5 @@ console.log(JSON.stringify({
   null_year_serialization:'PASS',
   modal_route_teardown:'PASS',
   unknown_hash_fallback:'PASS',
+  today_pre_catalog_guard:'PASS',
 }));
