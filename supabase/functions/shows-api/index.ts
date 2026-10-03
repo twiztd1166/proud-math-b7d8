@@ -1053,8 +1053,11 @@ Deno.serve(async r => {
     const u:any={};for(const[k,v]of Object.entries(p))u[k]=k==='posted_amount'?(v===''||v==null?null:Number(v)):(typeof v==='string'?(v.trim()||null):v);
     if(!Object.keys(u).length)return out(r,{ok:false,error:'No writable payment changes'},400);if(String(u.payment_owner||'').length>120||String(u.notes||'').length>4000)return out(r,{ok:false,error:'Payment owner must be 120 characters or less and operating note must be 4,000 characters or less'},400);
     const {data:old}=await db.from('shows_app_payments').select('*').eq('payment_id',id).maybeSingle();if(!old)return out(r,{ok:false,error:'Payment not found'},404);
-    let calc:any;try{calc=derive(old,u)}catch(e){return out(r,{ok:false,error:e instanceof Error?e.message:'Invalid payment update'},400)}
-    const candidate:any={...u,...calc};const changed=Object.entries(candidate).filter(([k,v])=>!same(old[k],v));if(!changed.length)return out(r,{ok:true,payment:old,noChange:true});
+    const editableChanged=Object.entries(u).filter(([k,v])=>!same(old[k],v));if(!editableChanged.length)return out(r,{ok:true,payment:old,noChange:true});
+    const paymentStateChanged=editableChanged.some(([k])=>new Set(['posted_amount','posted_date','clearing']).has(k));
+    let candidate:any={...u};
+    if(paymentStateChanged){let calc:any;try{calc=derive(old,u)}catch(e){return out(r,{ok:false,error:e instanceof Error?e.message:'Invalid payment update'},400)}candidate={...u,...calc}}
+    const changed=Object.entries(candidate).filter(([k,v])=>!same(old[k],v));if(!changed.length)return out(r,{ok:true,payment:old,noChange:true});
     const write:any=Object.fromEntries(changed);write.updated_at=new Date().toISOString();const {data:newrow,error}=await db.from('shows_app_payments').update(write).eq('payment_id',id).select('*').single();if(error)return out(r,{ok:false,error:'Payment update failed'},500);
     const logs=changed.map(([k,v])=>({payment_id:id,field_name:k,old_value:old[k]==null?null:String(old[k]),new_value:v==null?null:String(v),session_id:writeSession?.id||null}));if(logs.length)await db.from('shows_app_payment_audit').insert(logs);
     return out(r,{ok:true,payment:newrow});
