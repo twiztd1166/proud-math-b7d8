@@ -82,8 +82,8 @@ def validate_control_refresh_state():
 
 def validate_route_contract():
     text = CORE_SOURCE.read_text(encoding="utf-8")
-    assert "window.addEventListener('hashchange',activateLocationView);" in text, (
-        f"{CORE_SOURCE}: in-session hash navigation is not synchronized back into app state"
+    assert text.count("window.addEventListener('hashchange',activateLocationView);") == 1, (
+        f"{CORE_SOURCE}: hash-route synchronization listener is missing or duplicated"
     )
     assert "PROSPECT-[A-Z0-9-]+" in text, (
         f"{CORE_SOURCE}: prospect-only annual-plan profile routes are not accepted by the deep-link parser"
