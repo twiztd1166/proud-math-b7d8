@@ -423,7 +423,7 @@ function applyLocationView(){
   else if(hash==='plan2027'){state.tab='shows';state.showMode='PLAN2027';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(hash==='unlinked'){state.tab='shows';state.showMode='UNLINKED';state.deepLinkedProfile=null;state.deepLinkedYear=null}
   else if(['today','calendar','payments','control'].includes(hash)){state.tab=hash;state.deepLinkedProfile=null;state.deepLinkedYear=null}
-  else{state.tab='today';state.deepLinkedProfile=null;state.deepLinkedYear=null}
+  else{state.tab='today';state.deepLinkedProfile=null;state.deepLinkedYear=null;try{history.replaceState(null,'','#today')}catch{}}
 }
 function syncLocationView(){
   const hash=state.deepLinkedProfile
