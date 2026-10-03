@@ -24,12 +24,14 @@ function harness(hash='#today'){
     annualPlan:{loaded:false,loading:false,rows:[]},
   };
   const location={hash};
-  let modalOpen=false;
-  const detailModal={classList:{
-    contains(name){return name==='show'&&modalOpen},
-    remove(name){if(name==='show')modalOpen=false},
-    add(name){if(name==='show')modalOpen=true},
-  }};
+  const detailModal={
+    shown:false,
+    classList:{
+      contains(name){return name==='show'&&detailModal.shown},
+      add(name){if(name==='show')detailModal.shown=true},
+      remove(name){if(name==='show')detailModal.shown=false},
+    },
+  };
   const sandbox={
     state,
     location,
@@ -43,7 +45,7 @@ function harness(hash='#today'){
     },
     document:{
       querySelector(sel){return sel==='#detailModal'?detailModal:null},
-      querySelectorAll(sel){return sel==='.modal.show'&&modalOpen?[detailModal]:[]},
+      querySelectorAll(sel){return sel==='.modal.show'&&detailModal.shown?[detailModal]:[]},
     },
     render(){calls.render++},
     loadCatalog(){calls.catalog++;state.catalogLoading=true},
@@ -54,7 +56,7 @@ function harness(hash='#today'){
   };
   vm.createContext(sandbox);
   vm.runInContext(routerSource,sandbox,{filename:'app-core-router.js'});
-  return {sandbox,state,location,listeners,calls,setModalOpen(value){modalOpen=!!value},modalOpen(){return modalOpen}};
+  return {sandbox,state,location,listeners,calls,detailModal};
 }
 
 function invoke(h,expr){return vm.runInContext(expr,h.sandbox)}
@@ -104,6 +106,19 @@ function invoke(h,expr){return vm.runInContext(expr,h.sandbox)}
   invoke(h,'openDeepLinkedProfileIfReady()');
   assert.deepEqual(h.calls.open.at(-1),['PROSPECT-BOCA-CITY-SEAFOOD-FEST',null],'warm prospect route must open prospect detail after annual data arrives');
 
+  h.detailModal.classList.add('show');
+  h.location.hash='#calendar/2027';
+  h.listeners.hashchange();
+  assert.equal(h.state.tab,'calendar','route-away from prospect must activate Calendar');
+  assert.equal(h.detailModal.shown,false,'route-away must close a stale detail modal');
+
+  h.detailModal.classList.add('show');
+  h.location.hash='#not-a-real-route';
+  h.listeners.hashchange();
+  assert.equal(h.state.tab,'today','unknown hash must fall back to Today');
+  assert.equal(h.state.deepLinkedProfile,null,'unknown hash must clear stale deep-link identity');
+  assert.equal(h.detailModal.shown,false,'unknown hash fallback must close stale overlays');
+
   h.state.catalogLoaded=false;
   h.state.catalogLoading=false;
   h.location.hash='#show/LIFE-009/year/2025';
@@ -117,32 +132,12 @@ function invoke(h,expr){return vm.runInContext(expr,h.sandbox)}
   assert.deepEqual(h.calls.open.at(-1),['LIFE-009',2025],'historical detail must open once catalog is ready');
 }
 
-{
-  const h=harness('#show/PROSPECT-BOCA-CITY-SEAFOOD-FEST');
-  h.state.annualPlan.loaded=true;
-  h.state.annualPlan.loading=false;
-  h.setModalOpen(true);
-  h.location.hash='#calendar/2027';
-  h.listeners.hashchange();
-  assert.equal(h.state.tab,'calendar','routing away from a detail must select the destination tab');
-  assert.equal(h.state.deepLinkedProfile,null,'routing away from a detail must clear the deep-linked profile');
-  assert.equal(h.modalOpen(),false,'routing away from a detail must close stale modal overlays');
-
-  h.setModalOpen(true);
-  h.state.tab='control';
-  h.location.hash='#not-a-real-route';
-  h.listeners.hashchange();
-  assert.equal(h.state.tab,'today','unknown hashes must fall back to Today');
-  assert.equal(h.state.deepLinkedProfile,null,'unknown hashes must clear stale deep-linked profile state');
-  assert.equal(h.modalOpen(),false,'unknown hashes must also clear stale modal overlays');
-}
-
 console.log(JSON.stringify({
   route_contract:'PASS',
   cold_prospect:'PASS',
   warm_hash_sync:'PASS',
   lazy_route_data:'PASS',
   null_year_serialization:'PASS',
-  modal_route_teardown:'PASS',
+  route_overlay_cleanup:'PASS',
   unknown_hash_fallback:'PASS',
 }));

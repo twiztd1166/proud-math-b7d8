@@ -564,4 +564,3 @@ async function bootstrap(){
     toast(e.message);$('#content').innerHTML='<div class="empty">Unable to load current operating data.</div>'
   }
 }
-
