@@ -2390,10 +2390,11 @@ function annualPlanOutreachProfile(row){
   const lower=legacy.toLowerCase();
   const questions=[];
   const add=value=>{if(value&&!questions.includes(value))questions.push(value)};
-  if(!row?.event_start||/\b(date|dates|timing|calendar)\b/.test(lower))add('the confirmed 2027 date/timing');
+  const knownVerifiedCost=String(row?.cost_status||'').toUpperCase()==='KNOWN_VERIFIED'&&(row?.budget_min!=null||row?.budget_max!=null);
+  if(!row?.event_start)add('the confirmed 2027 date/timing');
   if(/eligib|accepted|qualif|category/.test(lower))add('Paradise Exteriors’ eligibility/category');
   if(/inventory|availab|space|opening|sold out|waitlist/.test(lower))add('current inventory/availability');
-  if(/price|pricing|rate|fee|quote|cost|all-in|package|economics/.test(lower))add('the current all-in price/package');
+  if(/price|pricing|rate|fee|quote|cost|all-in|package|economics/.test(lower)&&!knownVerifiedCost)add('the current all-in price/package');
   if(/placement|floor plan|map|location|footprint|booth|space number/.test(lower))add('the available footprint/placement');
   if(/payment|deposit|balance|refund|cancel/.test(lower))add('payment and cancellation/refund terms');
   if(/coi|insurance/.test(lower))add('insurance/COI requirements');
@@ -2402,7 +2403,7 @@ function annualPlanOutreachProfile(row){
   if(!questions.length)add('the current 2027 participation terms and any unresolved logistics');
   const facts=[];
   if(row?.event_start)facts.push(`Published timing in our planning record: ${timing}.`);
-  if(String(row?.cost_status||'').toUpperCase()==='KNOWN_VERIFIED'&&(row?.budget_min!=null||row?.budget_max!=null)){
+  if(knownVerifiedCost){
     facts.push(`Our planning record currently shows ${annualPlanBudgetText(row)}; please confirm it remains current.`);
   }
   return {event,timing,questions,facts};
