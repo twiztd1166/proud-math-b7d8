@@ -100,8 +100,8 @@ def validate_route_contract():
     assert "document.querySelectorAll('.modal.show').forEach(modal=>modal.classList.remove('show'));" in text, (
         f"{CORE_SOURCE}: route changes can leave stale modal overlays detached from the active URL"
     )
-    assert "else{state.tab='today';state.deepLinkedProfile=null;state.deepLinkedYear=null}" in text, (
-        f"{CORE_SOURCE}: unknown hashes can leave stale route state instead of falling back to Today"
+    assert "else{state.tab='today';state.deepLinkedProfile=null;state.deepLinkedYear=null;try{history.replaceState(null,'','#today')}catch{}}" in text, (
+        f"{CORE_SOURCE}: unknown hashes do not canonicalize to the Today route"
     )
     subprocess.run(["node", "scripts/verify-route-contract.mjs"], check=True)
 
