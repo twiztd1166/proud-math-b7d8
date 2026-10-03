@@ -97,6 +97,12 @@ def validate_route_contract():
     assert "Number(state.deepLinkedYear)>=2000" in text, (
         f"{CORE_SOURCE}: deep-link serializer can emit an invalid /year/0 route for null years"
     )
+    assert "document.querySelectorAll('.modal.show').forEach(modal=>modal.classList.remove('show'));" in text, (
+        f"{CORE_SOURCE}: route changes can leave stale modal overlays detached from the active URL"
+    )
+    assert "else{state.tab='today';state.deepLinkedProfile=null;state.deepLinkedYear=null}" in text, (
+        f"{CORE_SOURCE}: unknown hashes can leave stale route state instead of falling back to Today"
+    )
     subprocess.run(["node", "scripts/verify-route-contract.mjs"], check=True)
 
 
